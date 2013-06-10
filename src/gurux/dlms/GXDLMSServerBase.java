@@ -68,10 +68,10 @@ abstract public class GXDLMSServerBase
     private GXDLMSObjectCollection privateItems;
     private GXDLMS m_Base = new GXDLMS(true);	
     ByteArrayOutputStream ReceivedData = new ByteArrayOutputStream();
-    ArrayList<byte[]> SendData = new ArrayList<>();
+    ArrayList<byte[]> SendData = new ArrayList<byte[]>();
     int FrameIndex = 0;
     boolean Initialized = false;
-    private TreeMap<Integer, GXDLMSObject> SortedItems = new TreeMap<>();
+    private TreeMap<Integer, GXDLMSObject> SortedItems = new TreeMap<Integer, GXDLMSObject>();
     private ArrayList<Object> privateServerIDs;
     private ArrayList<GXAuthentication> privateAuthentications;
 
@@ -120,7 +120,7 @@ abstract public class GXDLMSServerBase
         reset();        
         m_Base.setLNSettings(new GXDLMSLNSettings(new byte[] {0x00, 0x7E, 0x1F}));
         m_Base.setSNSettings(new GXDLMSSNSettings(new byte[] {0x1C, 0x03, 0x20}));
-        privateServerIDs = new java.util.ArrayList<>();
+        privateServerIDs = new java.util.ArrayList<Object>();
         this.setInterfaceType(InterfaceType.GENERAL);        
     }
 
@@ -132,7 +132,7 @@ abstract public class GXDLMSServerBase
     */
     public static int countServerIDFromSerialNumber(int serialNumber)
     {
-        return (int) GXManufacturer.countServerAddress(HDLCAddressType.SERIAL_NUMBER, serialNumber, 0);
+        return ((Number)GXManufacturer.countServerAddress(HDLCAddressType.SERIAL_NUMBER, serialNumber, 0)).intValue();
     }
 
     /** 
@@ -144,7 +144,7 @@ abstract public class GXDLMSServerBase
     {
         if (this.getInterfaceType() == InterfaceType.NET)
         {
-            return (short)physicalAddress;
+            return ((Number)physicalAddress).shortValue();
         }
         return GXManufacturer.countServerAddress(HDLCAddressType.DEFAULT, physicalAddress, LogicalAddress);
     }
@@ -263,7 +263,7 @@ abstract public class GXDLMSServerBase
             {
                 if (privateAuthentications == null)
                 {
-                    privateAuthentications = new ArrayList<>();
+                    privateAuthentications = new ArrayList<GXAuthentication>();
                 }
                 else
                 {
@@ -279,7 +279,7 @@ abstract public class GXDLMSServerBase
             {
                 if (privateAuthentications == null)
                 {
-                    privateAuthentications = new ArrayList<>();
+                    privateAuthentications = new ArrayList<GXAuthentication>();
                 }
                 else
                 {
@@ -1028,7 +1028,7 @@ abstract public class GXDLMSServerBase
                 }
                 else
                 {
-                    int sn = (int)name[0];
+                    int sn = ((Number)name[0]).intValue();
                     for (Map.Entry<Integer, GXDLMSObject> it : SortedItems.entrySet())
                     {
                         if (it.getKey() > sn)

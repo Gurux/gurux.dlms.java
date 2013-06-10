@@ -47,7 +47,7 @@ enum StateError
         {
             if (mappings == null)
             {
-                mappings = new java.util.HashMap<>();
+                mappings = new java.util.HashMap<Integer, StateError>();
             }
         }
         return mappings;

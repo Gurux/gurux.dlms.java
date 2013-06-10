@@ -57,7 +57,7 @@ public enum MethodAccessMode
         {
             if (mappings == null)
             {
-                mappings = new java.util.HashMap<>();
+                mappings = new java.util.HashMap<Integer, MethodAccessMode>();
             }
         }
         return mappings;

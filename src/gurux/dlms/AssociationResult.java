@@ -61,7 +61,7 @@ enum AssociationResult
         {
             if (mappings == null)
             {
-                mappings = new java.util.HashMap<>();
+                mappings = new java.util.HashMap<Integer, AssociationResult>();
             }
         }
         return mappings;

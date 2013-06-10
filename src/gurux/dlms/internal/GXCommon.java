@@ -569,7 +569,7 @@ public class GXCommon
                 pos[0] = -1;
                 return null;
             }
-            java.util.ArrayList<Object> arr = new java.util.ArrayList<>(count[0]);
+            java.util.ArrayList<Object> arr = new java.util.ArrayList<Object>(count[0]);
             for (index[0] = 0; index[0] != count[0]; ++index[0])
             {
                 DataType[] itemType = new DataType[]{DataType.NONE};

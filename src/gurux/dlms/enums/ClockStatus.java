@@ -20,7 +20,7 @@ public enum ClockStatus
         {
             if (mappings == null)
             {
-                mappings = new java.util.HashMap<>();
+                mappings = new java.util.HashMap<Integer, ClockStatus>();
             }
         }
         return mappings;

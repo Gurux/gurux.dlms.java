@@ -65,7 +65,7 @@ public enum InactivityMode
         {
             if (mappings == null)
             {
-                mappings = new java.util.HashMap<>();
+                mappings = new java.util.HashMap<Integer, InactivityMode>();
             }
         }
         return mappings;

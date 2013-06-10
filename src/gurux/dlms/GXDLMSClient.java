@@ -1238,6 +1238,7 @@ public class GXDLMSClient
      * @param index Methdod index.
      @return DLMS action message.
     */
+    @SuppressWarnings("UseSpecificCatch")
     public final byte[] method(Object name, ObjectType objectType, int index, Object data, DataType type)
     {
         if (name == null || index < 1)
@@ -1253,8 +1254,8 @@ public class GXDLMSClient
                 type = GXCommon.getValueType(data);
             }
             GXCommon.setData(buff, type, data);
-        }
-        catch (RuntimeException | ParseException | IOException ex) 
+        }        
+        catch (Exception ex) 
         {
             Logger.getLogger(GXDLMSClient.class.getName()).log(Level.SEVERE, null, ex);
             throw new RuntimeException(ex.getMessage());

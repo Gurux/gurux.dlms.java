@@ -156,13 +156,14 @@ public enum DataType
 
     private int intValue;
     private static java.util.HashMap<Integer, DataType> mappings;
+    
     private static java.util.HashMap<Integer, DataType> getMappings()
     {
         synchronized (DataType.class)
         {
             if (mappings == null)
             {
-                mappings = new java.util.HashMap<>();
+                mappings = new java.util.HashMap<Integer, DataType>();
             }
         }
         return mappings;

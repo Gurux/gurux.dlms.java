@@ -107,8 +107,8 @@ public class GXManufacturerCollection extends java.util.ArrayList<GXManufacturer
         {
             return true;
         }
-        Map<String, Date> installed = new HashMap<>();
-        Map<String, Date> available = new HashMap<>();
+        Map<String, Date> installed = new HashMap<String, Date>();
+        Map<String, Date> available = new HashMap<String, Date>();
         DateFormat tmFormater = new SimpleDateFormat("MM-dd-yyyy");        
         try
         {
@@ -161,7 +161,7 @@ public class GXManufacturerCollection extends java.util.ArrayList<GXManufacturer
                 }
             }
         }
-        catch(FactoryConfigurationError | XMLStreamException | ParseException | IOException ex)
+        catch(Exception ex)
         {
             System.out.println(ex.getMessage());
             return true;

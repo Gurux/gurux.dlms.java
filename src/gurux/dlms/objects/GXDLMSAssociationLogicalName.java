@@ -211,7 +211,7 @@ public class GXDLMSAssociationLogicalName extends GXDLMSObject implements IGXDLM
             }
             return stream.toByteArray();
         }
-        catch(RuntimeException | ParseException | IOException ex)
+        catch(Exception ex)
         {
             throw new RuntimeException(ex.getMessage());
         }        

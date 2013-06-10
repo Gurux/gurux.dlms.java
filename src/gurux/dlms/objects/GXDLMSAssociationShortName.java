@@ -189,7 +189,7 @@ public class GXDLMSAssociationShortName extends GXDLMSObject implements IGXDLMSB
                 }
                 return data.toByteArray();
             }
-            catch(RuntimeException | ParseException | IOException ex)
+            catch(Exception ex)
             {
                 Logger.getLogger(GXDLMSAssociationShortName.class.getName()).log(Level.SEVERE, null, ex);
                 throw new RuntimeException(ex.getMessage());

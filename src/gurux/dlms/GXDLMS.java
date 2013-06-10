@@ -875,7 +875,7 @@ class GXDLMS
         }
         //If LN
         //Split to Blocks.
-        java.util.ArrayList<byte[]> buff = new java.util.ArrayList<>();
+        java.util.ArrayList<byte[]> buff = new java.util.ArrayList<byte[]>();
         int blockIndex = 0;
         do
         {

@@ -55,15 +55,17 @@ public enum AccessMode
     AUTHENTICATED_WRITE(5),
     AUTHENTICATED_READ_WRITE(6);
 
-    private int value;
+    private int value;    
     private static java.util.HashMap<Integer, AccessMode> mappings;
+        
+    @SuppressWarnings("all")
     private static java.util.HashMap<Integer, AccessMode> getMappings()
     {
         synchronized (AccessMode.class)
-        {
+        {            
             if (mappings == null)
-            {
-                mappings = new java.util.HashMap<>();
+            {                
+                mappings = new java.util.HashMap<Integer, AccessMode>();
             }
         }
         return mappings;

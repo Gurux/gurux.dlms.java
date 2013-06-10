@@ -51,7 +51,7 @@ enum ActionType
         {
             if (mappings == null)
             {
-                mappings = new java.util.HashMap<>();
+                mappings = new java.util.HashMap<Integer, ActionType>();
             }
         }
         return mappings;

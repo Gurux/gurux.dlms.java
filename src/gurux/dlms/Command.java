@@ -61,7 +61,7 @@ enum Command
         {
             if (mappings == null)
             {
-                mappings = new java.util.HashMap<>();
+                mappings = new java.util.HashMap<Integer, Command>();
             }
         }
         return mappings;

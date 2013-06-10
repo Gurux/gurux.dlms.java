@@ -98,7 +98,7 @@ public enum Unit
         {
             if (mappings == null)
             {
-                mappings = new java.util.HashMap<>();
+                mappings = new java.util.HashMap<Integer, Unit>();
             }
         }
         return mappings;

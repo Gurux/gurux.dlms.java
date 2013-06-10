@@ -76,7 +76,7 @@ public enum SortMethod
         {
             if (mappings == null)
             {
-                mappings = new java.util.HashMap<>();
+                mappings = new java.util.HashMap<Integer, SortMethod>();
             }
         }
         return mappings;

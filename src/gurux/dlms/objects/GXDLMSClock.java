@@ -347,7 +347,7 @@ public class GXDLMSClock extends GXDLMSObject implements IGXDLMSBase
             GXCommon.setData(stream, DataType.DATETIME, validityIntervalStart);
             GXCommon.setData(stream, DataType.DATETIME, validityIntervalEnd);
         } 
-        catch (RuntimeException | ParseException | IOException ex) 
+        catch (Exception ex) 
         {
             Logger.getLogger(GXDLMSClock.class.getName()).log(Level.SEVERE, null, ex);
             throw new RuntimeException(ex.getMessage());
@@ -538,7 +538,7 @@ public class GXDLMSClock extends GXDLMSObject implements IGXDLMSBase
             }
             else
             {
-                setEnabled((boolean) value);
+                setEnabled((Boolean) value);
             }
         }
         else if (index == 9)
