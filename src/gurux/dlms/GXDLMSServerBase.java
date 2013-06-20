@@ -65,7 +65,7 @@ import java.util.TreeMap;
 */
 abstract public class GXDLMSServerBase
 {
-    private GXDLMSObjectCollection privateItems;
+    private GXDLMSObjectCollection m_Items;
     private GXDLMS m_Base = new GXDLMS(true);	
     ByteArrayOutputStream ReceivedData = new ByteArrayOutputStream();
     ArrayList<byte[]> SendData = new ArrayList<byte[]>();
@@ -114,7 +114,7 @@ abstract public class GXDLMSServerBase
     public GXDLMSServerBase(boolean logicalNameReferencing)
     {
         m_Base = new GXDLMS(true);
-        privateItems = new GXDLMSObjectCollection(this);        
+        m_Items = new GXDLMSObjectCollection(this);        
         m_Base.setUseLogicalNameReferencing(logicalNameReferencing);
         //TODO: StartProtocol = StartProtocolType.DLMS;
         reset();        
@@ -154,11 +154,11 @@ abstract public class GXDLMSServerBase
     */
     public final GXDLMSObjectCollection getItems()
     {
-        return privateItems;
+        return m_Items;
     }
     public final void setItems(GXDLMSObjectCollection value)
     {
-        privateItems = value;
+        m_Items = value;
     }
 
     /** 
@@ -434,9 +434,9 @@ abstract public class GXDLMSServerBase
         Initialized = true;
         if (SortedItems.size() != getItems().size())
         {
-            for (int pos = 0; pos != privateItems.size(); ++pos)
+            for (int pos = 0; pos != m_Items.size(); ++pos)
             {
-                GXDLMSObject it = privateItems.get(pos);
+                GXDLMSObject it = m_Items.get(pos);
                 if (it.getLogicalName() == null)
                 {
                     throw new RuntimeException("Invalid Logical Name.");
@@ -475,7 +475,7 @@ abstract public class GXDLMSServerBase
                 else if (!(it instanceof IGXDLMSBase)) //Remove unsupported items.
                 {
                     System.out.println(it.getObjectType().toString() + " not supported.");
-                    privateItems.remove(pos);
+                    m_Items.remove(pos);
                     --pos;
                 }
             }
@@ -484,20 +484,20 @@ abstract public class GXDLMSServerBase
                 if (getUseLogicalNameReferencing())
                 {
                     GXDLMSAssociationLogicalName ln = new GXDLMSAssociationLogicalName();
-                    for(GXDLMSObject it : privateItems)
+                    for(GXDLMSObject it : m_Items)
                     {
                         ln.getObjectList().add(it);
                     }
-                    privateItems.add(ln);
+                    m_Items.add(ln);
                 }
                 else
                 {
                     GXDLMSAssociationShortName sn = new GXDLMSAssociationShortName();
-                    for(GXDLMSObject it : privateItems)
+                    for(GXDLMSObject it : m_Items)
                     {
                         sn.getObjectList().add(it);
                     }
-                    privateItems.add(sn);
+                    m_Items.add(sn);
                 }
             }
             //Arrange items by Short Name.
@@ -505,7 +505,7 @@ abstract public class GXDLMSServerBase
             if (!this.getUseLogicalNameReferencing())
             {
                 SortedItems.clear();
-                for (GXDLMSObject it : privateItems)
+                for (GXDLMSObject it : m_Items)
                 {                    
                     //Generate Short Name if not given.
                     if (it.getShortName() == 0)
@@ -934,7 +934,7 @@ abstract public class GXDLMSServerBase
                     int[] pos = new int[1], index2 = new int[1], index3 = new int[1], count = new int[1];
                     value = GXCommon.getData((byte[]) parameter[0], index3, 
                             ActionType.NONE.getValue(), count, index2, type2, pos);
-                    item = privateItems.findByLN(type[0], name[0].toString());
+                    item = m_Items.findByLN(type[0], name[0].toString());
                 }
                 if (item != null)
                 {
@@ -995,7 +995,7 @@ abstract public class GXDLMSServerBase
                 Object[] parameter = new Object[1];
                 getCommand(allData, type, name, index, parameter);
                 System.out.println(String.format("Reading %s, attribute index %d", name, index[0]));
-                item = privateItems.findByLN(type[0], name[0].toString());
+                item = m_Items.findByLN(type[0], name[0].toString());
                 if (item != null)
                 {
                     ValueEventArgs e = new ValueEventArgs(item, index[0]);
@@ -1024,7 +1024,7 @@ abstract public class GXDLMSServerBase
                 }
                 if (getUseLogicalNameReferencing())
                 {                    
-                    item = privateItems.findByLN(type[0], name[0].toString());
+                    item = m_Items.findByLN(type[0], name[0].toString());
                 }
                 else
                 {
@@ -1040,7 +1040,7 @@ abstract public class GXDLMSServerBase
                     //If item is last item.
                     if (item == null)
                     {
-                        item = (GXDLMSObject) SortedItems.values().toArray()[privateItems.size() - 1];
+                        item = (GXDLMSObject) SortedItems.values().toArray()[m_Items.size() - 1];
                     }
                     int[] value = new int[1], count = new int[1];
                     GXDLMS.getActionInfo(item.getObjectType(), value, count);
@@ -1139,6 +1139,10 @@ abstract public class GXDLMSServerBase
             throw new GXDLMSException("Invalid parameter");
         }
         ByteArrayOutputStream data = new ByteArrayOutputStream();        
+        if (type == DataType.NONE)
+        {
+            type = GXCommon.getValueType(value);
+        }
         GXCommon.setData(data, type, value);        
         return m_Base.generateMessage(name, 0, data.toByteArray(), objectType, 
                 attributeOrdinal, 

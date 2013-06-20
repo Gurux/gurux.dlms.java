@@ -371,59 +371,23 @@ public class GXDLMSAssociationLogicalName extends GXDLMSObject implements IGXDLM
         }
         else if (index == 3)
         {            
-            if (value == null)
-            {
-                setAssociatedPartnersId(null);
-            }
-            else
-            {
-               //TODO: setAssociatedPartnersId();
-            }
-            
+             setAssociatedPartnersId(value);            
         }
         else if (index == 4)
         {
-            if (value == null)
-            {
-                setApplicationContextName(null);
-            }
-            else
-            {
-                //TODO: setApplicationContextName();
-            }                        
+            setApplicationContextName(value);
         }
         else if (index == 5)
         {
-            if (value == null)
-            {
-                setXDLMSContextInfo(null);
-            }
-            else
-            {
-                //TODO: setXDLMSContextInfo();
-            }                        
+            setXDLMSContextInfo(value);
         }
         else if (index == 6)
         {
-            if (value == null)
-            {
-                setAuthenticationMechanismMame(null);
-            }
-            else
-            {
-                //TODO: setAuthenticationMechanismMame();
-            }                        
+            setAuthenticationMechanismMame(value);                                    
         }
         else if (index == 7)
         {
-            if (value == null)
-            {
-                setSecret(null);
-            }
-            else
-            {
-                //TODO: setSecret();
-            }                        
+            setSecret(value);
         }
         else if (index == 8)
         {
@@ -433,7 +397,7 @@ public class GXDLMSAssociationLogicalName extends GXDLMSObject implements IGXDLM
             }
             else
             {
-                //Mikko TODO: setAssociationStatus(AssociationStatus.);
+                //TODO: setAssociationStatus(AssociationStatus.);
             }                        
         }
         else if (index == 9)

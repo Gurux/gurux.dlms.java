@@ -1027,6 +1027,10 @@ public class GXCommon
         {
             throw new RuntimeException("Value can't be enum. Give integer value.");
         }
+        if (type == DataType.OCTET_STRING && value instanceof GXDateTime)
+        {
+            type = DataType.DATETIME;
+        }
         if (type == DataType.DATETIME ||
                 type == DataType.DATE ||
                 type == DataType.TIME)
@@ -1126,6 +1130,10 @@ public class GXCommon
             {
                 setObjectCount(((byte[])value).length, buff);
                 buff.write((byte[])value);
+            }
+            else if (value == null)
+            {
+                setObjectCount(0, buff);
             }
             else
             {

@@ -284,12 +284,11 @@ class GXAPDU
         data.put((byte)diagnostic.getValue()); //diagnostic
         //Add User Information
         data.put((byte) 0xBE); //Tag
-        data.put((byte) 0x11); //Length for AARQ user field
+        data.put((byte) 0x10); //Length for AARQ user field
         data.put((byte) 0x04); //Coding the choice for user-information (Octet STRING, universal)
-        data.put((byte) 0xF); //Length
+        data.put((byte) 0xE); //Length
         data.put(GXCommon.InitialResponce); // Tag for xDLMS-Initiate response
-        data.put((byte) 0x1); // Usage field for dedicated-key component � not used
-        data.put((byte) 0x00); // Usage field for the response allowed component � not used
+        data.put((byte) 0x00); // Usage field for the response allowed component not used
         data.put((byte) 6); // DLMSVersioNumber
         data.put((byte) 0x5F);
         data.put((byte) 0x1F);

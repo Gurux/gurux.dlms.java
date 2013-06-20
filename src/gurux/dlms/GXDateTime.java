@@ -46,7 +46,11 @@ public class GXDateTime
         if (month == -1)
         {
             Skip.add(DateTimeSkips.MONTH);
-            month = 1;
+            month = 0;
+        }
+        else
+        {
+            month -= 1;        
         }
         if (day == -1)
         {
