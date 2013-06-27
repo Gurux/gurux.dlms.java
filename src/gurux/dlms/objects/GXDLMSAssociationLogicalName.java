@@ -46,6 +46,8 @@ import java.io.IOException;
 import java.io.UnsupportedEncodingException;
 import java.lang.reflect.Array;
 import java.text.ParseException;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 public class GXDLMSAssociationLogicalName extends GXDLMSObject implements IGXDLMSBase
 {
@@ -213,6 +215,7 @@ public class GXDLMSAssociationLogicalName extends GXDLMSObject implements IGXDLM
         }
         catch(Exception ex)
         {
+            Logger.getLogger(GXDLMSRegisterMonitor.class.getName()).log(Level.SEVERE, null, ex);
             throw new RuntimeException(ex.getMessage());
         }        
     }
@@ -397,19 +400,12 @@ public class GXDLMSAssociationLogicalName extends GXDLMSObject implements IGXDLM
             }
             else
             {
-                //TODO: setAssociationStatus(AssociationStatus.);
+                setAssociationStatus(AssociationStatus.values()[((Number)value).intValue()]);
             }                        
         }
         else if (index == 9)
         {
-            if (value == null)
-            {
-                setSecuritySetupReference(null);
-            }
-            else
-            {
-                setSecuritySetupReference(String.valueOf(value));
-            }                        
+            setSecuritySetupReference(String.valueOf(value));
         }
         else
         {

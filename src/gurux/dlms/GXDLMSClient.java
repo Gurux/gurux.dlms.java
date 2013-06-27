@@ -774,7 +774,7 @@ public class GXDLMSClient
             }
             if (getUseLogicalNameReferencing())                
             {
-                /* //Mikko TODO:
+                /* //TODO:
                 for (Object methodAccess : (Object[])access[1])
                 {
                     int id = ((Number)((Object[]) methodAccess)[0]).intValue();
@@ -963,7 +963,7 @@ public class GXDLMSClient
     {
         target.setValue(attributeIndex, getValue(data, target, attributeIndex));        
         DataType[] type = new DataType[1];
-        return target.getValue(attributeIndex, type, null); //Mikko TODO:
+        return target.getValue(attributeIndex, type, null); //TODO:
     }
 
     

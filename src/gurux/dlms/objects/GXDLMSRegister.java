@@ -38,12 +38,20 @@ import gurux.dlms.GXDLMSClient;
 import gurux.dlms.enums.ObjectType;
 import gurux.dlms.enums.Unit;
 import gurux.dlms.enums.DataType;
+import gurux.dlms.internal.GXCommon;
+import java.io.ByteArrayOutputStream;
+import java.io.IOException;
+import java.io.UnsupportedEncodingException;
 import java.lang.reflect.Array;
+import java.text.ParseException;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 public class GXDLMSRegister extends GXDLMSObject implements IGXDLMSBase
 {
-    protected int[] ScalerUnit;
-    private Object privateValue;
+    protected int m_Scaler;
+    protected int m_Unit;
+    private Object m_Value;
 
     /**  
      Constructor.
@@ -87,21 +95,12 @@ public GXDLMSRegister(ObjectType type, String ln, int sn)
      Scaler of COSEM Register object.
     */
     public final double getScaler()
-    {
-        if (ScalerUnit == null)
-        {
-            return 1;
-        }
-        return Math.pow(10, (int)(ScalerUnit[0]));
+    {        
+        return Math.pow(10, m_Scaler);
     }
     public final void setScaler(double value)
     {
-        if (ScalerUnit == null)
-        {
-            ScalerUnit = new int[2];
-            ScalerUnit[1] = 0;
-        }
-        ScalerUnit[0] = (int)Math.log10(value);
+        m_Scaler = (int) Math.log10(value);
     }
 
     /** 
@@ -109,20 +108,11 @@ public GXDLMSRegister(ObjectType type, String ln, int sn)
     */
     public final Unit getUnit()
     {
-        if (ScalerUnit == null)
-        {
-            return Unit.NO_UNIT;
-        }
-        return Unit.forValue((int)(ScalerUnit[1]));
+        return Unit.forValue(m_Unit);
     }
     public final void setUnit(Unit value)
     {
-        if (ScalerUnit == null)
-        {
-            ScalerUnit = new int[2];
-            ScalerUnit[0] = 0;
-        }
-        ScalerUnit[1] = value.getValue();
+        m_Unit = value.getValue();
     }
 
     /** 
@@ -131,11 +121,11 @@ public GXDLMSRegister(ObjectType type, String ln, int sn)
     */
     public final Object getValue()
     {
-        return privateValue;
+        return m_Value;
     }
     public final void setValue(Object value)
     {
-        privateValue = value;
+        m_Value = value;
     }   
     
     /*
@@ -150,7 +140,8 @@ public GXDLMSRegister(ObjectType type, String ln, int sn)
     @Override
     public Object[] getValues()
     {
-        return new Object[] {getLogicalName(), getValue(), ScalerUnit};
+        String str = String.format("%d %d", m_Unit, m_Scaler);
+        return new Object[] {getLogicalName(), getValue(), str};
     }
    
     @Override
@@ -203,8 +194,21 @@ public GXDLMSRegister(ObjectType type, String ln, int sn)
         }
         if (index == 3)
         {
-            type[0] = DataType.STRUCTURE;
-            return ScalerUnit;
+            try 
+            {
+                type[0] = DataType.ARRAY;
+                ByteArrayOutputStream data = new ByteArrayOutputStream();
+                data.write(DataType.STRUCTURE.getValue());
+                data.write(2);
+                GXCommon.setData(data, DataType.UINT8, m_Scaler);            
+                GXCommon.setData(data, DataType.UINT8, m_Unit);
+                return data.toByteArray();
+            }
+            catch (Exception ex) 
+            {
+                Logger.getLogger(GXDLMSRegister.class.getName()).log(Level.SEVERE, null, ex);
+                throw new RuntimeException(ex.getMessage());
+            }
         }
         throw new IllegalArgumentException("GetValue failed. Invalid attribute index.");
     }
@@ -224,15 +228,11 @@ public GXDLMSRegister(ObjectType type, String ln, int sn)
             setValue(value);
         }
         else if (index == 3)
-        {
-            if (ScalerUnit == null)
-            {
-                ScalerUnit = new int[2];                
-            }
+        {            
             //Set default values.
             if (value == null)
             {
-                ScalerUnit[0] = ScalerUnit[1] = 0;
+                m_Scaler = m_Unit = 0;
             }
             else
             {
@@ -240,8 +240,8 @@ public GXDLMSRegister(ObjectType type, String ln, int sn)
                 {
                     throw new IllegalArgumentException("setValue failed. Invalid scaler unit value.");
                 }
-                ScalerUnit[0] = ((Number)Array.get(value, 0)).intValue();
-                ScalerUnit[1] = ((Number)Array.get(value, 1)).intValue();
+                m_Scaler = ((Number)Array.get(value, 0)).intValue();
+                m_Unit = ((Number)Array.get(value, 1)).intValue();
             }
         }
         else
