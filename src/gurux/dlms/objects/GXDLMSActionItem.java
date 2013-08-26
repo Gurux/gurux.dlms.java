@@ -34,42 +34,26 @@
 
 package gurux.dlms.objects;
 
-import gurux.dlms.enums.DataType;
-
-public interface IGXDLMSBase 
+public class GXDLMSActionItem
 {
-    /*
-     * Returns collection of attributes to read.
-     * 
-     * If attribute is static and already read or device is returned HW error it is not returned.
-     */
-    int[] GetAttributeIndexToRead();
-        
-    /*
-    * Returns amount of attributes.
-    */
-    int getAttributeCount();
-        
+    private String m_LogicalName;
+    private int m_ScriptSelector;
     
-    /*
-     * Returns amount of methods.
-     */    
-    int getMethodCount();
-            
-    /*
-    * Returns value of given attribute.
-    */
-    Object getValue(int index, DataType[] type, byte[] parameters, boolean raw);
+    public final String getLogicalName()
+    {
+        return m_LogicalName;
+    }
+    public final void setLogicalName(String value)
+    {
+        m_LogicalName = value;
+    }
 
-   /*
-    * Set value of given attribute.
-    */
-   void setValue(int index, Object value, boolean raw);
-   
-   /*
-    * Invokes method.
-    * 
-     @param index Method index.
-    */
-   void invoke(int index, Object parameters);
+    public final int getScriptSelector()
+    {
+        return m_ScriptSelector;
+    }
+    public final void setScriptSelector(int value)
+    {
+        m_ScriptSelector = value;
+    }
 }

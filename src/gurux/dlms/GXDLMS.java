@@ -1423,25 +1423,27 @@ class GXDLMS
                 throw new GXDLMSException("Invalid data format.");
             }
             frame[0] = buff.get();
+            
             //Is there more data available.
-            if (frame[0] == GXCommon.HDLCFrameTypeMoreData)
+            if ((frame[0] & 0x8) != 0)
             {
                 MoreData = EnumSet.of(RequestTypes.FRAME);
             }
+            //Check frame length.
+            if ((frame[0] & 0x7) != 0)
+            {
+                FrameLen = ((frame[0] & 0x7) << 8);
+            }
             //If not enought data.
-            FrameLen = buff.get();
-            //if (len - index + 2 < FrameLen)
+            FrameLen += buff.get();
             if (len < FrameLen + buff.position() - 1)
             {
                 packetFull[0] = false;
                 MoreData.clear();
                 return MoreData;
             }
-            if ((frame[0] != GXCommon.HDLCFrameType && 
-                    frame[0] != GXCommon.HDLCFrameTypeMoreData) || 
-                    (MoreData.isEmpty() && 
-                    buff.get(FrameLen + PacketStartID + 1) != GXCommon.HDLCFrameStartEnd)) 
-                //Check EOP - Check BOP
+            if (MoreData.isEmpty() && 
+                    buff.get(FrameLen + PacketStartID + 1) != GXCommon.HDLCFrameStartEnd)                
             {
                 throw new GXDLMSException("Invalid data format.");
             }

@@ -34,42 +34,71 @@
 
 package gurux.dlms.objects;
 
-import gurux.dlms.enums.DataType;
+import gurux.dlms.GXDateTime;
 
-public interface IGXDLMSBase 
+public class GXDLMSSeasonProfile
 {
-    /*
-     * Returns collection of attributes to read.
-     * 
-     * If attribute is static and already read or device is returned HW error it is not returned.
-     */
-    int[] GetAttributeIndexToRead();
-        
-    /*
-    * Returns amount of attributes.
-    */
-    int getAttributeCount();
-        
+    private String Name;
+    private GXDateTime Start;  
+    private String WeekName;
     
-    /*
-     * Returns amount of methods.
-     */    
-    int getMethodCount();
-            
-    /*
-    * Returns value of given attribute.
+    /** 
+     Constructor.
     */
-    Object getValue(int index, DataType[] type, byte[] parameters, boolean raw);
+    public GXDLMSSeasonProfile()
+    {
 
-   /*
-    * Set value of given attribute.
+    }
+
+    /** 
+     Constructor.
     */
-   void setValue(int index, Object value, boolean raw);
-   
-   /*
-    * Invokes method.
-    * 
-     @param index Method index.
+    public GXDLMSSeasonProfile(String name, GXDateTime start, String weekName)
+    {
+        setName(name);
+        setStart(start);
+        setWeekName(weekName);
+    }
+
+    /** 
+     Name of season profile.
     */
-   void invoke(int index, Object parameters);
+    public final String getName()
+    {
+        return Name;
+    }
+    public final void setName(String value)
+    {
+        Name = value;
+    }
+
+    /** 
+     Season Profile start time.
+    */    
+    public final GXDateTime getStart()
+    {
+        return Start;
+    }
+    public final void setStart(GXDateTime value)
+    {
+        Start = value;
+    }
+
+    /** 
+     Week name of season profile.
+    */    
+    public final String getWeekName()
+    {
+        return WeekName;
+    }
+    public final void setWeekName(String value)
+    {
+        WeekName = value;
+    }
+    
+    @Override
+    public String toString()
+    {
+        return Name + " " + Start.toString();
+    }
 }

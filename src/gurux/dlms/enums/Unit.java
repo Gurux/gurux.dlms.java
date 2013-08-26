@@ -36,6 +36,7 @@ package gurux.dlms.enums;
 
 public enum Unit 
 {
+    NONE(0),
     YEAR(1),
     MONTH(2),
     WEEK(3),

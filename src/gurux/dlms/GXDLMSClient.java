@@ -47,10 +47,17 @@ import gurux.dlms.objects.GXDLMSObject;
 import gurux.dlms.objects.GXDLMSObjectCollection;
 import gurux.dlms.manufacturersettings.GXDLMSAttributeSettings;
 import gurux.dlms.manufacturersettings.GXObisCode;
+import gurux.dlms.objects.GXDLMSActivityCalendar;
+import gurux.dlms.objects.GXDLMSCaptureObject;
+import gurux.dlms.objects.GXDLMSRegister;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
+import java.io.InputStream;
 import java.io.UnsupportedEncodingException;
 import java.text.ParseException;
+import java.util.AbstractMap;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
@@ -59,6 +66,7 @@ import java.util.logging.Logger;
 */
 public class GXDLMSClient
 {
+    GXDLMSObjectCollection Objects;
     private GXObisCodeCollection privateObisCodes;
     private Authentication privateAuthentication;
     private GXDLMS m_Base = new GXDLMS(false);            
@@ -92,6 +100,18 @@ public class GXDLMSClient
         this.setServerID(serverID);
     }
     
+    /*
+     * List of meter's objects.
+     */
+    public GXDLMSObjectCollection getObjects()
+    {
+        return Objects;
+    }
+    
+    public void setObjects(GXDLMSObjectCollection value)
+    {
+        Objects = value;
+    }
 
     /** 
      List of available obis codes.
@@ -681,11 +701,11 @@ public class GXDLMSClient
      @param dataIndex
      @return 
     */
-    private GXDLMSObject createDLMSObject(int ClassID, Object Version, int BaseName, Object LN, Object AccessRights, int AttributeIndex, int dataIndex)
+    private GXDLMSObject createDLMSObject(int ClassID, Object Version, int BaseName, Object LN, Object AccessRights)
     {
         ObjectType type = ObjectType.forValue(ClassID);
         GXDLMSObject obj = createObject(type); 
-        updateObjectData(obj, type, Version, BaseName, (byte[])LN, AccessRights, AttributeIndex, dataIndex);
+        updateObjectData(obj, type, Version, BaseName, (byte[])LN, AccessRights);
         if (getObisCodes() != null)
         {
             GXObisCode code = getObisCodes().findByLN(obj.getObjectType(), obj.getLogicalName(), null);
@@ -732,7 +752,7 @@ public class GXDLMSClient
             int baseName = ((Number)(objects[0])).intValue() & 0xFFFF;
             if (baseName > 0)
             {
-                GXDLMSObject comp = createDLMSObject(classID, objects[2], baseName, objects[3], null, 0, 0);
+                GXDLMSObject comp = createDLMSObject(classID, objects[2], baseName, objects[3], null);
                 if (!onlyKnownObjects || comp.getClass() != GXDLMSObject.class)
                 {
                     items.add(comp);
@@ -757,7 +777,7 @@ public class GXDLMSClient
      @param attributeIndex
      @param dataIndex
     */
-    final void updateObjectData(GXDLMSObject obj, ObjectType objectType, Object version, Object baseName, byte[] logicalName, Object accessRights, int attributeIndex, int dataIndex)
+    final void updateObjectData(GXDLMSObject obj, ObjectType objectType, Object version, Object baseName, byte[] logicalName, Object accessRights)
     {
         obj.setObjectType(objectType);
         // Check access rights.
@@ -793,8 +813,6 @@ public class GXDLMSClient
                 }
             }
         }
-        obj.setSelectedAttributeIndex(attributeIndex);
-        obj.setSelectedDataIndex(dataIndex);
         if (baseName != null)
         {
             obj.setShortName(((Number)baseName).intValue());
@@ -815,6 +833,125 @@ public class GXDLMSClient
     public final GXDLMSObjectCollection parseObjects(ByteArrayOutputStream data, boolean onlyKnownObjects)
     {
         return parseObjects(data.toByteArray(), onlyKnownObjects);
+    }
+        
+    static void updateOBISCodes(GXDLMSObjectCollection objects)
+    {        
+        InputStream stream = GXDLMSClient.class.getResourceAsStream("/resources/OBISCodes.txt");
+        if (stream == null)
+        {
+            return;
+        }
+        
+        ByteArrayOutputStream buffer = new ByteArrayOutputStream();
+        int nRead;
+        byte[] data = new byte[1000];
+        try 
+        {
+            while ((nRead = stream.read(data, 0, data.length)) != -1) 
+            {
+                buffer.write(data, 0, nRead);
+            }
+            buffer.flush();
+        } 
+        catch (IOException ex) 
+        {
+            Logger.getLogger(GXDLMSClient.class.getName()).log(Level.SEVERE, null, ex);
+        }        
+        String str = buffer.toString();        
+        GXStandardObisCodeCollection codes = new GXStandardObisCodeCollection();
+        String[] rows = str.split("\r\n");
+        for (String it : rows)
+        {
+            String[] items = it.split("[;]", -1);
+            String[] obis = items[0].split("[.]", -1);
+            GXStandardObisCode code = new GXStandardObisCode(obis, items[3] + "; " + items[4] + "; " + items[5] + "; " + items[6] + "; " + items[7], items[1], items[2]);
+            codes.add(code);
+        }
+        for (GXDLMSObject it : objects)
+        {
+            if (!(it.getDescription() == null || it.getDescription().equals("")) && 
+                    it.getObjectType() != ObjectType.NONE)
+            {
+                continue;
+            }
+            String ln = it.getLogicalName();
+            GXStandardObisCode code = codes.find(ln, it.getObjectType());
+            if (code != null)
+            {
+                it.setDescription(code.getDescription());                
+                //If string is used
+                if (code.getDataType().contains("10"))
+                {
+                    code.setDataType("10");
+                }
+                //If date time is used.
+                else if (code.getDataType().contains("25") || code.getDataType().contains("26"))
+                {
+                    code.setDataType("25");
+                }                
+                else if (code.getDataType().contains("9"))
+                {
+                    //Time stamps of the billing periods objects (first scheme if there are two)
+                    if ((GXStandardObisCodeCollection.equalsMask("0.0-64.96.7.10-14.255", ln) ||
+                        //Time stamps of the billing periods objects (second scheme)
+                        GXStandardObisCodeCollection.equalsMask("0.0-64.0.1.5.0-99,255", ln) ||
+                        //Time of power failure
+                        GXStandardObisCodeCollection.equalsMask("0.0-64.0.1.2.0-99,255", ln) ||
+                        //Time stamps of the billing periods objects (first scheme if there are two)                        
+                        GXStandardObisCodeCollection.equalsMask("1.0-64.0.1.2.0-99,255", ln) ||
+                        //Time stamps of the billing periods objects (second scheme)
+                        GXStandardObisCodeCollection.equalsMask("1.0-64.0.1.5.0-99,255", ln) ||
+                        //Time expired since last end of billing period
+                        GXStandardObisCodeCollection.equalsMask("1.0-64.0.9.0.255", ln) ||                        
+                        //Time of last reset
+                        GXStandardObisCodeCollection.equalsMask("1.0-64.0.9.6.255", ln) ||
+                        //Date of last reset
+                        GXStandardObisCodeCollection.equalsMask("1.0-64.0.9.7.255", ln) ||
+                        //Time expired since last end of billing period (Second billing period scheme)
+                        GXStandardObisCodeCollection.equalsMask("1.0-64.0.9.13.255", ln) ||                        
+                        //Time of last reset (Second billing period scheme)
+                        GXStandardObisCodeCollection.equalsMask("1.0-64.0.9.14.255", ln) ||
+                        //Date of last reset (Second billing period scheme)
+                        GXStandardObisCodeCollection.equalsMask("1.0-64.0.9.15.255", ln)))
+                    {
+                        code.setDataType("25");
+                    }
+                    //Local time
+                    else if (GXStandardObisCodeCollection.equalsMask("1.0-64.0.9.1.255", ln))
+                    {
+                        code.setDataType("27");
+                    }
+                    //Local date
+                    else if (GXStandardObisCodeCollection.equalsMask("1.0-64.0.9.2.255", ln))
+                    {
+                        code.setDataType("26");
+                    }
+                }
+                if (!code.getDataType().equals("*") && 
+                        !code.getDataType().equals("") && 
+                        !code.getDataType().contains(","))
+                {
+                    DataType type = DataType.forValue(Integer.parseInt(code.getDataType()));
+                    switch (it.getObjectType())
+                    {
+                        case DATA:
+                        case REGISTER:
+                        case REGISTER_ACTIVATION:                            
+                        case EXTENDED_REGISTER:                            
+                            it.setUIDataType(2, type);
+                            break;
+                        default:
+                        break;
+                    }                    
+                }
+            }
+            else
+            {
+                System.out.println("Unknown OBIS Code: " + it.getLogicalName() + 
+                        " Type: " + it.getObjectType());                
+            }
+        }
     }
     
     /** 
@@ -838,6 +975,8 @@ public class GXDLMSClient
         {
             objects = parseSNObjects(data, onlyKnownObjects);
         }
+        updateOBISCodes(objects);
+        Objects = objects;
         return objects;
     }
         
@@ -890,7 +1029,7 @@ public class GXDLMSClient
             int classID = ((Number)(objects[0])).intValue() & 0xFFFF;
             if (classID > 0)
             {
-                GXDLMSObject comp = createDLMSObject(classID, objects[1], 0, objects[2], objects[3], 0, 0);
+                GXDLMSObject comp = createDLMSObject(classID, objects[1], 0, objects[2], objects[3]);
                 if (!onlyKnownObjects || comp.getClass() != GXDLMSObject.class)
                 {
                     items.add(comp);
@@ -904,7 +1043,7 @@ public class GXDLMSClient
         return items;
     }
 
-    public final GXDLMSObjectCollection parseColumns(ByteArrayOutputStream data)
+    public final List<AbstractMap.SimpleEntry<GXDLMSObject, GXDLMSCaptureObject>> parseColumns(ByteArrayOutputStream data)
     {        
         return parseColumns(data.toByteArray());
     }
@@ -912,7 +1051,7 @@ public class GXDLMSClient
     /** 
      Parse data columns fro the byte stream.
     */
-    public final GXDLMSObjectCollection parseColumns(byte[] data)
+    public final List<AbstractMap.SimpleEntry<GXDLMSObject, GXDLMSCaptureObject>> parseColumns(byte[] data)
     {
         if (data == null)
         {
@@ -928,8 +1067,10 @@ public class GXDLMSClient
         //get object count
         int cnt = GXCommon.getObjectCount(data, index);
         int objectCnt = 0;
-        GXDLMSObjectCollection items = new GXDLMSObjectCollection();
+        List<AbstractMap.SimpleEntry<GXDLMSObject, GXDLMSCaptureObject>> items = 
+                new ArrayList<AbstractMap.SimpleEntry<GXDLMSObject, GXDLMSCaptureObject>>();        
         int[] total = new int[1], count = new int[1];
+        GXDLMSObjectCollection objects2 = new GXDLMSObjectCollection();
         while (index[0] != data.length && cnt != objectCnt)
         {
             DataType[] type = new DataType[]{DataType.NONE};
@@ -946,13 +1087,35 @@ public class GXDLMSClient
             }
             ++objectCnt;
             GXDLMSObject comp = createDLMSObject(((Number)objects[0]).shortValue(), 
-                    null, 0, objects[1], 0, ((Number)objects[2]).shortValue(), 
-                    ((Number)objects[3]).shortValue());
+                    null, 0, objects[1], 0);
             if (comp != null)
             {
-                items.add(comp);
-            }
+                GXDLMSCaptureObject co = new GXDLMSCaptureObject(((Number)objects[2]).shortValue(), ((Number)objects[3]).shortValue());                
+                items.add(new AbstractMap.SimpleEntry<GXDLMSObject, GXDLMSCaptureObject>(comp, co));
+                objects2.add(comp);
+                //Update data type and scaler unit if register.
+                if (Objects != null)
+                {
+                    GXDLMSObject tmp = Objects.findByLN(comp.getObjectType(), comp.getLogicalName());
+                    if (tmp != null)
+                    {
+                        if (comp instanceof GXDLMSRegister)
+                        {
+                            int index2 = co.getAttributeIndex();
+                            //Some meters return zero.
+                            if (index2 == 0)
+                            {
+                                index2 = 2;
+                            }
+                            comp.setUIDataType(index2, tmp.getUIDataType(index2));
+                            ((GXDLMSRegister) comp).setScaler(((GXDLMSRegister) tmp).getScaler());
+                            ((GXDLMSRegister) comp).setUnit(((GXDLMSRegister) tmp).getUnit());
+                        }
+                    }
+                }
+            }            
         }
+        updateOBISCodes(objects2);
         return items;
     }
 
@@ -961,9 +1124,8 @@ public class GXDLMSClient
      */
     public final Object updateValue(byte[] data, GXDLMSObject target, int attributeIndex) throws Exception
     {
-        target.setValue(attributeIndex, getValue(data, target, attributeIndex));        
-        DataType[] type = new DataType[1];
-        return target.getValue(attributeIndex, type, null); //TODO:
+        target.setValue(attributeIndex, getValue(data, target, attributeIndex), false);        
+        return target.getValues()[attributeIndex - 1];
     }
 
     
@@ -1166,6 +1328,7 @@ public class GXDLMSClient
                 total, count, tp, cachePosition);
         if (index[0] == -1)
         {
+            System.out.println(GXCommon.toHex(value));
             throw new OutOfMemoryError();
         }
         if (type == DataType.OCTET_STRING && ret instanceof byte[])
@@ -1201,7 +1364,7 @@ public class GXDLMSClient
 
      @return Read request, as byte array.
      */
-    public final byte[] getObjects()
+    public final byte[] getObjectsRequest()
     {
         Object name;
         if (getUseLogicalNameReferencing())
@@ -1281,7 +1444,7 @@ public class GXDLMSClient
             throws RuntimeException, UnsupportedEncodingException, ParseException
     {
         DataType[] type = new DataType[]{DataType.NONE};
-        Object value = item.getValue(index, type, null);
+        Object value = item.getValue(index, type, null, true);
         return write(item.getName(), value, type[0], item.getObjectType(), index);
     }
     
@@ -1433,7 +1596,7 @@ public class GXDLMSClient
         buff.put((byte) 0x04); //Add item count
         GXCommon.setData(buff, DataType.UINT16, (short)8); // Add class_id
         GXCommon.setData(buff, DataType.OCTET_STRING, sortedLn); // Add parameter Logical name
-        GXCommon.setData(buff, DataType.UINT8, 2);// Add attribute index.
+        GXCommon.setData(buff, DataType.INT8, 2);// Add attribute index.
         GXCommon.setData(buff, DataType.UINT16, sortedVersion); // Add version
         GXCommon.setData(buff, DataType.DATETIME, start); // Add start time
         GXCommon.setData(buff, DataType.DATETIME, end); // Add start time

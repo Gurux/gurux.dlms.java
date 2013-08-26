@@ -34,19 +34,22 @@
 
 package gurux.dlms.objects;
 
+import gurux.dlms.GXDLMSClient;
+import gurux.dlms.GXDateTime;
 import gurux.dlms.enums.DataType;
 import gurux.dlms.enums.ObjectType;
 
-public class GXDLMSData extends GXDLMSObject implements IGXDLMSBase
+public class GXDLMSExtendedRegister extends GXDLMSRegister
 {
-    private Object privateValue;
+    private GXDateTime privateCaptureTime = new GXDateTime();
+    private Object privateStatus;
 
     /**  
      Constructor.
     */
-    public GXDLMSData()
+    public GXDLMSExtendedRegister()
     {
-        super(ObjectType.DATA);
+        super(ObjectType.EXTENDED_REGISTER, null, 0);
     }
 
     /**  
@@ -54,40 +57,63 @@ public class GXDLMSData extends GXDLMSObject implements IGXDLMSBase
 
      @param ln Logican Name of the object.
     */
-    public GXDLMSData(String ln)
+    public GXDLMSExtendedRegister(String ln)
     {
-        super(ObjectType.DATA, ln, 0);
+        super(ObjectType.EXTENDED_REGISTER, ln, 0);
     }
 
     /**  
      Constructor.
-
      @param ln Logican Name of the object.
      @param sn Short Name of the object.
     */
-    public GXDLMSData(String ln, int sn)
+    public GXDLMSExtendedRegister(String ln, int sn)
     {
-        super(ObjectType.DATA, ln, sn);
+        super(ObjectType.EXTENDED_REGISTER, ln, sn);
+    }
+   
+    /** 
+     Scaler of COSEM Register object.
+    */
+    public final Object getStatus()
+    {
+        return privateStatus;
+    }
+    public final void setStatus(Object value)
+    {
+        privateStatus = value;
+    }
+    
+    @Override
+    public DataType getDataType(int index)
+    {
+        if (index == 5)
+        {
+            return DataType.DATETIME;
+        }
+        return super.getDataType(index);
     }
 
     /** 
-     Value of COSEM Data object.
+     Scaler of COSEM Register object.
     */
-    public final Object getValue()
+    public final GXDateTime getCaptureTime()
     {
-        return privateValue;
+        return privateCaptureTime;
     }
-    public final void setValue(Object value)
+    public final void setCaptureTime(GXDateTime value)
     {
-        privateValue = value;
+        privateCaptureTime = value;
     }
-
+    
     @Override
     public Object[] getValues()
     {
-        return new Object[] {getLogicalName(), getValue()};
+        String str = String.format("Scaler: %1$,.2f Unit: ", getScaler());
+        str += getUnit().toString();
+        return new Object[] {getLogicalName(), getValue(), str, getStatus(), getCaptureTime()};
     }
-    
+
     /*
      * Returns collection of attributes to read.
      * 
@@ -101,50 +127,55 @@ public class GXDLMSData extends GXDLMSObject implements IGXDLMSBase
         if (LogicalName == null || LogicalName.compareTo("") == 0)
         {
             attributes.add(1);
-        }   
+        }
+        //ScalerUnit
+        if (!isRead(3))
+        {
+            attributes.add(3);
+        }
         //Value
         if (canRead(2))
         {
             attributes.add(2);
+        }        
+        //Status
+        if (canRead(4))
+        {
+            attributes.add(4);
+        }
+        //CaptureTime
+        if (canRead(5))
+        {
+            attributes.add(5);
         }
         return toIntArray(attributes);
     }
     
     /*
      * Returns amount of attributes.
-     */  
+     */    
     @Override
     public int getAttributeCount()
     {
-        return 2;
-    }
-    
-    /*
-     * Returns amount of methods.
-     */ 
-    @Override
-    public int getMethodCount()
-    {
-        return 0;
-    }    
+        return 5;
+    }       
     
     /*
      * Returns value of given attribute.
      */    
     @Override
     public Object getValue(int index, DataType[] type, byte[] parameters, boolean raw)
-    {
-        if (index == 1)
+    {        
+        if (index == 4)
         {
-            type[0] = DataType.OCTET_STRING;
-            return getLogicalName();
+            return getStatus();
         }
-        if (index == 2)
+        if (index == 5)
         {
-            type[0] = getDataType(index);
-            return getValue();
-        }    
-        throw new IllegalArgumentException("GetValue failed. Invalid attribute index.");
+            type[0] = DataType.DATETIME;
+            return getCaptureTime();
+        }
+        return super.getValue(index, type, parameters, raw);
     }
     
     /*
@@ -153,17 +184,28 @@ public class GXDLMSData extends GXDLMSObject implements IGXDLMSBase
     @Override
     public void setValue(int index, Object value, boolean raw)
     {
-        if (index == 1)
+        if (index == 4)
         {
-            setLogicalName(GXDLMSObject.toLogicalName((byte[]) value));            
+            setStatus(value);
         }
-        else if (index == 2)
+        else if (index == 5)
         {
-            setValue(value);
+            if (value == null)
+            {
+                setCaptureTime(new GXDateTime());                
+            }
+            else
+            {
+                if (value instanceof byte[])
+                {
+                    value = GXDLMSClient.changeType((byte[]) value, DataType.DATETIME);
+                }
+                setCaptureTime((GXDateTime) value);
+            }
         }
         else
         {
-            throw new IllegalArgumentException("GetValue failed. Invalid attribute index.");
+            super.setValue(index, value, raw);
         }
     }
 }

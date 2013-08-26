@@ -1,0 +1,71 @@
+<?xml version="1.0" encoding="utf-8"?>
+<GXManufacturer xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:xsd="http://www.w3.org/2001/XMLSchema">
+  <Identification>grx</Identification>
+  <Name>Gurux</Name>
+  <UseLN>true</UseLN>
+  <ObisCodes>
+    <GXObisCode>
+      <LogicalName>0.0.42.0.0.255</LogicalName>
+      <Interface>Data</Interface>
+      <ObjectType>1</ObjectType>
+      <Attributes>
+        <GXDLMSAttributeSettings>
+          <Index>2</Index>
+          <Type>String</Type>
+        </GXDLMSAttributeSettings>
+      </Attributes>
+    </GXObisCode>
+    <GXObisCode>
+      <LogicalName>0.0.40.0.0.255</LogicalName>
+      <Interface>AssociationLogicalName</Interface>
+      <ObjectType>15</ObjectType>
+      <Attributes />
+    </GXObisCode>
+    <GXObisCode>
+      <LogicalName>1.1.21.25.0.255</LogicalName>
+      <Interface>Register</Interface>
+      <ObjectType>3</ObjectType>
+      <Attributes>
+        <GXDLMSAttributeSettings>
+          <Index>2</Index>
+        </GXDLMSAttributeSettings>
+      </Attributes>
+    </GXObisCode>
+    <GXObisCode>
+      <LogicalName>0.0.1.0.0.255</LogicalName>
+      <Interface>Clock</Interface>
+      <ObjectType>8</ObjectType>
+      <Attributes />
+    </GXObisCode>
+  </ObisCodes>
+  <StartProtocol>DLMS</StartProtocol>
+  <Settings>
+    <GXAuthentication>
+      <Type>None</Type>
+      <ClientID xsi:type="xsd:unsignedByte">16</ClientID>
+    </GXAuthentication>
+    <GXAuthentication>
+      <Type>Low</Type>
+      <ClientID xsi:type="xsd:unsignedByte">17</ClientID>
+    </GXAuthentication>
+    <GXAuthentication>
+      <Type>High</Type>
+      <ClientID xsi:type="xsd:unsignedByte">18</ClientID>
+    </GXAuthentication>
+  </Settings>
+  <ServerSettings>
+    <GXServerAddress>
+      <HDLCAddress>0</HDLCAddress>
+      <Formula />
+      <PhysicalAddress xsi:type="xsd:unsignedByte">1</PhysicalAddress>
+    </GXServerAddress>
+    <GXServerAddress>
+      <HDLCAddress>1</HDLCAddress>
+      <PhysicalAddress xsi:type="xsd:unsignedByte">1</PhysicalAddress>
+    </GXServerAddress>
+    <GXServerAddress>
+      <HDLCAddress>2</HDLCAddress>
+      <PhysicalAddress xsi:type="xsd:unsignedByte">1</PhysicalAddress>
+    </GXServerAddress>
+  </ServerSettings>
+</GXManufacturer>

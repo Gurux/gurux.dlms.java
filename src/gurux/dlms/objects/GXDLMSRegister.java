@@ -40,10 +40,7 @@ import gurux.dlms.enums.Unit;
 import gurux.dlms.enums.DataType;
 import gurux.dlms.internal.GXCommon;
 import java.io.ByteArrayOutputStream;
-import java.io.IOException;
-import java.io.UnsupportedEncodingException;
 import java.lang.reflect.Array;
-import java.text.ParseException;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
@@ -60,14 +57,14 @@ public class GXDLMSRegister extends GXDLMSObject implements IGXDLMSBase
     {
         super(ObjectType.REGISTER);
         setScaler(1);
-        setUnit(Unit.NO_UNIT);
+        setUnit(Unit.NONE);
     }
 
 public GXDLMSRegister(ObjectType type, String ln, int sn)
 {
     super(type, ln, sn);
     setScaler(1);
-    setUnit(Unit.NO_UNIT);
+    setUnit(Unit.NONE);
 }
 
     /**  
@@ -107,7 +104,7 @@ public GXDLMSRegister(ObjectType type, String ln, int sn)
      Unit of COSEM Register object.
     */
     public final Unit getUnit()
-    {
+    {        
         return Unit.forValue(m_Unit);
     }
     public final void setUnit(Unit value)
@@ -139,8 +136,9 @@ public GXDLMSRegister(ObjectType type, String ln, int sn)
 
     @Override
     public Object[] getValues()
-    {
-        String str = String.format("%d %d", m_Unit, m_Scaler);
+    {        
+        String str = String.format("Scaler: %1$,.2f Unit: ", getScaler());
+        str += getUnit().toString();
         return new Object[] {getLogicalName(), getValue(), str};
     }
    
@@ -158,7 +156,48 @@ public GXDLMSRegister(ObjectType type, String ln, int sn)
             throw new IllegalArgumentException("Invoke failed. Invalid attribute index.");
         }
     }
+    
+    /*
+     * Is attribute read. This can be used with static attributes to make 
+     * meter reading faster.
+     */    
+    @Override
+    public boolean isRead(int index)
+    {
+        if (index == 3)
+        {
+            return m_Unit != 0;
+        }
+        return super.isRead(index);
+    }
 
+    /*
+     * Returns collection of attributes to read.
+     * 
+     * If attribute is static and already read or device is returned HW error it is not returned.
+     */
+    @Override
+    public int[] GetAttributeIndexToRead()
+    {
+        java.util.ArrayList<Integer> attributes = new java.util.ArrayList<Integer>();
+        //LN is static and read only once.
+        if (LogicalName == null || LogicalName.compareTo("") == 0)
+        {
+            attributes.add(1);
+        }
+        //ScalerUnit
+        if (!isRead(3))
+        {
+            attributes.add(3);
+        }
+        //Value
+        if (canRead(2))
+        {
+            attributes.add(2);
+        }          
+        return toIntArray(attributes);
+    }
+    
     /*
      * Returns amount of attributes.
      */    
@@ -181,7 +220,7 @@ public GXDLMSRegister(ObjectType type, String ln, int sn)
      * Returns value of given attribute.
      */    
     @Override
-    public Object getValue(int index, DataType[] type, byte[] parameters)
+    public Object getValue(int index, DataType[] type, byte[] parameters, boolean raw)
     {
         if (index == 1)
         {
@@ -217,7 +256,7 @@ public GXDLMSRegister(ObjectType type, String ln, int sn)
      * Set value of given attribute.
      */
     @Override
-    public void setValue(int index, Object value)
+    public void setValue(int index, Object value, boolean raw)
     {
         if (index == 1)
         {
@@ -225,7 +264,29 @@ public GXDLMSRegister(ObjectType type, String ln, int sn)
         }
         else if (index == 2)
         {
-            setValue(value);
+            if (!raw)
+            {
+                if (m_Scaler != 0)
+                {
+                    try
+                    {                        
+                        m_Value = ((Number)value).doubleValue() * getScaler();
+                    }
+                    catch (Exception ex)
+                    {
+                        //Sometimes scaler is set for wrong Object type.
+                        setValue(value);
+                    }
+                }
+                else
+                {
+                    setValue(value);
+                }
+            }
+            else
+            {
+                setValue(value);
+            }            
         }
         else if (index == 3)
         {            
@@ -238,10 +299,13 @@ public GXDLMSRegister(ObjectType type, String ln, int sn)
             {
                 if (Array.getLength(value) != 2)
                 {
-                    throw new IllegalArgumentException("setValue failed. Invalid scaler unit value.");
+                    m_Scaler = m_Unit = 0;
                 }
-                m_Scaler = ((Number)Array.get(value, 0)).intValue();
-                m_Unit = ((Number)Array.get(value, 1)).intValue();
+                else
+                {
+                    m_Scaler = ((Number)Array.get(value, 0)).intValue();
+                    m_Unit = (((Number)Array.get(value, 1)).intValue() & 0xFF);
+                }
             }
         }
         else

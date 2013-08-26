@@ -34,19 +34,19 @@
 
 package gurux.dlms.objects;
 
+import gurux.dlms.GXDLMSClient;
 import gurux.dlms.enums.DataType;
 import gurux.dlms.enums.ObjectType;
 
-public class GXDLMSData extends GXDLMSObject implements IGXDLMSBase
+public class GXDLMSMacAddressSetup extends GXDLMSObject implements IGXDLMSBase
 {
-    private Object privateValue;
-
+    private String m_MacAddress;
     /**  
      Constructor.
     */
-    public GXDLMSData()
+    public GXDLMSMacAddressSetup()
     {
-        super(ObjectType.DATA);
+        super(ObjectType.MAC_ADDRESS_SETUP, "0.0.25.2.0.255", 0);
     }
 
     /**  
@@ -54,9 +54,9 @@ public class GXDLMSData extends GXDLMSObject implements IGXDLMSBase
 
      @param ln Logican Name of the object.
     */
-    public GXDLMSData(String ln)
+    public GXDLMSMacAddressSetup(String ln)
     {
-        super(ObjectType.DATA, ln, 0);
+        super(ObjectType.MAC_ADDRESS_SETUP, ln, 0);
     }
 
     /**  
@@ -65,27 +65,27 @@ public class GXDLMSData extends GXDLMSObject implements IGXDLMSBase
      @param ln Logican Name of the object.
      @param sn Short Name of the object.
     */
-    public GXDLMSData(String ln, int sn)
+    public GXDLMSMacAddressSetup(String ln, int sn)
     {
-        super(ObjectType.DATA, ln, sn);
+        super(ObjectType.MAC_ADDRESS_SETUP, ln, sn);
     }
 
     /** 
      Value of COSEM Data object.
     */
-    public final Object getValue()
+    public final String getMacAddress()
     {
-        return privateValue;
+        return m_MacAddress;
     }
-    public final void setValue(Object value)
+    public final void setMacAddress(String value)
     {
-        privateValue = value;
+        m_MacAddress = value;
     }
 
     @Override
     public Object[] getValues()
     {
-        return new Object[] {getLogicalName(), getValue()};
+        return new Object[] {getLogicalName(), getMacAddress()};
     }
     
     /*
@@ -101,9 +101,9 @@ public class GXDLMSData extends GXDLMSObject implements IGXDLMSBase
         if (LogicalName == null || LogicalName.compareTo("") == 0)
         {
             attributes.add(1);
-        }   
-        //Value
-        if (canRead(2))
+        }          
+        //MacAddress
+        if (!isRead(2))
         {
             attributes.add(2);
         }
@@ -141,9 +141,13 @@ public class GXDLMSData extends GXDLMSObject implements IGXDLMSBase
         }
         if (index == 2)
         {
-            type[0] = getDataType(index);
-            return getValue();
-        }    
+            type[0] = DataType.OCTET_STRING;
+            if (m_MacAddress == null)
+            {
+                return m_MacAddress;
+            }
+            return getMacAddress().replaceAll(":", ".");
+        }
         throw new IllegalArgumentException("GetValue failed. Invalid attribute index.");
     }
     
@@ -159,7 +163,9 @@ public class GXDLMSData extends GXDLMSObject implements IGXDLMSBase
         }
         else if (index == 2)
         {
-            setValue(value);
+            String add = GXDLMSClient.changeType((byte[]) value, DataType.OCTET_STRING).toString();
+            add = add.replaceAll(".", ":");
+            setMacAddress(add);
         }
         else
         {

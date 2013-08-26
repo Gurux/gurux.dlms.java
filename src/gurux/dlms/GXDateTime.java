@@ -125,51 +125,37 @@ public class GXDateTime
     public String toString()
     {
         if (!getSkip().isEmpty())
-        {
-            String format = null;
+        {            
+            SimpleDateFormat sd = new SimpleDateFormat();
+            String format = sd.toPattern();
+            String[] items = format.split("[.]", -1);
             if (getSkip().contains(DateTimeSkips.YEAR))
             {                
-                format += "yyyy";
+                format = format.replace("yyyy", "");
             }
             if (getSkip().contains(DateTimeSkips.MONTH))
             {
-                if (format != null)
-                {
-                    format += "-";
-                }
-                format += "MM";
+                format = format.replace("M", "");
             }
             if (getSkip().contains(DateTimeSkips.DAY))
             {
-                if (format != null)
-                {
-                    format += "-";
-                }
-                format += "dd";
+                format = format.replace("d", "");                
             }
             if (getSkip().contains(DateTimeSkips.HOUR))
             {
-                if (format != null)
-                {
-                    format += "-";
-                }
-                format += "HH";
+                format = format.replace("HH", "");
             }
             if (getSkip().contains(DateTimeSkips.MINUTE))
             {
-                if (format != null)
-                {
-                    format += "-";
-                }
-                format += "mm";
+                format = format.replace("m", "");
             }
             if (getSkip().contains(DateTimeSkips.SECOND))
             {
-                if (format != null)
-                {
-                    format += "-";
-                }
-                format += "ss";
+                format = format.replace("ss", "");
+            }
+            else
+            {
+                format += ":ss";
             }
             DateFormat df = new SimpleDateFormat(format);
             return df.format(getValue());

@@ -34,42 +34,42 @@
 
 package gurux.dlms.objects;
 
-import gurux.dlms.enums.DataType;
+import gurux.dlms.enums.ObjectType;
 
-public interface IGXDLMSBase 
+public class GXDLMSSchedule extends GXDLMSObject
 {
-    /*
-     * Returns collection of attributes to read.
-     * 
-     * If attribute is static and already read or device is returned HW error it is not returned.
-     */
-    int[] GetAttributeIndexToRead();
-        
-    /*
-    * Returns amount of attributes.
+    /**  
+     Constructor.
     */
-    int getAttributeCount();
-        
-    
-    /*
-     * Returns amount of methods.
-     */    
-    int getMethodCount();
-            
-    /*
-    * Returns value of given attribute.
-    */
-    Object getValue(int index, DataType[] type, byte[] parameters, boolean raw);
+    public GXDLMSSchedule()
+    {
+        super(ObjectType.SCHEDULE);
+    }
 
-   /*
-    * Set value of given attribute.
+    /**  
+     Constructor.
+
+     @param ln Logican Name of the object.
     */
-   void setValue(int index, Object value, boolean raw);
-   
-   /*
-    * Invokes method.
-    * 
-     @param index Method index.
+    public GXDLMSSchedule(String ln)
+    {
+        super(ObjectType.SCHEDULE, ln, 0);
+    }
+
+    /**  
+     Constructor.
+
+     @param ln Logican Name of the object.
+     @param sn Short Name of the object.
     */
-   void invoke(int index, Object parameters);
+    public GXDLMSSchedule(String ln, int sn)
+    {
+        super(ObjectType.SCHEDULE, ln, sn);
+    }
+
+    @Override
+    public Object[] getValues()
+    {
+        return new Object[] {getLogicalName()};
+    }
 }

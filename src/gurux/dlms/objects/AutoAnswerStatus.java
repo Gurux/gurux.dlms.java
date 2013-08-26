@@ -34,42 +34,45 @@
 
 package gurux.dlms.objects;
 
-import gurux.dlms.enums.DataType;
-
-public interface IGXDLMSBase 
+public enum AutoAnswerStatus
 {
-    /*
-     * Returns collection of attributes to read.
-     * 
-     * If attribute is static and already read or device is returned HW error it is not returned.
-     */
-    int[] GetAttributeIndexToRead();
-        
-    /*
-    * Returns amount of attributes.
-    */
-    int getAttributeCount();
-        
-    
-    /*
-     * Returns amount of methods.
-     */    
-    int getMethodCount();
-            
-    /*
-    * Returns value of given attribute.
-    */
-    Object getValue(int index, DataType[] type, byte[] parameters, boolean raw);
+    INACTIVE(0),
+    ACTIVE(1),
+    LOCKED(2);
 
-   /*
-    * Set value of given attribute.
-    */
-   void setValue(int index, Object value, boolean raw);
-   
-   /*
-    * Invokes method.
-    * 
-     @param index Method index.
-    */
-   void invoke(int index, Object parameters);
+    private int intValue;
+    private static java.util.HashMap<Integer, AutoAnswerStatus> mappings;
+    private static java.util.HashMap<Integer, AutoAnswerStatus> getMappings()
+    {
+        synchronized (AutoAnswerStatus.class)
+        {
+            if (mappings == null)
+            {
+                mappings = new java.util.HashMap<Integer, AutoAnswerStatus>();
+            }
+        }
+        return mappings;
+    }
+
+    private AutoAnswerStatus(int value)
+    {
+        intValue = value;
+        getMappings().put(value, this);
+    }
+
+    /*
+     * Get integer value for enum.
+     */
+    public int getValue()
+    {
+        return intValue;
+    }
+
+    /*
+     * Convert integer for enum value.
+     */
+    public static AutoAnswerStatus forValue(int value)
+    {
+        return getMappings().get(value);
+    }
 }

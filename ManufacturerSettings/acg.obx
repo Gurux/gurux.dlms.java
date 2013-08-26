@@ -1,0 +1,28 @@
+<?xml version="1.0" encoding="utf-8"?>
+<GXManufacturer xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:xsd="http://www.w3.org/2001/XMLSchema">
+  <Identification>ACG</Identification>
+  <Name>Actaris Gas</Name>
+  <UseLN>true</UseLN>
+  <ObisCodes />
+  <StartProtocol>DLMS</StartProtocol>
+  <Settings>
+    <GXAuthentication>
+      <Type>None</Type>
+      <ClientID xsi:type="xsd:unsignedByte">16</ClientID>
+    </GXAuthentication>
+    <GXAuthentication>
+      <Selected>true</Selected>
+      <Type>Low</Type>
+      <ClientID xsi:type="xsd:unsignedByte">1</ClientID>
+    </GXAuthentication>
+  </Settings>
+  <ServerSettings>
+    <GXServerAddress>
+      <Selected>true</Selected>
+      <HDLCAddress>0</HDLCAddress>
+      <Formula />
+      <PhysicalAddress xsi:type="xsd:unsignedInt">17</PhysicalAddress>
+      <LogicalAddress>1</LogicalAddress>
+    </GXServerAddress>
+  </ServerSettings>
+</GXManufacturer>

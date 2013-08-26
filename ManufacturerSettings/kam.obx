@@ -1,0 +1,339 @@
+<?xml version="1.0" encoding="utf-8"?>
+<GXManufacturer xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:xsd="http://www.w3.org/2001/XMLSchema">
+  <Identification>KAM</Identification>
+  <Name>Kamstrup</Name>
+  <UseLN>true</UseLN>
+  <ObisCodes>
+    <GXObisCode>
+      <LogicalName>0.0.42.0.0.255</LogicalName>
+      <Description>COSEM Logical device name</Description>
+      <Interface>Data</Interface>
+      <ObjectType>1</ObjectType>
+      <Attributes>
+        <GXDLMSAttributeSettings>
+          <Index>2</Index>
+          <Type>String</Type>
+        </GXDLMSAttributeSettings>
+      </Attributes>
+    </GXObisCode>
+    <GXObisCode>
+      <LogicalName>1.1.0.0.0.255</LogicalName>
+      <Description>Electricity ID 1</Description>
+      <Interface>Data</Interface>
+      <ObjectType>1</ObjectType>
+      <Attributes>
+        <GXDLMSAttributeSettings>
+          <Index>2</Index>
+        </GXDLMSAttributeSettings>
+      </Attributes>
+    </GXObisCode>
+    <GXObisCode>
+      <LogicalName>1.1.0.0.1.255</LogicalName>
+      <Description>Electricity ID 2</Description>
+      <Interface>Data</Interface>
+      <ObjectType>1</ObjectType>
+      <Attributes>
+        <GXDLMSAttributeSettings>
+          <Index>2</Index>
+        </GXDLMSAttributeSettings>
+      </Attributes>
+    </GXObisCode>
+    <GXObisCode>
+      <LogicalName>1.1.0.0.2.255</LogicalName>
+      <Description>Electricity ID 3</Description>
+      <Interface>Data</Interface>
+      <ObjectType>1</ObjectType>
+      <Attributes>
+        <GXDLMSAttributeSettings>
+          <Index>2</Index>
+        </GXDLMSAttributeSettings>
+      </Attributes>
+    </GXObisCode>
+    <GXObisCode>
+      <LogicalName>1.1.0.0.3.255</LogicalName>
+      <Description>Electricity ID 4</Description>
+      <Interface>Data</Interface>
+      <ObjectType>1</ObjectType>
+      <Attributes>
+        <GXDLMSAttributeSettings>
+          <Index>2</Index>
+        </GXDLMSAttributeSettings>
+      </Attributes>
+    </GXObisCode>
+    <GXObisCode>
+      <LogicalName>1.1.0.2.1.128</LogicalName>
+      <Description>Parameter record number</Description>
+      <Interface>Data</Interface>
+      <ObjectType>1</ObjectType>
+      <Attributes>
+        <GXDLMSAttributeSettings>
+          <Index>2</Index>
+        </GXDLMSAttributeSettings>
+      </Attributes>
+    </GXObisCode>
+    <GXObisCode>
+      <LogicalName>1.1.0.128.1.255</LogicalName>
+      <Interface>Data</Interface>
+      <ObjectType>1</ObjectType>
+      <Attributes>
+        <GXDLMSAttributeSettings>
+          <Index>2</Index>
+        </GXDLMSAttributeSettings>
+      </Attributes>
+    </GXObisCode>
+    <GXObisCode>
+      <LogicalName>1.1.0.130.1.255</LogicalName>
+      <Interface>Data</Interface>
+      <ObjectType>1</ObjectType>
+      <Attributes>
+        <GXDLMSAttributeSettings>
+          <Index>2</Index>
+        </GXDLMSAttributeSettings>
+      </Attributes>
+    </GXObisCode>
+    <GXObisCode>
+      <LogicalName>1.1.0.130.2.255</LogicalName>
+      <Interface>Data</Interface>
+      <ObjectType>1</ObjectType>
+      <Attributes>
+        <GXDLMSAttributeSettings>
+          <Index>2</Index>
+        </GXDLMSAttributeSettings>
+      </Attributes>
+    </GXObisCode>
+    <GXObisCode>
+      <LogicalName>1.1.96.1.0.255</LogicalName>
+      <Description>Metering point 1 object</Description>
+      <Interface>Data</Interface>
+      <ObjectType>1</ObjectType>
+      <Attributes>
+        <GXDLMSAttributeSettings>
+          <Index>2</Index>
+        </GXDLMSAttributeSettings>
+      </Attributes>
+    </GXObisCode>
+    <GXObisCode>
+      <LogicalName>1.1.96.1.1.255</LogicalName>
+      <Description>Metering point 2 object</Description>
+      <Interface>Data</Interface>
+      <ObjectType>1</ObjectType>
+      <Attributes>
+        <GXDLMSAttributeSettings>
+          <Index>2</Index>
+        </GXDLMSAttributeSettings>
+      </Attributes>
+    </GXObisCode>
+    <GXObisCode>
+      <LogicalName>1.1.1.7.0.255</LogicalName>
+      <Description>Instantaneous value (except for frequency)</Description>
+      <Interface>Register</Interface>
+      <ObjectType>3</ObjectType>
+      <Attributes>
+        <GXDLMSAttributeSettings>
+          <Index>2</Index>
+          <Type>Int32</Type>
+        </GXDLMSAttributeSettings>
+      </Attributes>
+    </GXObisCode>
+    <GXObisCode>
+      <LogicalName>1.1.2.7.0.255</LogicalName>
+      <Description>Instantaneous value (except for frequency)</Description>
+      <Interface>Register</Interface>
+      <ObjectType>3</ObjectType>
+      <Attributes>
+        <GXDLMSAttributeSettings>
+          <Index>2</Index>
+        </GXDLMSAttributeSettings>
+      </Attributes>
+    </GXObisCode>
+    <GXObisCode>
+      <LogicalName>1.1.3.7.0.255</LogicalName>
+      <Description>Instantaneous value (except for frequency)</Description>
+      <Interface>Register</Interface>
+      <ObjectType>3</ObjectType>
+      <Attributes>
+        <GXDLMSAttributeSettings>
+          <Index>2</Index>
+        </GXDLMSAttributeSettings>
+      </Attributes>
+    </GXObisCode>
+    <GXObisCode>
+      <LogicalName>1.1.4.7.0.255</LogicalName>
+      <Description>Instantaneous value (except for frequency)</Description>
+      <Interface>Register</Interface>
+      <ObjectType>3</ObjectType>
+      <Attributes>
+        <GXDLMSAttributeSettings>
+          <Index>2</Index>
+        </GXDLMSAttributeSettings>
+      </Attributes>
+    </GXObisCode>
+    <GXObisCode>
+      <LogicalName>1.1.21.25.0.255</LogicalName>
+      <Description>Last average 3</Description>
+      <Interface>Register</Interface>
+      <ObjectType>3</ObjectType>
+      <Attributes>
+        <GXDLMSAttributeSettings>
+          <Index>2</Index>
+        </GXDLMSAttributeSettings>
+      </Attributes>
+    </GXObisCode>
+    <GXObisCode>
+      <LogicalName>1.1.31.25.0.255</LogicalName>
+      <Description>Last average 3</Description>
+      <Interface>Register</Interface>
+      <ObjectType>3</ObjectType>
+      <Attributes>
+        <GXDLMSAttributeSettings>
+          <Index>2</Index>
+        </GXDLMSAttributeSettings>
+      </Attributes>
+    </GXObisCode>
+    <GXObisCode>
+      <LogicalName>1.1.32.25.0.255</LogicalName>
+      <Description>Last average 3</Description>
+      <Interface>Register</Interface>
+      <ObjectType>3</ObjectType>
+      <Attributes>
+        <GXDLMSAttributeSettings>
+          <Index>2</Index>
+        </GXDLMSAttributeSettings>
+      </Attributes>
+    </GXObisCode>
+    <GXObisCode>
+      <LogicalName>1.1.41.25.0.255</LogicalName>
+      <Description>Last average 3</Description>
+      <Interface>Register</Interface>
+      <ObjectType>3</ObjectType>
+      <Attributes>
+        <GXDLMSAttributeSettings>
+          <Index>2</Index>
+        </GXDLMSAttributeSettings>
+      </Attributes>
+    </GXObisCode>
+    <GXObisCode>
+      <LogicalName>1.1.51.25.0.255</LogicalName>
+      <Description>Last average 3</Description>
+      <Interface>Register</Interface>
+      <ObjectType>3</ObjectType>
+      <Attributes>
+        <GXDLMSAttributeSettings>
+          <Index>2</Index>
+        </GXDLMSAttributeSettings>
+      </Attributes>
+    </GXObisCode>
+    <GXObisCode>
+      <LogicalName>1.1.52.25.0.255</LogicalName>
+      <Description>Last average 3</Description>
+      <Interface>Register</Interface>
+      <ObjectType>3</ObjectType>
+      <Attributes>
+        <GXDLMSAttributeSettings>
+          <Index>2</Index>
+        </GXDLMSAttributeSettings>
+      </Attributes>
+    </GXObisCode>
+    <GXObisCode>
+      <LogicalName>1.1.61.25.0.255</LogicalName>
+      <Description>Last average 3</Description>
+      <Interface>Register</Interface>
+      <ObjectType>3</ObjectType>
+      <Attributes>
+        <GXDLMSAttributeSettings>
+          <Index>2</Index>
+        </GXDLMSAttributeSettings>
+      </Attributes>
+    </GXObisCode>
+    <GXObisCode>
+      <LogicalName>1.1.71.25.0.255</LogicalName>
+      <Description>Last average 3</Description>
+      <Interface>Register</Interface>
+      <ObjectType>3</ObjectType>
+      <Attributes>
+        <GXDLMSAttributeSettings>
+          <Index>2</Index>
+        </GXDLMSAttributeSettings>
+      </Attributes>
+    </GXObisCode>
+    <GXObisCode>
+      <LogicalName>1.1.72.25.0.255</LogicalName>
+      <Description>Last average 3</Description>
+      <Interface>Register</Interface>
+      <ObjectType>3</ObjectType>
+      <Attributes>
+        <GXDLMSAttributeSettings>
+          <Index>2</Index>
+        </GXDLMSAttributeSettings>
+      </Attributes>
+    </GXObisCode>
+    <GXObisCode>
+      <LogicalName>0.0.40.0.0.255</LogicalName>
+      <Description>Association Logical Name</Description>
+      <Interface>AssociationLogicalName</Interface>
+      <ObjectType>15</ObjectType>
+      <Attributes />
+    </GXObisCode>
+    <GXObisCode>
+      <LogicalName>0.0.41.0.0.255</LogicalName>
+      <Description>Sap Assignment</Description>
+      <Interface>SapAssignment</Interface>
+      <ObjectType>17</ObjectType>
+      <Attributes />
+    </GXObisCode>
+    <GXObisCode>
+      <LogicalName>1.1.0.2.2.128</LogicalName>
+      <Interface>Data</Interface>
+      <ObjectType>1</ObjectType>
+      <Attributes>
+        <GXDLMSAttributeSettings>
+          <Index>2</Index>
+        </GXDLMSAttributeSettings>
+      </Attributes>
+    </GXObisCode>
+    <GXObisCode>
+      <LogicalName>1.1.0.128.128.255</LogicalName>
+      <Interface>Data</Interface>
+      <ObjectType>1</ObjectType>
+      <Attributes>
+        <GXDLMSAttributeSettings>
+          <Index>2</Index>
+        </GXDLMSAttributeSettings>
+      </Attributes>
+    </GXObisCode>
+    <GXObisCode>
+      <LogicalName>1.1.0.130.130.255</LogicalName>
+      <Interface>Data</Interface>
+      <ObjectType>1</ObjectType>
+      <Attributes>
+        <GXDLMSAttributeSettings>
+          <Index>2</Index>
+        </GXDLMSAttributeSettings>
+      </Attributes>
+    </GXObisCode>
+  </ObisCodes>
+  <StartProtocol>DLMS</StartProtocol>
+  <Settings>
+    <GXAuthentication>
+      <Selected>true</Selected>
+      <Type>None</Type>
+      <ClientID xsi:type="xsd:unsignedByte">16</ClientID>
+    </GXAuthentication>
+    <GXAuthentication>
+      <Type>Low</Type>
+      <ClientID xsi:type="xsd:unsignedByte">17</ClientID>
+    </GXAuthentication>
+    <GXAuthentication>
+      <Type>High</Type>
+      <ClientID xsi:type="xsd:unsignedByte">18</ClientID>
+    </GXAuthentication>
+  </Settings>
+  <ServerSettings>
+    <GXServerAddress>
+      <Selected>true</Selected>
+      <HDLCAddress>0</HDLCAddress>
+      <Formula />
+      <PhysicalAddress xsi:type="xsd:unsignedByte">1</PhysicalAddress>
+    </GXServerAddress>
+  </ServerSettings>
+</GXManufacturer>

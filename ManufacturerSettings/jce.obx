@@ -1,0 +1,639 @@
+<?xml version="1.0" encoding="utf-8"?>
+<GXManufacturer xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:xsd="http://www.w3.org/2001/XMLSchema">
+  <Identification>JCE</Identification>
+  <Name>Janz SA</Name>
+  <UseLN>true</UseLN>
+  <ObisCodes>
+    <GXObisCode>
+      <LogicalName>0.0.1.0.0.255</LogicalName>
+      <Description>Clock</Description>
+      <Interface>Clock</Interface>
+      <ObjectType>8</ObjectType>
+      <Attributes>
+        <GXDLMSAttributeSettings xsi:type="GXDLMSAttribute">
+          <Index>2</Index>
+          <Type>DateTime</Type>
+        </GXDLMSAttributeSettings>
+      </Attributes>
+    </GXObisCode>
+    <GXObisCode>
+      <LogicalName>0.0.1.128.0.255</LogicalName>
+      <Interface>Data</Interface>
+      <ObjectType>1</ObjectType>
+      <Attributes>
+        <GXDLMSAttributeSettings xsi:type="GXDLMSAttribute">
+          <Index>2</Index>
+          <Type>Structure</Type>
+        </GXDLMSAttributeSettings>
+      </Attributes>
+    </GXObisCode>
+    <GXObisCode>
+      <LogicalName>0.0.1.128.1.255</LogicalName>
+      <Interface>Data</Interface>
+      <ObjectType>1</ObjectType>
+      <Attributes>
+        <GXDLMSAttributeSettings xsi:type="GXDLMSAttribute">
+          <Index>2</Index>
+          <Type>Structure</Type>
+        </GXDLMSAttributeSettings>
+      </Attributes>
+    </GXObisCode>
+    <GXObisCode>
+      <LogicalName>0.0.1.128.2.255</LogicalName>
+      <Interface>Data</Interface>
+      <ObjectType>1</ObjectType>
+      <Attributes>
+        <GXDLMSAttributeSettings xsi:type="GXDLMSAttribute">
+          <Index>2</Index>
+          <Type>Structure</Type>
+        </GXDLMSAttributeSettings>
+      </Attributes>
+    </GXObisCode>
+    <GXObisCode>
+      <LogicalName>0.0.22.0.0.255</LogicalName>
+      <Description>IEC HDLC setup object</Description>
+      <Interface>IecHdlcSetup</Interface>
+      <ObjectType>23</ObjectType>
+      <Attributes />
+    </GXObisCode>
+    <GXObisCode>
+      <LogicalName>0.0.42.0.0.255</LogicalName>
+      <Description>COSEM Logical device name</Description>
+      <Interface>Data</Interface>
+      <ObjectType>1</ObjectType>
+      <Attributes>
+        <GXDLMSAttributeSettings xsi:type="GXDLMSAttribute">
+          <Index>2</Index>
+          <Type>String</Type>
+        </GXDLMSAttributeSettings>
+      </Attributes>
+    </GXObisCode>
+    <GXObisCode>
+      <LogicalName>0.0.96.1.0.255</LogicalName>
+      <Description>Manufacturing number</Description>
+      <Interface>Data</Interface>
+      <ObjectType>1</ObjectType>
+      <Attributes>
+        <GXDLMSAttributeSettings xsi:type="GXDLMSAttribute">
+          <Index>2</Index>
+          <Type>String</Type>
+        </GXDLMSAttributeSettings>
+      </Attributes>
+    </GXObisCode>
+    <GXObisCode>
+      <LogicalName>0.0.96.5.0.255</LogicalName>
+      <Description>Internal operating status, global</Description>
+      <Interface>Data</Interface>
+      <ObjectType>1</ObjectType>
+      <Attributes>
+        <GXDLMSAttributeSettings xsi:type="GXDLMSAttribute">
+          <Index>2</Index>
+          <Type>UInt32</Type>
+        </GXDLMSAttributeSettings>
+      </Attributes>
+    </GXObisCode>
+    <GXObisCode>
+      <LogicalName>0.0.96.6.0.255</LogicalName>
+      <Description>Battery use time counter</Description>
+      <Interface>Register</Interface>
+      <ObjectType>3</ObjectType>
+      <Attributes>
+        <GXDLMSAttributeSettings xsi:type="GXDLMSAttribute">
+          <Index>2</Index>
+          <Type>UInt32</Type>
+        </GXDLMSAttributeSettings>
+      </Attributes>
+    </GXObisCode>
+    <GXObisCode>
+      <LogicalName>0.0.96.7.5.255</LogicalName>
+      <Description>in all three phases.</Description>
+      <Interface>Data</Interface>
+      <ObjectType>1</ObjectType>
+      <Attributes>
+        <GXDLMSAttributeSettings xsi:type="GXDLMSAttribute">
+          <Index>2</Index>
+          <Type>UInt32</Type>
+        </GXDLMSAttributeSettings>
+      </Attributes>
+    </GXObisCode>
+    <GXObisCode>
+      <LogicalName>0.0.96.7.20.255</LogicalName>
+      <Description>Time threshold for long of power failure</Description>
+      <Interface>Register</Interface>
+      <ObjectType>3</ObjectType>
+      <Attributes>
+        <GXDLMSAttributeSettings xsi:type="GXDLMSAttribute">
+          <Index>2</Index>
+          <Type>UInt8</Type>
+        </GXDLMSAttributeSettings>
+      </Attributes>
+    </GXObisCode>
+    <GXObisCode>
+      <LogicalName>0.0.96.8.0.255</LogicalName>
+      <Description>Time of operation</Description>
+      <Interface>Register</Interface>
+      <ObjectType>3</ObjectType>
+      <Attributes>
+        <GXDLMSAttributeSettings xsi:type="GXDLMSAttribute">
+          <Index>2</Index>
+          <Type>UInt32</Type>
+        </GXDLMSAttributeSettings>
+      </Attributes>
+    </GXObisCode>
+    <GXObisCode>
+      <LogicalName>0.0.96.52.0.255</LogicalName>
+      <Description>Manufacturer specific abstract objects</Description>
+      <Interface>Register</Interface>
+      <ObjectType>3</ObjectType>
+      <Attributes>
+        <GXDLMSAttributeSettings xsi:type="GXDLMSAttribute">
+          <Index>2</Index>
+          <Type>UInt32</Type>
+        </GXDLMSAttributeSettings>
+      </Attributes>
+    </GXObisCode>
+    <GXObisCode>
+      <LogicalName>0.0.128.0.1.255</LogicalName>
+      <Interface>Data</Interface>
+      <ObjectType>1</ObjectType>
+      <Attributes>
+        <GXDLMSAttributeSettings xsi:type="GXDLMSAttribute">
+          <Index>2</Index>
+          <Type>String</Type>
+        </GXDLMSAttributeSettings>
+      </Attributes>
+    </GXObisCode>
+    <GXObisCode>
+      <LogicalName>0.0.128.0.2.255</LogicalName>
+      <Interface>Data</Interface>
+      <ObjectType>1</ObjectType>
+      <Attributes>
+        <GXDLMSAttributeSettings xsi:type="GXDLMSAttribute">
+          <Index>2</Index>
+          <Type>String</Type>
+        </GXDLMSAttributeSettings>
+      </Attributes>
+    </GXObisCode>
+    <GXObisCode>
+      <LogicalName>0.0.128.0.3.255</LogicalName>
+      <Interface>Data</Interface>
+      <ObjectType>1</ObjectType>
+      <Attributes>
+        <GXDLMSAttributeSettings xsi:type="GXDLMSAttribute">
+          <Index>2</Index>
+          <Type>String</Type>
+        </GXDLMSAttributeSettings>
+      </Attributes>
+    </GXObisCode>
+    <GXObisCode>
+      <LogicalName>0.0.128.0.4.255</LogicalName>
+      <Interface>Data</Interface>
+      <ObjectType>1</ObjectType>
+      <Attributes>
+        <GXDLMSAttributeSettings xsi:type="GXDLMSAttribute">
+          <Index>2</Index>
+          <Type>String</Type>
+        </GXDLMSAttributeSettings>
+      </Attributes>
+    </GXObisCode>
+    <GXObisCode>
+      <LogicalName>0.0.128.1.0.255</LogicalName>
+      <Interface>Data</Interface>
+      <ObjectType>1</ObjectType>
+      <Attributes>
+        <GXDLMSAttributeSettings xsi:type="GXDLMSAttribute">
+          <Index>2</Index>
+          <Type>UInt8</Type>
+        </GXDLMSAttributeSettings>
+      </Attributes>
+    </GXObisCode>
+    <GXObisCode>
+      <LogicalName>0.0.128.2.0.255</LogicalName>
+      <Interface>Data</Interface>
+      <ObjectType>1</ObjectType>
+      <Attributes>
+        <GXDLMSAttributeSettings xsi:type="GXDLMSAttribute">
+          <Index>2</Index>
+          <Type>UInt8</Type>
+        </GXDLMSAttributeSettings>
+      </Attributes>
+    </GXObisCode>
+    <GXObisCode>
+      <LogicalName>0.0.128.6.0.255</LogicalName>
+      <Interface>Data</Interface>
+      <ObjectType>1</ObjectType>
+      <Attributes>
+        <GXDLMSAttributeSettings xsi:type="GXDLMSAttribute">
+          <Index>2</Index>
+          <Type>UInt8</Type>
+        </GXDLMSAttributeSettings>
+      </Attributes>
+    </GXObisCode>
+    <GXObisCode>
+      <LogicalName>0.0.128.7.0.255</LogicalName>
+      <Interface>Data</Interface>
+      <ObjectType>1</ObjectType>
+      <Attributes>
+        <GXDLMSAttributeSettings xsi:type="GXDLMSAttribute">
+          <Index>2</Index>
+          <Type>Structure</Type>
+        </GXDLMSAttributeSettings>
+      </Attributes>
+    </GXObisCode>
+    <GXObisCode>
+      <LogicalName>0.0.128.8.0.255</LogicalName>
+      <Interface>Data</Interface>
+      <ObjectType>1</ObjectType>
+      <Attributes>
+        <GXDLMSAttributeSettings xsi:type="GXDLMSAttribute">
+          <Index>2</Index>
+          <Type>Structure</Type>
+        </GXDLMSAttributeSettings>
+      </Attributes>
+    </GXObisCode>
+    <GXObisCode>
+      <LogicalName>0.0.128.9.0.0</LogicalName>
+      <Interface>Data</Interface>
+      <ObjectType>1</ObjectType>
+      <Attributes>
+        <GXDLMSAttributeSettings xsi:type="GXDLMSAttribute">
+          <Index>2</Index>
+          <Type>Structure</Type>
+        </GXDLMSAttributeSettings>
+      </Attributes>
+    </GXObisCode>
+    <GXObisCode>
+      <LogicalName>0.0.128.10.0.255</LogicalName>
+      <Interface>Data</Interface>
+      <ObjectType>1</ObjectType>
+      <Attributes>
+        <GXDLMSAttributeSettings xsi:type="GXDLMSAttribute">
+          <Index>2</Index>
+          <Type>Structure</Type>
+        </GXDLMSAttributeSettings>
+      </Attributes>
+    </GXObisCode>
+    <GXObisCode>
+      <LogicalName>0.0.128.11.0.255</LogicalName>
+      <Interface>Data</Interface>
+      <ObjectType>1</ObjectType>
+      <Attributes />
+    </GXObisCode>
+    <GXObisCode>
+      <LogicalName>0.0.128.12.0.255</LogicalName>
+      <Interface>Data</Interface>
+      <ObjectType>1</ObjectType>
+      <Attributes />
+    </GXObisCode>
+    <GXObisCode>
+      <LogicalName>0.0.128.13.0.255</LogicalName>
+      <Interface>Data</Interface>
+      <ObjectType>1</ObjectType>
+      <Attributes />
+    </GXObisCode>
+    <GXObisCode>
+      <LogicalName>0.0.128.14.2.255</LogicalName>
+      <Interface>Data</Interface>
+      <ObjectType>1</ObjectType>
+      <Attributes />
+    </GXObisCode>
+    <GXObisCode>
+      <LogicalName>0.0.128.14.3.255</LogicalName>
+      <Interface>Data</Interface>
+      <ObjectType>1</ObjectType>
+      <Attributes />
+    </GXObisCode>
+    <GXObisCode>
+      <LogicalName>0.0.128.14.4.255</LogicalName>
+      <Interface>Data</Interface>
+      <ObjectType>1</ObjectType>
+      <Attributes />
+    </GXObisCode>
+    <GXObisCode>
+      <LogicalName>0.0.128.14.5.255</LogicalName>
+      <Interface>Data</Interface>
+      <ObjectType>1</ObjectType>
+      <Attributes />
+    </GXObisCode>
+    <GXObisCode>
+      <LogicalName>0.0.128.30.0.255</LogicalName>
+      <Interface>Register</Interface>
+      <ObjectType>3</ObjectType>
+      <Attributes>
+        <GXDLMSAttributeSettings xsi:type="GXDLMSAttribute">
+          <Index>2</Index>
+          <Type>UInt8</Type>
+        </GXDLMSAttributeSettings>
+      </Attributes>
+    </GXObisCode>
+    <GXObisCode>
+      <LogicalName>0.0.128.31.0.255</LogicalName>
+      <Interface>Data</Interface>
+      <ObjectType>1</ObjectType>
+      <Attributes>
+        <GXDLMSAttributeSettings xsi:type="GXDLMSAttribute">
+          <Index>2</Index>
+          <Type>UInt8</Type>
+        </GXDLMSAttributeSettings>
+      </Attributes>
+    </GXObisCode>
+    <GXObisCode>
+      <LogicalName>0.0.128.32.0.255</LogicalName>
+      <Interface>Register</Interface>
+      <ObjectType>3</ObjectType>
+      <Attributes>
+        <GXDLMSAttributeSettings xsi:type="GXDLMSAttribute">
+          <Index>2</Index>
+          <Type>UInt8</Type>
+        </GXDLMSAttributeSettings>
+      </Attributes>
+    </GXObisCode>
+    <GXObisCode>
+      <LogicalName>0.0.128.33.0.255</LogicalName>
+      <Interface>Data</Interface>
+      <ObjectType>1</ObjectType>
+      <Attributes />
+    </GXObisCode>
+    <GXObisCode>
+      <LogicalName>0.0.129.0.0.255</LogicalName>
+      <Interface>Clock</Interface>
+      <ObjectType>8</ObjectType>
+      <Attributes>
+        <GXDLMSAttributeSettings xsi:type="GXDLMSAttribute">
+          <Index>2</Index>
+          <Type>DateTime</Type>
+        </GXDLMSAttributeSettings>
+      </Attributes>
+    </GXObisCode>
+    <GXObisCode>
+      <LogicalName>1.0.0.0.0.255</LogicalName>
+      <Description>Electricity ID 1</Description>
+      <Interface>Data</Interface>
+      <ObjectType>1</ObjectType>
+      <Attributes>
+        <GXDLMSAttributeSettings xsi:type="GXDLMSAttribute">
+          <Index>2</Index>
+          <Type>String</Type>
+        </GXDLMSAttributeSettings>
+      </Attributes>
+    </GXObisCode>
+    <GXObisCode>
+      <LogicalName>1.0.0.8.0.255</LogicalName>
+      <Description>Measurement period 1, for average value 1</Description>
+      <Interface>Register</Interface>
+      <ObjectType>3</ObjectType>
+      <Attributes>
+        <GXDLMSAttributeSettings xsi:type="GXDLMSAttribute">
+          <Index>2</Index>
+          <Type>UInt8</Type>
+        </GXDLMSAttributeSettings>
+      </Attributes>
+    </GXObisCode>
+    <GXObisCode>
+      <LogicalName>1.0.0.8.4.255</LogicalName>
+      <Description>Recording interval 1, for load profile</Description>
+      <Interface>Register</Interface>
+      <ObjectType>3</ObjectType>
+      <Attributes>
+        <GXDLMSAttributeSettings xsi:type="GXDLMSAttribute">
+          <Index>2</Index>
+          <Type>UInt8</Type>
+        </GXDLMSAttributeSettings>
+      </Attributes>
+    </GXObisCode>
+    <GXObisCode>
+      <LogicalName>1.0.1.6.0.255</LogicalName>
+      <Description>Maximum 1</Description>
+      <Interface>ExtendedRegister</Interface>
+      <ObjectType>4</ObjectType>
+      <Attributes>
+        <GXDLMSAttributeSettings xsi:type="GXDLMSAttribute">
+          <Index>2</Index>
+          <Type>Float32</Type>
+        </GXDLMSAttributeSettings>
+      </Attributes>
+    </GXObisCode>
+    <GXObisCode>
+      <LogicalName>1.0.1.7.0.255</LogicalName>
+      <Description>Instantaneous value (except for frequency)</Description>
+      <Interface>Register</Interface>
+      <ObjectType>3</ObjectType>
+      <Attributes>
+        <GXDLMSAttributeSettings xsi:type="GXDLMSAttribute">
+          <Index>2</Index>
+          <Type>Float32</Type>
+        </GXDLMSAttributeSettings>
+      </Attributes>
+    </GXObisCode>
+    <GXObisCode>
+      <LogicalName>1.0.1.8.0.255</LogicalName>
+      <Description>Time integral 1, total, current billing period</Description>
+      <Interface>ExtendedRegister</Interface>
+      <ObjectType>4</ObjectType>
+      <Attributes>
+        <GXDLMSAttributeSettings xsi:type="GXDLMSAttribute">
+          <Index>2</Index>
+          <Type>Float64</Type>
+        </GXDLMSAttributeSettings>
+      </Attributes>
+    </GXObisCode>
+    <GXObisCode>
+      <LogicalName>1.0.12.128.0.255</LogicalName>
+      <Interface>Register</Interface>
+      <ObjectType>3</ObjectType>
+      <Attributes>
+        <GXDLMSAttributeSettings xsi:type="GXDLMSAttribute">
+          <Index>2</Index>
+          <Type>UInt32</Type>
+        </GXDLMSAttributeSettings>
+      </Attributes>
+    </GXObisCode>
+    <GXObisCode>
+      <LogicalName>1.0.12.129.0.255</LogicalName>
+      <Interface>Data</Interface>
+      <ObjectType>1</ObjectType>
+      <Attributes>
+        <GXDLMSAttributeSettings xsi:type="GXDLMSAttribute">
+          <Index>2</Index>
+          <Type>UInt32</Type>
+        </GXDLMSAttributeSettings>
+      </Attributes>
+    </GXObisCode>
+    <GXObisCode>
+      <LogicalName>1.0.12.131.0.255</LogicalName>
+      <Interface>Data</Interface>
+      <ObjectType>1</ObjectType>
+      <Attributes>
+        <GXDLMSAttributeSettings xsi:type="GXDLMSAttribute">
+          <Index>2</Index>
+          <Type>UInt32</Type>
+        </GXDLMSAttributeSettings>
+      </Attributes>
+    </GXObisCode>
+    <GXObisCode>
+      <LogicalName>1.0.96.51.1.255</LogicalName>
+      <Description>Manufacturer specific abstract objects</Description>
+      <Interface>ExtendedRegister</Interface>
+      <ObjectType>4</ObjectType>
+      <Attributes>
+        <GXDLMSAttributeSettings xsi:type="GXDLMSAttribute">
+          <Index>2</Index>
+          <Type>Float64</Type>
+        </GXDLMSAttributeSettings>
+      </Attributes>
+    </GXObisCode>
+    <GXObisCode>
+      <LogicalName>1.0.96.52.1.255</LogicalName>
+      <Description>Manufacturer specific abstract objects</Description>
+      <Interface>ExtendedRegister</Interface>
+      <ObjectType>4</ObjectType>
+      <Attributes>
+        <GXDLMSAttributeSettings xsi:type="GXDLMSAttribute">
+          <Index>2</Index>
+          <Type>Float64</Type>
+        </GXDLMSAttributeSettings>
+      </Attributes>
+    </GXObisCode>
+    <GXObisCode>
+      <LogicalName>1.0.99.128.1.255</LogicalName>
+      <Interface>Register</Interface>
+      <ObjectType>3</ObjectType>
+      <Attributes>
+        <GXDLMSAttributeSettings xsi:type="GXDLMSAttribute">
+          <Index>2</Index>
+          <Type>UInt8</Type>
+        </GXDLMSAttributeSettings>
+      </Attributes>
+    </GXObisCode>
+    <GXObisCode>
+      <LogicalName>0.0.21.0.1.255</LogicalName>
+      <Description>General display readout</Description>
+      <Interface>ProfileGeneric</Interface>
+      <ObjectType>7</ObjectType>
+      <Attributes />
+    </GXObisCode>
+    <GXObisCode>
+      <LogicalName>1.0.96.51.0.255</LogicalName>
+      <Description>Manufacturer specific abstract objects</Description>
+      <Interface>ProfileGeneric</Interface>
+      <ObjectType>7</ObjectType>
+      <Attributes />
+    </GXObisCode>
+    <GXObisCode>
+      <LogicalName>1.0.96.52.0.255</LogicalName>
+      <Description>Manufacturer specific abstract objects</Description>
+      <Interface>ProfileGeneric</Interface>
+      <ObjectType>7</ObjectType>
+      <Attributes />
+    </GXObisCode>
+    <GXObisCode>
+      <LogicalName>1.0.98.1.0.255</LogicalName>
+      <Description>Data of billing period 1</Description>
+      <Interface>ProfileGeneric</Interface>
+      <ObjectType>7</ObjectType>
+      <Attributes />
+    </GXObisCode>
+    <GXObisCode>
+      <LogicalName>1.0.98.1.1.255</LogicalName>
+      <Description>Data of billing period 1</Description>
+      <Interface>ProfileGeneric</Interface>
+      <ObjectType>7</ObjectType>
+      <Attributes />
+    </GXObisCode>
+    <GXObisCode>
+      <LogicalName>1.0.98.1.2.255</LogicalName>
+      <Description>Data of billing period 1</Description>
+      <Interface>ProfileGeneric</Interface>
+      <ObjectType>7</ObjectType>
+      <Attributes />
+    </GXObisCode>
+    <GXObisCode>
+      <LogicalName>1.0.98.1.3.255</LogicalName>
+      <Description>Data of billing period 1</Description>
+      <Interface>ProfileGeneric</Interface>
+      <ObjectType>7</ObjectType>
+      <Attributes />
+    </GXObisCode>
+    <GXObisCode>
+      <LogicalName>1.0.98.2.0.255</LogicalName>
+      <Description>Data of billing period 2</Description>
+      <Interface>ProfileGeneric</Interface>
+      <ObjectType>7</ObjectType>
+      <Attributes />
+    </GXObisCode>
+    <GXObisCode>
+      <LogicalName>1.0.98.2.1.255</LogicalName>
+      <Description>Data of billing period 2</Description>
+      <Interface>ProfileGeneric</Interface>
+      <ObjectType>7</ObjectType>
+      <Attributes />
+    </GXObisCode>
+    <GXObisCode>
+      <LogicalName>1.0.98.2.2.255</LogicalName>
+      <Description>Data of billing period 2</Description>
+      <Interface>ProfileGeneric</Interface>
+      <ObjectType>7</ObjectType>
+      <Attributes />
+    </GXObisCode>
+    <GXObisCode>
+      <LogicalName>1.0.98.2.3.255</LogicalName>
+      <Description>Data of billing period 2</Description>
+      <Interface>ProfileGeneric</Interface>
+      <ObjectType>7</ObjectType>
+      <Attributes />
+    </GXObisCode>
+    <GXObisCode>
+      <LogicalName>1.0.99.1.1.255</LogicalName>
+      <Description>Load profile with recording period 1</Description>
+      <Interface>ProfileGeneric</Interface>
+      <ObjectType>7</ObjectType>
+      <Attributes />
+    </GXObisCode>
+    <GXObisCode>
+      <LogicalName>1.0.99.98.0.255</LogicalName>
+      <Description>Event log</Description>
+      <Interface>ProfileGeneric</Interface>
+      <ObjectType>7</ObjectType>
+      <Attributes />
+    </GXObisCode>
+    <GXObisCode>
+      <LogicalName>1.0.99.98.1.255</LogicalName>
+      <Description>Event log</Description>
+      <Interface>ProfileGeneric</Interface>
+      <ObjectType>7</ObjectType>
+      <Attributes />
+    </GXObisCode>
+  </ObisCodes>
+  <StartProtocol>DLMS</StartProtocol>
+  <Settings>
+    <GXAuthentication>
+      <Type>None</Type>
+      <ClientID xsi:type="xsd:unsignedByte">16</ClientID>
+    </GXAuthentication>
+    <GXAuthentication>
+      <Type>Low</Type>
+      <ClientID xsi:type="xsd:unsignedByte">17</ClientID>
+    </GXAuthentication>
+    <GXAuthentication>
+      <Type>High</Type>
+      <ClientID xsi:type="xsd:unsignedByte">18</ClientID>
+    </GXAuthentication>
+  </Settings>
+  <ServerSettings>
+    <GXServerAddress>
+      <Selected>true</Selected>
+      <HDLCAddress>0</HDLCAddress>
+      <Formula />
+      <PhysicalAddress xsi:type="xsd:unsignedByte">1</PhysicalAddress>
+    </GXServerAddress>
+    <GXServerAddress>
+      <HDLCAddress>1</HDLCAddress>
+      <Formula />
+      <PhysicalAddress xsi:type="xsd:unsignedByte">1</PhysicalAddress>
+    </GXServerAddress>
+    <GXServerAddress>
+      <HDLCAddress>2</HDLCAddress>
+      <PhysicalAddress xsi:type="xsd:unsignedByte">1</PhysicalAddress>
+    </GXServerAddress>
+  </ServerSettings>
+</GXManufacturer>

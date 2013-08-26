@@ -1,0 +1,4493 @@
+<?xml version="1.0" encoding="utf-8"?>
+<GXManufacturer xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:xsd="http://www.w3.org/2001/XMLSchema">
+  <Identification>ACE</Identification>
+  <Name>Actaris Electricity</Name>
+  <UseLN>true</UseLN>
+  <ObisCodes>
+    <GXObisCode>
+      <LogicalName>0.0.42.0.0.255</LogicalName>
+      <Description>COSEM Logical device name</Description>
+      <Interface>Data</Interface>
+      <ObjectType>1</ObjectType>
+      <Attributes>
+        <GXDLMSAttributeSettings>
+          <Index>2</Index>
+          <Type>OctetString</Type>
+          <UIType>String</UIType>
+        </GXDLMSAttributeSettings>
+      </Attributes>
+    </GXObisCode>
+    <GXObisCode>
+      <LogicalName>0.0.148.0.1.255</LogicalName>
+      <Interface>Data</Interface>
+      <ObjectType>1</ObjectType>
+      <Attributes>
+        <GXDLMSAttributeSettings>
+          <Index>2</Index>
+          <Type>Structure</Type>
+        </GXDLMSAttributeSettings>
+      </Attributes>
+    </GXObisCode>
+    <GXObisCode>
+      <LogicalName>0.0.148.0.3.255</LogicalName>
+      <Interface>Data</Interface>
+      <ObjectType>1</ObjectType>
+      <Attributes />
+    </GXObisCode>
+    <GXObisCode>
+      <LogicalName>0.0.148.0.2.255</LogicalName>
+      <Interface>Data</Interface>
+      <ObjectType>1</ObjectType>
+      <Attributes />
+    </GXObisCode>
+    <GXObisCode>
+      <LogicalName>0.0.148.1.1.255</LogicalName>
+      <Interface>Data</Interface>
+      <ObjectType>1</ObjectType>
+      <Attributes />
+    </GXObisCode>
+    <GXObisCode>
+      <LogicalName>0.0.148.1.2.255</LogicalName>
+      <Interface>Data</Interface>
+      <ObjectType>1</ObjectType>
+      <Attributes />
+    </GXObisCode>
+    <GXObisCode>
+      <LogicalName>0.0.148.1.3.255</LogicalName>
+      <Interface>Data</Interface>
+      <ObjectType>1</ObjectType>
+      <Attributes />
+    </GXObisCode>
+    <GXObisCode>
+      <LogicalName>0.0.148.2.1.255</LogicalName>
+      <Interface>Data</Interface>
+      <ObjectType>1</ObjectType>
+      <Attributes />
+    </GXObisCode>
+    <GXObisCode>
+      <LogicalName>0.0.148.2.2.255</LogicalName>
+      <Interface>Data</Interface>
+      <ObjectType>1</ObjectType>
+      <Attributes />
+    </GXObisCode>
+    <GXObisCode>
+      <LogicalName>0.0.148.2.3.255</LogicalName>
+      <Interface>Data</Interface>
+      <ObjectType>1</ObjectType>
+      <Attributes />
+    </GXObisCode>
+    <GXObisCode>
+      <LogicalName>0.0.148.6.0.255</LogicalName>
+      <Interface>Data</Interface>
+      <ObjectType>1</ObjectType>
+      <Attributes />
+    </GXObisCode>
+    <GXObisCode>
+      <LogicalName>0.0.148.3.1.255</LogicalName>
+      <Interface>Data</Interface>
+      <ObjectType>1</ObjectType>
+      <Attributes />
+    </GXObisCode>
+    <GXObisCode>
+      <LogicalName>0.0.148.4.1.255</LogicalName>
+      <Interface>Data</Interface>
+      <ObjectType>1</ObjectType>
+      <Attributes />
+    </GXObisCode>
+    <GXObisCode>
+      <LogicalName>0.0.148.4.2.255</LogicalName>
+      <Interface>Data</Interface>
+      <ObjectType>1</ObjectType>
+      <Attributes />
+    </GXObisCode>
+    <GXObisCode>
+      <LogicalName>0.0.148.5.1.255</LogicalName>
+      <Interface>Data</Interface>
+      <ObjectType>1</ObjectType>
+      <Attributes />
+    </GXObisCode>
+    <GXObisCode>
+      <LogicalName>0.0.148.5.2.255</LogicalName>
+      <Interface>Data</Interface>
+      <ObjectType>1</ObjectType>
+      <Attributes />
+    </GXObisCode>
+    <GXObisCode>
+      <LogicalName>0.0.148.6.1.255</LogicalName>
+      <Interface>Data</Interface>
+      <ObjectType>1</ObjectType>
+      <Attributes />
+    </GXObisCode>
+    <GXObisCode>
+      <LogicalName>0.0.148.8.0.255</LogicalName>
+      <Interface>Data</Interface>
+      <ObjectType>1</ObjectType>
+      <Attributes />
+    </GXObisCode>
+    <GXObisCode>
+      <LogicalName>0.0.148.9.0.255</LogicalName>
+      <Interface>Data</Interface>
+      <ObjectType>1</ObjectType>
+      <Attributes />
+    </GXObisCode>
+    <GXObisCode>
+      <LogicalName>0.0.130.0.1.255</LogicalName>
+      <Interface>Data</Interface>
+      <ObjectType>1</ObjectType>
+      <Attributes />
+    </GXObisCode>
+    <GXObisCode>
+      <LogicalName>0.0.130.0.2.255</LogicalName>
+      <Interface>Data</Interface>
+      <ObjectType>1</ObjectType>
+      <Attributes />
+    </GXObisCode>
+    <GXObisCode>
+      <LogicalName>0.0.130.0.3.255</LogicalName>
+      <Interface>Data</Interface>
+      <ObjectType>1</ObjectType>
+      <Attributes />
+    </GXObisCode>
+    <GXObisCode>
+      <LogicalName>0.0.130.0.4.255</LogicalName>
+      <Interface>Data</Interface>
+      <ObjectType>1</ObjectType>
+      <Attributes />
+    </GXObisCode>
+    <GXObisCode>
+      <LogicalName>0.0.130.0.5.255</LogicalName>
+      <Interface>Data</Interface>
+      <ObjectType>1</ObjectType>
+      <Attributes />
+    </GXObisCode>
+    <GXObisCode>
+      <LogicalName>0.0.130.0.6.255</LogicalName>
+      <Interface>Data</Interface>
+      <ObjectType>1</ObjectType>
+      <Attributes />
+    </GXObisCode>
+    <GXObisCode>
+      <LogicalName>0.0.97.97.1.255</LogicalName>
+      <Description>Error 2 object</Description>
+      <Interface>Register</Interface>
+      <ObjectType>3</ObjectType>
+      <Attributes>
+        <GXDLMSAttributeSettings>
+          <Index>2</Index>
+          <Type>BitString</Type>
+        </GXDLMSAttributeSettings>
+      </Attributes>
+    </GXObisCode>
+    <GXObisCode>
+      <LogicalName>0.0.96.54.3.255</LogicalName>
+      <Interface>Register</Interface>
+      <ObjectType>3</ObjectType>
+      <Attributes />
+    </GXObisCode>
+    <GXObisCode>
+      <LogicalName>0.0.96.54.4.255</LogicalName>
+      <Interface>Register</Interface>
+      <ObjectType>3</ObjectType>
+      <Attributes />
+    </GXObisCode>
+    <GXObisCode>
+      <LogicalName>0.0.140.0.9.255</LogicalName>
+      <Interface>Data</Interface>
+      <ObjectType>1</ObjectType>
+      <Attributes />
+    </GXObisCode>
+    <GXObisCode>
+      <LogicalName>0.0.141.0.1.255</LogicalName>
+      <Interface>Data</Interface>
+      <ObjectType>1</ObjectType>
+      <Attributes />
+    </GXObisCode>
+    <GXObisCode>
+      <LogicalName>0.0.20.0.0.255</LogicalName>
+      <Description>IEC optical port setup</Description>
+      <Interface>IecLocalPortSetup</Interface>
+      <ObjectType>19</ObjectType>
+      <Attributes />
+    </GXObisCode>
+    <GXObisCode>
+      <LogicalName>0.0.143.0.2.255</LogicalName>
+      <Interface>Data</Interface>
+      <ObjectType>1</ObjectType>
+      <Attributes />
+    </GXObisCode>
+    <GXObisCode>
+      <LogicalName>0.1.22.0.0.255</LogicalName>
+      <Description>IEC HDLC setup object</Description>
+      <Interface>IecHdlcSetup</Interface>
+      <ObjectType>23</ObjectType>
+      <Attributes />
+    </GXObisCode>
+    <GXObisCode>
+      <LogicalName>0.1.2.0.0.255</LogicalName>
+      <Description>Modem configuration</Description>
+      <Interface>ModemConfiguration</Interface>
+      <ObjectType>27</ObjectType>
+      <Attributes />
+    </GXObisCode>
+    <GXObisCode>
+      <LogicalName>0.2.2.0.0.255</LogicalName>
+      <Description>Modem configuration</Description>
+      <Interface>ModemConfiguration</Interface>
+      <ObjectType>27</ObjectType>
+      <Attributes />
+    </GXObisCode>
+    <GXObisCode>
+      <LogicalName>0.2.22.0.0.255</LogicalName>
+      <Description>IEC HDLC setup object</Description>
+      <Interface>IecHdlcSetup</Interface>
+      <ObjectType>23</ObjectType>
+      <Attributes />
+    </GXObisCode>
+    <GXObisCode>
+      <LogicalName>0.0.143.0.7.255</LogicalName>
+      <Interface>Data</Interface>
+      <ObjectType>1</ObjectType>
+      <Attributes />
+    </GXObisCode>
+    <GXObisCode>
+      <LogicalName>0.0.143.0.8.255</LogicalName>
+      <Interface>Data</Interface>
+      <ObjectType>1</ObjectType>
+      <Attributes />
+    </GXObisCode>
+    <GXObisCode>
+      <LogicalName>0.0.143.0.9.255</LogicalName>
+      <Interface>Data</Interface>
+      <ObjectType>1</ObjectType>
+      <Attributes />
+    </GXObisCode>
+    <GXObisCode>
+      <LogicalName>0.0.97.97.2.255</LogicalName>
+      <Description>Error 3 object</Description>
+      <Interface>Register</Interface>
+      <ObjectType>3</ObjectType>
+      <Attributes />
+    </GXObisCode>
+    <GXObisCode>
+      <LogicalName>0.0.96.2.5.255</LogicalName>
+      <Description>Date of last calibration</Description>
+      <Interface>ExtendedRegister</Interface>
+      <ObjectType>4</ObjectType>
+      <Attributes>
+        <GXDLMSAttributeSettings>
+          <Index>2</Index>
+          <Type>OctetString</Type>
+          <UIType>DateTime</UIType>
+        </GXDLMSAttributeSettings>
+      </Attributes>
+    </GXObisCode>
+    <GXObisCode>
+      <LogicalName>0.0.96.52.6.255</LogicalName>
+      <Description>Manufacturer specific abstract objects</Description>
+      <Interface>Register</Interface>
+      <ObjectType>3</ObjectType>
+      <Attributes />
+    </GXObisCode>
+    <GXObisCode>
+      <LogicalName>0.0.96.52.8.255</LogicalName>
+      <Description>Manufacturer specific abstract objects</Description>
+      <Interface>Register</Interface>
+      <ObjectType>3</ObjectType>
+      <Attributes />
+    </GXObisCode>
+    <GXObisCode>
+      <LogicalName>0.0.96.52.10.255</LogicalName>
+      <Description>Manufacturer specific abstract objects</Description>
+      <Interface>Register</Interface>
+      <ObjectType>3</ObjectType>
+      <Attributes />
+    </GXObisCode>
+    <GXObisCode>
+      <LogicalName>0.0.96.52.11.255</LogicalName>
+      <Description>Manufacturer specific abstract objects</Description>
+      <Interface>ExtendedRegister</Interface>
+      <ObjectType>4</ObjectType>
+      <Attributes />
+    </GXObisCode>
+    <GXObisCode>
+      <LogicalName>0.0.96.52.13.255</LogicalName>
+      <Description>Manufacturer specific abstract objects</Description>
+      <Interface>Register</Interface>
+      <ObjectType>3</ObjectType>
+      <Attributes />
+    </GXObisCode>
+    <GXObisCode>
+      <LogicalName>0.0.96.12.1.255</LogicalName>
+      <Description>Number of connections</Description>
+      <Interface>Register</Interface>
+      <ObjectType>3</ObjectType>
+      <Attributes />
+    </GXObisCode>
+    <GXObisCode>
+      <LogicalName>0.0.96.2.0.255</LogicalName>
+      <Description>Number of configuration program changes</Description>
+      <Interface>ExtendedRegister</Interface>
+      <ObjectType>4</ObjectType>
+      <Attributes />
+    </GXObisCode>
+    <GXObisCode>
+      <LogicalName>0.0.96.2.10.255</LogicalName>
+      <Description>Number of protected configuration program changes</Description>
+      <Interface>ExtendedRegister</Interface>
+      <ObjectType>4</ObjectType>
+      <Attributes />
+    </GXObisCode>
+    <GXObisCode>
+      <LogicalName>0.0.96.2.128.255</LogicalName>
+      <Interface>ExtendedRegister</Interface>
+      <ObjectType>4</ObjectType>
+      <Attributes />
+    </GXObisCode>
+    <GXObisCode>
+      <LogicalName>0.0.96.2.129.255</LogicalName>
+      <Interface>ExtendedRegister</Interface>
+      <ObjectType>4</ObjectType>
+      <Attributes />
+    </GXObisCode>
+    <GXObisCode>
+      <LogicalName>0.0.96.51.60.255</LogicalName>
+      <Description>Manufacturer specific abstract objects</Description>
+      <Interface>Register</Interface>
+      <ObjectType>3</ObjectType>
+      <Attributes />
+    </GXObisCode>
+    <GXObisCode>
+      <LogicalName>0.0.1.0.0.255</LogicalName>
+      <Description>Clock</Description>
+      <Interface>Clock</Interface>
+      <ObjectType>8</ObjectType>
+      <Attributes />
+    </GXObisCode>
+    <GXObisCode>
+      <LogicalName>0.0.131.0.1.255</LogicalName>
+      <Interface>Data</Interface>
+      <ObjectType>1</ObjectType>
+      <Attributes />
+    </GXObisCode>
+    <GXObisCode>
+      <LogicalName>0.0.131.0.2.255</LogicalName>
+      <Interface>Data</Interface>
+      <ObjectType>1</ObjectType>
+      <Attributes />
+    </GXObisCode>
+    <GXObisCode>
+      <LogicalName>0.0.131.0.3.255</LogicalName>
+      <Interface>Data</Interface>
+      <ObjectType>1</ObjectType>
+      <Attributes />
+    </GXObisCode>
+    <GXObisCode>
+      <LogicalName>0.0.131.0.4.255</LogicalName>
+      <Interface>Data</Interface>
+      <ObjectType>1</ObjectType>
+      <Attributes />
+    </GXObisCode>
+    <GXObisCode>
+      <LogicalName>0.0.131.0.5.255</LogicalName>
+      <Interface>Data</Interface>
+      <ObjectType>1</ObjectType>
+      <Attributes />
+    </GXObisCode>
+    <GXObisCode>
+      <LogicalName>0.0.131.0.6.255</LogicalName>
+      <Interface>Data</Interface>
+      <ObjectType>1</ObjectType>
+      <Attributes />
+    </GXObisCode>
+    <GXObisCode>
+      <LogicalName>0.0.96.8.0.255</LogicalName>
+      <Description>Time of operation</Description>
+      <Interface>Register</Interface>
+      <ObjectType>3</ObjectType>
+      <Attributes />
+    </GXObisCode>
+    <GXObisCode>
+      <LogicalName>0.0.96.6.0.255</LogicalName>
+      <Description>Battery use time counter</Description>
+      <Interface>Register</Interface>
+      <ObjectType>3</ObjectType>
+      <Attributes />
+    </GXObisCode>
+    <GXObisCode>
+      <LogicalName>0.0.132.0.1.255</LogicalName>
+      <Interface>Data</Interface>
+      <ObjectType>1</ObjectType>
+      <Attributes />
+    </GXObisCode>
+    <GXObisCode>
+      <LogicalName>0.0.132.0.2.255</LogicalName>
+      <Interface>Data</Interface>
+      <ObjectType>1</ObjectType>
+      <Attributes />
+    </GXObisCode>
+    <GXObisCode>
+      <LogicalName>0.0.133.0.1.255</LogicalName>
+      <Interface>Data</Interface>
+      <ObjectType>1</ObjectType>
+      <Attributes />
+    </GXObisCode>
+    <GXObisCode>
+      <LogicalName>0.0.133.0.2.255</LogicalName>
+      <Interface>Data</Interface>
+      <ObjectType>1</ObjectType>
+      <Attributes />
+    </GXObisCode>
+    <GXObisCode>
+      <LogicalName>0.0.134.0.1.255</LogicalName>
+      <Interface>Data</Interface>
+      <ObjectType>1</ObjectType>
+      <Attributes />
+    </GXObisCode>
+    <GXObisCode>
+      <LogicalName>0.0.134.0.2.255</LogicalName>
+      <Interface>Data</Interface>
+      <ObjectType>1</ObjectType>
+      <Attributes />
+    </GXObisCode>
+    <GXObisCode>
+      <LogicalName>0.0.134.0.3.255</LogicalName>
+      <Interface>Data</Interface>
+      <ObjectType>1</ObjectType>
+      <Attributes />
+    </GXObisCode>
+    <GXObisCode>
+      <LogicalName>1.9.82.8.0.255</LogicalName>
+      <Description>Time integral 1, total, current billing period</Description>
+      <Interface>Register</Interface>
+      <ObjectType>3</ObjectType>
+      <Attributes />
+    </GXObisCode>
+    <GXObisCode>
+      <LogicalName>1.1.1.2.1.255</LogicalName>
+      <Description>Access Error : Device reports a hardware fault</Description>
+      <Interface>Register</Interface>
+      <ObjectType>3</ObjectType>
+      <Attributes />
+    </GXObisCode>
+    <GXObisCode>
+      <LogicalName>1.1.1.2.2.255</LogicalName>
+      <Description>Access Error : Device reports a hardware fault</Description>
+      <Interface>Register</Interface>
+      <ObjectType>3</ObjectType>
+      <Attributes />
+    </GXObisCode>
+    <GXObisCode>
+      <LogicalName>1.1.1.2.3.255</LogicalName>
+      <Description>Access Error : Device reports a hardware fault</Description>
+      <Interface>Register</Interface>
+      <ObjectType>3</ObjectType>
+      <Attributes />
+    </GXObisCode>
+    <GXObisCode>
+      <LogicalName>1.1.2.2.1.255</LogicalName>
+      <Description>Access Error : Device reports a hardware fault</Description>
+      <Interface>Register</Interface>
+      <ObjectType>3</ObjectType>
+      <Attributes />
+    </GXObisCode>
+    <GXObisCode>
+      <LogicalName>1.1.2.2.2.255</LogicalName>
+      <Description>Access Error : Device reports a hardware fault</Description>
+      <Interface>Register</Interface>
+      <ObjectType>3</ObjectType>
+      <Attributes />
+    </GXObisCode>
+    <GXObisCode>
+      <LogicalName>1.1.2.2.3.255</LogicalName>
+      <Description>Access Error : Device reports a hardware fault</Description>
+      <Interface>Register</Interface>
+      <ObjectType>3</ObjectType>
+      <Attributes />
+    </GXObisCode>
+    <GXObisCode>
+      <LogicalName>1.1.1.35.1.255</LogicalName>
+      <Description>Over limit threshold</Description>
+      <Interface>Register</Interface>
+      <ObjectType>3</ObjectType>
+      <Attributes />
+    </GXObisCode>
+    <GXObisCode>
+      <LogicalName>1.1.1.35.2.255</LogicalName>
+      <Description>Over limit threshold</Description>
+      <Interface>Register</Interface>
+      <ObjectType>3</ObjectType>
+      <Attributes />
+    </GXObisCode>
+    <GXObisCode>
+      <LogicalName>1.1.1.35.3.255</LogicalName>
+      <Description>Over limit threshold</Description>
+      <Interface>Register</Interface>
+      <ObjectType>3</ObjectType>
+      <Attributes />
+    </GXObisCode>
+    <GXObisCode>
+      <LogicalName>1.1.2.35.1.255</LogicalName>
+      <Description>Over limit threshold</Description>
+      <Interface>Register</Interface>
+      <ObjectType>3</ObjectType>
+      <Attributes />
+    </GXObisCode>
+    <GXObisCode>
+      <LogicalName>1.1.2.35.2.255</LogicalName>
+      <Description>Over limit threshold</Description>
+      <Interface>Register</Interface>
+      <ObjectType>3</ObjectType>
+      <Attributes />
+    </GXObisCode>
+    <GXObisCode>
+      <LogicalName>1.1.2.35.3.255</LogicalName>
+      <Description>Over limit threshold</Description>
+      <Interface>Register</Interface>
+      <ObjectType>3</ObjectType>
+      <Attributes />
+    </GXObisCode>
+    <GXObisCode>
+      <LogicalName>1.1.1.36.1.255</LogicalName>
+      <Description>Over limit occurrence counter</Description>
+      <Interface>Register</Interface>
+      <ObjectType>3</ObjectType>
+      <Attributes />
+    </GXObisCode>
+    <GXObisCode>
+      <LogicalName>1.1.1.36.2.255</LogicalName>
+      <Description>Over limit occurrence counter</Description>
+      <Interface>Register</Interface>
+      <ObjectType>3</ObjectType>
+      <Attributes />
+    </GXObisCode>
+    <GXObisCode>
+      <LogicalName>1.1.1.36.3.255</LogicalName>
+      <Description>Over limit occurrence counter</Description>
+      <Interface>Register</Interface>
+      <ObjectType>3</ObjectType>
+      <Attributes />
+    </GXObisCode>
+    <GXObisCode>
+      <LogicalName>1.1.2.36.1.255</LogicalName>
+      <Description>Over limit occurrence counter</Description>
+      <Interface>Register</Interface>
+      <ObjectType>3</ObjectType>
+      <Attributes />
+    </GXObisCode>
+    <GXObisCode>
+      <LogicalName>1.1.2.36.2.255</LogicalName>
+      <Description>Over limit occurrence counter</Description>
+      <Interface>Register</Interface>
+      <ObjectType>3</ObjectType>
+      <Attributes />
+    </GXObisCode>
+    <GXObisCode>
+      <LogicalName>1.1.2.36.3.255</LogicalName>
+      <Description>Over limit occurrence counter</Description>
+      <Interface>Register</Interface>
+      <ObjectType>3</ObjectType>
+      <Attributes />
+    </GXObisCode>
+    <GXObisCode>
+      <LogicalName>1.1.1.37.1.255</LogicalName>
+      <Description>Over limit duration</Description>
+      <Interface>Register</Interface>
+      <ObjectType>3</ObjectType>
+      <Attributes />
+    </GXObisCode>
+    <GXObisCode>
+      <LogicalName>1.1.1.37.2.255</LogicalName>
+      <Description>Over limit duration</Description>
+      <Interface>Register</Interface>
+      <ObjectType>3</ObjectType>
+      <Attributes />
+    </GXObisCode>
+    <GXObisCode>
+      <LogicalName>1.1.1.37.3.255</LogicalName>
+      <Description>Over limit duration</Description>
+      <Interface>Register</Interface>
+      <ObjectType>3</ObjectType>
+      <Attributes />
+    </GXObisCode>
+    <GXObisCode>
+      <LogicalName>1.1.2.37.1.255</LogicalName>
+      <Description>Over limit duration</Description>
+      <Interface>Register</Interface>
+      <ObjectType>3</ObjectType>
+      <Attributes />
+    </GXObisCode>
+    <GXObisCode>
+      <LogicalName>1.1.2.37.2.255</LogicalName>
+      <Description>Over limit duration</Description>
+      <Interface>Register</Interface>
+      <ObjectType>3</ObjectType>
+      <Attributes />
+    </GXObisCode>
+    <GXObisCode>
+      <LogicalName>1.1.2.37.3.255</LogicalName>
+      <Description>Over limit duration</Description>
+      <Interface>Register</Interface>
+      <ObjectType>3</ObjectType>
+      <Attributes />
+    </GXObisCode>
+    <GXObisCode>
+      <LogicalName>1.1.1.38.1.255</LogicalName>
+      <Description>Over limit magnitude</Description>
+      <Interface>Register</Interface>
+      <ObjectType>3</ObjectType>
+      <Attributes />
+    </GXObisCode>
+    <GXObisCode>
+      <LogicalName>1.1.1.38.2.255</LogicalName>
+      <Description>Over limit magnitude</Description>
+      <Interface>Register</Interface>
+      <ObjectType>3</ObjectType>
+      <Attributes />
+    </GXObisCode>
+    <GXObisCode>
+      <LogicalName>1.1.1.38.3.255</LogicalName>
+      <Description>Over limit magnitude</Description>
+      <Interface>Register</Interface>
+      <ObjectType>3</ObjectType>
+      <Attributes />
+    </GXObisCode>
+    <GXObisCode>
+      <LogicalName>1.1.2.38.1.255</LogicalName>
+      <Description>Over limit magnitude</Description>
+      <Interface>Register</Interface>
+      <ObjectType>3</ObjectType>
+      <Attributes />
+    </GXObisCode>
+    <GXObisCode>
+      <LogicalName>1.1.2.38.2.255</LogicalName>
+      <Description>Over limit magnitude</Description>
+      <Interface>Register</Interface>
+      <ObjectType>3</ObjectType>
+      <Attributes />
+    </GXObisCode>
+    <GXObisCode>
+      <LogicalName>1.1.2.38.3.255</LogicalName>
+      <Description>Over limit magnitude</Description>
+      <Interface>Register</Interface>
+      <ObjectType>3</ObjectType>
+      <Attributes />
+    </GXObisCode>
+    <GXObisCode>
+      <LogicalName>1.1.98.128.1.255</LogicalName>
+      <Interface>ProfileGeneric</Interface>
+      <ObjectType>7</ObjectType>
+      <Attributes />
+    </GXObisCode>
+    <GXObisCode>
+      <LogicalName>0.0.98.133.3.255</LogicalName>
+      <Interface>Data</Interface>
+      <ObjectType>1</ObjectType>
+      <Attributes />
+    </GXObisCode>
+    <GXObisCode>
+      <LogicalName>0.0.134.0.4.255</LogicalName>
+      <Interface>Register</Interface>
+      <ObjectType>3</ObjectType>
+      <Attributes />
+    </GXObisCode>
+    <GXObisCode>
+      <LogicalName>0.0.135.0.1.255</LogicalName>
+      <Interface>Data</Interface>
+      <ObjectType>1</ObjectType>
+      <Attributes />
+    </GXObisCode>
+    <GXObisCode>
+      <LogicalName>0.0.135.0.2.255</LogicalName>
+      <Interface>Data</Interface>
+      <ObjectType>1</ObjectType>
+      <Attributes />
+    </GXObisCode>
+    <GXObisCode>
+      <LogicalName>0.0.136.0.1.255</LogicalName>
+      <Interface>Data</Interface>
+      <ObjectType>1</ObjectType>
+      <Attributes />
+    </GXObisCode>
+    <GXObisCode>
+      <LogicalName>0.0.136.0.2.255</LogicalName>
+      <Interface>Data</Interface>
+      <ObjectType>1</ObjectType>
+      <Attributes />
+    </GXObisCode>
+    <GXObisCode>
+      <LogicalName>0.0.136.1.1.255</LogicalName>
+      <Interface>Data</Interface>
+      <ObjectType>1</ObjectType>
+      <Attributes />
+    </GXObisCode>
+    <GXObisCode>
+      <LogicalName>0.0.136.1.2.255</LogicalName>
+      <Interface>Data</Interface>
+      <ObjectType>1</ObjectType>
+      <Attributes />
+    </GXObisCode>
+    <GXObisCode>
+      <LogicalName>0.0.144.0.1.255</LogicalName>
+      <Interface>Data</Interface>
+      <ObjectType>1</ObjectType>
+      <Attributes />
+    </GXObisCode>
+    <GXObisCode>
+      <LogicalName>0.0.144.0.2.255</LogicalName>
+      <Interface>Data</Interface>
+      <ObjectType>1</ObjectType>
+      <Attributes />
+    </GXObisCode>
+    <GXObisCode>
+      <LogicalName>0.0.137.0.1.255</LogicalName>
+      <Interface>Data</Interface>
+      <ObjectType>1</ObjectType>
+      <Attributes />
+    </GXObisCode>
+    <GXObisCode>
+      <LogicalName>0.0.137.0.2.255</LogicalName>
+      <Interface>Data</Interface>
+      <ObjectType>1</ObjectType>
+      <Attributes />
+    </GXObisCode>
+    <GXObisCode>
+      <LogicalName>0.0.0.1.1.255</LogicalName>
+      <Description>Number of available billing periods objects.</Description>
+      <Interface>Register</Interface>
+      <ObjectType>3</ObjectType>
+      <Attributes />
+    </GXObisCode>
+    <GXObisCode>
+      <LogicalName>0.0.138.0.1.255</LogicalName>
+      <Interface>Data</Interface>
+      <ObjectType>1</ObjectType>
+      <Attributes />
+    </GXObisCode>
+    <GXObisCode>
+      <LogicalName>0.0.138.0.2.255</LogicalName>
+      <Interface>Data</Interface>
+      <ObjectType>1</ObjectType>
+      <Attributes />
+    </GXObisCode>
+    <GXObisCode>
+      <LogicalName>0.0.138.0.3.255</LogicalName>
+      <Interface>Data</Interface>
+      <ObjectType>1</ObjectType>
+      <Attributes />
+    </GXObisCode>
+    <GXObisCode>
+      <LogicalName>0.0.139.0.1.255</LogicalName>
+      <Interface>Data</Interface>
+      <ObjectType>1</ObjectType>
+      <Attributes />
+    </GXObisCode>
+    <GXObisCode>
+      <LogicalName>0.0.139.0.2.255</LogicalName>
+      <Interface>Data</Interface>
+      <ObjectType>1</ObjectType>
+      <Attributes />
+    </GXObisCode>
+    <GXObisCode>
+      <LogicalName>0.0.139.0.3.255</LogicalName>
+      <Interface>Data</Interface>
+      <ObjectType>1</ObjectType>
+      <Attributes />
+    </GXObisCode>
+    <GXObisCode>
+      <LogicalName>0.0.140.0.1.255</LogicalName>
+      <Interface>Data</Interface>
+      <ObjectType>1</ObjectType>
+      <Attributes />
+    </GXObisCode>
+    <GXObisCode>
+      <LogicalName>0.0.96.6.2.255</LogicalName>
+      <Description>Date of next change</Description>
+      <Interface>Data</Interface>
+      <ObjectType>1</ObjectType>
+      <Attributes>
+        <GXDLMSAttributeSettings>
+          <Index>2</Index>
+          <Type>OctetString</Type>
+          <UIType>DateTime</UIType>
+        </GXDLMSAttributeSettings>
+      </Attributes>
+    </GXObisCode>
+    <GXObisCode>
+      <LogicalName>0.0.140.0.3.255</LogicalName>
+      <Interface>Data</Interface>
+      <ObjectType>1</ObjectType>
+      <Attributes />
+    </GXObisCode>
+    <GXObisCode>
+      <LogicalName>0.0.96.9.0.255</LogicalName>
+      <Description>Ambient temperature</Description>
+      <Interface>Register</Interface>
+      <ObjectType>3</ObjectType>
+      <Attributes />
+    </GXObisCode>
+    <GXObisCode>
+      <LogicalName>0.0.128.7.1.255</LogicalName>
+      <Interface>Register</Interface>
+      <ObjectType>3</ObjectType>
+      <Attributes />
+    </GXObisCode>
+    <GXObisCode>
+      <LogicalName>0.0.128.3.0.255</LogicalName>
+      <Interface>ExtendedRegister</Interface>
+      <ObjectType>4</ObjectType>
+      <Attributes />
+    </GXObisCode>
+    <GXObisCode>
+      <LogicalName>0.0.128.6.0.255</LogicalName>
+      <Interface>ExtendedRegister</Interface>
+      <ObjectType>4</ObjectType>
+      <Attributes />
+    </GXObisCode>
+    <GXObisCode>
+      <LogicalName>0.0.96.54.1.255</LogicalName>
+      <Description>Manufacturer specific abstract objects</Description>
+      <Interface>Register</Interface>
+      <ObjectType>3</ObjectType>
+      <Attributes />
+    </GXObisCode>
+    <GXObisCode>
+      <LogicalName>0.0.96.54.2.255</LogicalName>
+      <Description>Manufacturer specific abstract objects</Description>
+      <Interface>Register</Interface>
+      <ObjectType>3</ObjectType>
+      <Attributes />
+    </GXObisCode>
+    <GXObisCode>
+      <LogicalName>0.0.143.0.10.255</LogicalName>
+      <Interface>Data</Interface>
+      <ObjectType>1</ObjectType>
+      <Attributes />
+    </GXObisCode>
+    <GXObisCode>
+      <LogicalName>0.0.25.128.1.255</LogicalName>
+      <Interface>Data</Interface>
+      <ObjectType>1</ObjectType>
+      <Attributes />
+    </GXObisCode>
+    <GXObisCode>
+      <LogicalName>0.0.25.128.2.255</LogicalName>
+      <Interface>Data</Interface>
+      <ObjectType>1</ObjectType>
+      <Attributes />
+    </GXObisCode>
+    <GXObisCode>
+      <LogicalName>0.0.25.128.3.255</LogicalName>
+      <Interface>Data</Interface>
+      <ObjectType>1</ObjectType>
+      <Attributes />
+    </GXObisCode>
+    <GXObisCode>
+      <LogicalName>0.0.25.128.4.255</LogicalName>
+      <Interface>Data</Interface>
+      <ObjectType>1</ObjectType>
+      <Attributes />
+    </GXObisCode>
+    <GXObisCode>
+      <LogicalName>0.0.25.128.5.255</LogicalName>
+      <Interface>Data</Interface>
+      <ObjectType>1</ObjectType>
+      <Attributes />
+    </GXObisCode>
+    <GXObisCode>
+      <LogicalName>0.0.143.0.16.255</LogicalName>
+      <Interface>Data</Interface>
+      <ObjectType>1</ObjectType>
+      <Attributes />
+    </GXObisCode>
+    <GXObisCode>
+      <LogicalName>0.0.143.0.12.255</LogicalName>
+      <Interface>Data</Interface>
+      <ObjectType>1</ObjectType>
+      <Attributes />
+    </GXObisCode>
+    <GXObisCode>
+      <LogicalName>0.0.96.12.4.255</LogicalName>
+      <Description>Communication parameter 1</Description>
+      <Interface>Data</Interface>
+      <ObjectType>1</ObjectType>
+      <Attributes />
+    </GXObisCode>
+    <GXObisCode>
+      <LogicalName>0.0.143.0.17.255</LogicalName>
+      <Interface>Data</Interface>
+      <ObjectType>1</ObjectType>
+      <Attributes />
+    </GXObisCode>
+    <GXObisCode>
+      <LogicalName>0.1.20.0.0.255</LogicalName>
+      <Description>IEC optical port setup</Description>
+      <Interface>IecLocalPortSetup</Interface>
+      <ObjectType>19</ObjectType>
+      <Attributes />
+    </GXObisCode>
+    <GXObisCode>
+      <LogicalName>0.0.143.0.13.255</LogicalName>
+      <Interface>Data</Interface>
+      <ObjectType>1</ObjectType>
+      <Attributes />
+    </GXObisCode>
+    <GXObisCode>
+      <LogicalName>0.0.96.1.0.255</LogicalName>
+      <Description>Manufacturing number</Description>
+      <Interface>Data</Interface>
+      <ObjectType>1</ObjectType>
+      <Attributes />
+    </GXObisCode>
+    <GXObisCode>
+      <LogicalName>0.0.142.0.2.255</LogicalName>
+      <Interface>Data</Interface>
+      <ObjectType>1</ObjectType>
+      <Attributes />
+    </GXObisCode>
+    <GXObisCode>
+      <LogicalName>0.0.142.0.3.255</LogicalName>
+      <Interface>Data</Interface>
+      <ObjectType>1</ObjectType>
+      <Attributes />
+    </GXObisCode>
+    <GXObisCode>
+      <LogicalName>0.0.142.1.1.255</LogicalName>
+      <Interface>Data</Interface>
+      <ObjectType>1</ObjectType>
+      <Attributes />
+    </GXObisCode>
+    <GXObisCode>
+      <LogicalName>0.0.142.1.3.255</LogicalName>
+      <Interface>Data</Interface>
+      <ObjectType>1</ObjectType>
+      <Attributes />
+    </GXObisCode>
+    <GXObisCode>
+      <LogicalName>0.0.142.1.2.255</LogicalName>
+      <Interface>Data</Interface>
+      <ObjectType>1</ObjectType>
+      <Attributes />
+    </GXObisCode>
+    <GXObisCode>
+      <LogicalName>0.0.142.1.4.255</LogicalName>
+      <Interface>Data</Interface>
+      <ObjectType>1</ObjectType>
+      <Attributes />
+    </GXObisCode>
+    <GXObisCode>
+      <LogicalName>0.0.21.0.0.255</LogicalName>
+      <Description>Standard readout parametrization object 1</Description>
+      <Interface>Data</Interface>
+      <ObjectType>1</ObjectType>
+      <Attributes />
+    </GXObisCode>
+    <GXObisCode>
+      <LogicalName>0.0.142.2.1.255</LogicalName>
+      <Interface>Data</Interface>
+      <ObjectType>1</ObjectType>
+      <Attributes />
+    </GXObisCode>
+    <GXObisCode>
+      <LogicalName>0.0.142.3.1.255</LogicalName>
+      <Interface>Data</Interface>
+      <ObjectType>1</ObjectType>
+      <Attributes />
+    </GXObisCode>
+    <GXObisCode>
+      <LogicalName>0.0.142.4.1.255</LogicalName>
+      <Interface>Data</Interface>
+      <ObjectType>1</ObjectType>
+      <Attributes />
+    </GXObisCode>
+    <GXObisCode>
+      <LogicalName>0.0.142.5.1.255</LogicalName>
+      <Interface>Data</Interface>
+      <ObjectType>1</ObjectType>
+      <Attributes />
+    </GXObisCode>
+    <GXObisCode>
+      <LogicalName>0.0.142.3.2.255</LogicalName>
+      <Interface>Data</Interface>
+      <ObjectType>1</ObjectType>
+      <Attributes />
+    </GXObisCode>
+    <GXObisCode>
+      <LogicalName>0.0.96.3.1.255</LogicalName>
+      <Description>State of the input/output control signals, (statusword 1)</Description>
+      <Interface>Register</Interface>
+      <ObjectType>3</ObjectType>
+      <Attributes />
+    </GXObisCode>
+    <GXObisCode>
+      <LogicalName>0.0.96.3.2.255</LogicalName>
+      <Description>State of the input/output control signals, (statusword 2)</Description>
+      <Interface>Data</Interface>
+      <ObjectType>1</ObjectType>
+      <Attributes />
+    </GXObisCode>
+    <GXObisCode>
+      <LogicalName>0.0.96.62.0.255</LogicalName>
+      <Description>Manufacturer specific abstract objects</Description>
+      <Interface>Data</Interface>
+      <ObjectType>1</ObjectType>
+      <Attributes />
+    </GXObisCode>
+    <GXObisCode>
+      <LogicalName>0.0.96.60.1.255</LogicalName>
+      <Description>Manufacturer specific abstract objects</Description>
+      <Interface>Register</Interface>
+      <ObjectType>3</ObjectType>
+      <Attributes />
+    </GXObisCode>
+    <GXObisCode>
+      <LogicalName>0.0.96.6.3.255</LogicalName>
+      <Description>Battery voltage</Description>
+      <Interface>Register</Interface>
+      <ObjectType>3</ObjectType>
+      <Attributes />
+    </GXObisCode>
+    <GXObisCode>
+      <LogicalName>0.0.96.60.2.255</LogicalName>
+      <Description>Manufacturer specific abstract objects</Description>
+      <Interface>Register</Interface>
+      <ObjectType>3</ObjectType>
+      <Attributes />
+    </GXObisCode>
+    <GXObisCode>
+      <LogicalName>0.0.96.60.3.255</LogicalName>
+      <Description>Manufacturer specific abstract objects</Description>
+      <Interface>Register</Interface>
+      <ObjectType>3</ObjectType>
+      <Attributes />
+    </GXObisCode>
+    <GXObisCode>
+      <LogicalName>0.0.96.60.4.255</LogicalName>
+      <Description>Manufacturer specific abstract objects</Description>
+      <Interface>Register</Interface>
+      <ObjectType>3</ObjectType>
+      <Attributes />
+    </GXObisCode>
+    <GXObisCode>
+      <LogicalName>0.0.96.60.5.255</LogicalName>
+      <Description>Manufacturer specific abstract objects</Description>
+      <Interface>Register</Interface>
+      <ObjectType>3</ObjectType>
+      <Attributes />
+    </GXObisCode>
+    <GXObisCode>
+      <LogicalName>0.0.96.60.6.255</LogicalName>
+      <Description>Manufacturer specific abstract objects</Description>
+      <Interface>Register</Interface>
+      <ObjectType>3</ObjectType>
+      <Attributes />
+    </GXObisCode>
+    <GXObisCode>
+      <LogicalName>0.0.96.60.7.255</LogicalName>
+      <Description>Manufacturer specific abstract objects</Description>
+      <Interface>Register</Interface>
+      <ObjectType>3</ObjectType>
+      <Attributes />
+    </GXObisCode>
+    <GXObisCode>
+      <LogicalName>0.0.96.60.8.255</LogicalName>
+      <Description>Manufacturer specific abstract objects</Description>
+      <Interface>Register</Interface>
+      <ObjectType>3</ObjectType>
+      <Attributes />
+    </GXObisCode>
+    <GXObisCode>
+      <LogicalName>0.0.96.60.9.255</LogicalName>
+      <Description>Manufacturer specific abstract objects</Description>
+      <Interface>Register</Interface>
+      <ObjectType>3</ObjectType>
+      <Attributes />
+    </GXObisCode>
+    <GXObisCode>
+      <LogicalName>0.0.96.61.1.255</LogicalName>
+      <Description>Manufacturer specific abstract objects</Description>
+      <Interface>Register</Interface>
+      <ObjectType>3</ObjectType>
+      <Attributes />
+    </GXObisCode>
+    <GXObisCode>
+      <LogicalName>1.1.0.3.0.255</LogicalName>
+      <Description>Active energy metrological LED</Description>
+      <Interface>Register</Interface>
+      <ObjectType>3</ObjectType>
+      <Attributes />
+    </GXObisCode>
+    <GXObisCode>
+      <LogicalName>1.1.0.3.1.255</LogicalName>
+      <Description>Reactive energy metrological LED</Description>
+      <Interface>Register</Interface>
+      <ObjectType>3</ObjectType>
+      <Attributes />
+    </GXObisCode>
+    <GXObisCode>
+      <LogicalName>1.1.0.4.2.255</LogicalName>
+      <Description>Current Transformer ratio [1]</Description>
+      <Interface>Data</Interface>
+      <ObjectType>1</ObjectType>
+      <Attributes />
+    </GXObisCode>
+    <GXObisCode>
+      <LogicalName>1.1.0.4.3.255</LogicalName>
+      <Description>Voltage Transformer ratio [1]</Description>
+      <Interface>Data</Interface>
+      <ObjectType>1</ObjectType>
+      <Attributes />
+    </GXObisCode>
+    <GXObisCode>
+      <LogicalName>1.1.0.4.5.255</LogicalName>
+      <Description>Current Transformer ratio [1]</Description>
+      <Interface>Data</Interface>
+      <ObjectType>1</ObjectType>
+      <Attributes />
+    </GXObisCode>
+    <GXObisCode>
+      <LogicalName>1.1.0.4.6.255</LogicalName>
+      <Description>Voltage Transformer ratio [1]</Description>
+      <Interface>Data</Interface>
+      <ObjectType>1</ObjectType>
+      <Attributes />
+    </GXObisCode>
+    <GXObisCode>
+      <LogicalName>1.1.96.5.0.255</LogicalName>
+      <Description>Internal operating status, global</Description>
+      <Interface>Register</Interface>
+      <ObjectType>3</ObjectType>
+      <Attributes />
+    </GXObisCode>
+    <GXObisCode>
+      <LogicalName>1.1.81.7.40.255</LogicalName>
+      <Description>Angle measurement.(UL1) - (IL1)</Description>
+      <Interface>Register</Interface>
+      <ObjectType>3</ObjectType>
+      <Attributes />
+    </GXObisCode>
+    <GXObisCode>
+      <LogicalName>1.1.81.7.51.255</LogicalName>
+      <Description>Angle measurement.(UL2) - (IL2)</Description>
+      <Interface>Register</Interface>
+      <ObjectType>3</ObjectType>
+      <Attributes />
+    </GXObisCode>
+    <GXObisCode>
+      <LogicalName>1.1.81.7.62.255</LogicalName>
+      <Description>Angle measurement.(UL3) - (IL3)</Description>
+      <Interface>Register</Interface>
+      <ObjectType>3</ObjectType>
+      <Attributes />
+    </GXObisCode>
+    <GXObisCode>
+      <LogicalName>1.1.81.7.10.255</LogicalName>
+      <Description>Angle measurement.(UL1) - (UL2)</Description>
+      <Interface>Register</Interface>
+      <ObjectType>3</ObjectType>
+      <Attributes />
+    </GXObisCode>
+    <GXObisCode>
+      <LogicalName>1.1.81.7.2.255</LogicalName>
+      <Description>Angle measurement.(UL3) - (UL1)</Description>
+      <Interface>Register</Interface>
+      <ObjectType>3</ObjectType>
+      <Attributes />
+    </GXObisCode>
+    <GXObisCode>
+      <LogicalName>1.1.81.7.21.255</LogicalName>
+      <Description>Angle measurement.(UL2) - (UL3)</Description>
+      <Interface>Register</Interface>
+      <ObjectType>3</ObjectType>
+      <Attributes />
+    </GXObisCode>
+    <GXObisCode>
+      <LogicalName>1.1.96.50.1.255</LogicalName>
+      <Description>Manufacturer specific abstract objects</Description>
+      <Interface>Register</Interface>
+      <ObjectType>3</ObjectType>
+      <Attributes />
+    </GXObisCode>
+    <GXObisCode>
+      <LogicalName>1.1.96.50.2.255</LogicalName>
+      <Description>Manufacturer specific abstract objects</Description>
+      <Interface>Register</Interface>
+      <ObjectType>3</ObjectType>
+      <Attributes />
+    </GXObisCode>
+    <GXObisCode>
+      <LogicalName>1.1.96.50.3.255</LogicalName>
+      <Description>Manufacturer specific abstract objects</Description>
+      <Interface>Register</Interface>
+      <ObjectType>3</ObjectType>
+      <Attributes />
+    </GXObisCode>
+    <GXObisCode>
+      <LogicalName>1.1.96.50.4.255</LogicalName>
+      <Description>Manufacturer specific abstract objects</Description>
+      <Interface>Register</Interface>
+      <ObjectType>3</ObjectType>
+      <Attributes />
+    </GXObisCode>
+    <GXObisCode>
+      <LogicalName>1.1.96.50.5.255</LogicalName>
+      <Description>Manufacturer specific abstract objects</Description>
+      <Interface>Register</Interface>
+      <ObjectType>3</ObjectType>
+      <Attributes />
+    </GXObisCode>
+    <GXObisCode>
+      <LogicalName>1.1.96.50.6.255</LogicalName>
+      <Description>Manufacturer specific abstract objects</Description>
+      <Interface>Register</Interface>
+      <ObjectType>3</ObjectType>
+      <Attributes />
+    </GXObisCode>
+    <GXObisCode>
+      <LogicalName>1.1.91.7.0.255</LogicalName>
+      <Description>Instantaneous value (except for frequency)</Description>
+      <Interface>Register</Interface>
+      <ObjectType>3</ObjectType>
+      <Attributes />
+    </GXObisCode>
+    <GXObisCode>
+      <LogicalName>1.1.92.7.0.255</LogicalName>
+      <Description>Instantaneous value (except for frequency)</Description>
+      <Interface>Register</Interface>
+      <ObjectType>3</ObjectType>
+      <Attributes />
+    </GXObisCode>
+    <GXObisCode>
+      <LogicalName>1.1.21.7.0.255</LogicalName>
+      <Description>Instantaneous value (except for frequency)</Description>
+      <Interface>Register</Interface>
+      <ObjectType>3</ObjectType>
+      <Attributes />
+    </GXObisCode>
+    <GXObisCode>
+      <LogicalName>1.1.41.7.0.255</LogicalName>
+      <Description>Instantaneous value (except for frequency)</Description>
+      <Interface>Register</Interface>
+      <ObjectType>3</ObjectType>
+      <Attributes />
+    </GXObisCode>
+    <GXObisCode>
+      <LogicalName>1.1.61.7.0.255</LogicalName>
+      <Description>Instantaneous value (except for frequency)</Description>
+      <Interface>Register</Interface>
+      <ObjectType>3</ObjectType>
+      <Attributes />
+    </GXObisCode>
+    <GXObisCode>
+      <LogicalName>1.1.1.7.0.255</LogicalName>
+      <Description>Instantaneous value (except for frequency)</Description>
+      <Interface>Register</Interface>
+      <ObjectType>3</ObjectType>
+      <Attributes />
+    </GXObisCode>
+    <GXObisCode>
+      <LogicalName>1.1.22.7.0.255</LogicalName>
+      <Description>Instantaneous value (except for frequency)</Description>
+      <Interface>Register</Interface>
+      <ObjectType>3</ObjectType>
+      <Attributes />
+    </GXObisCode>
+    <GXObisCode>
+      <LogicalName>1.1.42.7.0.255</LogicalName>
+      <Description>Instantaneous value (except for frequency)</Description>
+      <Interface>Register</Interface>
+      <ObjectType>3</ObjectType>
+      <Attributes />
+    </GXObisCode>
+    <GXObisCode>
+      <LogicalName>1.1.62.7.0.255</LogicalName>
+      <Description>Instantaneous value (except for frequency)</Description>
+      <Interface>Register</Interface>
+      <ObjectType>3</ObjectType>
+      <Attributes />
+    </GXObisCode>
+    <GXObisCode>
+      <LogicalName>1.1.2.7.0.255</LogicalName>
+      <Description>Instantaneous value (except for frequency)</Description>
+      <Interface>Register</Interface>
+      <ObjectType>3</ObjectType>
+      <Attributes />
+    </GXObisCode>
+    <GXObisCode>
+      <LogicalName>1.1.23.7.0.255</LogicalName>
+      <Description>Instantaneous value (except for frequency)</Description>
+      <Interface>Register</Interface>
+      <ObjectType>3</ObjectType>
+      <Attributes />
+    </GXObisCode>
+    <GXObisCode>
+      <LogicalName>1.1.43.7.0.255</LogicalName>
+      <Description>Instantaneous value (except for frequency)</Description>
+      <Interface>Register</Interface>
+      <ObjectType>3</ObjectType>
+      <Attributes />
+    </GXObisCode>
+    <GXObisCode>
+      <LogicalName>1.1.63.7.0.255</LogicalName>
+      <Description>Instantaneous value (except for frequency)</Description>
+      <Interface>Register</Interface>
+      <ObjectType>3</ObjectType>
+      <Attributes />
+    </GXObisCode>
+    <GXObisCode>
+      <LogicalName>1.1.3.7.0.255</LogicalName>
+      <Description>Instantaneous value (except for frequency)</Description>
+      <Interface>Register</Interface>
+      <ObjectType>3</ObjectType>
+      <Attributes />
+    </GXObisCode>
+    <GXObisCode>
+      <LogicalName>1.1.24.7.0.255</LogicalName>
+      <Description>Instantaneous value (except for frequency)</Description>
+      <Interface>Register</Interface>
+      <ObjectType>3</ObjectType>
+      <Attributes />
+    </GXObisCode>
+    <GXObisCode>
+      <LogicalName>1.1.44.7.0.255</LogicalName>
+      <Description>Instantaneous value (except for frequency)</Description>
+      <Interface>Register</Interface>
+      <ObjectType>3</ObjectType>
+      <Attributes />
+    </GXObisCode>
+    <GXObisCode>
+      <LogicalName>1.1.64.7.0.255</LogicalName>
+      <Description>Instantaneous value (except for frequency)</Description>
+      <Interface>Register</Interface>
+      <ObjectType>3</ObjectType>
+      <Attributes />
+    </GXObisCode>
+    <GXObisCode>
+      <LogicalName>1.1.4.7.0.255</LogicalName>
+      <Description>Instantaneous value (except for frequency)</Description>
+      <Interface>Register</Interface>
+      <ObjectType>3</ObjectType>
+      <Attributes />
+    </GXObisCode>
+    <GXObisCode>
+      <LogicalName>1.1.5.7.0.255</LogicalName>
+      <Description>Instantaneous value (except for frequency)</Description>
+      <Interface>Register</Interface>
+      <ObjectType>3</ObjectType>
+      <Attributes />
+    </GXObisCode>
+    <GXObisCode>
+      <LogicalName>1.1.6.7.0.255</LogicalName>
+      <Description>Instantaneous value (except for frequency)</Description>
+      <Interface>Register</Interface>
+      <ObjectType>3</ObjectType>
+      <Attributes />
+    </GXObisCode>
+    <GXObisCode>
+      <LogicalName>1.1.7.7.0.255</LogicalName>
+      <Description>Instantaneous value (except for frequency)</Description>
+      <Interface>Register</Interface>
+      <ObjectType>3</ObjectType>
+      <Attributes />
+    </GXObisCode>
+    <GXObisCode>
+      <LogicalName>1.1.8.7.0.255</LogicalName>
+      <Description>Instantaneous value (except for frequency)</Description>
+      <Interface>Register</Interface>
+      <ObjectType>3</ObjectType>
+      <Attributes />
+    </GXObisCode>
+    <GXObisCode>
+      <LogicalName>1.1.29.7.0.255</LogicalName>
+      <Description>Instantaneous value (except for frequency)</Description>
+      <Interface>Register</Interface>
+      <ObjectType>3</ObjectType>
+      <Attributes />
+    </GXObisCode>
+    <GXObisCode>
+      <LogicalName>1.1.49.7.0.255</LogicalName>
+      <Description>Instantaneous value (except for frequency)</Description>
+      <Interface>Register</Interface>
+      <ObjectType>3</ObjectType>
+      <Attributes />
+    </GXObisCode>
+    <GXObisCode>
+      <LogicalName>1.1.69.7.0.255</LogicalName>
+      <Description>Instantaneous value (except for frequency)</Description>
+      <Interface>Register</Interface>
+      <ObjectType>3</ObjectType>
+      <Attributes />
+    </GXObisCode>
+    <GXObisCode>
+      <LogicalName>1.1.9.7.0.255</LogicalName>
+      <Description>Instantaneous value (except for frequency)</Description>
+      <Interface>Register</Interface>
+      <ObjectType>3</ObjectType>
+      <Attributes />
+    </GXObisCode>
+    <GXObisCode>
+      <LogicalName>1.1.30.7.0.255</LogicalName>
+      <Description>Instantaneous value (except for frequency)</Description>
+      <Interface>Register</Interface>
+      <ObjectType>3</ObjectType>
+      <Attributes />
+    </GXObisCode>
+    <GXObisCode>
+      <LogicalName>1.1.50.7.0.255</LogicalName>
+      <Description>Instantaneous value (except for frequency)</Description>
+      <Interface>Register</Interface>
+      <ObjectType>3</ObjectType>
+      <Attributes />
+    </GXObisCode>
+    <GXObisCode>
+      <LogicalName>1.1.70.7.0.255</LogicalName>
+      <Description>Instantaneous value (except for frequency)</Description>
+      <Interface>Register</Interface>
+      <ObjectType>3</ObjectType>
+      <Attributes />
+    </GXObisCode>
+    <GXObisCode>
+      <LogicalName>1.1.10.7.0.255</LogicalName>
+      <Description>Instantaneous value (except for frequency)</Description>
+      <Interface>Register</Interface>
+      <ObjectType>3</ObjectType>
+      <Attributes />
+    </GXObisCode>
+    <GXObisCode>
+      <LogicalName>1.1.33.7.0.255</LogicalName>
+      <Description>Instantaneous value (except for frequency)</Description>
+      <Interface>Register</Interface>
+      <ObjectType>3</ObjectType>
+      <Attributes />
+    </GXObisCode>
+    <GXObisCode>
+      <LogicalName>1.1.53.7.0.255</LogicalName>
+      <Description>Instantaneous value (except for frequency)</Description>
+      <Interface>Register</Interface>
+      <ObjectType>3</ObjectType>
+      <Attributes />
+    </GXObisCode>
+    <GXObisCode>
+      <LogicalName>1.1.73.7.0.255</LogicalName>
+      <Description>Instantaneous value (except for frequency)</Description>
+      <Interface>Register</Interface>
+      <ObjectType>3</ObjectType>
+      <Attributes />
+    </GXObisCode>
+    <GXObisCode>
+      <LogicalName>1.1.13.7.0.255</LogicalName>
+      <Description>Instantaneous value (except for frequency)</Description>
+      <Interface>Register</Interface>
+      <ObjectType>3</ObjectType>
+      <Attributes />
+    </GXObisCode>
+    <GXObisCode>
+      <LogicalName>1.1.31.7.0.255</LogicalName>
+      <Description>Instantaneous value (except for frequency)</Description>
+      <Interface>Register</Interface>
+      <ObjectType>3</ObjectType>
+      <Attributes />
+    </GXObisCode>
+    <GXObisCode>
+      <LogicalName>1.1.51.7.0.255</LogicalName>
+      <Description>Instantaneous value (except for frequency)</Description>
+      <Interface>Register</Interface>
+      <ObjectType>3</ObjectType>
+      <Attributes />
+    </GXObisCode>
+    <GXObisCode>
+      <LogicalName>1.1.71.7.0.255</LogicalName>
+      <Description>Instantaneous value (except for frequency)</Description>
+      <Interface>Register</Interface>
+      <ObjectType>3</ObjectType>
+      <Attributes />
+    </GXObisCode>
+    <GXObisCode>
+      <LogicalName>1.1.32.7.0.255</LogicalName>
+      <Description>Instantaneous value (except for frequency)</Description>
+      <Interface>Register</Interface>
+      <ObjectType>3</ObjectType>
+      <Attributes />
+    </GXObisCode>
+    <GXObisCode>
+      <LogicalName>1.1.52.7.0.255</LogicalName>
+      <Description>Instantaneous value (except for frequency)</Description>
+      <Interface>Register</Interface>
+      <ObjectType>3</ObjectType>
+      <Attributes />
+    </GXObisCode>
+    <GXObisCode>
+      <LogicalName>1.1.72.7.0.255</LogicalName>
+      <Description>Instantaneous value (except for frequency)</Description>
+      <Interface>Register</Interface>
+      <ObjectType>3</ObjectType>
+      <Attributes />
+    </GXObisCode>
+    <GXObisCode>
+      <LogicalName>1.1.31.7.126.255</LogicalName>
+      <Description>Instantaneous values, all harmonics value</Description>
+      <Interface>Register</Interface>
+      <ObjectType>3</ObjectType>
+      <Attributes />
+    </GXObisCode>
+    <GXObisCode>
+      <LogicalName>1.1.51.7.126.255</LogicalName>
+      <Description>Instantaneous values, all harmonics value</Description>
+      <Interface>Register</Interface>
+      <ObjectType>3</ObjectType>
+      <Attributes />
+    </GXObisCode>
+    <GXObisCode>
+      <LogicalName>1.1.71.7.126.255</LogicalName>
+      <Description>Instantaneous values, all harmonics value</Description>
+      <Interface>Register</Interface>
+      <ObjectType>3</ObjectType>
+      <Attributes />
+    </GXObisCode>
+    <GXObisCode>
+      <LogicalName>1.1.32.7.126.255</LogicalName>
+      <Description>Instantaneous values, all harmonics value</Description>
+      <Interface>Register</Interface>
+      <ObjectType>3</ObjectType>
+      <Attributes />
+    </GXObisCode>
+    <GXObisCode>
+      <LogicalName>1.1.52.7.126.255</LogicalName>
+      <Description>Instantaneous values, all harmonics value</Description>
+      <Interface>Register</Interface>
+      <ObjectType>3</ObjectType>
+      <Attributes />
+    </GXObisCode>
+    <GXObisCode>
+      <LogicalName>1.1.72.7.126.255</LogicalName>
+      <Description>Instantaneous values, all harmonics value</Description>
+      <Interface>Register</Interface>
+      <ObjectType>3</ObjectType>
+      <Attributes />
+    </GXObisCode>
+    <GXObisCode>
+      <LogicalName>1.1.31.7.1.255</LogicalName>
+      <Description>Instantaneous values, 1 harmonic</Description>
+      <Interface>Register</Interface>
+      <ObjectType>3</ObjectType>
+      <Attributes />
+    </GXObisCode>
+    <GXObisCode>
+      <LogicalName>1.1.51.7.1.255</LogicalName>
+      <Description>Instantaneous values, 1 harmonic</Description>
+      <Interface>Register</Interface>
+      <ObjectType>3</ObjectType>
+      <Attributes />
+    </GXObisCode>
+    <GXObisCode>
+      <LogicalName>1.1.71.7.1.255</LogicalName>
+      <Description>Instantaneous values, 1 harmonic</Description>
+      <Interface>Register</Interface>
+      <ObjectType>3</ObjectType>
+      <Attributes />
+    </GXObisCode>
+    <GXObisCode>
+      <LogicalName>1.1.32.7.1.255</LogicalName>
+      <Description>Instantaneous values, 1 harmonic</Description>
+      <Interface>Register</Interface>
+      <ObjectType>3</ObjectType>
+      <Attributes />
+    </GXObisCode>
+    <GXObisCode>
+      <LogicalName>1.1.52.7.1.255</LogicalName>
+      <Description>Instantaneous values, 1 harmonic</Description>
+      <Interface>Register</Interface>
+      <ObjectType>3</ObjectType>
+      <Attributes />
+    </GXObisCode>
+    <GXObisCode>
+      <LogicalName>1.1.72.7.1.255</LogicalName>
+      <Description>Instantaneous values, 1 harmonic</Description>
+      <Interface>Register</Interface>
+      <ObjectType>3</ObjectType>
+      <Attributes />
+    </GXObisCode>
+    <GXObisCode>
+      <LogicalName>1.1.31.7.124.255</LogicalName>
+      <Description>Total Harmonic Distortion (THD)</Description>
+      <Interface>Register</Interface>
+      <ObjectType>3</ObjectType>
+      <Attributes />
+    </GXObisCode>
+    <GXObisCode>
+      <LogicalName>1.1.51.7.124.255</LogicalName>
+      <Description>Total Harmonic Distortion (THD)</Description>
+      <Interface>Register</Interface>
+      <ObjectType>3</ObjectType>
+      <Attributes />
+    </GXObisCode>
+    <GXObisCode>
+      <LogicalName>1.1.71.7.124.255</LogicalName>
+      <Description>Total Harmonic Distortion (THD)</Description>
+      <Interface>Register</Interface>
+      <ObjectType>3</ObjectType>
+      <Attributes />
+    </GXObisCode>
+    <GXObisCode>
+      <LogicalName>1.1.11.7.125.255</LogicalName>
+      <Description>Total Demand Distortion (TDD)</Description>
+      <Interface>Register</Interface>
+      <ObjectType>3</ObjectType>
+      <Attributes />
+    </GXObisCode>
+    <GXObisCode>
+      <LogicalName>1.1.32.7.124.255</LogicalName>
+      <Description>Total Harmonic Distortion (THD)</Description>
+      <Interface>Register</Interface>
+      <ObjectType>3</ObjectType>
+      <Attributes />
+    </GXObisCode>
+    <GXObisCode>
+      <LogicalName>1.1.52.7.124.255</LogicalName>
+      <Description>Total Harmonic Distortion (THD)</Description>
+      <Interface>Register</Interface>
+      <ObjectType>3</ObjectType>
+      <Attributes />
+    </GXObisCode>
+    <GXObisCode>
+      <LogicalName>1.1.72.7.124.255</LogicalName>
+      <Description>Total Harmonic Distortion (THD)</Description>
+      <Interface>Register</Interface>
+      <ObjectType>3</ObjectType>
+      <Attributes />
+    </GXObisCode>
+    <GXObisCode>
+      <LogicalName>1.1.12.7.125.255</LogicalName>
+      <Description>Total Demand Distortion (TDD)</Description>
+      <Interface>Register</Interface>
+      <ObjectType>3</ObjectType>
+      <Attributes />
+    </GXObisCode>
+    <GXObisCode>
+      <LogicalName>1.1.148.7.1.255</LogicalName>
+      <Interface>Data</Interface>
+      <ObjectType>1</ObjectType>
+      <Attributes />
+    </GXObisCode>
+    <GXObisCode>
+      <LogicalName>1.0.0.8.2.255</LogicalName>
+      <Description>Measurement period 3, for instantaneous value</Description>
+      <Interface>Register</Interface>
+      <ObjectType>3</ObjectType>
+      <Attributes />
+    </GXObisCode>
+    <GXObisCode>
+      <LogicalName>1.1.128.1.0.255</LogicalName>
+      <Interface>Data</Interface>
+      <ObjectType>1</ObjectType>
+      <Attributes />
+    </GXObisCode>
+    <GXObisCode>
+      <LogicalName>1.1.128.2.0.255</LogicalName>
+      <Interface>Data</Interface>
+      <ObjectType>1</ObjectType>
+      <Attributes />
+    </GXObisCode>
+    <GXObisCode>
+      <LogicalName>1.1.128.3.0.255</LogicalName>
+      <Interface>Data</Interface>
+      <ObjectType>1</ObjectType>
+      <Attributes />
+    </GXObisCode>
+    <GXObisCode>
+      <LogicalName>1.1.128.4.0.255</LogicalName>
+      <Interface>Data</Interface>
+      <ObjectType>1</ObjectType>
+      <Attributes />
+    </GXObisCode>
+    <GXObisCode>
+      <LogicalName>1.1.128.5.0.255</LogicalName>
+      <Interface>Data</Interface>
+      <ObjectType>1</ObjectType>
+      <Attributes />
+    </GXObisCode>
+    <GXObisCode>
+      <LogicalName>1.1.128.6.0.255</LogicalName>
+      <Interface>Data</Interface>
+      <ObjectType>1</ObjectType>
+      <Attributes />
+    </GXObisCode>
+    <GXObisCode>
+      <LogicalName>1.2.32.7.0.255</LogicalName>
+      <Description>Instantaneous value (except for frequency)</Description>
+      <Interface>Register</Interface>
+      <ObjectType>3</ObjectType>
+      <Attributes />
+    </GXObisCode>
+    <GXObisCode>
+      <LogicalName>1.2.52.7.0.255</LogicalName>
+      <Description>Instantaneous value (except for frequency)</Description>
+      <Interface>Register</Interface>
+      <ObjectType>3</ObjectType>
+      <Attributes />
+    </GXObisCode>
+    <GXObisCode>
+      <LogicalName>1.2.72.7.0.255</LogicalName>
+      <Description>Instantaneous value (except for frequency)</Description>
+      <Interface>Register</Interface>
+      <ObjectType>3</ObjectType>
+      <Attributes />
+    </GXObisCode>
+    <GXObisCode>
+      <LogicalName>1.2.31.7.0.255</LogicalName>
+      <Description>Instantaneous value (except for frequency)</Description>
+      <Interface>Register</Interface>
+      <ObjectType>3</ObjectType>
+      <Attributes />
+    </GXObisCode>
+    <GXObisCode>
+      <LogicalName>1.2.51.7.0.255</LogicalName>
+      <Description>Instantaneous value (except for frequency)</Description>
+      <Interface>Register</Interface>
+      <ObjectType>3</ObjectType>
+      <Attributes />
+    </GXObisCode>
+    <GXObisCode>
+      <LogicalName>1.2.71.7.0.255</LogicalName>
+      <Description>Instantaneous value (except for frequency)</Description>
+      <Interface>Register</Interface>
+      <ObjectType>3</ObjectType>
+      <Attributes />
+    </GXObisCode>
+    <GXObisCode>
+      <LogicalName>1.0.12.36.124.255</LogicalName>
+      <Interface>Register</Interface>
+      <ObjectType>3</ObjectType>
+      <Attributes />
+    </GXObisCode>
+    <GXObisCode>
+      <LogicalName>1.0.11.36.124.255</LogicalName>
+      <Interface>Register</Interface>
+      <ObjectType>3</ObjectType>
+      <Attributes />
+    </GXObisCode>
+    <GXObisCode>
+      <LogicalName>1.1.21.8.0.255</LogicalName>
+      <Description>Time integral 1, total, current billing period</Description>
+      <Interface>Register</Interface>
+      <ObjectType>3</ObjectType>
+      <Attributes />
+    </GXObisCode>
+    <GXObisCode>
+      <LogicalName>1.1.41.8.0.255</LogicalName>
+      <Description>Time integral 1, total, current billing period</Description>
+      <Interface>Register</Interface>
+      <ObjectType>3</ObjectType>
+      <Attributes />
+    </GXObisCode>
+    <GXObisCode>
+      <LogicalName>1.1.61.8.0.255</LogicalName>
+      <Description>Time integral 1, total, current billing period</Description>
+      <Interface>Register</Interface>
+      <ObjectType>3</ObjectType>
+      <Attributes />
+    </GXObisCode>
+    <GXObisCode>
+      <LogicalName>1.1.1.8.0.255</LogicalName>
+      <Description>Time integral 1, total, current billing period</Description>
+      <Interface>Register</Interface>
+      <ObjectType>3</ObjectType>
+      <Attributes />
+    </GXObisCode>
+    <GXObisCode>
+      <LogicalName>1.1.22.8.0.255</LogicalName>
+      <Description>Time integral 1, total, current billing period</Description>
+      <Interface>Register</Interface>
+      <ObjectType>3</ObjectType>
+      <Attributes />
+    </GXObisCode>
+    <GXObisCode>
+      <LogicalName>1.1.42.8.0.255</LogicalName>
+      <Description>Time integral 1, total, current billing period</Description>
+      <Interface>Register</Interface>
+      <ObjectType>3</ObjectType>
+      <Attributes />
+    </GXObisCode>
+    <GXObisCode>
+      <LogicalName>1.1.62.8.0.255</LogicalName>
+      <Description>Time integral 1, total, current billing period</Description>
+      <Interface>Register</Interface>
+      <ObjectType>3</ObjectType>
+      <Attributes />
+    </GXObisCode>
+    <GXObisCode>
+      <LogicalName>1.1.2.8.0.255</LogicalName>
+      <Description>Time integral 1, total, current billing period</Description>
+      <Interface>Register</Interface>
+      <ObjectType>3</ObjectType>
+      <Attributes />
+    </GXObisCode>
+    <GXObisCode>
+      <LogicalName>1.1.23.8.0.255</LogicalName>
+      <Description>Time integral 1, total, current billing period</Description>
+      <Interface>Register</Interface>
+      <ObjectType>3</ObjectType>
+      <Attributes />
+    </GXObisCode>
+    <GXObisCode>
+      <LogicalName>1.1.43.8.0.255</LogicalName>
+      <Description>Time integral 1, total, current billing period</Description>
+      <Interface>Register</Interface>
+      <ObjectType>3</ObjectType>
+      <Attributes />
+    </GXObisCode>
+    <GXObisCode>
+      <LogicalName>1.1.63.8.0.255</LogicalName>
+      <Description>Time integral 1, total, current billing period</Description>
+      <Interface>Register</Interface>
+      <ObjectType>3</ObjectType>
+      <Attributes />
+    </GXObisCode>
+    <GXObisCode>
+      <LogicalName>1.1.3.8.0.255</LogicalName>
+      <Description>Time integral 1, total, current billing period</Description>
+      <Interface>Register</Interface>
+      <ObjectType>3</ObjectType>
+      <Attributes />
+    </GXObisCode>
+    <GXObisCode>
+      <LogicalName>1.1.24.8.0.255</LogicalName>
+      <Description>Time integral 1, total, current billing period</Description>
+      <Interface>Register</Interface>
+      <ObjectType>3</ObjectType>
+      <Attributes />
+    </GXObisCode>
+    <GXObisCode>
+      <LogicalName>1.1.44.8.0.255</LogicalName>
+      <Description>Time integral 1, total, current billing period</Description>
+      <Interface>Register</Interface>
+      <ObjectType>3</ObjectType>
+      <Attributes />
+    </GXObisCode>
+    <GXObisCode>
+      <LogicalName>1.1.64.8.0.255</LogicalName>
+      <Description>Time integral 1, total, current billing period</Description>
+      <Interface>Register</Interface>
+      <ObjectType>3</ObjectType>
+      <Attributes />
+    </GXObisCode>
+    <GXObisCode>
+      <LogicalName>1.1.4.8.0.255</LogicalName>
+      <Description>Time integral 1, total, current billing period</Description>
+      <Interface>Register</Interface>
+      <ObjectType>3</ObjectType>
+      <Attributes />
+    </GXObisCode>
+    <GXObisCode>
+      <LogicalName>1.1.25.8.0.255</LogicalName>
+      <Description>Time integral 1, total, current billing period</Description>
+      <Interface>Register</Interface>
+      <ObjectType>3</ObjectType>
+      <Attributes />
+    </GXObisCode>
+    <GXObisCode>
+      <LogicalName>1.1.45.8.0.255</LogicalName>
+      <Description>Time integral 1, total, current billing period</Description>
+      <Interface>Register</Interface>
+      <ObjectType>3</ObjectType>
+      <Attributes />
+    </GXObisCode>
+    <GXObisCode>
+      <LogicalName>1.1.65.8.0.255</LogicalName>
+      <Description>Time integral 1, total, current billing period</Description>
+      <Interface>Register</Interface>
+      <ObjectType>3</ObjectType>
+      <Attributes />
+    </GXObisCode>
+    <GXObisCode>
+      <LogicalName>1.1.5.8.0.255</LogicalName>
+      <Description>Time integral 1, total, current billing period</Description>
+      <Interface>Register</Interface>
+      <ObjectType>3</ObjectType>
+      <Attributes />
+    </GXObisCode>
+    <GXObisCode>
+      <LogicalName>1.1.26.8.0.255</LogicalName>
+      <Description>Time integral 1, total, current billing period</Description>
+      <Interface>Register</Interface>
+      <ObjectType>3</ObjectType>
+      <Attributes />
+    </GXObisCode>
+    <GXObisCode>
+      <LogicalName>1.1.46.8.0.255</LogicalName>
+      <Description>Time integral 1, total, current billing period</Description>
+      <Interface>Register</Interface>
+      <ObjectType>3</ObjectType>
+      <Attributes />
+    </GXObisCode>
+    <GXObisCode>
+      <LogicalName>1.1.66.8.0.255</LogicalName>
+      <Description>Time integral 1, total, current billing period</Description>
+      <Interface>Register</Interface>
+      <ObjectType>3</ObjectType>
+      <Attributes />
+    </GXObisCode>
+    <GXObisCode>
+      <LogicalName>1.1.6.8.0.255</LogicalName>
+      <Description>Time integral 1, total, current billing period</Description>
+      <Interface>Register</Interface>
+      <ObjectType>3</ObjectType>
+      <Attributes />
+    </GXObisCode>
+    <GXObisCode>
+      <LogicalName>1.1.27.8.0.255</LogicalName>
+      <Description>Time integral 1, total, current billing period</Description>
+      <Interface>Register</Interface>
+      <ObjectType>3</ObjectType>
+      <Attributes />
+    </GXObisCode>
+    <GXObisCode>
+      <LogicalName>1.1.47.8.0.255</LogicalName>
+      <Description>Time integral 1, total, current billing period</Description>
+      <Interface>Register</Interface>
+      <ObjectType>3</ObjectType>
+      <Attributes />
+    </GXObisCode>
+    <GXObisCode>
+      <LogicalName>1.1.67.8.0.255</LogicalName>
+      <Description>Time integral 1, total, current billing period</Description>
+      <Interface>Register</Interface>
+      <ObjectType>3</ObjectType>
+      <Attributes />
+    </GXObisCode>
+    <GXObisCode>
+      <LogicalName>1.1.7.8.0.255</LogicalName>
+      <Description>Time integral 1, total, current billing period</Description>
+      <Interface>Register</Interface>
+      <ObjectType>3</ObjectType>
+      <Attributes />
+    </GXObisCode>
+    <GXObisCode>
+      <LogicalName>1.1.28.8.0.255</LogicalName>
+      <Description>Time integral 1, total, current billing period</Description>
+      <Interface>Register</Interface>
+      <ObjectType>3</ObjectType>
+      <Attributes />
+    </GXObisCode>
+    <GXObisCode>
+      <LogicalName>1.1.48.8.0.255</LogicalName>
+      <Description>Time integral 1, total, current billing period</Description>
+      <Interface>Register</Interface>
+      <ObjectType>3</ObjectType>
+      <Attributes />
+    </GXObisCode>
+    <GXObisCode>
+      <LogicalName>1.1.68.8.0.255</LogicalName>
+      <Description>Time integral 1, total, current billing period</Description>
+      <Interface>Register</Interface>
+      <ObjectType>3</ObjectType>
+      <Attributes />
+    </GXObisCode>
+    <GXObisCode>
+      <LogicalName>1.1.8.8.0.255</LogicalName>
+      <Description>Time integral 1, total, current billing period</Description>
+      <Interface>Register</Interface>
+      <ObjectType>3</ObjectType>
+      <Attributes />
+    </GXObisCode>
+    <GXObisCode>
+      <LogicalName>1.1.29.8.0.255</LogicalName>
+      <Description>Time integral 1, total, current billing period</Description>
+      <Interface>Register</Interface>
+      <ObjectType>3</ObjectType>
+      <Attributes />
+    </GXObisCode>
+    <GXObisCode>
+      <LogicalName>1.1.49.8.0.255</LogicalName>
+      <Description>Time integral 1, total, current billing period</Description>
+      <Interface>Register</Interface>
+      <ObjectType>3</ObjectType>
+      <Attributes />
+    </GXObisCode>
+    <GXObisCode>
+      <LogicalName>1.1.69.8.0.255</LogicalName>
+      <Description>Time integral 1, total, current billing period</Description>
+      <Interface>Register</Interface>
+      <ObjectType>3</ObjectType>
+      <Attributes />
+    </GXObisCode>
+    <GXObisCode>
+      <LogicalName>1.1.9.8.0.255</LogicalName>
+      <Description>Time integral 1, total, current billing period</Description>
+      <Interface>Register</Interface>
+      <ObjectType>3</ObjectType>
+      <Attributes />
+    </GXObisCode>
+    <GXObisCode>
+      <LogicalName>1.1.30.8.0.255</LogicalName>
+      <Description>Time integral 1, total, current billing period</Description>
+      <Interface>Register</Interface>
+      <ObjectType>3</ObjectType>
+      <Attributes />
+    </GXObisCode>
+    <GXObisCode>
+      <LogicalName>1.1.50.8.0.255</LogicalName>
+      <Description>Time integral 1, total, current billing period</Description>
+      <Interface>Register</Interface>
+      <ObjectType>3</ObjectType>
+      <Attributes />
+    </GXObisCode>
+    <GXObisCode>
+      <LogicalName>1.1.70.8.0.255</LogicalName>
+      <Description>Time integral 1, total, current billing period</Description>
+      <Interface>Register</Interface>
+      <ObjectType>3</ObjectType>
+      <Attributes />
+    </GXObisCode>
+    <GXObisCode>
+      <LogicalName>1.1.10.8.0.255</LogicalName>
+      <Description>Time integral 1, total, current billing period</Description>
+      <Interface>Register</Interface>
+      <ObjectType>3</ObjectType>
+      <Attributes />
+    </GXObisCode>
+    <GXObisCode>
+      <LogicalName>1.1.21.17.0.255</LogicalName>
+      <Interface>ExtendedRegister</Interface>
+      <ObjectType>4</ObjectType>
+      <Attributes />
+    </GXObisCode>
+    <GXObisCode>
+      <LogicalName>1.1.41.17.0.255</LogicalName>
+      <Interface>ExtendedRegister</Interface>
+      <ObjectType>4</ObjectType>
+      <Attributes />
+    </GXObisCode>
+    <GXObisCode>
+      <LogicalName>1.1.61.17.0.255</LogicalName>
+      <Interface>ExtendedRegister</Interface>
+      <ObjectType>4</ObjectType>
+      <Attributes />
+    </GXObisCode>
+    <GXObisCode>
+      <LogicalName>1.1.1.17.0.255</LogicalName>
+      <Interface>ExtendedRegister</Interface>
+      <ObjectType>4</ObjectType>
+      <Attributes />
+    </GXObisCode>
+    <GXObisCode>
+      <LogicalName>1.1.22.17.0.255</LogicalName>
+      <Interface>ExtendedRegister</Interface>
+      <ObjectType>4</ObjectType>
+      <Attributes />
+    </GXObisCode>
+    <GXObisCode>
+      <LogicalName>1.1.42.17.0.255</LogicalName>
+      <Interface>ExtendedRegister</Interface>
+      <ObjectType>4</ObjectType>
+      <Attributes />
+    </GXObisCode>
+    <GXObisCode>
+      <LogicalName>1.1.62.17.0.255</LogicalName>
+      <Interface>ExtendedRegister</Interface>
+      <ObjectType>4</ObjectType>
+      <Attributes />
+    </GXObisCode>
+    <GXObisCode>
+      <LogicalName>1.1.2.17.0.255</LogicalName>
+      <Interface>ExtendedRegister</Interface>
+      <ObjectType>4</ObjectType>
+      <Attributes />
+    </GXObisCode>
+    <GXObisCode>
+      <LogicalName>1.1.23.17.0.255</LogicalName>
+      <Interface>ExtendedRegister</Interface>
+      <ObjectType>4</ObjectType>
+      <Attributes />
+    </GXObisCode>
+    <GXObisCode>
+      <LogicalName>1.1.43.17.0.255</LogicalName>
+      <Interface>ExtendedRegister</Interface>
+      <ObjectType>4</ObjectType>
+      <Attributes />
+    </GXObisCode>
+    <GXObisCode>
+      <LogicalName>1.1.63.17.0.255</LogicalName>
+      <Interface>ExtendedRegister</Interface>
+      <ObjectType>4</ObjectType>
+      <Attributes />
+    </GXObisCode>
+    <GXObisCode>
+      <LogicalName>1.1.3.17.0.255</LogicalName>
+      <Interface>ExtendedRegister</Interface>
+      <ObjectType>4</ObjectType>
+      <Attributes />
+    </GXObisCode>
+    <GXObisCode>
+      <LogicalName>1.1.24.17.0.255</LogicalName>
+      <Interface>ExtendedRegister</Interface>
+      <ObjectType>4</ObjectType>
+      <Attributes />
+    </GXObisCode>
+    <GXObisCode>
+      <LogicalName>1.1.44.17.0.255</LogicalName>
+      <Interface>ExtendedRegister</Interface>
+      <ObjectType>4</ObjectType>
+      <Attributes />
+    </GXObisCode>
+    <GXObisCode>
+      <LogicalName>1.1.64.17.0.255</LogicalName>
+      <Interface>ExtendedRegister</Interface>
+      <ObjectType>4</ObjectType>
+      <Attributes />
+    </GXObisCode>
+    <GXObisCode>
+      <LogicalName>1.1.4.17.0.255</LogicalName>
+      <Interface>ExtendedRegister</Interface>
+      <ObjectType>4</ObjectType>
+      <Attributes />
+    </GXObisCode>
+    <GXObisCode>
+      <LogicalName>1.1.25.17.0.255</LogicalName>
+      <Interface>ExtendedRegister</Interface>
+      <ObjectType>4</ObjectType>
+      <Attributes />
+    </GXObisCode>
+    <GXObisCode>
+      <LogicalName>1.1.45.17.0.255</LogicalName>
+      <Interface>ExtendedRegister</Interface>
+      <ObjectType>4</ObjectType>
+      <Attributes />
+    </GXObisCode>
+    <GXObisCode>
+      <LogicalName>1.1.65.17.0.255</LogicalName>
+      <Interface>ExtendedRegister</Interface>
+      <ObjectType>4</ObjectType>
+      <Attributes />
+    </GXObisCode>
+    <GXObisCode>
+      <LogicalName>1.1.5.17.0.255</LogicalName>
+      <Interface>ExtendedRegister</Interface>
+      <ObjectType>4</ObjectType>
+      <Attributes />
+    </GXObisCode>
+    <GXObisCode>
+      <LogicalName>1.1.26.17.0.255</LogicalName>
+      <Interface>ExtendedRegister</Interface>
+      <ObjectType>4</ObjectType>
+      <Attributes />
+    </GXObisCode>
+    <GXObisCode>
+      <LogicalName>1.1.46.17.0.255</LogicalName>
+      <Interface>ExtendedRegister</Interface>
+      <ObjectType>4</ObjectType>
+      <Attributes />
+    </GXObisCode>
+    <GXObisCode>
+      <LogicalName>1.1.66.17.0.255</LogicalName>
+      <Interface>ExtendedRegister</Interface>
+      <ObjectType>4</ObjectType>
+      <Attributes />
+    </GXObisCode>
+    <GXObisCode>
+      <LogicalName>1.1.6.17.0.255</LogicalName>
+      <Interface>ExtendedRegister</Interface>
+      <ObjectType>4</ObjectType>
+      <Attributes />
+    </GXObisCode>
+    <GXObisCode>
+      <LogicalName>1.1.27.17.0.255</LogicalName>
+      <Interface>ExtendedRegister</Interface>
+      <ObjectType>4</ObjectType>
+      <Attributes />
+    </GXObisCode>
+    <GXObisCode>
+      <LogicalName>1.1.47.17.0.255</LogicalName>
+      <Interface>ExtendedRegister</Interface>
+      <ObjectType>4</ObjectType>
+      <Attributes />
+    </GXObisCode>
+    <GXObisCode>
+      <LogicalName>1.1.67.17.0.255</LogicalName>
+      <Interface>ExtendedRegister</Interface>
+      <ObjectType>4</ObjectType>
+      <Attributes />
+    </GXObisCode>
+    <GXObisCode>
+      <LogicalName>1.1.7.17.0.255</LogicalName>
+      <Interface>ExtendedRegister</Interface>
+      <ObjectType>4</ObjectType>
+      <Attributes />
+    </GXObisCode>
+    <GXObisCode>
+      <LogicalName>1.1.28.17.0.255</LogicalName>
+      <Interface>ExtendedRegister</Interface>
+      <ObjectType>4</ObjectType>
+      <Attributes />
+    </GXObisCode>
+    <GXObisCode>
+      <LogicalName>1.1.48.17.0.255</LogicalName>
+      <Interface>ExtendedRegister</Interface>
+      <ObjectType>4</ObjectType>
+      <Attributes />
+    </GXObisCode>
+    <GXObisCode>
+      <LogicalName>1.1.68.17.0.255</LogicalName>
+      <Interface>ExtendedRegister</Interface>
+      <ObjectType>4</ObjectType>
+      <Attributes />
+    </GXObisCode>
+    <GXObisCode>
+      <LogicalName>1.1.8.17.0.255</LogicalName>
+      <Interface>ExtendedRegister</Interface>
+      <ObjectType>4</ObjectType>
+      <Attributes />
+    </GXObisCode>
+    <GXObisCode>
+      <LogicalName>1.1.29.17.0.255</LogicalName>
+      <Interface>ExtendedRegister</Interface>
+      <ObjectType>4</ObjectType>
+      <Attributes />
+    </GXObisCode>
+    <GXObisCode>
+      <LogicalName>1.1.49.17.0.255</LogicalName>
+      <Interface>ExtendedRegister</Interface>
+      <ObjectType>4</ObjectType>
+      <Attributes />
+    </GXObisCode>
+    <GXObisCode>
+      <LogicalName>1.1.69.17.0.255</LogicalName>
+      <Interface>ExtendedRegister</Interface>
+      <ObjectType>4</ObjectType>
+      <Attributes />
+    </GXObisCode>
+    <GXObisCode>
+      <LogicalName>1.1.9.17.0.255</LogicalName>
+      <Interface>ExtendedRegister</Interface>
+      <ObjectType>4</ObjectType>
+      <Attributes />
+    </GXObisCode>
+    <GXObisCode>
+      <LogicalName>1.1.30.17.0.255</LogicalName>
+      <Interface>ExtendedRegister</Interface>
+      <ObjectType>4</ObjectType>
+      <Attributes />
+    </GXObisCode>
+    <GXObisCode>
+      <LogicalName>1.1.50.17.0.255</LogicalName>
+      <Interface>ExtendedRegister</Interface>
+      <ObjectType>4</ObjectType>
+      <Attributes />
+    </GXObisCode>
+    <GXObisCode>
+      <LogicalName>1.1.70.17.0.255</LogicalName>
+      <Interface>ExtendedRegister</Interface>
+      <ObjectType>4</ObjectType>
+      <Attributes />
+    </GXObisCode>
+    <GXObisCode>
+      <LogicalName>1.1.10.17.0.255</LogicalName>
+      <Interface>ExtendedRegister</Interface>
+      <ObjectType>4</ObjectType>
+      <Attributes />
+    </GXObisCode>
+    <GXObisCode>
+      <LogicalName>1.1.13.5.0.255</LogicalName>
+      <Description>Last average 1</Description>
+      <Interface>Register</Interface>
+      <ObjectType>3</ObjectType>
+      <Attributes />
+    </GXObisCode>
+    <GXObisCode>
+      <LogicalName>1.1.13.3.0.255</LogicalName>
+      <Description>Minimum 1</Description>
+      <Interface>ExtendedRegister</Interface>
+      <ObjectType>4</ObjectType>
+      <Attributes />
+    </GXObisCode>
+    <GXObisCode>
+      <LogicalName>1.1.13.4.0.255</LogicalName>
+      <Description>Current average 1</Description>
+      <Interface>DemandRegister</Interface>
+      <ObjectType>9</ObjectType>
+      <Attributes />
+    </GXObisCode>
+    <GXObisCode>
+      <LogicalName>1.1.0.8.0.255</LogicalName>
+      <Description>Measurement period 1, for average value 1</Description>
+      <Interface>Register</Interface>
+      <ObjectType>3</ObjectType>
+      <Attributes />
+    </GXObisCode>
+    <GXObisCode>
+      <LogicalName>1.1.0.8.4.255</LogicalName>
+      <Description>Recording interval 1, for load profile</Description>
+      <Interface>Register</Interface>
+      <ObjectType>3</ObjectType>
+      <Attributes />
+    </GXObisCode>
+    <GXObisCode>
+      <LogicalName>1.1.0.8.5.255</LogicalName>
+      <Description>Recording interval 2, for load profile</Description>
+      <Interface>Register</Interface>
+      <ObjectType>3</ObjectType>
+      <Attributes />
+    </GXObisCode>
+    <GXObisCode>
+      <LogicalName>1.0.180.0.1.255</LogicalName>
+      <Interface>Register</Interface>
+      <ObjectType>3</ObjectType>
+      <Attributes />
+    </GXObisCode>
+    <GXObisCode>
+      <LogicalName>1.0.180.0.2.255</LogicalName>
+      <Interface>Register</Interface>
+      <ObjectType>3</ObjectType>
+      <Attributes />
+    </GXObisCode>
+    <GXObisCode>
+      <LogicalName>1.0.180.0.3.255</LogicalName>
+      <Interface>Register</Interface>
+      <ObjectType>3</ObjectType>
+      <Attributes />
+    </GXObisCode>
+    <GXObisCode>
+      <LogicalName>1.0.180.0.4.255</LogicalName>
+      <Interface>Register</Interface>
+      <ObjectType>3</ObjectType>
+      <Attributes />
+    </GXObisCode>
+    <GXObisCode>
+      <LogicalName>1.0.180.0.5.255</LogicalName>
+      <Interface>Register</Interface>
+      <ObjectType>3</ObjectType>
+      <Attributes />
+    </GXObisCode>
+    <GXObisCode>
+      <LogicalName>1.0.180.0.6.255</LogicalName>
+      <Interface>Register</Interface>
+      <ObjectType>3</ObjectType>
+      <Attributes />
+    </GXObisCode>
+    <GXObisCode>
+      <LogicalName>1.0.180.0.7.255</LogicalName>
+      <Interface>Register</Interface>
+      <ObjectType>3</ObjectType>
+      <Attributes />
+    </GXObisCode>
+    <GXObisCode>
+      <LogicalName>1.0.180.0.8.255</LogicalName>
+      <Interface>Register</Interface>
+      <ObjectType>3</ObjectType>
+      <Attributes />
+    </GXObisCode>
+    <GXObisCode>
+      <LogicalName>1.0.180.0.0.255</LogicalName>
+      <Interface>Register</Interface>
+      <ObjectType>3</ObjectType>
+      <Attributes />
+    </GXObisCode>
+    <GXObisCode>
+      <LogicalName>1.0.180.7.0.255</LogicalName>
+      <Interface>Register</Interface>
+      <ObjectType>3</ObjectType>
+      <Attributes />
+    </GXObisCode>
+    <GXObisCode>
+      <LogicalName>1.0.181.0.1.255</LogicalName>
+      <Interface>Register</Interface>
+      <ObjectType>3</ObjectType>
+      <Attributes />
+    </GXObisCode>
+    <GXObisCode>
+      <LogicalName>1.0.181.0.2.255</LogicalName>
+      <Interface>Register</Interface>
+      <ObjectType>3</ObjectType>
+      <Attributes />
+    </GXObisCode>
+    <GXObisCode>
+      <LogicalName>1.0.181.0.3.255</LogicalName>
+      <Interface>Register</Interface>
+      <ObjectType>3</ObjectType>
+      <Attributes />
+    </GXObisCode>
+    <GXObisCode>
+      <LogicalName>1.0.181.0.4.255</LogicalName>
+      <Interface>Register</Interface>
+      <ObjectType>3</ObjectType>
+      <Attributes />
+    </GXObisCode>
+    <GXObisCode>
+      <LogicalName>1.0.181.0.5.255</LogicalName>
+      <Interface>Register</Interface>
+      <ObjectType>3</ObjectType>
+      <Attributes />
+    </GXObisCode>
+    <GXObisCode>
+      <LogicalName>1.0.181.0.6.255</LogicalName>
+      <Interface>Register</Interface>
+      <ObjectType>3</ObjectType>
+      <Attributes />
+    </GXObisCode>
+    <GXObisCode>
+      <LogicalName>1.0.181.0.7.255</LogicalName>
+      <Interface>Register</Interface>
+      <ObjectType>3</ObjectType>
+      <Attributes />
+    </GXObisCode>
+    <GXObisCode>
+      <LogicalName>1.0.181.0.8.255</LogicalName>
+      <Interface>Register</Interface>
+      <ObjectType>3</ObjectType>
+      <Attributes />
+    </GXObisCode>
+    <GXObisCode>
+      <LogicalName>1.0.181.0.0.255</LogicalName>
+      <Interface>Register</Interface>
+      <ObjectType>3</ObjectType>
+      <Attributes />
+    </GXObisCode>
+    <GXObisCode>
+      <LogicalName>1.0.181.7.0.255</LogicalName>
+      <Interface>Register</Interface>
+      <ObjectType>3</ObjectType>
+      <Attributes />
+    </GXObisCode>
+    <GXObisCode>
+      <LogicalName>1.1.14.7.0.255</LogicalName>
+      <Description>Instantaneous value of frequency</Description>
+      <Interface>Register</Interface>
+      <ObjectType>3</ObjectType>
+      <Attributes />
+    </GXObisCode>
+    <GXObisCode>
+      <LogicalName>1.1.14.3.0.255</LogicalName>
+      <Description>Minimum 1</Description>
+      <Interface>ExtendedRegister</Interface>
+      <ObjectType>4</ObjectType>
+      <Attributes />
+    </GXObisCode>
+    <GXObisCode>
+      <LogicalName>1.1.14.6.0.255</LogicalName>
+      <Description>Maximum 1</Description>
+      <Interface>ExtendedRegister</Interface>
+      <ObjectType>4</ObjectType>
+      <Attributes />
+    </GXObisCode>
+    <GXObisCode>
+      <LogicalName>1.1.31.6.0.255</LogicalName>
+      <Description>Maximum 1</Description>
+      <Interface>ExtendedRegister</Interface>
+      <ObjectType>4</ObjectType>
+      <Attributes />
+    </GXObisCode>
+    <GXObisCode>
+      <LogicalName>1.1.51.6.0.255</LogicalName>
+      <Description>Maximum 1</Description>
+      <Interface>ExtendedRegister</Interface>
+      <ObjectType>4</ObjectType>
+      <Attributes />
+    </GXObisCode>
+    <GXObisCode>
+      <LogicalName>1.1.71.6.0.255</LogicalName>
+      <Description>Maximum 1</Description>
+      <Interface>ExtendedRegister</Interface>
+      <ObjectType>4</ObjectType>
+      <Attributes />
+    </GXObisCode>
+    <GXObisCode>
+      <LogicalName>1.1.32.6.0.255</LogicalName>
+      <Description>Maximum 1</Description>
+      <Interface>ExtendedRegister</Interface>
+      <ObjectType>4</ObjectType>
+      <Attributes />
+    </GXObisCode>
+    <GXObisCode>
+      <LogicalName>1.1.52.6.0.255</LogicalName>
+      <Description>Maximum 1</Description>
+      <Interface>ExtendedRegister</Interface>
+      <ObjectType>4</ObjectType>
+      <Attributes />
+    </GXObisCode>
+    <GXObisCode>
+      <LogicalName>1.1.72.6.0.255</LogicalName>
+      <Description>Maximum 1</Description>
+      <Interface>ExtendedRegister</Interface>
+      <ObjectType>4</ObjectType>
+      <Attributes />
+    </GXObisCode>
+    <GXObisCode>
+      <LogicalName>1.0.0.0.0.255</LogicalName>
+      <Description>Electricity ID 1</Description>
+      <Interface>Data</Interface>
+      <ObjectType>1</ObjectType>
+      <Attributes>
+        <GXDLMSAttributeSettings>
+          <Index>2</Index>
+          <Type>String</Type>
+        </GXDLMSAttributeSettings>
+      </Attributes>
+    </GXObisCode>
+    <GXObisCode>
+      <LogicalName>1.0.0.0.1.255</LogicalName>
+      <Description>Electricity ID 2</Description>
+      <Interface>Data</Interface>
+      <ObjectType>1</ObjectType>
+      <Attributes />
+    </GXObisCode>
+    <GXObisCode>
+      <LogicalName>1.0.0.0.2.255</LogicalName>
+      <Description>Electricity ID 3</Description>
+      <Interface>Data</Interface>
+      <ObjectType>1</ObjectType>
+      <Attributes />
+    </GXObisCode>
+    <GXObisCode>
+      <LogicalName>1.0.0.0.3.255</LogicalName>
+      <Description>Electricity ID 4</Description>
+      <Interface>Data</Interface>
+      <ObjectType>1</ObjectType>
+      <Attributes />
+    </GXObisCode>
+    <GXObisCode>
+      <LogicalName>1.0.0.0.4.255</LogicalName>
+      <Description>Electricity ID 5</Description>
+      <Interface>Data</Interface>
+      <ObjectType>1</ObjectType>
+      <Attributes />
+    </GXObisCode>
+    <GXObisCode>
+      <LogicalName>1.0.0.0.5.255</LogicalName>
+      <Description>Electricity ID 6</Description>
+      <Interface>Data</Interface>
+      <ObjectType>1</ObjectType>
+      <Attributes />
+    </GXObisCode>
+    <GXObisCode>
+      <LogicalName>1.0.0.0.6.255</LogicalName>
+      <Description>Electricity ID 7</Description>
+      <Interface>Data</Interface>
+      <ObjectType>1</ObjectType>
+      <Attributes />
+    </GXObisCode>
+    <GXObisCode>
+      <LogicalName>1.0.0.0.7.255</LogicalName>
+      <Description>Electricity ID 8</Description>
+      <Interface>Data</Interface>
+      <ObjectType>1</ObjectType>
+      <Attributes />
+    </GXObisCode>
+    <GXObisCode>
+      <LogicalName>1.0.0.0.8.255</LogicalName>
+      <Description>Electricity ID 9</Description>
+      <Interface>Data</Interface>
+      <ObjectType>1</ObjectType>
+      <Attributes />
+    </GXObisCode>
+    <GXObisCode>
+      <LogicalName>1.0.0.0.9.255</LogicalName>
+      <Description>Electricity ID 10</Description>
+      <Interface>Data</Interface>
+      <ObjectType>1</ObjectType>
+      <Attributes />
+    </GXObisCode>
+    <GXObisCode>
+      <LogicalName>1.1.1.9.1.255</LogicalName>
+      <Description>Time integral 2, tariff 1, current billing period</Description>
+      <Interface>ExtendedRegister</Interface>
+      <ObjectType>4</ObjectType>
+      <Attributes />
+    </GXObisCode>
+    <GXObisCode>
+      <LogicalName>1.1.1.9.2.255</LogicalName>
+      <Description>Time integral 2, tariff 2, current billing period</Description>
+      <Interface>ExtendedRegister</Interface>
+      <ObjectType>4</ObjectType>
+      <Attributes />
+    </GXObisCode>
+    <GXObisCode>
+      <LogicalName>1.1.1.9.3.255</LogicalName>
+      <Description>Time integral 2, tariff 3, current billing period</Description>
+      <Interface>ExtendedRegister</Interface>
+      <ObjectType>4</ObjectType>
+      <Attributes />
+    </GXObisCode>
+    <GXObisCode>
+      <LogicalName>1.1.5.9.1.255</LogicalName>
+      <Description>Time integral 2, tariff 1, current billing period</Description>
+      <Interface>ExtendedRegister</Interface>
+      <ObjectType>4</ObjectType>
+      <Attributes />
+    </GXObisCode>
+    <GXObisCode>
+      <LogicalName>1.1.5.9.2.255</LogicalName>
+      <Description>Time integral 2, tariff 2, current billing period</Description>
+      <Interface>ExtendedRegister</Interface>
+      <ObjectType>4</ObjectType>
+      <Attributes />
+    </GXObisCode>
+    <GXObisCode>
+      <LogicalName>1.1.5.9.3.255</LogicalName>
+      <Description>Time integral 2, tariff 3, current billing period</Description>
+      <Interface>ExtendedRegister</Interface>
+      <ObjectType>4</ObjectType>
+      <Attributes />
+    </GXObisCode>
+    <GXObisCode>
+      <LogicalName>1.1.8.9.1.255</LogicalName>
+      <Description>Time integral 2, tariff 1, current billing period</Description>
+      <Interface>ExtendedRegister</Interface>
+      <ObjectType>4</ObjectType>
+      <Attributes />
+    </GXObisCode>
+    <GXObisCode>
+      <LogicalName>1.1.8.9.2.255</LogicalName>
+      <Description>Time integral 2, tariff 2, current billing period</Description>
+      <Interface>ExtendedRegister</Interface>
+      <ObjectType>4</ObjectType>
+      <Attributes />
+    </GXObisCode>
+    <GXObisCode>
+      <LogicalName>1.1.8.9.3.255</LogicalName>
+      <Description>Time integral 2, tariff 3, current billing period</Description>
+      <Interface>ExtendedRegister</Interface>
+      <ObjectType>4</ObjectType>
+      <Attributes />
+    </GXObisCode>
+    <GXObisCode>
+      <LogicalName>1.1.2.9.1.255</LogicalName>
+      <Description>Time integral 2, tariff 1, current billing period</Description>
+      <Interface>ExtendedRegister</Interface>
+      <ObjectType>4</ObjectType>
+      <Attributes />
+    </GXObisCode>
+    <GXObisCode>
+      <LogicalName>1.1.2.9.2.255</LogicalName>
+      <Description>Time integral 2, tariff 2, current billing period</Description>
+      <Interface>ExtendedRegister</Interface>
+      <ObjectType>4</ObjectType>
+      <Attributes />
+    </GXObisCode>
+    <GXObisCode>
+      <LogicalName>1.1.2.9.3.255</LogicalName>
+      <Description>Time integral 2, tariff 3, current billing period</Description>
+      <Interface>ExtendedRegister</Interface>
+      <ObjectType>4</ObjectType>
+      <Attributes />
+    </GXObisCode>
+    <GXObisCode>
+      <LogicalName>1.1.6.9.1.255</LogicalName>
+      <Description>Time integral 2, tariff 1, current billing period</Description>
+      <Interface>ExtendedRegister</Interface>
+      <ObjectType>4</ObjectType>
+      <Attributes />
+    </GXObisCode>
+    <GXObisCode>
+      <LogicalName>1.1.6.9.2.255</LogicalName>
+      <Description>Time integral 2, tariff 2, current billing period</Description>
+      <Interface>ExtendedRegister</Interface>
+      <ObjectType>4</ObjectType>
+      <Attributes />
+    </GXObisCode>
+    <GXObisCode>
+      <LogicalName>1.1.6.9.3.255</LogicalName>
+      <Description>Time integral 2, tariff 3, current billing period</Description>
+      <Interface>ExtendedRegister</Interface>
+      <ObjectType>4</ObjectType>
+      <Attributes />
+    </GXObisCode>
+    <GXObisCode>
+      <LogicalName>1.1.7.9.1.255</LogicalName>
+      <Description>Time integral 2, tariff 1, current billing period</Description>
+      <Interface>ExtendedRegister</Interface>
+      <ObjectType>4</ObjectType>
+      <Attributes />
+    </GXObisCode>
+    <GXObisCode>
+      <LogicalName>1.1.7.9.2.255</LogicalName>
+      <Description>Time integral 2, tariff 2, current billing period</Description>
+      <Interface>ExtendedRegister</Interface>
+      <ObjectType>4</ObjectType>
+      <Attributes />
+    </GXObisCode>
+    <GXObisCode>
+      <LogicalName>1.1.7.9.3.255</LogicalName>
+      <Description>Time integral 2, tariff 3, current billing period</Description>
+      <Interface>ExtendedRegister</Interface>
+      <ObjectType>4</ObjectType>
+      <Attributes />
+    </GXObisCode>
+    <GXObisCode>
+      <LogicalName>1.2.82.8.0.255</LogicalName>
+      <Description>Time integral 1, total, current billing period</Description>
+      <Interface>Register</Interface>
+      <ObjectType>3</ObjectType>
+      <Attributes />
+    </GXObisCode>
+    <GXObisCode>
+      <LogicalName>1.3.82.8.0.255</LogicalName>
+      <Description>Time integral 1, total, current billing period</Description>
+      <Interface>Register</Interface>
+      <ObjectType>3</ObjectType>
+      <Attributes />
+    </GXObisCode>
+    <GXObisCode>
+      <LogicalName>1.4.82.8.0.255</LogicalName>
+      <Description>Time integral 1, total, current billing period</Description>
+      <Interface>Register</Interface>
+      <ObjectType>3</ObjectType>
+      <Attributes />
+    </GXObisCode>
+    <GXObisCode>
+      <LogicalName>1.5.82.8.0.255</LogicalName>
+      <Description>Time integral 1, total, current billing period</Description>
+      <Interface>Register</Interface>
+      <ObjectType>3</ObjectType>
+      <Attributes />
+    </GXObisCode>
+    <GXObisCode>
+      <LogicalName>1.6.82.8.0.255</LogicalName>
+      <Description>Time integral 1, total, current billing period</Description>
+      <Interface>Register</Interface>
+      <ObjectType>3</ObjectType>
+      <Attributes />
+    </GXObisCode>
+    <GXObisCode>
+      <LogicalName>1.7.82.8.0.255</LogicalName>
+      <Description>Time integral 1, total, current billing period</Description>
+      <Interface>Register</Interface>
+      <ObjectType>3</ObjectType>
+      <Attributes />
+    </GXObisCode>
+    <GXObisCode>
+      <LogicalName>1.8.82.8.0.255</LogicalName>
+      <Description>Time integral 1, total, current billing period</Description>
+      <Interface>Register</Interface>
+      <ObjectType>3</ObjectType>
+      <Attributes />
+    </GXObisCode>
+    <GXObisCode>
+      <LogicalName>1.1.98.128.6.255</LogicalName>
+      <Interface>ProfileGeneric</Interface>
+      <ObjectType>7</ObjectType>
+      <Attributes />
+    </GXObisCode>
+    <GXObisCode>
+      <LogicalName>1.1.98.128.2.255</LogicalName>
+      <Interface>ProfileGeneric</Interface>
+      <ObjectType>7</ObjectType>
+      <Attributes />
+    </GXObisCode>
+    <GXObisCode>
+      <LogicalName>1.1.98.128.3.255</LogicalName>
+      <Interface>ProfileGeneric</Interface>
+      <ObjectType>7</ObjectType>
+      <Attributes />
+    </GXObisCode>
+    <GXObisCode>
+      <LogicalName>1.1.98.128.5.255</LogicalName>
+      <Interface>ProfileGeneric</Interface>
+      <ObjectType>7</ObjectType>
+      <Attributes />
+    </GXObisCode>
+    <GXObisCode>
+      <LogicalName>1.1.98.128.4.255</LogicalName>
+      <Interface>ProfileGeneric</Interface>
+      <ObjectType>7</ObjectType>
+      <Attributes />
+    </GXObisCode>
+    <GXObisCode>
+      <LogicalName>1.0.99.10.1.255</LogicalName>
+      <Description>Dips voltage profile</Description>
+      <Interface>ProfileGeneric</Interface>
+      <ObjectType>7</ObjectType>
+      <Attributes />
+    </GXObisCode>
+    <GXObisCode>
+      <LogicalName>1.0.98.129.0.255</LogicalName>
+      <Interface>ProfileGeneric</Interface>
+      <ObjectType>7</ObjectType>
+      <Attributes />
+    </GXObisCode>
+    <GXObisCode>
+      <LogicalName>1.0.99.10.2.255</LogicalName>
+      <Description>Swells voltage profile</Description>
+      <Interface>ProfileGeneric</Interface>
+      <ObjectType>7</ObjectType>
+      <Attributes />
+    </GXObisCode>
+    <GXObisCode>
+      <LogicalName>1.0.98.129.10.255</LogicalName>
+      <Interface>ProfileGeneric</Interface>
+      <ObjectType>7</ObjectType>
+      <Attributes />
+    </GXObisCode>
+    <GXObisCode>
+      <LogicalName>1.0.99.10.3.255</LogicalName>
+      <Description>Cuts voltage profile</Description>
+      <Interface>ProfileGeneric</Interface>
+      <ObjectType>7</ObjectType>
+      <Attributes />
+    </GXObisCode>
+    <GXObisCode>
+      <LogicalName>1.0.98.129.20.255</LogicalName>
+      <Interface>ProfileGeneric</Interface>
+      <ObjectType>7</ObjectType>
+      <Attributes />
+    </GXObisCode>
+    <GXObisCode>
+      <LogicalName>1.0.99.128.2.255</LogicalName>
+      <Interface>ProfileGeneric</Interface>
+      <ObjectType>7</ObjectType>
+      <Attributes />
+    </GXObisCode>
+    <GXObisCode>
+      <LogicalName>1.0.99.128.34.255</LogicalName>
+      <Interface>ProfileGeneric</Interface>
+      <ObjectType>7</ObjectType>
+      <Attributes />
+    </GXObisCode>
+    <GXObisCode>
+      <LogicalName>1.0.98.129.35.255</LogicalName>
+      <Interface>ProfileGeneric</Interface>
+      <ObjectType>7</ObjectType>
+      <Attributes />
+    </GXObisCode>
+    <GXObisCode>
+      <LogicalName>0.0.99.130.0.255</LogicalName>
+      <Interface>ProfileGeneric</Interface>
+      <ObjectType>7</ObjectType>
+      <Attributes />
+    </GXObisCode>
+    <GXObisCode>
+      <LogicalName>0.0.98.130.1.255</LogicalName>
+      <Interface>ProfileGeneric</Interface>
+      <ObjectType>7</ObjectType>
+      <Attributes />
+    </GXObisCode>
+    <GXObisCode>
+      <LogicalName>0.0.99.130.2.255</LogicalName>
+      <Interface>ProfileGeneric</Interface>
+      <ObjectType>7</ObjectType>
+      <Attributes />
+    </GXObisCode>
+    <GXObisCode>
+      <LogicalName>0.0.99.130.3.255</LogicalName>
+      <Interface>ProfileGeneric</Interface>
+      <ObjectType>7</ObjectType>
+      <Attributes />
+    </GXObisCode>
+    <GXObisCode>
+      <LogicalName>0.0.99.130.4.255</LogicalName>
+      <Interface>ProfileGeneric</Interface>
+      <ObjectType>7</ObjectType>
+      <Attributes />
+    </GXObisCode>
+    <GXObisCode>
+      <LogicalName>0.0.99.130.5.255</LogicalName>
+      <Interface>ProfileGeneric</Interface>
+      <ObjectType>7</ObjectType>
+      <Attributes />
+    </GXObisCode>
+    <GXObisCode>
+      <LogicalName>0.0.99.12.0.255</LogicalName>
+      <Description>Connection profile</Description>
+      <Interface>ProfileGeneric</Interface>
+      <ObjectType>7</ObjectType>
+      <Attributes />
+    </GXObisCode>
+    <GXObisCode>
+      <LogicalName>0.0.99.130.8.255</LogicalName>
+      <Interface>ProfileGeneric</Interface>
+      <ObjectType>7</ObjectType>
+      <Attributes />
+    </GXObisCode>
+    <GXObisCode>
+      <LogicalName>0.0.99.98.0.255</LogicalName>
+      <Description>Event log</Description>
+      <Interface>ProfileGeneric</Interface>
+      <ObjectType>7</ObjectType>
+      <Attributes />
+    </GXObisCode>
+    <GXObisCode>
+      <LogicalName>1.0.99.11.124.255</LogicalName>
+      <Description>Voltage harmonic profile</Description>
+      <Interface>ProfileGeneric</Interface>
+      <ObjectType>7</ObjectType>
+      <Attributes />
+    </GXObisCode>
+    <GXObisCode>
+      <LogicalName>1.0.99.12.124.255</LogicalName>
+      <Description>Current harmonic profile</Description>
+      <Interface>ProfileGeneric</Interface>
+      <ObjectType>7</ObjectType>
+      <Attributes />
+    </GXObisCode>
+    <GXObisCode>
+      <LogicalName>0.0.98.133.1.255</LogicalName>
+      <Interface>ProfileGeneric</Interface>
+      <ObjectType>7</ObjectType>
+      <Attributes />
+    </GXObisCode>
+    <GXObisCode>
+      <LogicalName>1.0.96.51.1.255</LogicalName>
+      <Description>Manufacturer specific abstract objects</Description>
+      <Interface>ExtendedRegister</Interface>
+      <ObjectType>4</ObjectType>
+      <Attributes />
+    </GXObisCode>
+    <GXObisCode>
+      <LogicalName>1.0.96.51.2.255</LogicalName>
+      <Description>Manufacturer specific abstract objects</Description>
+      <Interface>ExtendedRegister</Interface>
+      <ObjectType>4</ObjectType>
+      <Attributes />
+    </GXObisCode>
+    <GXObisCode>
+      <LogicalName>1.0.96.51.3.255</LogicalName>
+      <Description>Manufacturer specific abstract objects</Description>
+      <Interface>ExtendedRegister</Interface>
+      <ObjectType>4</ObjectType>
+      <Attributes />
+    </GXObisCode>
+    <GXObisCode>
+      <LogicalName>1.0.96.51.4.255</LogicalName>
+      <Description>Manufacturer specific abstract objects</Description>
+      <Interface>ExtendedRegister</Interface>
+      <ObjectType>4</ObjectType>
+      <Attributes />
+    </GXObisCode>
+    <GXObisCode>
+      <LogicalName>1.0.96.51.5.255</LogicalName>
+      <Description>Manufacturer specific abstract objects</Description>
+      <Interface>ExtendedRegister</Interface>
+      <ObjectType>4</ObjectType>
+      <Attributes />
+    </GXObisCode>
+    <GXObisCode>
+      <LogicalName>1.0.96.51.6.255</LogicalName>
+      <Description>Manufacturer specific abstract objects</Description>
+      <Interface>ExtendedRegister</Interface>
+      <ObjectType>4</ObjectType>
+      <Attributes />
+    </GXObisCode>
+    <GXObisCode>
+      <LogicalName>1.0.96.51.7.255</LogicalName>
+      <Description>Manufacturer specific abstract objects</Description>
+      <Interface>ExtendedRegister</Interface>
+      <ObjectType>4</ObjectType>
+      <Attributes />
+    </GXObisCode>
+    <GXObisCode>
+      <LogicalName>1.0.96.51.8.255</LogicalName>
+      <Description>Manufacturer specific abstract objects</Description>
+      <Interface>ExtendedRegister</Interface>
+      <ObjectType>4</ObjectType>
+      <Attributes />
+    </GXObisCode>
+    <GXObisCode>
+      <LogicalName>1.0.96.51.9.255</LogicalName>
+      <Description>Manufacturer specific abstract objects</Description>
+      <Interface>ExtendedRegister</Interface>
+      <ObjectType>4</ObjectType>
+      <Attributes />
+    </GXObisCode>
+    <GXObisCode>
+      <LogicalName>1.0.96.51.10.255</LogicalName>
+      <Description>Manufacturer specific abstract objects</Description>
+      <Interface>ExtendedRegister</Interface>
+      <ObjectType>4</ObjectType>
+      <Attributes />
+    </GXObisCode>
+    <GXObisCode>
+      <LogicalName>1.0.96.51.11.255</LogicalName>
+      <Description>Manufacturer specific abstract objects</Description>
+      <Interface>ExtendedRegister</Interface>
+      <ObjectType>4</ObjectType>
+      <Attributes />
+    </GXObisCode>
+    <GXObisCode>
+      <LogicalName>1.0.96.51.12.255</LogicalName>
+      <Description>Manufacturer specific abstract objects</Description>
+      <Interface>ExtendedRegister</Interface>
+      <ObjectType>4</ObjectType>
+      <Attributes />
+    </GXObisCode>
+    <GXObisCode>
+      <LogicalName>1.0.96.51.13.255</LogicalName>
+      <Description>Manufacturer specific abstract objects</Description>
+      <Interface>ExtendedRegister</Interface>
+      <ObjectType>4</ObjectType>
+      <Attributes />
+    </GXObisCode>
+    <GXObisCode>
+      <LogicalName>1.0.96.51.14.255</LogicalName>
+      <Description>Manufacturer specific abstract objects</Description>
+      <Interface>ExtendedRegister</Interface>
+      <ObjectType>4</ObjectType>
+      <Attributes />
+    </GXObisCode>
+    <GXObisCode>
+      <LogicalName>1.0.96.51.15.255</LogicalName>
+      <Description>Manufacturer specific abstract objects</Description>
+      <Interface>ExtendedRegister</Interface>
+      <ObjectType>4</ObjectType>
+      <Attributes />
+    </GXObisCode>
+    <GXObisCode>
+      <LogicalName>1.0.96.51.16.255</LogicalName>
+      <Description>Manufacturer specific abstract objects</Description>
+      <Interface>ExtendedRegister</Interface>
+      <ObjectType>4</ObjectType>
+      <Attributes />
+    </GXObisCode>
+    <GXObisCode>
+      <LogicalName>1.0.96.51.17.255</LogicalName>
+      <Description>Manufacturer specific abstract objects</Description>
+      <Interface>ExtendedRegister</Interface>
+      <ObjectType>4</ObjectType>
+      <Attributes />
+    </GXObisCode>
+    <GXObisCode>
+      <LogicalName>1.0.96.51.18.255</LogicalName>
+      <Description>Manufacturer specific abstract objects</Description>
+      <Interface>ExtendedRegister</Interface>
+      <ObjectType>4</ObjectType>
+      <Attributes />
+    </GXObisCode>
+    <GXObisCode>
+      <LogicalName>1.0.96.51.19.255</LogicalName>
+      <Description>Manufacturer specific abstract objects</Description>
+      <Interface>ExtendedRegister</Interface>
+      <ObjectType>4</ObjectType>
+      <Attributes />
+    </GXObisCode>
+    <GXObisCode>
+      <LogicalName>1.0.96.51.20.255</LogicalName>
+      <Description>Manufacturer specific abstract objects</Description>
+      <Interface>ExtendedRegister</Interface>
+      <ObjectType>4</ObjectType>
+      <Attributes />
+    </GXObisCode>
+    <GXObisCode>
+      <LogicalName>1.0.96.51.21.255</LogicalName>
+      <Description>Manufacturer specific abstract objects</Description>
+      <Interface>ExtendedRegister</Interface>
+      <ObjectType>4</ObjectType>
+      <Attributes />
+    </GXObisCode>
+    <GXObisCode>
+      <LogicalName>1.0.96.51.26.255</LogicalName>
+      <Description>Manufacturer specific abstract objects</Description>
+      <Interface>ExtendedRegister</Interface>
+      <ObjectType>4</ObjectType>
+      <Attributes />
+    </GXObisCode>
+    <GXObisCode>
+      <LogicalName>1.0.96.51.30.255</LogicalName>
+      <Description>Manufacturer specific abstract objects</Description>
+      <Interface>ExtendedRegister</Interface>
+      <ObjectType>4</ObjectType>
+      <Attributes />
+    </GXObisCode>
+    <GXObisCode>
+      <LogicalName>1.0.96.51.31.255</LogicalName>
+      <Description>Manufacturer specific abstract objects</Description>
+      <Interface>Register</Interface>
+      <ObjectType>3</ObjectType>
+      <Attributes />
+    </GXObisCode>
+    <GXObisCode>
+      <LogicalName>1.0.96.51.32.255</LogicalName>
+      <Description>Manufacturer specific abstract objects</Description>
+      <Interface>Register</Interface>
+      <ObjectType>3</ObjectType>
+      <Attributes />
+    </GXObisCode>
+    <GXObisCode>
+      <LogicalName>1.0.96.51.33.255</LogicalName>
+      <Description>Manufacturer specific abstract objects</Description>
+      <Interface>Register</Interface>
+      <ObjectType>3</ObjectType>
+      <Attributes />
+    </GXObisCode>
+    <GXObisCode>
+      <LogicalName>0.0.96.52.1.255</LogicalName>
+      <Description>Manufacturer specific abstract objects</Description>
+      <Interface>ExtendedRegister</Interface>
+      <ObjectType>4</ObjectType>
+      <Attributes />
+    </GXObisCode>
+    <GXObisCode>
+      <LogicalName>0.0.96.52.2.255</LogicalName>
+      <Description>Manufacturer specific abstract objects</Description>
+      <Interface>ExtendedRegister</Interface>
+      <ObjectType>4</ObjectType>
+      <Attributes />
+    </GXObisCode>
+    <GXObisCode>
+      <LogicalName>0.0.96.52.3.255</LogicalName>
+      <Description>Manufacturer specific abstract objects</Description>
+      <Interface>ExtendedRegister</Interface>
+      <ObjectType>4</ObjectType>
+      <Attributes />
+    </GXObisCode>
+    <GXObisCode>
+      <LogicalName>0.0.96.52.4.255</LogicalName>
+      <Description>Manufacturer specific abstract objects</Description>
+      <Interface>Register</Interface>
+      <ObjectType>3</ObjectType>
+      <Attributes />
+    </GXObisCode>
+    <GXObisCode>
+      <LogicalName>0.0.96.7.0.255</LogicalName>
+      <Description>Number of power failures objects in all three phases.</Description>
+      <Interface>Register</Interface>
+      <ObjectType>3</ObjectType>
+      <Attributes />
+    </GXObisCode>
+    <GXObisCode>
+      <LogicalName>0.0.96.52.5.255</LogicalName>
+      <Description>Manufacturer specific abstract objects</Description>
+      <Interface>ExtendedRegister</Interface>
+      <ObjectType>4</ObjectType>
+      <Attributes />
+    </GXObisCode>
+    <GXObisCode>
+      <LogicalName>0.0.96.52.7.255</LogicalName>
+      <Description>Manufacturer specific abstract objects</Description>
+      <Interface>ExtendedRegister</Interface>
+      <ObjectType>4</ObjectType>
+      <Attributes />
+    </GXObisCode>
+    <GXObisCode>
+      <LogicalName>0.0.96.52.9.255</LogicalName>
+      <Description>Manufacturer specific abstract objects</Description>
+      <Interface>ExtendedRegister</Interface>
+      <ObjectType>4</ObjectType>
+      <Attributes />
+    </GXObisCode>
+    <GXObisCode>
+      <LogicalName>0.0.96.52.12.255</LogicalName>
+      <Description>Manufacturer specific abstract objects</Description>
+      <Interface>ExtendedRegister</Interface>
+      <ObjectType>4</ObjectType>
+      <Attributes />
+    </GXObisCode>
+    <GXObisCode>
+      <LogicalName>0.0.143.1.0.255</LogicalName>
+      <Interface>ExtendedRegister</Interface>
+      <ObjectType>4</ObjectType>
+      <Attributes />
+    </GXObisCode>
+    <GXObisCode>
+      <LogicalName>0.0.96.51.50.255</LogicalName>
+      <Description>Manufacturer specific abstract objects</Description>
+      <Interface>ExtendedRegister</Interface>
+      <ObjectType>4</ObjectType>
+      <Attributes />
+    </GXObisCode>
+    <GXObisCode>
+      <LogicalName>0.0.96.52.20.255</LogicalName>
+      <Description>Manufacturer specific abstract objects</Description>
+      <Interface>ExtendedRegister</Interface>
+      <ObjectType>4</ObjectType>
+      <Attributes />
+    </GXObisCode>
+    <GXObisCode>
+      <LogicalName>1.0.96.11.1.255</LogicalName>
+      <Description>Cumulative minimum 2 tariff 1, current billing period</Description>
+      <Interface>ExtendedRegister</Interface>
+      <ObjectType>4</ObjectType>
+      <Attributes />
+    </GXObisCode>
+    <GXObisCode>
+      <LogicalName>1.0.96.12.1.255</LogicalName>
+      <Description>Cumulative maximum 2 tariff 1, current billing period</Description>
+      <Interface>ExtendedRegister</Interface>
+      <ObjectType>4</ObjectType>
+      <Attributes />
+    </GXObisCode>
+    <GXObisCode>
+      <LogicalName>0.0.98.133.2.255</LogicalName>
+      <Interface>ProfileGeneric</Interface>
+      <ObjectType>7</ObjectType>
+      <Attributes />
+    </GXObisCode>
+    <GXObisCode>
+      <LogicalName>0.0.98.133.3.255</LogicalName>
+      <Interface>ProfileGeneric</Interface>
+      <ObjectType>7</ObjectType>
+      <Attributes />
+    </GXObisCode>
+    <GXObisCode>
+      <LogicalName>0.0.98.133.5.255</LogicalName>
+      <Interface>ProfileGeneric</Interface>
+      <ObjectType>7</ObjectType>
+      <Attributes />
+    </GXObisCode>
+    <GXObisCode>
+      <LogicalName>1.1.1.5.0.255</LogicalName>
+      <Description>Last average 1</Description>
+      <Interface>Register</Interface>
+      <ObjectType>3</ObjectType>
+      <Attributes />
+    </GXObisCode>
+    <GXObisCode>
+      <LogicalName>1.1.1.4.0.255</LogicalName>
+      <Description>Current average 1</Description>
+      <Interface>Register</Interface>
+      <ObjectType>3</ObjectType>
+      <Attributes />
+    </GXObisCode>
+    <GXObisCode>
+      <LogicalName>1.1.2.5.0.255</LogicalName>
+      <Description>Last average 1</Description>
+      <Interface>Register</Interface>
+      <ObjectType>3</ObjectType>
+      <Attributes />
+    </GXObisCode>
+    <GXObisCode>
+      <LogicalName>1.1.2.4.0.255</LogicalName>
+      <Description>Current average 1</Description>
+      <Interface>Register</Interface>
+      <ObjectType>3</ObjectType>
+      <Attributes />
+    </GXObisCode>
+    <GXObisCode>
+      <LogicalName>0.0.98.133.6.255</LogicalName>
+      <Interface>ProfileGeneric</Interface>
+      <ObjectType>7</ObjectType>
+      <Attributes />
+    </GXObisCode>
+    <GXObisCode>
+      <LogicalName>0.0.98.133.61.255</LogicalName>
+      <Interface>ProfileGeneric</Interface>
+      <ObjectType>7</ObjectType>
+      <Attributes />
+    </GXObisCode>
+    <GXObisCode>
+      <LogicalName>0.0.98.133.62.255</LogicalName>
+      <Interface>ProfileGeneric</Interface>
+      <ObjectType>7</ObjectType>
+      <Attributes>
+        <GXDLMSAttributeSettings>
+          <Index>2</Index>
+          <Type>OctetString</Type>
+          <UIType>OctetString</UIType>
+        </GXDLMSAttributeSettings>
+      </Attributes>
+    </GXObisCode>
+    <GXObisCode>
+      <LogicalName>0.0.98.133.63.255</LogicalName>
+      <Interface>ProfileGeneric</Interface>
+      <ObjectType>7</ObjectType>
+      <Attributes />
+    </GXObisCode>
+    <GXObisCode>
+      <LogicalName>0.0.98.133.64.255</LogicalName>
+      <Interface>ProfileGeneric</Interface>
+      <ObjectType>7</ObjectType>
+      <Attributes />
+    </GXObisCode>
+    <GXObisCode>
+      <LogicalName>0.0.98.133.65.255</LogicalName>
+      <Interface>ProfileGeneric</Interface>
+      <ObjectType>7</ObjectType>
+      <Attributes />
+    </GXObisCode>
+    <GXObisCode>
+      <LogicalName>0.0.98.133.66.255</LogicalName>
+      <Interface>ProfileGeneric</Interface>
+      <ObjectType>7</ObjectType>
+      <Attributes />
+    </GXObisCode>
+    <GXObisCode>
+      <LogicalName>1.1.1.6.1.255</LogicalName>
+      <Description>Maximum 1, tariff 1, current billing period</Description>
+      <Interface>ExtendedRegister</Interface>
+      <ObjectType>4</ObjectType>
+      <Attributes />
+    </GXObisCode>
+    <GXObisCode>
+      <LogicalName>1.1.1.6.2.255</LogicalName>
+      <Description>Maximum 1, tariff 2, current billing period</Description>
+      <Interface>ExtendedRegister</Interface>
+      <ObjectType>4</ObjectType>
+      <Attributes />
+    </GXObisCode>
+    <GXObisCode>
+      <LogicalName>1.1.1.6.3.255</LogicalName>
+      <Description>Maximum 1, tariff 3, current billing period</Description>
+      <Interface>ExtendedRegister</Interface>
+      <ObjectType>4</ObjectType>
+      <Attributes />
+    </GXObisCode>
+    <GXObisCode>
+      <LogicalName>1.1.2.6.1.255</LogicalName>
+      <Description>Maximum 1, tariff 1, current billing period</Description>
+      <Interface>ExtendedRegister</Interface>
+      <ObjectType>4</ObjectType>
+      <Attributes />
+    </GXObisCode>
+    <GXObisCode>
+      <LogicalName>1.1.2.6.2.255</LogicalName>
+      <Description>Maximum 1, tariff 2, current billing period</Description>
+      <Interface>ExtendedRegister</Interface>
+      <ObjectType>4</ObjectType>
+      <Attributes />
+    </GXObisCode>
+    <GXObisCode>
+      <LogicalName>1.1.2.6.3.255</LogicalName>
+      <Description>Maximum 1, tariff 3, current billing period</Description>
+      <Interface>ExtendedRegister</Interface>
+      <ObjectType>4</ObjectType>
+      <Attributes />
+    </GXObisCode>
+    <GXObisCode>
+      <LogicalName>0.0.98.133.67.255</LogicalName>
+      <Interface>ProfileGeneric</Interface>
+      <ObjectType>7</ObjectType>
+      <Attributes />
+    </GXObisCode>
+    <GXObisCode>
+      <LogicalName>0.0.98.133.68.255</LogicalName>
+      <Interface>ProfileGeneric</Interface>
+      <ObjectType>7</ObjectType>
+      <Attributes />
+    </GXObisCode>
+    <GXObisCode>
+      <LogicalName>0.0.98.133.69.255</LogicalName>
+      <Interface>ProfileGeneric</Interface>
+      <ObjectType>7</ObjectType>
+      <Attributes />
+    </GXObisCode>
+    <GXObisCode>
+      <LogicalName>0.0.98.133.70.255</LogicalName>
+      <Interface>ProfileGeneric</Interface>
+      <ObjectType>7</ObjectType>
+      <Attributes />
+    </GXObisCode>
+    <GXObisCode>
+      <LogicalName>0.0.98.133.71.255</LogicalName>
+      <Interface>ProfileGeneric</Interface>
+      <ObjectType>7</ObjectType>
+      <Attributes />
+    </GXObisCode>
+    <GXObisCode>
+      <LogicalName>0.0.98.133.72.255</LogicalName>
+      <Interface>ProfileGeneric</Interface>
+      <ObjectType>7</ObjectType>
+      <Attributes />
+    </GXObisCode>
+    <GXObisCode>
+      <LogicalName>0.0.98.133.73.255</LogicalName>
+      <Interface>ProfileGeneric</Interface>
+      <ObjectType>7</ObjectType>
+      <Attributes />
+    </GXObisCode>
+    <GXObisCode>
+      <LogicalName>0.0.98.133.74.255</LogicalName>
+      <Interface>ProfileGeneric</Interface>
+      <ObjectType>7</ObjectType>
+      <Attributes />
+    </GXObisCode>
+    <GXObisCode>
+      <LogicalName>0.0.98.133.75.255</LogicalName>
+      <Interface>ProfileGeneric</Interface>
+      <ObjectType>7</ObjectType>
+      <Attributes />
+    </GXObisCode>
+    <GXObisCode>
+      <LogicalName>0.0.98.133.76.255</LogicalName>
+      <Interface>ProfileGeneric</Interface>
+      <ObjectType>7</ObjectType>
+      <Attributes />
+    </GXObisCode>
+    <GXObisCode>
+      <LogicalName>0.0.98.133.77.255</LogicalName>
+      <Interface>ProfileGeneric</Interface>
+      <ObjectType>7</ObjectType>
+      <Attributes />
+    </GXObisCode>
+    <GXObisCode>
+      <LogicalName>0.0.98.133.78.255</LogicalName>
+      <Interface>ProfileGeneric</Interface>
+      <ObjectType>7</ObjectType>
+      <Attributes />
+    </GXObisCode>
+    <GXObisCode>
+      <LogicalName>0.0.98.133.79.255</LogicalName>
+      <Interface>ProfileGeneric</Interface>
+      <ObjectType>7</ObjectType>
+      <Attributes />
+    </GXObisCode>
+    <GXObisCode>
+      <LogicalName>0.0.98.133.80.255</LogicalName>
+      <Interface>ProfileGeneric</Interface>
+      <ObjectType>7</ObjectType>
+      <Attributes />
+    </GXObisCode>
+    <GXObisCode>
+      <LogicalName>0.0.98.133.81.255</LogicalName>
+      <Interface>ProfileGeneric</Interface>
+      <ObjectType>7</ObjectType>
+      <Attributes />
+    </GXObisCode>
+    <GXObisCode>
+      <LogicalName>0.0.98.133.82.255</LogicalName>
+      <Interface>ProfileGeneric</Interface>
+      <ObjectType>7</ObjectType>
+      <Attributes />
+    </GXObisCode>
+    <GXObisCode>
+      <LogicalName>0.0.98.133.83.255</LogicalName>
+      <Interface>ProfileGeneric</Interface>
+      <ObjectType>7</ObjectType>
+      <Attributes />
+    </GXObisCode>
+    <GXObisCode>
+      <LogicalName>0.0.98.133.84.255</LogicalName>
+      <Interface>ProfileGeneric</Interface>
+      <ObjectType>7</ObjectType>
+      <Attributes />
+    </GXObisCode>
+    <GXObisCode>
+      <LogicalName>0.0.98.133.90.255</LogicalName>
+      <Interface>ProfileGeneric</Interface>
+      <ObjectType>7</ObjectType>
+      <Attributes />
+    </GXObisCode>
+    <GXObisCode>
+      <LogicalName>1.1.98.133.31.255</LogicalName>
+      <Interface>ProfileGeneric</Interface>
+      <ObjectType>7</ObjectType>
+      <Attributes />
+    </GXObisCode>
+    <GXObisCode>
+      <LogicalName>0.0.98.133.7.255</LogicalName>
+      <Interface>ProfileGeneric</Interface>
+      <ObjectType>7</ObjectType>
+      <Attributes />
+    </GXObisCode>
+    <GXObisCode>
+      <LogicalName>0.0.99.1.0.255</LogicalName>
+      <Description>Load profile with recording period 1</Description>
+      <Interface>ProfileGeneric</Interface>
+      <ObjectType>7</ObjectType>
+      <Attributes />
+    </GXObisCode>
+    <GXObisCode>
+      <LogicalName>0.0.96.55.1.255</LogicalName>
+      <Description>Start Of Interval Date</Description>
+      <Interface>Data</Interface>
+      <ObjectType>1</ObjectType>
+      <Attributes>
+        <GXDLMSAttributeSettings>
+          <Index>2</Index>
+          <Type>OctetString</Type>
+          <UIType>DateTime</UIType>
+        </GXDLMSAttributeSettings>
+      </Attributes>
+    </GXObisCode>
+    <GXObisCode>
+      <LogicalName>0.0.96.55.2.255</LogicalName>
+      <Description>End Of Interval Date</Description>
+      <Interface>Data</Interface>
+      <ObjectType>1</ObjectType>
+      <Attributes>
+        <GXDLMSAttributeSettings>
+          <Index>2</Index>
+          <Type>OctetString</Type>
+          <UIType>DateTime</UIType>
+        </GXDLMSAttributeSettings>
+      </Attributes>
+    </GXObisCode>
+    <GXObisCode>
+      <LogicalName>0.0.96.55.3.255</LogicalName>
+      <Description>Time1</Description>
+      <Interface>Data</Interface>
+      <ObjectType>1</ObjectType>
+      <Attributes />
+    </GXObisCode>
+    <GXObisCode>
+      <LogicalName>0.0.96.55.4.255</LogicalName>
+      <Description>Time2</Description>
+      <Interface>Data</Interface>
+      <ObjectType>1</ObjectType>
+      <Attributes />
+    </GXObisCode>
+    <GXObisCode>
+      <LogicalName>1.1.1.27.0.255</LogicalName>
+      <Description>1.5 A+ (Wh)</Description>
+      <Interface>Register</Interface>
+      <ObjectType>3</ObjectType>
+      <Attributes />
+    </GXObisCode>
+    <GXObisCode>
+      <LogicalName>1.1.5.27.0.255</LogicalName>
+      <Description>5.5 Q1 (varh)</Description>
+      <Interface>Register</Interface>
+      <ObjectType>3</ObjectType>
+      <Attributes />
+    </GXObisCode>
+    <GXObisCode>
+      <LogicalName>1.1.8.27.0.255</LogicalName>
+      <Description>8.5 Q4 (varh)</Description>
+      <Interface>Register</Interface>
+      <ObjectType>3</ObjectType>
+      <Attributes />
+    </GXObisCode>
+    <GXObisCode>
+      <LogicalName>1.1.2.27.0.255</LogicalName>
+      <Description>2.5 A- (Wh)</Description>
+      <Interface>Register</Interface>
+      <ObjectType>3</ObjectType>
+      <Attributes />
+    </GXObisCode>
+    <GXObisCode>
+      <LogicalName>1.1.6.27.0.255</LogicalName>
+      <Description>6.5 Q2 (varh)</Description>
+      <Interface>Register</Interface>
+      <ObjectType>3</ObjectType>
+      <Attributes />
+    </GXObisCode>
+    <GXObisCode>
+      <LogicalName>1.1.7.27.0.255</LogicalName>
+      <Description>7.5 Q3 (varh)</Description>
+      <Interface>Register</Interface>
+      <ObjectType>3</ObjectType>
+      <Attributes />
+    </GXObisCode>
+    <GXObisCode>
+      <LogicalName>1.1.3.27.0.255</LogicalName>
+      <Description>3.5 R+ (varh)</Description>
+      <Interface>Register</Interface>
+      <ObjectType>3</ObjectType>
+      <Attributes />
+    </GXObisCode>
+    <GXObisCode>
+      <LogicalName>1.1.4.27.0.255</LogicalName>
+      <Description>4.5 R- (varh)</Description>
+      <Interface>Register</Interface>
+      <ObjectType>3</ObjectType>
+      <Attributes />
+    </GXObisCode>
+    <GXObisCode>
+      <LogicalName>0.0.99.128.1.255</LogicalName>
+      <Interface>ProfileGeneric</Interface>
+      <ObjectType>7</ObjectType>
+      <Attributes />
+    </GXObisCode>
+    <GXObisCode>
+      <LogicalName>0.0.96.55.5.255</LogicalName>
+      <Description>Manufacturer specific abstract objects</Description>
+      <Interface>ExtendedRegister</Interface>
+      <ObjectType>4</ObjectType>
+      <Attributes />
+    </GXObisCode>
+    <GXObisCode>
+      <LogicalName>0.0.96.55.6.255</LogicalName>
+      <Description>Manufacturer specific abstract objects</Description>
+      <Interface>ExtendedRegister</Interface>
+      <ObjectType>4</ObjectType>
+      <Attributes />
+    </GXObisCode>
+    <GXObisCode>
+      <LogicalName>0.0.99.1.2.255</LogicalName>
+      <Description>Load profile with recording period 1</Description>
+      <Interface>ProfileGeneric</Interface>
+      <ObjectType>7</ObjectType>
+      <Attributes />
+    </GXObisCode>
+    <GXObisCode>
+      <LogicalName>0.0.96.55.7.255</LogicalName>
+      <Description>Manufacturer specific abstract objects</Description>
+      <Interface>Data</Interface>
+      <ObjectType>1</ObjectType>
+      <Attributes />
+    </GXObisCode>
+    <GXObisCode>
+      <LogicalName>0.0.99.2.0.255</LogicalName>
+      <Description>Load profile with recording period 2</Description>
+      <Interface>ProfileGeneric</Interface>
+      <ObjectType>7</ObjectType>
+      <Attributes />
+    </GXObisCode>
+    <GXObisCode>
+      <LogicalName>0.0.99.129.1.255</LogicalName>
+      <Interface>ProfileGeneric</Interface>
+      <ObjectType>7</ObjectType>
+      <Attributes />
+    </GXObisCode>
+    <GXObisCode>
+      <LogicalName>0.0.96.56.5.255</LogicalName>
+      <Description>Manufacturer specific abstract objects</Description>
+      <Interface>ExtendedRegister</Interface>
+      <ObjectType>4</ObjectType>
+      <Attributes />
+    </GXObisCode>
+    <GXObisCode>
+      <LogicalName>0.0.96.56.6.255</LogicalName>
+      <Description>Manufacturer specific abstract objects</Description>
+      <Interface>ExtendedRegister</Interface>
+      <ObjectType>4</ObjectType>
+      <Attributes />
+    </GXObisCode>
+    <GXObisCode>
+      <LogicalName>0.0.99.2.2.255</LogicalName>
+      <Description>Load profile with recording period 2</Description>
+      <Interface>ProfileGeneric</Interface>
+      <ObjectType>7</ObjectType>
+      <Attributes />
+    </GXObisCode>
+    <GXObisCode>
+      <LogicalName>0.1.98.1.0.255</LogicalName>
+      <Description>Data of billing period 1</Description>
+      <Interface>ProfileGeneric</Interface>
+      <ObjectType>7</ObjectType>
+      <Attributes />
+    </GXObisCode>
+    <GXObisCode>
+      <LogicalName>1.0.98.134.1.255</LogicalName>
+      <Interface>ExtendedRegister</Interface>
+      <ObjectType>4</ObjectType>
+      <Attributes />
+    </GXObisCode>
+    <GXObisCode>
+      <LogicalName>1.1.98.134.3.255</LogicalName>
+      <Interface>ProfileGeneric</Interface>
+      <ObjectType>7</ObjectType>
+      <Attributes />
+    </GXObisCode>
+    <GXObisCode>
+      <LogicalName>0.1.98.2.0.255</LogicalName>
+      <Description>Data of billing period 2</Description>
+      <Interface>ProfileGeneric</Interface>
+      <ObjectType>7</ObjectType>
+      <Attributes />
+    </GXObisCode>
+    <GXObisCode>
+      <LogicalName>1.1.98.135.1.255</LogicalName>
+      <Interface>ProfileGeneric</Interface>
+      <ObjectType>7</ObjectType>
+      <Attributes />
+    </GXObisCode>
+    <GXObisCode>
+      <LogicalName>1.1.98.135.2.255</LogicalName>
+      <Interface>ProfileGeneric</Interface>
+      <ObjectType>7</ObjectType>
+      <Attributes />
+    </GXObisCode>
+    <GXObisCode>
+      <LogicalName>0.0.98.135.4.255</LogicalName>
+      <Interface>ProfileGeneric</Interface>
+      <ObjectType>7</ObjectType>
+      <Attributes />
+    </GXObisCode>
+    <GXObisCode>
+      <LogicalName>0.0.98.135.5.255</LogicalName>
+      <Interface>ProfileGeneric</Interface>
+      <ObjectType>7</ObjectType>
+      <Attributes />
+    </GXObisCode>
+    <GXObisCode>
+      <LogicalName>1.0.0.0.255.255</LogicalName>
+      <Description>Complete combined electricity ID</Description>
+      <Interface>ProfileGeneric</Interface>
+      <ObjectType>7</ObjectType>
+      <Attributes />
+    </GXObisCode>
+    <GXObisCode>
+      <LogicalName>0.0.96.4.0.255</LogicalName>
+      <Description>State of the internal control signals, global</Description>
+      <Interface>ProfileGeneric</Interface>
+      <ObjectType>7</ObjectType>
+      <Attributes />
+    </GXObisCode>
+    <GXObisCode>
+      <LogicalName>0.0.142.0.4.255</LogicalName>
+      <Interface>ProfileGeneric</Interface>
+      <ObjectType>7</ObjectType>
+      <Attributes />
+    </GXObisCode>
+    <GXObisCode>
+      <LogicalName>0.0.142.0.5.255</LogicalName>
+      <Interface>ProfileGeneric</Interface>
+      <ObjectType>7</ObjectType>
+      <Attributes />
+    </GXObisCode>
+    <GXObisCode>
+      <LogicalName>0.0.144.0.3.255</LogicalName>
+      <Interface>ProfileGeneric</Interface>
+      <ObjectType>7</ObjectType>
+      <Attributes />
+    </GXObisCode>
+    <GXObisCode>
+      <LogicalName>1.1.98.2.2.255</LogicalName>
+      <Description>Data of billing period 2</Description>
+      <Interface>ProfileGeneric</Interface>
+      <ObjectType>7</ObjectType>
+      <Attributes />
+    </GXObisCode>
+    <GXObisCode>
+      <LogicalName>0.0.148.1.4.255</LogicalName>
+      <Interface>Data</Interface>
+      <ObjectType>1</ObjectType>
+      <Attributes />
+    </GXObisCode>
+    <GXObisCode>
+      <LogicalName>0.0.148.1.6.255</LogicalName>
+      <Interface>Data</Interface>
+      <ObjectType>1</ObjectType>
+      <Attributes />
+    </GXObisCode>
+    <GXObisCode>
+      <LogicalName>0.0.148.4.3.255</LogicalName>
+      <Interface>Data</Interface>
+      <ObjectType>1</ObjectType>
+      <Attributes />
+    </GXObisCode>
+    <GXObisCode>
+      <LogicalName>0.0.130.0.7.255</LogicalName>
+      <Interface>Data</Interface>
+      <ObjectType>1</ObjectType>
+      <Attributes />
+    </GXObisCode>
+    <GXObisCode>
+      <LogicalName>0.0.141.0.3.255</LogicalName>
+      <Interface>Data</Interface>
+      <ObjectType>1</ObjectType>
+      <Attributes />
+    </GXObisCode>
+    <GXObisCode>
+      <LogicalName>0.0.141.0.4.255</LogicalName>
+      <Interface>Data</Interface>
+      <ObjectType>1</ObjectType>
+      <Attributes />
+    </GXObisCode>
+    <GXObisCode>
+      <LogicalName>0.0.141.0.5.255</LogicalName>
+      <Interface>Register</Interface>
+      <ObjectType>3</ObjectType>
+      <Attributes />
+    </GXObisCode>
+    <GXObisCode>
+      <LogicalName>0.0.134.0.5.255</LogicalName>
+      <Interface>Data</Interface>
+      <ObjectType>1</ObjectType>
+      <Attributes />
+    </GXObisCode>
+    <GXObisCode>
+      <LogicalName>0.0.135.0.3.255</LogicalName>
+      <Interface>Data</Interface>
+      <ObjectType>1</ObjectType>
+      <Attributes />
+    </GXObisCode>
+    <GXObisCode>
+      <LogicalName>0.0.96.55.0.255</LogicalName>
+      <Interface>Data</Interface>
+      <ObjectType>1</ObjectType>
+      <Attributes />
+    </GXObisCode>
+    <GXObisCode>
+      <LogicalName>0.0.140.1.0.255</LogicalName>
+      <Interface>Data</Interface>
+      <ObjectType>1</ObjectType>
+      <Attributes />
+    </GXObisCode>
+    <GXObisCode>
+      <LogicalName>0.0.96.52.15.255</LogicalName>
+      <Interface>Register</Interface>
+      <ObjectType>3</ObjectType>
+      <Attributes />
+    </GXObisCode>
+    <GXObisCode>
+      <LogicalName>0.0.96.52.16.255</LogicalName>
+      <Interface>Register</Interface>
+      <ObjectType>3</ObjectType>
+      <Attributes />
+    </GXObisCode>
+    <GXObisCode>
+      <LogicalName>0.0.96.52.17.255</LogicalName>
+      <Interface>Data</Interface>
+      <ObjectType>1</ObjectType>
+      <Attributes />
+    </GXObisCode>
+    <GXObisCode>
+      <LogicalName>0.0.96.52.19.255</LogicalName>
+      <Interface>Data</Interface>
+      <ObjectType>1</ObjectType>
+      <Attributes />
+    </GXObisCode>
+    <GXObisCode>
+      <LogicalName>0.0.140.0.4.255</LogicalName>
+      <Interface>Data</Interface>
+      <ObjectType>1</ObjectType>
+      <Attributes />
+    </GXObisCode>
+    <GXObisCode>
+      <LogicalName>0.0.140.0.8.255</LogicalName>
+      <Interface>Data</Interface>
+      <ObjectType>1</ObjectType>
+      <Attributes />
+    </GXObisCode>
+    <GXObisCode>
+      <LogicalName>0.0.141.0.2.255</LogicalName>
+      <Interface>Data</Interface>
+      <ObjectType>1</ObjectType>
+      <Attributes />
+    </GXObisCode>
+    <GXObisCode>
+      <LogicalName>0.0.25.1.0.255</LogicalName>
+      <Interface>Ip4Setup</Interface>
+      <ObjectType>42</ObjectType>
+      <Attributes />
+    </GXObisCode>
+    <GXObisCode>
+      <LogicalName>0.0.25.0.0.255</LogicalName>
+      <Interface>TcpUdpSetup</Interface>
+      <ObjectType>41</ObjectType>
+      <Attributes />
+    </GXObisCode>
+    <GXObisCode>
+      <LogicalName>0.0.25.4.0.255</LogicalName>
+      <Interface>GprsSetup</Interface>
+      <ObjectType>45</ObjectType>
+      <Attributes />
+    </GXObisCode>
+    <GXObisCode>
+      <LogicalName>0.0.144.1.1.255</LogicalName>
+      <Interface>Data</Interface>
+      <ObjectType>1</ObjectType>
+      <Attributes />
+    </GXObisCode>
+    <GXObisCode>
+      <LogicalName>0.0.96.61.2.255</LogicalName>
+      <Interface>Register</Interface>
+      <ObjectType>3</ObjectType>
+      <Attributes />
+    </GXObisCode>
+    <GXObisCode>
+      <LogicalName>0.0.96.61.3.255</LogicalName>
+      <Interface>Register</Interface>
+      <ObjectType>3</ObjectType>
+      <Attributes />
+    </GXObisCode>
+    <GXObisCode>
+      <LogicalName>1.1.149.1.0.255</LogicalName>
+      <Interface>Data</Interface>
+      <ObjectType>1</ObjectType>
+      <Attributes />
+    </GXObisCode>
+    <GXObisCode>
+      <LogicalName>1.1.149.2.0.255</LogicalName>
+      <Interface>Data</Interface>
+      <ObjectType>1</ObjectType>
+      <Attributes />
+    </GXObisCode>
+    <GXObisCode>
+      <LogicalName>1.1.149.3.0.255</LogicalName>
+      <Interface>Data</Interface>
+      <ObjectType>1</ObjectType>
+      <Attributes />
+    </GXObisCode>
+    <GXObisCode>
+      <LogicalName>1.1.149.4.0.255</LogicalName>
+      <Interface>Data</Interface>
+      <ObjectType>1</ObjectType>
+      <Attributes />
+    </GXObisCode>
+    <GXObisCode>
+      <LogicalName>1.1.149.5.0.255</LogicalName>
+      <Interface>Data</Interface>
+      <ObjectType>1</ObjectType>
+      <Attributes />
+    </GXObisCode>
+    <GXObisCode>
+      <LogicalName>1.1.149.6.0.255</LogicalName>
+      <Interface>Data</Interface>
+      <ObjectType>1</ObjectType>
+      <Attributes />
+    </GXObisCode>
+    <GXObisCode>
+      <LogicalName>1.0.96.53.0.255</LogicalName>
+      <Interface>Data</Interface>
+      <ObjectType>1</ObjectType>
+      <Attributes />
+    </GXObisCode>
+    <GXObisCode>
+      <LogicalName>1.1.1.8.15.255</LogicalName>
+      <Interface>Register</Interface>
+      <ObjectType>3</ObjectType>
+      <Attributes />
+    </GXObisCode>
+    <GXObisCode>
+      <LogicalName>1.1.2.8.15.255</LogicalName>
+      <Interface>Register</Interface>
+      <ObjectType>3</ObjectType>
+      <Attributes />
+    </GXObisCode>
+    <GXObisCode>
+      <LogicalName>1.1.3.8.15.255</LogicalName>
+      <Interface>Register</Interface>
+      <ObjectType>3</ObjectType>
+      <Attributes />
+    </GXObisCode>
+    <GXObisCode>
+      <LogicalName>1.1.4.8.15.255</LogicalName>
+      <Interface>Register</Interface>
+      <ObjectType>3</ObjectType>
+      <Attributes />
+    </GXObisCode>
+    <GXObisCode>
+      <LogicalName>1.1.5.8.15.255</LogicalName>
+      <Interface>Register</Interface>
+      <ObjectType>3</ObjectType>
+      <Attributes />
+    </GXObisCode>
+    <GXObisCode>
+      <LogicalName>1.1.6.8.15.255</LogicalName>
+      <Interface>Register</Interface>
+      <ObjectType>3</ObjectType>
+      <Attributes />
+    </GXObisCode>
+    <GXObisCode>
+      <LogicalName>1.1.7.8.15.255</LogicalName>
+      <Interface>Register</Interface>
+      <ObjectType>3</ObjectType>
+      <Attributes />
+    </GXObisCode>
+    <GXObisCode>
+      <LogicalName>1.1.8.8.15.255</LogicalName>
+      <Interface>Register</Interface>
+      <ObjectType>3</ObjectType>
+      <Attributes>
+        <GXDLMSAttributeSettings>
+          <Index>2</Index>
+          <Type>UInt32</Type>
+        </GXDLMSAttributeSettings>
+      </Attributes>
+    </GXObisCode>
+    <GXObisCode>
+      <LogicalName>1.1.1.8.1.255</LogicalName>
+      <Interface>ExtendedRegister</Interface>
+      <ObjectType>4</ObjectType>
+      <Attributes />
+    </GXObisCode>
+    <GXObisCode>
+      <LogicalName>1.1.1.8.2.255</LogicalName>
+      <Interface>ExtendedRegister</Interface>
+      <ObjectType>4</ObjectType>
+      <Attributes />
+    </GXObisCode>
+    <GXObisCode>
+      <LogicalName>1.1.2.8.1.255</LogicalName>
+      <Interface>ExtendedRegister</Interface>
+      <ObjectType>4</ObjectType>
+      <Attributes />
+    </GXObisCode>
+    <GXObisCode>
+      <LogicalName>1.1.2.8.2.255</LogicalName>
+      <Interface>ExtendedRegister</Interface>
+      <ObjectType>4</ObjectType>
+      <Attributes />
+    </GXObisCode>
+    <GXObisCode>
+      <LogicalName>1.1.3.8.1.255</LogicalName>
+      <Interface>ExtendedRegister</Interface>
+      <ObjectType>4</ObjectType>
+      <Attributes />
+    </GXObisCode>
+    <GXObisCode>
+      <LogicalName>1.1.4.8.1.255</LogicalName>
+      <Interface>ExtendedRegister</Interface>
+      <ObjectType>4</ObjectType>
+      <Attributes />
+    </GXObisCode>
+    <GXObisCode>
+      <LogicalName>1.1.2.2.0.255</LogicalName>
+      <Interface>Register</Interface>
+      <ObjectType>3</ObjectType>
+      <Attributes />
+    </GXObisCode>
+    <GXObisCode>
+      <LogicalName>1.1.2.35.0.255</LogicalName>
+      <Interface>Register</Interface>
+      <ObjectType>3</ObjectType>
+      <Attributes />
+    </GXObisCode>
+    <GXObisCode>
+      <LogicalName>1.1.2.36.0.255</LogicalName>
+      <Interface>Register</Interface>
+      <ObjectType>3</ObjectType>
+      <Attributes />
+    </GXObisCode>
+    <GXObisCode>
+      <LogicalName>1.1.2.37.0.255</LogicalName>
+      <Interface>Register</Interface>
+      <ObjectType>3</ObjectType>
+      <Attributes />
+    </GXObisCode>
+    <GXObisCode>
+      <LogicalName>1.1.2.38.0.255</LogicalName>
+      <Interface>Register</Interface>
+      <ObjectType>3</ObjectType>
+      <Attributes />
+    </GXObisCode>
+    <GXObisCode>
+      <LogicalName>0.1.98.2.1.255</LogicalName>
+      <Interface>ProfileGeneric</Interface>
+      <ObjectType>7</ObjectType>
+      <Attributes />
+    </GXObisCode>
+    <GXObisCode>
+      <LogicalName>0.0.99.130.9.255</LogicalName>
+      <Interface>ProfileGeneric</Interface>
+      <ObjectType>7</ObjectType>
+      <Attributes />
+    </GXObisCode>
+    <GXObisCode>
+      <LogicalName>0.0.99.131.9.255</LogicalName>
+      <Interface>ProfileGeneric</Interface>
+      <ObjectType>7</ObjectType>
+      <Attributes />
+    </GXObisCode>
+    <GXObisCode>
+      <LogicalName>0.0.13.0.0.255</LogicalName>
+      <Interface>ActivityCalendar</Interface>
+      <ObjectType>20</ObjectType>
+      <Attributes />
+    </GXObisCode>
+    <GXObisCode>
+      <LogicalName>0.0.11.0.0.255</LogicalName>
+      <Interface>SpecialDaysTable</Interface>
+      <ObjectType>11</ObjectType>
+      <Attributes />
+    </GXObisCode>
+    <GXObisCode>
+      <LogicalName>0.0.15.0.0.255</LogicalName>
+      <Interface>ActionSchedule</Interface>
+      <ObjectType>22</ObjectType>
+      <Attributes />
+    </GXObisCode>
+    <GXObisCode>
+      <LogicalName>0.2.2.2.0.255</LogicalName>
+      <Interface>AutoAnswer</Interface>
+      <ObjectType>28</ObjectType>
+      <Attributes />
+    </GXObisCode>
+    <GXObisCode>
+      <LogicalName>0.0.40.0.1.255</LogicalName>
+      <Interface>AssociationLogicalName</Interface>
+      <ObjectType>15</ObjectType>
+      <Attributes />
+    </GXObisCode>
+    <GXObisCode>
+      <LogicalName>0.0.40.0.2.255</LogicalName>
+      <Interface>AssociationLogicalName</Interface>
+      <ObjectType>15</ObjectType>
+      <Attributes />
+    </GXObisCode>
+    <GXObisCode>
+      <LogicalName>0.0.40.0.6.255</LogicalName>
+      <Interface>AssociationLogicalName</Interface>
+      <ObjectType>15</ObjectType>
+      <Attributes />
+    </GXObisCode>
+    <GXObisCode>
+      <LogicalName>0.0.40.0.7.255</LogicalName>
+      <Interface>AssociationLogicalName</Interface>
+      <ObjectType>15</ObjectType>
+      <Attributes />
+    </GXObisCode>
+    <GXObisCode>
+      <LogicalName>0.0.40.0.8.255</LogicalName>
+      <Interface>AssociationLogicalName</Interface>
+      <ObjectType>15</ObjectType>
+      <Attributes />
+    </GXObisCode>
+    <GXObisCode>
+      <LogicalName>0.0.40.0.9.255</LogicalName>
+      <Interface>AssociationLogicalName</Interface>
+      <ObjectType>15</ObjectType>
+      <Attributes />
+    </GXObisCode>
+    <GXObisCode>
+      <LogicalName>0.0.40.0.10.255</LogicalName>
+      <Interface>AssociationLogicalName</Interface>
+      <ObjectType>15</ObjectType>
+      <Attributes />
+    </GXObisCode>
+    <GXObisCode>
+      <LogicalName>0.0.41.0.0.255</LogicalName>
+      <Interface>SapAssignment</Interface>
+      <ObjectType>17</ObjectType>
+      <Attributes />
+    </GXObisCode>
+    <GXObisCode>
+      <LogicalName>0.0.40.0.0.255</LogicalName>
+      <Interface>AssociationLogicalName</Interface>
+      <ObjectType>15</ObjectType>
+      <Attributes />
+    </GXObisCode>
+    <GXObisCode>
+      <LogicalName>0.4.2.1.0.255</LogicalName>
+      <Interface>AutoConnect</Interface>
+      <ObjectType>29</ObjectType>
+      <Attributes />
+    </GXObisCode>
+    <GXObisCode>
+      <LogicalName>0.5.2.1.0.255</LogicalName>
+      <Interface>AutoConnect</Interface>
+      <ObjectType>29</ObjectType>
+      <Attributes />
+    </GXObisCode>
+    <GXObisCode>
+      <LogicalName>0.6.2.1.0.255</LogicalName>
+      <Interface>AutoConnect</Interface>
+      <ObjectType>29</ObjectType>
+      <Attributes />
+    </GXObisCode>
+    <GXObisCode>
+      <LogicalName>0.0.10.0.101.255</LogicalName>
+      <Interface>DemandRegister</Interface>
+      <ObjectType>9</ObjectType>
+      <Attributes />
+    </GXObisCode>
+    <GXObisCode>
+      <LogicalName>0.0.10.0.102.255</LogicalName>
+      <Interface>DemandRegister</Interface>
+      <ObjectType>9</ObjectType>
+      <Attributes />
+    </GXObisCode>
+    <GXObisCode>
+      <LogicalName>0.0.10.0.1.255</LogicalName>
+      <Interface>DemandRegister</Interface>
+      <ObjectType>9</ObjectType>
+      <Attributes />
+    </GXObisCode>
+    <GXObisCode>
+      <LogicalName>0.0.10.0.0.255</LogicalName>
+      <Interface>DemandRegister</Interface>
+      <ObjectType>9</ObjectType>
+      <Attributes />
+    </GXObisCode>
+    <GXObisCode>
+      <LogicalName>0.0.10.1.0.255</LogicalName>
+      <Interface>DemandRegister</Interface>
+      <ObjectType>9</ObjectType>
+      <Attributes />
+    </GXObisCode>
+    <GXObisCode>
+      <LogicalName>0.0.10.0.103.255</LogicalName>
+      <Interface>DemandRegister</Interface>
+      <ObjectType>9</ObjectType>
+      <Attributes />
+    </GXObisCode>
+    <GXObisCode>
+      <LogicalName>0.0.10.0.104.255</LogicalName>
+      <Interface>DemandRegister</Interface>
+      <ObjectType>9</ObjectType>
+      <Attributes />
+    </GXObisCode>
+    <GXObisCode>
+      <LogicalName>0.0.10.128.107.255</LogicalName>
+      <Interface>DemandRegister</Interface>
+      <ObjectType>9</ObjectType>
+      <Attributes />
+    </GXObisCode>
+    <GXObisCode>
+      <LogicalName>0.0.10.128.108.255</LogicalName>
+      <Interface>DemandRegister</Interface>
+      <ObjectType>9</ObjectType>
+      <Attributes />
+    </GXObisCode>
+    <GXObisCode>
+      <LogicalName>0.0.10.128.109.255</LogicalName>
+      <Interface>DemandRegister</Interface>
+      <ObjectType>9</ObjectType>
+      <Attributes />
+    </GXObisCode>
+    <GXObisCode>
+      <LogicalName>0.0.10.0.105.255</LogicalName>
+      <Interface>DemandRegister</Interface>
+      <ObjectType>9</ObjectType>
+      <Attributes />
+    </GXObisCode>
+    <GXObisCode>
+      <LogicalName>1.0.1.5.0.255</LogicalName>
+      <Interface>RegisterMonitor</Interface>
+      <ObjectType>21</ObjectType>
+      <Attributes />
+    </GXObisCode>
+    <GXObisCode>
+      <LogicalName>1.0.1.5.1.255</LogicalName>
+      <Interface>RegisterMonitor</Interface>
+      <ObjectType>21</ObjectType>
+      <Attributes />
+    </GXObisCode>
+    <GXObisCode>
+      <LogicalName>1.0.1.5.2.255</LogicalName>
+      <Interface>RegisterMonitor</Interface>
+      <ObjectType>21</ObjectType>
+      <Attributes />
+    </GXObisCode>
+    <GXObisCode>
+      <LogicalName>1.0.1.5.3.255</LogicalName>
+      <Interface>RegisterMonitor</Interface>
+      <ObjectType>21</ObjectType>
+      <Attributes />
+    </GXObisCode>
+    <GXObisCode>
+      <LogicalName>1.0.1.5.4.255</LogicalName>
+      <Interface>RegisterMonitor</Interface>
+      <ObjectType>21</ObjectType>
+      <Attributes />
+    </GXObisCode>
+    <GXObisCode>
+      <LogicalName>1.0.1.5.5.255</LogicalName>
+      <Interface>RegisterMonitor</Interface>
+      <ObjectType>21</ObjectType>
+      <Attributes />
+    </GXObisCode>
+    <GXObisCode>
+      <LogicalName>1.0.1.5.6.255</LogicalName>
+      <Interface>RegisterMonitor</Interface>
+      <ObjectType>21</ObjectType>
+      <Attributes />
+    </GXObisCode>
+    <GXObisCode>
+      <LogicalName>1.0.1.5.7.255</LogicalName>
+      <Interface>RegisterMonitor</Interface>
+      <ObjectType>21</ObjectType>
+      <Attributes />
+    </GXObisCode>
+    <GXObisCode>
+      <LogicalName>1.0.1.5.8.255</LogicalName>
+      <Interface>RegisterMonitor</Interface>
+      <ObjectType>21</ObjectType>
+      <Attributes />
+    </GXObisCode>
+    <GXObisCode>
+      <LogicalName>1.0.1.5.9.255</LogicalName>
+      <Interface>RegisterMonitor</Interface>
+      <ObjectType>21</ObjectType>
+      <Attributes />
+    </GXObisCode>
+    <GXObisCode>
+      <LogicalName>0.0.10.0.101.255</LogicalName>
+      <Interface>DemandRegister</Interface>
+      <ObjectType>9</ObjectType>
+      <Attributes />
+    </GXObisCode>
+    <GXObisCode>
+      <LogicalName>0.0.10.0.102.255</LogicalName>
+      <Interface>DemandRegister</Interface>
+      <ObjectType>9</ObjectType>
+      <Attributes />
+    </GXObisCode>
+    <GXObisCode>
+      <LogicalName>0.0.10.0.1.255</LogicalName>
+      <Interface>DemandRegister</Interface>
+      <ObjectType>9</ObjectType>
+      <Attributes />
+    </GXObisCode>
+    <GXObisCode>
+      <LogicalName>0.0.10.0.0.255</LogicalName>
+      <Interface>DemandRegister</Interface>
+      <ObjectType>9</ObjectType>
+      <Attributes />
+    </GXObisCode>
+    <GXObisCode>
+      <LogicalName>0.0.10.1.0.255</LogicalName>
+      <Interface>DemandRegister</Interface>
+      <ObjectType>9</ObjectType>
+      <Attributes />
+    </GXObisCode>
+    <GXObisCode>
+      <LogicalName>0.0.10.0.103.255</LogicalName>
+      <Interface>DemandRegister</Interface>
+      <ObjectType>9</ObjectType>
+      <Attributes />
+    </GXObisCode>
+    <GXObisCode>
+      <LogicalName>0.0.10.0.104.255</LogicalName>
+      <Interface>DemandRegister</Interface>
+      <ObjectType>9</ObjectType>
+      <Attributes />
+    </GXObisCode>
+    <GXObisCode>
+      <LogicalName>0.0.10.128.107.255</LogicalName>
+      <Interface>DemandRegister</Interface>
+      <ObjectType>9</ObjectType>
+      <Attributes />
+    </GXObisCode>
+    <GXObisCode>
+      <LogicalName>0.0.10.128.108.255</LogicalName>
+      <Interface>DemandRegister</Interface>
+      <ObjectType>9</ObjectType>
+      <Attributes />
+    </GXObisCode>
+    <GXObisCode>
+      <LogicalName>0.0.10.128.109.255</LogicalName>
+      <Interface>DemandRegister</Interface>
+      <ObjectType>9</ObjectType>
+      <Attributes />
+    </GXObisCode>
+    <GXObisCode>
+      <LogicalName>0.0.10.0.105.255</LogicalName>
+      <Interface>DemandRegister</Interface>
+      <ObjectType>9</ObjectType>
+      <Attributes />
+    </GXObisCode>
+    <GXObisCode>
+      <LogicalName>0.0.10.0.101.255</LogicalName>
+      <Interface>DemandRegister</Interface>
+      <ObjectType>9</ObjectType>
+      <Attributes />
+    </GXObisCode>
+    <GXObisCode>
+      <LogicalName>0.0.10.0.102.255</LogicalName>
+      <Interface>DemandRegister</Interface>
+      <ObjectType>9</ObjectType>
+      <Attributes />
+    </GXObisCode>
+    <GXObisCode>
+      <LogicalName>0.0.10.0.1.255</LogicalName>
+      <Interface>DemandRegister</Interface>
+      <ObjectType>9</ObjectType>
+      <Attributes />
+    </GXObisCode>
+    <GXObisCode>
+      <LogicalName>0.0.10.0.0.255</LogicalName>
+      <Interface>DemandRegister</Interface>
+      <ObjectType>9</ObjectType>
+      <Attributes />
+    </GXObisCode>
+    <GXObisCode>
+      <LogicalName>0.0.10.1.0.255</LogicalName>
+      <Interface>DemandRegister</Interface>
+      <ObjectType>9</ObjectType>
+      <Attributes />
+    </GXObisCode>
+    <GXObisCode>
+      <LogicalName>0.0.10.0.103.255</LogicalName>
+      <Interface>DemandRegister</Interface>
+      <ObjectType>9</ObjectType>
+      <Attributes />
+    </GXObisCode>
+    <GXObisCode>
+      <LogicalName>0.0.10.0.104.255</LogicalName>
+      <Interface>DemandRegister</Interface>
+      <ObjectType>9</ObjectType>
+      <Attributes />
+    </GXObisCode>
+    <GXObisCode>
+      <LogicalName>0.0.10.128.107.255</LogicalName>
+      <Interface>DemandRegister</Interface>
+      <ObjectType>9</ObjectType>
+      <Attributes />
+    </GXObisCode>
+    <GXObisCode>
+      <LogicalName>0.0.10.128.108.255</LogicalName>
+      <Interface>DemandRegister</Interface>
+      <ObjectType>9</ObjectType>
+      <Attributes />
+    </GXObisCode>
+    <GXObisCode>
+      <LogicalName>0.0.10.128.109.255</LogicalName>
+      <Interface>DemandRegister</Interface>
+      <ObjectType>9</ObjectType>
+      <Attributes />
+    </GXObisCode>
+    <GXObisCode>
+      <LogicalName>0.0.10.0.105.255</LogicalName>
+      <Interface>DemandRegister</Interface>
+      <ObjectType>9</ObjectType>
+      <Attributes />
+    </GXObisCode>
+    <GXObisCode>
+      <LogicalName>0.0.10.0.101.255</LogicalName>
+      <Interface>DemandRegister</Interface>
+      <ObjectType>9</ObjectType>
+      <Attributes />
+    </GXObisCode>
+    <GXObisCode>
+      <LogicalName>0.0.10.0.102.255</LogicalName>
+      <Interface>DemandRegister</Interface>
+      <ObjectType>9</ObjectType>
+      <Attributes />
+    </GXObisCode>
+    <GXObisCode>
+      <LogicalName>0.0.10.0.1.255</LogicalName>
+      <Interface>DemandRegister</Interface>
+      <ObjectType>9</ObjectType>
+      <Attributes />
+    </GXObisCode>
+    <GXObisCode>
+      <LogicalName>0.0.10.0.0.255</LogicalName>
+      <Interface>DemandRegister</Interface>
+      <ObjectType>9</ObjectType>
+      <Attributes />
+    </GXObisCode>
+    <GXObisCode>
+      <LogicalName>0.0.10.1.0.255</LogicalName>
+      <Interface>DemandRegister</Interface>
+      <ObjectType>9</ObjectType>
+      <Attributes />
+    </GXObisCode>
+    <GXObisCode>
+      <LogicalName>0.0.10.0.103.255</LogicalName>
+      <Interface>DemandRegister</Interface>
+      <ObjectType>9</ObjectType>
+      <Attributes />
+    </GXObisCode>
+    <GXObisCode>
+      <LogicalName>0.0.10.0.104.255</LogicalName>
+      <Interface>DemandRegister</Interface>
+      <ObjectType>9</ObjectType>
+      <Attributes />
+    </GXObisCode>
+    <GXObisCode>
+      <LogicalName>0.0.10.128.107.255</LogicalName>
+      <Interface>DemandRegister</Interface>
+      <ObjectType>9</ObjectType>
+      <Attributes />
+    </GXObisCode>
+    <GXObisCode>
+      <LogicalName>0.0.10.128.108.255</LogicalName>
+      <Interface>DemandRegister</Interface>
+      <ObjectType>9</ObjectType>
+      <Attributes />
+    </GXObisCode>
+    <GXObisCode>
+      <LogicalName>0.0.10.128.109.255</LogicalName>
+      <Interface>DemandRegister</Interface>
+      <ObjectType>9</ObjectType>
+      <Attributes />
+    </GXObisCode>
+    <GXObisCode>
+      <LogicalName>0.0.10.0.105.255</LogicalName>
+      <Interface>DemandRegister</Interface>
+      <ObjectType>9</ObjectType>
+      <Attributes />
+    </GXObisCode>
+  </ObisCodes>
+  <StartProtocol>DLMS</StartProtocol>
+  <Extension>Extensions.Actaris</Extension>
+  <Settings>
+    <GXAuthentication>
+      <Type>None</Type>
+      <ClientID xsi:type="xsd:unsignedByte">16</ClientID>
+    </GXAuthentication>
+    <GXAuthentication>
+      <Selected>true</Selected>
+      <Type>Low</Type>
+      <ClientID xsi:type="xsd:unsignedByte">1</ClientID>
+    </GXAuthentication>
+  </Settings>
+  <ServerSettings>
+    <GXServerAddress>
+      <Selected>true</Selected>
+      <HDLCAddress>0</HDLCAddress>
+      <Formula />
+      <PhysicalAddress xsi:type="xsd:unsignedInt">17</PhysicalAddress>
+      <LogicalAddress>1</LogicalAddress>
+    </GXServerAddress>
+  </ServerSettings>
+</GXManufacturer>

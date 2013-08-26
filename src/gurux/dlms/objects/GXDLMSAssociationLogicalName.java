@@ -161,7 +161,39 @@ public class GXDLMSAssociationLogicalName extends GXDLMSObject implements IGXDLM
         return new Object[] {getLogicalName(), getObjectList(), getAssociatedPartnersId(), getApplicationContextName(), getXDLMSContextInfo(), getAuthenticationMechanismMame(), getSecret(), getAssociationStatus()};
     }
     
-     @Override
+    /*
+     * Returns collection of attributes to read.
+     * 
+     * If attribute is static and already read or device is returned HW error it is not returned.
+     */
+    @Override
+    public int[] GetAttributeIndexToRead()
+    {
+        java.util.ArrayList<Integer> attributes = new java.util.ArrayList<Integer>();
+        //LN is static and read only once.
+        if (LogicalName == null || LogicalName.compareTo("") == 0)
+        {
+            attributes.add(1);
+        }
+        //ObjectList is static and read only once.
+        if (!isRead(2))
+        {
+            attributes.add(2);
+        }
+        //AccessRightsList is static and read only once.
+        if (!isRead(3))
+        {
+            attributes.add(3);
+        }
+        //SecuritySetupReference is static and read only once.
+        if (!isRead(4))
+        {
+            attributes.add(4);
+        }
+        return toIntArray(attributes);
+    }
+    
+    @Override
     public int getAttributeCount()
     {
         return 9;
@@ -293,7 +325,7 @@ public class GXDLMSAssociationLogicalName extends GXDLMSObject implements IGXDLM
      * Returns value of given attribute.
      */    
     @Override
-    public Object getValue(int index, DataType[] type, byte[] parameters)
+    public Object getValue(int index, DataType[] type, byte[] parameters, boolean raw)
     {
         if (index == 1)
         {
@@ -347,7 +379,7 @@ public class GXDLMSAssociationLogicalName extends GXDLMSObject implements IGXDLM
      * Set value of given attribute.
      */
     @Override
-    public void setValue(int index, Object value)
+    public void setValue(int index, Object value, boolean raw)
     {
         if (index == 1)
         {

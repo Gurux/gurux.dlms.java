@@ -34,42 +34,35 @@
 
 package gurux.dlms.objects;
 
-import gurux.dlms.enums.DataType;
-
-public interface IGXDLMSBase 
+public class GXDLMSActionSet
 {
-    /*
-     * Returns collection of attributes to read.
-     * 
-     * If attribute is static and already read or device is returned HW error it is not returned.
-     */
-    int[] GetAttributeIndexToRead();
-        
-    /*
-    * Returns amount of attributes.
-    */
-    int getAttributeCount();
-        
+    private GXDLMSActionItem m_ActionUp;
+    private GXDLMSActionItem m_ActionDown;
     
-    /*
-     * Returns amount of methods.
-     */    
-    int getMethodCount();
-            
-    /*
-    * Returns value of given attribute.
+    /** 
+     Constructor.
     */
-    Object getValue(int index, DataType[] type, byte[] parameters, boolean raw);
+    public GXDLMSActionSet()
+    {
+        setActionUp(new GXDLMSActionItem());
+        setActionDown(new GXDLMSActionItem());
+    }
 
-   /*
-    * Set value of given attribute.
-    */
-   void setValue(int index, Object value, boolean raw);
-   
-   /*
-    * Invokes method.
-    * 
-     @param index Method index.
-    */
-   void invoke(int index, Object parameters);
+    public final GXDLMSActionItem getActionUp()
+    {
+        return m_ActionUp;
+    }
+    public final void setActionUp(GXDLMSActionItem value)
+    {
+        m_ActionUp = value;
+    }
+
+    public final GXDLMSActionItem getActionDown()
+    {
+        return m_ActionDown;
+    }
+    public final void setActionDown(GXDLMSActionItem value)
+    {
+        m_ActionDown = value;
+    }
 }

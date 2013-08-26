@@ -41,24 +41,25 @@ import gurux.dlms.enums.AccessMode;
 import gurux.dlms.*;
 import gurux.dlms.manufacturersettings.GXAttributeCollection;
 import gurux.dlms.manufacturersettings.GXDLMSAttributeSettings;
+import java.util.Dictionary;
+import java.util.Enumeration;
+import java.util.Hashtable;
+import java.util.List;
 
 /** 
  GXDLMSObject provides an interface to DLMS registers. 
 */
-public class GXDLMSObject implements IGXDLMSColumnObject
+public class GXDLMSObject
 {
-    private int privateVersion;
-    private ObjectType privateObjectType = ObjectType.NONE;
-    private GXAttributeCollection privateAttributes = null;
-    private GXDLMSObjectCollection privateParent = null;
-    private GXAttributeCollection privateMethodAttributes = null;
-    int privateShortName;
-    private int privateSelectedAttributeIndex;
-    private ObjectType privateSourceObjectType = ObjectType.NONE;
-    private String privateLogicalName;
-    private String privateSourceLogicalName;
-    private String privateDescription;
-    private int privateSelectedDataIndex;
+    Dictionary<Integer, java.util.Date> ReadTimes = new Hashtable<Integer, java.util.Date>();
+    private int Version;
+    private ObjectType m_ObjectType = ObjectType.NONE;
+    private GXAttributeCollection Attributes = null;
+    private GXDLMSObjectCollection Parent = null;
+    private GXAttributeCollection MethodAttributes = null;
+    int ShortName;
+    protected String LogicalName;
+    private String Description;
 
     /** 
      Constructor.
@@ -81,8 +82,8 @@ public class GXDLMSObject implements IGXDLMSColumnObject
     */
     protected GXDLMSObject(gurux.dlms.enums.ObjectType objectType, String ln, int sn)
     {
-        privateAttributes = new GXAttributeCollection();
-        privateMethodAttributes = new GXAttributeCollection();        
+        Attributes = new GXAttributeCollection();
+        MethodAttributes = new GXAttributeCollection();        
         setObjectType(objectType);
         this.setShortName(sn);
         if (ln != null)
@@ -93,17 +94,84 @@ public class GXDLMSObject implements IGXDLMSColumnObject
                 throw new GXDLMSException("Invalid Logical Name.");
             }
         }
-        this.setLogicalName(ln);
+        LogicalName = ln;
     }
     
+    protected static int[] toIntArray(List<Integer> list)  
+    {
+        int[] ret = new int[list.size()];
+        int i = -1;
+        for (Integer e : list)  
+        {
+            ret[++i] = e.intValue();
+        }
+        return ret;
+    }
+    
+    protected static long[] toLongArray(List<Long> list)  
+    {
+        long[] ret = new long[list.size()];
+        int i = -1;
+        for (Long e : list)  
+        {
+            ret[++i] = e.longValue();
+        }
+        return ret;
+    }
+    
+    /*
+     * Is attribute read. This can be used with static attributes to make 
+     * meter reading faster.
+     */    
+    protected boolean isRead(int index)
+    {            
+        if (!canRead(index))
+        {
+            return true;
+        }        
+        return !getLastReadTime(index).equals(new java.util.Date(0));
+    }        
+    protected boolean canRead(int index)
+    {
+        return getAccess(index) != AccessMode.NO_ACCESS;
+    }
+    
+    /** 
+    Returns time when attribute was last time read.
+    -
+    @param attributeIndex Attribute index.
+    @return Is attribute read only.
+*/
+    protected final java.util.Date getLastReadTime(int attributeIndex)
+    {
+        Enumeration<Integer> key = ReadTimes.keys();
+        int value;
+        while(key.hasMoreElements())
+        {            
+            if ((value = key.nextElement()) == attributeIndex)
+            {
+                return ReadTimes.get(value);
+            }
+        }
+        return new java.util.Date(0);        
+    }
+
+    /** 
+     Set time when attribute was last time read.
+    */
+    protected final void setLastReadTime(int attributeIndex, java.util.Date tm)
+    {
+        ReadTimes.put(attributeIndex, tm);
+    }
+
     public final gurux.dlms.objects.GXDLMSObjectCollection getParent()
     {
-        return privateParent;
+        return Parent;
     }
     
     final void setParent(gurux.dlms.objects.GXDLMSObjectCollection value)
     {
-        privateParent = value;
+        Parent = value;
     }
 
     /** 
@@ -137,11 +205,11 @@ public class GXDLMSObject implements IGXDLMSColumnObject
     */
     public final ObjectType getObjectType()
     {
-        return privateObjectType;
+        return m_ObjectType;
     }
     public final void setObjectType(ObjectType value)
     {
-        privateObjectType = value;
+        m_ObjectType = value;
     }
 
     /** 
@@ -149,11 +217,11 @@ public class GXDLMSObject implements IGXDLMSColumnObject
     */
     public final int getVersion()
     {
-        return privateVersion;
+        return Version;
     }
     public final void setVersion(int value)
     {
-        privateVersion = value;
+        Version = value;
     }
 
     /** 
@@ -163,11 +231,11 @@ public class GXDLMSObject implements IGXDLMSColumnObject
     */
     public final int getShortName()
     {
-        return privateShortName;
+        return ShortName;
     }
     public final void setShortName(int value)
     {
-        privateShortName = value;
+        ShortName = value;
     }
 
     /** 
@@ -182,72 +250,17 @@ public class GXDLMSObject implements IGXDLMSColumnObject
         }
         return getLogicalName();
     }
-
-    /** 
-     Index of the object, if it is in a profile generic table. 
-     Retrieves the index of the DLMS object, if the object is a part of a  
-     profile generic table. If the object is not a part of a profile generic 
-     table, the value is 0.
-    */
-    public final int getSelectedAttributeIndex()
-    {
-        return privateSelectedAttributeIndex;
-    }
-    public final void setSelectedAttributeIndex(int value)
-    {
-        privateSelectedAttributeIndex = value;
-    }
-
-    /** 
-     Data index of DLMS object, if it is in a profile generic table. 
-    */
-    @Override
-    public final int getSelectedDataIndex()
-    {
-        return privateSelectedDataIndex;
-    }
-    @Override
-    public final void setSelectedDataIndex(int value)
-    {
-        privateSelectedDataIndex = value;
-    }
-
-    /** 
-     Logical Name of parent object.
-    */
-    @Override
-    public final String getSourceLogicalName()
-    {
-        return privateSourceLogicalName;
-    }
-    @Override
-    public final void setSourceLogicalName(String value)
-    {
-        privateSourceLogicalName = value;
-    }
-
-    /** 
-     object type of parent object.
-    */
-    public final ObjectType getSourceObjectType()
-    {
-        return privateSourceObjectType;
-    }
-    public final void setSourceObjectType(ObjectType value)
-    {
-        privateSourceObjectType = value;
-    }
-
+    
     /** 
      Logical Name of DLMS object.
     */
     public String getLogicalName()
     {
-        return privateLogicalName;
+        return LogicalName;
     }
     public void setLogicalName(String value)
     {
-        privateLogicalName = value;
+        LogicalName = value;
     }
 
     /** 
@@ -255,12 +268,12 @@ public class GXDLMSObject implements IGXDLMSColumnObject
     */
     public final String getDescription()
     {
-        return privateDescription;
+        return Description;
     }
 
     public final void setDescription(String value)
     {
-        privateDescription = value;
+        Description = value;
     }
 
     /** 
@@ -268,7 +281,7 @@ public class GXDLMSObject implements IGXDLMSColumnObject
     */
     public final GXAttributeCollection getAttributes()
     {
-        return privateAttributes;
+        return Attributes;
     }
 
     /** 
@@ -276,7 +289,7 @@ public class GXDLMSObject implements IGXDLMSColumnObject
     */
     public final GXAttributeCollection getMethodAttributes()
     {
-        return privateMethodAttributes;
+        return MethodAttributes;
     }
 
     /** 
@@ -287,7 +300,7 @@ public class GXDLMSObject implements IGXDLMSColumnObject
     */
     public final AccessMode getAccess(int index)
     {   
-        GXDLMSAttributeSettings att = privateAttributes.find(index);
+        GXDLMSAttributeSettings att = Attributes.find(index);
         if (att == null)
         {
             return AccessMode.READ_WRITE;
@@ -300,11 +313,11 @@ public class GXDLMSObject implements IGXDLMSColumnObject
     */
     public final void setAccess(int index, AccessMode access)
     {
-        GXDLMSAttributeSettings att = privateAttributes.find(index);
+        GXDLMSAttributeSettings att = Attributes.find(index);
         if (att == null)
         {
             att = new GXDLMSAttributeSettings(index);
-            privateAttributes.add(att);
+            Attributes.add(att);
         }
         att.setAccess(access);
     }
@@ -361,7 +374,7 @@ public class GXDLMSObject implements IGXDLMSColumnObject
 
     public DataType getDataType(int index)
     {
-        GXDLMSAttributeSettings att = privateAttributes.find(index);
+        GXDLMSAttributeSettings att = Attributes.find(index);
         if (att == null)
         {
             return DataType.NONE;
@@ -371,7 +384,7 @@ public class GXDLMSObject implements IGXDLMSColumnObject
 
     public DataType getUIDataType(int index)
     {
-        GXDLMSAttributeSettings att = privateAttributes.find(index);
+        GXDLMSAttributeSettings att = Attributes.find(index);
         if (att == null)
         {
             return DataType.NONE;
@@ -400,7 +413,7 @@ public class GXDLMSObject implements IGXDLMSColumnObject
     /*
      * Returns value of given attribute.
      */    
-    public Object getValue(int index, DataType[] type, byte[] parameters)
+    public Object getValue(int index, DataType[] type, byte[] parameters, boolean raw)
     {
         assert(false);
         throw new UnsupportedOperationException("getValue");
@@ -409,7 +422,7 @@ public class GXDLMSObject implements IGXDLMSColumnObject
     /*
      * Set value of given attribute.
      */
-    public void setValue(int index, Object value)
+    public void setValue(int index, Object value, boolean raw)
     {
         assert(false);
         throw new UnsupportedOperationException("setValue");
@@ -428,44 +441,44 @@ public class GXDLMSObject implements IGXDLMSColumnObject
 
     public final void setDataType(int index, DataType type)
     {
-        GXDLMSAttributeSettings att = privateAttributes.find(index);
+        GXDLMSAttributeSettings att = Attributes.find(index);
         if (att == null)
         {
             att = new GXDLMSAttributeSettings(index);
-            privateAttributes.add(att);
+            Attributes.add(att);
         }
         att.setType(type);
     }
 
     public final void setUIDataType(int index, DataType type)
     {
-        GXDLMSAttributeSettings att = privateAttributes.find(index);
+        GXDLMSAttributeSettings att = Attributes.find(index);
         if (att == null)
         {
             att = new GXDLMSAttributeSettings(index);
-            privateAttributes.add(att);
+            Attributes.add(att);
         }
         att.setUIType(type);
     }
 
     public final void setStatic(int index, boolean isStatic)
     {
-        GXDLMSAttributeSettings att = privateAttributes.find(index);
+        GXDLMSAttributeSettings att = Attributes.find(index);
         if (att == null)
         {
             att = new GXDLMSAttributeSettings(index);
-            privateAttributes.add(att);
+            Attributes.add(att);
         }
         att.setStatic(isStatic);
     }
 
     public final boolean getStatic(int index)
     {
-        GXDLMSAttributeSettings att = privateAttributes.find(index);
+        GXDLMSAttributeSettings att = Attributes.find(index);
         if (att == null)
         {
             att = new GXDLMSAttributeSettings(index);
-            privateAttributes.add(att);
+            Attributes.add(att);
         }
         return att.getStatic();
     }

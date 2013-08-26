@@ -59,8 +59,6 @@ import java.util.logging.Logger;
 public class GXCommon
 {       
     public static final byte HDLCFrameStartEnd = 0x7E;
-    public static final byte HDLCFrameType = (byte)0xA0;
-    public static final byte HDLCFrameTypeMoreData = (byte)0xA8;
     public static final byte InitialRequest = 0x1;
     public static final byte InitialResponce = 0x8;
     public static final byte AARQTag = 0x60;
@@ -663,7 +661,35 @@ public class GXCommon
             }
             if (len > 0)
             {
-                value = new String(GXCommon.rawData(buff, pos, len));
+                //Check that this is not a Octect string.
+                boolean octetString = false;
+                if (knownType)
+                {                    
+                    for(byte ch : buff)
+                    {
+                        //If not printable char
+                        if (ch < 0x21)
+                        {
+                            octetString = true;
+                            break;
+                        }
+                    }                    
+                }
+                if (octetString)
+                {
+                    StringBuilder str = new StringBuilder(buff.length * 3);
+                    for(byte ch : buff)
+                    {                        
+                        str.append(ch & 0xFF);
+                        str.append('.');
+                    }
+                    str.deleteCharAt(str.length() - 1);
+                    value = str.toString();
+                }
+                else
+                {
+                    value = new String(GXCommon.rawData(buff, pos, len));
+                }
             }
         }
         //Example Logical name is octet string, so do not change to string...
@@ -721,7 +747,7 @@ public class GXCommon
         }
         else if (type[0] == DataType.UINT8)
         {
-            value = buff[pos[0]++];
+            value = buff[pos[0]++] & 0xFF;
         }
         else if (type[0] == DataType.UINT16)
         {
@@ -900,7 +926,10 @@ public class GXCommon
                 pos[0] = -1;
                 return null;
             }
-            java.util.Set<DateTimeSkips> skip = EnumSet.noneOf(DateTimeSkips.class);
+            java.util.Set<DateTimeSkips> skip = EnumSet.of(DateTimeSkips.HOUR);
+            skip.add(DateTimeSkips.MINUTE);
+            skip.add(DateTimeSkips.SECOND);
+            skip.add(DateTimeSkips.MILLISECOND);
             java.util.Calendar tm = java.util.Calendar.getInstance();
             //Get year.
             int val = GXCommon.getUInt16(buff, pos);
@@ -945,7 +974,7 @@ public class GXCommon
         {
             if (knownType)
             {
-                if (size < 7) //If there is not enought data available.
+                if (size < 4) //If there is not enought data available.
                 {
                     pos[0] = -1;
                     return null;
@@ -956,7 +985,10 @@ public class GXCommon
                 pos[0] = -1;
                 return null;
             }
-            java.util.Set<DateTimeSkips> skip = EnumSet.noneOf(DateTimeSkips.class);
+            java.util.Set<DateTimeSkips> skip = EnumSet.of(DateTimeSkips.DAY);
+            skip.add(DateTimeSkips.DAY_OF_WEEK);
+            skip.add(DateTimeSkips.MONTH);
+            skip.add(DateTimeSkips.YEAR);            
             java.util.Calendar tm = java.util.Calendar.getInstance();
             //Get time.
             int val = buff[pos[0]++];

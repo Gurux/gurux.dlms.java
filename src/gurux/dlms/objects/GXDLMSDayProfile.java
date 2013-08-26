@@ -34,42 +34,59 @@
 
 package gurux.dlms.objects;
 
-import gurux.dlms.enums.DataType;
-
-public interface IGXDLMSBase 
+ /** 
+ Activity Calendar's Day profile is defined on the standard.
+ */
+public class GXDLMSDayProfile
 {
-    /*
-     * Returns collection of attributes to read.
-     * 
-     * If attribute is static and already read or device is returned HW error it is not returned.
-     */
-    int[] GetAttributeIndexToRead();
-        
-    /*
-    * Returns amount of attributes.
-    */
-    int getAttributeCount();
-        
+    private int DayId;
+    private GXDLMSDayProfileAction[] DaySchedules;    
     
-    /*
-     * Returns amount of methods.
-     */    
-    int getMethodCount();
-            
-    /*
-    * Returns value of given attribute.
+    /** 
+     Constructor.
     */
-    Object getValue(int index, DataType[] type, byte[] parameters, boolean raw);
+    public GXDLMSDayProfile()
+    {
+    }
 
-   /*
-    * Set value of given attribute.
+    /** 
+     Constructor.
     */
-   void setValue(int index, Object value, boolean raw);
-   
-   /*
-    * Invokes method.
-    * 
-     @param index Method index.
+    public GXDLMSDayProfile(int dayId, GXDLMSDayProfileAction[] schedules)
+    {
+        setDayId(dayId);
+        setDaySchedules(schedules);
+    }
+
+    /** 
+     User defined identifier, identifying the currentday_profile.
     */
-   void invoke(int index, Object parameters);
+    public final int getDayId()
+    {
+        return DayId;
+    }
+    public final void setDayId(int value)
+    {
+        DayId = value;
+    }
+    
+    public final GXDLMSDayProfileAction[] getDaySchedules()
+    {
+        return DaySchedules;
+    }
+    public final void setDaySchedules(GXDLMSDayProfileAction[] value)
+    {
+        DaySchedules = value;
+    }
+    
+    @Override
+    public String toString()
+    {
+        String str = String.format("%d", DayId);
+        for (GXDLMSDayProfileAction it : DaySchedules)
+        {
+            str += " " + it.toString();
+        }
+        return str;
+    }
 }

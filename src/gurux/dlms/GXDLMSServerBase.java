@@ -45,6 +45,7 @@ import gurux.dlms.manufacturersettings.GXManufacturer;
 import gurux.dlms.manufacturersettings.HDLCAddressType;
 import gurux.dlms.objects.GXDLMSAssociationLogicalName;
 import gurux.dlms.objects.GXDLMSAssociationShortName;
+import gurux.dlms.objects.GXDLMSCaptureObject;
 import gurux.dlms.objects.GXDLMSObject;
 import gurux.dlms.objects.GXDLMSObjectCollection;
 import gurux.dlms.objects.GXDLMSProfileGeneric;
@@ -55,8 +56,10 @@ import java.io.IOException;
 import java.io.UnsupportedEncodingException;
 import java.security.InvalidParameterException;
 import java.text.ParseException;
+import java.util.AbstractMap;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.EnumSet;
 import java.util.Map;
 import java.util.TreeMap;
 
@@ -449,13 +452,6 @@ abstract public class GXDLMSServerBase
                     {
                         throw new RuntimeException("Invalid Profile Entries. Profile entries tells amount of rows in the table.");
                     }
-                    for (GXDLMSObject obj : pg.getCaptureObjects())
-                    {
-                        if (obj.getSelectedAttributeIndex() < 1)
-                        {
-                            throw new RuntimeException("Invalid attribute index. SelectedAttributeIndex is not set for " + obj.getName());
-                        }
-                    }
                     if (pg.getProfileEntries() < 1)
                     {
                         throw new RuntimeException("Invalid Profile Entries. Profile entries tells amount of rows in the table.");
@@ -732,21 +728,25 @@ abstract public class GXDLMSServerBase
                 throw new GXDLMSException("Invalid data format.");
             }
             byte frame = buff[index[0]++];
-            RequestTypes MoreData = RequestTypes.NONE;
+            java.util.Set<RequestTypes> MoreData = EnumSet.noneOf(RequestTypes.class);           
             //Is there more data available.
-            if (frame == GXCommon.HDLCFrameTypeMoreData)
+            if ((frame & 0x8) != 0)
             {
-                MoreData = RequestTypes.FRAME;
+                MoreData = EnumSet.of(RequestTypes.FRAME);
             }
+            //Check frame length.
+            if ((frame & 0x7) != 0)
+            {
+                FrameLen = ((frame & 0x7) << 8);
+            }            
             //If not enought data.
-            FrameLen = buff[index[0]++];
+            FrameLen += buff[index[0]++];
             if (len < FrameLen + index[0] - 1)
             {
                 return false;
             }
-            if ((frame != GXCommon.HDLCFrameType && frame != GXCommon.HDLCFrameTypeMoreData) || 
-                    (MoreData == RequestTypes.NONE && 
-                    buff[FrameLen + PacketStartID + 1] != GXCommon.HDLCFrameStartEnd)) //Check EOP - Check BOP
+            if (MoreData.isEmpty() && 
+                buff[FrameLen + PacketStartID + 1] != GXCommon.HDLCFrameStartEnd)
             {
                 throw new GXDLMSException("Invalid data format.");
             }
@@ -957,7 +957,7 @@ abstract public class GXDLMSServerBase
                             return SendData.get(FrameIndex);
                         }
                     }                                        
-                    item.setValue(index[0], value);
+                    item.setValue(index[0], value, true);
                     SendData.add(acknowledge(getUseLogicalNameReferencing() ? Command.SetResponse : Command.WriteResponse, 0));
                     return SendData.get(FrameIndex);
                 }
@@ -1087,7 +1087,7 @@ abstract public class GXDLMSServerBase
             {
                 params = (byte[]) parameters[0];            
             }
-            value = item.getValue(index, tp, params);
+            value = item.getValue(index, tp, params, true);
             if (tp[0] == DataType.NONE)
             {
                 tp[0] = GXCommon.getValueType(value);

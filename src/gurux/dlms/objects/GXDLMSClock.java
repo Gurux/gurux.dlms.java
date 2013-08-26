@@ -103,7 +103,7 @@ public class GXDLMSClock extends GXDLMSObject implements IGXDLMSBase
         Begin.setSkip(value);
         End.setSkip(Begin.getSkip());
     }   
-    
+            
     @Override
     public DataType getUIDataType(int index)
     {
@@ -369,6 +369,63 @@ public class GXDLMSClock extends GXDLMSObject implements IGXDLMSBase
     }
 
     /*
+     * Returns collection of attributes to read.
+     * 
+     * If attribute is static and already read or device is returned HW error it is not returned.
+     */
+    @Override
+    public int[] GetAttributeIndexToRead()
+    {
+        java.util.ArrayList<Integer> attributes = new java.util.ArrayList<Integer>();
+        //LN is static and read only once.
+        if (LogicalName == null || LogicalName.compareTo("") == 0)
+        {
+            attributes.add(1);
+        }
+        //Time
+        if (canRead(2))
+        {
+            attributes.add(2);
+        }
+        //TimeZone
+        if (!isRead(3))
+        {
+            attributes.add(3);
+        }
+        //Status
+        if (canRead(4))
+        {
+            attributes.add(4);
+        }
+        //Begin
+        if (!isRead(5))
+        {
+            attributes.add(5);
+        }
+        //End
+        if (!isRead(6))
+        {
+            attributes.add(6);
+        }
+        //Deviation
+        if (!isRead(7))
+        {
+            attributes.add(7);
+        }
+        //Enabled
+        if (!isRead(8))
+        {
+            attributes.add(8);
+        }
+        //ClockBase
+        if (!isRead(9))
+        {
+            attributes.add(9);
+        }
+        return toIntArray(attributes);
+    }
+    
+    /*
      * Returns amount of attributes.
      */  
     @Override
@@ -390,7 +447,7 @@ public class GXDLMSClock extends GXDLMSObject implements IGXDLMSBase
      * Returns value of given attribute.
      */    
     @Override
-    public Object getValue(int index, DataType[] type, byte[] parameters)
+    public Object getValue(int index, DataType[] type, byte[] parameters, boolean raw)
     {
         if (index == 1)
         {
@@ -444,7 +501,7 @@ public class GXDLMSClock extends GXDLMSObject implements IGXDLMSBase
      * Set value of given attribute.
      */
     @Override
-    public void setValue(int index, Object value)
+    public void setValue(int index, Object value, boolean raw)
     {
         if (index == 1)
         {

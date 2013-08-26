@@ -102,6 +102,38 @@ public class GXDLMSAssociationShortName extends GXDLMSObject implements IGXDLMSB
         return new Object[] {getLogicalName(), getObjectList(), getAccessRightsList(), getSecuritySetupReference()};
     }
         
+    /*
+     * Returns collection of attributes to read.
+     * 
+     * If attribute is static and already read or device is returned HW error it is not returned.
+     */
+    @Override
+    public int[] GetAttributeIndexToRead()
+    {
+        java.util.ArrayList<Integer> attributes = new java.util.ArrayList<Integer>();
+        //LN is static and read only once.
+        if (LogicalName == null || LogicalName.compareTo("") == 0)
+        {
+            attributes.add(1);
+        }    
+        //ObjectList is static and read only once.
+        if (!isRead(2))
+        {
+            attributes.add(2);
+        }
+        //AccessRightsList is static and read only once.
+        if (!isRead(3))
+        {
+            attributes.add(3);
+        }
+        //SecuritySetupReference is static and read only once.
+        if (!isRead(4))
+        {
+            attributes.add(4);
+        }
+        return toIntArray(attributes);
+    }
+    
     @Override
     public int getAttributeCount()
     {
@@ -149,7 +181,7 @@ public class GXDLMSAssociationShortName extends GXDLMSObject implements IGXDLMSB
      * Returns value of given attribute.
      */    
     @Override
-    public Object getValue(int index, DataType[] type, byte[] parameters)
+    public Object getValue(int index, DataType[] type, byte[] parameters, boolean raw)
     {
         if (index == 1)
         {
@@ -162,7 +194,7 @@ public class GXDLMSAssociationShortName extends GXDLMSObject implements IGXDLMSB
             int cnt = m_ObjectList.size();
             try
             {
-                ByteArrayOutputStream data = new ByteArrayOutputStream();            
+                ByteArrayOutputStream data = new ByteArrayOutputStream();
                 data.write((byte)DataType.ARRAY.getValue());
                 //Add count            
                 GXCommon.setObjectCount(cnt, data);
@@ -273,7 +305,7 @@ public class GXDLMSAssociationShortName extends GXDLMSObject implements IGXDLMSB
      * Set value of given attribute.
      */
     @Override
-    public void setValue(int index, Object value)
+    public void setValue(int index, Object value, boolean raw)
     {
         if (index == 1)
         {
@@ -286,7 +318,7 @@ public class GXDLMSAssociationShortName extends GXDLMSObject implements IGXDLMSB
             {
                 for(Object item : (Object[])value)
                 {
-                    int sn = ((Number)Array.get(item, 0)).intValue();
+                    int sn = ((Number)Array.get(item, 0)).intValue() & 0xFFFF;
                     ObjectType type = ObjectType.forValue(((Number)Array.get(item, 1)).intValue());
                     int version = ((Number)Array.get(item, 2)).intValue();
                     String ln = GXDLMSObject.toLogicalName((byte[]) Array.get(item, 3));

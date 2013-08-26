@@ -34,42 +34,46 @@
 
 package gurux.dlms.objects;
 
-import gurux.dlms.enums.DataType;
-
-public interface IGXDLMSBase 
-{
+public class GXDLMSCaptureObject
+{   
     /*
-     * Returns collection of attributes to read.
-     * 
-     * If attribute is static and already read or device is returned HW error it is not returned.
+     * Constructor.
      */
-    int[] GetAttributeIndexToRead();
+    public GXDLMSCaptureObject()
+    {
         
+    }
     /*
-    * Returns amount of attributes.
+     * Constructor.
+     */
+    public GXDLMSCaptureObject(int attributeIndex, int dataIndex)
+    {
+        this.AttributeIndex = attributeIndex;
+        this.DataIndex = dataIndex;
+    }
+    int AttributeIndex;
+    int DataIndex;
+    /** 
+     Index of DLMS object in the profile generic table
     */
-    int getAttributeCount();
-        
-    
-    /*
-     * Returns amount of methods.
-     */    
-    int getMethodCount();
-            
-    /*
-    * Returns value of given attribute.
-    */
-    Object getValue(int index, DataType[] type, byte[] parameters, boolean raw);
+    public final int getAttributeIndex()
+    {
+        return AttributeIndex;
+    }
+    public final void setAttributeIndex(int value)
+    {
+        AttributeIndex = value;
+    }
 
-   /*
-    * Set value of given attribute.
+    /** 
+     Data index of DLMS object in the profile generic table. 
     */
-   void setValue(int index, Object value, boolean raw);
-   
-   /*
-    * Invokes method.
-    * 
-     @param index Method index.
-    */
-   void invoke(int index, Object parameters);
+    public final int getDataIndex()
+    {
+        return DataIndex;
+    }
+    public final void setDataIndex(int value)
+    {
+        DataIndex = value;
+    }
 }

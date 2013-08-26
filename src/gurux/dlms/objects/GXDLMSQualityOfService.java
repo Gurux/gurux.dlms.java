@@ -34,42 +34,56 @@
 
 package gurux.dlms.objects;
 
-import gurux.dlms.enums.DataType;
-
-public interface IGXDLMSBase 
+public class GXDLMSQualityOfService 
 {
-    /*
-     * Returns collection of attributes to read.
-     * 
-     * If attribute is static and already read or device is returned HW error it is not returned.
-     */
-    int[] GetAttributeIndexToRead();
-        
-    /*
-    * Returns amount of attributes.
-    */
-    int getAttributeCount();
-        
+    int m_Precedence;
+    int m_Delay;
+    int m_Reliability;
+    int m_PeakThroughput;
+    int m_MeanThroughput;
     
-    /*
-     * Returns amount of methods.
-     */    
-    int getMethodCount();
-            
-    /*
-    * Returns value of given attribute.
-    */
-    Object getValue(int index, DataType[] type, byte[] parameters, boolean raw);
-
-   /*
-    * Set value of given attribute.
-    */
-   void setValue(int index, Object value, boolean raw);
-   
-   /*
-    * Invokes method.
-    * 
-     @param index Method index.
-    */
-   void invoke(int index, Object parameters);
+    public final int getPrecedence()
+    {
+        return m_Precedence;
+    }
+    public final void setPrecedence(int value)
+    {
+        m_Precedence = value;
+    }
+    
+    public final int getDelay()
+    {
+        return m_Delay;
+    }
+    public final void setDelay(int value)
+    {
+        m_Delay = value;
+    }
+    
+    public final int getReliability()
+    {
+        return m_Reliability;
+    }
+    public final void setReliability(int value)
+    {
+        m_Reliability = value;
+    }
+    
+    public final int getPeakThroughput()
+    {
+        return m_PeakThroughput;
+    }
+    public final void setPeakThroughput(int value)
+    {
+        m_PeakThroughput = value;
+    }
+    
+    public final int getMeanThroughput()
+    {
+        return m_MeanThroughput;
+    }
+    public final void setMeanThroughput(int value)
+    {
+        m_MeanThroughput = value;
+    }
 }

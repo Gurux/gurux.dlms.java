@@ -34,19 +34,25 @@
 
 package gurux.dlms.objects;
 
+import gurux.dlms.GXDLMSClient;
+import gurux.dlms.GXDateTime;
 import gurux.dlms.enums.DataType;
 import gurux.dlms.enums.ObjectType;
+import gurux.dlms.internal.GXCommon;
+import java.io.ByteArrayOutputStream;
+import java.lang.reflect.Array;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
-public class GXDLMSData extends GXDLMSObject implements IGXDLMSBase
+public class GXDLMSSpecialDaysTable extends GXDLMSObject implements IGXDLMSBase
 {
-    private Object privateValue;
-
+    private GXDLMSSpecialDay[] Entries;
     /**  
      Constructor.
     */
-    public GXDLMSData()
+    public GXDLMSSpecialDaysTable()
     {
-        super(ObjectType.DATA);
+        super(ObjectType.SPECIAL_DAYS_TABLE);
     }
 
     /**  
@@ -54,9 +60,9 @@ public class GXDLMSData extends GXDLMSObject implements IGXDLMSBase
 
      @param ln Logican Name of the object.
     */
-    public GXDLMSData(String ln)
+    public GXDLMSSpecialDaysTable(String ln)
     {
-        super(ObjectType.DATA, ln, 0);
+        super(ObjectType.SPECIAL_DAYS_TABLE, ln, 0);
     }
 
     /**  
@@ -65,29 +71,35 @@ public class GXDLMSData extends GXDLMSObject implements IGXDLMSBase
      @param ln Logican Name of the object.
      @param sn Short Name of the object.
     */
-    public GXDLMSData(String ln, int sn)
+    public GXDLMSSpecialDaysTable(String ln, int sn)
     {
-        super(ObjectType.DATA, ln, sn);
+        super(ObjectType.SPECIAL_DAYS_TABLE, ln, sn);
     }
 
     /** 
      Value of COSEM Data object.
     */
-    public final Object getValue()
+    public final GXDLMSSpecialDay[] getEntries()
     {
-        return privateValue;
+        return Entries;
     }
-    public final void setValue(Object value)
+    public final void setEntries(GXDLMSSpecialDay[] value)
     {
-        privateValue = value;
+        Entries = value;
     }
 
     @Override
     public Object[] getValues()
     {
-        return new Object[] {getLogicalName(), getValue()};
+        return new Object[] {getLogicalName(), getEntries()};
     }
     
+    @Override
+    public void invoke(int index, Object parameters)
+    {
+        throw new IllegalArgumentException("Invoke failed. Invalid attribute index.");        
+    }
+
     /*
      * Returns collection of attributes to read.
      * 
@@ -101,18 +113,18 @@ public class GXDLMSData extends GXDLMSObject implements IGXDLMSBase
         if (LogicalName == null || LogicalName.compareTo("") == 0)
         {
             attributes.add(1);
-        }   
-        //Value
-        if (canRead(2))
+        }                 
+        //Entries
+        if (!isRead(2))
         {
             attributes.add(2);
-        }
+        }     
         return toIntArray(attributes);
     }
     
     /*
      * Returns amount of attributes.
-     */  
+     */    
     @Override
     public int getAttributeCount()
     {
@@ -125,8 +137,8 @@ public class GXDLMSData extends GXDLMSObject implements IGXDLMSBase
     @Override
     public int getMethodCount()
     {
-        return 0;
-    }    
+        return 2;
+    }
     
     /*
      * Returns value of given attribute.
@@ -140,10 +152,34 @@ public class GXDLMSData extends GXDLMSObject implements IGXDLMSBase
             return getLogicalName();
         }
         if (index == 2)
-        {
-            type[0] = getDataType(index);
-            return getValue();
-        }    
+        {          
+            type[0] = DataType.ARRAY;
+            int cnt = getEntries().length;
+            ByteArrayOutputStream data = new ByteArrayOutputStream();
+            data.write((byte)DataType.ARRAY.getValue());
+            //Add count            
+            GXCommon.setObjectCount(cnt, data);
+            if (cnt != 0)
+            {
+                try
+                {
+                    for (GXDLMSSpecialDay it : Entries)
+                    {
+                        data.write((byte)DataType.STRUCTURE.getValue());
+                        data.write((byte)3); //Count
+                        GXCommon.setData(data, DataType.UINT16, it.getIndex());
+                        GXCommon.setData(data, DataType.DATETIME, it.getDate());
+                        GXCommon.setData(data, DataType.UINT8, it.getDayId());
+                    }
+                }
+                catch(Exception ex)
+                {
+                    Logger.getLogger(GXDLMSAssociationShortName.class.getName()).log(Level.SEVERE, null, ex);
+                    throw new RuntimeException(ex.getMessage());
+                }
+            }
+            return data.toByteArray();
+        }
         throw new IllegalArgumentException("GetValue failed. Invalid attribute index.");
     }
     
@@ -159,8 +195,22 @@ public class GXDLMSData extends GXDLMSObject implements IGXDLMSBase
         }
         else if (index == 2)
         {
-            setValue(value);
-        }
+            Entries = null;
+            if (value != null)
+            {
+                java.util.ArrayList<GXDLMSSpecialDay> items = new java.util.ArrayList<GXDLMSSpecialDay>();
+                for (Object item : (Object[])value)
+                {
+                    GXDLMSSpecialDay it = new GXDLMSSpecialDay();
+                    
+                    it.setIndex(((Number)Array.get(item, 0)).intValue());
+                    it.setDate((GXDateTime)GXDLMSClient.changeType((byte[])Array.get(item, 1), DataType.DATE));
+                    it.setDayId(((Number)Array.get(item, 2)).intValue());
+                    items.add(it);
+                }
+                Entries = items.toArray(new GXDLMSSpecialDay[0]);
+            }
+        }       
         else
         {
             throw new IllegalArgumentException("GetValue failed. Invalid attribute index.");

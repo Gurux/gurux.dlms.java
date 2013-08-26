@@ -34,42 +34,38 @@
 
 package gurux.dlms.objects;
 
-import gurux.dlms.enums.DataType;
+import gurux.dlms.GXDLMSServerBase;
 
-public interface IGXDLMSBase 
+/*
+ * This class is reserved for internal use. Do not use.
+ */
+public class GXProfileGenericUpdater extends Thread
 {
-    /*
-     * Returns collection of attributes to read.
-     * 
-     * If attribute is static and already read or device is returned HW error it is not returned.
-     */
-    int[] GetAttributeIndexToRead();
-        
-    /*
-    * Returns amount of attributes.
-    */
-    int getAttributeCount();
-        
-    
-    /*
-     * Returns amount of methods.
-     */    
-    int getMethodCount();
-            
-    /*
-    * Returns value of given attribute.
-    */
-    Object getValue(int index, DataType[] type, byte[] parameters, boolean raw);
+    private GXDLMSProfileGeneric Target;
+    private GXDLMSServerBase Server;
 
-   /*
-    * Set value of given attribute.
-    */
-   void setValue(int index, Object value, boolean raw);
-   
-   /*
-    * Invokes method.
-    * 
-     @param index Method index.
-    */
-   void invoke(int index, Object parameters);
+    /*
+     * Constructor.
+     */
+    public GXProfileGenericUpdater(GXDLMSServerBase server, GXDLMSProfileGeneric pg)
+    {
+        Server = server;
+        Target = pg;
+    }
+
+    public final void run()
+    {
+        try
+        {
+            while (true)
+            {
+                Thread.sleep(Target.getCapturePeriod() * 1000);
+                Target.capture();
+            }
+        }
+        catch(Exception ex)
+        {
+            System.out.printf(ex.getMessage());
+        }
+    }
 }

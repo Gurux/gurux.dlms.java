@@ -37,16 +37,19 @@ package gurux.dlms.objects;
 import gurux.dlms.enums.DataType;
 import gurux.dlms.enums.ObjectType;
 
-public class GXDLMSData extends GXDLMSObject implements IGXDLMSBase
+public class GXDLMSPppSetup extends GXDLMSObject implements IGXDLMSBase
 {
-    private Object privateValue;
+    private Object privatePPPAuthentication;
+    private Object privateIPCPOptions;
+    private String privatePHYReference;
+    private Object privateLCPOptions;
 
     /**  
      Constructor.
     */
-    public GXDLMSData()
+    public GXDLMSPppSetup()
     {
-        super(ObjectType.DATA);
+        super(ObjectType.PPP_SETUP);
     }
 
     /**  
@@ -54,9 +57,9 @@ public class GXDLMSData extends GXDLMSObject implements IGXDLMSBase
 
      @param ln Logican Name of the object.
     */
-    public GXDLMSData(String ln)
+    public GXDLMSPppSetup(String ln)
     {
-        super(ObjectType.DATA, ln, 0);
+        super(ObjectType.PPP_SETUP, ln, 0);
     }
 
     /**  
@@ -65,27 +68,51 @@ public class GXDLMSData extends GXDLMSObject implements IGXDLMSBase
      @param ln Logican Name of the object.
      @param sn Short Name of the object.
     */
-    public GXDLMSData(String ln, int sn)
+    public GXDLMSPppSetup(String ln, int sn)
     {
-        super(ObjectType.DATA, ln, sn);
+        super(ObjectType.PPP_SETUP, ln, sn);
     }
 
-    /** 
-     Value of COSEM Data object.
-    */
-    public final Object getValue()
+    public final String getPHYReference()
     {
-        return privateValue;
+        return privatePHYReference;
     }
-    public final void setValue(Object value)
+    public final void setPHYReference(String value)
     {
-        privateValue = value;
+        privatePHYReference = value;
+    }
+
+    public final Object getLCPOptions()
+    {
+        return privateLCPOptions;
+    }
+    public final void setLCPOptions(Object value)
+    {
+        privateLCPOptions = value;
+    }
+
+    public final Object getIPCPOptions()
+    {
+        return privateIPCPOptions;
+    }
+    public final void setIPCPOptions(Object value)
+    {
+        privateIPCPOptions = value;
+    }
+
+    public final Object getPPPAuthentication()
+    {
+        return privatePPPAuthentication;
+    }
+    public final void setPPPAuthentication(Object value)
+    {
+        privatePPPAuthentication = value;
     }
 
     @Override
     public Object[] getValues()
     {
-        return new Object[] {getLogicalName(), getValue()};
+        return new Object[] {getLogicalName(), getPHYReference(), getLCPOptions(), getIPCPOptions(), getPPPAuthentication()};
     }
     
     /*
@@ -102,11 +129,26 @@ public class GXDLMSData extends GXDLMSObject implements IGXDLMSBase
         {
             attributes.add(1);
         }   
-        //Value
-        if (canRead(2))
+        //PHYReference
+        if (!isRead(2))
         {
             attributes.add(2);
         }
+        //LCPOptions
+        if (!isRead(3))
+        {
+            attributes.add(3);
+        }
+        //IPCPOptions
+        if (!isRead(4))
+        {
+            attributes.add(4);
+        }
+        //PPPAuthentication
+        if (!isRead(5))
+        {
+            attributes.add(5);
+        }   
         return toIntArray(attributes);
     }
     
@@ -116,7 +158,7 @@ public class GXDLMSData extends GXDLMSObject implements IGXDLMSBase
     @Override
     public int getAttributeCount()
     {
-        return 2;
+        return 5;
     }
     
     /*
@@ -138,12 +180,7 @@ public class GXDLMSData extends GXDLMSObject implements IGXDLMSBase
         {
             type[0] = DataType.OCTET_STRING;
             return getLogicalName();
-        }
-        if (index == 2)
-        {
-            type[0] = getDataType(index);
-            return getValue();
-        }    
+        }        
         throw new IllegalArgumentException("GetValue failed. Invalid attribute index.");
     }
     
@@ -156,11 +193,7 @@ public class GXDLMSData extends GXDLMSObject implements IGXDLMSBase
         if (index == 1)
         {
             setLogicalName(GXDLMSObject.toLogicalName((byte[]) value));            
-        }
-        else if (index == 2)
-        {
-            setValue(value);
-        }
+        }        
         else
         {
             throw new IllegalArgumentException("GetValue failed. Invalid attribute index.");

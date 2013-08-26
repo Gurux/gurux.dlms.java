@@ -32,34 +32,37 @@
 // Full text may be retrieved at http://www.gnu.org/licenses/gpl-2.0.txt
 //---------------------------------------------------------------------------
 
+
 package gurux.dlms.objects;
 
-import gurux.dlms.enums.ObjectType;
-import gurux.dlms.*;
-
-public interface IGXDLMSColumnObject
+public enum AccessRange
 {
     /** 
-     Index of the object, if it is in a profile generic table. 
-
-
-     Retrieves the index of the DLMS object, if the object is a part of a  
-     profile generic table. If the object is not a part of a profile generic 
-     table, the value is 0.
-
+     Read emtries.
     */
-    int getSelectedAttributeIndex();
-    void setSelectedAttributeIndex(int value);
-
+    Entry,
     /** 
-     Data index of DLMS object, if it is in a profile generic table. 
+     Read last N days.
     */
-    int getSelectedDataIndex();
-    void setSelectedDataIndex(int value);
+    Last,
+    /** 
+     Read between days
+    */
+    Range;
 
-    String getSourceLogicalName();
-    void setSourceLogicalName(String value);
+    /*
+     * Get integer value for enum.
+     */
+    public int getValue()
+    {
+        return this.ordinal();
+    }
 
-    ObjectType getSourceObjectType();
-    void setSourceObjectType(ObjectType value);
+    /*
+     * Convert integer for enum value.
+     */
+    public static AccessRange forValue(int value)
+    {
+        return values()[value];
+    }
 }
