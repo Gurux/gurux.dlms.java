@@ -87,12 +87,7 @@ abstract public class GXDLMSServerBase
      * Write selected item.
      */
     abstract public void write(ValueEventArgs e);
-    
-    /*
-     * Returns collection of available items.
-     */
-    abstract public void updateItems();
-    
+        
     /*
      * Client attempts to connect with the wrong server or client address.     
      */
