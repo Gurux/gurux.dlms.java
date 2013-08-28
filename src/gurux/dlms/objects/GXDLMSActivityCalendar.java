@@ -212,17 +212,17 @@ public class GXDLMSActivityCalendar extends GXDLMSObject implements IGXDLMSBase
         {
             attributes.add(6);
         } 
-        //SeasonProfileActive
+        //SeasonProfilePassive
         if (canRead(7))
         {
             attributes.add(7);
         }
-        //WeekProfileTableActive
+        //WeekProfileTablePassive
         if (canRead(8))
         {
             attributes.add(8);
         }
-        //DayProfileTableActive
+        //DayProfileTablePassive
         if (canRead(9))
         {
             attributes.add(9);
@@ -393,19 +393,19 @@ public class GXDLMSActivityCalendar extends GXDLMSObject implements IGXDLMSBase
             type[0] = DataType.ARRAY;
             ByteArrayOutputStream data = new ByteArrayOutputStream();
             data.write((byte)DataType.ARRAY.getValue());
-            if (getSeasonProfileActive() == null)
+            if (getSeasonProfilePassive() == null)
             {
                 //Add count            
                 GXCommon.setObjectCount(0, data);
             }
             else
             {
-                int cnt = getSeasonProfileActive().length;
+                int cnt = getSeasonProfilePassive().length;
                 try
                 {
                     //Add count            
                     GXCommon.setObjectCount(cnt, data);
-                    for (GXDLMSSeasonProfile it : getSeasonProfileActive())
+                    for (GXDLMSSeasonProfile it : getSeasonProfilePassive())
                     {
                         data.write((byte)DataType.STRUCTURE.getValue());
                         data.write(3);
@@ -426,19 +426,19 @@ public class GXDLMSActivityCalendar extends GXDLMSObject implements IGXDLMSBase
             type[0] = DataType.ARRAY;
             ByteArrayOutputStream data = new ByteArrayOutputStream();
             data.write((byte)DataType.ARRAY.getValue());
-            if (getWeekProfileTableActive() == null)
+            if (getWeekProfileTablePassive() == null)
             {
                 //Add count            
                 GXCommon.setObjectCount(0, data);
             }
             else
             {
-                int cnt = getWeekProfileTableActive().length;
+                int cnt = getWeekProfileTablePassive().length;
                 //Add count            
                 GXCommon.setObjectCount(cnt, data);
                 try
                 {
-                    for(GXDLMSWeekProfile it : getWeekProfileTableActive())
+                    for(GXDLMSWeekProfile it : getWeekProfileTablePassive())
                     {
                         data.write((byte)DataType.ARRAY.getValue());
                         data.write(8);
@@ -464,19 +464,19 @@ public class GXDLMSActivityCalendar extends GXDLMSObject implements IGXDLMSBase
             type[0] = DataType.ARRAY;
             ByteArrayOutputStream data = new ByteArrayOutputStream();
             data.write((byte)DataType.ARRAY.getValue());
-            if (getDayProfileTableActive() == null)
+            if (getDayProfileTablePassive() == null)
             {
                 //Add count            
                 GXCommon.setObjectCount(0, data);
             }
             else
             {
-                int cnt = getDayProfileTableActive().length;
+                int cnt = getDayProfileTablePassive().length;
                 //Add count            
                 GXCommon.setObjectCount(cnt, data);
                 try
                 {
-                    for(GXDLMSDayProfile it : getDayProfileTableActive())
+                    for(GXDLMSDayProfile it : getDayProfileTablePassive())
                     {
                         data.write(DataType.STRUCTURE.getValue());
                         data.write(2);

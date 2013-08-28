@@ -4,7 +4,7 @@ Join the Gurux Community or follow [@Gurux](https://twitter.com/guruxorg "@Gurux
 
 Gurux.DLMS library for Java is a high-performance Java component that helps you to read you DLMS/COSEM compatible electricity, gas or water meters. We have try to make component so easy to use that you do not need understand protocol at all.
 
-For more info check out [Gurux](http://www.gurux.org/ "Gurux").
+For more info check out [Gurux.DLMS](http://www.gurux.fi/index.php?q=Gurux.DLMS "Gurux.DLMS").
 
 We are updating documentation on Gurux web page. 
 
