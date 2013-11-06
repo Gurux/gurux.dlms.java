@@ -160,11 +160,11 @@ When authentication (Access security) is used server(meter) can allow different 
 Example without authentication (None) only read is allowed.
 Gurux DLMS component supports five different authentication level:
 
-•None
-•Low
-•High
-•HighMD5.
-•HighSHA1.
+*None
+*Low
+*High
+*HighMD5.
+*HighSHA1.
 
 In default Authentication level None is used. If other level is used password must also give.
 Used password depends from the meter.
