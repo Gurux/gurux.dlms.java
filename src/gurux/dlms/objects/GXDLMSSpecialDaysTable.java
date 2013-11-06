@@ -93,13 +93,7 @@ public class GXDLMSSpecialDaysTable extends GXDLMSObject implements IGXDLMSBase
     {
         return new Object[] {getLogicalName(), getEntries()};
     }
-    
-    @Override
-    public void invoke(int index, Object parameters)
-    {
-        throw new IllegalArgumentException("Invoke failed. Invalid attribute index.");        
-    }
-
+        
     /*
      * Returns collection of attributes to read.
      * 

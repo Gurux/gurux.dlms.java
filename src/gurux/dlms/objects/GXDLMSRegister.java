@@ -143,7 +143,7 @@ public GXDLMSRegister(ObjectType type, String ln, int sn)
     }
    
     @Override
-    public void invoke(int index, Object parameters)
+    public byte[] invoke(Object sender, int index, Object parameters)
     {
         // Resets the value to the default value. 
         // The default value is an instance specific constant.
@@ -155,6 +155,7 @@ public GXDLMSRegister(ObjectType type, String ln, int sn)
         {
             throw new IllegalArgumentException("Invoke failed. Invalid attribute index.");
         }
+        return null;
     }
     
     /*

@@ -47,7 +47,6 @@ import gurux.dlms.objects.GXDLMSObject;
 import gurux.dlms.objects.GXDLMSObjectCollection;
 import gurux.dlms.manufacturersettings.GXDLMSAttributeSettings;
 import gurux.dlms.manufacturersettings.GXObisCode;
-import gurux.dlms.objects.GXDLMSActivityCalendar;
 import gurux.dlms.objects.GXDLMSCaptureObject;
 import gurux.dlms.objects.GXDLMSRegister;
 import java.io.ByteArrayOutputStream;
@@ -68,8 +67,10 @@ public class GXDLMSClient
 {
     GXDLMSObjectCollection Objects;
     private GXObisCodeCollection privateObisCodes;
-    private Authentication privateAuthentication;
     private GXDLMS m_Base = new GXDLMS(false);            
+    boolean m_IsAuthenticationRequired;
+    private byte[] m_Password;
+    
     /** 
      Constructor.
     */
@@ -308,13 +309,13 @@ public class GXDLMSClient
 
      @see GXDLMSClient#getAuthentication
     */
-    public final String getPassword()
+    public final byte[] getPassword()
     {
-        return m_Base.getPassword();
+        return m_Password;
     }
-    public final void setPassword(String value)
+    public final void setPassword(byte[] value)
     {
-        m_Base.setPassword(value);
+        m_Password = value;
     }
 
     /** 
@@ -392,11 +393,11 @@ public class GXDLMSClient
     */
     public final Authentication getAuthentication()
     {
-        return privateAuthentication;
+        return m_Base.getAuthentication();
     }
     public final void setAuthentication(Authentication value)
     {
-        privateAuthentication = value;
+        m_Base.setAuthentication(value);
     }
 
     /** 
@@ -460,6 +461,7 @@ public class GXDLMSClient
     */
     public final byte[] SNRMRequest()
     {
+        m_IsAuthenticationRequired = false;
         m_Base.setMaxReceivePDUSize(0xFFFF);
         m_Base.clearProgress();
         //SNRM reguest is not used in network connections.
@@ -556,7 +558,7 @@ public class GXDLMSClient
         java.nio.ByteBuffer buff = java.nio.ByteBuffer.allocate(100);
         m_Base.checkInit();
         GXAPDU aarq = new GXAPDU(Tags);
-        aarq.setUseLN(this.getUseLogicalNameReferencing());
+        aarq.setUseLN(this.getUseLogicalNameReferencing());        
         if (this.getUseLogicalNameReferencing())
         {
             m_Base.setSNSettings(null);
@@ -571,8 +573,17 @@ public class GXDLMSClient
         }
         aarq.setAuthentication(this.getAuthentication(), getPassword());
         aarq.userInformation.dlmsVersioNumber = getDLMSVersion();
-        aarq.userInformation.maxReceivePDUSize = getMaxReceivePDUSize();
-        aarq.codeData(buff);
+        aarq.userInformation.maxReceivePDUSize = getMaxReceivePDUSize();        
+        m_Base.StoCChallenge = null;
+        if (getAuthentication().ordinal() > Authentication.HIGH.ordinal())
+        {
+            m_Base.CtoSChallenge = GXDLMS.generateChallenge();
+        }
+        else
+        {
+            m_Base.CtoSChallenge = null;
+        }
+        aarq.codeData(buff, getInterfaceType(), m_Base.CtoSChallenge);
         m_Base.frameSequence = -1;
         m_Base.expectedFrame = -1;
         return m_Base.splitToBlocks(buff, Command.None);
@@ -623,6 +634,7 @@ public class GXDLMSClient
         GXDLMSTagCollection Tags = new GXDLMSTagCollection();
         GXAPDU pdu = new GXAPDU(Tags);
         pdu.encodeData(arr);
+        m_Base.StoCChallenge = pdu.password;
         setUseLogicalNameReferencing(pdu.getUseLN());
         AssociationResult ret = pdu.getResultComponent();
         if (ret == AssociationResult.ACCEPTED)
@@ -642,11 +654,109 @@ public class GXDLMSClient
         {
            throw new GXDLMSException(ret, pdu.getResultDiagnosticValue());
         }
+        m_IsAuthenticationRequired = pdu.resultDiagnosticValue == SourceDiagnostic.AUTHENTICATION_REQUIRED.getValue();
         if (getDLMSVersion() != 6)
         {
             throw new GXDLMSException("Invalid DLMS version number.");
         }
         return Tags;
+    }
+    
+    /*
+     * Is authentication Required.
+     */
+    public boolean getIsAuthenticationRequired()
+    {
+        return m_IsAuthenticationRequired;
+    }
+
+    /// <summary>
+    /// Get challenge request if HLS authentication is used.
+    /// </summary>
+    /// <returns></returns>
+    public byte[] getApplicationAssociationRequest()
+    {
+        if (m_Password == null || m_Password.length == 0)
+        {
+            throw new IllegalArgumentException("Password is invalid.");
+        }
+        ByteArrayOutputStream CtoS = new ByteArrayOutputStream();        
+        try
+        {
+            CtoS.write(m_Password);
+            CtoS.write(m_Base.StoCChallenge);
+        }
+        catch(IOException ex)
+        {
+            throw new RuntimeException(ex.getMessage());
+        }
+        byte[] challenge = GXDLMSServerBase.chipher(getAuthentication(), CtoS.toByteArray());
+        if (getUseLogicalNameReferencing())
+        {
+            return method("0.0.40.0.0.255", ObjectType.ASSOCIATION_LOGICAL_NAME, 1, challenge, DataType.OCTET_STRING);
+        }
+        return method(0xFA00, ObjectType.ASSOCIATION_SHORT_NAME, 8, challenge, DataType.OCTET_STRING);            
+    }
+
+    /// <summary>
+    /// Parse server's challenge if HLS authentication is used.
+    /// </summary>
+    /// <param name="reply"></param>
+    public void parseApplicationAssociationResponse(byte[] reply)
+    {
+        int[] error = new int[1];
+        byte[] frame = new byte[1];
+        boolean[] packetFull = new boolean[1], wrongCrc = new boolean[1];
+        ByteArrayOutputStream tmp = new ByteArrayOutputStream();        
+        int[] command = new int[1];        
+        try
+        {
+            m_Base.getDataFromFrame(java.nio.ByteBuffer.wrap(reply), tmp, 
+                    frame, true, error, false, packetFull, wrongCrc, command);
+        }
+        catch(Exception ex)
+        {
+            throw new RuntimeException(ex.getMessage());        
+        }
+        java.nio.ByteBuffer arr = java.nio.ByteBuffer.wrap(tmp.toByteArray());
+        if (!packetFull[0])
+        {
+            throw new GXDLMSException("Not enought data to parse frame.");
+        }
+        if (wrongCrc[0])
+        {
+            throw new GXDLMSException("Wrong Checksum.");
+        }
+        int[] index = new int[1];
+        //Skip invoke ID and priority.
+        index[0] += 2;
+        //Skip Error
+        ++index[0];
+        //Skip item count
+        ++index[0];
+        //Skip item status
+        ++index[0];
+        int[] total = new int[1], count = new int[1];
+        DataType[] type = new DataType[]{DataType.NONE};
+        int[] cachePosition = new int[1];
+        byte[] serverChallenge = (byte[]) GXCommon.getData(tmp.toByteArray(), index, 
+                ActionType.NONE.getValue(), total, count, type, cachePosition);        
+        ByteArrayOutputStream challenge = new ByteArrayOutputStream();        
+        try
+        {
+            challenge.write(m_Password);        
+            challenge.write(m_Base.CtoSChallenge);
+        }
+        catch(IOException ex)
+        {
+            throw new RuntimeException(ex.getMessage());        
+        }
+        byte[] clientChallenge = GXDLMSServerBase.chipher(getAuthentication(), challenge.toByteArray());
+        int[] pos = new int[1];
+        if (!GXCommon.compare(serverChallenge, pos, clientChallenge))
+        {
+            throw new GXDLMSException("Server returns invalid challenge.");
+        }
     }
 
     /** 
@@ -1397,8 +1507,8 @@ public class GXDLMSClient
 
      @param name Method object short name or Logical Name.
      @param objectType Object type.
-     @param data Methdod data.
-     * @param index Methdod index.
+     @param data Method data.
+     @param index Method index.
      @return DLMS action message.
     */
     @SuppressWarnings("UseSpecificCatch")

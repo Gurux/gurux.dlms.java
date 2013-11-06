@@ -34,12 +34,15 @@
 
 package gurux.dlms.objects;
 
+import gurux.dlms.Command;
+import gurux.dlms.GXDLMSServerBase;
 import gurux.dlms.enums.AccessMode;
 import gurux.dlms.enums.DataType;
 import gurux.dlms.enums.MethodAccessMode;
 import gurux.dlms.enums.ObjectType;
 import gurux.dlms.internal.GXCommon;
 import gurux.dlms.manufacturersettings.GXAttributeCollection;
+import gurux.dlms.manufacturersettings.GXAuthentication;
 import gurux.dlms.manufacturersettings.GXDLMSAttributeSettings;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
@@ -152,13 +155,78 @@ public class GXDLMSAssociationLogicalName extends GXDLMSObject implements IGXDLM
     {
         m_SecuritySetupReference = value;
     }
-    
-    
-
+       
     @Override
     public Object[] getValues()
     {
         return new Object[] {getLogicalName(), getObjectList(), getAssociatedPartnersId(), getApplicationContextName(), getXDLMSContextInfo(), getAuthenticationMechanismMame(), getSecret(), getAssociationStatus()};
+    }
+    
+    /*
+    * Invokes method.
+    * 
+     @param index Method index.
+    */
+    @Override
+    public byte[] invoke(Object sender, int index, Object parameters)
+    {
+        //Check reply_to_HLS_authentication
+        if (index == 1)
+        {
+            GXDLMSServerBase s = (GXDLMSServerBase) sender;
+            if (s == null)
+            {
+                throw new IllegalArgumentException("sender");
+            }
+            //Get server Challenge.
+            ByteArrayOutputStream challenge = new ByteArrayOutputStream();
+            ByteArrayOutputStream CtoS = new ByteArrayOutputStream();
+            //Find shared secret
+            for(GXAuthentication it : s.getAuthentications())
+            {
+                if (it.getType() == s.getAuthentication())
+                {
+                    try 
+                    {
+                        CtoS.write(it.getPassword());
+                        challenge.write(it.getPassword());
+                        challenge.write(s.getStoCChallenge());
+                    }
+                    catch (IOException ex) 
+                    {
+                        throw new RuntimeException(ex.getMessage());
+                    }
+                    break;
+                }
+            }            
+            byte[] serverChallenge = GXDLMSServerBase.chipher(s.getAuthentication(), 
+                    challenge.toByteArray());
+            byte[] clientChallenge = (byte[])parameters;
+            int[] pos = new int[1];
+            if (GXCommon.compare(serverChallenge, pos, clientChallenge))
+            {
+                try 
+                {
+                    CtoS.write(s.getCtoSChallenge());                    
+                } 
+                catch (IOException ex) 
+                {
+                    throw new RuntimeException(ex.getMessage());
+                }
+                return s.acknowledge(Command.MethodResponse, 0, 
+                        GXDLMSServerBase.chipher(s.getAuthentication(), CtoS.toByteArray()), 
+                        DataType.OCTET_STRING);
+            }
+            else
+            {
+                //Return error.
+                return s.serverReportError(1, 5, 3);
+            }            
+        }
+        else
+        {
+            throw new IllegalArgumentException("Invoke failed. Invalid attribute index.");
+        }
     }
     
     /*

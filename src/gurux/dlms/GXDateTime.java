@@ -127,8 +127,7 @@ public class GXDateTime
         if (!getSkip().isEmpty())
         {            
             SimpleDateFormat sd = new SimpleDateFormat();
-            String format = sd.toPattern();
-            String[] items = format.split("[.]", -1);
+            String format = sd.toPattern();            
             if (getSkip().contains(DateTimeSkips.YEAR))
             {                
                 format = format.replace("yyyy", "");

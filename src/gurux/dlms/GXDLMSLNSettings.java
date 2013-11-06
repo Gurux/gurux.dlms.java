@@ -63,29 +63,29 @@ public class GXDLMSLNSettings
 
     public final boolean getAttribute0SetReferencing()
     {
-        return GXCommon.getBits(conformanceBlock[1], 0x1);
+        return GXCommon.getBits(conformanceBlock[1], 0x80);
     }
     public final void setAttribute0SetReferencing(boolean value)
     {
-        conformanceBlock[1] = GXCommon.setBits(conformanceBlock[1], 0x1, value);
+        conformanceBlock[1] = GXCommon.setBits(conformanceBlock[1], 0x80, value);
     }
 
     public final boolean getPriorityManagement()
     {
-        return GXCommon.getBits(conformanceBlock[1], 0x2);
+        return GXCommon.getBits(conformanceBlock[1], 0x40);
     }
     public final void setPriorityManagement(boolean value)
     {
-        conformanceBlock[1] = GXCommon.setBits(conformanceBlock[1], 0x2, value);
+        conformanceBlock[1] = GXCommon.setBits(conformanceBlock[1], 0x40, value);
     }
 
     public final boolean getAttribute0GetReferencing()
     {
-        return GXCommon.getBits(conformanceBlock[1], 0x4);
+        return GXCommon.getBits(conformanceBlock[1], 0x20);
     }
     public final void setAttribute0GetReferencing(boolean value)
     {
-        conformanceBlock[1] = GXCommon.setBits(conformanceBlock[1], 0x4, value);
+        conformanceBlock[1] = GXCommon.setBits(conformanceBlock[1], 0x20, value);
     }
 
     /** 
@@ -93,11 +93,11 @@ public class GXDLMSLNSettings
     */
     public final boolean getGetBlockTransfer()
     {
-        return GXCommon.getBits(conformanceBlock[1], 0x8);
+        return GXCommon.getBits(conformanceBlock[1], 0x10);
     }
     public final void setGetBlockTransfer(boolean value)
     {
-        conformanceBlock[1] = GXCommon.setBits(conformanceBlock[1], 0x8, value);
+        conformanceBlock[1] = GXCommon.setBits(conformanceBlock[1], 0x10, value);
     }
 
     /** 
@@ -105,31 +105,31 @@ public class GXDLMSLNSettings
     */
     public final boolean getSetBlockTransfer()
     {
-        return GXCommon.getBits(conformanceBlock[1], 0x10);
+        return GXCommon.getBits(conformanceBlock[1], 0x8);
     }
     public final void setSetBlockTransfer(boolean value)
     {
-        conformanceBlock[1] = GXCommon.setBits(conformanceBlock[1], 0x10, value);
+        conformanceBlock[1] = GXCommon.setBits(conformanceBlock[1], 0x8, value);
     }
 
 
     public final boolean getActionBlockTransfer()
     {
-        return GXCommon.getBits(conformanceBlock[1], 0x20);
+        return GXCommon.getBits(conformanceBlock[1], 0x4);
     }
     public final void setActionBlockTransfer(boolean value)
     {
-        conformanceBlock[1] = GXCommon.setBits(conformanceBlock[1], 0x20, value);
+        conformanceBlock[1] = GXCommon.setBits(conformanceBlock[1], 0x4, value);
     }
 
 
     public final boolean getMultipleReferences()
     {
-        return GXCommon.getBits(conformanceBlock[1], 0x40);
+        return GXCommon.getBits(conformanceBlock[1], 0x2);
     }
     public final void setMultipleReferences(boolean value)
     {
-        conformanceBlock[1] = GXCommon.setBits(conformanceBlock[1], 0x40, value);
+        conformanceBlock[1] = GXCommon.setBits(conformanceBlock[1], 0x2, value);
     }
 
 
@@ -151,29 +151,29 @@ public class GXDLMSLNSettings
     */
     public final boolean getSet()
     {
-        return GXCommon.getBits(conformanceBlock[2], 0x10);
+        return GXCommon.getBits(conformanceBlock[2], 0x4);
     }
     public final void setSet(boolean value)
     {
-        conformanceBlock[2] = GXCommon.setBits(conformanceBlock[2], 0x10, value);
+        conformanceBlock[2] = GXCommon.setBits(conformanceBlock[2], 0x4, value);
     }
 
     public final boolean getAction()
     {
-        return GXCommon.getBits(conformanceBlock[2], 0x20);
+        return GXCommon.getBits(conformanceBlock[2], 0x2);
     }
     public final void setAction(boolean value)
     {
-        conformanceBlock[2] = GXCommon.setBits(conformanceBlock[2], 0x20, value);
+        conformanceBlock[2] = GXCommon.setBits(conformanceBlock[2], 0x2, value);
     }
 
     public final boolean getEventNotification()
     {
-        return GXCommon.getBits(conformanceBlock[2], 0x40);
+        return GXCommon.getBits(conformanceBlock[2], 0x1);
     }
     public final void setEventNotification(boolean value)
     {
-        conformanceBlock[2] = GXCommon.setBits(conformanceBlock[2], 0x40, value);
+        conformanceBlock[2] = GXCommon.setBits(conformanceBlock[2], 0x1, value);
     }
 
     /** 

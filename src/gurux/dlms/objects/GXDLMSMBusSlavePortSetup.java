@@ -45,10 +45,10 @@ import gurux.dlms.enums.ObjectType;
  */
 public class GXDLMSMBusSlavePortSetup extends GXDLMSObject implements IGXDLMSBase
 {
-    BaudRate DefaultBaud;
-    BaudRate AvailableBaud;
-    AddressState AddressState;
-    int BusAddress;      
+    BaudRate m_DefaultBaud;
+    BaudRate m_AvailableBaud;
+    AddressState m_AddressState;
+    int m_BusAddress;      
 
     /**  
      Constructor.
@@ -83,22 +83,22 @@ public class GXDLMSMBusSlavePortSetup extends GXDLMSObject implements IGXDLMSBas
     */
     public final BaudRate getDefaultBaud()
     {
-        return DefaultBaud;
+        return m_DefaultBaud;
     }
     public final void setDefaultBaud(BaudRate value)
     {
-        DefaultBaud = value;
+    	m_DefaultBaud = value;
     }    
     /** 
      Defines the baud rate for the opening sequence.
     */
     public final BaudRate getAvailableBaud()
     {
-        return AvailableBaud;
+        return m_AvailableBaud;
     }
     public final void setAvailableBaud(BaudRate value)
     {
-        AvailableBaud = value;
+    	m_AvailableBaud = value;
     }
         
     /** 
@@ -107,11 +107,11 @@ public class GXDLMSMBusSlavePortSetup extends GXDLMSObject implements IGXDLMSBas
     */
     public final AddressState getAddressState()
     {
-        return AddressState;
+        return m_AddressState;
     }
     public final void setAddressState(AddressState value)
     {
-        AddressState = value;
+        m_AddressState = value;
     }
     
     
@@ -120,11 +120,11 @@ public class GXDLMSMBusSlavePortSetup extends GXDLMSObject implements IGXDLMSBas
     */
     public final int getBusAddress()
     {
-        return BusAddress;
+        return m_BusAddress;
     }
     public final void setBusAddress(int value)
     {
-        BusAddress = value;
+    	m_BusAddress = value;
     }
     
     @Override
@@ -233,7 +233,7 @@ public class GXDLMSMBusSlavePortSetup extends GXDLMSObject implements IGXDLMSBas
             }
             else
             {
-                setDefaultBaud(DefaultBaud.values()[((Number) value).intValue()]);
+                setDefaultBaud(BaudRate.values()[((Number) value).intValue()]);
             }
         }
         else if (index == 3)
@@ -244,7 +244,7 @@ public class GXDLMSMBusSlavePortSetup extends GXDLMSObject implements IGXDLMSBas
             }
             else
             {
-                setAvailableBaud(DefaultBaud.values()[((Number) value).intValue()]);
+                setAvailableBaud(BaudRate.values()[((Number) value).intValue()]);
             }           
         }
         else if (index == 4)

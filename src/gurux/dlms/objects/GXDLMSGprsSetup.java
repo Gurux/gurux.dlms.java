@@ -39,9 +39,7 @@ import gurux.dlms.enums.DataType;
 import gurux.dlms.enums.ObjectType;
 import gurux.dlms.internal.GXCommon;
 import java.io.ByteArrayOutputStream;
-import java.io.IOException;
 import java.lang.reflect.Array;
-import java.text.ParseException;
 
 public class GXDLMSGprsSetup extends GXDLMSObject implements IGXDLMSBase
 {

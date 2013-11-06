@@ -82,7 +82,7 @@ public class ValueEventArgs
     }
     
      /** 
-     Data type ot the value.
+     Data type of the value.
     */
     public final DataType getDataType()
     {
@@ -110,7 +110,7 @@ public class ValueEventArgs
     */
     public ValueEventArgs(GXDLMSObject target, int index)
     {
-        this.m_DataType = m_DataType.NONE;
+        this.m_DataType = DataType.NONE;
         setTarget(target);
         setIndex(index);
     }

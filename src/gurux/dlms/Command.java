@@ -34,7 +34,7 @@
 
 package gurux.dlms;
 
-enum Command
+public enum Command
 {
     None(0),
     ReadRequest(0x5),

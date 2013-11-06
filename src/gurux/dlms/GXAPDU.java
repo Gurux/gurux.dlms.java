@@ -36,6 +36,7 @@ package gurux.dlms;
 
 import gurux.dlms.internal.GXCommon;
 import gurux.dlms.enums.Authentication;
+import gurux.dlms.enums.InterfaceType;
 import java.io.UnsupportedEncodingException;
 
 /**
@@ -47,7 +48,7 @@ import java.io.UnsupportedEncodingException;
  */
 class GXAPDU
 {
-    String password;
+    byte[] password;
     Authentication authentication;
     GXApplicationContextName applicationContextName = new GXApplicationContextName();
     int resultValue, resultDiagnosticValue;
@@ -102,7 +103,7 @@ class GXAPDU
      * @param val Authentication level
      * @param pw Password
      */
-    void setAuthentication(Authentication authentication, String password)
+    void setAuthentication(Authentication authentication, byte[] password)
     {
         this.authentication = authentication;
         this.password = password;
@@ -111,7 +112,7 @@ class GXAPDU
      * Retrieves the string that indicates the level of authentication, if any. 
      * @param data 
      */
-    void getAuthenticationString(java.nio.ByteBuffer data) throws UnsupportedEncodingException
+    void getAuthenticationString(java.nio.ByteBuffer data, byte[] challenge) throws UnsupportedEncodingException
     {
         //If authentication is used.
         if (this.authentication != Authentication.NONE)
@@ -128,17 +129,32 @@ class GXAPDU
             int len = 0;
             if (password != null)
             {
-                len = password.length();
+                len = password.length;
+            }
+            if (authentication == Authentication.LOW)
+            {
+                if (password != null)
+                {
+                    len = password.length;
+                }
+            }
+            else
+            {                    
+                len = challenge.length;
             }
             data.put((byte) 0xAC);
             data.put((byte) (2 + len));
             //Add authentication information.
             data.put((byte) 0x80);
-            data.put((byte) len);
-            if (password != null)
+            data.put((byte) len);            
+            if (challenge != null)
             {
-                data.put(password.getBytes("ASCII"));
+                data.put(challenge);
             }
+            else if (password != null)
+            {
+                data.put(password);
+            }            
         }
     }
     /**
@@ -146,7 +162,8 @@ class GXAPDU
      * @param data
      * @param interfaceType
      */
-    void codeData(java.nio.ByteBuffer data) throws UnsupportedEncodingException
+    void codeData(java.nio.ByteBuffer data, InterfaceType interfaceType, 
+            byte[] challenge) throws UnsupportedEncodingException
     {
         //AARQ APDU Tag
         data.put(GXCommon.AARQTag);
@@ -156,7 +173,7 @@ class GXAPDU
         ///////////////////////////////////////////
         // Add Application context name.
         applicationContextName.codeData(data);
-        getAuthenticationString(data);
+        getAuthenticationString(data, challenge);
         userInformation.codeData(data);
         //Add extra tags...
         if (tags != null)
@@ -238,6 +255,77 @@ class GXAPDU
                 GXCommon.unsignedByteToInt(buff.get());
                 resultDiagnosticValue = GXCommon.unsignedByteToInt(buff.get());
             }
+            else if (tag == 0x8A || tag == 0x88) //Authentication.
+            {
+                tag = buff.get();
+                //Get sender ACSE-requirenents field component.
+                if (buff.get() != 2)
+                {
+                    throw new RuntimeException("Invalid tag.");
+                }                
+                int val = (buff.getShort() & 0xFFFF);
+                if (val != 0x0780 && val != 0x0680)
+                {
+                    throw new RuntimeException("Invalid tag.");
+                }
+            }               
+            else if (tag == 0xAA) //Server Challenge.                
+            {
+                tag = buff.get();
+                len = buff.get();
+                buff.get();
+                len = GXCommon.unsignedByteToInt(buff.get());
+                //Get challenge
+            }
+            else if (tag == 0x8B || tag == 0x89) //Authentication.
+            {
+                tag = buff.get();
+                len = buff.get();
+                if (buff.get() != 0x60)
+                {
+                    throw new RuntimeException("Invalid tag.");
+                }
+                if ((buff.get() & 0xFF) != 0x85)
+                {
+                    throw new RuntimeException("Invalid tag.");
+                }
+                if (buff.get() != 0x74)
+                {
+                    throw new RuntimeException("Invalid tag.");
+                }
+                if (buff.get() != 0x05)
+                {
+                    throw new RuntimeException("Invalid tag.");
+                }
+                if (buff.get() != 0x08)
+                {
+                    throw new RuntimeException("Invalid tag.");
+                }
+                if (buff.get() != 0x02)
+                {
+                    throw new RuntimeException("Invalid tag.");
+                }
+                int tmp = buff.get();
+                if (tmp < 0 || tmp > 4)
+                {
+                    throw new RuntimeException("Invalid tag.");
+                }
+                authentication = Authentication.forValue(tmp);
+                int tag2 = (buff.get() & 0xFF);
+                if (tag2 != 0xAC && tag2 != 0xAA)
+                {
+                    throw new RuntimeException("Invalid tag.");
+                }
+                len = buff.get();
+                //Get authentication information.
+                if ((buff.get() & 0xFF) != 0x80)
+                {
+                    throw new RuntimeException("Invalid tag.");
+                }
+                len = buff.get() & 0xFF;
+                password = new byte[len];
+                buff.get(password);
+            }
             //Unknown tags.
             else
             {
@@ -259,7 +347,9 @@ class GXAPDU
     /**
      * Server generates AARE message.
     */
-    public final void generateAARE(java.nio.ByteBuffer data, int maxReceivePDUSize, byte[] conformanceBlock, AssociationResult result, SourceDiagnostic diagnostic)
+    public final void generateAARE(java.nio.ByteBuffer data, Authentication authentication, 
+            byte[] challenge, int maxReceivePDUSize, byte[] conformanceBlock, 
+            AssociationResult result, SourceDiagnostic diagnostic)
     {
         int offset = data.position();
         // Set AARE tag and length
@@ -282,6 +372,29 @@ class GXAPDU
         //Choice for result (INTEGER, universal)
         data.put((byte) 1); //Len
         data.put((byte)diagnostic.getValue()); //diagnostic
+        if (diagnostic == SourceDiagnostic.AUTHENTICATION_REQUIRED)
+        {                
+            //Add server ACSE-requirenents field component.
+            data.put((byte)0x88);
+            data.put((byte)0x02);  //Len.            
+            GXCommon.setUInt16((short) 0x0780, data);
+            //Add tag.
+            data.put((byte)0x89);
+            data.put((byte)0x07);//Len
+            data.put((byte)0x60);
+            data.put((byte)0x85);
+            data.put((byte)0x74);
+            data.put((byte)0x05);
+            data.put((byte)0x08);
+            data.put((byte)0x02);
+            data.put((byte) authentication.getValue());
+            //Add tag.
+            data.put((byte)0xAA);
+            data.put((byte) (2 + challenge.length));//Len
+            data.put((byte)0x80);
+            data.put((byte) challenge.length);
+            data.put(challenge);
+        }      
         //Add User Information
         data.put((byte) 0xBE); //Tag
         data.put((byte) 0x10); //Length for AARQ user field

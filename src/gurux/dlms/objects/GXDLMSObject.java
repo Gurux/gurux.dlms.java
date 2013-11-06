@@ -433,7 +433,7 @@ public class GXDLMSObject
     * 
      @param index Method index.
     */
-    public void invoke(int index, Object parameters)
+    public byte[] invoke(Object sender, int index, Object parameters)
     {
         assert(false);
         throw new UnsupportedOperationException("invoke");

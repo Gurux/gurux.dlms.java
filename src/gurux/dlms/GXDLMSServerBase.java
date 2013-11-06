@@ -45,7 +45,6 @@ import gurux.dlms.manufacturersettings.GXManufacturer;
 import gurux.dlms.manufacturersettings.HDLCAddressType;
 import gurux.dlms.objects.GXDLMSAssociationLogicalName;
 import gurux.dlms.objects.GXDLMSAssociationShortName;
-import gurux.dlms.objects.GXDLMSCaptureObject;
 import gurux.dlms.objects.GXDLMSObject;
 import gurux.dlms.objects.GXDLMSObjectCollection;
 import gurux.dlms.objects.GXDLMSProfileGeneric;
@@ -55,8 +54,9 @@ import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.UnsupportedEncodingException;
 import java.security.InvalidParameterException;
+import java.security.MessageDigest;
+import java.security.NoSuchAlgorithmException;
 import java.text.ParseException;
-import java.util.AbstractMap;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.EnumSet;
@@ -69,7 +69,7 @@ import java.util.TreeMap;
 abstract public class GXDLMSServerBase
 {
     private GXDLMSObjectCollection m_Items;
-    private GXDLMS m_Base = new GXDLMS(true);	
+    GXDLMS m_Base = new GXDLMS(true);	
     ByteArrayOutputStream ReceivedData = new ByteArrayOutputStream();
     ArrayList<byte[]> SendData = new ArrayList<byte[]>();
     int FrameIndex = 0;
@@ -78,6 +78,56 @@ abstract public class GXDLMSServerBase
     private ArrayList<Object> privateServerIDs;
     private ArrayList<GXAuthentication> privateAuthentications;
 
+    static public byte[] chipher(Authentication auth, byte[] plainText)
+    {     
+        try
+        {
+            if (auth == Authentication.HIGH_MD5)
+            {
+                MessageDigest md = MessageDigest.getInstance("MD5");
+                return md.digest(plainText);
+            }
+            if (auth == Authentication.HIGH_SHA1)
+            {
+                MessageDigest md = MessageDigest.getInstance("SHA-1");
+                return md.digest(plainText);
+            }
+            if (auth == Authentication.HIGH_GMAC)
+            {
+
+            }
+        }
+        catch(NoSuchAlgorithmException ex)
+        {
+            throw new RuntimeException(ex.getMessage());
+        }
+        return plainText;
+    }
+    
+    /*
+     * Client to Server challenge.
+     * Reserved internal use. Do not use.
+     */
+    public final byte[] getCtoSChallenge()
+    {
+        return m_Base.CtoSChallenge;
+    }
+    
+    /*
+     * Server to Client challenge.
+     * Reserved internal use. Do not use.
+     */
+    public final byte[] getStoCChallenge()
+    {
+        return m_Base.StoCChallenge;
+    }
+     
+    //Reserved for inner use. Do not use.
+    public final Authentication getAuthentication()
+    {
+        return m_Base.getAuthentication();
+    }
+    
     /*
      * Read selected item.
      */
@@ -268,9 +318,18 @@ abstract public class GXDLMSServerBase
                     privateAuthentications.clear();
                     privateServerIDs.clear();
                 }
-                privateAuthentications.add(new GXAuthentication(Authentication.NONE, "", (byte) 0x10));
-                privateAuthentications.add(new GXAuthentication(Authentication.LOW, "GuruxLow", (byte) 0x20));
-                privateAuthentications.add(new GXAuthentication(Authentication.HIGH, "GuruxHigh", (byte) 0x40));        
+                try
+                {
+                    privateAuthentications.add(new GXAuthentication(Authentication.NONE, "".getBytes("ASCII"), (byte) 0x10));
+                    privateAuthentications.add(new GXAuthentication(Authentication.LOW, "GuruxLow".getBytes("ASCII"), (byte) 0x20));
+                    privateAuthentications.add(new GXAuthentication(Authentication.HIGH, "GuruxHigh".getBytes("ASCII"), (byte) 0x40));        
+                    privateAuthentications.add(new GXAuthentication(Authentication.HIGH_MD5, "GuruxHighMD5".getBytes("ASCII"), (byte) 0x40));        
+                    privateAuthentications.add(new GXAuthentication(Authentication.HIGH_SHA1, "GuruxHighSHA1".getBytes("ASCII"), (byte) 0x40));        
+                }
+                catch(UnsupportedEncodingException ex)
+                {
+                    throw new RuntimeException(ex.getMessage());
+                }
                 privateServerIDs.add(countServerID((byte)1, 0));
             }
             else
@@ -284,9 +343,18 @@ abstract public class GXDLMSServerBase
                     privateAuthentications.clear();
                     privateServerIDs.clear();
                 }
-                privateAuthentications.add(new GXAuthentication(Authentication.NONE, "", (short) 0x10));
-                privateAuthentications.add(new GXAuthentication(Authentication.LOW, "GuruxLow", (short) 0x20));
-                privateAuthentications.add(new GXAuthentication(Authentication.HIGH, "GuruxHigh", (short) 0x40));        
+                try
+                {
+                    privateAuthentications.add(new GXAuthentication(Authentication.NONE, "".getBytes("ASCII"), (short) 0x10));
+                    privateAuthentications.add(new GXAuthentication(Authentication.LOW, "GuruxLow".getBytes("ASCII"), (short) 0x20));
+                    privateAuthentications.add(new GXAuthentication(Authentication.HIGH, "GuruxHigh".getBytes("ASCII"), (short) 0x40));        
+                    privateAuthentications.add(new GXAuthentication(Authentication.HIGH_MD5, "GuruxHighMD5".getBytes("ASCII"), (short) 0x40));        
+                    privateAuthentications.add(new GXAuthentication(Authentication.HIGH_SHA1, "GuruxHighSHA1".getBytes("ASCII"), (short) 0x40));        
+                }
+                catch(UnsupportedEncodingException ex)
+                {
+                    throw new RuntimeException(ex.getMessage());
+                }                
                 privateServerIDs.add((short) 1);
             }
         }
@@ -540,10 +608,16 @@ abstract public class GXDLMSServerBase
         GXAPDU aarq = new GXAPDU(null);
         aarq.setUseLN(this.getUseLogicalNameReferencing());
         arr = java.nio.ByteBuffer.wrap(tmp.toByteArray());
-        int[] pos = new int[]{0};
         aarq.encodeData(arr);
         AssociationResult result = AssociationResult.ACCEPTED;
         SourceDiagnostic diagnostic = SourceDiagnostic.NONE;
+        m_Base.setAuthentication(aarq.authentication);
+        m_Base.CtoSChallenge = null;
+        m_Base.StoCChallenge = null;
+        if (aarq.authentication.getValue() >= Authentication.HIGH.getValue())
+        {
+            m_Base.CtoSChallenge = aarq.password;
+        }
         if (this.getUseLogicalNameReferencing() != aarq.getUseLN())
         {
             result = AssociationResult.PERMANENT_REJECTED;
@@ -574,16 +648,25 @@ abstract public class GXDLMSServerBase
                 }
             }
             //If authentication is used check pw.
-            else if (aarq.authentication != Authentication.NONE && 
-                    !auth.getPassword().equals(aarq.password) && 
-                    auth.getPassword().length() != aarq.password.length())
+            else if (aarq.authentication != Authentication.NONE)
             {
-                result = AssociationResult.PERMANENT_REJECTED;
-                diagnostic = SourceDiagnostic.AUTHENTICATION_FAILURE;
+                //If Low authentication is used and pw don't match.                    
+                if (aarq.authentication == Authentication.LOW && 
+                        !java.util.Arrays.equals(auth.getPassword(), aarq.password))
+                {
+                    result = AssociationResult.PERMANENT_REJECTED;
+                    diagnostic = SourceDiagnostic.AUTHENTICATION_FAILURE;
+                }
+                else //If High authentication is used.
+                {
+                    m_Base.StoCChallenge = GXDLMS.generateChallenge();
+                    result = AssociationResult.ACCEPTED;
+                    diagnostic = SourceDiagnostic.AUTHENTICATION_REQUIRED;
+                }
             }
         }
         //Generate AARE packet.
-        java.nio.ByteBuffer buff = java.nio.ByteBuffer.allocate(100);
+        java.nio.ByteBuffer buff = java.nio.ByteBuffer.allocate(150);
         byte[] conformanceBlock;
         if (getUseLogicalNameReferencing())
         {
@@ -599,7 +682,7 @@ abstract public class GXDLMSServerBase
             buff.put((byte) 0xE7);
             buff.put((byte) 0x00);
         }        
-        aarq.generateAARE(buff, getMaxReceivePDUSize(), conformanceBlock, result, diagnostic);
+        aarq.generateAARE(buff, aarq.authentication, m_Base.StoCChallenge, getMaxReceivePDUSize(), conformanceBlock, result, diagnostic);
         m_Base.expectedFrame = 0;
         m_Base.frameSequence = -1;
         return m_Base.addFrame(m_Base.generateIFrame(), false, buff, 0, buff.position());
@@ -1039,7 +1122,7 @@ abstract public class GXDLMSServerBase
                     }
                     int[] value = new int[1], count = new int[1];
                     GXDLMS.getActionInfo(item.getObjectType(), value, count);
-                    index[0] = ((sn - item.getShortName()) / value[0]);                    
+                    index[0] = ((sn - item.getShortName() - value[0]) / 8) + 1;                    
                 }
                 if (item != null)
                 {
@@ -1049,7 +1132,13 @@ abstract public class GXDLMSServerBase
                     action(e);
                     if (!e.getHandled())
                     {
-                        item.invoke(index[0], e.getValue());
+                        byte[] reply = item.invoke(this, index[0], e.getValue());
+                        System.out.println(GXCommon.toHex(reply));
+                        if (reply != null)
+                        {
+                            SendData.add(reply);
+                            return SendData.get(FrameIndex);
+                        }
                     }
                     SendData.add(acknowledge(Command.MethodResponse, 0));
                     return SendData.get(FrameIndex);                    
@@ -1144,23 +1233,57 @@ abstract public class GXDLMSServerBase
                 this.getUseLogicalNameReferencing() ? Command.GetResponse : Command.ReadResponse);
     }
 
+    byte[] acknowledge(Command cmd, int status)
+    {
+        return acknowledge(cmd, status, null, DataType.NONE);
+    }
+    
     /** 
      Generates a acknowledge message.
     */
-    final byte[] acknowledge(Command cmd, int status)
+    public byte[] acknowledge(Command cmd, int status, Object data, DataType type)
     {
-        java.nio.ByteBuffer data = java.nio.ByteBuffer.allocate(7);
+        ByteArrayOutputStream buff = new ByteArrayOutputStream();
         if (this.getInterfaceType() == InterfaceType.GENERAL)
         {
-            data.put(GXCommon.LLCReplyBytes);
+            try 
+            {
+                if (m_Base.getServer())
+                {
+                    buff.write(GXCommon.LLCReplyBytes);
+                }
+                else
+                {
+                    buff.write(GXCommon.LLCSendBytes);
+                }
+                
+            } 
+            catch (IOException ex) 
+            {
+                throw new RuntimeException(ex.getMessage());
+            }
         }           
         //Get request normal
-        data.put((byte) cmd.getValue());
-        data.put((byte) 0x01);
+        buff.write((byte) cmd.getValue());
+        buff.write((byte) 0x01);
         //Invoke ID and priority.
-        data.put((byte) 0x81);
-        data.put((byte) status);
-        return m_Base.addFrame(m_Base.generateIFrame(), false, data, 0, data.position());
+        buff.write((byte) 0x81);
+        buff.write((byte) status);
+        if (type != DataType.NONE)
+        {
+            buff.write(0x01);
+            buff.write(0x00);
+            try
+            {
+                GXCommon.setData(buff, type, data);
+            }
+            catch(Exception ex)
+            {
+                throw new RuntimeException(ex.getMessage());
+            }
+        }
+        return m_Base.addFrame(m_Base.generateIFrame(), false, 
+                java.nio.ByteBuffer.wrap(buff.toByteArray()), 0, buff.size());
     }
 
     /** 

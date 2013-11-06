@@ -222,7 +222,7 @@ public class GXDLMSScriptTable extends GXDLMSObject implements IGXDLMSBase
     }
     
     @Override
-    public void invoke(int index, Object parameters)
+    public byte[] invoke(Object sender, int index, Object parameters)
     {
         //Execute selected method.
         if (index == 1)
@@ -233,6 +233,7 @@ public class GXDLMSScriptTable extends GXDLMSObject implements IGXDLMSBase
         {
             throw new IllegalArgumentException("Invoke failed. Invalid attribute index.");
         }
+        return null;
     }
     
     /*

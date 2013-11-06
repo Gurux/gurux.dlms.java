@@ -41,10 +41,10 @@ import gurux.dlms.enums.Authentication;
 */
 public class GXAuthentication
 {
-    private boolean privateSelected;
-    private Object privateClientID;
-    private Authentication privateType = Authentication.NONE;
-    private String privatePassword;
+    private boolean m_Selected;
+    private Object m_ClientID;
+    private Authentication m_Type = Authentication.NONE;
+    private byte[] m_Password;
 
     public GXAuthentication()
     {
@@ -74,7 +74,7 @@ public class GXAuthentication
      @param pw Used password.
      @param clientID Client Id.
     */
-    public GXAuthentication(Authentication type, String pw, Object clientID)
+    public GXAuthentication(Authentication type, byte[] pw, Object clientID)
     {
         setType(type);
         setPassword(pw);
@@ -87,11 +87,11 @@ public class GXAuthentication
 
     public final boolean getSelected()
     {
-        return privateSelected;
+        return m_Selected;
     }
     public final void setSelected(boolean value)
     {
-        privateSelected = value;
+        m_Selected = value;
     }
 
     /** 
@@ -99,11 +99,11 @@ public class GXAuthentication
     */
     public final Authentication getType()
     {
-        return privateType;
+        return m_Type;
     }
     public final void setType(Authentication value)
     {
-        privateType = value;
+        m_Type = value;
     }
 
     /** 
@@ -111,22 +111,22 @@ public class GXAuthentication
     */
     public final Object getClientID()
     {
-        return privateClientID;
+        return m_ClientID;
     }
     public final void setClientID(Object value)
     {
-        privateClientID = value;
+        m_ClientID = value;
     }
 
     /** 
      Used password.
     */
-    public final String getPassword()
+    public final byte[] getPassword()
     {
-        return privatePassword;
+        return m_Password;
     }
-    public final void setPassword(String value)
+    public final void setPassword(byte[] value)
     {
-        privatePassword = value;
+        m_Password = value;
     }
 }

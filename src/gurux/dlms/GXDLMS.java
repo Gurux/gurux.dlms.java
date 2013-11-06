@@ -34,6 +34,7 @@
 
 package gurux.dlms;
 
+import gurux.dlms.enums.Authentication;
 import gurux.dlms.internal.GXCommon;
 import gurux.dlms.enums.ObjectType;
 import gurux.dlms.enums.RequestTypes;
@@ -43,6 +44,7 @@ import gurux.dlms.objects.*;
 import java.io.ByteArrayOutputStream;
 import java.lang.reflect.Array;
 import java.util.EnumSet;
+import java.util.Random;
 
 /** 
  GXDLMS implements methods to communicate with DLMS/COSEM metering devices.
@@ -71,12 +73,47 @@ class GXDLMS
     private boolean privateGenerateFrame;
     private byte privateDLMSVersion;
     private boolean privateUseLogicalNameReferencing;
-    private String privatePassword;
     private InterfaceType privateInterfaceType;
     private boolean privateServer;
     private GXDLMSLimits privateLimits;
     private GXDLMSLNSettings privateLNSettings;
     private GXDLMSSNSettings privateSNSettings;
+    byte[] CtoSChallenge;
+    byte[] StoCChallenge;
+   
+    Authentication m_Authentication;
+    
+    public Authentication getAuthentication()
+    {
+        return m_Authentication;
+    }
+
+    public void setAuthentication(Authentication value)
+    {
+        m_Authentication = value;
+    }
+
+    /*
+     * Generates challenge.
+     */
+    static public byte[] generateChallenge()
+    {
+        Random r = new Random();
+        // Random challenge is 8 to 64 bytes.
+        int len = r.nextInt(57) + 8;
+        byte[] result = new byte[len];
+        for (int pos = 0; pos != len; ++pos)
+        {
+            // Allow printable characters only.
+            do
+            {
+                result[pos] = (byte)r.nextInt(0x7A);
+            }
+            while (result[pos] < 0x21);
+        }
+        return result;
+    }
+
 
     static GXDLMSObject createObject(ObjectType type)
     {
@@ -747,21 +784,7 @@ class GXDLMS
     public final void setInterfaceType(InterfaceType value)
     {
         privateInterfaceType = value;
-    }
-
-    /** 
-     Retrieves the password that is used in communication.
-
-     If authentication is set to none, password is not used.
-    */
-    public final String getPassword()
-    {
-        return privatePassword;
-    }
-    public final void setPassword(String value)
-    {
-        privatePassword = value;
-    }
+    }   
 
     private byte[][] splitToFrames(java.nio.ByteBuffer packet, int blockIndex, int[] index, int count, Command cmd)
     {
@@ -1511,7 +1534,7 @@ class GXDLMS
             if (frame[0] == FrameType.SNRM.getValue() || frame[0] == FrameType.Disconnect.getValue())
             {
                 //Check that CRC match.
-                int crcRead = buff.getShort();
+                int crcRead = buff.getShort() & 0xFFFF;
                 int crcCount = GXFCS16.countFCS16(buff, PacketStartID + 1, len - PacketStartID - 4);
                 if (crcRead != crcCount)
                 {

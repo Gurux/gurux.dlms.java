@@ -152,3 +152,69 @@ public byte[] readDLMSPacket(byte[] data) throws Exception
 }
 
 ```
+
+Using authentication
+
+
+When authentication (Access security) is used server(meter) can allow different rights to  the client.
+Example without authentication (None) only read is allowed.
+Gurux DLMS component supports five different authentication level:
+
+•None
+•Low
+•High
+•HighMD5.
+•HighSHA1.
+
+In default Authentication level None is used. If other level is used password must also give.
+Used password depends from the meter.
+
+```Java
+client.setAuthentication(Authentication.HIGH_MD5);
+client.setPassword("12345678".GetBytes("ASCII"));
+``` 
+
+When authentication is High or above High Level security (HLS) is used.
+After connection is made client must send challenge to the server and server must accept this challenge.
+This is done checking is Is Authentication Required after AARE message is parsed.
+If authentication is required client sends challenge to the server and if everything succeeded
+server returns own challenge that client checks.
+
+```Java
+//Parse reply.
+client.parseAAREResponse(reply);
+//Get challenge Is HSL authentication is used.
+if (client.IsAuthenticationRequired)
+{
+    reply = readDLMSPacket(client.getApplicationAssociationRequest());
+    client.parseApplicationAssociationResponse(reply);
+}
+``` 
+
+Writing values
+
+Writing values to the meter is very simple. There are two ways to do this. 
+First is using Write -method of GXDLMSClient.
+
+```Java
+readDLMSPacket(client.write("0.0.1.0.0.255", dateTime, 2, DataType.OCTET_STRING, ObjectType.CLOCK, 2));
+``` 
+
+
+Note!
+Data type must be correct or meter returns usually error.
+If you are reading byte value you can't write UIn16.
+
+It is easy to write simple data types like this. If you want to write complex data types like arrays there
+is also another way to do this. You can Update Object's propery and then write it.
+In this example we want to update listening window of GXDLMSAutoAnswer object.
+
+```Java
+//Read Association view and find GXDLMSAutoAnswer object first.
+GXDLMSAutoAnswer item = client.getObject().findByLN("0.0.2.2.0.255", ObjectType.AUTO_ANSWER);
+//Window time is from 6am to 8am.
+item.getListeningWindow().add(new AbstractMap.SimpleEntry<GXDateTime, 
+                GXDateTime>(new GXDateTime(-1, -1, -1, 6, -1, -1, -1), 
+                new GXDateTime(-1, -1, -1, 8, -1, -1, -1)));
+readDLMSPacket(client.write(item, 3));
+``` 

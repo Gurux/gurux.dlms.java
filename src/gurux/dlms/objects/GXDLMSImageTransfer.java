@@ -41,19 +41,17 @@ import gurux.dlms.enums.ImageTransferredBlocksStatus;
 import gurux.dlms.enums.ObjectType;
 import gurux.dlms.internal.GXCommon;
 import java.io.ByteArrayOutputStream;
-import java.io.IOException;
 import java.lang.reflect.Array;
-import java.text.ParseException;
 import java.util.ArrayList;
 import java.util.List;
 
 public class GXDLMSImageTransfer extends GXDLMSObject implements IGXDLMSBase
 {
     long ImageBlockSize;
-    ImageTransferredBlocksStatus ImageTransferredBlocksStatus;
+    ImageTransferredBlocksStatus m_ImageTransferredBlocksStatus;
     long ImageFirstNotTransferredBlockNumber;
     boolean ImageTransferEnabled;
-    ImageTransferStatus ImageTransferStatus;
+    ImageTransferStatus m_ImageTransferStatus;
     List<GXDLMSImageActivateInfo> ImageActivateInfo = new ArrayList<GXDLMSImageActivateInfo>();
 
     /**  
@@ -104,11 +102,11 @@ public class GXDLMSImageTransfer extends GXDLMSObject implements IGXDLMSBase
     */
     public final ImageTransferredBlocksStatus getImageTransferredBlocksStatus()
     {
-        return ImageTransferredBlocksStatus;
+        return m_ImageTransferredBlocksStatus;
     }
     public final void setImageTransferredBlocksStatus(ImageTransferredBlocksStatus value)
     {
-        ImageTransferredBlocksStatus = value;
+    	m_ImageTransferredBlocksStatus = value;
     }
 
     /** 
@@ -143,11 +141,11 @@ public class GXDLMSImageTransfer extends GXDLMSObject implements IGXDLMSBase
      */
     public final ImageTransferStatus getImageTransferStatus()
     {
-        return ImageTransferStatus;
+        return m_ImageTransferStatus;
     }
     public final void setImageTransferStatus(ImageTransferStatus value)
     {
-        ImageTransferStatus = value;
+    	m_ImageTransferStatus = value;
     }
 
     public final List<GXDLMSImageActivateInfo> getImageActivateInfo()

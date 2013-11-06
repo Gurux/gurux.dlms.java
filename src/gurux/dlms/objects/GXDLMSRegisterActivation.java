@@ -39,9 +39,7 @@ import gurux.dlms.enums.DataType;
 import gurux.dlms.enums.ObjectType;
 import gurux.dlms.internal.GXCommon;
 import java.io.ByteArrayOutputStream;
-import java.io.IOException;
 import java.lang.reflect.Array;
-import java.text.ParseException;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -138,12 +136,6 @@ public class GXDLMSRegisterActivation extends GXDLMSObject implements IGXDLMSBas
         return new Object[] {getLogicalName(), getRegisterAssignment(), getMaskList(), getActiveMask()};
     }
     
-    @Override
-    public void invoke(int index, Object parameters)
-    {
-        throw new IllegalArgumentException("Invoke failed. Invalid attribute index.");
-    }
-
     /*
      * Returns collection of attributes to read.
      * 

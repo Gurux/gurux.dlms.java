@@ -39,10 +39,7 @@ import gurux.dlms.*;
 import gurux.dlms.enums.DataType;
 import gurux.dlms.internal.GXCommon;
 import java.io.ByteArrayOutputStream;
-import java.io.IOException;
-import java.io.UnsupportedEncodingException;
 import java.lang.reflect.Array;
-import java.text.ParseException;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.logging.Level;
@@ -52,7 +49,7 @@ public class GXDLMSRegisterMonitor extends GXDLMSObject implements IGXDLMSBase
 {
     private GXDLMSActionSet[] m_Actions;
     private GXDLMSMonitoredValue m_MonitoredValue;
-    private Object m_Thresholds;
+    private Object[] m_Thresholds;
     /**  
      Constructor.
     */
@@ -91,11 +88,11 @@ public class GXDLMSRegisterMonitor extends GXDLMSObject implements IGXDLMSBase
         this.setActions(new GXDLMSActionSet[0]);
     }
 
-    public final Object getThresholds()
+    public final Object[] getThresholds()
     {
         return m_Thresholds;
     }
-    public final void setThresholds(Object value)
+    public final void setThresholds(Object[] value)
     {
         m_Thresholds = value;
     }
@@ -211,8 +208,39 @@ public class GXDLMSRegisterMonitor extends GXDLMSObject implements IGXDLMSBase
         }
         if (index == 4)
         {
-            type[0] = DataType.STRUCTURE;
-            return getActions();
+            type[0] = DataType.ARRAY;
+            ByteArrayOutputStream stream = new ByteArrayOutputStream();
+            stream.write((byte)DataType.STRUCTURE.getValue());
+            if (m_Actions == null)
+            {
+                stream.write(0);
+            }
+            else
+            {
+                stream.write(m_Actions.length);
+                try 
+                {
+                    for(GXDLMSActionSet it : m_Actions)
+                    {
+                        stream.write((byte)DataType.STRUCTURE.getValue());
+                        stream.write(2);
+                        stream.write((byte)DataType.STRUCTURE.getValue());
+                        stream.write(2);
+                        GXCommon.setData(stream, DataType.OCTET_STRING, it.getActionUp().getLogicalName()); //LN
+                        GXCommon.setData(stream, DataType.UINT16, it.getActionUp().getScriptSelector()); //ScriptSelector
+                        stream.write((byte)DataType.STRUCTURE.getValue());
+                        stream.write(2);
+                        GXCommon.setData(stream, DataType.OCTET_STRING, it.getActionDown().getLogicalName()); //LN
+                        GXCommon.setData(stream, DataType.UINT16, it.getActionDown().getScriptSelector()); //ScriptSelector
+                    }
+                }
+                catch (Exception ex) 
+                {
+                    Logger.getLogger(GXDLMSRegisterMonitor.class.getName()).log(Level.SEVERE, null, ex);
+                    throw new RuntimeException(ex.getMessage());
+                }
+            }
+            return stream.toByteArray();
         }  
         throw new IllegalArgumentException("GetValue failed. Invalid attribute index.");
     }
@@ -243,7 +271,7 @@ public class GXDLMSRegisterMonitor extends GXDLMSObject implements IGXDLMSBase
         }
         else if (index == 4)
         {
-            setActions(null);
+            setActions(new GXDLMSActionSet[0]);
             if (value != null)
             {
                 List<GXDLMSActionSet> items = new ArrayList<GXDLMSActionSet>();

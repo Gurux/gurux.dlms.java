@@ -51,7 +51,7 @@ public class GXDLMSLimits
     GXDLMSLimits()
     {
         setMaxInfoTX((short)128);
-        setMaxInfoRX((byte)62);
+        setMaxInfoRX((byte)128);
         setWindowSizeTX((byte) 1);
         setWindowSizeRX(getWindowSizeTX());
     }

@@ -43,8 +43,8 @@ import gurux.dlms.enums.ObjectType;
 public class GXDLMSDisconnectControl extends GXDLMSObject implements IGXDLMSBase
 {
     private boolean OutputState;
-    private ControlState ControlState;        
-    private ControlMode ControlMode;
+    private ControlState m_ControlState;        
+    private ControlMode m_ControlMode;
 
     /**  
      Constructor.
@@ -92,11 +92,11 @@ public class GXDLMSDisconnectControl extends GXDLMSObject implements IGXDLMSBase
     */
     public final ControlState getControlState()
     {
-        return ControlState;
+        return m_ControlState;
     }
     public final void setControlState(ControlState value)
     {
-        ControlState = value;
+        m_ControlState = value;
     }
     
      /** 
@@ -104,11 +104,11 @@ public class GXDLMSDisconnectControl extends GXDLMSObject implements IGXDLMSBase
     */
     public final ControlMode getControlMode()
     {
-        return ControlMode;
+        return m_ControlMode;
     }
     public final void setControlMode(ControlMode value)
     {
-        ControlMode = value;
+        m_ControlMode = value;
     }
     
     /*
@@ -137,13 +137,7 @@ public class GXDLMSDisconnectControl extends GXDLMSObject implements IGXDLMSBase
     public Object[] getValues()
     {
         return new Object[] {getLogicalName(), getOutputState(), getControlState(), getControlMode()};
-    }
-    
-    @Override
-    public void invoke(int index, Object parameters)
-    {
-        
-    }
+    }       
     
     /*
      * Returns collection of attributes to read.

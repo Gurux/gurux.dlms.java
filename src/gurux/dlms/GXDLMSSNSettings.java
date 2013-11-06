@@ -65,11 +65,11 @@ public class GXDLMSSNSettings
     */
     public final boolean getRead()
     {
-        return GXCommon.getBits(conformanceBlock[0], 0x8);
+        return GXCommon.getBits(conformanceBlock[0], 0x10);
     }
     public final void setRead(boolean value)
     {
-        conformanceBlock[0] = GXCommon.setBits(conformanceBlock[0], 0x8, value);
+        conformanceBlock[0] = GXCommon.setBits(conformanceBlock[0], 0x10, value);
     }
 
     /** 
@@ -77,46 +77,46 @@ public class GXDLMSSNSettings
     */
     public final boolean getWrite()
     {
-        return GXCommon.getBits(conformanceBlock[0], 0x10);
+        return GXCommon.getBits(conformanceBlock[0], 0x8);
     }
     public final void setWrite(boolean value)
     {
-        conformanceBlock[0] = GXCommon.setBits(conformanceBlock[0], 0x10, value);
+        conformanceBlock[0] = GXCommon.setBits(conformanceBlock[0], 0x8, value);
     }
 
     public final boolean getUnconfirmedWrite()
     {
-        return GXCommon.getBits(conformanceBlock[0], 0x20);
+        return GXCommon.getBits(conformanceBlock[0], 0x4);
     }
     public final void setUnconfirmedWrite(boolean value)
     {
-        conformanceBlock[0] = GXCommon.setBits(conformanceBlock[0], 0x20, value);
+        conformanceBlock[0] = GXCommon.setBits(conformanceBlock[0], 0x4, value);
     }
 
     public final boolean getInformationReport()
     {
-        return GXCommon.getBits(conformanceBlock[1], 0x80);
+        return GXCommon.getBits(conformanceBlock[1], 0x1);
     }
     public final void setInformationReport(boolean value)
     {
-        conformanceBlock[1] = GXCommon.setBits(conformanceBlock[1], 0x80, value);
+        conformanceBlock[1] = GXCommon.setBits(conformanceBlock[1], 0x1, value);
     }
 
     public final boolean getMultipleReferences()
     {
-        return GXCommon.getBits(conformanceBlock[1], 0x40);
+        return GXCommon.getBits(conformanceBlock[1], 0x2);
     }
     public final void setMultipleReferences(boolean value)
     {
-        conformanceBlock[1] = GXCommon.setBits(conformanceBlock[1], 0x40, value);
+        conformanceBlock[1] = GXCommon.setBits(conformanceBlock[1], 0x2, value);
     }
 
     public final boolean getParameterizedAccess()
     {
-        return GXCommon.getBits(conformanceBlock[2], 0x4);
+        return GXCommon.getBits(conformanceBlock[2], 0x20);
     }
     public final void setParameterizedAccess(boolean value)
     {
-        conformanceBlock[2] = GXCommon.setBits(conformanceBlock[2], 0x4, value);
+        conformanceBlock[2] = GXCommon.setBits(conformanceBlock[2], 0x20, value);
     }
 }

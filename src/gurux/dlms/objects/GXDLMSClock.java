@@ -41,9 +41,7 @@ import gurux.dlms.enums.DateTimeSkips;
 import gurux.dlms.enums.ObjectType;
 import gurux.dlms.internal.GXCommon;
 import java.io.ByteArrayOutputStream;
-import java.io.IOException;
 import java.lang.reflect.Array;
-import java.text.ParseException;
 import java.util.Date;
 import java.util.EnumSet;
 import java.util.logging.Level;
@@ -207,7 +205,8 @@ public class GXDLMSClock extends GXDLMSObject implements IGXDLMSBase
     }
     
     @Override
-    public void invoke(int index, Object parameters)
+    @SuppressWarnings("unused")
+    public byte[] invoke(Object sender, int index, Object parameters)
     {
         // Resets the value to the default value. 
         // The default value is an instance specific constant.
@@ -288,6 +287,7 @@ public class GXDLMSClock extends GXDLMSObject implements IGXDLMSBase
         {
             throw new IllegalArgumentException("Invoke failed. Invalid attribute index.");
         }
+        return null;
     }
     
     /*

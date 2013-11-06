@@ -71,5 +71,5 @@ public interface IGXDLMSBase
     * 
      @param index Method index.
     */
-   void invoke(int index, Object parameters);
+   byte[] invoke(Object sender, int index, Object parameters);
 }

@@ -402,7 +402,7 @@ public class GXDLMSIp4Setup extends GXDLMSObject implements IGXDLMSBase
     }
     else if (index == 8)
     {
-        setUseDHCP((boolean)value);
+        setUseDHCP((Boolean)value);
     }
     else if (index == 9)
     {

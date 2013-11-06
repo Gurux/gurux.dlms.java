@@ -50,7 +50,19 @@ public enum Authentication
     /** 
      High authentication is used.
     */
-    HIGH;
+    HIGH,
+    /*
+     * High authentication is used. Password is hashed with MD5.
+     */
+    HIGH_MD5,
+    /*
+     * High authentication is used. Password is hashed with SHA1.
+     */
+    HIGH_SHA1,
+    /*
+     * High authentication is used. Password is hashed with GMAC.
+     */
+    HIGH_GMAC;
 
     /*
      * Get integer value for enum.

@@ -820,8 +820,8 @@ public class GXCommon
             }
             else
             {
-                 //If there is not enought data available.
-                int cnt = ++pos[0];
+                 //If there is not enough data available.
+                ++pos[0]; //Get count.
                 if (size < 12)
                 {
                     pos[0] = -1;
@@ -1152,10 +1152,18 @@ public class GXCommon
             if (value instanceof String)
             {
                 String[] items = ((String)value).split("[.]", -1);
-                setObjectCount(items.length, buff);
-                for (String it : items)
+                if (items.length == 1 && items[0].equals(value))
                 {
-                    buff.write(Integer.parseInt(it));
+                    setObjectCount(((String)value).length(), buff);
+                    buff.write(((String)value).getBytes("ASCII"));                    
+                }
+                else
+                {
+                    setObjectCount(items.length, buff);
+                    for (String it : items)
+                    {
+                        buff.write(Integer.parseInt(it));
+                    }
                 }
             }
             else if (value instanceof byte[])

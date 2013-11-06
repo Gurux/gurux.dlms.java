@@ -392,7 +392,8 @@ public class GXDLMSProfileGeneric extends GXDLMSObject implements IGXDLMSBase
         }
     }
     
-    private void getAccessSelector(byte[] data, int[] selector, Object[] start, Object[] to)
+    @SuppressWarnings("unused")
+	private void getAccessSelector(byte[] data, int[] selector, Object[] start, Object[] to)
     {
         selector[0] = data[0];
         int[] pos = new int[1];
