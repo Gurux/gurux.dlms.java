@@ -340,8 +340,8 @@ public class GXDLMSDemandRegister extends GXDLMSObject implements IGXDLMSBase
             data.write(2);            
             try 
             {                
-                GXCommon.setData(data, DataType.UINT8, m_Scaler);            
-                GXCommon.setData(data, DataType.UINT8, m_Unit);
+                GXCommon.setData(data, DataType.INT8, m_Scaler);            
+                GXCommon.setData(data, DataType.ENUM, m_Unit);
                 return data.toByteArray();
             }
             catch (Exception ex) 

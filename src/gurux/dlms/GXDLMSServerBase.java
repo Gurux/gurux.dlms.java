@@ -164,7 +164,6 @@ abstract public class GXDLMSServerBase
         m_Base = new GXDLMS(true);
         m_Items = new GXDLMSObjectCollection(this);        
         m_Base.setUseLogicalNameReferencing(logicalNameReferencing);
-        //TODO: StartProtocol = StartProtocolType.DLMS;
         reset();        
         m_Base.setLNSettings(new GXDLMSLNSettings(new byte[] {0x00, 0x7E, 0x1F}));
         m_Base.setSNSettings(new GXDLMSSNSettings(new byte[] {0x1C, 0x03, 0x20}));
@@ -172,6 +171,10 @@ abstract public class GXDLMSServerBase
         this.setInterfaceType(InterfaceType.GENERAL);        
     }
 
+    public GXCiphering getCiphering()
+    {
+        return m_Base.Ciphering;
+    }
     /** 
      Count server ID from serial number.
 
@@ -860,7 +863,6 @@ abstract public class GXDLMSServerBase
         {
             System.out.println(ex.getMessage());
         }
-        //TODO: Protocol = StartProtocol;
         m_Base.setServerID(null);
         m_Base.setClientID(null);
     }
@@ -941,7 +943,7 @@ abstract public class GXDLMSServerBase
                 {
                     FrameIndex = 0;
                     SendData.clear();
-                    SendData.add(m_Base.addFrame(m_Base.generateAliveFrame(), false, null, 0, 0));
+                    SendData.add(m_Base.addFrame(m_Base.generateAliveFrame(), false, (byte[])null, 0, 0));
                     return SendData.get(FrameIndex);
                 }
                 return SendData.get(FrameIndex);
@@ -953,9 +955,17 @@ abstract public class GXDLMSServerBase
                 int[] index = new int[]{0};
                 GXCommon.getUInt32(allData, index);                    
                 return SendData.get(FrameIndex);
-            }                      
+            }                            
             FrameIndex = 0;
             SendData.clear();
+            if (command[0] == Command.GloGetRequest.getValue() ||
+                command[0] == Command.GloSetRequest.getValue() ||
+                command[0] == Command.GloMethodRequest.getValue())
+            {
+                Command[] cmd = new Command[1];
+                allData = m_Base.decrypt(allData, cmd);
+                command[0] = cmd[0].getValue();
+            }
             if (command[0] == Command.Aarq.getValue())
             {
                 SendData.add(handleAARQRequest(data));
@@ -1267,7 +1277,7 @@ abstract public class GXDLMSServerBase
         buff.write((byte) cmd.getValue());
         buff.write((byte) 0x01);
         //Invoke ID and priority.
-        buff.write((byte) 0x81);
+        buff.write(m_Base.getInvokeIDPriority());
         buff.write((byte) status);
         if (type != DataType.NONE)
         {

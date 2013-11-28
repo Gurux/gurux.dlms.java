@@ -32,72 +32,60 @@
 // Full text may be retrieved at http://www.gnu.org/licenses/gpl-2.0.txt
 //---------------------------------------------------------------------------
 
-package gurux.dlms;
+package gurux.dlms.enums;
 
-public enum Command
+/**
+ * Used security model.
+ */
+public enum Security
 {
-    None(0),
-    ReadRequest(0x5),
-    ReadResponse(0xC),
-    WriteRequest(0x6),
-    WriteResponse(0xD),
-    GetRequest(0xC0),
-    GetResponse(0xC4),
-    SetRequest(0xC1),
-    SetResponse(0xC5),
-    MethodRequest(0xC3),
-    MethodResponse(0xC7),
-    REJECTED(0x97),
-    Snrm(0x93),
-    Aarq(0x60),
-    DisconnectRequest(0x62),
-    DisconnectResponse(0x63),
-    //Clo messages
-    GloGetRequest(0xC8),
-    GloGetResponse(0xCC),
-    GloSetRequest(0xC9),
-    GloSetResponse(0xCD),
-    GloMethodRequest(0xCB),
-    GloMethodResponse(0xCF);
+    /** 
+     Transport security is not used.
+    */
+    NONE(0),
+    /** 
+     Authentication security is used.
+    */
+    AUTHENTICATION(0x10),
+    /** 
+     Encryption security is used.
+    */
+    ENCRYPTION(0x20),
+    /** 
+     Authentication and Encryption security are used.
+    */
+    AUTHENTICATIONENCRYPTION(0x30);
 
     private int intValue;
-    private static java.util.HashMap<Integer, Command> mappings;
-    private static java.util.HashMap<Integer, Command> getMappings()
+    private static java.util.HashMap<Integer, Security> mappings;
+    private static java.util.HashMap<Integer, Security> getMappings()
     {
-        synchronized (Command.class)
+        if (mappings == null)
         {
-            if (mappings == null)
+            synchronized (Security.class)
             {
-                mappings = new java.util.HashMap<Integer, Command>();
+                if (mappings == null)
+                {
+                    mappings = new java.util.HashMap<Integer, Security>();
+                }
             }
         }
         return mappings;
     }
 
-    @SuppressWarnings("LeakingThisInConstructor")
-    private Command(int value)
+    private Security(int value)
     {
         intValue = value;
         getMappings().put(value, this);
     }
 
-    /*
-     * Get integer value for enum.
-     */
     public int getValue()
     {
         return intValue;
     }
 
-    /*
-     * Convert integer for enum value.
-     */
-    public static Command forValue(int value)
+    public static Security forValue(int value)
     {
-        if (value < 0)
-        {
-            throw new IllegalArgumentException("Invalid Command.");
-        }
         return getMappings().get(value);
     }
 }

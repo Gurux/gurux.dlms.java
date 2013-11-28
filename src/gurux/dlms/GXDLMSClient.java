@@ -42,6 +42,9 @@ import gurux.dlms.enums.InterfaceType;
 import gurux.dlms.enums.DataType;
 import gurux.dlms.enums.Authentication;
 import gurux.dlms.enums.AccessMode;
+import gurux.dlms.enums.Priority;
+import gurux.dlms.enums.Security;
+import gurux.dlms.enums.ServiceClass;
 import gurux.dlms.manufacturersettings.GXObisCodeCollection;
 import gurux.dlms.objects.GXDLMSObject;
 import gurux.dlms.objects.GXDLMSObjectCollection;
@@ -140,6 +143,10 @@ public class GXDLMSClient
         return m_Base.isReplyPacket(sendData, receivedData);
     }
 
+    public final GXCiphering getCiphering()
+    {
+        return m_Base.Ciphering;
+    }
     /** 
      Client ID is the identification of the device that is used as a client.
      Client ID is aka HDLC Address.
@@ -400,6 +407,39 @@ public class GXDLMSClient
         m_Base.setAuthentication(value);
     }
 
+    public final Priority getPriority()
+    {
+        return m_Base.getPriority();
+    }
+    public final void setPriority(Priority value)
+    {
+        m_Base.setPriority(value);
+    }
+
+    /** 
+     Used service class.
+    */
+    public final ServiceClass getServiceClass()
+    {
+       return m_Base.getServiceClass();
+    }
+    public final void setServiceClass(ServiceClass value)
+    {
+        m_Base.setServiceClass(value);
+    }
+
+    /** 
+     Invoke ID.
+    */
+    public final int getInvokeID()
+    {
+        return m_Base.getInvokeID();
+    }
+    public final void setInvokeID(int value)
+    {
+        m_Base.setInvokeID(value);
+    }
+                
     /** 
      Determines the type of the connection
 
@@ -469,7 +509,7 @@ public class GXDLMSClient
         {
             return new byte[0];
         }
-        return m_Base.addFrame(FrameType.SNRM.getValue(), false, null, 0, 0);
+        return m_Base.addFrame(FrameType.SNRM.getValue(), false, (byte[]) null, 0, 0);
     }
 
     /** 
@@ -478,7 +518,7 @@ public class GXDLMSClient
      @param data        
      @see GXDLMSClient#SNRMRequest
     */
-    public final void parseUAResponse(byte[] data) throws Exception
+    public final void parseUAResponse(byte[] data)
     {
         int[] error = new int[1];
         byte[] frame = new byte[1];
@@ -553,8 +593,8 @@ public class GXDLMSClient
      @see GXDLMSClient#parseAAREResponse     
      @see GXDLMSClient#isDLMSPacketComplete
     */
-    public final byte[][] AARQRequest(GXDLMSTagCollection Tags) throws UnsupportedEncodingException
-    {        
+    public final byte[][] AARQRequest(GXDLMSTagCollection Tags)
+    {           
         java.nio.ByteBuffer buff = java.nio.ByteBuffer.allocate(100);
         m_Base.checkInit();
         GXAPDU aarq = new GXAPDU(Tags);
@@ -583,7 +623,14 @@ public class GXDLMSClient
         {
             m_Base.CtoSChallenge = null;
         }
-        aarq.codeData(buff, getInterfaceType(), m_Base.CtoSChallenge);
+        try
+        {
+            aarq.codeData(buff, getInterfaceType(), m_Base.CtoSChallenge);
+        }
+        catch(UnsupportedEncodingException ex)
+        {
+            throw new RuntimeException(ex.getMessage());
+        }
         m_Base.frameSequence = -1;
         m_Base.expectedFrame = -1;
         return m_Base.splitToBlocks(buff, Command.None);
@@ -612,7 +659,7 @@ public class GXDLMSClient
      @see GXDLMSClient#getLNSettings
      @see GXDLMSClient#getSNSettings
     */
-    public final GXDLMSTagCollection parseAAREResponse(byte[] reply) throws Exception
+    public final GXDLMSTagCollection parseAAREResponse(byte[] reply)
     {
         byte[] frame = new byte[1];
         int[] error = new int[1];
@@ -775,7 +822,7 @@ public class GXDLMSClient
         //In current behavior, disconnect is not generated for network connection.
         if (this.getInterfaceType() != InterfaceType.NET)
         {
-            return m_Base.addFrame(FrameType.DisconnectMode.getValue(), false, null, 0, 0);
+            return m_Base.addFrame(FrameType.DisconnectMode.getValue(), false, (byte[]) null, 0, 0);
         }
         return new byte[0];
     }
@@ -795,7 +842,7 @@ public class GXDLMSClient
         }
         if (this.getInterfaceType() != InterfaceType.NET)
         {
-            return m_Base.addFrame(FrameType.Disconnect.getValue(), false, null, 0, 0);
+            return m_Base.addFrame(FrameType.Disconnect.getValue(), false, (byte[]) null, 0, 0);
         }
         return new byte[0];
     }
@@ -1244,6 +1291,11 @@ public class GXDLMSClient
      */
     public final Object getValue(byte[] data, GXDLMSObject target, int attributeIndex) throws Exception
     {        
+        if (getCiphering().getSecurity() != Security.NONE)
+        {
+            Command[] cmd = new Command[1];
+            data = m_Base.decrypt(data, cmd);
+        }
         DataType type = target.getDataType(attributeIndex);
         Object value = getValue(data);
         if (type != DataType.NONE)
@@ -1285,6 +1337,11 @@ public class GXDLMSClient
     */
     public final Object getValue(byte[] data, ObjectType type, String ln, int attributeIndex) throws Exception
     {
+        if (getCiphering().getSecurity() != Security.NONE)
+        {
+            Command[] cmd = new Command[1];
+            data = m_Base.decrypt(data, cmd);
+        }
         Object value = getValue(data);
         if (value instanceof byte[])
         {
@@ -1320,7 +1377,7 @@ public class GXDLMSClient
      @param data Byte array received from the meter.
      @return Received data.
     */
-    public final Object getValue(ByteArrayOutputStream data) throws Exception
+    public final Object getValue(ByteArrayOutputStream data)
     {
         return getValue(data.toByteArray());
     }    
@@ -1331,8 +1388,13 @@ public class GXDLMSClient
      @param data Byte array received from the meter.
      @return Received data.
     */
-    public final Object getValue(byte[] data) throws Exception
+    public final Object getValue(byte[] data)
     {
+        if (getCiphering().getSecurity() != Security.NONE)
+        {
+            Command[] cmd = new Command[1];
+            data = m_Base.decrypt(data, cmd);
+        }
         if (!getUseCache() || data.length < m_Base.cacheIndex)
         {
             m_Base.clearProgress();
@@ -1510,8 +1572,7 @@ public class GXDLMSClient
      @param data Method data.
      @param index Method index.
      @return DLMS action message.
-    */
-    @SuppressWarnings("UseSpecificCatch")
+    */    
     public final byte[] method(Object name, ObjectType objectType, int index, Object data, DataType type)
     {
         if (name == null || index < 1)
@@ -1652,7 +1713,7 @@ public class GXDLMSClient
         {
             return new byte[0];
         }
-        return m_Base.addFrame(m_Base.generateAliveFrame(), false, null, 0, 0);
+        return m_Base.addFrame(m_Base.generateAliveFrame(), false, (byte[]) null, 0, 0);
     }
 
     /** 
@@ -1816,7 +1877,7 @@ public class GXDLMSClient
      @return COSEM data.
     */
     public final java.util.Set<RequestTypes> getDataFromPacket(byte[] packet, 
-            ByteArrayOutputStream data) throws Exception
+            ByteArrayOutputStream data)
     {
         byte[] frame = new byte[1];
         int[] command = new int[1];

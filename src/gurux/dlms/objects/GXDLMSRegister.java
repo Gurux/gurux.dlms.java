@@ -240,8 +240,8 @@ public GXDLMSRegister(ObjectType type, String ln, int sn)
                 ByteArrayOutputStream data = new ByteArrayOutputStream();
                 data.write(DataType.STRUCTURE.getValue());
                 data.write(2);
-                GXCommon.setData(data, DataType.UINT8, m_Scaler);            
-                GXCommon.setData(data, DataType.UINT8, m_Unit);
+                GXCommon.setData(data, DataType.INT8, m_Scaler);            
+                GXCommon.setData(data, DataType.ENUM, m_Unit);
                 return data.toByteArray();
             }
             catch (Exception ex) 

@@ -203,7 +203,7 @@ class GXAPDU
     {
         // Get AARE tag and length
         int tag = GXCommon.unsignedByteToInt(buff.get());
-        if (tag != 0x61 && tag != 0x60)
+        if (tag != 0x61 && tag != 0x60 && tag != 0x81 && tag != 0x80)
         {
             throw new GXDLMSException("Invalid tag.");
         }

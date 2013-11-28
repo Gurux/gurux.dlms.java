@@ -160,11 +160,19 @@ When authentication (Access security) is used server(meter) can allow different 
 Example without authentication (None) only read is allowed.
 Gurux DLMS component supports five different authentication level:
 
+<<<<<<< HEAD
++ None
++ Low
++ High
++ HighMD5
++ HighSHA1
+=======
 * None
 * Low
 * High
 * HighMD5
 * HighSHA1
+>>>>>>> b84405ede0bde835e7aacb2a9128a6b32c6415c2
 
 In default Authentication level None is used. If other level is used password must also give.
 Used password depends from the meter.
@@ -218,3 +226,27 @@ item.getListeningWindow().add(new AbstractMap.SimpleEntry<GXDateTime,
                 new GXDateTime(-1, -1, -1, 8, -1, -1, -1)));
 readDLMSPacket(client.write(item, 3));
 ``` 
+
+Transport security
+
+DLMS supports tree different transport security. When transport security is used each packet is secured using GMAC security. Security level are:
+* Authentication
+* Encryption
+* AuthenticationEncryption
+
+Using secured messages is easy. Before security can be used following properties must set:
+* Security
+* SystemTitle
+* AuthenticationKey
+* BlockCipherKey
+* FrameCounter
+
+If we want communicate with Gurux DLMS server you just need to set the following settings.
+
+
+```Java
+Client.getCiphering().setSecurity(Security.ENCRYPTION);
+//Default security when using gurux test server.
+Client.getCiphering().setSystemTitle("GRX12345".GetBytes("ASCII");
+
+```
