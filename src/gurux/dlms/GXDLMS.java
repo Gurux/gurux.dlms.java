@@ -1640,10 +1640,10 @@ class GXDLMS
             //Check frame length.
             if ((frame[0] & 0x7) != 0)
             {
-                FrameLen = ((frame[0] & 0x7) << 8);
+                FrameLen = (((frame[0] & 0x7) << 8) & 0xFF);
             }
             //If not enought data.
-            FrameLen += buff.get();
+            FrameLen += (buff.get() & 0xFF);
             if (len < FrameLen + buff.position() - 1)
             {
                 packetFull[0] = false;
