@@ -1736,7 +1736,7 @@ public class GXDLMSClient
         GXCommon.setData(buff, DataType.UINT32, count); //Add Count
         GXCommon.setData(buff, DataType.UINT16, 0); //Read all columns.
         GXCommon.setData(buff, DataType.UINT16, 0);
-        return m_Base.generateMessage(name, 4, buff.array(), 
+        return m_Base.generateMessage(name, 1, buff.array(), 
                 ObjectType.PROFILE_GENERIC, 2, 
                 this.getUseLogicalNameReferencing() ? 
                 Command.GetRequest : Command.ReadRequest)[0];
@@ -1777,7 +1777,7 @@ public class GXDLMSClient
         byte[] tmp = new byte[buff.position()];        
         buff.position(0);
         buff.get(tmp);
-        return m_Base.generateMessage(name, 4, tmp, 
+        return m_Base.generateMessage(name, 1, tmp, 
                 ObjectType.PROFILE_GENERIC, 2, 
                 this.getUseLogicalNameReferencing() ? 
                 Command.GetRequest : Command.ReadRequest)[0];

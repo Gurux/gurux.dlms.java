@@ -49,8 +49,6 @@ import java.io.UnsupportedEncodingException;
 import java.lang.reflect.Array;
 import java.util.EnumSet;
 import java.util.Random;
-import java.util.logging.Level;
-import java.util.logging.Logger;
 
 /** 
  GXDLMS implements methods to communicate with DLMS/COSEM metering devices.
@@ -1297,15 +1295,6 @@ class GXDLMS
         return val;
     }
 
-    private boolean isKeepAlive(byte value)
-    {
-        if (((value >> 5) & 0x7) == expectedFrame)
-        {
-            return true;
-        }
-        return false;
-    }
-
     /** 
      Return true if frame sequences are same. Reserved for internal use.
 
@@ -1360,18 +1349,6 @@ class GXDLMS
     {
         boolean b = (val & 0xF) == 1 && (val >>> 4) == (((expectedFrame & 0x7) << 1) | 0x1);
         return b;
-    }
-
-
-    /** 
-     Reserved for internal use.
-
-     @param val
-     @return 
-    */
-    private boolean isRejectedFrame(byte val)
-    {
-        return (val & 0x07) == 0x07;
     }
 
     /** 

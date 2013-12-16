@@ -87,9 +87,71 @@ public enum Unit
     V260(48), // V260*60s
     A260(49), // A260*60s
     MASS_KG_PER_SECOND(50), // Mass flux kg/s
-    CONDUCTANCE(51), // Conductance siemens 1/ohm
-    OTHER_UNIT(254), // Other Unit
-    NO_UNIT(255); // No Unit
+    
+    /** 
+    Unit is Conductance siemens 1/ohm.
+   */
+   CONDUCTANCE(51),
+   /** 
+    Temperature in Kelvin.
+   */
+   KELVIN(52),
+   /** 
+    1/(V2h) RU2h , volt-squared hour meter constant or pulse value.
+   */
+   V2H(53),
+   /** 
+    1/(A2h) RI2h , ampere-squared hour meter constant or pulse value.
+   */
+   A2H(54),
+   /** 
+    1/m3 RV , meter constant or pulse value (volume).
+   */
+   CUBIC_METER_RV(55),
+   /** 
+    Percentage
+   */
+   PERCENTAGE(56),
+   // Ah ampere-hours 
+   AMPERE_HOURS(57),
+   /** 
+    Wh/m3 energy per volume 3,6*103 J/m3.
+   */
+   ENERGY_PER_VOLUME(60),
+   /** 
+    J/m3 calorific value, wobbe.
+   */
+   WOBBE(61),
+   /** 
+    Mol % molar fraction of gas composition mole percent (Basic gas composition unit)
+   */
+   MOLE_PERCENT(62),
+   /** 
+    g/m3 mass density, quantity of material.
+   */
+   MASS_DENSITY(63),
+   /** 
+    Dynamic viscosity pascal second (Characteristic of gas stream).
+   */
+   PASCAL_SECOND(64),
+   /** 
+    J/kg Specific energy 
+    NOTE The amount of energy per unit of mass of a 
+    substance Joule / kilogram m2 . kg . s -2 / kg = m2 . s –2
+   */
+   JOULE_KILOGRAM(65),
+   /** 
+    dBm Signal strength (e.g. of GSM radio systems)
+   */
+   SIGNAL_STRENGTH(70),
+   /*
+    * Other Unit
+    */
+   OTHER_UNIT(254), 
+   /*
+    * No Unit
+    */
+    NO_UNIT(255); 
 
     private int intValue;
     private static java.util.HashMap<Integer, Unit> mappings;
