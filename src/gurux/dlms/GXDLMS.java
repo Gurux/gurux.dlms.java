@@ -497,7 +497,7 @@ class GXDLMS
                     }
                     buff.put((byte) AttributeOrdinal);
                     //Items count
-                    if (data == null || data.length == 0)
+                    if (data == null || data.length == 0 || cmd == Command.SetRequest)
                     {
                         buff.put((byte)0);                     
                     }
