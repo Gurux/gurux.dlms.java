@@ -42,10 +42,9 @@ import gurux.dlms.enums.ObjectType;
 import gurux.dlms.internal.GXCommon;
 import java.io.ByteArrayOutputStream;
 import java.lang.reflect.Array;
+import java.util.Calendar;
 import java.util.Date;
 import java.util.EnumSet;
-import java.util.logging.Level;
-import java.util.logging.Logger;
 
 public class GXDLMSClock extends GXDLMSObject implements IGXDLMSBase
 {
@@ -213,7 +212,7 @@ public class GXDLMSClock extends GXDLMSObject implements IGXDLMSBase
         if (index == 1)
         {
             GXDateTime dt = getTime();
-            java.util.Calendar tm = java.util.Calendar.getInstance();
+            java.util.Calendar tm = Calendar.getInstance(java.util.TimeZone.getTimeZone("UTC"));
             tm.setTime(dt.getValue());
             int minutes = tm.get(java.util.Calendar.MINUTE);
             if (minutes < 8)
@@ -247,7 +246,7 @@ public class GXDLMSClock extends GXDLMSObject implements IGXDLMSBase
         else if (index == 3)
         {
             GXDateTime dt = getTime();
-            java.util.Calendar tm = java.util.Calendar.getInstance();
+            java.util.Calendar tm = Calendar.getInstance(java.util.TimeZone.getTimeZone("UTC"));
             tm.setTime(dt.getValue());
             int s = tm.get(java.util.Calendar.SECOND);
             if (s > 30)
@@ -277,7 +276,7 @@ public class GXDLMSClock extends GXDLMSObject implements IGXDLMSBase
         {   
             int shift = ((Number)parameters).intValue();
             GXDateTime dt = getTime();
-            java.util.Calendar tm = java.util.Calendar.getInstance();
+            java.util.Calendar tm = Calendar.getInstance(java.util.TimeZone.getTimeZone("UTC"));
             tm.setTime(dt.getValue());
             tm.add(java.util.Calendar.SECOND, shift);   
             dt.setValue(tm.getTime());
@@ -349,7 +348,6 @@ public class GXDLMSClock extends GXDLMSObject implements IGXDLMSBase
         } 
         catch (Exception ex) 
         {
-            Logger.getLogger(GXDLMSClock.class.getName()).log(Level.SEVERE, null, ex);
             throw new RuntimeException(ex.getMessage());
         }
         byte[] ret = client.method(getName(), getObjectType(), 5, stream.toByteArray(), DataType.ARRAY);    

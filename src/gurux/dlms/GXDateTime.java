@@ -77,7 +77,7 @@ public class GXDateTime
             Skip.add(DateTimeSkips.MILLISECOND);
             millisecond = 0;
         }
-        java.util.Calendar tm = java.util.Calendar.getInstance();
+        java.util.Calendar tm = java.util.Calendar.getInstance(java.util.TimeZone.getTimeZone("UTC"));
         tm.set(year, month, day, hour, minute, second);
         if (millisecond != 0)
         {

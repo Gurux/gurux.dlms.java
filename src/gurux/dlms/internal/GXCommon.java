@@ -829,7 +829,7 @@ public class GXCommon
                 }
             }
             java.util.Set<DateTimeSkips> skip = EnumSet.noneOf(DateTimeSkips.class);
-            java.util.Calendar tm = java.util.Calendar.getInstance();
+            java.util.Calendar tm = java.util.Calendar.getInstance(java.util.TimeZone.getTimeZone("UTC"));
             //Get year.
             int val = GXCommon.getUInt16(buff, pos);
             if (val != 0xFFFF)
@@ -930,7 +930,7 @@ public class GXCommon
             skip.add(DateTimeSkips.MINUTE);
             skip.add(DateTimeSkips.SECOND);
             skip.add(DateTimeSkips.MILLISECOND);
-            java.util.Calendar tm = java.util.Calendar.getInstance();
+            java.util.Calendar tm = java.util.Calendar.getInstance(java.util.TimeZone.getTimeZone("UTC"));
             //Get year.
             int val = GXCommon.getUInt16(buff, pos);
             if (val != -1)
@@ -989,7 +989,7 @@ public class GXCommon
             skip.add(DateTimeSkips.DAY_OF_WEEK);
             skip.add(DateTimeSkips.MONTH);
             skip.add(DateTimeSkips.YEAR);            
-            java.util.Calendar tm = java.util.Calendar.getInstance();
+            java.util.Calendar tm = java.util.Calendar.getInstance(java.util.TimeZone.getTimeZone("UTC"));
             //Get time.
             int val = buff[pos[0]++];
             if (val != -1)
@@ -1226,7 +1226,7 @@ public class GXCommon
         else if (type == DataType.DATETIME)
         {
             java.util.Set<DateTimeSkips> skip = EnumSet.noneOf(DateTimeSkips.class);
-            java.util.Calendar tm = java.util.Calendar.getInstance();
+            java.util.Calendar tm = java.util.Calendar.getInstance(java.util.TimeZone.getTimeZone("UTC"));
             if (value instanceof GXDateTime)
             {
                 GXDateTime tmp = (GXDateTime) value;
@@ -1326,7 +1326,7 @@ public class GXCommon
         else if (type == DataType.DATE)
         {
             java.util.Set<DateTimeSkips> skip = EnumSet.noneOf(DateTimeSkips.class);
-            java.util.Calendar tm = java.util.Calendar.getInstance();
+            java.util.Calendar tm = java.util.Calendar.getInstance(java.util.TimeZone.getTimeZone("UTC"));
             if (value instanceof GXDateTime)
             {
                 GXDateTime tmp = (GXDateTime) value;
@@ -1388,7 +1388,7 @@ public class GXCommon
         else if (type == DataType.TIME)
         {
             java.util.Set<DateTimeSkips> skip = EnumSet.noneOf(DateTimeSkips.class);
-            java.util.Calendar tm = java.util.Calendar.getInstance();
+            java.util.Calendar tm = java.util.Calendar.getInstance(java.util.TimeZone.getTimeZone("UTC"));
             if (value instanceof GXDateTime)
             {
                 GXDateTime tmp = (GXDateTime) value;
@@ -1620,7 +1620,7 @@ public class GXCommon
         }
         else if (type == DataType.DATETIME)
         {
-            java.util.Calendar tm = java.util.Calendar.getInstance();
+            java.util.Calendar tm = java.util.Calendar.getInstance(java.util.TimeZone.getTimeZone("UTC"));
             if (value instanceof java.util.Date)
             {
                 tm.setTime((java.util.Date) value);
@@ -1668,7 +1668,7 @@ public class GXCommon
         }
         else if (type == DataType.DATE)
         {
-            java.util.Calendar tm = java.util.Calendar.getInstance();
+            java.util.Calendar tm = java.util.Calendar.getInstance(java.util.TimeZone.getTimeZone("UTC"));
             if (value instanceof java.util.Date)
             {
                 tm.setTime((java.util.Date) value);
@@ -1699,7 +1699,7 @@ public class GXCommon
         }
         else if (type == DataType.TIME)
         {
-            java.util.Calendar tm = java.util.Calendar.getInstance();
+            java.util.Calendar tm = java.util.Calendar.getInstance(java.util.TimeZone.getTimeZone("UTC"));
             if (value instanceof java.util.Date)
             {
                 tm.setTime((java.util.Date) value);

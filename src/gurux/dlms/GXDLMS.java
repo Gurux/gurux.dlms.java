@@ -496,52 +496,60 @@ class GXDLMS
                         buff.put((byte) (Short.parseShort(it) & 0xFF));
                     }
                     buff.put((byte) AttributeOrdinal);
-                    buff.put((byte) 0x0); //Items count
+                    //Items count
+                    if (data == null || data.length == 0)
+                    {
+                        buff.put((byte)0);                     
+                    }
+                    else
+                    {
+                        buff.put((byte)1); //Items count                    
+                    }
+                }
+            }
+            else
+            {
+                int len = data == null ? 0 : data.length;
+                buff = java.nio.ByteBuffer.allocate(11 + len);
+                //Add name count.
+                if (name.getClass().isArray())
+                {
+                    for (int pos = 0; pos != Array.getLength(name); ++pos)
+                    {
+                        Object it = Array.get(name, pos);
+                        buff.put((byte) 2);
+                        int base_address = ((Number)it).shortValue() & 0xFFFF;
+                        base_address += ((AttributeOrdinal - 1) * 8);
+                        buff.putShort((short) base_address);
                     }
                 }
                 else
                 {
-                    int len = data == null ? 0 : data.length;
-                    buff = java.nio.ByteBuffer.allocate(11 + len);
-                    //Add name count.
-                    if (name.getClass().isArray())
-                    {
-                        for (int pos = 0; pos != Array.getLength(name); ++pos)
-                        {
-                            Object it = Array.get(name, pos);
-                            buff.put((byte) 2);
-                            int base_address = ((Number)it).shortValue() & 0xFFFF;
-                            base_address += ((AttributeOrdinal - 1) * 8);
-                            buff.putShort((short) base_address);
-                        }
-                    }
-                        else
-                        {
-                            buff.put((byte) 1);
-                        }
-                        if (cmd == Command.ReadResponse || cmd == Command.WriteResponse)
-                        {
-                            buff.put((byte) 0x0);
-                        }
-                        else
-                        {
-                            buff.put((byte)parameterCount);
-                            int base_address = GXCommon.intValue(name);
-                            if (cmd == Command.MethodRequest)
-                            {
-                                base_address += AttributeOrdinal;
-                            }
-                            else
-                            {
-                                base_address += ((AttributeOrdinal - 1) * 8);
-                            }
-                            buff.putShort((short) base_address);
-                        }
+                    buff.put((byte) 1);
                 }
-                if (data != null && data.length != 0)
+                if (cmd == Command.ReadResponse || cmd == Command.WriteResponse)
                 {
-                    buff.put(data);
+                    buff.put((byte) 0x0);
                 }
+                else
+                {
+                    buff.put((byte)parameterCount);
+                    int base_address = GXCommon.intValue(name);
+                    if (cmd == Command.MethodRequest)
+                    {
+                        base_address += AttributeOrdinal;
+                    }
+                    else
+                    {
+                        base_address += ((AttributeOrdinal - 1) * 8);
+                    }
+                    buff.putShort((short) base_address);
+                }
+            }
+            if (data != null && data.length != 0)
+            {
+                buff.put(data);
+            }
         }
         return splitToBlocks(buff, cmd);
     }

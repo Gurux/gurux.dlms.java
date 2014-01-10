@@ -42,6 +42,7 @@ import gurux.dlms.enums.ObjectType;
 import gurux.dlms.internal.GXCommon;
 import java.io.ByteArrayOutputStream;
 import java.lang.reflect.Array;
+import java.util.Calendar;
 
 public class GXDLMSActionSchedule extends GXDLMSObject implements IGXDLMSBase
 {
@@ -265,9 +266,9 @@ public class GXDLMSActionSchedule extends GXDLMSObject implements IGXDLMSBase
                 {
                     GXDateTime dt = (GXDateTime) GXDLMSClient.changeType((byte[])Array.get(it, 0), DataType.TIME);
                     GXDateTime dt2 = (GXDateTime) GXDLMSClient.changeType((byte[])Array.get(it, 1), DataType.DATE);                    
-                    java.util.Calendar tm = java.util.Calendar.getInstance();
+                    java.util.Calendar tm = Calendar.getInstance(java.util.TimeZone.getTimeZone("UTC"));
                     tm.setTime(dt.getValue());
-                    java.util.Calendar date = java.util.Calendar.getInstance();
+                    java.util.Calendar date = java.util.Calendar.getInstance(java.util.TimeZone.getTimeZone("UTC"));
                     date.setTime(dt2.getValue());                    
                     tm.set(java.util.Calendar.YEAR, date.get(java.util.Calendar.YEAR));
                     tm.set(java.util.Calendar.MONTH, date.get(java.util.Calendar.MONTH));
