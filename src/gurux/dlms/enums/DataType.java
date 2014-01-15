@@ -124,6 +124,11 @@ public enum DataType
     */
     STRING(10),
 
+    /*
+     * Data type is UTF8 String.
+     */
+    STRING_UTF8(12),
+    
     /**
     Data type is Structure.
     */

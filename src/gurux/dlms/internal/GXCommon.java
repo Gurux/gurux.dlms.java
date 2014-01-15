@@ -688,8 +688,43 @@ public class GXCommon
                 }
                 else
                 {
-                    value = new String(GXCommon.rawData(buff, pos, len));
+                    try 
+                    {
+                        value = new String(GXCommon.rawData(buff, pos, len), "ASCII");
+                    }
+                    catch (UnsupportedEncodingException ex) 
+                    {
+                        throw new RuntimeException(ex.getMessage());
+                    }
                 }
+            }
+        }
+        else if (type[0] == DataType.STRING_UTF8)
+        {
+            int len;
+            if (knownType)
+            {
+                len = buff.length;
+            }
+            else
+            {
+                len = GXCommon.getObjectCount(buff, pos);
+                if (buff.length - pos[0] < len) //If there is not enought data available.
+                {
+                    pos[0] = -1;
+                    return null;
+                }
+            }
+            if (len > 0)
+            {
+                try 
+                {
+                    value = new String(GXCommon.rawData(buff, pos, len), "UTF-8");
+                }
+                catch (UnsupportedEncodingException ex) 
+                {
+                    throw new RuntimeException(ex.getMessage());
+                }                
             }
         }
         //Example Logical name is octet string, so do not change to string...
@@ -1146,6 +1181,20 @@ public class GXCommon
                 setObjectCount(0, buff);
             }
         }
+        else if (type == DataType.STRING_UTF8)
+        {
+            if (value != null)
+            {
+                String str = value.toString();
+                setObjectCount(str.length(), buff);
+                buff.write(str.getBytes("UTF-8"));                 
+            }
+            else
+            {
+                setObjectCount(0, buff);
+            }
+        }
+        
         //Excample Logical name is octet string, so do not change to string...
         else if (type == DataType.OCTET_STRING)
         {
