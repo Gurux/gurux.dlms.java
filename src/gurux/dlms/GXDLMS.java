@@ -255,9 +255,21 @@ class GXDLMS
         {
             return new GXDLMSImageTransfer();
         }
+        if (type == ObjectType.SECURITY_SETUP)
+        {
+            return new GXDLMSSecuritySetup();
+        }        
         if (type == ObjectType.DISCONNECT_CONTROL)
         {
             return new GXDLMSDisconnectControl();
+        }        
+        if (type == ObjectType.LIMITER)
+        {
+            return new GXDLMSLimiter();
+        }        
+        if (type == ObjectType.MBUS_CLIENT)
+        {
+            return new GXDLMSMBusClient();
         }
         if (type == ObjectType.MODEM_CONFIGURATION)
         {

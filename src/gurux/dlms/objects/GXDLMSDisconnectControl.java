@@ -100,7 +100,7 @@ public class GXDLMSDisconnectControl extends GXDLMSObject implements IGXDLMSBase
     }
     
      /** 
-     Control state of COSEM Disconnect Control object.
+     Control mode of COSEM Disconnect Control object.
     */
     public final ControlMode getControlMode()
     {
@@ -153,7 +153,21 @@ public class GXDLMSDisconnectControl extends GXDLMSObject implements IGXDLMSBase
         {
             attributes.add(1);
         }     
-        //Mikko
+        //OutputState
+        if (canRead(2))
+        {
+            attributes.add(2);
+        }
+        //ControlState
+        if (canRead(3))
+        {
+            attributes.add(3);
+        }
+        //ControlMode
+        if (canRead(4))
+        {
+            attributes.add(4);
+        }
         return toIntArray(attributes);
     }
     

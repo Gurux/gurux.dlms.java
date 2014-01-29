@@ -193,10 +193,10 @@ public class GXManufacturer
     {
         for (GXAuthentication it : getSettings())
         {
-                if (it.getType() == authentication)
-                {
-                        return it;
-                }
+            if (it.getType() == authentication)
+            {
+                return it;
+            }
         }
         return null;
     }

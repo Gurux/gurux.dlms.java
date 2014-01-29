@@ -196,7 +196,7 @@ public class GXCommon
         {
             return ((Short)value).intValue() & 0xFFFF;        
         }
-        return ((Integer)value).intValue();
+        return ((Number)value).intValue();
     }
     
     public static short getInt16(byte[] data, int[] index)
@@ -525,6 +525,29 @@ public class GXCommon
     /** 
      Reserved for internal use.
     */
+    static String ToBitString(byte value, int count)
+    {
+        if (count > 8)
+        {
+            count = 8;
+        }
+        char[] data = new char[count];
+        for (int pos = 0; pos != count; ++pos)
+        {
+            if ((value & (1 << pos)) != 0)
+            {
+                data[count - pos - 1] = '1';
+            }
+            else
+            {
+                data[count - pos - 1] = '0';
+            }
+        }
+        return new String(data);
+    }
+    /** 
+     Reserved for internal use.
+    */
     public static Object getData(byte[] buff, int[] pos, int action, int[] count, int[] index, DataType[] type, int[] cachePosition)
     {
         count[0] = 0;
@@ -614,16 +637,13 @@ public class GXCommon
                 pos[0] = -1;
                 return null;
             }
-            char[] tmp = new char[cnt];
-            for (int a = 0; a != cnt; ++a)
+            String str = "";
+            while (cnt > 0)
             {
-                int i = a / 8;
-                byte b = buff[pos[0] + i];
-                int val = (b >>> (a % 8)) & 0x1;
-                tmp[cnt - a - 1] = val == 0 ? '0' : '1';
+                str += ToBitString(buff[pos[0]++], cnt);
+                cnt -= 8;
             }
-            pos[0] += (int)t;
-            value = new String(tmp);
+            value = new String(str);
         }
         else if (type[0] == DataType.INT32)
         {

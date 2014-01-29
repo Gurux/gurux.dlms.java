@@ -34,19 +34,25 @@
 
 package gurux.dlms.objects;
 
+import gurux.dlms.GXDLMSClient;
 import gurux.dlms.enums.DataType;
 import gurux.dlms.enums.ObjectType;
+import gurux.dlms.enums.SecurityPolicy;
+import gurux.dlms.enums.SecuritySuite;
 
-public class GXDLMSData extends GXDLMSObject implements IGXDLMSBase
+public class GXDLMSSecuritySetup extends GXDLMSObject implements IGXDLMSBase
 {
-    private Object Value;
+    private SecurityPolicy SecurityPolicy;
+    private SecuritySuite SecuritySuite;
+    private String ServerSystemTitle;
+    private String ClientSystemTitle;
 
     /**  
      Constructor.
     */
-    public GXDLMSData()
+    public GXDLMSSecuritySetup()
     {
-        super(ObjectType.DATA);
+        super(ObjectType.SECURITY_SETUP);
     }
 
     /**  
@@ -54,9 +60,9 @@ public class GXDLMSData extends GXDLMSObject implements IGXDLMSBase
 
      @param ln Logican Name of the object.
     */
-    public GXDLMSData(String ln)
+    public GXDLMSSecuritySetup(String ln)
     {
-        super(ObjectType.DATA, ln, 0);
+        super(ObjectType.SECURITY_SETUP, ln, 0);
     }
 
     /**  
@@ -65,27 +71,52 @@ public class GXDLMSData extends GXDLMSObject implements IGXDLMSBase
      @param ln Logican Name of the object.
      @param sn Short Name of the object.
     */
-    public GXDLMSData(String ln, int sn)
+    public GXDLMSSecuritySetup(String ln, int sn)
     {
-        super(ObjectType.DATA, ln, sn);
+        super(ObjectType.SECURITY_SETUP, ln, sn);
     }
 
-    /** 
-     Value of COSEM Data object.
-    */
-    public final Object getValue()
+    public final SecurityPolicy getSecurityPolicy()
     {
-        return Value;
+            return SecurityPolicy;
     }
-    public final void setValue(Object value)
+    public final void setSecurityPolicy(SecurityPolicy value)
     {
-        Value = value;
+            SecurityPolicy = value;
+    }
+
+    public final SecuritySuite getSecuritySuite()
+    {
+            return SecuritySuite;
+    }
+    public final void setSecuritySuite(SecuritySuite value)
+    {
+            SecuritySuite = value;
+    }
+
+    public final String getClientSystemTitle()
+    {
+            return ClientSystemTitle;
+    }
+    public final void setClientSystemTitle(String value)
+    {
+            ClientSystemTitle = value;
+    }
+
+    public final String getServerSystemTitle()
+    {
+            return ServerSystemTitle;
+    }
+    public final void setServerSystemTitle(String value)
+    {
+            ServerSystemTitle = value;
     }
 
     @Override
     public Object[] getValues()
     {
-        return new Object[] {getLogicalName(), getValue()};
+        return new Object[] {LogicalName, SecurityPolicy, SecuritySuite, 
+            ClientSystemTitle, ServerSystemTitle};
     }
     
     /*
@@ -102,10 +133,26 @@ public class GXDLMSData extends GXDLMSObject implements IGXDLMSBase
         {
             attributes.add(1);
         }   
-        //Value
+        //SecurityPolicy
         if (canRead(2))
         {
             attributes.add(2);
+        }
+        //SecuritySuite
+        if (canRead(3))
+        {
+            attributes.add(3);
+        }
+
+        //ClientSystemTitle
+        if (canRead(4))
+        {
+            attributes.add(4);
+        }
+        //ServerSystemTitle
+        if (canRead(5))
+        {
+            attributes.add(5);
         }
         return toIntArray(attributes);
     }
@@ -116,7 +163,7 @@ public class GXDLMSData extends GXDLMSObject implements IGXDLMSBase
     @Override
     public int getAttributeCount()
     {
-        return 2;
+        return 5;
     }
     
     /*
@@ -125,7 +172,7 @@ public class GXDLMSData extends GXDLMSObject implements IGXDLMSBase
     @Override
     public int getMethodCount()
     {
-        return 0;
+        return 2;
     }    
     
     /*
@@ -141,9 +188,24 @@ public class GXDLMSData extends GXDLMSObject implements IGXDLMSBase
         }
         if (index == 2)
         {
-            type[0] = getDataType(index);
-            return getValue();
-        }    
+            type[0] = DataType.ENUM;
+            return getSecurityPolicy();
+        }
+        if (index == 3)
+        {
+            type[0] = DataType.ENUM;
+            return getSecuritySuite();
+        }
+        if (index == 4)
+        {
+            type[0] = DataType.OCTET_STRING;
+            return getClientSystemTitle();
+        }
+        if (index == 5)
+        {
+            type[0] = DataType.OCTET_STRING;
+            return getServerSystemTitle();
+        }   
         throw new IllegalArgumentException("GetValue failed. Invalid attribute index.");
     }
     
@@ -159,7 +221,33 @@ public class GXDLMSData extends GXDLMSObject implements IGXDLMSBase
         }
         else if (index == 2)
         {
-            setValue(value);
+            setSecurityPolicy(SecurityPolicy.forValue((byte)value));
+        }
+        else if (index == 3)
+        {
+            setSecuritySuite(SecuritySuite.forValue((byte)value));
+        }
+        else if (index == 4)
+        {
+            if (value instanceof String)
+            {
+                setClientSystemTitle(value.toString());
+            }
+            else
+            {
+                setClientSystemTitle(GXDLMSClient.changeType((byte[])value, DataType.OCTET_STRING).toString());
+            }
+        }
+        else if (index == 5)
+        {
+            if (value instanceof String)
+            {
+                setServerSystemTitle(value.toString());
+            }
+            else
+            {
+                setServerSystemTitle(GXDLMSClient.changeType((byte[])value, DataType.OCTET_STRING).toString());
+            }
         }
         else
         {

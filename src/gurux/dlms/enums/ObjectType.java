@@ -239,6 +239,10 @@ public enum ObjectType
      * – partly or entirely – the premises of the consumer to / from the supply.     
 * */
     DISCONNECT_CONTROL(70),
+        
+    LIMITER(71),
+    
+    MBUS_CLIENT(72),
     
     /**
     RegisterTable stores identical attributes of objects, in a selected 
@@ -311,6 +315,8 @@ public enum ObjectType
     */
     STATUS_MAPPING(63),
 
+    SECURITY_SETUP(64),
+    
     /**
     To determine Internet TCP/UDP protocol settings, use the TcpUdpSetup object.
     */

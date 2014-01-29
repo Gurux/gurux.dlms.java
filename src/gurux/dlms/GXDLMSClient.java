@@ -157,6 +157,10 @@ public class GXDLMSClient
     }
     public final void setClientID(Object value)
     {
+        if (getInterfaceType() == InterfaceType.NET)
+        {
+            value = ((Number) value).shortValue();
+        }
         m_Base.setClientID(value);
     }
 
@@ -170,6 +174,10 @@ public class GXDLMSClient
     }
     public final void setServerID(Object value)
     {
+        if (getInterfaceType() == InterfaceType.NET)
+        {
+            value = ((Number) value).shortValue();
+        }
         m_Base.setServerID(value);
     }
 

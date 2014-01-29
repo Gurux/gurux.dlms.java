@@ -60,7 +60,7 @@ public class GXDLMSAssociationLogicalName extends GXDLMSObject implements IGXDLM
     Object m_ApplicationContextName;
     Object m_XDLMSContextInfo;
     Object m_AuthenticationMechanismMame;
-    Object m_Secret;
+    byte[] m_Secret;
     String m_SecuritySetupReference;
 
     /**  
@@ -129,11 +129,11 @@ public class GXDLMSAssociationLogicalName extends GXDLMSObject implements IGXDLM
         m_AuthenticationMechanismMame = value;
     }
 
-    public final Object getSecret()
+    public final byte[] getSecret()
     {
         return m_Secret;
     }
-    public final void setSecret(Object value)
+    public final void setSecret(byte[] value)
     {
         m_Secret = value;
     }
@@ -242,21 +242,46 @@ public class GXDLMSAssociationLogicalName extends GXDLMSObject implements IGXDLM
         if (LogicalName == null || LogicalName.compareTo("") == 0)
         {
             attributes.add(1);
-        }
+        }        
         //ObjectList is static and read only once.
         if (!isRead(2))
         {
             attributes.add(2);
         }
-        //AccessRightsList is static and read only once.
+        //associated_partners_id is static and read only once.
         if (!isRead(3))
         {
             attributes.add(3);
         }
-        //SecuritySetupReference is static and read only once.
+        //Application Context Name is static and read only once.
         if (!isRead(4))
         {
             attributes.add(4);
+        }
+        //xDLMS Context Info
+        if (!isRead(5))
+        {
+            attributes.add(5);
+        }
+        // Authentication Mechanism Name
+        if (!isRead(6))
+        {
+            attributes.add(6);
+        }
+        // Secret
+        if (!isRead(7))
+        {
+            attributes.add(7);
+        }
+        // Association Status
+        if (!isRead(8))
+        {
+            attributes.add(8);
+        }
+        //Security Setup Reference is from version 1.
+        if (getVersion() > 0 && !isRead(9))
+        {
+            attributes.add(9);
         }
         return toIntArray(attributes);
     }
@@ -264,7 +289,12 @@ public class GXDLMSAssociationLogicalName extends GXDLMSObject implements IGXDLM
     @Override
     public int getAttributeCount()
     {
-        return 9;
+        //Security Setup Reference is from version 1.
+        if (getVersion() > 0)
+        {
+            return 9;
+        }
+        return 8;
     }
      
     /*
@@ -383,7 +413,22 @@ public class GXDLMSAssociationLogicalName extends GXDLMSObject implements IGXDLM
         {
             Object[] methodAccess = (Object[]) access;
             int id = GXCommon.intValue(methodAccess[0]);
-            int tmp = GXCommon.intValue(methodAccess[1]);
+            int tmp;
+            if (methodAccess[1] instanceof Boolean)
+            {   
+                if (((Boolean) methodAccess[1]).booleanValue())
+                {
+                    tmp = 1;
+                }
+                else
+                {
+                    tmp = 0;
+                }                
+            }
+            else
+            {
+                tmp = GXCommon.intValue(methodAccess[1]);
+            }
             MethodAccessMode mode = MethodAccessMode.forValue(tmp);
             obj.setMethodAccess(id, mode);
         }
@@ -490,7 +535,7 @@ public class GXDLMSAssociationLogicalName extends GXDLMSObject implements IGXDLM
         }
         else if (index == 7)
         {
-            setSecret(value);
+            m_Secret = (byte[]) value;
         }
         else if (index == 8)
         {

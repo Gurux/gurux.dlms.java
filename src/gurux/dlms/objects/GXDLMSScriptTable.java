@@ -41,19 +41,21 @@ import gurux.dlms.internal.GXCommon;
 import java.io.ByteArrayOutputStream;
 import java.lang.reflect.Array;
 import java.util.AbstractMap;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
 public class GXDLMSScriptTable extends GXDLMSObject implements IGXDLMSBase
 {
-    private List<AbstractMap.SimpleEntry<Integer, GXDLMSScriptAction>> privateScripts;
+    private List<AbstractMap.SimpleEntry<Integer, GXDLMSScriptAction>> Scripts;
     /**  
      Constructor.
     */
     public GXDLMSScriptTable()
     {
         super(ObjectType.SCRIPT_TABLE);
+        Scripts = new ArrayList<AbstractMap.SimpleEntry<Integer, GXDLMSScriptAction>>();
     }
 
     /**  
@@ -64,6 +66,7 @@ public class GXDLMSScriptTable extends GXDLMSObject implements IGXDLMSBase
     public GXDLMSScriptTable(String ln)
     {
         super(ObjectType.SCRIPT_TABLE, ln, 0);
+        Scripts = new ArrayList<AbstractMap.SimpleEntry<Integer, GXDLMSScriptAction>>();
     }
 
     /**  
@@ -75,15 +78,12 @@ public class GXDLMSScriptTable extends GXDLMSObject implements IGXDLMSBase
     public GXDLMSScriptTable(String ln, int sn)
     {
         super(ObjectType.SCRIPT_TABLE, ln, sn);
+        Scripts = new ArrayList<AbstractMap.SimpleEntry<Integer, GXDLMSScriptAction>>();
     }
 
     public final List<AbstractMap.SimpleEntry<Integer, GXDLMSScriptAction>> getScripts()
     {
-        return privateScripts;
-    }
-    public final void setScripts(List<AbstractMap.SimpleEntry<Integer, GXDLMSScriptAction>> value)
-    {
-        privateScripts = value;
+        return Scripts;
     }
 
     @Override
@@ -193,26 +193,46 @@ public class GXDLMSScriptTable extends GXDLMSObject implements IGXDLMSBase
         }
         else if (index == 2)
         {
-            getScripts().clear();
-            if (value != null)
+            Scripts.clear();
+            //Fix Xemex bug here.
+            //Xemex meters do not return array as they shoul be according standard.
+            if (value instanceof Object[] && Array.getLength(value) != 0)
             {
-                for(Object item : (Object[])value)
-                { 
-                    int script_identifier = ((Number)Array.get(item, 0)).intValue();
-                    for(Object arr : (Object[])Array.get(item, 1))
+                if (((Object[])value)[0] instanceof Object[])
+                {
+                    for(Object item : (Object[])value)
                     { 
-                        GXDLMSScriptAction it = new GXDLMSScriptAction();
-                        GXDLMSScriptActionType type = GXDLMSScriptActionType.values()[((Number)Array.get(arr, 0)).intValue() - 1];
-                        it.setType(type);                
-                        ObjectType ot = ObjectType.forValue(((Number)Array.get(arr, 1)).intValue());
-                        it.setObjectType(ot);
-                        String ln = GXDLMSObject.toLogicalName((byte[]) Array.get(arr, 2));
-                        it.setLogicalName(ln);
-                        it.setIndex(((Number)Array.get(arr, 3)).intValue());
-                        it.setParameter(Array.get(arr, 4), DataType.NONE);
-                        privateScripts.add(new AbstractMap.SimpleEntry<Integer, GXDLMSScriptAction>(script_identifier, it));
-                    }                    
-                }               
+                        int script_identifier = ((Number)Array.get(item, 0)).intValue();
+                        for(Object arr : (Object[])Array.get(item, 1))
+                        { 
+                            GXDLMSScriptAction it = new GXDLMSScriptAction();
+                            GXDLMSScriptActionType type = GXDLMSScriptActionType.values()[((Number)Array.get(arr, 0)).intValue() - 1];
+                            it.setType(type);                
+                            ObjectType ot = ObjectType.forValue(((Number)Array.get(arr, 1)).intValue());
+                            it.setObjectType(ot);
+                            String ln = GXDLMSObject.toLogicalName((byte[]) Array.get(arr, 2));
+                            it.setLogicalName(ln);
+                            it.setIndex(((Number)Array.get(arr, 3)).intValue());
+                            it.setParameter(Array.get(arr, 4), DataType.NONE);
+                            Scripts.add(new AbstractMap.SimpleEntry<Integer, GXDLMSScriptAction>(script_identifier, it));
+                        }                    
+                    }               
+                }
+                else //Read Xemex meter here.
+                {
+                    int script_identifier = ((Number)Array.get(value, 0)).intValue();
+                    Object[] arr = (Object[])((Object[])value)[1];
+                    GXDLMSScriptAction it = new GXDLMSScriptAction();
+                    GXDLMSScriptActionType type = GXDLMSScriptActionType.values()[((Number)Array.get(arr, 0)).intValue() - 1];
+                    it.setType(type);
+                    ObjectType ot = ObjectType.forValue(((Number)Array.get(arr, 1)).intValue());
+                    it.setObjectType(ot);
+                    String ln = GXDLMSObject.toLogicalName((byte[]) Array.get(arr, 2));
+                    it.setLogicalName(ln);
+                    it.setIndex(((Number)Array.get(arr, 3)).intValue());
+                    it.setParameter(Array.get(arr, 4), DataType.NONE);
+                    Scripts.add(new AbstractMap.SimpleEntry<Integer, GXDLMSScriptAction>(script_identifier, it));                
+                }
             }
         }
         else

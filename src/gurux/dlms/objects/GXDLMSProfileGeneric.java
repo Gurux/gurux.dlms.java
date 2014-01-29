@@ -686,16 +686,7 @@ public class GXDLMSProfileGeneric extends GXDLMSObject implements IGXDLMSBase
                     }
                     ObjectType type = ObjectType.forValue(((Number)tmp[0]).intValue());
                     String ln = GXDLMSObject.toLogicalName((byte[])tmp[1]);
-                    GXDLMSObject obj = null;
-                    Object owner = getOwner();
-                    if (owner instanceof GXDLMSServerBase)
-                    {
-                        obj = ((GXDLMSServerBase) owner).getItems().findByLN(type, ln);
-                    }
-                    else if (owner instanceof GXDLMSClient)
-                    {
-                        obj = ((GXDLMSClient) owner).getObjects().findByLN(type, ln);
-                    }
+                    GXDLMSObject obj = getParent().findByLN(type, ln);
                     if(obj == null)
                     {                        
                         obj = gurux.dlms.GXDLMSClient.createObject(type);

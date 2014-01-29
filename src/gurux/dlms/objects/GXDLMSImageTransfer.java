@@ -48,7 +48,7 @@ import java.util.List;
 public class GXDLMSImageTransfer extends GXDLMSObject implements IGXDLMSBase
 {
     long ImageBlockSize;
-    ImageTransferredBlocksStatus m_ImageTransferredBlocksStatus;
+    String m_ImageTransferredBlocksStatus;
     long ImageFirstNotTransferredBlockNumber;
     boolean ImageTransferEnabled;
     ImageTransferStatus m_ImageTransferStatus;
@@ -100,11 +100,11 @@ public class GXDLMSImageTransfer extends GXDLMSObject implements IGXDLMSBase
      * ImageBlock. Each bit in the bit-string provides information about
      * one individual ImageBlock.
     */
-    public final ImageTransferredBlocksStatus getImageTransferredBlocksStatus()
+    public final String getImageTransferredBlocksStatus()
     {
         return m_ImageTransferredBlocksStatus;
     }
-    public final void setImageTransferredBlocksStatus(ImageTransferredBlocksStatus value)
+    public final void setImageTransferredBlocksStatus(String value)
     {
     	m_ImageTransferredBlocksStatus = value;
     }
@@ -176,8 +176,37 @@ public class GXDLMSImageTransfer extends GXDLMSObject implements IGXDLMSBase
         if (LogicalName == null || LogicalName.compareTo("") == 0)
         {
             attributes.add(1);
-        }   
-        //Mikko
+        } 
+        //ImageBlockSize
+        if (!isRead(2))
+        {
+            attributes.add(2);
+        }        
+        //ImageTransferredBlocksStatus
+        if (!isRead(3))
+        {
+            attributes.add(3);
+        }
+        //ImageFirstNotTransferredBlockNumber
+        if (!isRead(4))
+        {
+            attributes.add(4);
+        }
+        //ImageTransferEnabled
+        if (!isRead(5))
+        {
+            attributes.add(5);
+        }
+        //ImageTransferStatus
+        if (!isRead(6))
+        {
+            attributes.add(6);
+        }
+        //ImageActivateInfo
+        if (!isRead(7))
+        {
+            attributes.add(7);
+        }
         return toIntArray(attributes);
     }
     
@@ -216,7 +245,7 @@ public class GXDLMSImageTransfer extends GXDLMSObject implements IGXDLMSBase
         }
         if (index == 3)
         {
-            return getImageTransferredBlocksStatus().ordinal();
+            return m_ImageTransferredBlocksStatus;
         }
         if (index == 4)
         {
@@ -282,11 +311,11 @@ public class GXDLMSImageTransfer extends GXDLMSObject implements IGXDLMSBase
         {
             if (value == null)
             {
-                setImageTransferredBlocksStatus(ImageTransferredBlocksStatus.NOT_TRANSFERRED);
+                m_ImageTransferredBlocksStatus = "";
             }
             else
             {
-                setImageTransferredBlocksStatus(ImageTransferredBlocksStatus.values()[((Number) value).intValue()]);
+                m_ImageTransferredBlocksStatus = value.toString();
             }            
         }
         else if (index == 4)

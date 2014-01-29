@@ -34,16 +34,56 @@
 
 package gurux.dlms.objects;
 
+import gurux.dlms.GXDLMSClient;
 import gurux.dlms.enums.DataType;
 import gurux.dlms.enums.ObjectType;
+import java.lang.reflect.Array;
 
 public class GXDLMSPppSetup extends GXDLMSObject implements IGXDLMSBase
 {
-    private Object privatePPPAuthentication;
-    private Object privateIPCPOptions;
-    private String privatePHYReference;
-    private Object privateLCPOptions;
+    private GXDLMSPppSetupIPCPOption[] IPCPOptions;
+    private String PHYReference;
+    private GXDLMSPppSetupLcpOption[] LCPOptions;
+    private byte[] UserName;
+    private byte[] Password;
 
+    private PppAuthenticationType m_Authentication;
+    
+    public final PppAuthenticationType getAuthentication()
+    {
+        return m_Authentication;
+    }
+    public final void setAuthentication(PppAuthenticationType value)
+    {
+        m_Authentication = value;
+    }    
+    
+    /** 
+    PPP authentication procedure user name.
+   */    
+    public final byte[] getUserName()
+    {
+        return UserName;
+    }
+
+    public final void setUserName(byte[] value)
+    {
+        UserName = value;
+    }
+
+    /** 
+     PPP authentication procedure password.
+    */
+
+    public final byte[] getPassword()
+    {
+        return Password;
+    }
+    public final void setPassword(byte[] value)
+    {
+        Password = value;
+    }
+    
     /**  
      Constructor.
     */
@@ -75,44 +115,44 @@ public class GXDLMSPppSetup extends GXDLMSObject implements IGXDLMSBase
 
     public final String getPHYReference()
     {
-        return privatePHYReference;
+        return PHYReference;
     }
     public final void setPHYReference(String value)
     {
-        privatePHYReference = value;
+        PHYReference = value;
     }
 
-    public final Object getLCPOptions()
+    public final GXDLMSPppSetupLcpOption[] getLCPOptions()
     {
-        return privateLCPOptions;
+        return LCPOptions;
     }
-    public final void setLCPOptions(Object value)
+    public final void setLCPOptions(GXDLMSPppSetupLcpOption[] value)
     {
-        privateLCPOptions = value;
-    }
-
-    public final Object getIPCPOptions()
-    {
-        return privateIPCPOptions;
-    }
-    public final void setIPCPOptions(Object value)
-    {
-        privateIPCPOptions = value;
+        LCPOptions = value;
     }
 
-    public final Object getPPPAuthentication()
+    public final GXDLMSPppSetupIPCPOption[] getIPCPOptions()
     {
-        return privatePPPAuthentication;
+        return IPCPOptions;
     }
-    public final void setPPPAuthentication(Object value)
+    public final void setIPCPOptions(GXDLMSPppSetupIPCPOption[] value)
     {
-        privatePPPAuthentication = value;
-    }
+        IPCPOptions = value;
+    }   
 
     @Override
     public Object[] getValues()
     {
-        return new Object[] {getLogicalName(), getPHYReference(), getLCPOptions(), getIPCPOptions(), getPPPAuthentication()};
+        String str = "";
+        if (UserName != null)
+        {
+            str = new String(UserName);
+        }
+        if (Password != null)
+        {
+            str += " " + new String(Password);
+        }
+        return new Object[] {getLogicalName(), getPHYReference(), getLCPOptions(), getIPCPOptions(), str};
     }
     
     /*
@@ -193,7 +233,55 @@ public class GXDLMSPppSetup extends GXDLMSObject implements IGXDLMSBase
         if (index == 1)
         {
             setLogicalName(GXDLMSObject.toLogicalName((byte[]) value));            
-        }        
+        } 
+        else if (index == 2)
+        {
+            if (value instanceof String)
+            {
+                PHYReference = value.toString();
+            }
+            else
+            {
+                PHYReference = GXDLMSClient.changeType((byte[])value, DataType.OCTET_STRING).toString();
+            }
+        }
+        else if (index == 3)
+        {
+            java.util.ArrayList<GXDLMSPppSetupLcpOption> items = new java.util.ArrayList<GXDLMSPppSetupLcpOption>();
+            if (value != null)
+            {
+                for (Object item : (Object[])value)
+                {
+                    GXDLMSPppSetupLcpOption it = new GXDLMSPppSetupLcpOption();
+                    it.setType(GXDLMSPppSetupLcpOptionType.forValue((int) Array.get(item, 0)));
+                    it.setLength((int)Array.get(item, 1));
+                    it.setData(Array.get(item, 2));
+                    items.add(it);
+                }
+            }
+            LCPOptions = items.toArray(new GXDLMSPppSetupLcpOption[0]);
+        }
+        else if (index == 4)
+        {
+            java.util.ArrayList<GXDLMSPppSetupIPCPOption> items = new java.util.ArrayList<GXDLMSPppSetupIPCPOption>();
+            if (value != null)
+            {
+                for (Object item : (Object[])value)
+                {
+                    GXDLMSPppSetupIPCPOption it = new GXDLMSPppSetupIPCPOption();
+                    it.setType(GXDLMSPppSetupIPCPOptionType.forValue((int)Array.get(item, 0)));
+                    it.setLength((int)Array.get(item, 1));
+                    it.setData(Array.get(item, 2));
+                    items.add(it);
+                }
+            }
+            IPCPOptions = items.toArray(new GXDLMSPppSetupIPCPOption[0]);
+        }
+        else if (index == 5)
+        {
+            UserName = (byte[])((Object[])value)[0];
+            Password = (byte[])((Object[])value)[1];
+        }
         else
         {
             throw new IllegalArgumentException("GetValue failed. Invalid attribute index.");
