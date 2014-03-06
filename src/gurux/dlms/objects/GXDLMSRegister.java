@@ -130,8 +130,7 @@ public GXDLMSRegister(ObjectType type, String ln, int sn)
      */
     public byte[][] reset(GXDLMSClient client)
     {
-        byte[] ret = client.method(getName(), getObjectType(), 1, (int) 0);
-        return new byte[][]{ret};    
+        return client.method(getName(), getObjectType(), 1, 0, 1, DataType.UINT8);
     }
 
     @Override
@@ -143,7 +142,7 @@ public GXDLMSRegister(ObjectType type, String ln, int sn)
     }
    
     @Override
-    public byte[] invoke(Object sender, int index, Object parameters)
+    public byte[][] invoke(Object sender, int index, Object parameters)
     {
         // Resets the value to the default value. 
         // The default value is an instance specific constant.
@@ -178,7 +177,7 @@ public GXDLMSRegister(ObjectType type, String ln, int sn)
      * If attribute is static and already read or device is returned HW error it is not returned.
      */
     @Override
-    public int[] GetAttributeIndexToRead()
+    public int[] getAttributeIndexToRead()
     {
         java.util.ArrayList<Integer> attributes = new java.util.ArrayList<Integer>();
         //LN is static and read only once.
@@ -217,15 +216,36 @@ public GXDLMSRegister(ObjectType type, String ln, int sn)
         return 1;
     }
     
+    @Override
+    public DataType getDataType(int index)
+    {
+        if (index == 1)
+        {
+            return DataType.OCTET_STRING;
+        }
+        if (index == 2)
+        {
+            return super.getDataType(index);
+        }
+        if (index == 3)
+        {
+            return DataType.ARRAY;
+        }  
+        if (index == 4 && this instanceof GXDLMSExtendedRegister)
+        {
+            return super.getDataType(index);
+        }  
+        throw new IllegalArgumentException("getDataType failed. Invalid attribute index.");
+    }
+    
     /*
      * Returns value of given attribute.
      */    
     @Override
-    public Object getValue(int index, DataType[] type, byte[] parameters, boolean raw)
+    public Object getValue(int index, int selector, Object parameters)
     {
         if (index == 1)
         {
-            type[0] = DataType.OCTET_STRING;
             return getLogicalName();
         }
         if (index == 2)
@@ -236,7 +256,6 @@ public GXDLMSRegister(ObjectType type, String ln, int sn)
         {
             try 
             {
-                type[0] = DataType.ARRAY;
                 ByteArrayOutputStream data = new ByteArrayOutputStream();
                 data.write(DataType.STRUCTURE.getValue());
                 data.write(2);
@@ -257,37 +276,30 @@ public GXDLMSRegister(ObjectType type, String ln, int sn)
      * Set value of given attribute.
      */
     @Override
-    public void setValue(int index, Object value, boolean raw)
+    public void setValue(int index, Object value)
     {
         if (index == 1)
         {
-            setLogicalName(GXDLMSObject.toLogicalName((byte[]) value));            
+            super.setValue(index, value);            
         }
         else if (index == 2)
         {
-            if (!raw)
+            if (m_Scaler != 0)
             {
-                if (m_Scaler != 0)
-                {
-                    try
-                    {                        
-                        m_Value = ((Number)value).doubleValue() * getScaler();
-                    }
-                    catch (Exception ex)
-                    {
-                        //Sometimes scaler is set for wrong Object type.
-                        setValue(value);
-                    }
+                try
+                {                        
+                    m_Value = ((Number)value).doubleValue() * getScaler();
                 }
-                else
+                catch (Exception ex)
                 {
+                    //Sometimes scaler is set for wrong Object type.
                     setValue(value);
                 }
             }
             else
             {
                 setValue(value);
-            }            
+            }
         }
         else if (index == 3)
         {            

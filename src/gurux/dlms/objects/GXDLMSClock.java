@@ -205,7 +205,7 @@ public class GXDLMSClock extends GXDLMSObject implements IGXDLMSBase
     
     @Override
     @SuppressWarnings("unused")
-    public byte[] invoke(Object sender, int index, Object parameters)
+    public byte[][] invoke(Object sender, int index, Object parameters)
     {
         // Resets the value to the default value. 
         // The default value is an instance specific constant.
@@ -295,8 +295,7 @@ public class GXDLMSClock extends GXDLMSObject implements IGXDLMSBase
      */
     public byte[][] adjustToQuarter(GXDLMSClient client)
     {
-        byte[] ret = client.method(getName(), getObjectType(), 1, (int) 0);
-        return new byte[][]{ret};    
+        return client.method(this, 1, 0, DataType.INT8);
     }
 
     
@@ -306,8 +305,7 @@ public class GXDLMSClock extends GXDLMSObject implements IGXDLMSBase
      */
     public byte[][] adjustToMeasuringPeriod(GXDLMSClient client)
     {
-        byte[] ret = client.method(getName(), getObjectType(), 2, (int) 0);
-        return new byte[][]{ret};    
+        return client.method(this, 2, 0, DataType.INT8);        
     }
 
     /*
@@ -318,8 +316,7 @@ public class GXDLMSClock extends GXDLMSObject implements IGXDLMSBase
      */
     public byte[][] adjustToMinute(GXDLMSClient client)
     {
-        byte[] ret = client.method(getName(), getObjectType(), 3, (int) 0);
-        return new byte[][]{ret};    
+        return client.method(this, 3, 0, DataType.INT8);
     }
     /*
      * This method is used in conjunction with the preset_adjusting_time
@@ -328,8 +325,7 @@ public class GXDLMSClock extends GXDLMSObject implements IGXDLMSBase
      */
     public byte[][] adjustToPresetTime(GXDLMSClient client)
     {
-        byte[] ret = client.method(getName(), getObjectType(), 4, (int) 0);
-        return new byte[][]{ret};    
+        return client.method(this, 4, 0, DataType.INT8);
     }
     /*
      * Presets the time to a new value (preset_time) and defines a
@@ -350,8 +346,7 @@ public class GXDLMSClock extends GXDLMSObject implements IGXDLMSBase
         {
             throw new RuntimeException(ex.getMessage());
         }
-        byte[] ret = client.method(getName(), getObjectType(), 5, stream.toByteArray(), DataType.ARRAY);    
-        return new byte[][]{ret};        
+        return client.method(this, 5, stream.toByteArray(), DataType.ARRAY);    
     }
     /*
      * Shifts the time by n (-900 <= n <= 900) s.
@@ -362,8 +357,7 @@ public class GXDLMSClock extends GXDLMSObject implements IGXDLMSBase
         {
             throw new IllegalArgumentException("Invalid shift time.");
         }
-        byte[] ret = client.method(getName(), getObjectType(), 6, time);
-        return new byte[][]{ret};    
+        return client.method(this, 6, time, DataType.INT16);
     }
 
     /*
@@ -372,7 +366,7 @@ public class GXDLMSClock extends GXDLMSObject implements IGXDLMSBase
      * If attribute is static and already read or device is returned HW error it is not returned.
      */
     @Override
-    public int[] GetAttributeIndexToRead()
+    public int[] getAttributeIndexToRead()
     {
         java.util.ArrayList<Integer> attributes = new java.util.ArrayList<Integer>();
         //LN is static and read only once.
@@ -441,55 +435,88 @@ public class GXDLMSClock extends GXDLMSObject implements IGXDLMSBase
         return 6;
     }
     
+    @Override
+    public DataType getDataType(int index)
+    {
+        if (index == 1)
+        {
+            return DataType.OCTET_STRING;
+        }
+        if (index == 2)
+        {
+            return DataType.DATETIME;
+        }
+        if (index == 3)
+        {
+            return DataType.INT16;
+        }
+        if (index == 4)
+        {
+            return DataType.UINT8;
+        }
+        if (index == 5)
+        {
+            return DataType.DATETIME;            
+        }
+        if (index == 6)
+        {
+            return DataType.DATETIME;            
+        }
+        if (index == 7)
+        {
+            return DataType.INT8;
+        }
+        if (index == 8)
+        {
+            return DataType.BOOLEAN;
+        }
+        if (index == 9)
+        {
+            return DataType.ENUM;
+        }  
+        throw new IllegalArgumentException("getDataType failed. Invalid attribute index.");
+    }
+    
     /*
      * Returns value of given attribute.
      */    
     @Override
-    public Object getValue(int index, DataType[] type, byte[] parameters, boolean raw)
+    public Object getValue(int index, int selector, Object parameters)
     {
         if (index == 1)
         {
-            type[0] = DataType.OCTET_STRING;
             return getLogicalName();
         }
         if (index == 2)
         {
-            type[0] = DataType.DATETIME;
             return getTime();
         }
         if (index == 3)
         {
-            type[0] = DataType.INT16;
             return getTimeZone();
         }
         if (index == 4)
         {
-            type[0] = DataType.UINT8;
             return getStatus().getValue();
         }
         if (index == 5)
         {
-            type[0] = DataType.DATETIME;            
             return getBegin();
         }
         if (index == 6)
         {
-            type[0] = DataType.DATETIME;            
             return getEnd();
         }
         if (index == 7)
         {
-            type[0] = DataType.INT8;
             return getDeviation();
         }
         if (index == 8)
         {
-            type[0] = DataType.BOOLEAN;
             return getEnabled();
         }
         if (index == 9)
         {
-            type[0] = DataType.ENUM;
             return getClockBase();
         }
         throw new IllegalArgumentException("GetValue failed. Invalid attribute index.");
@@ -499,11 +526,11 @@ public class GXDLMSClock extends GXDLMSObject implements IGXDLMSBase
      * Set value of given attribute.
      */
     @Override
-    public void setValue(int index, Object value, boolean raw)
+    public void setValue(int index, Object value)
     {
         if (index == 1)
         {
-            setLogicalName(GXDLMSObject.toLogicalName((byte[]) value));            
+            super.setValue(index, value);            
         }        
         else if (index == 2)
         {

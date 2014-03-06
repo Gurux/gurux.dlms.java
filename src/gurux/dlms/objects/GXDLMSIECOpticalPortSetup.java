@@ -168,7 +168,7 @@ public class GXDLMSIECOpticalPortSetup extends GXDLMSObject implements IGXDLMSBa
      * If attribute is static and already read or device is returned HW error it is not returned.
      */
     @Override
-    public int[] GetAttributeIndexToRead()
+    public int[] getAttributeIndexToRead()
     {
         java.util.ArrayList<Integer> attributes = new java.util.ArrayList<Integer>();
         //LN is static and read only once.
@@ -237,40 +237,76 @@ public class GXDLMSIECOpticalPortSetup extends GXDLMSObject implements IGXDLMSBa
         return 0;
     }    
     
+     @Override
+    public DataType getDataType(int index)
+    {
+        if (index == 1)
+        {
+            return DataType.OCTET_STRING;
+        }
+        if (index == 2)
+        {
+            return DataType.ENUM;
+        }
+        if (index == 3)
+        {
+            return DataType.ENUM;
+        }
+        if (index == 4)
+        {
+            return DataType.ENUM;
+        }
+        if (index == 5)
+        {
+            return DataType.ENUM;
+        }
+        if (index == 6)
+        {
+            return DataType.OCTET_STRING;
+        }
+        if (index == 7)
+        {
+            return DataType.OCTET_STRING;
+        }
+        if (index == 8)
+        {
+            return DataType.OCTET_STRING;
+        }
+        if (index == 9)
+        {
+            return DataType.OCTET_STRING;
+        }   
+        throw new IllegalArgumentException("getDataType failed. Invalid attribute index.");
+    }
+     
     /*
      * Returns value of given attribute.
      */    
     @Override
-    public Object getValue(int index, DataType[] type, byte[] parameters, boolean raw)
+    public Object getValue(int index, int selector, Object parameters)
     {
         if (index == 1)
         {
-            type[0] = DataType.OCTET_STRING;
             return getLogicalName();
         }
         if (index == 2)
         {
-            type[0] = DataType.ENUM;
             return this.getDefaultMode().getValue();
         }
         if (index == 3)
         {
-            type[0] = DataType.ENUM;
             return getDefaultBaudrate().ordinal();
         }
         if (index == 4)
         {
-            type[0] = DataType.ENUM;
             return getProposedBaudrate().ordinal();
         }
         if (index == 5)
         {
-            type[0] = DataType.ENUM;
             return getResponseTime().ordinal();
         }
         if (index == 6)
         {
-            type[0] = DataType.OCTET_STRING;
             try 
             {
                 if (getDeviceAddress() == null)
@@ -287,7 +323,6 @@ public class GXDLMSIECOpticalPortSetup extends GXDLMSObject implements IGXDLMSBa
         }
         if (index == 7)
         {
-            type[0] = DataType.OCTET_STRING;
             try 
             {
                 if (getPassword1() == null)
@@ -304,7 +339,6 @@ public class GXDLMSIECOpticalPortSetup extends GXDLMSObject implements IGXDLMSBa
         }
         if (index == 8)
         {
-            type[0] = DataType.OCTET_STRING;
             try 
             {               
                 if (getPassword2() == null)
@@ -321,7 +355,6 @@ public class GXDLMSIECOpticalPortSetup extends GXDLMSObject implements IGXDLMSBa
         }
         if (index == 9)
         {
-            type[0] = DataType.OCTET_STRING;
             try 
             {            
                 if (getPassword5() == null)
@@ -343,11 +376,11 @@ public class GXDLMSIECOpticalPortSetup extends GXDLMSObject implements IGXDLMSBa
      * Set value of given attribute.
      */
     @Override
-    public void setValue(int index, Object value, boolean raw)
+    public void setValue(int index, Object value)
     {
         if (index == 1)
         {
-            setLogicalName(GXDLMSObject.toLogicalName((byte[]) value));            
+            super.setValue(index, value);            
         }
         else if (index == 2)
         {

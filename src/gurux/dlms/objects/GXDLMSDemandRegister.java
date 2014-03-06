@@ -87,16 +87,6 @@ public class GXDLMSDemandRegister extends GXDLMSObject implements IGXDLMSBase
         setScaler(1);
     }
     
-    @Override
-    public DataType getDataType(int index)
-    {
-        if (index == 6 || index == 7)
-        {
-            return DataType.DATETIME;
-        }
-        return super.getDataType(index);
-    }
-
     /** 
      Current avarage value of COSEM Data object.
     */
@@ -244,7 +234,7 @@ public class GXDLMSDemandRegister extends GXDLMSObject implements IGXDLMSBase
      * If attribute is static and already read or device is returned HW error it is not returned.
      */
     @Override
-    public int[] GetAttributeIndexToRead()
+    public int[] getAttributeIndexToRead()
     {
         java.util.ArrayList<Integer> attributes = new java.util.ArrayList<Integer>();
         //LN is static and read only once.
@@ -301,7 +291,7 @@ public class GXDLMSDemandRegister extends GXDLMSObject implements IGXDLMSBase
     @Override
     public int getAttributeCount()
     {
-        return 5;
+        return 9;
     }       
     
     /*
@@ -313,15 +303,56 @@ public class GXDLMSDemandRegister extends GXDLMSObject implements IGXDLMSBase
         return 2;
     }
     
+    @Override
+    public DataType getDataType(int index)
+    {
+        if (index == 1)
+        {
+            return DataType.OCTET_STRING;
+        }
+        if (index == 2)
+        {
+            return super.getDataType(index);
+        }
+        if (index == 3)
+        {
+            return super.getDataType(index);
+        }      
+        if (index == 4)
+        {
+            return DataType.ARRAY;
+        }
+        if (index == 5)
+        {
+            return super.getDataType(index);
+        }
+        if (index == 6)
+        {
+            return DataType.DATETIME;
+        }
+        if (index == 7)
+        {
+            return DataType.DATETIME;
+        }
+        if (index == 8)
+        {
+            return DataType.UINT32;
+        } 
+        if (index == 9)
+        {
+            return DataType.UINT16;
+        }  
+        throw new IllegalArgumentException("getDataType failed. Invalid attribute index.");
+    }
+     
     /*
      * Returns value of given attribute.
      */    
     @Override
-    public Object getValue(int index, DataType[] type, byte[] parameters, boolean raw)
+    public Object getValue(int index, int selector, Object parameters)
     {    
         if (index == 1)
         {
-            type[0] = DataType.OCTET_STRING;
             return getLogicalName();
         }
         if (index == 2)
@@ -334,7 +365,6 @@ public class GXDLMSDemandRegister extends GXDLMSObject implements IGXDLMSBase
         }      
         if (index == 4)
         {
-            type[0] = DataType.ARRAY;
             ByteArrayOutputStream data = new ByteArrayOutputStream();
             data.write(DataType.STRUCTURE.getValue());
             data.write(2);            
@@ -356,22 +386,18 @@ public class GXDLMSDemandRegister extends GXDLMSObject implements IGXDLMSBase
         }
         if (index == 6)
         {
-            type[0] = DataType.DATETIME;
             return getCaptureTime();
         }
         if (index == 7)
         {
-            type[0] = DataType.DATETIME;
             return getStartTimeCurrent();
         }
         if (index == 8)
         {
-            type[0] = DataType.UINT32;
             return getPeriod();
         } 
         if (index == 9)
         {
-            type[0] = DataType.UINT16;
             return getNumberOfPeriods();
         }         
         throw new IllegalArgumentException("GetValue failed. Invalid attribute index.");
@@ -381,11 +407,11 @@ public class GXDLMSDemandRegister extends GXDLMSObject implements IGXDLMSBase
      * Set value of given attribute.
      */
     @Override
-    public void setValue(int index, Object value, boolean raw)
+    public void setValue(int index, Object value)
     {
         if (index == 1)
         {
-            setLogicalName(GXDLMSObject.toLogicalName((byte[]) value));            
+            super.setValue(index, value);            
         }
         else if (index == 2)
         {

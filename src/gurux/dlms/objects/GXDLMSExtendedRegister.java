@@ -41,15 +41,15 @@ import gurux.dlms.enums.ObjectType;
 
 public class GXDLMSExtendedRegister extends GXDLMSRegister
 {
-    private GXDateTime privateCaptureTime = new GXDateTime();
-    private Object privateStatus;
+    private GXDateTime CaptureTime = new GXDateTime();
+    private Object Status;
 
     /**  
      Constructor.
     */
     public GXDLMSExtendedRegister()
     {
-        super(ObjectType.EXTENDED_REGISTER, null, 0);
+        super(ObjectType.EXTENDED_REGISTER, null, 0);        
     }
 
     /**  
@@ -73,37 +73,27 @@ public class GXDLMSExtendedRegister extends GXDLMSRegister
     }
    
     /** 
-     Scaler of COSEM Register object.
+     Status of COSEM Extended Register object.
     */
     public final Object getStatus()
     {
-        return privateStatus;
+        return Status;
     }
     public final void setStatus(Object value)
     {
-        privateStatus = value;
+        Status = value;
     }
     
-    @Override
-    public DataType getDataType(int index)
-    {
-        if (index == 5)
-        {
-            return DataType.DATETIME;
-        }
-        return super.getDataType(index);
-    }
-
     /** 
-     Scaler of COSEM Register object.
+     Capture time of COSEM Extended Register object.
     */
     public final GXDateTime getCaptureTime()
     {
-        return privateCaptureTime;
+        return CaptureTime;
     }
     public final void setCaptureTime(GXDateTime value)
     {
-        privateCaptureTime = value;
+        CaptureTime = value;
     }
     
     @Override
@@ -120,7 +110,7 @@ public class GXDLMSExtendedRegister extends GXDLMSRegister
      * If attribute is static and already read or device is returned HW error it is not returned.
      */
     @Override
-    public int[] GetAttributeIndexToRead()
+    public int[] getAttributeIndexToRead()
     {
         java.util.ArrayList<Integer> attributes = new java.util.ArrayList<Integer>();
         //LN is static and read only once.
@@ -160,11 +150,37 @@ public class GXDLMSExtendedRegister extends GXDLMSRegister
         return 5;
     }       
     
+    @Override
+    public DataType getDataType(int index)
+    {
+        if (index == 1)
+        {
+            return DataType.OCTET_STRING;
+        }
+        if (index == 2)
+        {
+            return super.getDataType(index);
+        }
+        if (index == 3)
+        {
+            return DataType.ARRAY;
+        }
+        if (index == 4)
+        {
+            return super.getDataType(index);
+        }
+        if (index == 5)
+        {
+            return DataType.DATETIME;                
+        }
+        throw new IllegalArgumentException("getDataType failed. Invalid attribute index.");
+    }
+     
     /*
      * Returns value of given attribute.
      */    
     @Override
-    public Object getValue(int index, DataType[] type, byte[] parameters, boolean raw)
+    public Object getValue(int index, int selector, Object parameters)
     {        
         if (index == 4)
         {
@@ -172,17 +188,16 @@ public class GXDLMSExtendedRegister extends GXDLMSRegister
         }
         if (index == 5)
         {
-            type[0] = DataType.DATETIME;
             return getCaptureTime();
         }
-        return super.getValue(index, type, parameters, raw);
+        return super.getValue(index, selector, parameters);
     }
     
     /*
      * Set value of given attribute.
      */
     @Override
-    public void setValue(int index, Object value, boolean raw)
+    public void setValue(int index, Object value)
     {
         if (index == 4)
         {
@@ -205,7 +220,7 @@ public class GXDLMSExtendedRegister extends GXDLMSRegister
         }
         else
         {
-            super.setValue(index, value, raw);
+            super.setValue(index, value);
         }
     }
 }

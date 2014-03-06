@@ -43,7 +43,6 @@ import gurux.dlms.enums.DataType;
 import gurux.dlms.enums.Authentication;
 import gurux.dlms.enums.AccessMode;
 import gurux.dlms.enums.Priority;
-import gurux.dlms.enums.Security;
 import gurux.dlms.enums.ServiceClass;
 import gurux.dlms.manufacturersettings.GXObisCodeCollection;
 import gurux.dlms.objects.GXDLMSObject;
@@ -97,11 +96,21 @@ public class GXDLMSClient
             Object serverID,            
             gurux.dlms.enums.Authentication authentication,             
             String password,
-            InterfaceType intefaceType)
+            InterfaceType interfaceType)
     {
         this.setUseLogicalNameReferencing(useLogicalNameReferencing);
         this.setClientID(clientID);
         this.setServerID(serverID);
+        setAuthentication(authentication);
+        try
+        {
+            setPassword(password.getBytes("ASCII"));
+        }
+        catch(Exception ex)
+        {
+            throw new RuntimeException(ex.getMessage());
+        }    
+        setInterfaceType(interfaceType);
     }
     
     /*
@@ -603,7 +612,7 @@ public class GXDLMSClient
     */
     public final byte[][] AARQRequest(GXDLMSTagCollection Tags)
     {           
-        java.nio.ByteBuffer buff = java.nio.ByteBuffer.allocate(100);
+        java.nio.ByteBuffer buff = java.nio.ByteBuffer.allocate(200);
         m_Base.checkInit();
         GXAPDU aarq = new GXAPDU(Tags);
         aarq.setUseLN(this.getUseLogicalNameReferencing());        
@@ -729,7 +738,7 @@ public class GXDLMSClient
     /// Get challenge request if HLS authentication is used.
     /// </summary>
     /// <returns></returns>
-    public byte[] getApplicationAssociationRequest()
+    public byte[][] getApplicationAssociationRequest()
     {
         if (m_Password == null || m_Password.length == 0)
         {
@@ -748,9 +757,9 @@ public class GXDLMSClient
         byte[] challenge = GXDLMSServerBase.chipher(getAuthentication(), CtoS.toByteArray());
         if (getUseLogicalNameReferencing())
         {
-            return method("0.0.40.0.0.255", ObjectType.ASSOCIATION_LOGICAL_NAME, 1, challenge, DataType.OCTET_STRING);
+            return method("0.0.40.0.0.255", ObjectType.ASSOCIATION_LOGICAL_NAME, 1, challenge, 1, DataType.OCTET_STRING);
         }
-        return method(0xFA00, ObjectType.ASSOCIATION_SHORT_NAME, 8, challenge, DataType.OCTET_STRING);            
+        return method(0xFA00, ObjectType.ASSOCIATION_SHORT_NAME, 8, challenge, 1, DataType.OCTET_STRING);            
     }
 
     /// <summary>
@@ -773,7 +782,6 @@ public class GXDLMSClient
         {
             throw new RuntimeException(ex.getMessage());        
         }
-        java.nio.ByteBuffer arr = java.nio.ByteBuffer.wrap(tmp.toByteArray());
         if (!packetFull[0])
         {
             throw new GXDLMSException("Not enought data to parse frame.");
@@ -783,10 +791,6 @@ public class GXDLMSClient
             throw new GXDLMSException("Wrong Checksum.");
         }
         int[] index = new int[1];
-        //Skip invoke ID and priority.
-        index[0] += 2;
-        //Skip Error
-        ++index[0];
         //Skip item count
         ++index[0];
         //Skip item status
@@ -957,25 +961,28 @@ public class GXDLMSClient
                 AccessMode mode = AccessMode.forValue(tmp);
                 obj.setAccess(id, mode);
             }
-            if (getUseLogicalNameReferencing())                
+            for (Object methodAccess : (Object[])access[1])
             {
-                /* //TODO:
-                for (Object methodAccess : (Object[])access[1])
+                int id = ((Number)((Object[]) methodAccess)[0]).intValue();
+                int tmp;
+                //If version is 0
+                if (((Object[]) methodAccess)[1] instanceof Boolean)
                 {
-                    int id = ((Number)((Object[]) methodAccess)[0]).intValue();
-                    boolean tmp = (boolean) ((Object[]) methodAccess)[1];
+                    if ((boolean) ((Object[]) methodAccess)[1])
+                    {
+                        tmp = 1;
+                    }
+                    else
+                    {
+                        tmp = 0;
+                    }
                 }
-                * */
-            }
-            else
-            {
-                for (Object methodAccess : (Object[])access[1])
+                else //If version is 1.
                 {
-                    int id = ((Number)((Object[]) methodAccess)[0]).intValue();
-                    int tmp = ((Number)((Object[]) methodAccess)[1]).intValue();
-                    MethodAccessMode mode = MethodAccessMode.forValue(tmp);
-                    obj.setMethodAccess(id, mode);
+                    tmp = ((Number)((Object[]) methodAccess)[1]).intValue();
                 }
+                MethodAccessMode mode = MethodAccessMode.forValue(tmp);
+                obj.setMethodAccess(id, mode);
             }
         }
         if (baseName != null)
@@ -1289,7 +1296,8 @@ public class GXDLMSClient
      */
     public final Object updateValue(byte[] data, GXDLMSObject target, int attributeIndex) throws Exception
     {
-        target.setValue(attributeIndex, getValue(data, target, attributeIndex), false);        
+        Object value = getValue(data, target, attributeIndex);
+        target.setValue(attributeIndex, value);        
         return target.getValues()[attributeIndex - 1];
     }
 
@@ -1299,17 +1307,17 @@ public class GXDLMSClient
      */
     public final Object getValue(byte[] data, GXDLMSObject target, int attributeIndex) throws Exception
     {        
-        if (getCiphering().getSecurity() != Security.NONE)
-        {
-            Command[] cmd = new Command[1];
-            data = m_Base.decrypt(data, cmd);
-        }
         DataType type = target.getDataType(attributeIndex);
         Object value = getValue(data);
         if (type != DataType.NONE)
         {           
             if (value instanceof byte[])
             {
+                if (type == DataType.OCTET_STRING && 
+                        target.getUIDataType(attributeIndex) == DataType.NONE)
+                {
+                    return value;
+                }
                 return GXDLMSClient.changeType((byte[]) value, type);
             }
             if (type == DataType.UINT8)
@@ -1345,11 +1353,6 @@ public class GXDLMSClient
     */
     public final Object getValue(byte[] data, ObjectType type, String ln, int attributeIndex) throws Exception
     {
-        if (getCiphering().getSecurity() != Security.NONE)
-        {
-            Command[] cmd = new Command[1];
-            data = m_Base.decrypt(data, cmd);
-        }
         Object value = getValue(data);
         if (value instanceof byte[])
         {
@@ -1398,11 +1401,6 @@ public class GXDLMSClient
     */
     public final Object getValue(byte[] data)
     {
-        if (getCiphering().getSecurity() != Security.NONE)
-        {
-            Command[] cmd = new Command[1];
-            data = m_Base.decrypt(data, cmd);
-        }
         if (!getUseCache() || data.length < m_Base.cacheIndex)
         {
             m_Base.clearProgress();
@@ -1567,9 +1565,9 @@ public class GXDLMSClient
      * @param index Methdod index.
      @return DLMS action message.
     */
-     public final byte[] method(Object name, ObjectType objectType, int index, Object data)
+     public final byte[][] method(GXDLMSObject item, int index, Object data, DataType type)
     {
-        return method(name, objectType, index, data, DataType.NONE);         
+        return method(item.getName(), item.getObjectType(), index, data, 1, type);         
     }
      
       /** 
@@ -1581,7 +1579,7 @@ public class GXDLMSClient
      @param index Method index.
      @return DLMS action message.
     */    
-    public final byte[] method(Object name, ObjectType objectType, int index, Object data, DataType type)
+    public final byte[][] method(Object name, ObjectType objectType, int index, Object data, int parameterCount, DataType type)
     {
         if (name == null || index < 1)
         {
@@ -1589,20 +1587,7 @@ public class GXDLMSClient
         }
         m_Base.clearProgress();
         ByteArrayOutputStream buff = new ByteArrayOutputStream();
-        try
-        {
-            if (type == DataType.NONE)
-            {
-                type = GXCommon.getValueType(data);
-            }
-            GXCommon.setData(buff, type, data);
-        }        
-        catch (Exception ex) 
-        {
-            Logger.getLogger(GXDLMSClient.class.getName()).log(Level.SEVERE, null, ex);
-            throw new RuntimeException(ex.getMessage());
-        }
-        if (!this.getUseLogicalNameReferencing())
+        if (!getUseLogicalNameReferencing())
         {
             int[] value = new int[1], count = new int[1];
             GXDLMS.getActionInfo(objectType, value, count);
@@ -1610,9 +1595,26 @@ public class GXDLMSClient
             {
                 throw new IllegalArgumentException("methodIndex");
             }
-            index = (value[0] + (index - 1) * 0x8);
+            index = (value[0] + (index - 1) * 0x8);           
+            name = ((Number)name).intValue() + index;
+            index = 0;
+            if (data != null)
+            {
+                //Add parameter count.
+                buff.write((byte) parameterCount);
+            }
         }
-        return m_Base.generateMessage(name, 0, buff.toByteArray(), objectType, index, Command.MethodRequest)[0];
+        GXCommon.setData(buff, type, data);        
+        Command cmd;
+        if (getUseLogicalNameReferencing())
+        {
+            cmd = Command.MethodRequest;
+        }
+        else
+        {
+            cmd = Command.ReadRequest;
+        } 
+        return m_Base.generateMessage(name, buff.toByteArray(), objectType, index, cmd);
     }
    
     /*
@@ -1621,10 +1623,10 @@ public class GXDLMSClient
     public final byte[][] write(GXDLMSObject item, 
             int index)
             throws RuntimeException, UnsupportedEncodingException, ParseException
-    {
-        DataType[] type = new DataType[]{DataType.NONE};
-        Object value = item.getValue(index, type, null, true);
-        return write(item.getName(), value, type[0], item.getObjectType(), index);
+    {        
+        Object value = item.getValue(index, 0, null);
+        DataType type = item.getDataType(index);
+        return write(item.getName(), value, type, item.getObjectType(), index);
     }
     
     /** 
@@ -1654,17 +1656,9 @@ public class GXDLMSClient
             }
         }
         ByteArrayOutputStream buff = new ByteArrayOutputStream();
-        try
-        {
-            GXCommon.setData(buff, type, value);
-        }
-        catch (IOException ex) 
-        {
-            Logger.getLogger(GXDLMSClient.class.getName()).log(Level.SEVERE, null, ex);
-            throw new RuntimeException(ex.getMessage());
-        }
+        GXCommon.setData(buff, type, value);
         m_Base.clearProgress();
-        return m_Base.generateMessage(name, 2, buff.toByteArray(), objectType, index, 
+        return m_Base.generateMessage(name, buff.toByteArray(), objectType, index, 
                 this.getUseLogicalNameReferencing() ? Command.SetRequest : 
                 Command.WriteRequest);
     }
@@ -1685,7 +1679,7 @@ public class GXDLMSClient
         }
         //Clear cache
         m_Base.clearProgress();
-        return m_Base.generateMessage(name, 2, new byte[0], objectType, attributeOrdinal, this.getUseLogicalNameReferencing() ? Command.GetRequest : Command.ReadRequest);
+        return m_Base.generateMessage(name, new byte[0], objectType, attributeOrdinal, this.getUseLogicalNameReferencing() ? Command.GetRequest : Command.ReadRequest);
     }
 
     /** 
@@ -1703,7 +1697,7 @@ public class GXDLMSClient
         }
         //Clear cache
         m_Base.clearProgress();
-        return m_Base.generateMessage(item.getName(), 2, new byte[0], item.getObjectType(), attributeOrdinal, this.getUseLogicalNameReferencing() ? Command.GetRequest : Command.ReadRequest);
+        return m_Base.generateMessage(item.getName(), new byte[0], item.getObjectType(), attributeOrdinal, this.getUseLogicalNameReferencing() ? Command.GetRequest : Command.ReadRequest);
     }
 
     /** 
@@ -1733,7 +1727,6 @@ public class GXDLMSClient
      @return Read message as byte array.
     */
     public final byte[] readRowsByEntry(Object name, int index, int count)
-            throws RuntimeException, UnsupportedEncodingException, ParseException
     {
         m_Base.clearProgress();
         java.nio.ByteBuffer buff = java.nio.ByteBuffer.allocate(19);
@@ -1742,9 +1735,9 @@ public class GXDLMSClient
         buff.put((byte) 0x04); //Add item count
         GXCommon.setData(buff, DataType.UINT32, index); //Add start index
         GXCommon.setData(buff, DataType.UINT32, count); //Add Count
-        GXCommon.setData(buff, DataType.UINT16, 0); //Read all columns.
+        GXCommon.setData(buff, DataType.UINT16, 1); //Read all columns.
         GXCommon.setData(buff, DataType.UINT16, 0);
-        return m_Base.generateMessage(name, 4, buff.array(), 
+        return m_Base.generateMessage(name, buff.array(), 
                 ObjectType.PROFILE_GENERIC, 2, 
                 this.getUseLogicalNameReferencing() ? 
                 Command.GetRequest : Command.ReadRequest)[0];
@@ -1785,7 +1778,7 @@ public class GXDLMSClient
         byte[] tmp = new byte[buff.position()];        
         buff.position(0);
         buff.get(tmp);
-        return m_Base.generateMessage(name, 4, tmp, 
+        return m_Base.generateMessage(name, tmp, 
                 ObjectType.PROFILE_GENERIC, 2, 
                 this.getUseLogicalNameReferencing() ? 
                 Command.GetRequest : Command.ReadRequest)[0];

@@ -35,6 +35,7 @@
 package gurux.dlms.internal;
 
 import gurux.dlms.GXDateTime;
+import gurux.dlms.enums.ClockStatus;
 import gurux.dlms.enums.DataType;
 import gurux.dlms.enums.DateTimeSkips;
 import java.io.ByteArrayOutputStream;
@@ -105,6 +106,35 @@ public class GXCommon
         return new byte[0];
     }
     
+    /*
+    /// Convert string to byte array.
+    */
+    public static byte[] hexToBytes(String str, boolean includeSpace)
+    {
+        if (includeSpace && !str.isEmpty() && str.charAt(str.length() -1) != ' ')
+        {
+            str += " ";
+        }
+        int cnt = includeSpace ? 3 : 2;
+        if (str.length() == 0 || str.length() % cnt != 0)
+        {
+            throw new RuntimeException("Not hex string");
+        }
+        byte[] buffer = new byte[str.length() / cnt];
+        char c;
+        for (int bx = 0, sx = 0; bx < buffer.length; ++bx, ++sx)
+        {
+            c = str.charAt(sx);
+            buffer[bx] = (byte)((c > '9' ? (c > 'Z' ? (c - 'a' + 10) : (c - 'A' + 10)) : (c - '0')) << 4);
+            c = str.charAt(++sx);
+            buffer[bx] |= (byte)(c > '9' ? (c > 'Z' ? (c - 'a' + 10) : (c - 'A' + 10)) : (c - '0'));
+            if (includeSpace)
+            {
+                ++sx;
+            }
+        }
+        return buffer;
+    }
     /*
      * Convert byte array to hex string.
      */
@@ -352,6 +382,13 @@ public class GXCommon
                 tmp = java.nio.ByteBuffer.allocate(2);
                 tmp.putShort((short)count);
             }
+            else if(cnt == 3)
+            {
+                tmp = java.nio.ByteBuffer.allocate(3);
+                tmp.put((byte)(count >> 16));
+                tmp.put((byte)((count >> 8) & 0xFF));
+                tmp.put((byte) (count & 0xFF));
+            }
             else if(cnt == 4)
             {
                 tmp = java.nio.ByteBuffer.allocate(4);
@@ -525,7 +562,7 @@ public class GXCommon
     /** 
      Reserved for internal use.
     */
-    static String ToBitString(byte value, int count)
+    static void ToBitString(StringBuilder sb, byte value, int count)
     {
         if (count > 8)
         {
@@ -543,7 +580,7 @@ public class GXCommon
                 data[count - pos - 1] = '0';
             }
         }
-        return new String(data);
+        sb.append(data);
     }
     /** 
      Reserved for internal use.
@@ -623,8 +660,9 @@ public class GXCommon
         }
         else if (type[0] == DataType.BITSTRING)
         {
-            int cnt = buff[pos[0]++];
-            --size;
+            int oldPos = pos[0];
+            int cnt = getObjectCount(buff, pos);
+            size -= pos[0] - oldPos;            
             double t = cnt;
             t /= 8;
             if (cnt % 8 != 0)
@@ -637,13 +675,13 @@ public class GXCommon
                 pos[0] = -1;
                 return null;
             }
-            String str = "";
+            StringBuilder sb = new StringBuilder();
             while (cnt > 0)
             {
-                str += ToBitString(buff[pos[0]++], cnt);
+                ToBitString(sb, buff[pos[0]++], cnt);
                 cnt -= 8;
             }
-            value = new String(str);
+            value = sb.toString();
         }
         else if (type[0] == DataType.INT32)
         {
@@ -883,87 +921,30 @@ public class GXCommon
                     return null;
                 }
             }
-            java.util.Set<DateTimeSkips> skip = EnumSet.noneOf(DateTimeSkips.class);
-            java.util.Calendar tm = java.util.Calendar.getInstance(java.util.TimeZone.getTimeZone("UTC"));
             //Get year.
-            int val = GXCommon.getUInt16(buff, pos);
-            if (val != 0xFFFF)
-            {
-                tm.set(java.util.Calendar.YEAR, val);
-            }
-            else
-            {
-                skip.add(DateTimeSkips.YEAR);
-                tm.set(java.util.Calendar.YEAR, 0);
-            }
+            int year = GXCommon.getUInt16(buff, pos);
             //Get month
-            val = buff[pos[0]++];
-            if (val > 0 && val < 13)
-            {
-                tm.set(java.util.Calendar.MONTH, val - 1);
-            }
-            else
-            {
-                skip.add(DateTimeSkips.MONTH);
-                tm.set(java.util.Calendar.MONTH, 0);
-            }
+            int month = buff[pos[0]++];
             //Get day
-            val = buff[pos[0]++];
-            if (val > 0 && val < 32)
-            {
-                tm.set(java.util.Calendar.DATE, val);
-            }
-            else
-            {
-                skip.add(DateTimeSkips.DAY);
-                tm.set(java.util.Calendar.DATE, 0);
-            }
+            int day = buff[pos[0]++];
             //Skip week day
             pos[0]++;
             //Get time.
-            val = buff[pos[0]++];
-            if (val != -1)
+            int hour = buff[pos[0]++];
+            int minute = buff[pos[0]++];
+            int second = buff[pos[0]++];
+            int ms = buff[pos[0]++] & 0xFF;
+            if (ms != 0xFF)
             {
-                tm.set(java.util.Calendar.HOUR_OF_DAY, val);
+                ms *= 10;
             }
             else
             {
-                skip.add(DateTimeSkips.HOUR);
-                tm.set(java.util.Calendar.HOUR_OF_DAY, 0);
+                ms = 0;
             }
-            val = buff[pos[0]++];
-            if (val != -1)
-            {
-                tm.set(java.util.Calendar.MINUTE, val);
-            }
-            else
-            {
-                skip.add(DateTimeSkips.MINUTE);
-                tm.set(java.util.Calendar.MINUTE, 0);
-            }
-            val = buff[pos[0]++];
-            if (val != -1)
-            {
-                tm.set(java.util.Calendar.SECOND, val);
-            }
-            else
-            {
-                skip.add(DateTimeSkips.SECOND);
-                tm.set(java.util.Calendar.SECOND, 0);
-            }
-            //Skip milliseconds.
-            val = buff[pos[0]++];
-            if (val != -1)
-            {
-                skip.add(DateTimeSkips.MILLISECOND);
-                tm.set(java.util.Calendar.MILLISECOND, val);
-            }
-            else
-            {
-                tm.set(java.util.Calendar.MILLISECOND, 0);
-            }
-            GXDateTime dt = new GXDateTime(tm.getTime());
-            dt.setSkip(skip);
+            int deviation = GXCommon.getUInt16(buff, pos);                            
+            GXDateTime dt = new GXDateTime(year, month, day, hour, minute, second, ms, deviation);
+            dt.setStatus(ClockStatus.forValue(buff[pos[0]++]));
             value = dt;
         }
         else if (type[0] == DataType.DATE)
@@ -981,48 +962,15 @@ public class GXCommon
                 pos[0] = -1;
                 return null;
             }
-            java.util.Set<DateTimeSkips> skip = EnumSet.of(DateTimeSkips.HOUR);
-            skip.add(DateTimeSkips.MINUTE);
-            skip.add(DateTimeSkips.SECOND);
-            skip.add(DateTimeSkips.MILLISECOND);
-            java.util.Calendar tm = java.util.Calendar.getInstance(java.util.TimeZone.getTimeZone("UTC"));
             //Get year.
-            int val = GXCommon.getUInt16(buff, pos);
-            if (val != -1)
-            {
-                tm.set(java.util.Calendar.YEAR, val);
-            }
-            else
-            {
-                skip.add(DateTimeSkips.YEAR);
-                tm.set(java.util.Calendar.YEAR, 0);
-            }
+            int year = GXCommon.getUInt16(buff, pos);
             //Get month
-            val = buff[pos[0]++];
-            if (val > 0 && val < 13)
-            {
-                tm.set(java.util.Calendar.MONTH, val - 1);
-            }
-            else
-            {
-                skip.add(DateTimeSkips.MONTH);
-                tm.set(java.util.Calendar.MONTH, 0);
-            }
+            int month = buff[pos[0]++];
             //Get day
-            val = buff[pos[0]++];
-            if (val > 0 && val < 32)
-            {
-                tm.set(java.util.Calendar.DATE, val);
-            }
-            else
-            {
-                skip.add(DateTimeSkips.DAY);
-                tm.set(java.util.Calendar.DATE, 0);
-            }
+            int day = buff[pos[0]++];
             //Skip week day
             pos[0]++;
-            GXDateTime dt = new GXDateTime(tm.getTime());
-            dt.setSkip(skip);
+            GXDateTime dt = new GXDateTime(year, month, day, -1, -1, -1, -1);
             value = dt;                            
         }
         else if (type[0] == DataType.TIME)
@@ -1040,55 +988,12 @@ public class GXCommon
                 pos[0] = -1;
                 return null;
             }
-            java.util.Set<DateTimeSkips> skip = EnumSet.of(DateTimeSkips.DAY);
-            skip.add(DateTimeSkips.DAY_OF_WEEK);
-            skip.add(DateTimeSkips.MONTH);
-            skip.add(DateTimeSkips.YEAR);            
-            java.util.Calendar tm = java.util.Calendar.getInstance(java.util.TimeZone.getTimeZone("UTC"));
             //Get time.
-            int val = buff[pos[0]++];
-            if (val != -1)
-            {
-                tm.set(java.util.Calendar.HOUR_OF_DAY, val);
-            }
-            else
-            {
-                skip.add(DateTimeSkips.HOUR);
-                tm.set(java.util.Calendar.HOUR_OF_DAY, 0);
-            }
-            val = buff[pos[0]++];
-            if (val != -1)
-            {
-                tm.set(java.util.Calendar.MINUTE, val);
-            }
-            else
-            {
-                skip.add(DateTimeSkips.MINUTE);
-                tm.set(java.util.Calendar.MINUTE, 0);
-            }
-            val = buff[pos[0]++];
-            if (val != -1)
-            {
-                tm.set(java.util.Calendar.SECOND, val);
-            }
-            else
-            {
-                skip.add(DateTimeSkips.SECOND);
-                tm.set(java.util.Calendar.SECOND, 0);
-            }
-            //Skip milliseconds.
-            val = buff[pos[0]++];
-            if (val != -1)
-            {
-                tm.set(java.util.Calendar.MILLISECOND, val);
-            }
-            else
-            {
-                skip.add(DateTimeSkips.MILLISECOND);
-                tm.set(java.util.Calendar.MILLISECOND, 0);
-            }
-            GXDateTime dt = new GXDateTime(tm.getTime());
-            dt.setSkip(skip);
+            int hour = buff[pos[0]++];
+            int minute = buff[pos[0]++];
+            int second = buff[pos[0]++];            
+            int ms = buff[pos[0]++];
+            GXDateTime dt = new GXDateTime(-1, -1, -1, hour, minute, second, ms);
             value = dt;
         }
         else
@@ -1105,429 +1010,494 @@ public class GXCommon
      @param type
      @param value
     */
-    public static void setData(ByteArrayOutputStream buff, DataType type, Object value) 
-            throws RuntimeException, UnsupportedEncodingException, ParseException, 
-            IOException
+    public static void setData(ByteArrayOutputStream buff, DataType type, Object value)            
     {
-        //If value is enum get integer value.
-        if (value instanceof Enum)
+        try
         {
-            throw new RuntimeException("Value can't be enum. Give integer value.");
-        }
-        if (type == DataType.OCTET_STRING && value instanceof GXDateTime)
-        {
-            type = DataType.DATETIME;
-        }
-        if (type == DataType.DATETIME ||
-                type == DataType.DATE ||
-                type == DataType.TIME)
-        {
-            buff.write(DataType.OCTET_STRING.getValue());
-        }
-         //If byte array is added do not add type.
-        else if (type == DataType.ARRAY && value instanceof byte[])
-        {
-            buff.write((byte[]) value);
-            return;
-        }
-        else
-        {
-            buff.write(type.getValue());
-        }
-        if (type == DataType.NONE)
-        {
-            return;
-        }
-        if (type == DataType.BOOLEAN)
-        {
-            if (Boolean.parseBoolean(value.toString()))
+            //If value is enum get integer value.
+            if (value instanceof Enum)
             {
-                buff.write(1);
+                throw new RuntimeException("Value can't be enum. Give integer value.");
+            }
+            if (type == DataType.OCTET_STRING && value instanceof GXDateTime)
+            {
+                type = DataType.DATETIME;
+            }
+            if (type == DataType.DATETIME ||
+                    type == DataType.DATE ||
+                    type == DataType.TIME)
+            {
+                buff.write(DataType.OCTET_STRING.getValue());
+            }
+             //If byte array is added do not add type.
+            else if ((type == DataType.ARRAY || type == DataType.STRUCTURE) && value instanceof byte[])
+            {
+                buff.write((byte[]) value);
+                return;
             }
             else
             {
-                buff.write(0);
+                buff.write(type.getValue());
             }
-        }
-        else if (type == DataType.INT8 || type == DataType.UINT8 ||
-            type == DataType.ENUM)
-        {
-            buff.write(((Number)value).byteValue());
-        }
-        else if (type == DataType.INT16 || type == DataType.UINT16)
-        {
-            java.nio.ByteBuffer tmp = java.nio.ByteBuffer.allocate(2);
-            tmp.putShort(((Number)value).shortValue());
-            buff.write(tmp.array());
-        }
-        else if (type == DataType.INT32 || type == DataType.UINT32)
-        {
-            java.nio.ByteBuffer tmp = java.nio.ByteBuffer.allocate(4);
-            tmp.putInt(((Number)value).intValue());
-            buff.write(tmp.array());
-        }
-        else if (type == DataType.INT64 || type == DataType.UINT64)
-        {
-            java.nio.ByteBuffer tmp = java.nio.ByteBuffer.allocate(8);
-            tmp.putLong(((Number)value).longValue());
-            buff.write(tmp.array());            
-        }
-        else if (type == DataType.FLOAT32)
-        {
-            java.nio.ByteBuffer tmp = java.nio.ByteBuffer.allocate(4);
-            tmp.putFloat(((Number)value).floatValue());
-            buff.write(tmp.array());
-        }
-        else if (type == DataType.FLOAT64)
-        {
-            java.nio.ByteBuffer tmp = java.nio.ByteBuffer.allocate(8);
-            tmp.putDouble(((Number)value).doubleValue());
-            buff.write(tmp.array());
-        }
-        else if (type == DataType.BITSTRING)
-        {
-            throw new RuntimeException("Invalid data type.");
-        }
-        else if (type == DataType.STRING)
-        {
-            if (value != null)
+            if (type == DataType.NONE)
             {
-                String str = value.toString();
-                setObjectCount(str.length(), buff);
-                buff.write(str.getBytes("ASCII"));                 
+                return;
             }
-            else
+            if (type == DataType.BOOLEAN)
             {
-                setObjectCount(0, buff);
-            }
-        }
-        else if (type == DataType.STRING_UTF8)
-        {
-            if (value != null)
-            {
-                String str = value.toString();
-                setObjectCount(str.length(), buff);
-                buff.write(str.getBytes("UTF-8"));                 
-            }
-            else
-            {
-                setObjectCount(0, buff);
-            }
-        }
-        
-        //Excample Logical name is octet string, so do not change to string...
-        else if (type == DataType.OCTET_STRING)
-        {
-            if (value instanceof String)
-            {
-                String[] items = ((String)value).split("[.]", -1);
-                if (items.length == 1 && items[0].equals(value))
+                if (Boolean.parseBoolean(value.toString()))
                 {
-                    setObjectCount(((String)value).length(), buff);
-                    buff.write(((String)value).getBytes("ASCII"));                    
+                    buff.write(1);
                 }
                 else
                 {
-                    setObjectCount(items.length, buff);
-                    for (String it : items)
-                    {
-                        buff.write(Integer.parseInt(it));
-                    }
+                    buff.write(0);
                 }
             }
-            else if (value instanceof byte[])
+            else if (type == DataType.INT8 || type == DataType.UINT8 ||
+                type == DataType.ENUM)
             {
-                setObjectCount(((byte[])value).length, buff);
-                buff.write((byte[])value);
+                buff.write(((Number)value).byteValue());
             }
-            else if (value == null)
-            {
-                setObjectCount(0, buff);
-            }
-            else
-            {
-                 throw new RuntimeException("Invalid data type.");
-            }
-        }
-        else if (type == DataType.ARRAY || type == DataType.STRUCTURE)
-        {
-            if (value != null)
-            {
-                int len = Array.getLength(value);
-                setObjectCount(len, buff);                
-                for (int pos = 0; pos != len; ++pos)
-                {
-                    Object it = Array.get(value, pos);
-                    setData(buff, getValueType(it), it);
-                }
-            }
-            else
-            {
-                setObjectCount(0, buff);
-            }
-        }        
-        else if (type == DataType.BCD)
-        {
-            if (!(value instanceof String))
-            {
-                throw new RuntimeException("BCD value must give as string.");
-            }
-            String str = value.toString().trim();
-            int len = str.length();
-            if (len % 2 != 0)
-            {
-                str = "0" + str;
-                ++len;
-            }
-            len /= 2;
-            buff.write(len);
-            for (int pos = 0; pos != len; ++pos)
-            {
-                int ch1 = Integer.parseInt(str.substring(2 * pos, 2 * pos + 1));
-                int ch2 = Integer.parseInt(str.substring(2 * pos + 1, 2 * pos + 1 + 1));
-                buff.write((byte)(ch1 << 4 | ch2));
-            }
-        }
-        else if (type == DataType.COMPACTARRAY)
-        {
-            throw new RuntimeException("Invalid data type.");
-        }
-        else if (type == DataType.DATETIME)
-        {
-            java.util.Set<DateTimeSkips> skip = EnumSet.noneOf(DateTimeSkips.class);
-            java.util.Calendar tm = java.util.Calendar.getInstance(java.util.TimeZone.getTimeZone("UTC"));
-            if (value instanceof GXDateTime)
-            {
-                GXDateTime tmp = (GXDateTime) value;
-                tm.setTime(tmp.getValue());
-                skip = tmp.getSkip();
-            }
-            else if (value instanceof java.util.Date)
-            {
-                tm.setTime((java.util.Date) value);
-            }
-            else if(value instanceof java.util.Calendar)
-            {
-                tm.setTime(((java.util.Calendar) value).getTime());
-            }
-            else if (value instanceof String)
-            {
-                DateFormat f = new SimpleDateFormat();
-                try
-                {                        
-                    tm.setTime(f.parse(value.toString()));
-                }
-                catch(ParseException ex)
-                {
-                    throw new RuntimeException("Invalid date time value." + ex.getMessage());
-                }
-            }
-            else
-            {
-                throw new RuntimeException("Invalid date format.");
-            }
-            //Add size
-            buff.write(12);
-            //Add year.
-            if (skip.contains(DateTimeSkips.YEAR))
-            {
-                buff.write(0xFF);
-                buff.write(0xFF);
-            }
-            else
+            else if (type == DataType.INT16 || type == DataType.UINT16)
             {
                 java.nio.ByteBuffer tmp = java.nio.ByteBuffer.allocate(2);
-                tmp.putShort((short) tm.get(java.util.Calendar.YEAR));
-                buff.write(tmp.array());                        
-            }
-            //Add month
-            if (skip.contains(DateTimeSkips.MONTH))
-            {
-                buff.write(0xFF);
-            }
-            else
-            {
-                buff.write((tm.get(java.util.Calendar.MONTH) + 1));                
-            }
-            //Add day
-            if (skip.contains(DateTimeSkips.DAY))
-            {
-                buff.write(0xFF);
-            }
-            else
-            {
-                buff.write(tm.get(java.util.Calendar.DATE));
-            }
-            //Week day is not spesified.
-            buff.write(0xFF);
-            //Add time.
-            if (skip.contains(DateTimeSkips.HOUR))
-            {
-                buff.write(0xFF);
-            }
-            else
-            {
-                buff.write(tm.get(java.util.Calendar.HOUR_OF_DAY));                
-            }
-            if (skip.contains(DateTimeSkips.MINUTE))
-            {
-                buff.write(0xFF);
-            }
-            else
-            {
-                buff.write(tm.get(java.util.Calendar.MINUTE));            
-            }
-            if (skip.contains(DateTimeSkips.SECOND))
-            {
-                buff.write(0xFF);
-            }
-            else
-            {
-                buff.write(tm.get(java.util.Calendar.SECOND));                
-            }
-            buff.write(0xFF); //Hundredths of second is not used.
-            //Add deviation (Not used).
-            buff.write(0x80);
-            buff.write(0x00);
-            //Add clock_status
-            buff.write(0xFF);   
-        }
-        else if (type == DataType.DATE)
-        {
-            java.util.Set<DateTimeSkips> skip = EnumSet.noneOf(DateTimeSkips.class);
-            java.util.Calendar tm = java.util.Calendar.getInstance(java.util.TimeZone.getTimeZone("UTC"));
-            if (value instanceof GXDateTime)
-            {
-                GXDateTime tmp = (GXDateTime) value;
-                tm.setTime(tmp.getValue());
-                skip = tmp.getSkip();
-            }
-            else if (value instanceof java.util.Date)
-            {
-                tm.setTime((java.util.Date) value);
-            }
-            else if(value instanceof java.util.Calendar)
-            {
-                tm.setTime(((java.util.Calendar) value).getTime());
-            }
-            else if (value instanceof String)
-            {
-                DateFormat f = new SimpleDateFormat();
-                tm.setTime(f.parse(value.toString()));
-            }
-            else
-            {
-                throw new RuntimeException("Invalid date format.");
-            }
-            //Add size
-            buff.write(5);
-            //Add year.
-            if (skip.contains(DateTimeSkips.YEAR))
-            {
-                buff.write(0xFF);
-                buff.write(0xFF);
-            }
-            else
-            {
-                java.nio.ByteBuffer tmp = java.nio.ByteBuffer.allocate(2);
-                tmp.putShort((short) tm.get(java.util.Calendar.YEAR));
+                tmp.putShort(((Number)value).shortValue());
                 buff.write(tmp.array());
             }
-            //Add month
-            if (skip.contains(DateTimeSkips.MONTH))
+            else if (type == DataType.INT32 || type == DataType.UINT32)
             {
-                buff.write(0xFF);
+                java.nio.ByteBuffer tmp = java.nio.ByteBuffer.allocate(4);
+                tmp.putInt(((Number)value).intValue());
+                buff.write(tmp.array());
             }
-            else
+            else if (type == DataType.INT64 || type == DataType.UINT64)
             {
-                buff.write((tm.get(java.util.Calendar.MONTH) + 1));               
+                java.nio.ByteBuffer tmp = java.nio.ByteBuffer.allocate(8);
+                tmp.putLong(((Number)value).longValue());
+                buff.write(tmp.array());            
             }
-            //Add day
-            if (skip.contains(DateTimeSkips.DAY))
+            else if (type == DataType.FLOAT32)
             {
-                buff.write(0xFF);
+                java.nio.ByteBuffer tmp = java.nio.ByteBuffer.allocate(4);
+                tmp.putFloat(((Number)value).floatValue());
+                buff.write(tmp.array());
             }
-            else
+            else if (type == DataType.FLOAT64)
             {
-                buff.write(tm.get(java.util.Calendar.DATE));                
+                java.nio.ByteBuffer tmp = java.nio.ByteBuffer.allocate(8);
+                tmp.putDouble(((Number)value).doubleValue());
+                buff.write(tmp.array());
             }
-            //Week day is not spesified.
-            buff.write(0xFF);
-        }
-        else if (type == DataType.TIME)
-        {
-            java.util.Set<DateTimeSkips> skip = EnumSet.noneOf(DateTimeSkips.class);
-            java.util.Calendar tm = java.util.Calendar.getInstance(java.util.TimeZone.getTimeZone("UTC"));
-            if (value instanceof GXDateTime)
+            else if (type == DataType.BITSTRING)
             {
-                GXDateTime tmp = (GXDateTime) value;
-                tm.setTime(tmp.getValue());
-                skip = tmp.getSkip();
-            }
-            else if (value instanceof java.util.Date)
-            {
-                tm.setTime((java.util.Date) value);
-            }
-            else if(value instanceof java.util.Calendar)
-            {
-                tm.setTime(((java.util.Calendar) value).getTime());
-            }
-            else if (value instanceof String)
-            {
-                DateFormat f = new SimpleDateFormat();
-                try
-                {                        
-                    tm.setTime(f.parse(value.toString()));
-                }
-                catch(ParseException ex)
+                if (value instanceof String)
                 {
-                    throw new RuntimeException("Invalid date time value.\r\n" + 
-                            ex.getMessage());
+                    byte val = 0;
+                    int index = 0;
+                    String str = new StringBuilder((String) value).reverse().toString();
+                    setObjectCount(str.length(), buff);
+                    for (char it : str.toCharArray())
+                    {
+                        if (it == '1')
+                        {
+                            val |= (byte)(1 << index++);
+                        }
+                        else if (it == '0')
+                        {
+                            index++;
+                        }
+                        else 
+                        {
+                            throw new RuntimeException("Not a bit string.");
+                        }
+                        if (index == 8)
+                        {
+                            index = 0;
+                            buff.write(val);
+                            val = 0;
+                        }
+                    }
+                    if (index != 0)
+                    {
+                        buff.write(val);
+                    }
+                }
+                else if (value instanceof byte[])
+                {
+                    byte[] arr = (byte[]) value;
+                    setObjectCount(arr.length, buff);
+                    buff.write(arr);
+                }
+                else if (value == null)
+                {
+                    buff.write(0);
+                }
+                else
+                {
+                    throw new RuntimeException("BitString must give as string.");
                 }
             }
-            else
+            else if (type == DataType.STRING)
             {
-                throw new RuntimeException("Invalid date format.");
+                if (value != null)
+                {
+                    String str = value.toString();
+                    setObjectCount(str.length(), buff);
+                    buff.write(str.getBytes("ASCII"));                 
+                }
+                else
+                {
+                    setObjectCount(0, buff);
+                }
             }
-            //Add size
-            buff.write(7);
-            //Add time.
-            if (skip.contains(DateTimeSkips.HOUR))
+            else if (type == DataType.STRING_UTF8)
             {
+                if (value != null)
+                {
+                    String str = value.toString();
+                    setObjectCount(str.length(), buff);
+                    buff.write(str.getBytes("UTF-8"));                 
+                }
+                else
+                {
+                    setObjectCount(0, buff);
+                }
+            }
+
+            //Excample Logical name is octet string, so do not change to string...
+            else if (type == DataType.OCTET_STRING)
+            {
+                if (value instanceof String)
+                {
+                    String[] items = ((String)value).split("[.]", -1);
+                    if (items.length == 1 && items[0].equals(value))
+                    {
+                        setObjectCount(((String)value).length(), buff);
+                        buff.write(((String)value).getBytes("ASCII"));                    
+                    }
+                    else
+                    {
+                        setObjectCount(items.length, buff);
+                        for (String it : items)
+                        {
+                            buff.write(Integer.parseInt(it));
+                        }
+                    }
+                }
+                else if (value instanceof byte[])
+                {
+                    setObjectCount(((byte[])value).length, buff);
+                    buff.write((byte[])value);
+                }
+                else if (value == null)
+                {
+                    setObjectCount(0, buff);
+                }
+                else
+                {
+                     throw new RuntimeException("Invalid data type.");
+                }
+            }
+            else if (type == DataType.ARRAY || type == DataType.STRUCTURE)
+            {
+                if (value != null)
+                {
+                    int len = Array.getLength(value);
+                    setObjectCount(len, buff);                
+                    for (int pos = 0; pos != len; ++pos)
+                    {
+                        Object it = Array.get(value, pos);
+                        setData(buff, getValueType(it), it);
+                    }
+                }
+                else
+                {
+                    setObjectCount(0, buff);
+                }
+            }        
+            else if (type == DataType.BCD)
+            {
+                if (!(value instanceof String))
+                {
+                    throw new RuntimeException("BCD value must give as string.");
+                }
+                String str = value.toString().trim();
+                int len = str.length();
+                if (len % 2 != 0)
+                {
+                    str = "0" + str;
+                    ++len;
+                }
+                len /= 2;
+                buff.write(len);
+                for (int pos = 0; pos != len; ++pos)
+                {
+                    int ch1 = Integer.parseInt(str.substring(2 * pos, 2 * pos + 1));
+                    int ch2 = Integer.parseInt(str.substring(2 * pos + 1, 2 * pos + 1 + 1));
+                    buff.write((byte)(ch1 << 4 | ch2));
+                }
+            }
+            else if (type == DataType.COMPACTARRAY)
+            {
+                throw new RuntimeException("Invalid data type.");
+            }
+            else if (type == DataType.DATETIME)
+            {
+                GXDateTime dt;
+                if (value instanceof GXDateTime)
+                {
+                    dt = (GXDateTime) value;
+                }
+                else if (value instanceof java.util.Date)
+                {
+                    dt = new GXDateTime((java.util.Date) value);
+                }
+                else if(value instanceof java.util.Calendar)
+                {
+                    dt = new GXDateTime(((java.util.Calendar) value).getTime());
+                }
+                else if (value instanceof String)
+                {
+                    DateFormat f = new SimpleDateFormat();
+                    try
+                    {                        
+                        dt = new GXDateTime(f.parse(value.toString()));
+                    }
+                    catch(ParseException ex)
+                    {
+                        throw new RuntimeException("Invalid date time value." + ex.getMessage());
+                    }
+                }
+                else
+                {
+                    throw new RuntimeException("Invalid date format.");
+                }
+                //Add size
+                buff.write(12);
+                java.util.Calendar tm = java.util.Calendar.getInstance(java.util.TimeZone.getTimeZone("UTC"));
+                tm.setTime(dt.getValue());
+ 
+                //Add year.
+                if (dt.getSkip().contains(DateTimeSkips.YEAR))
+                {
+                    buff.write(0xFF);
+                    buff.write(0xFF);
+                }
+                else
+                {
+                    java.nio.ByteBuffer tmp = java.nio.ByteBuffer.allocate(2);
+                    tmp.putShort((short) tm.get(java.util.Calendar.YEAR));
+                    buff.write(tmp.array());                        
+                }
+                //Add month
+                if (dt.getDaylightSavingsEnd())
+                {
+                    buff.write(0xFD);
+                }
+                else if (dt.getDaylightSavingsBegin())
+                {
+                    buff.write(0xFE);
+                }
+                else if (dt.getSkip().contains(DateTimeSkips.MONTH))
+                {
+                    buff.write(0xFF);
+                }
+                else
+                {
+                    buff.write((tm.get(java.util.Calendar.MONTH) + 1));                
+                }
+                //Add day
+                if (dt.getSkip().contains(DateTimeSkips.DAY))
+                {
+                    buff.write(0xFF);
+                }
+                else
+                {
+                    buff.write(tm.get(java.util.Calendar.DATE));
+                }
+                //Week day is not spesified.
+                buff.write(0xFF);
+                //Add time.
+                if (dt.getSkip().contains(DateTimeSkips.HOUR))
+                {
+                    buff.write(0xFF);
+                }
+                else
+                {
+                    buff.write(tm.get(java.util.Calendar.HOUR_OF_DAY));                
+                }
+                if (dt.getSkip().contains(DateTimeSkips.MINUTE))
+                {
+                    buff.write(0xFF);
+                }
+                else
+                {
+                    buff.write(tm.get(java.util.Calendar.MINUTE));            
+                }
+                if (dt.getSkip().contains(DateTimeSkips.SECOND))
+                {
+                    buff.write(0xFF);
+                }
+                else
+                {
+                    buff.write(tm.get(java.util.Calendar.SECOND));                
+                }
+                buff.write(0xFF); //Hundredths of second is not used.
+                //Add deviation (Not used).
+                buff.write(0x80);
+                buff.write(0x00);
+                //Add clock_status
+                buff.write(dt.getStatus().getValue());   
+            }
+            else if (type == DataType.DATE)
+            {
+                GXDateTime dt;
+                if (value instanceof GXDateTime)
+                {
+                    dt = (GXDateTime) value;
+                }
+                else if (value instanceof java.util.Date)
+                {
+                    dt = new GXDateTime((java.util.Date) value);
+                }
+                else if(value instanceof java.util.Calendar)
+                {
+                    dt = new GXDateTime(((java.util.Calendar) value).getTime());
+                }
+                else if (value instanceof String)
+                {
+                    DateFormat f = new SimpleDateFormat();
+                    dt = new GXDateTime(f.parse(value.toString()));
+                }
+                else
+                {
+                    throw new RuntimeException("Invalid date format.");
+                }
+                java.util.Calendar tm = java.util.Calendar.getInstance(java.util.TimeZone.getTimeZone("UTC"));
+                tm.setTime(dt.getValue());                
+                //Add size
+                buff.write(5);
+                //Add year.
+                if (dt.getSkip().contains(DateTimeSkips.YEAR))
+                {
+                    buff.write(0xFF);
+                    buff.write(0xFF);
+                }
+                else
+                {
+                    java.nio.ByteBuffer tmp = java.nio.ByteBuffer.allocate(2);
+                    tmp.putShort((short) tm.get(java.util.Calendar.YEAR));
+                    buff.write(tmp.array());
+                }
+                //Add month
+                if (dt.getDaylightSavingsBegin())
+                {
+                    buff.write(0xFE);
+                }
+                else if (dt.getDaylightSavingsEnd())
+                {
+                    buff.write(0xFD);
+                }
+                else if (dt.getSkip().contains(DateTimeSkips.MONTH))
+                {
+                    buff.write(0xFF);
+                }
+                else
+                {
+                    buff.write((tm.get(java.util.Calendar.MONTH) + 1));               
+                }
+                //Add day
+                if (dt.getSkip().contains(DateTimeSkips.DAY))
+                {
+                    buff.write(0xFF);
+                }
+                else
+                {
+                    buff.write(tm.get(java.util.Calendar.DATE));                
+                }
+                //Week day is not spesified.
+                buff.write(0xFF);
+            }
+            else if (type == DataType.TIME)
+            {
+                java.util.Set<DateTimeSkips> skip = EnumSet.noneOf(DateTimeSkips.class);
+                java.util.Calendar tm = java.util.Calendar.getInstance(java.util.TimeZone.getTimeZone("UTC"));
+                if (value instanceof GXDateTime)
+                {
+                    GXDateTime tmp = (GXDateTime) value;
+                    tm.setTime(tmp.getValue());
+                    skip = tmp.getSkip();
+                }
+                else if (value instanceof java.util.Date)
+                {
+                    tm.setTime((java.util.Date) value);
+                }
+                else if(value instanceof java.util.Calendar)
+                {
+                    tm.setTime(((java.util.Calendar) value).getTime());
+                }
+                else if (value instanceof String)
+                {
+                    DateFormat f = new SimpleDateFormat();
+                    try
+                    {                        
+                        tm.setTime(f.parse(value.toString()));
+                    }
+                    catch(ParseException ex)
+                    {
+                        throw new RuntimeException("Invalid date time value.\r\n" + 
+                                ex.getMessage());
+                    }
+                }
+                else
+                {
+                    throw new RuntimeException("Invalid date format.");
+                }
+                //Add size
+                buff.write(7);
+                //Add time.
+                if (skip.contains(DateTimeSkips.HOUR))
+                {
+                    buff.write(0xFF);
+                }
+                else
+                {
+                    buff.write(tm.get(java.util.Calendar.HOUR_OF_DAY));
+                }
+                if (skip.contains(DateTimeSkips.MINUTE))
+                {
+                    buff.write(0xFF);
+                }
+                else
+                {
+                    buff.write(tm.get(java.util.Calendar.MINUTE));
+                }
+                if (skip.contains(DateTimeSkips.SECOND))
+                {
+                    buff.write(0xFF);
+                }
+                else
+                {
+                    buff.write(tm.get(java.util.Calendar.SECOND));
+                }
+                buff.write(0xFF); //Hundredths of second is not used.
+                //Add deviation (Not used).
+                buff.write(0x80);
+                buff.write(0x00);
+                //Add clock_status
                 buff.write(0xFF);
             }
             else
             {
-                buff.write(tm.get(java.util.Calendar.HOUR_OF_DAY));
+                throw new RuntimeException("Invalid data type.");
             }
-            if (skip.contains(DateTimeSkips.MINUTE))
-            {
-                buff.write(0xFF);
-            }
-            else
-            {
-                buff.write(tm.get(java.util.Calendar.MINUTE));
-            }
-            if (skip.contains(DateTimeSkips.SECOND))
-            {
-                buff.write(0xFF);
-            }
-            else
-            {
-                buff.write(tm.get(java.util.Calendar.SECOND));
-            }
-            buff.write(0xFF); //Hundredths of second is not used.
-            //Add deviation (Not used).
-            buff.write(0x80);
-            buff.write(0x00);
-            //Add clock_status
-            buff.write(0xFF);
         }
-        else
+        catch(Exception ex)
         {
-            throw new RuntimeException("Invalid data type.");
+            throw new RuntimeException(ex.getLocalizedMessage());
         }
-    }               
+    }
             
     /** 
      Reserved for internal use.
@@ -1536,8 +1506,7 @@ public class GXCommon
      @param type
      @param value
     */
-    public static void setData(java.nio.ByteBuffer buff, DataType type, Object value) 
-            throws RuntimeException, UnsupportedEncodingException, ParseException
+    public static void setData(java.nio.ByteBuffer buff, DataType type, Object value)    
     {
         if (value != null && type == DataType.NONE)
         {
@@ -1615,7 +1584,14 @@ public class GXCommon
             {
                 String str = value.toString();
                 setObjectCount(str.length(), buff);
-                buff.put(str.getBytes("ASCII"));                 
+                try
+                {
+                    buff.put(str.getBytes("ASCII"));                 
+                }
+                catch(Exception ex)
+                {
+                    throw new RuntimeException(ex.getLocalizedMessage());
+                }
             }
             else
             {
@@ -1689,21 +1665,25 @@ public class GXCommon
         }
         else if (type == DataType.DATETIME)
         {
-            java.util.Calendar tm = java.util.Calendar.getInstance(java.util.TimeZone.getTimeZone("UTC"));
-            if (value instanceof java.util.Date)
+            GXDateTime dt;            
+            if (value instanceof GXDateTime)
             {
-                tm.setTime((java.util.Date) value);
+                dt = (GXDateTime) value;
+            }
+            else if (value instanceof java.util.Date)
+            {
+                dt = new GXDateTime((java.util.Date) value);                
             }
             else if(value instanceof java.util.Calendar)
             {
-                tm.setTime(((java.util.Calendar) value).getTime());
+                dt = new GXDateTime(((java.util.Calendar) value).getTime());
             }
             else if (value instanceof String)
             {
                 DateFormat f = new SimpleDateFormat();
                 try
                 {                        
-                    tm.setTime(f.parse(value.toString()));
+                    dt = new GXDateTime(f.parse(value.toString()));
                 }
                 catch(ParseException ex)
                 {
@@ -1714,6 +1694,8 @@ public class GXCommon
             {
                 throw new RuntimeException("Invalid date format.");
             }
+            java.util.Calendar tm = java.util.Calendar.getInstance(java.util.TimeZone.getTimeZone("UTC"));
+            tm.setTime(dt.getValue());
             //Add size
             buff.put((byte) 12);
             //Add year.
@@ -1733,7 +1715,7 @@ public class GXCommon
             buff.put((byte) 0x80);
             buff.put((byte) 0x00);
             //Add clock_status
-            buff.put((byte) 0xFF);   
+            buff.put((byte) dt.getStatus().getValue());   
         }
         else if (type == DataType.DATE)
         {
@@ -1749,7 +1731,14 @@ public class GXCommon
             else if (value instanceof String)
             {
                 DateFormat f = new SimpleDateFormat();
-                tm.setTime(f.parse(value.toString()));
+                try
+                {
+                    tm.setTime(f.parse(value.toString()));
+                }
+                catch(Exception ex)
+                {
+                    throw new RuntimeException(ex.getLocalizedMessage());
+                }
             }
             else
             {

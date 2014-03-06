@@ -43,7 +43,8 @@ public class ValueEventArgs
     private boolean m_Handled;
     private GXDLMSObject m_Target;
     private int m_Index;    
-    private DataType m_DataType;        
+    private DataType m_DataType; 
+    private int m_Selector;
     
     /** 
      Target DLMS object.
@@ -106,12 +107,20 @@ public class ValueEventArgs
     }
 
     /** 
+     Is request handled.
+    */
+    public final int getSelector()
+    {
+        return m_Selector;
+    }
+    /** 
      Constructor.
     */
-    public ValueEventArgs(GXDLMSObject target, int index)
+    public ValueEventArgs(GXDLMSObject target, int index, int selector)
     {
         this.m_DataType = DataType.NONE;
         setTarget(target);
         setIndex(index);
+        m_Selector = selector;
     }
 }

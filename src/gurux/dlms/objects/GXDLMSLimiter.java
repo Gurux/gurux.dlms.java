@@ -37,6 +37,10 @@ package gurux.dlms.objects;
 import gurux.dlms.GXDLMSClient;
 import gurux.dlms.enums.DataType;
 import gurux.dlms.enums.ObjectType;
+import gurux.dlms.internal.GXCommon;
+import java.io.ByteArrayOutputStream;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 public class GXDLMSLimiter extends GXDLMSObject implements IGXDLMSBase
 {
@@ -234,7 +238,7 @@ public class GXDLMSLimiter extends GXDLMSObject implements IGXDLMSBase
      * If attribute is static and already read or device is returned HW error it is not returned.
      */
     @Override
-    public int[] GetAttributeIndexToRead()
+    public int[] getAttributeIndexToRead()
     {
         java.util.ArrayList<Integer> attributes = new java.util.ArrayList<Integer>();
         //LN is static and read only once.
@@ -320,18 +324,164 @@ public class GXDLMSLimiter extends GXDLMSObject implements IGXDLMSBase
         return 0;
     }    
     
+     @Override
+    public DataType getDataType(int index)
+    {
+        if (index == 1)
+        {
+            return DataType.OCTET_STRING;
+        }
+        if (index == 2)
+        {
+            return DataType.STRUCTURE;
+        }
+        if (index == 3)
+        {
+            return super.getDataType(index);
+        }
+        if (index == 4)
+        {
+            return super.getDataType(index);
+        }
+        if (index == 5)
+        {
+            return super.getDataType(index);
+        }
+        if (index == 6)
+        {
+            return DataType.UINT32;
+        }
+        if (index == 7)
+        {
+            return DataType.UINT32;
+        }
+        if (index == 8)
+        {
+            return DataType.STRUCTURE;
+        }
+        if (index == 9)
+        {
+            return DataType.ARRAY;
+        }
+        if (index == 10)
+        {
+            return DataType.BOOLEAN;
+        }
+        if (index == 11)
+        {
+            return DataType.STRUCTURE;
+        } 
+        throw new IllegalArgumentException("getDataType failed. Invalid attribute index.");
+    }
+     
     /*
      * Returns value of given attribute.
      */    
     @Override
-    public Object getValue(int index, DataType[] type, byte[] parameters, boolean raw)
+    public Object getValue(int index, int selector, Object parameters)
     {
         if (index == 1)
         {
-            type[0] = DataType.OCTET_STRING;
             return getLogicalName();
         }
-        //TODO:
+        else if (index == 2)
+        {
+            ByteArrayOutputStream data = new ByteArrayOutputStream();
+            data.write((byte) DataType.STRUCTURE.getValue());
+            data.write(3);
+            try
+            {
+            GXCommon.setData(data, DataType.INT16, MonitoredValue.getObjectType());
+            GXCommon.setData(data, DataType.OCTET_STRING, MonitoredValue.getLogicalName());
+            //TODO: GXCommon.setData(data, DataType.UINT8, MonitoredValue.getSelectedAttributeIndex());
+            }
+            catch(Exception ex)
+            {
+                throw new RuntimeException(ex.getMessage());
+            } 
+            return data;
+        }
+        else if (index == 3)
+        {
+            return ThresholdActive;
+        }
+        else if (index == 4)
+        {
+            return ThresholdNormal;
+        }
+        else if (index == 5)
+        {
+            return ThresholdEmergency;
+        }
+        else if (index == 6)
+        {
+            return MinOverThresholdDuration;
+        }
+        else if (index == 7)
+        {
+            return MinUnderThresholdDuration;
+        }
+        else if (index == 8)
+        {
+            ByteArrayOutputStream data = new ByteArrayOutputStream();
+            data.write((byte) DataType.STRUCTURE.getValue());
+            data.write(3);  
+            try
+            {
+                GXCommon.setData(data, DataType.UINT16, EmergencyProfile.getID());
+                GXCommon.setData(data, DataType.DATETIME, EmergencyProfile.getActivationTime());
+                GXCommon.setData(data, DataType.UINT32, EmergencyProfile.getDuration());
+            }
+            catch(Exception ex)
+            {
+                throw new RuntimeException(ex.getMessage());
+            } 
+            return data;
+        }
+        else if (index == 9)
+        {
+            ByteArrayOutputStream data = new ByteArrayOutputStream();
+            data.write((byte) DataType.ARRAY.getValue());
+            data.write((byte)EmergencyProfileGroupIDs.length);
+            try
+            {
+                for (Object it : EmergencyProfileGroupIDs)
+                {
+                    GXCommon.setData(data, DataType.UINT16, it);
+                }
+            }
+            catch(Exception ex)
+            {
+                throw new RuntimeException(ex.getMessage());
+            } 
+            return data;
+        }
+        else if (index == 10)
+        {
+            return EmergencyProfileActive;
+        }
+        else if (index == 11)
+        {
+            ByteArrayOutputStream data = new ByteArrayOutputStream();
+            data.write((byte) DataType.STRUCTURE.getValue());
+            data.write(2);
+            data.write((byte) DataType.STRUCTURE.getValue());
+            data.write(2);
+            try
+            {
+                GXCommon.setData(data, DataType.OCTET_STRING, ActionOverThreshold.getLogicalName());
+                GXCommon.setData(data, DataType.UINT16, ActionOverThreshold.getScriptSelector());
+                data.write((byte)DataType.STRUCTURE.getValue());
+                data.write(2);
+                GXCommon.setData(data, DataType.OCTET_STRING, ActionUnderThreshold.getLogicalName());
+                GXCommon.setData(data, DataType.UINT16, ActionUnderThreshold.getScriptSelector());
+            }
+            catch(Exception ex)
+            {
+                throw new RuntimeException(ex.getMessage());
+            } 
+            return data;
+        }
         throw new IllegalArgumentException("GetValue failed. Invalid attribute index.");
     }
     
@@ -339,17 +489,17 @@ public class GXDLMSLimiter extends GXDLMSObject implements IGXDLMSBase
      * Set value of given attribute.
      */
     @Override
-    public void setValue(int index, Object value, boolean raw)
+    public void setValue(int index, Object value)
     {
         if (index == 1)
         {
-            setLogicalName(GXDLMSObject.toLogicalName((byte[]) value));            
+            super.setValue(index, value);            
         }
         else if (index == 2)
         {
         ObjectType ot = ObjectType.forValue((int)(((Object[])value)[0]));
         String ln = GXDLMSClient.changeType((byte[])((Object[])value)[1], DataType.OCTET_STRING).toString();
-        int attIndex = (int)(((Object[])value)[0]);
+        int attIndex = ((Number)(((Object[])value)[2])).intValue();
         MonitoredValue = getParent().findByLN(ot, ln);
         if (MonitoredValue != null)
         {

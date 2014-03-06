@@ -43,10 +43,10 @@ import java.lang.reflect.Array;
 
 public class GXDLMSGprsSetup extends GXDLMSObject implements IGXDLMSBase
 {
-    private String privateAPN;
-    private long privatePINCode;
-    GXDLMSQualityOfService m_DefaultQualityOfService;
-    GXDLMSQualityOfService m_RequestedQualityOfService;   
+    private String APN;
+    private long PINCode;
+    GXDLMSQualityOfService DefaultQualityOfService;
+    GXDLMSQualityOfService RequestedQualityOfService;   
             
     /**  
      Constructor.
@@ -54,8 +54,8 @@ public class GXDLMSGprsSetup extends GXDLMSObject implements IGXDLMSBase
     public GXDLMSGprsSetup()
     {
         super(ObjectType.GPRS_SETUP);
-        m_DefaultQualityOfService = new GXDLMSQualityOfService();
-        m_RequestedQualityOfService = new GXDLMSQualityOfService();
+        DefaultQualityOfService = new GXDLMSQualityOfService();
+        RequestedQualityOfService = new GXDLMSQualityOfService();
     }
 
     /**  
@@ -66,8 +66,8 @@ public class GXDLMSGprsSetup extends GXDLMSObject implements IGXDLMSBase
     public GXDLMSGprsSetup(String ln)
     {
         super(ObjectType.GPRS_SETUP, ln, 0);
-        m_DefaultQualityOfService = new GXDLMSQualityOfService();
-        m_RequestedQualityOfService = new GXDLMSQualityOfService();
+        DefaultQualityOfService = new GXDLMSQualityOfService();
+        RequestedQualityOfService = new GXDLMSQualityOfService();
     }
 
     /**  
@@ -79,34 +79,36 @@ public class GXDLMSGprsSetup extends GXDLMSObject implements IGXDLMSBase
     public GXDLMSGprsSetup(String ln, int sn)
     {
         super(ObjectType.GPRS_SETUP, ln, sn);
+        DefaultQualityOfService = new GXDLMSQualityOfService();
+        RequestedQualityOfService = new GXDLMSQualityOfService();
     }
 
     public final String getAPN()
     {
-        return privateAPN;
+        return APN;
     }
     public final void setAPN(String value)
     {
-        privateAPN = value;
+        APN = value;
     }
 
     public final long getPINCode()
     {
-        return privatePINCode;
+        return PINCode;
     }
     public final void setPINCode(long value)
     {
-        privatePINCode = value;
+        PINCode = value;
     }
 
     public final GXDLMSQualityOfService getDefaultQualityOfService()
     {
-        return m_DefaultQualityOfService;
+        return DefaultQualityOfService;
     }
 
     public final GXDLMSQualityOfService getRequestedQualityOfService()
     {
-        return m_RequestedQualityOfService;
+        return RequestedQualityOfService;
     }
 
     
@@ -122,7 +124,7 @@ public class GXDLMSGprsSetup extends GXDLMSObject implements IGXDLMSBase
      * If attribute is static and already read or device is returned HW error it is not returned.
      */
     @Override
-    public int[] GetAttributeIndexToRead()
+    public int[] getAttributeIndexToRead()
     {
         java.util.ArrayList<Integer> attributes = new java.util.ArrayList<Integer>();
         //LN is static and read only once.
@@ -166,30 +168,48 @@ public class GXDLMSGprsSetup extends GXDLMSObject implements IGXDLMSBase
         return 0;
     }    
     
+     @Override
+    public DataType getDataType(int index)
+    {
+        if (index == 1)
+        {
+            return DataType.OCTET_STRING;
+        }
+        if (index == 2)
+        {
+            return DataType.OCTET_STRING;
+        }  
+        if (index == 3)
+        {
+            return DataType.UINT16;
+        }
+        if (index == 4)
+        {
+            return DataType.ARRAY;
+        }  
+        throw new IllegalArgumentException("getDataType failed. Invalid attribute index.");
+    }
+     
     /*
      * Returns value of given attribute.
      */    
     @Override
-    public Object getValue(int index, DataType[] type, byte[] parameters, boolean raw)
+    public Object getValue(int index, int selector, Object parameters)
     {
         if (index == 1)
         {
-            type[0] = DataType.OCTET_STRING;
             return getLogicalName();
         }
         if (index == 2)
         {
-            type[0] = DataType.OCTET_STRING;
             return getAPN();
         }  
         if (index == 3)
         {
-            type[0] = DataType.UINT16;
             return getPINCode();
         }
         if (index == 4)
         {
-            type[0] = DataType.ARRAY;
             ByteArrayOutputStream data = new ByteArrayOutputStream();
             data.write((byte)DataType.STRUCTURE.getValue());
             data.write((byte) 2);
@@ -197,17 +217,17 @@ public class GXDLMSGprsSetup extends GXDLMSObject implements IGXDLMSBase
             try
             {
                 data.write((byte) 5);
-                GXCommon.setData(data, DataType.UINT8, m_DefaultQualityOfService.getPrecedence());
-                GXCommon.setData(data, DataType.UINT8, m_DefaultQualityOfService.getDelay());
-                GXCommon.setData(data, DataType.UINT8, m_DefaultQualityOfService.getReliability());
-                GXCommon.setData(data, DataType.UINT8, m_DefaultQualityOfService.getPeakThroughput());
-                GXCommon.setData(data, DataType.UINT8, m_DefaultQualityOfService.getMeanThroughput());
+                GXCommon.setData(data, DataType.UINT8, DefaultQualityOfService.getPrecedence());
+                GXCommon.setData(data, DataType.UINT8, DefaultQualityOfService.getDelay());
+                GXCommon.setData(data, DataType.UINT8, DefaultQualityOfService.getReliability());
+                GXCommon.setData(data, DataType.UINT8, DefaultQualityOfService.getPeakThroughput());
+                GXCommon.setData(data, DataType.UINT8, DefaultQualityOfService.getMeanThroughput());
                 data.write((byte) 5);
-                GXCommon.setData(data, DataType.UINT8, m_RequestedQualityOfService.getPrecedence());
-                GXCommon.setData(data, DataType.UINT8, m_RequestedQualityOfService.getDelay());
-                GXCommon.setData(data, DataType.UINT8, m_RequestedQualityOfService.getReliability());
-                GXCommon.setData(data, DataType.UINT8, m_RequestedQualityOfService.getPeakThroughput());
-                GXCommon.setData(data, DataType.UINT8, m_RequestedQualityOfService.getMeanThroughput());
+                GXCommon.setData(data, DataType.UINT8, RequestedQualityOfService.getPrecedence());
+                GXCommon.setData(data, DataType.UINT8, RequestedQualityOfService.getDelay());
+                GXCommon.setData(data, DataType.UINT8, RequestedQualityOfService.getReliability());
+                GXCommon.setData(data, DataType.UINT8, RequestedQualityOfService.getPeakThroughput());
+                GXCommon.setData(data, DataType.UINT8, RequestedQualityOfService.getMeanThroughput());
                 return data.toByteArray();
             }
             catch(Exception ex)
@@ -222,15 +242,22 @@ public class GXDLMSGprsSetup extends GXDLMSObject implements IGXDLMSBase
      * Set value of given attribute.
      */
     @Override
-    public void setValue(int index, Object value, boolean raw)
+    public void setValue(int index, Object value)
     {
         if (index == 1)
         {
-            setLogicalName(GXDLMSObject.toLogicalName((byte[]) value));            
+            super.setValue(index, value);            
         }
         else if (index == 2)
         {            
-            setAPN(GXDLMSClient.changeType((byte[]) value, DataType.STRING).toString());
+            if (value instanceof String)            
+            {
+                setAPN(value.toString());
+            }
+            else
+            {            
+                setAPN(GXDLMSClient.changeType((byte[]) value, DataType.STRING).toString());
+            }
         }
         else if (index == 3)
         {            
@@ -239,17 +266,17 @@ public class GXDLMSGprsSetup extends GXDLMSObject implements IGXDLMSBase
         else if (index == 4)
         {            
             Object[] arr = (Object[]) Array.get(value, 0);
-            m_DefaultQualityOfService.setPrecedence(((Number) Array.get(arr, 0)).intValue());
-            m_DefaultQualityOfService.setDelay(((Number) Array.get(arr, 1)).intValue());
-            m_DefaultQualityOfService.setReliability(((Number) Array.get(arr, 2)).intValue());
-            m_DefaultQualityOfService.setPeakThroughput(((Number) Array.get(arr, 3)).intValue());
-            m_DefaultQualityOfService.setMeanThroughput(((Number) Array.get(arr, 4)).intValue());
+            DefaultQualityOfService.setPrecedence(((Number) Array.get(arr, 0)).intValue());
+            DefaultQualityOfService.setDelay(((Number) Array.get(arr, 1)).intValue());
+            DefaultQualityOfService.setReliability(((Number) Array.get(arr, 2)).intValue());
+            DefaultQualityOfService.setPeakThroughput(((Number) Array.get(arr, 3)).intValue());
+            DefaultQualityOfService.setMeanThroughput(((Number) Array.get(arr, 4)).intValue());
             arr = (Object[]) Array.get(value, 1);
-            m_RequestedQualityOfService.setPrecedence(((Number) Array.get(arr, 0)).intValue());
-            m_RequestedQualityOfService.setDelay(((Number) Array.get(arr, 1)).intValue());
-            m_RequestedQualityOfService.setReliability(((Number) Array.get(arr, 2)).intValue());
-            m_RequestedQualityOfService.setPeakThroughput(((Number) Array.get(arr, 3)).intValue());
-            m_RequestedQualityOfService.setMeanThroughput(((Number) Array.get(arr, 4)).intValue());
+            RequestedQualityOfService.setPrecedence(((Number) Array.get(arr, 0)).intValue());
+            RequestedQualityOfService.setDelay(((Number) Array.get(arr, 1)).intValue());
+            RequestedQualityOfService.setReliability(((Number) Array.get(arr, 2)).intValue());
+            RequestedQualityOfService.setPeakThroughput(((Number) Array.get(arr, 3)).intValue());
+            RequestedQualityOfService.setMeanThroughput(((Number) Array.get(arr, 4)).intValue());
         }
         else
         {

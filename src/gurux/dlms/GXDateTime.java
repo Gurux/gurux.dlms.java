@@ -1,9 +1,40 @@
-/*
- * To change this template, choose Tools | Templates
- * and open the template in the editor.
- */
+//
+// --------------------------------------------------------------------------
+//  Gurux Ltd
+// 
+//
+//
+// Filename:        $HeadURL:  $
+//
+// Version:         $Revision: $,
+//                  $Date:  $
+//                  $Author: $
+//
+// Copyright (c) Gurux Ltd
+//
+//---------------------------------------------------------------------------
+//
+//  DESCRIPTION
+//
+// This file is a part of Gurux Device Framework.
+//
+// Gurux Device Framework is Open Source software; you can redistribute it
+// and/or modify it under the terms of the GNU General Public License 
+// as published by the Free Software Foundation; version 2 of the License.
+// Gurux Device Framework is distributed in the hope that it will be useful,
+// but WITHOUT ANY WARRANTY; without even the implied warranty of 
+// MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. 
+// See the GNU General Public License for more details.
+//
+// More information of Gurux DLMS/COSEM Director: http://www.gurux.org/GXDLMSDirector
+//
+// This code is licensed under the GNU General Public License v2. 
+// Full text may be retrieved at http://www.gnu.org/licenses/gpl-2.0.txt
+//---------------------------------------------------------------------------
+
 package gurux.dlms;
 
+import gurux.dlms.enums.ClockStatus;
 import gurux.dlms.enums.DateTimeSkips;
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
@@ -12,8 +43,11 @@ import java.util.EnumSet;
 
 public class GXDateTime
 {
+    private ClockStatus Status;
     private java.util.Date Value = new java.util.Date(0);
     private java.util.Set<DateTimeSkips> Skip;
+    private boolean DaylightSavingsBegin;
+    private boolean DaylightSavingsEnd;
 
     /** 
      Constructor.
@@ -21,6 +55,7 @@ public class GXDateTime
     public GXDateTime()
     {
         Skip = EnumSet.noneOf(DateTimeSkips.class);
+        Status = ClockStatus.OK;
     }
     
     /** 
@@ -30,20 +65,34 @@ public class GXDateTime
     {
         Skip = EnumSet.noneOf(DateTimeSkips.class);
         setValue(value);
+        Status = ClockStatus.OK;
+    }
+
+    public GXDateTime(int year, int month, int day, int hour, int minute, int second, int millisecond)
+    {
+        init(year, month, day, hour, minute, second, millisecond, 0);
     }
 
     /** 
      Constructor.
     */
-    public GXDateTime(int year, int month, int day, int hour, int minute, int second, int millisecond)
+    public GXDateTime(int year, int month, int day, int hour, int minute, int second, int millisecond, int deviation)
     {
+        init(year, month, day, hour, minute, second, millisecond, deviation);
+    }
+    
+    private final void init(int year, int month, int day, int hour, int minute, int second, int millisecond, int deviation)
+    {
+        Status = ClockStatus.OK;
         Skip = EnumSet.noneOf(DateTimeSkips.class);
-        if (year == -1)
+        if (year == -1 || year == 0xFFFF)
         {
             Skip.add(DateTimeSkips.YEAR);
             year = 1;
         }
-        if (month == -1)
+        DaylightSavingsBegin = month == 0xFE;
+        DaylightSavingsEnd = month == 0xFD;
+        if (month < 0 || month > 11)
         {
             Skip.add(DateTimeSkips.MONTH);
             month = 0;
@@ -52,33 +101,38 @@ public class GXDateTime
         {
             month -= 1;        
         }
-        if (day == -1)
+        
+        if (day < 0 || day > 31)
         {
             Skip.add(DateTimeSkips.DAY);
             day = 1;
         }
-        if (hour == -1)
+        if (hour < 0 || hour > 24)
         {
             Skip.add(DateTimeSkips.HOUR);
             hour = 0;
         }
-        if (minute == -1)
+        if (minute < 0 || minute > 60 )
         {
             Skip.add(DateTimeSkips.MINUTE);
             minute = 0;
         }
-        if (second == -1)
+        if (second < 0 || second > 60)
         {
             Skip.add(DateTimeSkips.SECOND);
             second = 0;
         }
-        if (millisecond == -1)
+        if (millisecond < 0 || millisecond > 1000)
         {
             Skip.add(DateTimeSkips.MILLISECOND);
             millisecond = 0;
         }
         java.util.Calendar tm = java.util.Calendar.getInstance(java.util.TimeZone.getTimeZone("UTC"));
         tm.set(year, month, day, hour, minute, second);
+        if (deviation != 0 && deviation != 0x8000)
+        {
+            tm.add(java.util.Calendar.MINUTE, deviation);
+        }        
         if (millisecond != 0)
         {
             tm.set(Calendar.MILLISECOND, millisecond);
@@ -121,6 +175,42 @@ public class GXDateTime
         Skip = DateTimeSkips.forValue(tmp);
     }
 
+    /** 
+     Daylight savings begin.
+    */    
+    public final boolean getDaylightSavingsBegin()
+    {
+        return DaylightSavingsBegin;
+    }
+    public final void setDaylightSavingsBegin(boolean value)
+    {
+        DaylightSavingsBegin = value;
+    }
+
+    /** 
+     Daylight savings end.
+    */
+    public final boolean getDaylightSavingsEnd()
+    {
+        return DaylightSavingsEnd;
+    }
+    public final void setDaylightSavingsEnd(boolean value)
+    {
+        DaylightSavingsEnd = value;
+    }
+    
+    /*
+        Status of the clock.
+    */    
+    public final ClockStatus getStatus()
+    {
+        return Status;
+    }
+    public final void setStatus(ClockStatus value)
+    {
+        Status = value;
+    }
+    
     @Override
     public String toString()
     {

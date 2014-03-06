@@ -1,16 +1,28 @@
 package gurux.dlms.enums;
 
+/*
+ *  Defines Clock status.
+ */
 public enum ClockStatus
-{    
+{   
+    //OK.
     OK(0),
+    //Invalid value.
     INVALID_VALUE(0x1),
+    //Doubtful b value.
     DOUBTFUL_VALUE(0x2),
+    //Different clock base c.
     DIFFERENT_CLOCK_BASE(0X4),
-    RESERVED1(0X8),
+    //Invalid clock status d.
+    INVALID_CLOCK_STATUS(0x8),
+    //Reserved.
     RESERVED2(0x10),
+    //Reserved.
     RESERVED3(0x20),
+    //Reserved.
     RESERVED4(0x40),
-    DAYLIGHT_SAVE_ACTIVE(0x40);
+    //Daylight saving active.
+    DAYLIGHT_SAVE_ACTIVE(0x80);
 
     private int value;
     private static java.util.HashMap<Integer, ClockStatus> mappings;

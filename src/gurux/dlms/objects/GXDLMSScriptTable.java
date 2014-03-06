@@ -98,7 +98,7 @@ public class GXDLMSScriptTable extends GXDLMSObject implements IGXDLMSBase
      * If attribute is static and already read or device is returned HW error it is not returned.
      */
     @Override
-    public int[] GetAttributeIndexToRead()
+    public int[] getAttributeIndexToRead()
     {
         java.util.ArrayList<Integer> attributes = new java.util.ArrayList<Integer>();
         //LN is static and read only once.
@@ -132,20 +132,32 @@ public class GXDLMSScriptTable extends GXDLMSObject implements IGXDLMSBase
         return 1;
     }    
     
+    @Override
+    public DataType getDataType(int index)
+    {
+        if (index == 1)
+        {
+            return DataType.OCTET_STRING;
+        }
+        if (index == 2)
+        {
+            return DataType.ARRAY;
+        }
+        throw new IllegalArgumentException("getDataType failed. Invalid attribute index.");
+    }
+    
     /*
      * Returns value of given attribute.
      */    
     @Override
-    public Object getValue(int index, DataType[] type, byte[] parameters, boolean raw)
+    public Object getValue(int index, int selector, Object parameters)
     {
         if (index == 1)
         {
-            type[0] = DataType.OCTET_STRING;
             return getLogicalName();
         }
         if (index == 2)
-        {
-            type[0] = DataType.ARRAY;
+        {            
             int cnt = getScripts().size();
             ByteArrayOutputStream data = new ByteArrayOutputStream();   
             data.write(DataType.ARRAY.getValue());
@@ -163,7 +175,7 @@ public class GXDLMSScriptTable extends GXDLMSObject implements IGXDLMSBase
                         data.write(DataType.ARRAY.getValue());
                         data.write(5); //Count
                         GXDLMSScriptAction tmp = it.getValue();
-                        GXCommon.setData(data, DataType.ENUM, tmp.getType().ordinal()); //service_id
+                        GXCommon.setData(data, DataType.ENUM, tmp.getType().ordinal() + 1); //service_id
                         GXCommon.setData(data, DataType.UINT16, tmp.getObjectType()); //class_id
                         GXCommon.setData(data, DataType.OCTET_STRING, tmp.getLogicalName()); //logical_name
                         GXCommon.setData(data, DataType.INT8, tmp.getIndex()); //index
@@ -185,11 +197,11 @@ public class GXDLMSScriptTable extends GXDLMSObject implements IGXDLMSBase
      * Set value of given attribute.
      */
     @Override
-    public void setValue(int index, Object value, boolean raw)
+    public void setValue(int index, Object value)
     {
         if (index == 1)
         {
-            setLogicalName(GXDLMSObject.toLogicalName((byte[]) value));            
+            super.setValue(index, value);            
         }
         else if (index == 2)
         {
@@ -206,7 +218,14 @@ public class GXDLMSScriptTable extends GXDLMSObject implements IGXDLMSBase
                         for(Object arr : (Object[])Array.get(item, 1))
                         { 
                             GXDLMSScriptAction it = new GXDLMSScriptAction();
-                            GXDLMSScriptActionType type = GXDLMSScriptActionType.values()[((Number)Array.get(arr, 0)).intValue() - 1];
+                            int val = ((Number)Array.get(arr, 0)).intValue();
+                            GXDLMSScriptActionType type = GXDLMSScriptActionType.NONE;
+                            //Some Iskra meters return -1 here.
+                            //It is not standard value.
+                            if (val > 0)
+                            {
+                                type = GXDLMSScriptActionType.values()[val];
+                            }                            
                             it.setType(type);                
                             ObjectType ot = ObjectType.forValue(((Number)Array.get(arr, 1)).intValue());
                             it.setObjectType(ot);
@@ -242,7 +261,7 @@ public class GXDLMSScriptTable extends GXDLMSObject implements IGXDLMSBase
     }
     
     @Override
-    public byte[] invoke(Object sender, int index, Object parameters)
+    public byte[][] invoke(Object sender, int index, Object parameters)
     {
         //Execute selected method.
         if (index == 1)
@@ -261,7 +280,6 @@ public class GXDLMSScriptTable extends GXDLMSObject implements IGXDLMSBase
      */
     public byte[][] execute(GXDLMSClient client, Object data, DataType type)
     {
-        byte[] ret = client.method(getName(), getObjectType(), 1, data, type);
-        return new byte[][]{ret};
+        return client.method(this, 1, data, type);
     }
 }

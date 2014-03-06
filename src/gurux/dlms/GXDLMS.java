@@ -45,8 +45,10 @@ import gurux.dlms.enums.Security;
 import gurux.dlms.enums.ServiceClass;
 import gurux.dlms.objects.*;
 import java.io.ByteArrayOutputStream;
+import java.io.IOException;
 import java.io.UnsupportedEncodingException;
 import java.lang.reflect.Array;
+import java.util.Arrays;
 import java.util.EnumSet;
 import java.util.Random;
 
@@ -55,10 +57,10 @@ import java.util.Random;
 */
 class GXDLMS
 {
-    private int privateValueOfQualityOfService;
-    private int privateNumberOfUnusedBits;
+    private int ValueOfQualityOfService;
+    private int NumberOfUnusedBits;
     private int packetIndex;
-    private boolean bIsLastMsgKeepAliveMsg;
+    private boolean IsLastMsgKeepAliveMsg;
     int expectedFrame, frameSequence;
     //Cached data.
     Object cacheData;
@@ -353,14 +355,16 @@ class GXDLMS
     {
         m_Priority = Priority.HIGH;
         m_InvokeID = 1;        
-        try {
+        try 
+        {
             Ciphering = new GXCiphering("ABCDEFGH".getBytes("ASCII"));
         }
         catch (UnsupportedEncodingException ex) 
         {
             throw new RuntimeException(ex.getMessage());
         }
-        bIsLastMsgKeepAliveMsg = false;
+        m_Authentication = Authentication.NONE;
+        IsLastMsgKeepAliveMsg = false;
         setServer(server);
         setUseCache(true);
         this.setInterfaceType(InterfaceType.GENERAL);
@@ -473,7 +477,7 @@ class GXDLMS
     /** 
      Reserved for internal use.
     */
-    final byte[][] generateMessage(Object name, int parameterCount, byte[] data, ObjectType interfaceClass, int AttributeOrdinal, Command cmd)
+    final byte[][] generateMessage(Object name, byte[] data, ObjectType interfaceClass, int AttributeOrdinal, Command cmd)
     {
         if (getLimits().getMaxInfoRX() == null)
         {
@@ -492,6 +496,7 @@ class GXDLMS
             }
             else if (getUseLogicalNameReferencing())
             {
+                //Interface class.
                 int len = data == null ? 0 : data.length;
                 buff = java.nio.ByteBuffer.allocate(20 + len);
                 if (cmd == Command.GetRequest || cmd == Command.SetRequest || cmd == Command.MethodRequest)
@@ -545,13 +550,17 @@ class GXDLMS
                 }
                 else
                 {
-                    buff.put((byte)parameterCount);
-                    int base_address = GXCommon.intValue(name);
-                    if (cmd == Command.MethodRequest)
+                    if (data == null || data.length == 0)
                     {
-                        base_address += AttributeOrdinal;
+                        buff.put((byte) 2);
                     }
-                    else
+                    else //if Parameterised Access
+                    {
+                        buff.put((byte) 4);
+                    }  
+                    int base_address = GXCommon.intValue(name);
+                    //AttributeOrdinal is count already for action.
+                    if (AttributeOrdinal != 0)
                     {
                         base_address += ((AttributeOrdinal - 1) * 8);
                     }
@@ -620,6 +629,26 @@ class GXDLMS
         {
             throw new GXDLMSException("Packet rejected.");
         }
+        if (moreData.isEmpty() && Ciphering.getSecurity() != Security.NONE &&
+            (command[0] == Command.GloGetResponse.getValue() ||
+            command[0] == Command.GloSetResponse.getValue() ||
+            command[0] == Command.GloMethodResponse.getValue() || 
+            command[0] == Command.None.getValue()) &&
+            data.size() != 0)
+        {
+            Command cmd[] = new Command[1];
+            byte[] tmp = decrypt(data.toByteArray(), cmd);
+            data.reset();
+            try 
+            {
+                data.write(tmp);
+            }
+            catch (IOException ex) 
+            {
+                throw new RuntimeException(ex.getMessage());
+            }
+            command[0] = (byte)cmd[0].getValue();
+        }
         return moreData;
     }
 
@@ -665,6 +694,10 @@ class GXDLMS
     */
     public final boolean isDLMSPacketComplete(byte[] data)
     {
+        if (data == null)
+        {
+            return false;
+        }
         byte[] frame = new byte[1];
         int[] error = new int[1];
         try
@@ -877,7 +910,8 @@ class GXDLMS
         privateInterfaceType = value;
     }   
 
-    private byte[][] splitToFrames(java.nio.ByteBuffer packet, int blockIndex, int[] index, int count, Command cmd)
+    public byte[][] splitToFrames(java.nio.ByteBuffer packet, int blockIndex, 
+                        int[] index, int count, Command cmd, int resultChoice)
     {
         ByteArrayOutputStream tmp = new ByteArrayOutputStream();
         if (this.getInterfaceType() == InterfaceType.GENERAL  &&
@@ -908,7 +942,7 @@ class GXDLMS
             tmp.write(getInvokeIDPriority());
             if (getServer())
             {
-                tmp.write((byte) 0x0); // Get-Data-Result choice data
+                tmp.write(resultChoice); // Get-Data-Result choice data
             }
             if (moreBlocks)
             {
@@ -974,6 +1008,7 @@ class GXDLMS
                 Ciphering.getFrameCounter(), Ciphering.getSystemTitle(), Ciphering.getBlockCipherKey(), 
                 Ciphering.getAuthenticationKey(), tmp2));            
             packet.position(packet.limit());
+            count = packet.position();
             tmp.reset();
             try
             {
@@ -992,11 +1027,7 @@ class GXDLMS
             catch(Exception ex)
             {
                 throw new RuntimeException(ex.getMessage());
-            }
-            if (!getUseLogicalNameReferencing())
-            {
-                count = packet.position();
-            }
+            }           
         }                             
         int dataSize;
         if (this.getInterfaceType() == InterfaceType.NET)
@@ -1079,7 +1110,7 @@ class GXDLMS
         packet.position(0);
         if (!getUseLogicalNameReferencing()) //SN
         {            
-            return splitToFrames(packet, 0, index, len, cmd);
+            return splitToFrames(packet, 0, index, len, cmd, 0);
         }
         //If LN
         //Split to Blocks.
@@ -1087,12 +1118,10 @@ class GXDLMS
         int blockIndex = 0;
         do
         {
-            byte[][] frames = splitToFrames(packet, ++blockIndex, index, getMaxReceivePDUSize(), cmd);
-            for(byte[] it : frames)
-            {
-                buff.add(it);
-            }
-            if (frames.length != 1)
+            byte[][] frames = splitToFrames(packet, ++blockIndex, index, 
+                    getMaxReceivePDUSize(), cmd, 0);
+            buff.addAll(Arrays.asList(frames));
+            if (cmd != Command.WriteRequest && cmd != Command.MethodRequest && frames.length != 1)
             {
                 expectedFrame += 3;
             }
@@ -1109,6 +1138,66 @@ class GXDLMS
         return tmp;
     }
 
+    static String getDescription(int errCode)
+    {
+        String str;
+        switch (errCode)
+        {
+            case -1:
+                str = "Not a reply";
+                break;
+            case 1:
+                str = "Access Error : Device reports a hardware fault";
+                break;
+            case 2:
+                str = "Access Error : Device reports a temporary failure";
+                break;
+            case 3:
+                str = "Access Error : Device reports Read-Write denied";
+                break;
+            case 4:
+                str = "Access Error : Device reports a undefined object";
+                break;
+            case 9: 
+                str = "Access Error : Device reports a inconsistent Class or object";
+                break;
+            case 11: 
+                str = "Access Error : Device reports a unavailable object";
+                break;
+            case 12: 
+                str = "Access Error : Device reports a unmatched type";
+                break;
+            case 13:
+                str = "Access Error : Device reports scope of access violated";
+                break;
+            case 14:   
+                str = "Access Error : Data Block Unavailable.";
+                break;
+            case 15: 
+                str = "Access Error : Long Get Or Read Aborted.";
+                break;
+            case 16: 
+                str = "Access Error : No Long Get Or Read In Progress.";
+                break;
+            case 17: 
+                str = "Access Error : Long Set Or Write Aborted.";
+                break;
+            case 18: 
+                str = "Access Error : No Long Set Or Write In Progress.";
+                break;
+            case 19: 
+                str = "Access Error : Data Block Number Invalid.";
+                break;
+            case 250: 
+                str = "Access Error : Other Reason.";
+                break;
+            default:
+                str = "Unknown error";
+            break;
+        }
+        return str;
+    }
+    
     /** 
      Checks, whether there are any errors on received packet.
 
@@ -1176,40 +1265,9 @@ class GXDLMS
         }
         if (err[0] != 0x00)
         {
-            String str;
-            switch (err[0])
-            {
-                case 1:
-                    str = "Access Error : Device reports a hardware fault.";
-                    break;
-                case 2:
-                    str = "Access Error : Device reports a temporary failure.";
-                    break;
-                case 3:
-                    str = "Access Error : Device reports Read-Write denied.";
-                    break;
-                case 4:
-                    str = "Access Error : Device reports a undefined object.";
-                    break;
-                case 5:
-                    str = "Access Error : Device reports a inconsistent Class or object.";
-                    break;
-                case 6:
-                    str = "Access Error : Device reports a unavailable object.";
-                    break;
-                case 7:
-                    str = "Access Error : Device reports a unmatched type.";
-                    break;
-                case 8:
-                    str = "Access Error : Device reports scope of access violated.";
-                    break;
-                default:
-                    str = "Unknown error: " + err[0];
-                    break;
-            }
             Object[][] list = new Object[1][2];
             list[0][0] = err[0];
-            list[0][1] = str;
+            list[0][1] = getDescription(err[0]);
             return list;
         }
         return null;
@@ -1246,11 +1304,11 @@ class GXDLMS
     */    
     final int getValueOfQualityOfService()
     {
-        return privateValueOfQualityOfService;
+        return ValueOfQualityOfService;
     }
     void setValueOfQualityOfService(int value)
     {
-        privateValueOfQualityOfService = value;
+        ValueOfQualityOfService = value;
     }
 
     /** 
@@ -1260,11 +1318,11 @@ class GXDLMS
     */
     final int getNumberOfUnusedBits()
     {
-        return privateNumberOfUnusedBits;
+        return NumberOfUnusedBits;
     }
     void setNumberOfUnusedBits(int value)
     {
-        privateNumberOfUnusedBits = value;
+        NumberOfUnusedBits = value;
     }
 
     /** 
@@ -1273,7 +1331,7 @@ class GXDLMS
     byte generateIFrame()
     {
         //Expected frame number is increased only when first keep alive msg is send...
-        if (!bIsLastMsgKeepAliveMsg)
+        if (!IsLastMsgKeepAliveMsg)
         {
             ++expectedFrame;
             expectedFrame = (expectedFrame & 0x7);
@@ -1292,7 +1350,7 @@ class GXDLMS
         frameSequence = (frameSequence & 0x7);
         byte val = (byte)(((frameSequence & 0x7) << 1) & 0xF);
         val |= (byte)(((((expectedFrame & 0x7) << 1) | 0x1) & 0xF) << 4);
-        bIsLastMsgKeepAliveMsg = false;
+        IsLastMsgKeepAliveMsg = false;
         return val;
     }
 
@@ -1304,11 +1362,11 @@ class GXDLMS
     byte generateAliveFrame()
     {
         //Expected frame number is increased only when first keep alive msg is send...
-        if (!bIsLastMsgKeepAliveMsg && !getServer())
+        if (!IsLastMsgKeepAliveMsg && !getServer())
         {
             ++expectedFrame;
             expectedFrame = (expectedFrame & 0x7);
-            bIsLastMsgKeepAliveMsg = true;
+            IsLastMsgKeepAliveMsg = true;
         }
         byte val = 1;
         val |= (byte)((((((expectedFrame) & 0x7) << 1) | 0x1) & 0xF) << 4);
@@ -1322,7 +1380,10 @@ class GXDLMS
     private boolean isExpectedFrame(int send, int received)
     {
         //In keep alive msg send ID might be same as receiver ID.
-        boolean ret = send == received || ((send >> 5) & 0x7) == ((received >> 1) & 0x7) || ((send & 0x1) == 0x1 && (received & 0x1) == 1); //If echo.
+        //If echo.
+        boolean ret = send == received || 
+                ((send >> 5) & 0x7) == ((received >> 1) & 0x7) || 
+                ((send & 0x1) == 0x1 || (received & 0x1) == 1);
         //If U-Frame...
         if (!ret)
         {
@@ -1355,7 +1416,7 @@ class GXDLMS
         expectedFrame = (expectedFrame & 0x7);
         byte val = (byte)((((type & 0x3) << 2) | 0x1) & 0xF);
         val |= (byte)(((((expectedFrame & 0x7) << 1) | 0x1) & 0xF) << 4);
-        bIsLastMsgKeepAliveMsg = false;
+        IsLastMsgKeepAliveMsg = false;
         return val;
     }
 
@@ -1777,7 +1838,6 @@ class GXDLMS
                         command[0] == 0x60 ||
                         command[0] == 0x61)
                     {
-                        MoreData = EnumSet.noneOf(RequestTypes.class);                        
                     }
                     else if (bReply && (command[0] == Command.GetRequest.getValue() || 
                         command[0] == Command.GetResponse.getValue() ||
@@ -1894,8 +1954,8 @@ class GXDLMS
  
     public final byte[] decrypt(byte[] buff, Command[] command)
     {
-        int index = 0;
-        command[0] = Command.forValue(buff[index] & 0xFF);
+        int index[] = new int[1];
+        command[0] = Command.forValue(buff[index[0]++] & 0xFF);
         if (!(command[0] == Command.GloGetRequest || 
             command[0] == Command.GloSetRequest || 
             command[0] == Command.GloMethodRequest || 
@@ -1905,12 +1965,12 @@ class GXDLMS
         {
             throw new GXDLMSException("Invalid data format.");
         }
-        int len = buff[++index];
-        if (buff.length - 2 != len)
+        int len = GXCommon.getObjectCount(buff, index);
+        if (buff.length - index[0] != len)
         {
             throw new GXDLMSException("Invalid data format.");
         }
-        byte value = buff[++index];
+        byte value = buff[index[0]++];
         if (value != 0x10 && value != 0x20 && value != 0x30)
         {
             throw new IllegalArgumentException("Invalid security value.");
@@ -1941,8 +2001,7 @@ class GXDLMS
         }
         byte[] tmp2 = new byte[tmp.capacity() - tmp.position()];
         tmp.get(tmp2);
-        //tmp.removeRange(0, index + 0);
-       return tmp2;
+        return tmp2;
     }
 
     private static void getSNData(java.nio.ByteBuffer buff, int[] pError, Command command)
@@ -1960,7 +2019,8 @@ class GXDLMS
             command != Command.MethodResponse)
         {
             throw new GXDLMSException("Invalid command");
-        }        
+        }   
+        //Ship invoke ID and priority.
         buff.get();
         if (command == Command.ReadResponse || command == Command.WriteResponse)
         {
@@ -2001,20 +2061,25 @@ class GXDLMS
         //Skip Invoke ID and priority.
         buff.get();
         if (server && AttributeID == 0x2)
-        {
-            MoreData.clear();
+        {            
             MoreData.add(RequestTypes.DATABLOCK);
         }
-        else if (res == Command.SetRequest.getValue() ||
-                res == Command.MethodRequest.getValue())
+        else if (res == Command.SetRequest.getValue())
         {
             MoreData.clear();
+        }
+        else if (res == Command.SetResponse.getValue() || 
+                res == Command.MethodResponse.getValue())
+        {
+            if (buff.get() != 0)
+            {
+                pError[0] = buff.get();
+            }
         }
         else
         {
             if (server && AttributeID == 0x01)
             {
-                MoreData.clear();
             }
             else
             {
@@ -2044,7 +2109,7 @@ class GXDLMS
         return true;
     }
     
-        static void getActionInfo(ObjectType objectType, int[] value, int[] count) throws RuntimeException
+    static void getActionInfo(ObjectType objectType, int[] value, int[] count) throws RuntimeException
     {        
         switch (objectType)
         {
@@ -2071,6 +2136,10 @@ class GXDLMS
             case TUNNEL:
             case UTILITY_TABLES:
                 throw new RuntimeException("Target do not support Action.");
+            case IMAGE_TRANSFER:
+                value[0] = 0x40;
+                count[0] = 4;
+                break;
             case ACTIVITY_CALENDAR:
                 value[0] = 0x50;
                 count[0] = 1;

@@ -1,7 +1,7 @@
 package gurux.dlms.enums;
 
 /*
- * Yhe internal states of the disconnect control object.
+ * The internal states of the disconnect control object.
  */
 public enum ControlState 
 {

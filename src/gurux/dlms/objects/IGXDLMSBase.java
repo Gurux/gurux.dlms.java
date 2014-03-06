@@ -34,8 +34,6 @@
 
 package gurux.dlms.objects;
 
-import gurux.dlms.enums.DataType;
-
 public interface IGXDLMSBase 
 {
     /*
@@ -43,7 +41,7 @@ public interface IGXDLMSBase
      * 
      * If attribute is static and already read or device is returned HW error it is not returned.
      */
-    int[] GetAttributeIndexToRead();
+    int[] getAttributeIndexToRead();
         
     /*
     * Returns amount of attributes.
@@ -59,17 +57,17 @@ public interface IGXDLMSBase
     /*
     * Returns value of given attribute.
     */
-    Object getValue(int index, DataType[] type, byte[] parameters, boolean raw);
+    Object getValue(int index, int selector, Object parameters);
 
    /*
     * Set value of given attribute.
     */
-   void setValue(int index, Object value, boolean raw);
+   void setValue(int index, Object value);
    
    /*
     * Invokes method.
     * 
      @param index Method index.
     */
-   byte[] invoke(Object sender, int index, Object parameters);
+   byte[][] invoke(Object sender, int index, Object parameters);
 }

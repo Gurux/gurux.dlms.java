@@ -34,10 +34,13 @@
 
 package gurux.dlms.objects;
 
+import gurux.dlms.enums.DataType;
 import gurux.dlms.enums.ObjectType;
 
-public class GXDLMSSchedule extends GXDLMSObject
+public class GXDLMSSchedule extends GXDLMSObject implements IGXDLMSBase
 {
+    private Object Entries;
+
     /**  
      Constructor.
     */
@@ -66,10 +69,118 @@ public class GXDLMSSchedule extends GXDLMSObject
     {
         super(ObjectType.SCHEDULE, ln, sn);
     }
+    
+    public final Object getEntries()
+    {
+        return Entries;
+    }
+    public final void setEntries(Object value)
+    {
+        Entries = value;
+    }
+
 
     @Override
     public Object[] getValues()
     {
-        return new Object[] {getLogicalName()};
+        return new Object[] {getLogicalName(), Entries};
+    }
+    
+    /*
+     * Returns collection of attributes to read.
+     * 
+     * If attribute is static and already read or device is returned HW error it is not returned.
+     */
+    @Override
+    public int[] getAttributeIndexToRead()
+    {
+        java.util.ArrayList<Integer> attributes = new java.util.ArrayList<Integer>();
+        //LN is static and read only once.
+        if (LogicalName == null || LogicalName.compareTo("") == 0)
+        {
+            attributes.add(1);
+        }
+        //ExecutedScriptLogicalName is static and read only once.
+        if (!isRead(2))
+        {
+            attributes.add(2);
+        }
+        //Type is static and read only once.
+        if (!isRead(3))
+        {
+            attributes.add(3);
+        }
+        //ExecutionTime is static and read only once.
+        if (!isRead(4))
+        {
+            attributes.add(4);
+        }                       
+        return toIntArray(attributes);
+    }
+    
+    /*
+     * Returns amount of attributes.
+     */  
+    @Override
+    public int getAttributeCount()
+    {
+        return 2;
+    }
+    
+    /*
+     * Returns amount of methods.
+     */ 
+    @Override
+    public int getMethodCount()
+    {
+        return 3;
+    }    
+    
+    @Override
+    public DataType getDataType(int index)
+    {
+        if (index == 1)
+        {
+            return DataType.OCTET_STRING;
+        }
+        if (index == 2)
+        {
+            return DataType.ARRAY;
+        }        
+        throw new IllegalArgumentException("getDataType failed. Invalid attribute index.");
+    }
+    
+    /*
+     * Returns value of given attribute.
+     */    
+    @Override
+    public Object getValue(int index, int selector, Object parameters)
+    {
+        if (index == 1)
+        {
+            return getLogicalName();
+        }
+        //TODO:
+        throw new IllegalArgumentException("GetValue failed. Invalid attribute index.");
+    }
+    
+    /*
+     * Set value of given attribute.
+     */
+    @Override
+    public void setValue(int index, Object value)
+    {
+        if (index == 1)
+        {
+            super.setValue(index, value);            
+        }
+        else if (index == 2)
+        {                
+            Entries = value;
+        }                           
+        else
+        {
+            throw new IllegalArgumentException("GetValue failed. Invalid attribute index.");
+        }
     }
 }

@@ -300,9 +300,13 @@ public class GXDLMSObject
     */
     public final AccessMode getAccess(int index)
     {   
+        if (index == 1)
+        {
+            return AccessMode.READ;
+        }
         GXDLMSAttributeSettings att = Attributes.find(index);
         if (att == null)
-        {
+        {            
             return AccessMode.READ_WRITE;
         }
         return att.getAccess();
@@ -413,7 +417,7 @@ public class GXDLMSObject
     /*
      * Returns value of given attribute.
      */    
-    public Object getValue(int index, DataType[] type, byte[] parameters, boolean raw)
+    public Object getValue(int index, int selector, Object parameters)
     {
         assert(false);
         throw new UnsupportedOperationException("getValue");
@@ -422,10 +426,24 @@ public class GXDLMSObject
     /*
      * Set value of given attribute.
      */
-    public void setValue(int index, Object value, boolean raw)
+    public void setValue(int index, Object value)
     {
-        assert(false);
-        throw new UnsupportedOperationException("setValue");
+        if (index == 1)
+        {
+            if (value instanceof String)
+            {
+                setLogicalName(value.toString());
+            }
+            else
+            {
+                setLogicalName(GXDLMSObject.toLogicalName((byte[]) value));                
+            }
+        }
+        else
+        {
+            assert(false);
+            throw new UnsupportedOperationException("setValue");
+        }
     }
     
     /*
@@ -433,7 +451,7 @@ public class GXDLMSObject
     * 
      @param index Method index.
     */
-    public byte[] invoke(Object sender, int index, Object parameters)
+    public byte[][] invoke(Object sender, int index, Object parameters)
     {
         assert(false);
         throw new UnsupportedOperationException("invoke");

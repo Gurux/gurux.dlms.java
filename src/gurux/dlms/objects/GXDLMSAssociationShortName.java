@@ -34,6 +34,7 @@
 
 package gurux.dlms.objects;
 import gurux.dlms.Command;
+import gurux.dlms.GXDLMSClient;
 import gurux.dlms.GXDLMSServerBase;
 import gurux.dlms.enums.AccessMode;
 import gurux.dlms.enums.DataType;
@@ -54,7 +55,7 @@ public class GXDLMSAssociationShortName extends GXDLMSObject implements IGXDLMSB
 {
     Object m_AccessRightsList;
     GXDLMSObjectCollection m_ObjectList;
-    Object m_SecuritySetupReference;
+    String m_SecuritySetupReference;
 
     /**  
      Constructor.
@@ -90,11 +91,11 @@ public class GXDLMSAssociationShortName extends GXDLMSObject implements IGXDLMSB
         m_AccessRightsList = value;
     }
 
-    public final Object getSecuritySetupReference()
+    public final String getSecuritySetupReference()
     {
         return m_SecuritySetupReference;
     }
-    public final void setSecuritySetupReference(Object value)
+    public final void setSecuritySetupReference(String value)
     {
         m_SecuritySetupReference = value;
     }
@@ -111,7 +112,7 @@ public class GXDLMSAssociationShortName extends GXDLMSObject implements IGXDLMSB
      @param index Method index.
     */
     @Override
-    public byte[] invoke(Object sender, int index, Object parameters)
+    public byte[][] invoke(Object sender, int index, Object parameters)
     {
         //Check reply_to_HLS_authentication
         if (index == 8)
@@ -146,7 +147,7 @@ public class GXDLMSAssociationShortName extends GXDLMSObject implements IGXDLMSB
                     challenge.toByteArray());
             byte[] clientChallenge = (byte[])parameters;
             int[] pos = new int[1];
-            if (GXCommon.compare(serverChallenge, pos, clientChallenge))
+            if (GXCommon.compare(clientChallenge, pos, serverChallenge))
             {
                 try 
                 {
@@ -156,14 +157,14 @@ public class GXDLMSAssociationShortName extends GXDLMSObject implements IGXDLMSB
                 {
                     throw new RuntimeException(ex.getMessage());
                 }
-                return s.acknowledge(Command.MethodResponse, 0, 
+                return s.acknowledge(Command.WriteResponse, 0, 
                         GXDLMSServerBase.chipher(s.getAuthentication(), CtoS.toByteArray()), 
                         DataType.OCTET_STRING);
             }
             else
             {
                 //Return error.
-                return s.serverReportError(1, 5, 3);
+                return s.serverReportError(Command.MethodRequest, 5);
             }            
         }
         else
@@ -178,7 +179,7 @@ public class GXDLMSAssociationShortName extends GXDLMSObject implements IGXDLMSB
      * If attribute is static and already read or device is returned HW error it is not returned.
      */
     @Override
-    public int[] GetAttributeIndexToRead()
+    public int[] getAttributeIndexToRead()
     {
         java.util.ArrayList<Integer> attributes = new java.util.ArrayList<Integer>();
         //LN is static and read only once.
@@ -247,20 +248,40 @@ public class GXDLMSAssociationShortName extends GXDLMSObject implements IGXDLMSB
         }        
     }
     
+    @Override
+    public DataType getDataType(int index)
+    {
+        if (index == 1)
+        {
+            return DataType.OCTET_STRING;
+        }
+        else if (index == 2)
+        {
+            return DataType.ARRAY;                  
+        }  
+        else if (index == 3)
+        {
+            return DataType.ARRAY;
+        }  
+        else if (index == 4)
+        {
+            return DataType.OCTET_STRING;
+        }  
+        throw new IllegalArgumentException("getDataType failed. Invalid attribute index.");
+    }
+    
     /*
      * Returns value of given attribute.
      */    
     @Override
-    public Object getValue(int index, DataType[] type, byte[] parameters, boolean raw)
+    public Object getValue(int index, int selector, Object parameters)
     {
         if (index == 1)
         {
-            type[0] = DataType.OCTET_STRING;
             return getLogicalName();
         }
         else if (index == 2)
         {
-            type[0] = DataType.ARRAY;
             int cnt = m_ObjectList.size();
             try
             {
@@ -299,7 +320,6 @@ public class GXDLMSAssociationShortName extends GXDLMSObject implements IGXDLMSB
         }  
         else if (index == 3)
         {
-            type[0] = DataType.ARRAY;
             boolean lnExists = m_ObjectList.findBySN(this.getShortName()) != null;
             //Add count        
             int cnt = m_ObjectList.size();
@@ -360,26 +380,16 @@ public class GXDLMSAssociationShortName extends GXDLMSObject implements IGXDLMSB
             }
         }
     }
-    
-    @Override
-    public DataType getDataType(int index)
-    {
-        if (index == 2 || index == 3)
-        {
-            return DataType.ARRAY;
-        }
-        return super.getDataType(index);
-    }
-    
+        
     /*
      * Set value of given attribute.
      */
     @Override
-    public void setValue(int index, Object value, boolean raw)
+    public void setValue(int index, Object value)
     {
         if (index == 1)
         {
-            setLogicalName(GXDLMSObject.toLogicalName((byte[]) value));            
+            super.setValue(index, value);
         } 
         else if (index == 2)
         {
@@ -419,9 +429,13 @@ public class GXDLMSAssociationShortName extends GXDLMSObject implements IGXDLMSB
         }  
         else if (index == 4)
         {  
-            if (value != null)
+            if (value instanceof String)
             {
-                throw new UnsupportedOperationException();
+                m_SecuritySetupReference = value.toString();
+            }
+            else if (value != null)
+            {
+                m_SecuritySetupReference = GXDLMSClient.changeType((byte[]) value, DataType.OCTET_STRING).toString();
             }
         }  
         else

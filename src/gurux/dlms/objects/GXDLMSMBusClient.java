@@ -205,7 +205,7 @@ public class GXDLMSMBusClient extends GXDLMSObject implements IGXDLMSBase
      * If attribute is static and already read or device is returned HW error it is not returned.
      */
     @Override
-    public int[] GetAttributeIndexToRead()
+    public int[] getAttributeIndexToRead()
     {
         java.util.ArrayList<Integer> attributes = new java.util.ArrayList<Integer>();
         //LN is static and read only once.
@@ -289,70 +289,112 @@ public class GXDLMSMBusClient extends GXDLMSObject implements IGXDLMSBase
         return 8;
     }    
     
+     @Override
+    public DataType getDataType(int index)
+    {
+        if (index == 1)
+        {
+            return DataType.OCTET_STRING;
+        }
+        if (index == 2)
+        {
+            return DataType.OCTET_STRING;
+        }
+        if (index == 3)
+        {
+            return DataType.ARRAY;
+        }
+        if (index == 4)
+        {
+            return DataType.UINT32;
+        }
+        if (index == 5)
+        {
+            return DataType.UINT8;
+        }
+        if (index == 6)
+        {
+            return DataType.UINT32;
+        }
+        if (index == 7)
+        {
+            return DataType.UINT16;
+        }
+        if (index == 8)
+        {
+            return DataType.UINT8;
+        }
+        if (index == 9)
+        {
+            return DataType.UINT8;
+        }
+        if (index == 10)
+        {
+            return DataType.UINT8;
+        }
+        if (index == 11)
+        {
+            return DataType.UINT8;
+        }
+        if (index == 12)
+        {
+            return DataType.UINT8;
+        } 
+        throw new IllegalArgumentException("getDataType failed. Invalid attribute index.");
+    }
+     
     /*
      * Returns value of given attribute.
      */    
     @Override
-    public Object getValue(int index, DataType[] type, byte[] parameters, boolean raw)
+    public Object getValue(int index, int selector, Object parameters)
     {
         if (index == 1)
         {
-            type[0] = DataType.OCTET_STRING;
             return getLogicalName();
         }
         if (index == 2)
         {
-            type[0] = DataType.OCTET_STRING;
             return MBusPortReference;
         }
         if (index == 3)
         {
-            type[0] = DataType.ARRAY;
             return CaptureDefinition;//TODO;
         }
         if (index == 4)
         {
-            type[0] = DataType.UINT32;
             return CapturePeriod;
         }
         if (index == 5)
         {
-            type[0] = DataType.UINT8;
             return PrimaryAddress;
         }
         if (index == 6)
         {
-            type[0] = DataType.UINT32;
             return IdentificationNumber;
         }
         if (index == 7)
         {
-            type[0] = DataType.UINT16;
             return ManufacturerID;
         }
         if (index == 8)
         {
-            type[0] = DataType.UINT8;
             return DataHeaderVersion;
         }
         if (index == 9)
         {
-            type[0] = DataType.UINT8;
             return DeviceType;
         }
         if (index == 10)
         {
-            type[0] = DataType.UINT8;
             return AccessNumber;
         }
         if (index == 11)
         {
-            type[0] = DataType.UINT8;
             return Status;
         }
         if (index == 12)
         {
-            type[0] = DataType.UINT8;
             return Alarm;
         }  
         throw new IllegalArgumentException("GetValue failed. Invalid attribute index.");
@@ -362,11 +404,11 @@ public class GXDLMSMBusClient extends GXDLMSObject implements IGXDLMSBase
      * Set value of given attribute.
      */
     @Override
-    public void setValue(int index, Object value, boolean raw)
+    public void setValue(int index, Object value)
     {
         if (index == 1)
         {
-            setLogicalName(GXDLMSObject.toLogicalName((byte[]) value));            
+            super.setValue(index, value);            
         }
         else if (index == 2)
         {

@@ -35,6 +35,7 @@
 package gurux.dlms;
 
 import gurux.dlms.enums.Security;
+import gurux.dlms.internal.GXCommon;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 
@@ -109,7 +110,7 @@ class GXDLMSChippering
                 data.write(tmp);
                 data.write(ciphertext);
             }
-            else if (security == Security.AUTHENTICATIONENCRYPTION)
+            else if (security == Security.AUTHENTICATION_ENCRYPTION)
             {
                 if (type == CountType.PACKET)
                 {
@@ -161,7 +162,7 @@ class GXDLMSChippering
             {
                 return AuthenticationKey;
             }
-            else if (security == Security.AUTHENTICATIONENCRYPTION)
+            else if (security == Security.AUTHENTICATION_ENCRYPTION)
             {
                 ByteArrayOutputStream tmp2 = new ByteArrayOutputStream();
                 tmp2.write((byte)security.getValue());
@@ -191,34 +192,33 @@ class GXDLMSChippering
         {
             throw new IllegalArgumentException("cryptedData");
         }
-        int pos = -1;
-        Command cmd = Command.forValue(cryptedText[++pos] & 0xFF);
+        int[] pos = new int[1];
+        Command cmd = Command.forValue(cryptedText[pos[0]++] & 0xFF);
         if (!(cmd == Command.GloGetRequest || cmd == Command.GloGetResponse || 
                 cmd == Command.GloSetRequest || cmd == Command.GloSetResponse || 
                 cmd == Command.GloMethodRequest || cmd == Command.GloMethodResponse))
         {
             throw new IllegalArgumentException("cryptedData");
         }
-        int len = cryptedText[++pos];
-        Security security = Security.forValue(cryptedText[++pos]);
+        int len = GXCommon.getObjectCount(cryptedText, pos);
+        Security security = Security.forValue(cryptedText[pos[0]++]);
         byte[] FrameCounterData = new byte[4];
-        FrameCounterData[0] = cryptedText[++pos];
-        FrameCounterData[1] = cryptedText[++pos];
-        FrameCounterData[2] = cryptedText[++pos];
-        FrameCounterData[3] = cryptedText[++pos];
+        FrameCounterData[0] = cryptedText[pos[0]++];
+        FrameCounterData[1] = cryptedText[pos[0]++];
+        FrameCounterData[2] = cryptedText[pos[0]++];
+        FrameCounterData[3] = cryptedText[pos[0]++];
         int[] index = new int[1];
         long frameCounter = (long) gurux.dlms.internal.GXCommon.getUInt32(FrameCounterData, index);
         byte[] tag = new byte[12];
         byte[] encryptedData;
-        ++pos;
         int length;
         if (security == Security.AUTHENTICATION)
         {
-            length = cryptedText.length - pos - 12;
+            length = cryptedText.length - pos[0] - 12;
             encryptedData = new byte[length];
-            System.arraycopy(cryptedText, pos, encryptedData, 0, length);
-            pos += length;
-            System.arraycopy(cryptedText, pos, tag, 0, 12);
+            System.arraycopy(cryptedText, pos[0], encryptedData, 0, length);
+            pos[0] += length;
+            System.arraycopy(cryptedText, pos[0], tag, 0, 12);
             //Check tag.
             byte[] countTag;
             Object[] tmp = new Object[1];
@@ -233,19 +233,19 @@ class GXDLMSChippering
         byte[] ciphertext = null;
         if (security == Security.ENCRYPTION)
         {
-            length = cryptedText.length - pos;
+            length = cryptedText.length - pos[0];
             ciphertext = new byte[length];
-            System.arraycopy(cryptedText, pos, ciphertext, 0, ciphertext.length);
-            pos += ciphertext.length;
+            System.arraycopy(cryptedText, pos[0], ciphertext, 0, ciphertext.length);
+            pos[0] += ciphertext.length;
         }
-        else if (security == Security.AUTHENTICATIONENCRYPTION)
+        else if (security == Security.AUTHENTICATION_ENCRYPTION)
         {
-            length = cryptedText.length - pos - 12;
+            length = cryptedText.length - pos[0] - 12;
             ciphertext = new byte[length];
-            System.arraycopy(cryptedText, pos, ciphertext, 0, ciphertext.length);
-            pos += ciphertext.length;
-            System.arraycopy(cryptedText, pos, tag, 0, 12);
-            pos += tag.length;
+            System.arraycopy(cryptedText, pos[0], ciphertext, 0, ciphertext.length);
+            pos[0] += ciphertext.length;
+            System.arraycopy(cryptedText, pos[0], tag, 0, 12);
+            pos[0] += tag.length;
         }
         byte[] aad = GetAuthenticatedData(security, authenticationKey, cryptedText);
         GXDLMSChipperingStream gcm = new GXDLMSChipperingStream(security, false, blockCipherKey, aad, GetNonse(frameCounter, systemTitle), tag);

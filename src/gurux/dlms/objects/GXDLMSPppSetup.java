@@ -37,7 +37,14 @@ package gurux.dlms.objects;
 import gurux.dlms.GXDLMSClient;
 import gurux.dlms.enums.DataType;
 import gurux.dlms.enums.ObjectType;
+import gurux.dlms.internal.GXCommon;
+import java.io.ByteArrayOutputStream;
+import java.io.IOException;
+import java.io.UnsupportedEncodingException;
 import java.lang.reflect.Array;
+import java.text.ParseException;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 public class GXDLMSPppSetup extends GXDLMSObject implements IGXDLMSBase
 {
@@ -161,7 +168,7 @@ public class GXDLMSPppSetup extends GXDLMSObject implements IGXDLMSBase
      * If attribute is static and already read or device is returned HW error it is not returned.
      */
     @Override
-    public int[] GetAttributeIndexToRead()
+    public int[] getAttributeIndexToRead()
     {
         java.util.ArrayList<Integer> attributes = new java.util.ArrayList<Integer>();
         //LN is static and read only once.
@@ -210,17 +217,121 @@ public class GXDLMSPppSetup extends GXDLMSObject implements IGXDLMSBase
         return 0;
     }    
     
+    @Override
+    public DataType getDataType(int index)
+    {
+        if (index == 1)
+        {
+            return DataType.OCTET_STRING;
+        }
+        if (index == 2)
+        {
+            return DataType.OCTET_STRING;
+        }
+        if (index == 3)
+        {
+            return DataType.ARRAY;
+        }
+        if (index == 4)
+        {
+            return DataType.ARRAY;
+        }
+        if (index == 5)
+        {
+            return DataType.STRUCTURE;
+        } 
+        throw new IllegalArgumentException("getDataType failed. Invalid attribute index.");
+    }
+     
     /*
      * Returns value of given attribute.
      */    
     @Override
-    public Object getValue(int index, DataType[] type, byte[] parameters, boolean raw)
+    public Object getValue(int index, int selector, Object parameters)
     {
         if (index == 1)
         {
-            type[0] = DataType.OCTET_STRING;
             return getLogicalName();
         }        
+        if (index == 2)
+        {
+            return PHYReference;
+        }
+        if (index == 3)
+        {
+            ByteArrayOutputStream data = new ByteArrayOutputStream();            
+            data.write((byte)DataType.ARRAY.getValue());
+            if (LCPOptions == null)
+            {
+                data.write(0);
+            }
+            else
+            {
+                data.write((byte)IPCPOptions.length);
+                try 
+                {               
+                    for (GXDLMSPppSetupLcpOption it : LCPOptions)
+                    {
+                        data.write((byte)DataType.STRUCTURE.getValue());
+                        data.write((byte)3);
+                        GXCommon.setData(data, DataType.UINT8, it.getType());                    
+                        GXCommon.setData(data, DataType.UINT8, it.getLength());
+                        GXCommon.setData(data, GXCommon.getValueType(it.getData()), it.getData());
+                    }
+                } 
+                catch (Exception ex) 
+                {                        
+                    throw new RuntimeException(ex.getMessage());
+                }
+                
+            }
+            return data.toByteArray();
+        }
+        if (index == 4)
+        {
+            ByteArrayOutputStream data = new ByteArrayOutputStream();
+            data.write((byte)DataType.ARRAY.getValue());
+            if (IPCPOptions == null)
+            {
+                data.write(0);
+            }
+            else
+            {
+                data.write((byte)IPCPOptions.length);
+                try
+                {
+                    for (GXDLMSPppSetupIPCPOption it : IPCPOptions)
+                    {
+                        data.write((byte)DataType.STRUCTURE.getValue());
+                        data.write((byte)3);
+                        GXCommon.setData(data, DataType.UINT8, it.getType());
+                        GXCommon.setData(data, DataType.UINT8, it.getLength());
+                        GXCommon.setData(data, GXCommon.getValueType(it.getData()), it.getData());
+                    }
+                } 
+                catch (Exception ex) 
+                {                        
+                    throw new RuntimeException(ex.getMessage());
+                }
+            }
+            return data.toByteArray();
+        }
+        else if (index == 5)
+        {
+            ByteArrayOutputStream data = new ByteArrayOutputStream();
+            data.write((byte)DataType.STRUCTURE.getValue());
+            data.write(2);
+            try
+            {
+                GXCommon.setData(data, DataType.OCTET_STRING, UserName);
+                GXCommon.setData(data, DataType.OCTET_STRING, Password);
+            } 
+            catch (Exception ex) 
+            {                        
+                throw new RuntimeException(ex.getMessage());
+            }
+            return data.toByteArray();
+        }
         throw new IllegalArgumentException("GetValue failed. Invalid attribute index.");
     }
     
@@ -228,11 +339,11 @@ public class GXDLMSPppSetup extends GXDLMSObject implements IGXDLMSBase
      * Set value of given attribute.
      */
     @Override
-    public void setValue(int index, Object value, boolean raw)
+    public void setValue(int index, Object value)
     {
         if (index == 1)
         {
-            setLogicalName(GXDLMSObject.toLogicalName((byte[]) value));            
+            super.setValue(index, value);            
         } 
         else if (index == 2)
         {

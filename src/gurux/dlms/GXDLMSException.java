@@ -43,45 +43,9 @@ public class GXDLMSException extends RuntimeException
     private SourceDiagnostic privateDiagnostic = SourceDiagnostic.NONE;
     private int privateErrorCode;
 
-    private static String getDescription(int errCode)
-    {
-        String str;
-        switch (errCode)
-        {
-            case 1:
-                str = "Access Error : Device reports a hardware fault";
-                break;
-            case 2:
-                str = "Access Error : Device reports a temporary failure";
-                break;
-            case 3:
-                str = "Access Error : Device reports Read-Write denied";
-                break;
-            case 4:
-                str = "Access Error : Device reports a undefined object";
-                break;
-            case 5: 
-                str = "Access Error : Device reports a inconsistent Class or object";
-                break;
-            case 6: 
-                str = "Access Error : Device reports a unavailable object";
-                break;
-            case 7: 
-                str = "Access Error : Device reports a unmatched type";
-                break;
-            case 8:
-                str = "Access Error : Device reports scope of access violated";
-                break;
-            default:
-                str = "Unknown error";
-            break;
-        }
-        return str;
-    }
-
     public GXDLMSException(int errCode)
     {
-        super(getDescription(errCode));
+        super(GXDLMS.getDescription(errCode));
         setErrorCode(errCode);
     }
 

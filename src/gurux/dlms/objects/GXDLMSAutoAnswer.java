@@ -163,7 +163,7 @@ public class GXDLMSAutoAnswer extends GXDLMSObject implements IGXDLMSBase
      * If attribute is static and already read or device is returned HW error it is not returned.
      */
     @Override
-    public int[] GetAttributeIndexToRead()
+    public int[] getAttributeIndexToRead()
     {
         java.util.ArrayList<Integer> attributes = new java.util.ArrayList<Integer>();
         //LN is static and read only once.
@@ -218,25 +218,52 @@ public class GXDLMSAutoAnswer extends GXDLMSObject implements IGXDLMSBase
         return 0;
     }    
     
+    @Override
+    public DataType getDataType(int index)
+    {
+        if (index == 1)
+        {
+            return DataType.OCTET_STRING;
+        }
+        if (index == 2)
+        {
+            return DataType.ENUM;
+        }    
+        if (index == 3)
+        {
+            return DataType.ARRAY;
+        }
+        if (index == 4)
+        {
+            return DataType.ENUM;
+        }
+        if (index == 5)
+        {
+            return DataType.UINT8;
+        }
+        if (index == 6)
+        {
+            return DataType.ARRAY;
+        } 
+        throw new IllegalArgumentException("getDataType failed. Invalid attribute index.");
+    }
+    
     /*
      * Returns value of given attribute.
      */    
     @Override
-    public Object getValue(int index, DataType[] type, byte[] parameters, boolean raw)
+    public Object getValue(int index, int selector, Object parameters)
     {
         if (index == 1)
         {
-            type[0] = DataType.OCTET_STRING;
             return getLogicalName();
         }
         if (index == 2)
         {
-            type[0] = DataType.ENUM;
             return getMode().ordinal();
         }    
         if (index == 3)
         {
-            type[0] = DataType.ARRAY;
             int cnt = getListeningWindow().size();
             ByteArrayOutputStream data = new ByteArrayOutputStream();   
             data.write(DataType.ARRAY.getValue());
@@ -264,17 +291,14 @@ public class GXDLMSAutoAnswer extends GXDLMSObject implements IGXDLMSBase
         }
         if (index == 4)
         {
-            type[0] = DataType.ENUM;
             return getStatus().getValue();
         }
         if (index == 5)
         {
-            type[0] = DataType.UINT8;
             return getNumberOfCalls();
         }
         if (index == 6)
         {
-            type[0] = DataType.ARRAY;
             ByteArrayOutputStream data = new ByteArrayOutputStream();   
             data.write(DataType.STRUCTURE.getValue());
             GXCommon.setObjectCount(2, data);
@@ -297,11 +321,11 @@ public class GXDLMSAutoAnswer extends GXDLMSObject implements IGXDLMSBase
      * Set value of given attribute.
      */
     @Override
-    public void setValue(int index, Object value, boolean raw)
+    public void setValue(int index, Object value)
     {
         if (index == 1)
         {
-            setLogicalName(GXDLMSObject.toLogicalName((byte[]) value));            
+            super.setValue(index, value);            
         }
         else if (index == 2)
         {

@@ -178,7 +178,7 @@ public class GXDLMSActivityCalendar extends GXDLMSObject implements IGXDLMSBase
      * If attribute is static and already read or device is returned HW error it is not returned.
      */
     @Override
-    public int[] GetAttributeIndexToRead()
+    public int[] getAttributeIndexToRead()
     {
         java.util.ArrayList<Integer> attributes = new java.util.ArrayList<Integer>();
         //LN is static and read only once.
@@ -253,25 +253,67 @@ public class GXDLMSActivityCalendar extends GXDLMSObject implements IGXDLMSBase
         return 1;
     }            
     
+    @Override
+    public DataType getDataType(int index)
+    {
+        if (index == 1)
+        {
+            return DataType.OCTET_STRING;
+        }
+        if (index == 2)
+        {
+            return DataType.OCTET_STRING;
+        }
+        if (index == 3)
+        {
+            return DataType.ARRAY;
+        }
+        if (index == 4)
+        {
+            return DataType.ARRAY;
+        }
+        if (index == 5)
+        {
+            return DataType.ARRAY;
+        }
+        if (index == 6)
+        {
+            return DataType.OCTET_STRING;
+        }        
+        if (index == 7)
+        {
+            return DataType.ARRAY;
+        }
+        if (index == 8)
+        {
+            return DataType.ARRAY;
+        }
+        if (index == 9)
+        {
+            return DataType.ARRAY;
+        }
+        if (index == 10)
+        {
+            return DataType.DATETIME;
+        }   
+        throw new IllegalArgumentException("getDataType failed. Invalid attribute index.");
+    }
     /*
      * Returns value of given attribute.
      */    
     @Override
-    public Object getValue(int index, DataType[] type, byte[] parameters, boolean raw)
+    public Object getValue(int index, int selector, Object parameters)
     {
         if (index == 1)
         {
-            type[0] = DataType.OCTET_STRING;
             return getLogicalName();
         }
         if (index == 2)
         {
-            type[0] = DataType.OCTET_STRING;
             return GXDLMSClient.changeType(GXCommon.getBytes(getCalendarNameActive()), DataType.OCTET_STRING);
         }
         if (index == 3)
         {
-            type[0] = DataType.ARRAY;
             ByteArrayOutputStream data = new ByteArrayOutputStream();
             data.write((byte)DataType.ARRAY.getValue());
             if (getSeasonProfileActive() == null)
@@ -304,7 +346,6 @@ public class GXDLMSActivityCalendar extends GXDLMSObject implements IGXDLMSBase
         }
         if (index == 4)
         {
-            type[0] = DataType.ARRAY;
             ByteArrayOutputStream data = new ByteArrayOutputStream();            
             data.write((byte)DataType.ARRAY.getValue());
             if (getWeekProfileTableActive() == null)
@@ -342,7 +383,6 @@ public class GXDLMSActivityCalendar extends GXDLMSObject implements IGXDLMSBase
         }
         if (index == 5)
         {
-            type[0] = DataType.ARRAY;
             ByteArrayOutputStream data = new ByteArrayOutputStream();
             data.write((byte)DataType.ARRAY.getValue());
             if (getDayProfileTableActive() == null)
@@ -384,13 +424,11 @@ public class GXDLMSActivityCalendar extends GXDLMSObject implements IGXDLMSBase
         }
         if (index == 6)
         {
-            type[0] = DataType.OCTET_STRING;
             return GXDLMSClient.changeType(GXCommon.getBytes(getCalendarNamePassive()), DataType.OCTET_STRING);
         }
         //
         if (index == 7)
         {
-            type[0] = DataType.ARRAY;
             ByteArrayOutputStream data = new ByteArrayOutputStream();
             data.write((byte)DataType.ARRAY.getValue());
             if (getSeasonProfilePassive() == null)
@@ -423,7 +461,6 @@ public class GXDLMSActivityCalendar extends GXDLMSObject implements IGXDLMSBase
         }
         if (index == 8)
         {
-            type[0] = DataType.ARRAY;
             ByteArrayOutputStream data = new ByteArrayOutputStream();
             data.write((byte)DataType.ARRAY.getValue());
             if (getWeekProfileTablePassive() == null)
@@ -461,7 +498,6 @@ public class GXDLMSActivityCalendar extends GXDLMSObject implements IGXDLMSBase
         }
         if (index == 9)
         {
-            type[0] = DataType.ARRAY;
             ByteArrayOutputStream data = new ByteArrayOutputStream();
             data.write((byte)DataType.ARRAY.getValue());
             if (getDayProfileTablePassive() == null)
@@ -503,7 +539,6 @@ public class GXDLMSActivityCalendar extends GXDLMSObject implements IGXDLMSBase
         }
         if (index == 10)
         {
-            type[0] = DataType.DATETIME;
             return getTime();
         }  
         throw new IllegalArgumentException("GetValue failed. Invalid attribute index.");
@@ -513,11 +548,11 @@ public class GXDLMSActivityCalendar extends GXDLMSObject implements IGXDLMSBase
      * Set value of given attribute.
      */
     @Override
-    public void setValue(int index, Object value, boolean raw)
+    public void setValue(int index, Object value)
     {
         if (index == 1)
         {
-            setLogicalName(GXDLMSObject.toLogicalName((byte[]) value));            
+            super.setValue(index, value);            
         }
         else if (index == 2)
         {

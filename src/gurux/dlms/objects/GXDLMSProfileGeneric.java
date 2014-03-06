@@ -46,6 +46,7 @@ import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.UnsupportedEncodingException;
 import java.lang.reflect.Array;
+import java.nio.Buffer;
 import java.text.ParseException;
 import java.util.AbstractMap;
 import java.util.ArrayList;
@@ -296,7 +297,7 @@ public class GXDLMSProfileGeneric extends GXDLMSObject implements IGXDLMSBase
      * If attribute is static and already read or device is returned HW error it is not returned.
      */
     @Override
-    public int[] GetAttributeIndexToRead()
+    public int[] getAttributeIndexToRead()
     {
         java.util.ArrayList<Integer> attributes = new java.util.ArrayList<Integer>();
         //LN is static and read only once.
@@ -390,59 +391,7 @@ public class GXDLMSProfileGeneric extends GXDLMSObject implements IGXDLMSBase
         {
             throw new RuntimeException(ex.getMessage());
         }
-    }
-    
-    @SuppressWarnings("unused")
-	private void getAccessSelector(byte[] data, int[] selector, Object[] start, Object[] to)
-    {
-        selector[0] = data[0];
-        int[] pos = new int[1];
-        DataType[] type = new DataType[]{DataType.NONE};
-        //Start index
-        int[] index = new int[1], count = new int[1], cachePos = new int[1];
-        if (selector[0] == 1) //Read by range
-        {
-            if (data[1] != (int)DataType.STRUCTURE.getValue() || data[2] != 4 || data[3] != (int)DataType.STRUCTURE.getValue() || data[4] != 4)
-            {
-                throw new GXDLMSException("Invalid parameter");
-            }
-            pos[0] = 5;
-            Object classId = GXCommon.getData(data, pos, 0, count, index, type, cachePos);
-            type[0] = DataType.NONE;
-            Object ln = GXCommon.getData(data, pos, 0, count, index, type, cachePos);
-            type[0] = DataType.NONE;
-            Object attributeIndex = GXCommon.getData(data, pos, 0, count, index, type, cachePos);
-            type[0] = DataType.NONE;
-            Object version = GXCommon.getData(data, pos, 0, count, index, type, cachePos);
-            type[0] = DataType.NONE;
-            Object tempVar = GXCommon.getData(data, pos, 0, count, index, type, cachePos);
-            byte[] tmp = (byte[]) tempVar;
-            start[0] = GXDLMSClient.changeType(tmp, DataType.DATETIME);
-            type[0] = DataType.NONE;
-            Object tempVar2 = GXCommon.getData(data, pos, 0, count, index, type, cachePos);
-            tmp = (byte[]) tempVar2;
-            to[0] = GXDLMSClient.changeType(tmp, DataType.DATETIME);
-        }
-        else if (selector[0] == 2) //Read by entry.
-        {
-            if (data[1] != (int)DataType.STRUCTURE.getValue() || data[2] != 4)
-            {
-                    throw new GXDLMSException("Invalid parameter");
-            }
-            pos[0] = 3;
-            start[0] = GXCommon.getData(data, pos, 0, count, index, type, cachePos);
-            type[0] = DataType.NONE;
-            to[0] = GXCommon.getData(data, pos, 0, count, index, type, cachePos);
-            if (((Number)start[0]).longValue() > ((Number)to[0]).longValue())
-            {
-                throw new GXDLMSException("Invalid parameter");
-            }
-        }
-        else
-        {
-            throw new GXDLMSException("Invalid parameter");
-        }
-    }
+    }     
 
     /** 
      Returns Association View.
@@ -450,9 +399,7 @@ public class GXDLMSProfileGeneric extends GXDLMSObject implements IGXDLMSBase
      @param table
      @return 
     */
-    private byte[] getData(Object[] table) 
-            throws RuntimeException, ParseException, 
-            UnsupportedEncodingException, IOException            
+    private byte[] getData(Object[] table)            
     {
         ByteArrayOutputStream data = new ByteArrayOutputStream();
         data.write((byte)DataType.ARRAY.getValue());        
@@ -484,91 +431,127 @@ public class GXDLMSProfileGeneric extends GXDLMSObject implements IGXDLMSBase
         
     }   
     
-    private byte[] getProfileGenericData(byte[] data)
-    {        
-        try
+    byte[] getProfileGenericData(int selector, Object parameters)
+    {                        
+        //If all data is readed.
+        if (selector == 0 || parameters == null)
         {
-            int[] selector = new int[1];
-            Object[] from = new Object[1], to = new Object[1];
-            //If all data is readed.
-            if (data == null || data.length == 0)
+            return getData(getBuffer());
+        }
+        
+        Object[] arr = (Object[])parameters;
+        ArrayList<Object[]> table = new ArrayList<Object[]>();
+        if (selector == 1) //Read by range
+        {
+            DataType[] dt = new DataType[]{DataType.DATETIME};
+            int[] a = new int[1], b = new int[1], c = new int[1], pos = new int[1];
+            java.util.Date start = ((GXDateTime)GXCommon.getData((byte[])arr[1], pos, 0, a, b, dt, c)).getValue();
+            c[0] = pos[0] = 0;
+            java.util.Date end = ((GXDateTime)GXCommon.getData((byte[])arr[2], pos, 0, a, b, dt, c)).getValue();
+            for (Object row : getBuffer())
             {
-                return getData(getBuffer());            
-            }
-            getAccessSelector(data, selector, from, to);
-            Object[] table = getBuffer();
-            ArrayList<Object[]> items = new ArrayList<Object[]>();
-            synchronized (this)
-            {
-                if (selector[0] == 1) //Read by range
+                java.util.Date tm;
+                Object tmp = ((Object[]) row)[0];
+                if (tmp instanceof GXDateTime)
                 {
-                    java.util.Date start = ((GXDateTime)from[0]).getValue();
-                    java.util.Date end = ((GXDateTime)to[0]).getValue();
-                    for (Object row : table)
-                    {
-                        java.util.Date tm = (java.util.Date)((Object[]) row)[0];
-                        if (tm.compareTo(start) >= 0 && tm.compareTo(end) <= 0)
-                        {
-                            items.add((Object[])row);
-                        }
-                    }
+                    tm = ((GXDateTime)tmp).getValue();    
                 }
-                else if (selector[0] == 2) //Read by entry.
+                else
                 {
-                    int start = ((Number)from[0]).intValue();
-                    int count = ((Number)to[0]).intValue();
-                    for (int pos = 0; pos < count; ++pos)
-                    {
-                        if (pos + start == Array.getLength(table))
-                        {
-                            break;
-                        }
-                        items.add((Object[]) table[start + pos]);
-                    }
+                    tm = (java.util.Date) tmp;
+                }                
+                if (tm.compareTo(start) >= 0 && tm.compareTo(end) <= 0)
+                {
+                    table.add((Object[])row);
                 }
             }
-            return getData(items.toArray());       
         }
-        catch(Exception ex)
+        else if (selector == 2)//Read by entry.
         {
-            throw new RuntimeException(ex.getMessage());
+            int start = ((Number)arr[0]).intValue();
+            int count = ((Number)arr[1]).intValue();
+            for (int pos = 0; pos < count; ++pos)
+            {
+                if (pos + start == getBuffer().length)
+                {
+                    break;
+                }
+                table.add((Object[]) getBuffer()[start + pos]);
+            }
         }
+        else
+        {
+            throw new IllegalArgumentException("Invalid selector.");
+        }    
+        return getData(table.toArray());
+    }    
+    
+    @Override
+    public DataType getDataType(int index)
+    {
+        if (index == 1)
+        {
+            return DataType.OCTET_STRING;
+        }
+        if (index == 2)
+        {
+            return DataType.ARRAY;
+        }        
+        if (index == 3)
+        {
+            return DataType.ARRAY;            
+        }
+        if (index == 4)
+        {
+            return DataType.INT8;
+        }
+        if (index == 5)
+        {            
+            return DataType.INT8;
+        }        
+        if (index == 6)
+        {
+            return DataType.ARRAY;
+        }
+        if (index == 7)
+        {
+            return DataType.UINT32;            
+        }
+        if (index == 8)
+        {
+            return DataType.UINT32;
+        }  
+        throw new IllegalArgumentException("getDataType failed. Invalid attribute index.");
     }
     
      /*
      * Returns value of given attribute.
      */    
     @Override
-    public Object getValue(int index, DataType[] type, byte[] parameters, boolean raw)
+    public Object getValue(int index, int selector, Object parameters)
     {
         if (index == 1)
         {
-            type[0] = DataType.OCTET_STRING;
             return getLogicalName();
         }        
         if (index == 2)
         {
-            type[0] = DataType.ARRAY;
-            return getProfileGenericData(parameters);          
+            return getProfileGenericData(selector, parameters);          
         }        
         if (index == 3)
         {
-            type[0] = DataType.ARRAY;            
             return getColumns();
         }
         if (index == 4)
         {
-            type[0] = DataType.INT8;
             return getCapturePeriod();
         }
         if (index == 5)
         {            
-            type[0] = DataType.INT8;
             return getSortMethod().getValue();
         }        
         if (index == 6)
         {
-            type[0] = DataType.ARRAY;
             ByteArrayOutputStream data = new ByteArrayOutputStream();            
             data.write((byte)DataType.STRUCTURE.getValue());
             data.write((byte) 4); //Count  
@@ -597,12 +580,10 @@ public class GXDLMSProfileGeneric extends GXDLMSObject implements IGXDLMSBase
         }
         if (index == 7)
         {
-            type[0] = DataType.UINT32;
             return getEntriesInUse();
         }
         if (index == 8)
         {
-            type[0] = DataType.UINT32;
             return getProfileEntries();
         }
         throw new IllegalArgumentException("GetValue failed. Invalid attribute index.");
@@ -612,11 +593,11 @@ public class GXDLMSProfileGeneric extends GXDLMSObject implements IGXDLMSBase
      * Set value of given attribute.
      */
     @Override
-    public void setValue(int index, Object value, boolean raw)
+    public void setValue(int index, Object value)
     {
         if (index == 1)
         {
-            setLogicalName(GXDLMSObject.toLogicalName((byte[]) value));            
+            super.setValue(index, value);            
         }
         else if (index == 2)
         {
@@ -632,7 +613,8 @@ public class GXDLMSProfileGeneric extends GXDLMSObject implements IGXDLMSBase
                 for(AbstractMap.SimpleEntry<GXDLMSObject, GXDLMSCaptureObject> it : m_CaptureObjects)
                 {
                     types[++pos] = it.getKey().getUIDataType(it.getValue().getAttributeIndex());
-                }                
+                }
+                int deviation = getParent().getDeviation();
                 for(Object row : (Object[]) value)
                 {
                     if (Array.getLength(row) != m_CaptureObjects.size())
@@ -647,6 +629,18 @@ public class GXDLMSProfileGeneric extends GXDLMSObject implements IGXDLMSBase
                                 data instanceof byte[])
                         {
                             data = GXDLMSClient.changeType((byte[]) data, type);
+                            //If summer time is used.
+                            if (type == DataType.DATETIME && data instanceof GXDateTime)
+                            {
+                                GXDateTime dt = (GXDateTime)data;                                
+                                if ((dt.getStatus().getValue() & 0x80) != 0)
+                                {
+                                    java.util.Calendar tm = java.util.Calendar.getInstance(java.util.TimeZone.getTimeZone("UTC"));
+                                    tm.setTime(dt.getValue());                                    
+                                    tm.add(java.util.Calendar.MINUTE, deviation);
+                                    dt.setValue(tm.getTime());
+                                }
+                            }
                             Array.set(row, a, data);
                         }
                         AbstractMap.SimpleEntry<GXDLMSObject, GXDLMSCaptureObject> item = m_CaptureObjects.get(pos);
@@ -792,7 +786,7 @@ public class GXDLMSProfileGeneric extends GXDLMSObject implements IGXDLMSBase
            int pos = -1;
            for (AbstractMap.SimpleEntry<GXDLMSObject, GXDLMSCaptureObject> obj : m_CaptureObjects)
             {
-                ValueEventArgs e = new ValueEventArgs(obj.getKey(), obj.getValue().getAttributeIndex());
+                ValueEventArgs e = new ValueEventArgs(obj.getKey(), obj.getValue().getAttributeIndex(), 0);
                 Server.read(e);
                 if (e.getHandled())
                 {
@@ -800,8 +794,7 @@ public class GXDLMSProfileGeneric extends GXDLMSObject implements IGXDLMSBase
                 }
                 else
                 {
-                    DataType[] type = new DataType[]{DataType.NONE};
-                    values[++pos] = obj.getKey().getValue(obj.getValue().getAttributeIndex(), type, null, false);
+                    values[++pos] = obj.getKey().getValue(obj.getValue().getAttributeIndex() - 1, 0, null);
                 }
             }
             synchronized (this)

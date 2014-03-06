@@ -306,7 +306,7 @@ class GXAPDU
                     throw new RuntimeException("Invalid tag.");
                 }
                 int tmp = buff.get();
-                if (tmp < 0 || tmp > 4)
+                if (tmp < 0 || tmp > 5)
                 {
                     throw new RuntimeException("Invalid tag.");
                 }

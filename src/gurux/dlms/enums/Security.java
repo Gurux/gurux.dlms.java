@@ -54,7 +54,7 @@ public enum Security
     /** 
      Authentication and Encryption security are used.
     */
-    AUTHENTICATIONENCRYPTION(0x30);
+    AUTHENTICATION_ENCRYPTION(0x30);
 
     private int intValue;
     private static java.util.HashMap<Integer, Security> mappings;
