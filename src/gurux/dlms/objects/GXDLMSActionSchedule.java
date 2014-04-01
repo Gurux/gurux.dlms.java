@@ -119,7 +119,9 @@ public class GXDLMSActionSchedule extends GXDLMSObject implements IGXDLMSBase
     @Override
     public Object[] getValues()
     {
-        return new Object[] {getLogicalName(), getExecutedScriptLogicalName(), getType(), getExecutionTime()};
+        return new Object[] {getLogicalName(), 
+            m_ExecutedScriptLogicalName + " " + m_ExecutedScriptSelector, 
+            getType(), getExecutionTime()};
     }
     
     /*
@@ -288,9 +290,9 @@ public class GXDLMSActionSchedule extends GXDLMSObject implements IGXDLMSBase
                     tm.setTime(dt.getValue());
                     java.util.Calendar date = java.util.Calendar.getInstance(java.util.TimeZone.getTimeZone("UTC"));
                     date.setTime(dt2.getValue());                    
-                    tm.set(java.util.Calendar.YEAR, date.get(java.util.Calendar.YEAR));
+                    tm.set(java.util.Calendar.YEAR, date.get(java.util.Calendar.YEAR) - 1);
                     tm.set(java.util.Calendar.MONTH, date.get(java.util.Calendar.MONTH));
-                    tm.set(java.util.Calendar.DAY_OF_MONTH, date.get(java.util.Calendar.DAY_OF_MONTH));
+                    tm.set(java.util.Calendar.DAY_OF_MONTH, date.get(java.util.Calendar.DAY_OF_MONTH) - 1);
                     java.util.Set<DateTimeSkips> skip = dt.getSkip();
                     skip.addAll(dt2.getSkip());
                     dt.setSkip(skip);

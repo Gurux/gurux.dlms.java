@@ -32,34 +32,46 @@
 // Full text may be retrieved at http://www.gnu.org/licenses/gpl-2.0.txt
 //---------------------------------------------------------------------------
 
-package gurux.dlms.objects;
+package gurux.dlms.enums;
 
-public class GXDLMSActionItem
-{
-    private String m_LogicalName;
-    private int m_ScriptSelector;
-    
-    public final String getLogicalName()
+ public enum ServiceType
+ {
+    TCP(0),
+    UDP(1),
+    FTP(2),
+    SMTP(3),
+    SMS(4);
+
+    private int intValue;
+    private static java.util.HashMap<Integer, ServiceType> mappings;
+    private static java.util.HashMap<Integer, ServiceType> getMappings()
     {
-        return m_LogicalName;
-    }
-    public final void setLogicalName(String value)
-    {
-        m_LogicalName = value;
+        if (mappings == null)
+        {
+            synchronized (ServiceType.class)
+            {
+                if (mappings == null)
+                {
+                    mappings = new java.util.HashMap<Integer, ServiceType>();
+                }
+            }
+        }
+        return mappings;
     }
 
-    public final int getScriptSelector()
+    private ServiceType(int value)
     {
-        return m_ScriptSelector;
+        intValue = value;
+        getMappings().put(value, this);
     }
-    public final void setScriptSelector(int value)
+
+    public int getValue()
     {
-        m_ScriptSelector = value;
+        return intValue;
     }
-    
-    @Override
-    public final String toString()
+
+    public static ServiceType forValue(int value)
     {
-        return m_LogicalName + " " + String.valueOf(m_ScriptSelector);
+        return getMappings().get(value);
     }
 }

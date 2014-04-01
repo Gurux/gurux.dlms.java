@@ -34,32 +34,30 @@
 
 package gurux.dlms.objects;
 
-public class GXDLMSActionItem
+public enum ClockBase
 {
-    private String m_LogicalName;
-    private int m_ScriptSelector;
-    
-    public final String getLogicalName()
-    {
-        return m_LogicalName;
-    }
-    public final void setLogicalName(String value)
-    {
-        m_LogicalName = value;
-    }
-
-    public final int getScriptSelector()
-    {
-        return m_ScriptSelector;
-    }
-    public final void setScriptSelector(int value)
-    {
-        m_ScriptSelector = value;
-    }
-    
-    @Override
-    public final String toString()
-    {
-        return m_LogicalName + " " + String.valueOf(m_ScriptSelector);
-    }
+    /// <summary>
+    /// Not defined
+    /// </summary>
+    None,
+    /// <summary>
+    /// Internal Crystal
+    /// </summary>
+    Crystal,
+    /// <summary>
+    /// Mains frequency 50 Hz,
+    /// </summary>
+    Frequency50,
+    /// <summary>
+    /// Mains frequency 60 Hz,
+    /// </summary>
+    Frequency60,
+    /// <summary>
+    /// Global Positioning System.
+    /// </summary>
+    GPS,
+    /// <summary>
+    /// Radio controlled.
+    /// </summary>
+    Radio
 }

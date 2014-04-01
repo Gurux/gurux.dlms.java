@@ -38,17 +38,17 @@ import gurux.dlms.enums.ObjectType;
 
 public class GXDLMSObjectDefinition 
 {
-    ObjectType class_id;
+    ObjectType ClassId;
     String LogicalName;
 
     public final ObjectType getClassId()
     {
-        return class_id;
+        return ClassId;
     }
     
     public final void setClassId(ObjectType value)
     {
-        class_id = value;
+        ClassId = value;
     }
 
     public final String getLogicalName()
@@ -73,7 +73,13 @@ public class GXDLMSObjectDefinition
      */
     public GXDLMSObjectDefinition(ObjectType classId, String logicalName)
     {
-        class_id = classId;
+        ClassId = classId;
         LogicalName = logicalName;
-    }    
+    }   
+    
+    @Override 
+    public String toString()
+    {
+        return ClassId.toString() + " " + LogicalName;
+    }
 }

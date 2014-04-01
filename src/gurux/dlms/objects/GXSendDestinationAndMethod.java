@@ -34,32 +34,39 @@
 
 package gurux.dlms.objects;
 
-public class GXDLMSActionItem
-{
-    private String m_LogicalName;
-    private int m_ScriptSelector;
-    
-    public final String getLogicalName()
-    {
-        return m_LogicalName;
-    }
-    public final void setLogicalName(String value)
-    {
-        m_LogicalName = value;
-    }
+import gurux.dlms.enums.MessageType;
+import gurux.dlms.enums.ServiceType;
 
-    public final int getScriptSelector()
+public class GXSendDestinationAndMethod
+{
+    private ServiceType Service;
+    private String Destination;
+    private MessageType Message;
+    
+    public final ServiceType getService()
     {
-        return m_ScriptSelector;
+        return Service;
     }
-    public final void setScriptSelector(int value)
+    public final void setService(ServiceType value)
     {
-        m_ScriptSelector = value;
+        Service = value;
     }
     
-    @Override
-    public final String toString()
+    public final String getDestination()
     {
-        return m_LogicalName + " " + String.valueOf(m_ScriptSelector);
+        return Destination;
+    }
+    public final void setDestination(String value)
+    {
+        Destination = value;
+    }
+    
+    public final MessageType getMessage()
+    {
+        return Message;
+    }
+    public final void setMessage(MessageType value)
+    {
+        Message = value;
     }
 }

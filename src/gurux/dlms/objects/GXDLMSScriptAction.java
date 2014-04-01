@@ -35,26 +35,27 @@ package gurux.dlms.objects;
 
 import gurux.dlms.enums.DataType;
 import gurux.dlms.enums.ObjectType;
+import gurux.dlms.internal.GXCommon;
 
 public class GXDLMSScriptAction 
 {
-    GXDLMSScriptActionType m_Type;
-    ObjectType m_ObjectType;
-    String m_LogicalName;
-    int m_Index;
-    Object m_Parameter;
-    DataType m_ParameterType;
+    GXDLMSScriptActionType Type;
+    ObjectType ObjectType;
+    String LogicalName;
+    int Index;
+    Object Parameter;
+    DataType ParameterType;
     
     /** 
      Defines which action to be applied to the referenced object.
     */
     public final GXDLMSScriptActionType getType()
     {
-        return m_Type;
+        return Type;
     }
     public final void setType(GXDLMSScriptActionType value)
     {
-        m_Type = value;
+        Type = value;
     }     
     
     /** 
@@ -62,11 +63,11 @@ public class GXDLMSScriptAction
     */
     public final ObjectType getObjectType()
     {
-        return m_ObjectType;
+        return ObjectType;
     }
     public final void setObjectType(ObjectType value)
     {
-        m_ObjectType = value;
+        ObjectType = value;
     }   
     
     /** 
@@ -74,11 +75,11 @@ public class GXDLMSScriptAction
     */
     public final String getLogicalName()
     {
-        return m_LogicalName;
+        return LogicalName;
     }
     public final void setLogicalName(String value)
     {
-        m_LogicalName = value;
+        LogicalName = value;
     }
     
     /** 
@@ -87,11 +88,11 @@ public class GXDLMSScriptAction
     */
     public final int getIndex()
     {
-        return m_Index;
+        return Index;
     }
     public final void setIndex(int value)
     {
-        m_Index = value;
+        Index = value;
     }   
     
     /** 
@@ -99,12 +100,12 @@ public class GXDLMSScriptAction
     */
     public final Object getParameter()
     {
-        return m_Parameter;
+        return Parameter;
     }
     public final void setParameter(Object value, DataType type)
     {
-        m_Parameter = value;
-        m_ParameterType = type;
+        Parameter = value;
+        ParameterType = type;
     }   
     
     /** 
@@ -112,6 +113,23 @@ public class GXDLMSScriptAction
     */
     public final DataType getParameterType()
     {
-        return m_ParameterType;
+        return ParameterType;
     }
+    
+    @Override
+    public String toString()
+    {
+        String tmp;
+        if (Parameter instanceof byte[])
+        {
+            tmp = GXCommon.toHex((byte[]) Parameter);
+        }
+        else
+        {
+            tmp = String.valueOf(Parameter);
+        }
+        return Type.toString() + " " + String.valueOf(ObjectType)  + " " + 
+                LogicalName  + " " +  String.valueOf(Index)  + " " + tmp;
+    }
+
 }

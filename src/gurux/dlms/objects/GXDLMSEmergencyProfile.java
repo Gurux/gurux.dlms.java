@@ -40,7 +40,7 @@ public class GXDLMSEmergencyProfile
 {
     private int ID;
     private GXDateTime ActivationTime;
-    private int Duration;
+    private long Duration;
 
     public final int getID()
     {
@@ -58,12 +58,18 @@ public class GXDLMSEmergencyProfile
     {
         ActivationTime = value;
     }
-    public final int getDuration()
+    public final long getDuration()
     {
         return Duration;
     }
-    public final void setDuration(int value)
+    public final void setDuration(long value)
     {
         Duration = value;
+    }
+    
+    @Override
+    public String toString()    
+    {
+        return String.valueOf(ID) + " " + ActivationTime.toString() + " " + String.valueOf(Duration);
     }
 }

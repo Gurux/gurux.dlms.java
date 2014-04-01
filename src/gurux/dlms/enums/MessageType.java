@@ -32,34 +32,45 @@
 // Full text may be retrieved at http://www.gnu.org/licenses/gpl-2.0.txt
 //---------------------------------------------------------------------------
 
-package gurux.dlms.objects;
+package gurux.dlms.enums;
 
-public class GXDLMSActionItem
-{
-    private String m_LogicalName;
-    private int m_ScriptSelector;
-    
-    public final String getLogicalName()
+ public enum MessageType
+ {
+    COSEM_APDU(0),
+    COSEM_APDU_XML(1),
+    MANUFACTURER_SPESIFIC(128);
+    //(128...255) manufacturer specific
+
+    private int intValue;
+    private static java.util.HashMap<Integer, MessageType> mappings;
+    private static java.util.HashMap<Integer, MessageType> getMappings()
     {
-        return m_LogicalName;
-    }
-    public final void setLogicalName(String value)
-    {
-        m_LogicalName = value;
+        if (mappings == null)
+        {
+            synchronized (MessageType.class)
+            {
+                if (mappings == null)
+                {
+                    mappings = new java.util.HashMap<Integer, MessageType>();
+                }
+            }
+        }
+        return mappings;
     }
 
-    public final int getScriptSelector()
+    private MessageType(int value)
     {
-        return m_ScriptSelector;
+        intValue = value;
+        getMappings().put(value, this);
     }
-    public final void setScriptSelector(int value)
+
+    public int getValue()
     {
-        m_ScriptSelector = value;
+        return intValue;
     }
-    
-    @Override
-    public final String toString()
+
+    public static MessageType forValue(int value)
     {
-        return m_LogicalName + " " + String.valueOf(m_ScriptSelector);
+        return getMappings().get(value);
     }
-}
+ }

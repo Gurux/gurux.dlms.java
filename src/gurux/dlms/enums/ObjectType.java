@@ -169,6 +169,13 @@ public enum ObjectType
     To determine the IP 4 settings, use the Ip4Setup object.
     */
     IP4_SETUP(42),
+    
+
+    GSM_DIAGNOSTIC(47),
+
+    ///To determine the IP 6 settings, use the Ip6Setup object.
+    IP6_SETUP(48), 
+
 
     /**
     To determine the M-BUS settings, use the MbusSetup object.
@@ -243,7 +250,20 @@ public enum ObjectType
     LIMITER(71),
     
     MBUS_CLIENT(72),
+        
+    PUSH_SETUP(40),
     
+    /*
+      How the device manages incoming messages such as SMS, MMS, e-mail, etc. 
+      as well as the execution of dedicated actions based on the identification of the sender. 
+      The message service used is implicitly defined by the modem used.
+    */    
+    MESSAGE_HANDLER(60),
+        
+    PARAMETER_MONITOR(65),
+    WIRELESS_MODE_Q_CHANNEL(73),
+    MBUS_MASTER_PORT_SETUP(74),
+        
     /**
     RegisterTable stores identical attributes of objects, in a selected 
     collection of objects. All the objects in the collection need to be of 

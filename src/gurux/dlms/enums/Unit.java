@@ -50,7 +50,7 @@ public enum Unit
     LENGTH(11), // Length l meter m
     SPEED(12), // "Speed v m/s
     VOLUME_CUBIC_METER(13), //Volume V m3
-    CORRECT_ED_VOLUME(14), // Corrected volume m3
+    CORRECTED_VOLUME(14), // Corrected volume m3
     VOLUME_FLUX_HOUR(15), //Volume flux m3/60*60s
     CORRECTED_VOLUME_FLUX_HOUR(16), // Corrected volume flux m3/60*60s
     VOLUME_FLUXDAY(17), // Volume flux m3/24*60*60s
@@ -188,5 +188,217 @@ public enum Unit
     public static Unit forValue(int value)
     {
         return getMappings().get(value);
+    }
+    
+    @Override
+    public String toString()
+    {
+        String str;
+        switch(intValue)
+        {
+            case 0: //NONE
+                str = "None";
+            break;
+            case 1: //YEAR
+            str = "Year";
+                break;
+            case 2: //MONTH
+            str = "Month";
+                break;
+            case 3: //WEEK
+            str = "Week";
+                break;
+            case 4: //DAY
+            str = "Day";
+                break;
+            case 5: //HOUR
+            str = "Hour";
+            case 6: //MINUTE
+            str = "Minute";
+                break;
+            case 7: //SECOND
+            str = "Second";
+                break;
+            case 8: //PHASE_ANGLEGEGREE
+            str = "PhaseAngle";
+                break;
+            case 9: //TEMPERATURE
+            str = "Temperature";
+                break;
+            case 10: //LOCAL_CURRENCY
+            str = "LocalCurrency";
+                break;
+            case 11: //LENGTH
+            str = "Length";
+                break;
+            case 12: //SPEED
+            str = "Speed";
+                break;
+            case 13: //VOLUME_CUBIC_METER
+            str = "VolumeCubicMeter";
+                break;
+            case 14: //CORRECTED_VOLUME
+            str = "CorrectededCVolume";
+                break;
+            case 15: //VOLUME_FLUX_HOUR
+            str = "VolumeFluxHour";
+                break;
+            case 16: //CORRECTED_VOLUME_FLUX_HOUR
+            str = "CorrectedVolumeFluxHour";
+                break;
+            case 17: //VOLUME_FLUXDAY
+            str = "VolumeFluxDay";
+                break;
+            case 18: //CORRECTE_VOLUME_FLUX_DAY
+            str = "CorrectedVolumeFluxDay";
+                break;
+            case 19: //VOLUME_LITER
+            str = "VolumeLiter";
+                break;
+            case 20: //MASS_KG
+            str = "MassKg";
+                break;
+            case 21: //FORCE
+            str = "Force";
+                break;
+            case 22: //ENERGY
+            str = "Energy";
+                break;
+            case 23: //PRESSURE_PASCAL
+            str = "PressurePascal";
+                break;
+            case 24: //PRESSURE_BAR
+            str = "PressureBar";
+                break;
+            case 25: //ENERGY_JOULE
+            str = "EnergyJoule";
+                break;
+            case 26: //THERMAL_POWER
+            str = "ThermalPower";
+                break;
+            case 27: //ACTIVE_POWER
+            str = "ActivePower";
+                break;
+            case 28: //APPARENT_POWER
+            str = "ApparentPower";
+                break;
+            case 29: //REACTIVE_POWER
+            str = "ReactivePower";
+                break;
+            case 30: //ACTIVE_ENERGY
+            str = "ActiveEnergy";
+                break;
+            case 31: //APPARENT_ENERGY
+            str = "ApparentEenergy";
+                break;
+            case 32: //REACTIVE_ENERGY
+            str = "ReactiveEnergy";
+                break;
+            case 33: //CURRENT
+            str = "Current";
+                break;
+            case 34: //ELECTRICAL_CHARGE
+            str = "ElectricalCharge";
+                break;
+            case 35: //VOLTAGE
+            str = "Voltage";
+                break;
+            case 36: //ELECTRICAL_FIELD_STRENGTH
+            str = "ElectricalFieldStrength";
+                break;
+            case 37: //CAPACITY
+            str = "Capacity";
+                break;
+            case 38: //RESISTANCE
+            str = "Resistance";
+                break;
+            case 39: //RESISTIVITY
+            str = "Resistivity";
+                break;
+            case 40: //MAGNETIC_FLUX
+            str = "MagneticFlux";
+                break;                
+            case 41: //INDUCTION
+            str = "Induction";
+                break;
+            case 42: //MAGNETIC
+            str = "Magnetic";
+                break;
+            case 43: //INDUCTIVITY
+            str = "Inductivity";
+                break;
+            case 44: //FREQUENCY
+            str = "Frequency";
+                break;
+            case 45: //ACTIVE
+            str = "Active";
+                break;
+            case 46: //REACTIVE
+            str = "Reactive";
+                break;
+            case 47: //APPARENT
+            str = "Apparent";
+                break;
+            case 48: //V260
+            str = "V260";
+                break;
+            case 49: //A260
+            str = "A260";
+                break;                
+            case 50: //MASS_KG_PER_SECOND
+            str = "MassKgPerSecond";
+                break;
+            case 51: //CONDUCTANCE
+            str = "Conductance";
+                break;
+            case 52: //KELVIN
+                str = "Kelvin.";
+                break;
+            case 53: //V2H
+                str = "V2H";
+                break;
+            case 54: //A2H
+                str = "A2H";
+                break;
+            case 55: //CUBIC_METER_RV
+                str = "CubicMeterRV";
+                break;
+            case 56: //PERCENTAGE
+                str = "Percentage";
+                break;
+            case 57: //AMPERE_HOURS
+                str = "AmpereHours";
+                break;
+            case 60: //ENERGY_PER_VOLUME
+                str = "EnergyPerVolume";
+                break;
+            case 61: //WOBBE
+                str = "WOBBE";
+                break;
+            case 62: //MOLE_PERCENT
+                str = "MolePercent";
+                break;                
+            case 63: //MASS_DENSITY
+                str = "MassDensity";
+                break;
+            case 64: //PASCAL_SECOND
+                str = "PascalSecond";
+                break;
+            case 65: //JOULE_KILOGRAM
+                str = "JouleKilogram.";
+                break;
+            case 70: //SIGNAL_STRENGTH
+                str = "SignalStrength";
+                break;
+            case 254: //OTHER_UNIT
+                str = "OtherUnit";
+                break;
+            case 255: //NO_UNIT
+                str = "NoUnit";
+                break;
+            default:
+                str = "Unknown :" + String.valueOf(intValue);
+        }
+        return str;
     }
 }

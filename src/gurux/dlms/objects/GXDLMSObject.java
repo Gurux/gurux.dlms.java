@@ -181,11 +181,20 @@ public class GXDLMSObject
     @Override
     public String toString()
     {
+        String str;
         if (getShortName() != 0)
         {
-            return (new Integer(getShortName())).toString();
+            str = String.valueOf(getShortName());
         }
-        return getLogicalName();
+        else
+        {
+            str = getLogicalName();
+        }
+        if (Description != null)
+        {
+            str += " " + Description;
+        }
+        return str;
     }
 
     /** 

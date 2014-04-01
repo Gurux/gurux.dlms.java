@@ -39,9 +39,9 @@ package gurux.dlms;
 */
 public class GXDLMSException extends RuntimeException
 {
-    private AssociationResult privateResult = AssociationResult.ACCEPTED;
-    private SourceDiagnostic privateDiagnostic = SourceDiagnostic.NONE;
-    private int privateErrorCode;
+    private AssociationResult Result = AssociationResult.ACCEPTED;
+    private SourceDiagnostic Diagnostic = SourceDiagnostic.NONE;
+    private int ErrorCode;
 
     public GXDLMSException(int errCode)
     {
@@ -120,11 +120,11 @@ public class GXDLMSException extends RuntimeException
     */
     public final int getErrorCode()
     {
-        return privateErrorCode;
+        return ErrorCode;
     }
     public final void setErrorCode(int value)
     {
-        privateErrorCode = value;
+        ErrorCode = value;
     }
 
 
@@ -133,11 +133,11 @@ public class GXDLMSException extends RuntimeException
     */
     final AssociationResult getResult()
     {
-        return privateResult;
+        return Result;
     }
     final void setResult(AssociationResult value)
     {
-        privateResult = value;
+        Result = value;
     }
 
     /** 
@@ -145,10 +145,10 @@ public class GXDLMSException extends RuntimeException
     */
     final SourceDiagnostic getDiagnostic()
     {
-        return privateDiagnostic;
+        return Diagnostic;
     }
     final void setDiagnostic(SourceDiagnostic value)
     {
-        privateDiagnostic = value;
+        Diagnostic = value;
     }
 }

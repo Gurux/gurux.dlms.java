@@ -148,24 +148,24 @@ public class GXDLMSMBusSlavePortSetup extends GXDLMSObject implements IGXDLMSBas
         if (LogicalName == null || LogicalName.compareTo("") == 0)
         {
             attributes.add(1);
-        }                 
+        }      
         //DefaultBaud
-        if (isRead(2))
+        if (!isRead(2))
         {
             attributes.add(2);
         }
         //AvailableBaud
-        if (isRead(3))
+        if (!isRead(3))
         {
             attributes.add(3);
         }
         //AddressState
-        if (isRead(4))
+        if (!isRead(4))
         {
             attributes.add(4);
         }
         //BusAddress
-        if (isRead(5))
+        if (!isRead(5))
         {
             attributes.add(5);
         }

@@ -34,23 +34,21 @@
 
 package gurux.dlms.objects;
 
-import gurux.dlms.GXDLMSClient;
-import gurux.dlms.GXDateTime;
+import gurux.dlms.enums.BaudRate;
 import gurux.dlms.enums.DataType;
 import gurux.dlms.enums.ObjectType;
-import java.text.NumberFormat;
 
-public class GXDLMSExtendedRegister extends GXDLMSRegister
+public class GXDLMSMBusMasterPortSetup extends GXDLMSObject implements IGXDLMSBase
 {
-    private GXDateTime CaptureTime = new GXDateTime();
-    private Object Status;
+    private BaudRate CommSpeed;
 
     /**  
      Constructor.
     */
-    public GXDLMSExtendedRegister()
+    public GXDLMSMBusMasterPortSetup()
     {
-        super(ObjectType.EXTENDED_REGISTER, null, 0);        
+        super(ObjectType.MBUS_MASTER_PORT_SETUP);
+        CommSpeed = BaudRate.BAUDRATE_2400;
     }
 
     /**  
@@ -58,65 +56,42 @@ public class GXDLMSExtendedRegister extends GXDLMSRegister
 
      @param ln Logican Name of the object.
     */
-    public GXDLMSExtendedRegister(String ln)
+    public GXDLMSMBusMasterPortSetup(String ln)
     {
-        super(ObjectType.EXTENDED_REGISTER, ln, 0);
+        super(ObjectType.MBUS_MASTER_PORT_SETUP, ln, 0);
+        CommSpeed = BaudRate.BAUDRATE_2400;
     }
 
     /**  
      Constructor.
+
      @param ln Logican Name of the object.
      @param sn Short Name of the object.
     */
-    public GXDLMSExtendedRegister(String ln, int sn)
+    public GXDLMSMBusMasterPortSetup(String ln, int sn)
     {
-        super(ObjectType.EXTENDED_REGISTER, ln, sn);
-    }
-   
-    /** 
-     Status of COSEM Extended Register object.
-    */
-    public final Object getStatus()
-    {
-        return Status;
-    }
-    public final void setStatus(Object value)
-    {
-        Status = value;
-    }
+        super(ObjectType.MBUS_MASTER_PORT_SETUP, ln, sn);
+        CommSpeed = BaudRate.BAUDRATE_2400;
+    }    
     
     /** 
-     Capture time of COSEM Extended Register object.
+    The communication speed supported by the port.
     */
-    public final GXDateTime getCaptureTime()
+    public final BaudRate getCommSpeed()
     {
-        return CaptureTime;
+        return CommSpeed;
     }
-    public final void setCaptureTime(GXDateTime value)
+    public final void setCommSpeed(BaudRate value)
     {
-        CaptureTime = value;
+        CommSpeed = value;
     }
-    
-    @Override   
-    public DataType getUIDataType(int index)
-    {
-        if (index == 5)
-        {
-            return DataType.DATETIME;
-        }        
-        return super.getUIDataType(index);
-    }
-    
+
     @Override
     public Object[] getValues()
     {
-        NumberFormat formatter = NumberFormat.getNumberInstance();
-        String str = "Scaler: " + formatter.format(getScaler());
-        str += " Unit: ";
-        str += getUnit().toString();
-        return new Object[] {getLogicalName(), getValue(), str, getStatus(), getCaptureTime()};
+        return new Object[] {getLogicalName(), CommSpeed};
     }
-
+    
     /*
      * Returns collection of attributes to read.
      * 
@@ -130,38 +105,32 @@ public class GXDLMSExtendedRegister extends GXDLMSRegister
         if (LogicalName == null || LogicalName.compareTo("") == 0)
         {
             attributes.add(1);
-        }
-        //ScalerUnit
-        if (!isRead(3))
-        {
-            attributes.add(3);
-        }
-        //Value
+        }   
+        //CommSpeed
         if (canRead(2))
         {
             attributes.add(2);
-        }        
-        //Status
-        if (canRead(4))
-        {
-            attributes.add(4);
-        }
-        //CaptureTime
-        if (canRead(5))
-        {
-            attributes.add(5);
         }
         return toIntArray(attributes);
     }
     
     /*
      * Returns amount of attributes.
-     */    
+     */  
     @Override
     public int getAttributeCount()
     {
-        return 5;
-    }       
+        return 2;
+    }
+    
+    /*
+     * Returns amount of methods.
+     */ 
+    @Override
+    public int getMethodCount()
+    {
+        return 0;
+    }    
     
     @Override
     public DataType getDataType(int index)
@@ -172,38 +141,26 @@ public class GXDLMSExtendedRegister extends GXDLMSRegister
         }
         if (index == 2)
         {
-            return super.getDataType(index);
-        }
-        if (index == 3)
-        {
-            return DataType.ARRAY;
-        }
-        if (index == 4)
-        {
-            return super.getDataType(index);
-        }
-        if (index == 5)
-        {
-            return DataType.DATETIME;                
-        }
+            return DataType.ENUM;
+        }   
         throw new IllegalArgumentException("getDataType failed. Invalid attribute index.");
     }
-     
+    
     /*
      * Returns value of given attribute.
      */    
     @Override
     public Object getValue(int index, int selector, Object parameters)
-    {        
-        if (index == 4)
+    {
+        if (index == 1)
         {
-            return getStatus();
+            return getLogicalName();
         }
-        if (index == 5)
+        if (index == 2)
         {
-            return getCaptureTime();
-        }
-        return super.getValue(index, selector, parameters);
+            return CommSpeed.ordinal();
+        }    
+        throw new IllegalArgumentException("GetValue failed. Invalid attribute index.");
     }
     
     /*
@@ -212,28 +169,17 @@ public class GXDLMSExtendedRegister extends GXDLMSRegister
     @Override
     public void setValue(int index, Object value)
     {
-        if (index == 4)
+        if (index == 1)
         {
-            setStatus(value);
+            super.setValue(index, value);            
         }
-        else if (index == 5)
+        else if (index == 2)
         {
-            if (value == null)
-            {
-                setCaptureTime(new GXDateTime());                
-            }
-            else
-            {
-                if (value instanceof byte[])
-                {
-                    value = GXDLMSClient.changeType((byte[]) value, DataType.DATETIME);
-                }
-                setCaptureTime((GXDateTime) value);
-            }
+            CommSpeed = BaudRate.values()[((Number)value).intValue()];
         }
         else
         {
-            super.setValue(index, value);
+            throw new IllegalArgumentException("GetValue failed. Invalid attribute index.");
         }
     }
 }

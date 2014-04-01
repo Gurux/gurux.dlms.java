@@ -274,13 +274,13 @@ class GXAPDU
                 tag = buff.get();
                 len = buff.get();
                 buff.get();
-                len = GXCommon.unsignedByteToInt(buff.get());
-                //Get challenge
+                len = GXCommon.unsignedByteToInt(buff.get());                
             }
             else if (tag == 0x8B || tag == 0x89) //Authentication.
             {
                 tag = buff.get();
                 len = buff.get();
+                boolean IsAuthenticationTag = len > 7;
                 if (buff.get() != 0x60)
                 {
                     throw new RuntimeException("Invalid tag.");
@@ -310,21 +310,28 @@ class GXAPDU
                 {
                     throw new RuntimeException("Invalid tag.");
                 }
-                authentication = Authentication.forValue(tmp);
-                int tag2 = (buff.get() & 0xFF);
-                if (tag2 != 0xAC && tag2 != 0xAA)
+                if (IsAuthenticationTag)
                 {
-                    throw new RuntimeException("Invalid tag.");
+                    authentication = Authentication.forValue(tmp);
+                    int tag2 = (buff.get() & 0xFF);
+                    if (tag2 != 0xAC && tag2 != 0xAA)
+                    {
+                        throw new RuntimeException("Invalid tag.");
+                    }
+                    len = buff.get();
+                    //Get authentication information.
+                    if ((buff.get() & 0xFF) != 0x80)
+                    {
+                        throw new RuntimeException("Invalid tag.");
+                    }
+                    len = buff.get() & 0xFF;
+                    password = new byte[len];
+                    buff.get(password);
                 }
-                len = buff.get();
-                //Get authentication information.
-                if ((buff.get() & 0xFF) != 0x80)
+                else
                 {
-                    throw new RuntimeException("Invalid tag.");
+                    authentication = Authentication.NONE;                
                 }
-                len = buff.get() & 0xFF;
-                password = new byte[len];
-                buff.get(password);
             }
             //Unknown tags.
             else

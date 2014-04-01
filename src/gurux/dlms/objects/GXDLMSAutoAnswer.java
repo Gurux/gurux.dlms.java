@@ -329,7 +329,7 @@ public class GXDLMSAutoAnswer extends GXDLMSObject implements IGXDLMSBase
         }
         else if (index == 2)
         {
-            setMode(AutoConnectMode.forValue(((Number)value).intValue()));
+            setMode(AutoConnectMode.forValue(((Number)value).byteValue()& 0xFF));
         }
         else if (index == 3)
         {

@@ -612,7 +612,7 @@ public class GXDLMSActivityCalendar extends GXDLMSObject implements IGXDLMSBase
                     {
                         GXDLMSDayProfileAction ac = new GXDLMSDayProfileAction();
                         ac.setStartTime((GXDateTime)GXDLMSClient.changeType((byte[])Array.get(it2, 0), DataType.TIME));
-                        ac.setScriptLogicalName(GXDLMSClient.changeType((byte[])Array.get(it2, 1), DataType.STRING).toString());
+                        ac.setScriptLogicalName(GXDLMSClient.changeType((byte[])Array.get(it2, 1), DataType.OCTET_STRING).toString());
                         ac.setScriptSelector(((Number)Array.get(it2, 2)).intValue());
                         actions.add(ac);
                     }
@@ -692,7 +692,14 @@ public class GXDLMSActivityCalendar extends GXDLMSObject implements IGXDLMSBase
         }
         else if (index == 10)
         {
-            setTime((GXDateTime)GXDLMSClient.changeType((byte[])value, DataType.DATETIME));
+            if (value instanceof GXDateTime)
+            {
+                setTime((GXDateTime)value);
+            }
+            else
+            {
+                setTime((GXDateTime)GXDLMSClient.changeType((byte[])value, DataType.DATETIME));
+            }
         }
         else
         {

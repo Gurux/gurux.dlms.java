@@ -37,41 +37,47 @@ import gurux.dlms.enums.ObjectType;
 
 public class GXDLMSMonitoredValue
 {
-    private ObjectType m_ObjectType;
-    private String m_LogicalName;
-    private int m_AttributeIndex;
+    private ObjectType ObjectType;
+    private String LogicalName;
+    private int AttributeIndex;
   
     public final void update(GXDLMSObject value, int attributeIndex)
     {
-        m_ObjectType = value.getObjectType();
-        m_LogicalName = value.getLogicalName();
-        m_AttributeIndex = attributeIndex;
+        ObjectType = value.getObjectType();
+        LogicalName = value.getLogicalName();
+        AttributeIndex = attributeIndex;
     }
     
     public final ObjectType getObjectType()
     {
-        return m_ObjectType;
+        return ObjectType;
     }
     public final void setObjectType(ObjectType value)
     {
-        m_ObjectType = value;
+        ObjectType = value;
     }
 
     public final String getLogicalName()
     {
-        return m_LogicalName;
+        return LogicalName;
     }
     public final void setLogicalName(String value)
     {
-        m_LogicalName = value;
+        LogicalName = value;
     }
 
     public final int getAttributeIndex()
     {
-        return m_AttributeIndex;
+        return AttributeIndex;
     }
     public final void setAttributeIndex(int value)
     {
-        m_AttributeIndex = value;
+        AttributeIndex = value;
+    }
+    
+    @Override
+    public String toString()
+    {
+        return String.valueOf(ObjectType) + " " + LogicalName + " " + String.valueOf(AttributeIndex);
     }
 }

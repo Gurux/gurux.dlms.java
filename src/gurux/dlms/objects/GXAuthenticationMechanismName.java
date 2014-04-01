@@ -114,4 +114,13 @@ public class GXAuthenticationMechanismName
     {
         MechanismId = value;
     }
+    
+    @Override
+    public String toString()
+    {        
+        return String.valueOf(JointIsoCtt) + " " + String.valueOf(Country) + " " + 
+                String.valueOf(CountryName) + " " + String.valueOf(IdentifiedOrganization) + " " + 
+                String.valueOf(DlmsUA) + " " + String.valueOf(AuthenticationMechanismName) + " " + 
+                String.valueOf(MechanismId);
+    }
 }

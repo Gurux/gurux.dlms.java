@@ -41,6 +41,7 @@ import gurux.dlms.enums.DataType;
 import gurux.dlms.internal.GXCommon;
 import java.io.ByteArrayOutputStream;
 import java.lang.reflect.Array;
+import java.text.NumberFormat;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
@@ -136,7 +137,9 @@ public GXDLMSRegister(ObjectType type, String ln, int sn)
     @Override
     public Object[] getValues()
     {        
-        String str = String.format("Scaler: %1$,.2f Unit: ", getScaler());
+        NumberFormat formatter = NumberFormat.getNumberInstance();
+        String str = "Scaler: " + formatter.format(getScaler());
+        str += " Unit: ";
         str += getUnit().toString();
         return new Object[] {getLogicalName(), getValue(), str};
     }

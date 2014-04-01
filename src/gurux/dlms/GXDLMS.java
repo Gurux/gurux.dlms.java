@@ -344,7 +344,19 @@ class GXDLMS
         if (type == ObjectType.UTILITY_TABLES)
         {
             return new GXDLMSObject();
+        }        
+        if (type == ObjectType.MBUS_MASTER_PORT_SETUP)
+        {
+            return new GXDLMSMBusMasterPortSetup();
         }                
+        if (type == ObjectType.PUSH_SETUP)
+        {
+            return new GXDLMSPushSetup();
+        }        
+        if (type == ObjectType.MESSAGE_HANDLER)
+        {
+            return new GXDLMSMessageHandler();
+        }        
         return new GXDLMSObject();
     }
 
@@ -1116,17 +1128,23 @@ class GXDLMS
         //Split to Blocks.
         java.util.ArrayList<byte[]> buff = new java.util.ArrayList<byte[]>();
         int blockIndex = 0;
+        boolean multibleFrames = false;
         do
         {
             byte[][] frames = splitToFrames(packet, ++blockIndex, index, 
                     getMaxReceivePDUSize(), cmd, 0);
             buff.addAll(Arrays.asList(frames));
-            if (cmd != Command.WriteRequest && cmd != Command.MethodRequest && frames.length != 1)
+            if (frames.length != 1)
             {
+                multibleFrames = true;
                 expectedFrame += 3;
             }
         }
         while (index[0] < len);
+        if (multibleFrames)
+        {
+            expectedFrame -= 3;
+        }
         byte[][] tmp = new byte[buff.size()][];
         int pos = -1;
         for(byte[] it : buff)
@@ -1147,28 +1165,28 @@ class GXDLMS
                 str = "Not a reply";
                 break;
             case 1:
-                str = "Access Error : Device reports a hardware fault";
+                str = "Access Error : Device reports a hardware fault.";
                 break;
             case 2:
-                str = "Access Error : Device reports a temporary failure";
+                str = "Access Error : Device reports a temporary failure.";
                 break;
             case 3:
-                str = "Access Error : Device reports Read-Write denied";
+                str = "Access Error : Device reports Read-Write denied.";
                 break;
             case 4:
-                str = "Access Error : Device reports a undefined object";
+                str = "Access Error : Device reports a undefined object.";
                 break;
             case 9: 
-                str = "Access Error : Device reports a inconsistent Class or object";
+                str = "Access Error : Device reports a inconsistent Class or object.";
                 break;
             case 11: 
-                str = "Access Error : Device reports a unavailable object";
+                str = "Access Error : Device reports a unavailable object.";
                 break;
             case 12: 
-                str = "Access Error : Device reports a unmatched type";
+                str = "Access Error : Device reports a unmatched type.";
                 break;
             case 13:
-                str = "Access Error : Device reports scope of access violated";
+                str = "Access Error : Device reports scope of access violated.";
                 break;
             case 14:   
                 str = "Access Error : Data Block Unavailable.";
@@ -1192,7 +1210,7 @@ class GXDLMS
                 str = "Access Error : Other Reason.";
                 break;
             default:
-                str = "Unknown error";
+                str = "Access Error : Unknown error.";
             break;
         }
         return str;
@@ -1266,8 +1284,8 @@ class GXDLMS
         if (err[0] != 0x00)
         {
             Object[][] list = new Object[1][2];
-            list[0][0] = err[0];
-            list[0][1] = getDescription(err[0]);
+            list[0][0] = err[0] & 0xFF;
+            list[0][1] = getDescription(err[0] & 0xFF);
             return list;
         }
         return null;

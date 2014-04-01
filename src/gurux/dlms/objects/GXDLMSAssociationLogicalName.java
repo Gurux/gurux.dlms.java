@@ -172,7 +172,10 @@ public class GXDLMSAssociationLogicalName extends GXDLMSObject implements IGXDLM
     @Override
     public Object[] getValues()
     {
-        return new Object[] {getLogicalName(), getObjectList(), ClientSAP + "/" + ServerSAP, getApplicationContextName(), getXDLMSContextInfo(), getAuthenticationMechanismMame(), getSecret(), getAssociationStatus()};
+        return new Object[] {getLogicalName(), getObjectList(), 
+            ClientSAP + "/" + ServerSAP, getApplicationContextName(), 
+            getXDLMSContextInfo(), getAuthenticationMechanismMame(), 
+            getSecret(), getAssociationStatus(), getSecuritySetupReference()};
     }
     
     /*
@@ -632,8 +635,8 @@ public class GXDLMSAssociationLogicalName extends GXDLMSObject implements IGXDLM
         {            
             if (value != null)
             {
-                ClientSAP = ((Number)Array.get(value, 0)).shortValue();
-                ServerSAP = ((Number)Array.get(value, 1)).shortValue();
+                ClientSAP = (short) GXCommon.intValue(Array.get(value, 0));
+                ServerSAP = (short) GXCommon.intValue(Array.get(value, 1));
             }
         }
         else if (index == 4)
@@ -810,20 +813,20 @@ public class GXDLMSAssociationLogicalName extends GXDLMSObject implements IGXDLM
                         AuthenticationMechanismMame.setMechanismId(Authentication.forValue(arr[++pos]));
                     }
                 }
+                else
+                {           
+                    if (value != null)
+                    {
+                        AuthenticationMechanismMame.setJointIsoCtt(((Number)Array.get(value, 0)).intValue());
+                        AuthenticationMechanismMame.setCountry(((Number)Array.get(value, 1)).intValue());
+                        AuthenticationMechanismMame.setCountryName(((Number)Array.get(value, 2)).intValue());
+                        AuthenticationMechanismMame.setIdentifiedOrganization(((Number)Array.get(value, 3)).intValue());
+                        AuthenticationMechanismMame.setDlmsUA(((Number)Array.get(value, 4)).intValue());
+                        AuthenticationMechanismMame.setAuthenticationMechanismName(((Number)Array.get(value, 5)).intValue());
+                        AuthenticationMechanismMame.setMechanismId(Authentication.forValue(((Number)Array.get(value, 6)).intValue()));
+                    }
+                }                                           
             }
-            else
-            {           
-                if (value != null)
-                {
-                    AuthenticationMechanismMame.setJointIsoCtt(((Number)Array.get(value, 0)).intValue());
-                    AuthenticationMechanismMame.setCountry(((Number)Array.get(value, 1)).intValue());
-                    AuthenticationMechanismMame.setCountryName(((Number)Array.get(value, 2)).intValue());
-                    AuthenticationMechanismMame.setIdentifiedOrganization(((Number)Array.get(value, 3)).intValue());
-                    AuthenticationMechanismMame.setDlmsUA(((Number)Array.get(value, 4)).intValue());
-                    AuthenticationMechanismMame.setAuthenticationMechanismName(((Number)Array.get(value, 5)).intValue());
-                    AuthenticationMechanismMame.setMechanismId(Authentication.forValue(((Number)Array.get(value, 6)).intValue()));
-                }
-            }                                           
         }
         else if (index == 7)
         {
@@ -841,8 +844,8 @@ public class GXDLMSAssociationLogicalName extends GXDLMSObject implements IGXDLM
             }                        
         }
         else if (index == 9)
-        {
-            setSecuritySetupReference(String.valueOf(value));
+        {            
+            setSecuritySetupReference(GXDLMSObject.toLogicalName((byte[]) value));
         }
         else
         {

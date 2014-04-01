@@ -42,6 +42,7 @@ import gurux.dlms.enums.InterfaceType;
 import gurux.dlms.enums.DataType;
 import gurux.dlms.enums.Authentication;
 import gurux.dlms.enums.AccessMode;
+import gurux.dlms.enums.DateTimeSkips;
 import gurux.dlms.enums.Priority;
 import gurux.dlms.enums.ServiceClass;
 import gurux.dlms.manufacturersettings.GXObisCodeCollection;
@@ -716,6 +717,8 @@ public class GXDLMSClient
         }
         else
         {
+           m_Base.setLNSettings(null);
+           m_Base.setSNSettings(null);
            throw new GXDLMSException(ret, pdu.getResultDiagnosticValue());
         }
         m_IsAuthenticationRequired = pdu.resultDiagnosticValue == SourceDiagnostic.AUTHENTICATION_REQUIRED.getValue();
@@ -847,11 +850,6 @@ public class GXDLMSClient
     public final byte[] disconnectRequest()
     {
         m_Base.clearProgress();
-        //If connection is not established there is no need to send DisconnectRequest.
-        if (getSNSettings() == null && getLNSettings() == null)
-        {
-            return new byte[0];
-        }
         if (this.getInterfaceType() != InterfaceType.NET)
         {
             return m_Base.addFrame(FrameType.Disconnect.getValue(), false, (byte[]) null, 0, 0);
@@ -1042,12 +1040,11 @@ public class GXDLMSClient
         }
         for (GXDLMSObject it : objects)
         {
-            if (!(it.getDescription() == null || it.getDescription().equals("")) && 
-                    it.getObjectType() != ObjectType.NONE)
+            if (!(it.getDescription() == null || it.getDescription().equals("")))
             {
                 continue;
             }
-            String ln = it.getLogicalName();
+            String ln = it.getLogicalName();           
             GXStandardObisCode code = codes.find(ln, it.getObjectType());
             if (code != null)
             {
@@ -1201,14 +1198,16 @@ public class GXDLMSClient
             int classID = ((Number)(objects[0])).intValue() & 0xFFFF;
             if (classID > 0)
             {
-                GXDLMSObject comp = createDLMSObject(classID, objects[1], 0, objects[2], objects[3]);
+                GXDLMSObject comp = createDLMSObject(classID, objects[1], 0, 
+                        objects[2], objects[3]);
                 if (!onlyKnownObjects || comp.getClass() != GXDLMSObject.class)
                 {
                     items.add(comp);
                 }
                 else
                 {
-                    System.out.println(String.format("Unknown object : %d %s", classID, objects[2]));                    
+                    System.out.println(String.format("Unknown object : %d %s", 
+                            classID, GXDLMSObject.toLogicalName((byte[]) objects[2])));                    
                 }
             }
         }
@@ -1307,36 +1306,16 @@ public class GXDLMSClient
      */
     public final Object getValue(byte[] data, GXDLMSObject target, int attributeIndex) throws Exception
     {        
-        DataType type = target.getDataType(attributeIndex);
         Object value = getValue(data);
-        if (type != DataType.NONE)
-        {           
-            if (value instanceof byte[])
+        if (value instanceof byte[])
+        {
+            DataType type = target.getUIDataType(attributeIndex);
+            if (type == DataType.NONE)
             {
-                if (type == DataType.OCTET_STRING && 
-                        target.getUIDataType(attributeIndex) == DataType.NONE)
-                {
-                    return value;
-                }
-                return GXDLMSClient.changeType((byte[]) value, type);
+                return value;
             }
-            if (type == DataType.UINT8)
-            { 
-                return GXCommon.unsignedByteToInt(((Number)value).byteValue());            
-            }
-            if (type == DataType.UINT16)
-            { 
-                return GXCommon.wordToInt(((Number)value).shortValue());            
-            }
-            if (type == DataType.UINT32)
-            { 
-                return GXCommon.dWordTolong(((Number)value).intValue());            
-            }
-            if (type == DataType.UINT64)
-            { 
-                return GXCommon.uint64ToInt(((Number)value).longValue());            
-            }
-        }
+            return GXDLMSClient.changeType((byte[]) value, type);
+        }            
         return value;
     }
     
@@ -1758,7 +1737,7 @@ public class GXDLMSClient
             ObjectType sortedObjectType, int sortedVersion, 
             java.util.Date start, java.util.Date end)
             throws RuntimeException, UnsupportedEncodingException, ParseException
-    {
+    {                
         m_Base.clearProgress();
         java.nio.ByteBuffer buff = java.nio.ByteBuffer.allocate(100);
         buff.put((byte) 0x01); //Add AccessSelector

@@ -112,4 +112,18 @@ public class GXApplicationContextName
     {
         ContextId = value;
     }
+    
+    @Override
+    public String toString()
+    {
+        String name = "";
+        if (LogicalName != null)
+        {
+            name = LogicalName;
+        }
+        return name + " " + String.valueOf(JointIsoCtt) + " " + 
+            String.valueOf(Country) + " " + String.valueOf(CountryName) + " " + 
+            String.valueOf(IdentifiedOrganization) + " " + String.valueOf(DlmsUA) + " " + 
+            String.valueOf(ApplicationContext) + " " + String.valueOf(ContextId);
+    }
 }

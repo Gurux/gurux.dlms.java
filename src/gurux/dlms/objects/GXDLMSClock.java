@@ -48,7 +48,7 @@ import java.util.EnumSet;
 
 public class GXDLMSClock extends GXDLMSObject implements IGXDLMSBase
 {
-    int ClockBase;
+    ClockBase m_ClockBase;
     int Deviation;
     boolean Enabled;
     GXDateTime End = new GXDateTime();
@@ -186,13 +186,13 @@ public class GXDLMSClock extends GXDLMSObject implements IGXDLMSBase
     /** 
      Clock base of COSEM Clock object.
     */
-    public final int getClockBase()
+    public final ClockBase getClockBase()
     {
-        return ClockBase;
+        return m_ClockBase;
     }
-    public final void setClockBase(int value)
+    public final void setClockBase(ClockBase value)
     {
-        ClockBase = value;
+        m_ClockBase = value;
     }
 
     @Override
@@ -627,11 +627,11 @@ public class GXDLMSClock extends GXDLMSObject implements IGXDLMSBase
         {
             if (value == null)
             {
-                setClockBase(0);
+                setClockBase(m_ClockBase.None);
             }
             else
             {
-                setClockBase(((Number) value).intValue());
+                setClockBase(ClockBase.values()[((Number) value).intValue()]);
             }            
         }        
         else

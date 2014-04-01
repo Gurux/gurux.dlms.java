@@ -268,7 +268,7 @@ public class GXDLMSIp4Setup extends GXDLMSObject implements IGXDLMSBase
         }
         if (index == 3)
         {
-            return DataType.UINT16;
+            return DataType.UINT32;
         }
         if (index == 4)
         {

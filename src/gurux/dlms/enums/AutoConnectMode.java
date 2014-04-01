@@ -68,7 +68,8 @@ public enum AutoConnectMode
     /*
      * Email sending.
      */
-    EMAIL_SENDING(6);
+    EMAIL_SENDING(6),
+    MANUFACTURE_SPESIFIC(200);
     //(200..255) manufacturer specific modes
     
     private int value;
@@ -92,6 +93,10 @@ public enum AutoConnectMode
     private AutoConnectMode(int value)
     {
         this.value = value;
+        if (value > 200 && value < 255)
+        {
+            value = 200;
+        }
         getMappings().put(value, this);
     }
 
@@ -108,6 +113,10 @@ public enum AutoConnectMode
      */
     public static AutoConnectMode forValue(int value)
     {
+        if (value > 200 && value < 255)
+        {
+            return MANUFACTURE_SPESIFIC;
+        }
         return getMappings().get(value);
     }
 }

@@ -35,12 +35,11 @@
 package gurux.dlms.objects;
 
 import gurux.dlms.GXDLMSClient;
+import gurux.dlms.GXDateTime;
 import gurux.dlms.enums.DataType;
 import gurux.dlms.enums.ObjectType;
 import gurux.dlms.internal.GXCommon;
 import java.io.ByteArrayOutputStream;
-import java.util.logging.Level;
-import java.util.logging.Logger;
 
 public class GXDLMSLimiter extends GXDLMSObject implements IGXDLMSBase
 {
@@ -64,8 +63,9 @@ public class GXDLMSLimiter extends GXDLMSObject implements IGXDLMSBase
     public GXDLMSLimiter()
     {
         super(ObjectType.LIMITER);
+        EmergencyProfile = new GXDLMSEmergencyProfile();
         ActionOverThreshold = new GXDLMSActionItem();
-        ActionUnderThreshold = new GXDLMSActionItem();        
+        ActionUnderThreshold = new GXDLMSActionItem();                        
     }
 
     /**  
@@ -76,6 +76,7 @@ public class GXDLMSLimiter extends GXDLMSObject implements IGXDLMSBase
     public GXDLMSLimiter(String ln)
     {
         super(ObjectType.LIMITER, ln, 0);
+        EmergencyProfile = new GXDLMSEmergencyProfile();
         ActionOverThreshold = new GXDLMSActionItem();
         ActionUnderThreshold = new GXDLMSActionItem();        
     }
@@ -89,6 +90,7 @@ public class GXDLMSLimiter extends GXDLMSObject implements IGXDLMSBase
     public GXDLMSLimiter(String ln, int sn)
     {
         super(ObjectType.LIMITER, ln, sn);
+        EmergencyProfile = new GXDLMSEmergencyProfile();
         ActionOverThreshold = new GXDLMSActionItem();
         ActionUnderThreshold = new GXDLMSActionItem();        
     }
@@ -171,11 +173,7 @@ public class GXDLMSLimiter extends GXDLMSObject implements IGXDLMSBase
     public final GXDLMSEmergencyProfile getEmergencyProfile()
     {
         return EmergencyProfile;
-    }
-    public final void setEmergencyProfile(GXDLMSEmergencyProfile value)
-    {
-        EmergencyProfile = value;
-    }
+    }   
 
     public final int[] getEmergencyProfileGroupIDs()
     {
@@ -528,7 +526,10 @@ public class GXDLMSLimiter extends GXDLMSObject implements IGXDLMSBase
         }
         else if (index == 8)
         {
-            //EmergencyProfile = value;TODO:
+            Object[] tmp = (Object[])value;
+            EmergencyProfile.setID((int) tmp[0]);
+            EmergencyProfile.setActivationTime((GXDateTime)GXDLMSClient.changeType((byte[])tmp[1], DataType.DATETIME));
+            EmergencyProfile.setDuration((long) tmp[2]);
         }
         else if (index == 9)
         {

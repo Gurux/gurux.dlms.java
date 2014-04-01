@@ -43,14 +43,11 @@ import gurux.dlms.enums.ObjectType;
 import gurux.dlms.enums.SortMethod;
 import gurux.dlms.internal.GXCommon;
 import java.io.ByteArrayOutputStream;
-import java.io.IOException;
-import java.io.UnsupportedEncodingException;
 import java.lang.reflect.Array;
-import java.nio.Buffer;
-import java.text.ParseException;
 import java.util.AbstractMap;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Date;
 import java.util.List;
 
 public class GXDLMSProfileGeneric extends GXDLMSObject implements IGXDLMSBase
@@ -61,13 +58,13 @@ public class GXDLMSProfileGeneric extends GXDLMSObject implements IGXDLMSBase
     AccessRange m_AccessSelector;
     Object m_To;    
     List<AbstractMap.SimpleEntry<GXDLMSObject, GXDLMSCaptureObject>> m_CaptureObjects;
-    int m_CapturePeriod;
+    int CapturePeriod;
     SortMethod m_SortMethod;
     GXDLMSObject m_SortObject;
     int SortObjectAttributeIndex;
     int SortObjectDataIndex;
     
-    int m_ProfileEntries;
+    int m_EntriesInUse, m_ProfileEntries;
 
     Object getOwner()
     {
@@ -209,11 +206,11 @@ public class GXDLMSProfileGeneric extends GXDLMSObject implements IGXDLMSBase
     */
     public final int getCapturePeriod()
     {
-        return m_CapturePeriod;
+        return CapturePeriod;
     }
     public final void setCapturePeriod(int value)
     {
-        m_CapturePeriod = value;
+        CapturePeriod = value;
     }
 
     /** 
@@ -269,7 +266,12 @@ public class GXDLMSProfileGeneric extends GXDLMSObject implements IGXDLMSBase
     */
     public final int getEntriesInUse()
     {
-        return m_Buffer.size();
+        return m_EntriesInUse;
+    }
+    
+    public final int setEntriesInUse()
+    {
+        return m_EntriesInUse;
     }
 
     /** 
@@ -605,16 +607,17 @@ public class GXDLMSProfileGeneric extends GXDLMSObject implements IGXDLMSBase
             {
                 throw new RuntimeException("Read capture objects first.");
             }
-            m_Buffer.clear();
+            m_Buffer.clear();           
             if (value != null)
             {
+                java.util.Calendar lastDate = java.util.Calendar.getInstance();
+                //java.util.Date lastDate = null;
                 DataType[] types = new DataType[m_CaptureObjects.size()];
                 int pos = -1;                
                 for(AbstractMap.SimpleEntry<GXDLMSObject, GXDLMSCaptureObject> it : m_CaptureObjects)
                 {
                     types[++pos] = it.getKey().getUIDataType(it.getValue().getAttributeIndex());
                 }
-                int deviation = getParent().getDeviation();
                 for(Object row : (Object[]) value)
                 {
                     if (Array.getLength(row) != m_CaptureObjects.size())
@@ -629,19 +632,24 @@ public class GXDLMSProfileGeneric extends GXDLMSObject implements IGXDLMSBase
                                 data instanceof byte[])
                         {
                             data = GXDLMSClient.changeType((byte[]) data, type);
-                            //If summer time is used.
-                            if (type == DataType.DATETIME && data instanceof GXDateTime)
+                            if (data instanceof GXDateTime)
                             {
                                 GXDateTime dt = (GXDateTime)data;                                
-                                if ((dt.getStatus().getValue() & 0x80) != 0)
-                                {
-                                    java.util.Calendar tm = java.util.Calendar.getInstance(java.util.TimeZone.getTimeZone("UTC"));
-                                    tm.setTime(dt.getValue());                                    
-                                    tm.add(java.util.Calendar.MINUTE, deviation);
-                                    dt.setValue(tm.getTime());
-                                }
+                                lastDate.setTime(dt.getValue());
                             }
                             Array.set(row, a, data);
+                        }
+                        else if (type == DataType.DATETIME && data == null && CapturePeriod != 0)
+                        {
+                            if (lastDate.getTimeInMillis() == 0 && !m_Buffer.isEmpty())
+                            {
+                                lastDate.setTime(((GXDateTime)m_Buffer.get(m_Buffer.size() - 1)[pos]).getValue());
+                            }
+                            if (lastDate.getTimeInMillis() != 0)
+                            {
+                                lastDate.add(java.util.Calendar.SECOND, CapturePeriod);                                            
+                                Array.set(row, a, new GXDateTime(lastDate.getTime()));
+                            }
                         }
                         AbstractMap.SimpleEntry<GXDLMSObject, GXDLMSCaptureObject> item = m_CaptureObjects.get(pos);
                         if (item.getKey() instanceof GXDLMSRegister && item.getValue().AttributeIndex == 2)
@@ -680,7 +688,11 @@ public class GXDLMSProfileGeneric extends GXDLMSObject implements IGXDLMSBase
                     }
                     ObjectType type = ObjectType.forValue(((Number)tmp[0]).intValue());
                     String ln = GXDLMSObject.toLogicalName((byte[])tmp[1]);
-                    GXDLMSObject obj = getParent().findByLN(type, ln);
+                    GXDLMSObject obj = null;
+                    if (getParent() != null)
+                    {
+                        obj = getParent().findByLN(type, ln);                    
+                    }
                     if(obj == null)
                     {                        
                         obj = gurux.dlms.GXDLMSClient.createObject(type);
@@ -694,11 +706,11 @@ public class GXDLMSProfileGeneric extends GXDLMSObject implements IGXDLMSBase
         {
             if (value == null)
             {
-                m_CapturePeriod = 0;
+                CapturePeriod = 0;
             }
             else
             {
-                m_CapturePeriod = ((Number)value).intValue();                
+                CapturePeriod = ((Number)value).intValue();                
             }
             
         }
@@ -742,9 +754,15 @@ public class GXDLMSProfileGeneric extends GXDLMSObject implements IGXDLMSBase
             }                        
         }
         else if (index == 7)
-        {                
-            //Client can't set row count.
-            //TODO: throw new IllegalArgumentException("SetValue failed. Invalid attribute index.");
+        {     
+            if (value == null)
+            {
+                m_EntriesInUse = 0;
+            }
+            else
+            {
+                m_EntriesInUse = ((Number)value).intValue();
+            }
         }
         else if (index == 8)
         {

@@ -46,6 +46,8 @@ import java.math.BigInteger;
 import java.text.DateFormat;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
+import java.util.Calendar;
+import java.util.Date;
 import java.util.EnumSet;
 import java.util.logging.Level;
 import java.util.logging.Logger;
@@ -533,7 +535,7 @@ public class GXCommon
      * @param b The Word to convert. 
      * @return The Integer value of the given Word.
      */
-    public static int wordToInt(short b)
+    public static int wordToInt(int b)
     {
         return (int) b & 0xFFFF;
     }
@@ -543,7 +545,7 @@ public class GXCommon
      * @param b The DWord to convert.
      * @return The Long value of the given DWord.
      */
-    public static long dWordTolong(int b)
+    public static long dWordTolong(long b)
     {
         return (long) b & 0xFFFFFFFF;
     }
@@ -718,43 +720,15 @@ public class GXCommon
                 }
             }
             if (len > 0)
-            {
-                //Check that this is not a Octect string.
-                boolean octetString = false;
-                if (knownType)
-                {                    
-                    for(byte ch : buff)
-                    {
-                        //If not printable char
-                        if (ch < 0x21)
-                        {
-                            octetString = true;
-                            break;
-                        }
-                    }                    
-                }
-                if (octetString)
+            {                
+                try 
                 {
-                    StringBuilder str = new StringBuilder(buff.length * 3);
-                    for(byte ch : buff)
-                    {                        
-                        str.append(ch & 0xFF);
-                        str.append('.');
-                    }
-                    str.deleteCharAt(str.length() - 1);
-                    value = str.toString();
+                    value = new String(GXCommon.rawData(buff, pos, len), "ASCII");
                 }
-                else
+                catch (UnsupportedEncodingException ex) 
                 {
-                    try 
-                    {
-                        value = new String(GXCommon.rawData(buff, pos, len), "ASCII");
-                    }
-                    catch (UnsupportedEncodingException ex) 
-                    {
-                        throw new RuntimeException(ex.getMessage());
-                    }
-                }
+                    throw new RuntimeException(ex.getMessage());
+                }            
             }
         }
         else if (type[0] == DataType.STRING_UTF8)
@@ -942,22 +916,89 @@ public class GXCommon
             {
                 ms = 0;
             }
-            int deviation = GXCommon.getUInt16(buff, pos);                            
-            GXDateTime dt = new GXDateTime(year, month, day, hour, minute, second, ms, deviation);
-            dt.setStatus(ClockStatus.forValue(buff[pos[0]++]));
+            int deviation = GXCommon.getInt16(buff, pos);  
+            ClockStatus status = ClockStatus.forValue(buff[pos[0]++] & 0xFF);                                                            
+            GXDateTime dt = new GXDateTime();            
+            dt.setStatus(status);
+            java.util.Set<DateTimeSkips> Skip = EnumSet.noneOf(DateTimeSkips.class);
+            if (year < 1 || year == 0xFFFF)
+            {
+                Skip.add(DateTimeSkips.YEAR);
+                java.util.Calendar tm = java.util.Calendar.getInstance();
+                year = tm.get(Calendar.YEAR);            
+            }
+            dt.setDaylightSavingsBegin(month == 0xFE);
+            dt.setDaylightSavingsEnd(month == 0xFD);
+            if (month < 0 || month > 11)
+            {
+                Skip.add(DateTimeSkips.MONTH);
+                month = 0;
+            }
+            else
+            {
+                month -= 1;        
+            }
+            if (day == -1 || day == 0 || day > 31)
+            {
+                Skip.add(DateTimeSkips.DAY);
+                day = 1;
+            }
+            else if (day < 0)
+            {            
+                Calendar cal = Calendar.getInstance();
+                day = cal.getActualMaximum(Calendar.DATE) + day + 3;
+            }
+            if (hour < 0 || hour > 24)
+            {
+                Skip.add(DateTimeSkips.HOUR);
+                hour = 0;
+            }
+            if (minute < 0 || minute > 60 )
+            {
+                Skip.add(DateTimeSkips.MINUTE);
+                minute = 0;
+            }        
+            if (second < 0 || second > 60)
+            {
+                Skip.add(DateTimeSkips.SECOND);
+                second = 0;
+            }
+            //If ms is Zero it's skipped.
+            if (ms < 1 || ms > 1000)
+            {
+                Skip.add(DateTimeSkips.MILLISECOND);
+                ms = 0;
+            }          
+            java.util.Calendar tm;
+            if ((deviation & 0xFFFF) != 0x8000)
+            {
+                tm = java.util.Calendar.getInstance(java.util.TimeZone.getTimeZone("UTC"));            
+                tm.add(java.util.Calendar.MINUTE, deviation);                                            
+            }
+            else
+            {
+                tm = java.util.Calendar.getInstance();
+            }            
+            tm.set(year, month, day, hour, minute, second);       
+            if (ms != 0)
+            {
+                tm.set(Calendar.MILLISECOND, ms);
+            }        
+            dt.setValue(tm.getTime());
+            dt.setSkip(Skip);
             value = dt;
         }
         else if (type[0] == DataType.DATE)
         {
             if (knownType)
             {
-                if (size < 4) //If there is not enought data available.
+                if (size < 5) //If there is not enought data available.
                 {
                     pos[0] = -1;
                     return null;
                 }                
             }
-            else if (size < 5) //If there is not enought data available.
+            else if (size < 6) //If there is not enought data available.
             {
                 pos[0] = -1;
                 return null;
@@ -983,7 +1024,7 @@ public class GXCommon
                     return null;
                 }
             }
-            else if (size < 7) //If there is not enought data available.
+            else if (size < 5) //If there is not enought data available.
             {
                 pos[0] = -1;
                 return null;
@@ -1019,7 +1060,8 @@ public class GXCommon
             {
                 throw new RuntimeException("Value can't be enum. Give integer value.");
             }
-            if (type == DataType.OCTET_STRING && value instanceof GXDateTime)
+            if (type == DataType.OCTET_STRING && (value instanceof GXDateTime 
+                    || value instanceof Date))
             {
                 type = DataType.DATETIME;
             }
@@ -1275,7 +1317,7 @@ public class GXCommon
                 }
                 //Add size
                 buff.write(12);
-                java.util.Calendar tm = java.util.Calendar.getInstance(java.util.TimeZone.getTimeZone("UTC"));
+                java.util.Calendar tm = java.util.Calendar.getInstance();
                 tm.setTime(dt.getValue());
  
                 //Add year.
@@ -1343,10 +1385,32 @@ public class GXCommon
                 {
                     buff.write(tm.get(java.util.Calendar.SECOND));                
                 }
-                buff.write(0xFF); //Hundredths of second is not used.
-                //Add deviation (Not used).
-                buff.write(0x80);
-                buff.write(0x00);
+                if (dt.getSkip().contains(DateTimeSkips.MILLISECOND))
+                {
+                    //Hundredths of second is not used.
+                    buff.write(0xFF);
+                }
+                else
+                {
+                    int ms = tm.get(java.util.Calendar.MILLISECOND);
+                    if (ms != 0)
+                    {
+                        ms /= 10;
+                    }
+                    buff.write(ms);                
+                }                
+                //devitation not used.
+                if (dt.getSkip().contains(DateTimeSkips.DEVITATION))
+                {
+                    buff.write(0x80);
+                    buff.write(0x00);
+                }
+                else //Add devitation.
+                {
+                    short tmp = (short) -(tm.getTimeZone().getOffset(tm.getTime().getTime()) / 60000);
+                    buff.write(tmp >> 8);
+                    buff.write(tmp & 0xFF);                    
+                }
                 //Add clock_status
                 buff.write(dt.getStatus().getValue());   
             }
@@ -1374,7 +1438,7 @@ public class GXCommon
                 {
                     throw new RuntimeException("Invalid date format.");
                 }
-                java.util.Calendar tm = java.util.Calendar.getInstance(java.util.TimeZone.getTimeZone("UTC"));
+                java.util.Calendar tm = java.util.Calendar.getInstance();
                 tm.setTime(dt.getValue());                
                 //Add size
                 buff.write(5);
@@ -1422,7 +1486,7 @@ public class GXCommon
             else if (type == DataType.TIME)
             {
                 java.util.Set<DateTimeSkips> skip = EnumSet.noneOf(DateTimeSkips.class);
-                java.util.Calendar tm = java.util.Calendar.getInstance(java.util.TimeZone.getTimeZone("UTC"));
+                java.util.Calendar tm = java.util.Calendar.getInstance();
                 if (value instanceof GXDateTime)
                 {
                     GXDateTime tmp = (GXDateTime) value;
@@ -1455,7 +1519,7 @@ public class GXCommon
                     throw new RuntimeException("Invalid date format.");
                 }
                 //Add size
-                buff.write(7);
+                buff.write(4);
                 //Add time.
                 if (skip.contains(DateTimeSkips.HOUR))
                 {
@@ -1481,12 +1545,7 @@ public class GXCommon
                 {
                     buff.write(tm.get(java.util.Calendar.SECOND));
                 }
-                buff.write(0xFF); //Hundredths of second is not used.
-                //Add deviation (Not used).
-                buff.write(0x80);
-                buff.write(0x00);
-                //Add clock_status
-                buff.write(0xFF);
+                buff.write(0xFF); //Hundredths of second is not used.               
             }
             else
             {
@@ -1694,7 +1753,7 @@ public class GXCommon
             {
                 throw new RuntimeException("Invalid date format.");
             }
-            java.util.Calendar tm = java.util.Calendar.getInstance(java.util.TimeZone.getTimeZone("UTC"));
+            java.util.Calendar tm = java.util.Calendar.getInstance();
             tm.setTime(dt.getValue());
             //Add size
             buff.put((byte) 12);
@@ -1711,15 +1770,24 @@ public class GXCommon
             buff.put((byte) tm.get(java.util.Calendar.MINUTE));
             buff.put((byte) tm.get(java.util.Calendar.SECOND));
             buff.put((byte) 0xFF); //Hundredths of second is not used.
-            //Add deviation (Not used).
-            buff.put((byte) 0x80);
-            buff.put((byte) 0x00);
+            //If devitation is not used.
+            if (dt.getSkip().contains(DateTimeSkips.DEVITATION))
+            {                
+                buff.put((byte) 0x80);
+                buff.put((byte) 0x00);
+            }
+            else
+            {
+                short tmp = (short) -(tm.getTimeZone().getOffset(tm.getTime().getTime()) / 60000);
+                buff.put((byte) (tmp >> 8));
+                buff.put((byte) (tmp & 0xFF));
+            }
             //Add clock_status
             buff.put((byte) dt.getStatus().getValue());   
         }
         else if (type == DataType.DATE)
         {
-            java.util.Calendar tm = java.util.Calendar.getInstance(java.util.TimeZone.getTimeZone("UTC"));
+            java.util.Calendar tm = java.util.Calendar.getInstance();
             if (value instanceof java.util.Date)
             {
                 tm.setTime((java.util.Date) value);
@@ -1757,7 +1825,7 @@ public class GXCommon
         }
         else if (type == DataType.TIME)
         {
-            java.util.Calendar tm = java.util.Calendar.getInstance(java.util.TimeZone.getTimeZone("UTC"));
+            java.util.Calendar tm = java.util.Calendar.getInstance();
             if (value instanceof java.util.Date)
             {
                 tm.setTime((java.util.Date) value);

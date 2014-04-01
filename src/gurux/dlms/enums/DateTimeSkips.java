@@ -76,7 +76,12 @@ public enum DateTimeSkips
     /*
      * Hundreds of seconds part of date time is skipped.
      */
-    MILLISECOND(0x80);
+    MILLISECOND(0x80),
+    
+    /*
+     * Devitation is now used on write.
+     */
+    DEVITATION(0x100);
     
     private int Value;
    

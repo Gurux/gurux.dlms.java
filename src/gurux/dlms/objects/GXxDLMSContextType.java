@@ -34,6 +34,8 @@
 
 package gurux.dlms.objects;
 
+import gurux.dlms.internal.GXCommon;
+
 public class GXxDLMSContextType
 {
     private String Conformance;
@@ -94,5 +96,13 @@ public class GXxDLMSContextType
     public final void setCypheringInfo(byte[] value)
     {
             CypheringInfo = value;
+    }
+    
+    @Override
+    public String toString()
+    {
+        return String.valueOf(Conformance) + " " + String.valueOf(MaxReceivePduSize)  + " " + 
+                String.valueOf(MaxSendPpuSize) + " " + String.valueOf(DlmsVersionNumber) + " " + 
+                String.valueOf(QualityOfService) + " " + GXCommon.toHex(CypheringInfo);
     }
 }

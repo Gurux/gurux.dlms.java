@@ -44,8 +44,8 @@ public class GXDLMSSecuritySetup extends GXDLMSObject implements IGXDLMSBase
 {
     private SecurityPolicy SecurityPolicy;
     private SecuritySuite SecuritySuite;
-    private String ServerSystemTitle;
-    private String ClientSystemTitle;
+    private byte[] ServerSystemTitle;
+    private byte[] ClientSystemTitle;
 
     /**  
      Constructor.
@@ -78,38 +78,38 @@ public class GXDLMSSecuritySetup extends GXDLMSObject implements IGXDLMSBase
 
     public final SecurityPolicy getSecurityPolicy()
     {
-            return SecurityPolicy;
+        return SecurityPolicy;
     }
     public final void setSecurityPolicy(SecurityPolicy value)
     {
-            SecurityPolicy = value;
+        SecurityPolicy = value;
     }
 
     public final SecuritySuite getSecuritySuite()
     {
-            return SecuritySuite;
+        return SecuritySuite;
     }
     public final void setSecuritySuite(SecuritySuite value)
     {
-            SecuritySuite = value;
+        SecuritySuite = value;
     }
 
-    public final String getClientSystemTitle()
+    public final byte[] getClientSystemTitle()
     {
-            return ClientSystemTitle;
+        return ClientSystemTitle;
     }
-    public final void setClientSystemTitle(String value)
+    public final void setClientSystemTitle(byte[] value)
     {
-            ClientSystemTitle = value;
+        ClientSystemTitle = value;
     }
 
-    public final String getServerSystemTitle()
+    public final byte[] getServerSystemTitle()
     {
-            return ServerSystemTitle;
+        return ServerSystemTitle;
     }
-    public final void setServerSystemTitle(String value)
+    public final void setServerSystemTitle(byte[] value)
     {
-            ServerSystemTitle = value;
+        ServerSystemTitle = value;
     }
 
     @Override
@@ -250,25 +250,11 @@ public class GXDLMSSecuritySetup extends GXDLMSObject implements IGXDLMSBase
         }
         else if (index == 4)
         {
-            if (value instanceof String)
-            {
-                setClientSystemTitle(value.toString());
-            }
-            else
-            {
-                setClientSystemTitle(GXDLMSClient.changeType((byte[])value, DataType.OCTET_STRING).toString());
-            }
+            setClientSystemTitle((byte[])value);
         }
         else if (index == 5)
         {
-            if (value instanceof String)
-            {
-                setServerSystemTitle(value.toString());
-            }
-            else
-            {
-                setServerSystemTitle(GXDLMSClient.changeType((byte[])value, DataType.OCTET_STRING).toString());
-            }
+            setServerSystemTitle((byte[])value);
         }
         else
         {

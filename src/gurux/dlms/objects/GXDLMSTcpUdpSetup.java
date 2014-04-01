@@ -34,16 +34,17 @@
 
 package gurux.dlms.objects;
 
+import gurux.dlms.GXDLMSClient;
 import gurux.dlms.enums.DataType;
 import gurux.dlms.enums.ObjectType;
 
 public class GXDLMSTcpUdpSetup extends GXDLMSObject implements IGXDLMSBase
 {
-    private int privatePort;
-    private String privateIPReference;
-    private int privateMaximumSimultaneousConnections;
-    private int privateInactivityTimeout;
-    private int privateMaximumSegmentSize;
+    private int Port;
+    private String IPReference;
+    private int MaximumSimultaneousConnections;
+    private int InactivityTimeout;
+    private int MaximumSegmentSize;
     
     /**  
      Constructor.
@@ -79,34 +80,34 @@ public class GXDLMSTcpUdpSetup extends GXDLMSObject implements IGXDLMSBase
 
     public final int getPort()
     {
-        return privatePort;
+        return Port;
     }
     public final void setPort(int value)
     {
-        privatePort = value;
+        Port = value;
     }
 
     public final String getIPReference()
     {
-        return privateIPReference;
+        return IPReference;
     }
     public final void setIPReference(String value)
     {
-        privateIPReference = value;
+        IPReference = value;
     }
 
     public final int getMaximumSegmentSize()
     {
-        return privateMaximumSegmentSize;
+        return MaximumSegmentSize;
     }
     public final void setMaximumSegmentSize(int value)
     {
-        privateMaximumSegmentSize = value;
+        MaximumSegmentSize = value;
     }
    
     public final int getMaximumSimultaneousConnections()
     {
-        return privateMaximumSimultaneousConnections;
+        return MaximumSimultaneousConnections;
     }
     public final void setMaximumSimultaneousConnections(int value)
     {
@@ -114,16 +115,16 @@ public class GXDLMSTcpUdpSetup extends GXDLMSObject implements IGXDLMSBase
         {
             throw new IllegalArgumentException("Invalid value");
         }
-        privateMaximumSimultaneousConnections = value;
+        MaximumSimultaneousConnections = value;
     }
 
     public final int getInactivityTimeout()
     {
-        return privateInactivityTimeout;
+        return InactivityTimeout;
     }
     public final void setInactivityTimeout(int value)
     {
-        privateInactivityTimeout = value;
+        InactivityTimeout = value;
     }
 
     @Override
@@ -284,17 +285,8 @@ public class GXDLMSTcpUdpSetup extends GXDLMSObject implements IGXDLMSBase
             else
             {
                 if (value instanceof byte[])
-                {
-                    String str = "";
-                    for(int ch : (byte[]) value)
-                    {
-                        str += String.valueOf(ch) + ".";
-                    }
-                    if (str.length() != 0)
-                    {
-                        str = str.substring(0, str.length() - 1);
-                    }
-                    setIPReference(str);
+                {                    
+                    setIPReference(GXDLMSClient.changeType((byte[]) value, DataType.OCTET_STRING).toString());
                 }
                 else
                 {

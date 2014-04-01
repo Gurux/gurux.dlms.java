@@ -96,4 +96,11 @@ public class GXDLMSImageActivateInfo
         Identification = identification;
         Signature = signature;
     }
+    
+    
+    @Override
+    public String toString()
+    {
+        return Identification + " " + Signature + " " + String.valueOf(Size);        
+    }
 }

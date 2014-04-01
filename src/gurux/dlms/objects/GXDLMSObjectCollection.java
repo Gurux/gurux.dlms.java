@@ -41,7 +41,6 @@ import gurux.dlms.enums.ObjectType;
 */
 public class GXDLMSObjectCollection extends java.util.ArrayList<GXDLMSObject> implements java.util.List<GXDLMSObject>
 {
-    private int Deviation;
     private static final long serialVersionUID = 1L;
     private Object Parent;
     
@@ -67,19 +66,7 @@ public class GXDLMSObjectCollection extends java.util.ArrayList<GXDLMSObject> im
     final void setParent(Object value)
     {
         Parent = value;
-    }
-    
-    /** 
-    Local time to GMT in minutes.
-     */
-    public final int getDeviation()
-    {
-        return Deviation;
-    }
-    public final void setDeviation(int value)
-    {
-        Deviation = value;
-    }
+    }     
 
     public final GXDLMSObjectCollection getObjects(ObjectType type)
     {
@@ -144,5 +131,21 @@ public class GXDLMSObjectCollection extends java.util.ArrayList<GXDLMSObject> im
             item.setParent(this);
         }
         return ret;
+    }
+    
+    public @Override String toString()
+    {
+        StringBuilder sb = new StringBuilder();
+        sb.append('[');
+        for (GXDLMSObject it : this)
+        {
+            if (sb.length() != 1)
+            {
+                sb.append(", ");
+            }
+            sb.append(it.getName().toString());
+        }
+        sb.append(']');
+        return sb.toString();
     }
 }

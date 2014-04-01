@@ -359,7 +359,7 @@ public class GXDLMSPppSetup extends GXDLMSObject implements IGXDLMSBase
         else if (index == 3)
         {
             java.util.ArrayList<GXDLMSPppSetupLcpOption> items = new java.util.ArrayList<GXDLMSPppSetupLcpOption>();
-            if (value != null)
+            if (value instanceof Object[])
             {
                 for (Object item : (Object[])value)
                 {
@@ -370,12 +370,12 @@ public class GXDLMSPppSetup extends GXDLMSObject implements IGXDLMSBase
                     items.add(it);
                 }
             }
-            LCPOptions = items.toArray(new GXDLMSPppSetupLcpOption[0]);
+            LCPOptions = items.toArray(new GXDLMSPppSetupLcpOption[items.size()]);
         }
         else if (index == 4)
         {
             java.util.ArrayList<GXDLMSPppSetupIPCPOption> items = new java.util.ArrayList<GXDLMSPppSetupIPCPOption>();
-            if (value != null)
+            if (value instanceof Object[])
             {
                 for (Object item : (Object[])value)
                 {
@@ -386,7 +386,7 @@ public class GXDLMSPppSetup extends GXDLMSObject implements IGXDLMSBase
                     items.add(it);
                 }
             }
-            IPCPOptions = items.toArray(new GXDLMSPppSetupIPCPOption[0]);
+            IPCPOptions = items.toArray(new GXDLMSPppSetupIPCPOption[items.size()]);
         }
         else if (index == 5)
         {
