@@ -298,7 +298,7 @@ public class GXDLMSHdlcSetup extends GXDLMSObject implements IGXDLMSBase
         }
         if (index == 2)
         {
-            return this.CommunicationSpeed;
+            return this.CommunicationSpeed.ordinal();
         }
         if (index == 3)
         {

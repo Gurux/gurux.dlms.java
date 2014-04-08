@@ -180,6 +180,15 @@ public class GXDLMSMBusSlavePortSetup extends GXDLMSObject implements IGXDLMSBas
     {
         return 5;
     }      
+    
+    /*
+     * Returns amount of methods.
+     */ 
+    @Override
+    public int getMethodCount()
+    {
+        return 0;
+    }
        
      @Override
     public DataType getDataType(int index)

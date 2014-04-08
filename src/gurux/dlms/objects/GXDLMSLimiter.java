@@ -389,7 +389,7 @@ public class GXDLMSLimiter extends GXDLMSObject implements IGXDLMSBase
             data.write(3);
             try
             {
-            GXCommon.setData(data, DataType.INT16, MonitoredValue.getObjectType());
+            GXCommon.setData(data, DataType.INT16, MonitoredValue.getObjectType().getValue());
             GXCommon.setData(data, DataType.OCTET_STRING, MonitoredValue.getLogicalName());
             //TODO: GXCommon.setData(data, DataType.UINT8, MonitoredValue.getSelectedAttributeIndex());
             }
@@ -397,7 +397,7 @@ public class GXDLMSLimiter extends GXDLMSObject implements IGXDLMSBase
             {
                 throw new RuntimeException(ex.getMessage());
             } 
-            return data;
+            return data.toByteArray();
         }
         else if (index == 3)
         {
@@ -434,7 +434,7 @@ public class GXDLMSLimiter extends GXDLMSObject implements IGXDLMSBase
             {
                 throw new RuntimeException(ex.getMessage());
             } 
-            return data;
+            return data.toByteArray();
         }
         else if (index == 9)
         {
@@ -452,7 +452,7 @@ public class GXDLMSLimiter extends GXDLMSObject implements IGXDLMSBase
             {
                 throw new RuntimeException(ex.getMessage());
             } 
-            return data;
+            return data.toByteArray();
         }
         else if (index == 10)
         {
@@ -478,7 +478,7 @@ public class GXDLMSLimiter extends GXDLMSObject implements IGXDLMSBase
             {
                 throw new RuntimeException(ex.getMessage());
             } 
-            return data;
+            return data.toByteArray();
         }
         throw new IllegalArgumentException("GetValue failed. Invalid attribute index.");
     }

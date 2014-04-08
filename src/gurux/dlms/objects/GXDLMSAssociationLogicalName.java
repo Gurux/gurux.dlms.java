@@ -626,8 +626,12 @@ public class GXDLMSAssociationLogicalName extends GXDLMSObject implements IGXDLM
                         obj.setLogicalName(ln);
                         obj.setVersion(version);                        
                     }
-                    updateAccessRights(obj, (Object[]) Array.get(item, 3));
-                    m_ObjectList.add(obj);
+                    //Add only known objects.
+                    if (obj instanceof IGXDLMSBase)
+                    {
+                        updateAccessRights(obj, (Object[]) Array.get(item, 3));
+                        m_ObjectList.add(obj);
+                    }
                 }               
             }
         }

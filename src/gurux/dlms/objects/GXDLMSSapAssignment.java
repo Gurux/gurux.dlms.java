@@ -180,7 +180,7 @@ public class GXDLMSSapAssignment extends GXDLMSObject implements IGXDLMSBase
                         data.write(DataType.STRUCTURE.getValue());
                         data.write((byte)2); //Count
                         GXCommon.setData(data, DataType.UINT16, it.getKey());
-                        GXCommon.setData(data, DataType.OCTET_STRING, it.getValue().getBytes("ASCII"));
+                        GXCommon.setData(data, DataType.OCTET_STRING, GXCommon.getBytes(it.getValue()));
                     }
                 }
                 catch(Exception ex)

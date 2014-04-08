@@ -76,6 +76,7 @@ public class GXDLMSImageTransfer extends GXDLMSObject implements IGXDLMSBase
         info.Signature = "";
         info.Identification = "";
         ImageActivateInfo = new GXDLMSImageActivateInfo[] { info };
+        ImageTransferStatus = ImageTransferStatus.IMAGE_TRANSFER_NOT_INITIATED;
     }
     
     /**  
@@ -93,6 +94,7 @@ public class GXDLMSImageTransfer extends GXDLMSObject implements IGXDLMSBase
         info.Signature = "";
         info.Identification = "";
         ImageActivateInfo = new GXDLMSImageActivateInfo[] { info };
+        ImageTransferStatus = ImageTransferStatus.IMAGE_TRANSFER_NOT_INITIATED;
     }
 
     /**  
@@ -111,6 +113,7 @@ public class GXDLMSImageTransfer extends GXDLMSObject implements IGXDLMSBase
         info.Signature = "";
         info.Identification = "";
         ImageActivateInfo = new GXDLMSImageActivateInfo[] { info };
+        ImageTransferStatus = ImageTransferStatus.IMAGE_TRANSFER_NOT_INITIATED;
     }       
 
     /** 
@@ -420,11 +423,11 @@ public class GXDLMSImageTransfer extends GXDLMSObject implements IGXDLMSBase
                     data.write((byte)DataType.STRUCTURE.getValue());                    
                     data.write((byte)3);//Item count.
                     GXCommon.setData(data, DataType.UINT32, it.getSize());
-                    GXCommon.setData(data, DataType.OCTET_STRING, it.getIdentification().getBytes("ASCII"));
+                    GXCommon.setData(data, DataType.OCTET_STRING, GXCommon.getBytes(it.getIdentification()));
                     String tmp = it.getSignature();
                     if (tmp != null)
                     {
-                        GXCommon.setData(data, DataType.OCTET_STRING, it.getSignature().getBytes("ASCII"));
+                        GXCommon.setData(data, DataType.OCTET_STRING, GXCommon.getBytes(it.getSignature()));
                     }
                     else
                     {
@@ -540,7 +543,7 @@ public class GXDLMSImageTransfer extends GXDLMSObject implements IGXDLMSBase
         data.write(2);
         try
         {            
-            GXCommon.setData(data, DataType.OCTET_STRING, imageIdentifier.getBytes("ASCII"));
+            GXCommon.setData(data, DataType.OCTET_STRING, GXCommon.getBytes(imageIdentifier));
             GXCommon.setData(data, DataType.UINT32, imageSize);
         }
         catch(Exception ex)

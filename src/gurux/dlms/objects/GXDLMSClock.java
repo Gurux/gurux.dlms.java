@@ -68,6 +68,7 @@ public class GXDLMSClock extends GXDLMSObject implements IGXDLMSBase
         value.add(DateTimeSkips.DAY);
         Begin.setSkip(value);
         End.setSkip(Begin.getSkip());
+        m_ClockBase = ClockBase.None;
     }
 
     /**  
@@ -83,6 +84,7 @@ public class GXDLMSClock extends GXDLMSObject implements IGXDLMSBase
         value.add(DateTimeSkips.DAY);
         Begin.setSkip(value);
         End.setSkip(Begin.getSkip());
+        m_ClockBase = ClockBase.None;
     }
 
     /**  
@@ -99,6 +101,7 @@ public class GXDLMSClock extends GXDLMSObject implements IGXDLMSBase
         value.add(DateTimeSkips.DAY);
         Begin.setSkip(value);
         End.setSkip(Begin.getSkip());
+        m_ClockBase = ClockBase.None;
     }   
             
     @Override
@@ -517,7 +520,7 @@ public class GXDLMSClock extends GXDLMSObject implements IGXDLMSBase
         }
         if (index == 9)
         {
-            return getClockBase();
+            return getClockBase().ordinal();
         }
         throw new IllegalArgumentException("GetValue failed. Invalid attribute index.");
     }

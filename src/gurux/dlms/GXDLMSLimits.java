@@ -40,17 +40,17 @@ package gurux.dlms;
 */
 public class GXDLMSLimits
 {
-    private Object privateMaxInfoTX;
-    private Object privateMaxInfoRX;        
-    private Object privateWindowSizeTX;
-    private Object privateWindowSizeRX;
+    private Object MaxInfoTX;
+    private Object MaxInfoRX;        
+    private Object WindowSizeTX;
+    private Object WindowSizeRX;
 
     /*
      * Constructor.
      */
     GXDLMSLimits()
     {
-        setMaxInfoTX((short)128);
+        setMaxInfoTX((byte)128);
         setMaxInfoRX((byte)128);
         setWindowSizeTX((byte) 1);
         setWindowSizeRX(getWindowSizeTX());
@@ -62,11 +62,11 @@ public class GXDLMSLimits
     */
     public final Object getMaxInfoTX()
     {
-            return privateMaxInfoTX;
+        return MaxInfoTX;
     }
     public final void setMaxInfoTX(Object value)
     {
-            privateMaxInfoTX = value;
+        MaxInfoTX = value;
     }
 
     /** 
@@ -78,11 +78,11 @@ public class GXDLMSLimits
     */
     public final Object getMaxInfoRX()
     {
-        return privateMaxInfoRX;
+        return MaxInfoRX;
     }
     public final void setMaxInfoRX(Object value)
     {
-        privateMaxInfoRX = value;
+        MaxInfoRX = value;
     }
 
     /** 
@@ -94,11 +94,11 @@ public class GXDLMSLimits
     */
     public final Object getWindowSizeTX()
     {
-        return privateWindowSizeTX;
+        return WindowSizeTX;
     }
     public final void setWindowSizeTX(Object value)
     {
-        privateWindowSizeTX = value;
+        WindowSizeTX = value;
     }
 
     /** 
@@ -110,10 +110,10 @@ public class GXDLMSLimits
     */
     public final Object getWindowSizeRX()
     {
-        return privateWindowSizeRX;
+        return WindowSizeRX;
     }
     public final void setWindowSizeRX(Object value)
     {
-        privateWindowSizeRX = value;
+        WindowSizeRX = value;
     }
 }

@@ -233,8 +233,8 @@ public class GXDLMSModemConfiguration extends GXDLMSObject implements IGXDLMSBas
                     {
                         data.write(DataType.STRUCTURE.getValue());
                         data.write(3); //Count                        
-                        GXCommon.setData(data, DataType.OCTET_STRING, it.getRequest().getBytes("ASCII"));
-                        GXCommon.setData(data, DataType.OCTET_STRING, it.getResponse().getBytes("ASCII"));
+                        GXCommon.setData(data, DataType.OCTET_STRING, GXCommon.getBytes(it.getRequest()));
+                        GXCommon.setData(data, DataType.OCTET_STRING, GXCommon.getBytes(it.getResponse()));
                         GXCommon.setData(data, DataType.UINT16, it.getDelay());                    
                     }
                 } 
@@ -263,7 +263,7 @@ public class GXDLMSModemConfiguration extends GXDLMSObject implements IGXDLMSBas
                 {                
                     for(String it : m_ModemProfile)
                     {
-                        GXCommon.setData(data, DataType.OCTET_STRING, it.getBytes("ASCII"));
+                        GXCommon.setData(data, DataType.OCTET_STRING, GXCommon.getBytes(it));
                     }
                 }
                 catch (Exception ex) 

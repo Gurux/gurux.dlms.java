@@ -293,7 +293,7 @@ public class GXDLMSAutoConnect extends GXDLMSObject implements IGXDLMSBase
                 {
                     try 
                     {
-                        GXCommon.setData(data, DataType.OCTET_STRING, it.getBytes("ASCII")); //destination
+                        GXCommon.setData(data, DataType.OCTET_STRING, GXCommon.getBytes(it)); //destination
                     }
                     catch (Exception ex) 
                     {

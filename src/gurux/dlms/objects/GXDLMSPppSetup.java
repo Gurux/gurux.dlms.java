@@ -267,7 +267,7 @@ public class GXDLMSPppSetup extends GXDLMSObject implements IGXDLMSBase
             }
             else
             {
-                data.write((byte)IPCPOptions.length);
+                data.write((byte)LCPOptions.length);
                 try 
                 {               
                     for (GXDLMSPppSetupLcpOption it : LCPOptions)

@@ -792,6 +792,9 @@ abstract public class GXDLMSServerBase
             return m_Base.addFrame((byte) 0, false, buff, 0, buff.position());
         }
         java.nio.ByteBuffer buff = java.nio.ByteBuffer.allocate(20);
+        buff.put((byte) 0x81); //FromatID
+        buff.put((byte) 0x80); //GroupID
+        buff.put((byte) 0); //len        
         buff.put((byte)HDLCInfo.MaxInfoTX);
         setValue(buff, getLimits().getMaxInfoTX());
         buff.put((byte)HDLCInfo.MaxInfoRX);
@@ -800,9 +803,7 @@ abstract public class GXDLMSServerBase
         setValue(buff, getLimits().getWindowSizeTX());
         buff.put((byte)HDLCInfo.WindowSizeRX);
         setValue(buff, getLimits().getWindowSizeRX());
-        byte len = (byte) buff.position();
-        buff.put(0, (byte) 0x81); //FromatID
-        buff.put(1, (byte) 0x80); //GroupID
+        byte len = (byte) (buff.position() - 3);
         buff.put(2, len); //len
         return m_Base.addFrame(FrameType.UA.getValue(), false, buff, 0, buff.position());
     }
@@ -1069,6 +1070,7 @@ abstract public class GXDLMSServerBase
             
             else if (command[0] == Command.DisconnectRequest.getValue())            
             {
+                System.out.println("Disonnecting");
                 SendData.add(generateDisconnectRequest());
                 return SendData.get(FrameIndex);
             }
@@ -1087,7 +1089,7 @@ abstract public class GXDLMSServerBase
                     if (sn >= it.getKey() && sn <= (it.getKey() + (8 * aCnt)))
                     {
                         item = it.getValue();
-                        attributeIndex = ((sn - item.getShortName()) / 8) + 1;
+                        attributeIndex = ((sn - item.getShortName()) / 8) + 1;                        
                         //If write is denied.
                         AccessMode acc = item.getAccess(attributeIndex);
                         if (acc == AccessMode.NO_ACCESS || acc == AccessMode.READ ||
@@ -1176,6 +1178,7 @@ abstract public class GXDLMSServerBase
                     {
                         item = it.getValue();
                         attributeIndex = ((sn - item.getShortName()) / 8) + 1;                        
+                        System.out.println(String.format("Reading %d, attribute index %d", item.getName(), attributeIndex));
                         ValueEventArgs e = new ValueEventArgs(item, attributeIndex, selector[0]);
                         e.setValue(value[0]);
                         read(e);
@@ -1200,6 +1203,7 @@ abstract public class GXDLMSServerBase
                         {
                             item = it.getValue();
                             attributeIndex = ((sn - item.getShortName() - value2[0]) / 8) + 1;
+                            System.out.println(String.format("Reading %d, attribute index %d", item.getName(), attributeIndex));
                             ValueEventArgs e = new ValueEventArgs(item, attributeIndex, selector[0]);                            
                             e.setValue(value[0]);
                             action(e);
@@ -1293,7 +1297,12 @@ abstract public class GXDLMSServerBase
             if (tp == DataType.NONE)
             {
                 tp = GXCommon.getValueType(value);
-            }            
+            } 
+            if (tp == DataType.OCTET_STRING && value instanceof String && 
+                item.getUIDataType(index) == DataType.STRING)
+            {
+                value = ((String)value).getBytes("ASCII");
+            } 
             if (tp != DataType.NONE || (value == null && tp == DataType.NONE))
             {
                 SendData.addAll(Arrays.asList(readReply(name, item.getObjectType(), index, value, tp)));
@@ -1404,11 +1413,11 @@ abstract public class GXDLMSServerBase
         }
         if (!this.getUseLogicalNameReferencing())
         {
-            buff.put((byte) 0x00);
             buff.put((byte) 0x01);
-        }
-        buff.put((byte) serviceErrorCode);
+            buff.put((byte) 0x01);
+            buff.put((byte) serviceErrorCode);
+        }        
         int index[] = new int[1];
-        return m_Base.splitToFrames(buff, 1, index, buff.position(), cmd, 1);
+        return m_Base.splitToFrames(buff, 1, index, buff.position(), cmd, serviceErrorCode);
     }
 }

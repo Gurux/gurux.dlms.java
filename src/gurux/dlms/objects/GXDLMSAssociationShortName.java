@@ -295,7 +295,7 @@ public class GXDLMSAssociationShortName extends GXDLMSObject implements IGXDLMSB
                     {
                         data.write((byte) DataType.STRUCTURE.getValue());
                         data.write((byte) 4); //Count
-                        GXCommon.setData(data, DataType.UINT16, it.getShortName()); //base address.
+                        GXCommon.setData(data, DataType.INT16, it.getShortName()); //base address.
                         GXCommon.setData(data, DataType.UINT16, it.getObjectType().getValue()); //ClassID
                         GXCommon.setData(data, DataType.UINT8, 0); //Version
                         GXCommon.setData(data, DataType.OCTET_STRING, it.getLogicalName()); //LN
@@ -304,7 +304,7 @@ public class GXDLMSAssociationShortName extends GXDLMSObject implements IGXDLMSB
                     {
                         data.write((byte) DataType.STRUCTURE.getValue());
                         data.write((byte) 4); //Count
-                        GXCommon.setData(data, DataType.UINT16, this.getShortName()); //base address.
+                        GXCommon.setData(data, DataType.INT16, this.getShortName()); //base address.
                         GXCommon.setData(data, DataType.UINT16, this.getObjectType().getValue()); //ClassID
                         GXCommon.setData(data, DataType.UINT8, 0); //Version
                         GXCommon.setData(data, DataType.OCTET_STRING, this.getLogicalName()); //LN

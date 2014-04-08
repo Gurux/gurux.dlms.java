@@ -1213,18 +1213,10 @@ public class GXCommon
                 if (value instanceof String)
                 {
                     String[] items = ((String)value).split("[.]", -1);
-                    if (items.length == 1 && items[0].equals(value))
+                    setObjectCount(items.length, buff);
+                    for (String it : items)
                     {
-                        setObjectCount(((String)value).length(), buff);
-                        buff.write(((String)value).getBytes("ASCII"));                    
-                    }
-                    else
-                    {
-                        setObjectCount(items.length, buff);
-                        for (String it : items)
-                        {
-                            buff.write(Integer.parseInt(it));
-                        }
+                        buff.write(Integer.parseInt(it));
                     }
                 }
                 else if (value instanceof byte[])

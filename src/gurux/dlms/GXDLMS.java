@@ -2089,10 +2089,7 @@ class GXDLMS
         else if (res == Command.SetResponse.getValue() || 
                 res == Command.MethodResponse.getValue())
         {
-            if (buff.get() != 0)
-            {
-                pError[0] = buff.get();
-            }
+            pError[0] = buff.get();
         }
         else
         {

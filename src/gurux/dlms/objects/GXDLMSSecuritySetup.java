@@ -213,11 +213,11 @@ public class GXDLMSSecuritySetup extends GXDLMSObject implements IGXDLMSBase
         }
         if (index == 2)
         {
-            return getSecurityPolicy();
+            return getSecurityPolicy().getValue();
         }
         if (index == 3)
         {
-            return getSecuritySuite();
+            return getSecuritySuite().getValue();
         }
         if (index == 4)
         {

@@ -409,8 +409,8 @@ public class GXDLMSActivityCalendar extends GXDLMSObject implements IGXDLMSBase
                         {
                             data.write((byte)DataType.STRUCTURE.getValue());
                             data.write(3);
-                            GXCommon.setData(data, DataType.TIME, action.getStartTime());
-                            GXCommon.setData(data, DataType.OCTET_STRING, action.getScriptLogicalName().getBytes("ASCII"));
+                            GXCommon.setData(data, DataType.TIME, action.getStartTime());                            
+                            GXCommon.setData(data, DataType.OCTET_STRING, GXCommon.getBytes(action.getScriptLogicalName()));
                             GXCommon.setData(data, DataType.UINT16, action.getScriptSelector());
                         }
                     }
@@ -525,7 +525,7 @@ public class GXDLMSActivityCalendar extends GXDLMSObject implements IGXDLMSBase
                             data.write(DataType.STRUCTURE.getValue());
                             data.write(3);
                             GXCommon.setData(data, DataType.TIME, action.getStartTime());
-                            GXCommon.setData(data, DataType.OCTET_STRING, action.getScriptLogicalName().getBytes("ASCII"));
+                            GXCommon.setData(data, DataType.OCTET_STRING, action.getScriptLogicalName());
                             GXCommon.setData(data, DataType.UINT16, action.getScriptSelector());
                         }
                     }

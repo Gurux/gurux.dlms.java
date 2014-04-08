@@ -176,10 +176,10 @@ public class GXDLMSScriptTable extends GXDLMSObject implements IGXDLMSBase
                         data.write(5); //Count
                         GXDLMSScriptAction tmp = it.getValue();
                         GXCommon.setData(data, DataType.ENUM, tmp.getType().ordinal() + 1); //service_id
-                        GXCommon.setData(data, DataType.UINT16, tmp.getObjectType()); //class_id
+                        GXCommon.setData(data, DataType.UINT16, tmp.getObjectType().getValue()); //class_id
                         GXCommon.setData(data, DataType.OCTET_STRING, tmp.getLogicalName()); //logical_name
                         GXCommon.setData(data, DataType.INT8, tmp.getIndex()); //index
-                        GXCommon.setData(data, tmp.getParameterType(), tmp.getObjectType()); //parameter
+                        GXCommon.setData(data, tmp.getParameterType(), tmp.getObjectType().getValue()); //parameter
                     }
                 }                
                 catch (Exception ex) 
