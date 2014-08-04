@@ -47,7 +47,6 @@ import java.lang.reflect.Array;
 import java.util.AbstractMap;
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.Date;
 import java.util.List;
 
 public class GXDLMSProfileGeneric extends GXDLMSObject implements IGXDLMSBase
@@ -166,6 +165,7 @@ public class GXDLMSProfileGeneric extends GXDLMSObject implements IGXDLMSBase
     public final void setBuffer(Object[][] value)
     {
         m_Buffer.addAll(Arrays.asList(value));
+        m_EntriesInUse = m_Buffer.size();
     }
 
     /*
@@ -671,12 +671,15 @@ public class GXDLMSProfileGeneric extends GXDLMSObject implements IGXDLMSBase
                         }   
                     }
                     m_Buffer.add((Object[]) row);
-                }                
+                }
+                m_EntriesInUse = m_Buffer.size();
             }            
         }
         else if (index == 3)
         {
             m_CaptureObjects.clear();
+            m_Buffer.clear();
+            m_EntriesInUse = m_Buffer.size();
             if (value != null)
             {
                 for (Object it : (Object[]) value)
@@ -789,6 +792,7 @@ public class GXDLMSProfileGeneric extends GXDLMSObject implements IGXDLMSBase
         synchronized (this)
         {
             m_Buffer.clear();
+            m_EntriesInUse = 0;
         }
    }
 
@@ -823,6 +827,7 @@ public class GXDLMSProfileGeneric extends GXDLMSObject implements IGXDLMSBase
                     m_Buffer.remove(0);
                 }
                 m_Buffer.add(values);
+                m_EntriesInUse = m_Buffer.size();
             }           
        }         
    }

@@ -875,26 +875,13 @@ public class GXCommon
             value = GXCommon.toDouble(buff, pos);
         }
         else if (type[0] == DataType.DATETIME)
-        {            
-            if (knownType)
+        {      
+            //If there is not enought data available.
+            if (size - pos[0] < 12)
             {
-                 //If there is not enought data available.
-                if (size - pos[0] < 12)
-                {
-                    pos[0] = -1;
-                    return null;
-                }
-            }
-            else
-            {
-                 //If there is not enough data available.
-                ++pos[0]; //Get count.
-                if (size < 12)
-                {
-                    pos[0] = -1;
-                    return null;
-                }
-            }
+                pos[0] = -1;
+                return null;
+            }            
             //Get year.
             int year = GXCommon.getUInt16(buff, pos);
             //Get month
