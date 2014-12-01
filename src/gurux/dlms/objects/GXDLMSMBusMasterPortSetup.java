@@ -54,7 +54,7 @@ public class GXDLMSMBusMasterPortSetup extends GXDLMSObject implements IGXDLMSBa
     /**  
      Constructor.
 
-     @param ln Logican Name of the object.
+     @param ln Logical Name of the object.
     */
     public GXDLMSMBusMasterPortSetup(String ln)
     {
@@ -65,7 +65,7 @@ public class GXDLMSMBusMasterPortSetup extends GXDLMSObject implements IGXDLMSBa
     /**  
      Constructor.
 
-     @param ln Logican Name of the object.
+     @param ln Logical Name of the object.
      @param sn Short Name of the object.
     */
     public GXDLMSMBusMasterPortSetup(String ln, int sn)

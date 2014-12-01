@@ -40,9 +40,11 @@ import gurux.dlms.enums.AutoConnectMode;
 import gurux.dlms.enums.DataType;
 import gurux.dlms.enums.ObjectType;
 import gurux.dlms.internal.GXCommon;
+
 import java.io.ByteArrayOutputStream;
 import java.lang.reflect.Array;
 import java.util.AbstractMap;
+import java.util.AbstractMap.SimpleEntry;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.logging.Level;
@@ -68,7 +70,7 @@ public class GXDLMSAutoAnswer extends GXDLMSObject implements IGXDLMSBase
     /**  
      Constructor.
 
-     @param ln Logican Name of the object.
+     @param ln Logical Name of the object.
     */
     public GXDLMSAutoAnswer(String ln)
     {
@@ -79,7 +81,7 @@ public class GXDLMSAutoAnswer extends GXDLMSObject implements IGXDLMSBase
     /**  
      Constructor.
 
-     @param ln Logican Name of the object.
+     @param ln Logical Name of the object.
      @param sn Short Name of the object.
     */
     public GXDLMSAutoAnswer(String ln, int sn)
@@ -340,7 +342,7 @@ public class GXDLMSAutoAnswer extends GXDLMSObject implements IGXDLMSBase
                 {
                     GXDateTime start = (GXDateTime)GXDLMSClient.changeType((byte[])Array.get(item, 0), DataType.DATETIME);
                     GXDateTime end = (GXDateTime)GXDLMSClient.changeType((byte[])Array.get(item, 1), DataType.DATETIME);                    
-                    getListeningWindow().add(new AbstractMap.SimpleEntry(start, end));
+                    getListeningWindow().add(new SimpleEntry<GXDateTime, GXDateTime>(start, end));
                 }
             }
         }

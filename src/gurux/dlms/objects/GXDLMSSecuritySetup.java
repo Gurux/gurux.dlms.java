@@ -58,7 +58,7 @@ public class GXDLMSSecuritySetup extends GXDLMSObject implements IGXDLMSBase
     /**  
      Constructor.
 
-     @param ln Logican Name of the object.
+     @param ln Logical Name of the object.
     */
     public GXDLMSSecuritySetup(String ln)
     {
@@ -68,7 +68,7 @@ public class GXDLMSSecuritySetup extends GXDLMSObject implements IGXDLMSBase
     /**  
      Constructor.
 
-     @param ln Logican Name of the object.
+     @param ln Logical Name of the object.
      @param sn Short Name of the object.
     */
     public GXDLMSSecuritySetup(String ln, int sn)
@@ -242,11 +242,11 @@ public class GXDLMSSecuritySetup extends GXDLMSObject implements IGXDLMSBase
         }
         else if (index == 2)
         {
-            setSecurityPolicy(SecurityPolicy.forValue((byte)value));
+            setSecurityPolicy(SecurityPolicy.forValue((Byte)value));
         }
         else if (index == 3)
         {
-            setSecuritySuite(SecuritySuite.forValue((byte)value));
+            setSecuritySuite(SecuritySuite.forValue((Byte)value));
         }
         else if (index == 4)
         {

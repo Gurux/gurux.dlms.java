@@ -966,7 +966,7 @@ public class GXDLMSClient
                 //If version is 0
                 if (((Object[]) methodAccess)[1] instanceof Boolean)
                 {
-                    if ((boolean) ((Object[]) methodAccess)[1])
+                    if ((Boolean) ((Object[]) methodAccess)[1])
                     {
                         tmp = 1;
                     }

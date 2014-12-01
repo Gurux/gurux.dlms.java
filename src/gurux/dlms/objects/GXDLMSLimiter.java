@@ -71,7 +71,7 @@ public class GXDLMSLimiter extends GXDLMSObject implements IGXDLMSBase
     /**  
      Constructor.
 
-     @param ln Logican Name of the object.
+     @param ln Logical Name of the object.
     */
     public GXDLMSLimiter(String ln)
     {
@@ -84,7 +84,7 @@ public class GXDLMSLimiter extends GXDLMSObject implements IGXDLMSBase
     /**  
      Constructor.
 
-     @param ln Logican Name of the object.
+     @param ln Logical Name of the object.
      @param sn Short Name of the object.
     */
     public GXDLMSLimiter(String ln, int sn)
@@ -494,15 +494,15 @@ public class GXDLMSLimiter extends GXDLMSObject implements IGXDLMSBase
             super.setValue(index, value);            
         }
         else if (index == 2)
-        {
-        ObjectType ot = ObjectType.forValue((int)(((Object[])value)[0]));
-        String ln = GXDLMSClient.changeType((byte[])((Object[])value)[1], DataType.OCTET_STRING).toString();
-        int attIndex = ((Number)(((Object[])value)[2])).intValue();
-        MonitoredValue = getParent().findByLN(ot, ln);
-        if (MonitoredValue != null)
-        {
-            //TODO: MonitoredValue.setSelectedAttributeIndex(attIndex);
-        }
+        {        	        	
+	        ObjectType ot = ObjectType.forValue(((Number)(((Object[])value)[0])).intValue());
+	        String ln = GXDLMSClient.changeType((byte[])((Object[])value)[1], DataType.OCTET_STRING).toString();
+	        int attIndex = ((Number)(((Object[])value)[2])).intValue();
+	        MonitoredValue = getParent().findByLN(ot, ln);
+	        if (MonitoredValue != null)
+	        {
+	            //TODO: MonitoredValue.setSelectedAttributeIndex(attIndex);
+	        }
         }
         else if (index == 3)
         {
@@ -518,31 +518,31 @@ public class GXDLMSLimiter extends GXDLMSObject implements IGXDLMSBase
         }
         else if (index == 6)
         {
-            MinOverThresholdDuration = (long)value;
+            MinOverThresholdDuration = ((Number)value).longValue();
         }
         else if (index == 7)
         {
-            MinUnderThresholdDuration = (long)value;
+            MinUnderThresholdDuration = ((Number)value).longValue();
         }
         else if (index == 8)
         {
             Object[] tmp = (Object[])value;
-            EmergencyProfile.setID((int) tmp[0]);
+            EmergencyProfile.setID(((Number) tmp[0]).intValue());
             EmergencyProfile.setActivationTime((GXDateTime)GXDLMSClient.changeType((byte[])tmp[1], DataType.DATETIME));
-            EmergencyProfile.setDuration((long) tmp[2]);
+            EmergencyProfile.setDuration((Long) tmp[2]);
         }
         else if (index == 9)
         {
             java.util.ArrayList<Integer> list = new java.util.ArrayList<Integer>();
             for (Object it : (Object[])value)
             {
-                list.add((int)it);
+                list.add(((Number)it).intValue());
             }
             EmergencyProfileGroupIDs = toIntArray(list);
         }
         else if (index == 10)
         {
-            EmergencyProfileActive = (boolean)value;
+            EmergencyProfileActive = (Boolean)value;
         }
         else if (index == 11)
         {
@@ -550,9 +550,9 @@ public class GXDLMSLimiter extends GXDLMSObject implements IGXDLMSBase
             Object[] tmp1 = (Object[])tmp[0];
             Object[] tmp2 = (Object[])tmp[1];
             ActionOverThreshold.setLogicalName(GXDLMSClient.changeType((byte[])tmp1[0], DataType.OCTET_STRING).toString());
-            ActionOverThreshold.setScriptSelector((int)(tmp1[1]));
+            ActionOverThreshold.setScriptSelector(((Number)(tmp1[1])).intValue());
             ActionUnderThreshold.setLogicalName(GXDLMSClient.changeType((byte[])tmp2[0], DataType.OCTET_STRING).toString());
-            ActionUnderThreshold.setScriptSelector((int)(tmp2[1]));
+            ActionUnderThreshold.setScriptSelector(((Number)(tmp2[1])).intValue());
         }
         else
         {

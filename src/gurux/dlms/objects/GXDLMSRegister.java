@@ -71,7 +71,7 @@ public GXDLMSRegister(ObjectType type, String ln, int sn)
     /**  
      Constructor.
 
-     @param ln Logican Name of the object.
+     @param ln Logical Name of the object.
     */
     public GXDLMSRegister(String ln)
     {
@@ -81,7 +81,7 @@ public GXDLMSRegister(ObjectType type, String ln, int sn)
     /**  
      Constructor.
 
-     @param ln Logican Name of the object.
+     @param ln Logical Name of the object.
      @param sn Short Name of the object.
     */
     public GXDLMSRegister(String ln, int sn)

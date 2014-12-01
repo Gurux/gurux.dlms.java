@@ -65,7 +65,7 @@ public class GXDLMSIECOpticalPortSetup extends GXDLMSObject implements IGXDLMSBa
     /**  
      Constructor.
 
-     @param ln Logican Name of the object.
+     @param ln Logical Name of the object.
     */
     public GXDLMSIECOpticalPortSetup(String ln)
     {
@@ -74,7 +74,7 @@ public class GXDLMSIECOpticalPortSetup extends GXDLMSObject implements IGXDLMSBa
 
     /**  
      Constructor.
-     @param ln Logican Name of the object.
+     @param ln Logical Name of the object.
      @param sn Short Name of the object.
     */
     public GXDLMSIECOpticalPortSetup(String ln, int sn)

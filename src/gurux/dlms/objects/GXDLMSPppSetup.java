@@ -102,7 +102,7 @@ public class GXDLMSPppSetup extends GXDLMSObject implements IGXDLMSBase
     /**  
      Constructor.
 
-     @param ln Logican Name of the object.
+     @param ln Logical Name of the object.
     */
     public GXDLMSPppSetup(String ln)
     {
@@ -112,7 +112,7 @@ public class GXDLMSPppSetup extends GXDLMSObject implements IGXDLMSBase
     /**  
      Constructor.
 
-     @param ln Logican Name of the object.
+     @param ln Logical Name of the object.
      @param sn Short Name of the object.
     */
     public GXDLMSPppSetup(String ln, int sn)
@@ -364,8 +364,8 @@ public class GXDLMSPppSetup extends GXDLMSObject implements IGXDLMSBase
                 for (Object item : (Object[])value)
                 {
                     GXDLMSPppSetupLcpOption it = new GXDLMSPppSetupLcpOption();
-                    it.setType(GXDLMSPppSetupLcpOptionType.forValue((int) Array.get(item, 0)));
-                    it.setLength((int)Array.get(item, 1));
+                    it.setType(GXDLMSPppSetupLcpOptionType.forValue(((Number) Array.get(item, 0)).intValue()));
+                    it.setLength(((Number)Array.get(item, 1)).intValue());
                     it.setData(Array.get(item, 2));
                     items.add(it);
                 }
@@ -380,8 +380,8 @@ public class GXDLMSPppSetup extends GXDLMSObject implements IGXDLMSBase
                 for (Object item : (Object[])value)
                 {
                     GXDLMSPppSetupIPCPOption it = new GXDLMSPppSetupIPCPOption();
-                    it.setType(GXDLMSPppSetupIPCPOptionType.forValue((int)Array.get(item, 0)));
-                    it.setLength((int)Array.get(item, 1));
+                    it.setType(GXDLMSPppSetupIPCPOptionType.forValue(((Number)Array.get(item, 0)).intValue()));
+                    it.setLength(((Number)Array.get(item, 1)).intValue());
                     it.setData(Array.get(item, 2));
                     items.add(it);
                 }

@@ -1082,7 +1082,7 @@ abstract public class GXDLMSServerBase
                 ObjectType[] type = new ObjectType[1];
                 int[] selector = new int[1];
                 getCommand(command[0], allData, type, names, tmp2, selector, value);
-                int sn = (int)names.get(0);
+                int sn = ((Number)names.get(0)).intValue();
                 for (Map.Entry<Integer, GXDLMSObject> it : SortedItems.entrySet())                    
                 {
                     int aCnt = ((IGXDLMSBase) it.getValue()).getAttributeCount();
@@ -1170,7 +1170,7 @@ abstract public class GXDLMSServerBase
                 ObjectType[] type = new ObjectType[1];
                 int[] selector = new int[1];
                 getCommand(command[0], allData, type, names, tmp2, selector, value);
-                int sn = (int)names.get(0);
+                int sn = ((Number)names.get(0)).intValue();
                 for (Map.Entry<Integer, GXDLMSObject> it : SortedItems.entrySet())
                 {
                     int aCnt = ((IGXDLMSBase) it.getValue()).getAttributeCount();

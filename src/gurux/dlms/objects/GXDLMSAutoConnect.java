@@ -66,7 +66,7 @@ public class GXDLMSAutoConnect extends GXDLMSObject implements IGXDLMSBase
     /**  
      Constructor.
 
-     @param ln Logican Name of the object.
+     @param ln Logical Name of the object.
     */
     public GXDLMSAutoConnect(String ln)
     {
@@ -76,7 +76,7 @@ public class GXDLMSAutoConnect extends GXDLMSObject implements IGXDLMSBase
     /**  
      Constructor.
 
-     @param ln Logican Name of the object.
+     @param ln Logical Name of the object.
      @param sn Short Name of the object.
     */
     public GXDLMSAutoConnect(String ln, int sn)

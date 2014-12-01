@@ -61,7 +61,7 @@ public class GXDLMSGprsSetup extends GXDLMSObject implements IGXDLMSBase
     /**  
      Constructor.
 
-     @param ln Logican Name of the object.
+     @param ln Logical Name of the object.
     */
     public GXDLMSGprsSetup(String ln)
     {
@@ -73,7 +73,7 @@ public class GXDLMSGprsSetup extends GXDLMSObject implements IGXDLMSBase
     /**  
      Constructor.
 
-     @param ln Logican Name of the object.
+     @param ln Logical Name of the object.
      @param sn Short Name of the object.
     */
     public GXDLMSGprsSetup(String ln, int sn)

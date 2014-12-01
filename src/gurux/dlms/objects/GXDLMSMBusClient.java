@@ -67,7 +67,7 @@ public class GXDLMSMBusClient extends GXDLMSObject implements IGXDLMSBase
     /**  
      Constructor.
 
-     @param ln Logican Name of the object.
+     @param ln Logical Name of the object.
     */
     public GXDLMSMBusClient(String ln)
     {
@@ -78,7 +78,7 @@ public class GXDLMSMBusClient extends GXDLMSObject implements IGXDLMSBase
     /**  
      Constructor.
 
-     @param ln Logican Name of the object.
+     @param ln Logical Name of the object.
      @param sn Short Name of the object.
     */
     public GXDLMSMBusClient(String ln, int sn)
@@ -425,39 +425,39 @@ public class GXDLMSMBusClient extends GXDLMSObject implements IGXDLMSBase
         }
         else if (index == 4)
         {
-            CapturePeriod = (long)value;
+            CapturePeriod = ((Number)value).longValue();
         }
         else if (index == 5)
         {
-            PrimaryAddress = (int)value;
+            PrimaryAddress = ((Number)value).intValue();
         }
         else if (index == 6)
         {
-            IdentificationNumber = (long)value;
+            IdentificationNumber = ((Number)value).longValue();
         }
         else if (index == 7)
         {
-            ManufacturerID = (int)value;
+            ManufacturerID = ((Number)value).intValue();
         }
         else if (index == 8)
         {
-            DataHeaderVersion = (int)value;
+            DataHeaderVersion = ((Number)value).intValue();
         }
         else if (index == 9)
         {
-            DeviceType = (int)value;
+            DeviceType = ((Number)value).intValue();
         }
         else if (index == 10)
         {
-            AccessNumber = (int)value;
+            AccessNumber = ((Number)value).intValue();
         }
         else if (index == 11)
         {
-            Status = (int)value;
+            Status = ((Number)value).intValue();
         }
         else if (index == 12)
         {
-            Alarm = (int)value;
+            Alarm = ((Number)value).intValue();
         }
         else
         {
