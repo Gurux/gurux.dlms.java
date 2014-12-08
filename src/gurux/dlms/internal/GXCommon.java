@@ -916,7 +916,7 @@ public class GXCommon
             }
             dt.setDaylightSavingsBegin(month == 0xFE);
             dt.setDaylightSavingsEnd(month == 0xFD);
-            if (month < 0 || month > 11)
+            if (month < 1 || month > 12)
             {
                 Skip.add(DateTimeSkips.MONTH);
                 month = 0;

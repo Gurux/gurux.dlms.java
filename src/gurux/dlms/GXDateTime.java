@@ -86,7 +86,7 @@ public class GXDateTime
         }
         DaylightSavingsBegin = month == 0xFE;
         DaylightSavingsEnd = month == 0xFD;
-        if (month < 0 || month > 11)
+        if (month < 1 || month > 12)
         {
             Skip.add(DateTimeSkips.MONTH);
             month = 0;
@@ -215,8 +215,8 @@ public class GXDateTime
         {               
             //Separate date and time parts.
             String[] tmp = sd.toPattern().split(" ");
-            List<String> date = new ArrayList();
-            List<String> time = new ArrayList();            
+            List<String> date = new ArrayList<String>();
+            List<String> time = new ArrayList<String>();            
             //Find date time separator.
             char separator = 0;
             for(char it : tmp[0].toCharArray())
