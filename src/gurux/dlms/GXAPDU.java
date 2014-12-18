@@ -274,7 +274,9 @@ class GXAPDU
                 tag = buff.get();
                 len = buff.get();
                 buff.get();
-                len = GXCommon.unsignedByteToInt(buff.get());                
+                len = GXCommon.unsignedByteToInt(buff.get());
+                password = new byte[len];
+                buff.get(password);
             }
             else if (tag == 0x8B || tag == 0x89) //Authentication.
             {
