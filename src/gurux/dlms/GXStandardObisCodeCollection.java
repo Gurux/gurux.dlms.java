@@ -62,6 +62,9 @@ class GXStandardObisCodeCollection extends java.util.ArrayList<GXStandardObisCod
     }
     public final GXStandardObisCode find(String ln, ObjectType objectType)
     {
+        if (objectType == null){
+            return null;
+        }
         return find(getBytes(ln), objectType.getValue());
     }
 

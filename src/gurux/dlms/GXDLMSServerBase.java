@@ -1382,7 +1382,8 @@ abstract public class GXDLMSServerBase
             GXCommon.setData(buff, type, data);
         }
         int index[] = new int[1];
-        return m_Base.splitToFrames(java.nio.ByteBuffer.wrap(buff.toByteArray()), 1, index, buff.size(), cmd, 0);
+        return m_Base.splitToFrames(java.nio.ByteBuffer.wrap(buff.toByteArray()),
+                1, index, buff.size(), cmd, 0, false);
     }
 
     /** 
@@ -1418,6 +1419,7 @@ abstract public class GXDLMSServerBase
             buff.put((byte) serviceErrorCode);
         }        
         int index[] = new int[1];
-        return m_Base.splitToFrames(buff, 1, index, buff.position(), cmd, serviceErrorCode);
+        return m_Base.splitToFrames(buff, 1, index, buff.position(), 
+                cmd, serviceErrorCode, false);
     }
 }

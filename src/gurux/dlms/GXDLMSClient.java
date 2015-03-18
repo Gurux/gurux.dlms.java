@@ -42,7 +42,6 @@ import gurux.dlms.enums.InterfaceType;
 import gurux.dlms.enums.DataType;
 import gurux.dlms.enums.Authentication;
 import gurux.dlms.enums.AccessMode;
-import gurux.dlms.enums.DateTimeSkips;
 import gurux.dlms.enums.Priority;
 import gurux.dlms.enums.ServiceClass;
 import gurux.dlms.manufacturersettings.GXObisCodeCollection;
@@ -128,7 +127,7 @@ public class GXDLMSClient
     }
 
     /** 
-     List of available obis codes.
+     List of available OBIS codes.
      This list is used when Association view is read from the meter and description of the object is needed.
      If collection is not set description of object is empty.
     */
@@ -651,7 +650,7 @@ public class GXDLMSClient
         }
         m_Base.frameSequence = -1;
         m_Base.expectedFrame = -1;
-        return m_Base.splitToBlocks(buff, Command.None);
+        return m_Base.splitToBlocks(buff, Command.None, false);
     }
 
     /** 
@@ -1395,6 +1394,35 @@ public class GXDLMSClient
         return m_Base.cacheData;
     }
 
+    /*
+     Update list values.
+    */
+    public void updateValues(List<AbstractMap.SimpleEntry<GXDLMSObject, Integer>> list, byte[] data)
+    {
+        Object value;    
+        DataType[] type = new DataType[]{DataType.NONE};
+        int[] read = new int[1], total = new int[1], 
+                index = new int[1], lastIndex = new int[1];
+        for(AbstractMap.SimpleEntry<GXDLMSObject, Integer> it : list)
+        {
+            type[0] = DataType.NONE;
+            if (index[0] != 0)
+            {
+                //Check status.
+                if (data[index[0]] != 0)
+                {
+                    throw new GXDLMSException(data[index[0]]);
+                }
+                //Skip status code.
+                ++index[0];
+            }
+            lastIndex[0] = 0;
+            value = GXCommon.getData(data, index, ActionType.NONE.getValue(), 
+                    total, read, type, lastIndex);
+            it.getKey().setValue(it.getValue(), value);
+        }            
+    }
+
     /** 
      TryGetValue try parse multirow value from byte array to variant.
 
@@ -1431,7 +1459,6 @@ public class GXDLMSClient
                     throw new RuntimeException("Cache data is not empty.");
                 }
             }
-            //Object value = GXCommon.GetData(data, ActionType.NONE, total, read, type, ref m_Base.CacheIndex);            
             int[] cachePosition = new int[] {m_Base.cacheIndex};
             Object value = GXCommon.getData(data, index, ActionType.NONE.getValue(), 
                     total, read, type, cachePosition);
@@ -1676,9 +1703,31 @@ public class GXDLMSClient
         }
         //Clear cache
         m_Base.clearProgress();
-        return m_Base.generateMessage(item.getName(), new byte[0], item.getObjectType(), attributeOrdinal, this.getUseLogicalNameReferencing() ? Command.GetRequest : Command.ReadRequest);
+        return m_Base.generateMessage(item.getName(), new byte[0], item.getObjectType(), attributeOrdinal, 
+            this.getUseLogicalNameReferencing() ? Command.GetRequest : Command.ReadRequest);
     }
 
+    /** 
+     Read list of COSEM objects.
+
+     @param list DLMS objects to read.
+     @return Read request as byte array.
+    */
+    public final byte[][] readList(List<AbstractMap.SimpleEntry<GXDLMSObject, Integer>> list)
+    {
+        if (list == null || list.isEmpty())
+        {
+            throw new RuntimeException("Invalid parameter.");
+        }
+        if (getUseLogicalNameReferencing() && list.size() > 10)
+        {
+            throw new RuntimeException("Max 10 items can be read at the time.");
+        }
+        //Clear cache
+        m_Base.clearProgress();
+        return m_Base.generateMessage(list, new byte[0], ObjectType.NONE, 0, 
+            this.getUseLogicalNameReferencing() ? Command.GetRequest : Command.ReadRequest);
+    }
     /** 
      Generates the keep alive message. 
 

@@ -63,7 +63,6 @@ public class GXDLMSImageTransfer extends GXDLMSObject implements IGXDLMSBase
 
     /**  
      Constructor.
-     @param ln Logical Name of the object.
     */
     public GXDLMSImageTransfer()
     {

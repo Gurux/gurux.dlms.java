@@ -138,26 +138,28 @@ public class GXDLMSLNSettings
     */
     public final boolean getGet()
     {
-        return GXCommon.getBits(conformanceBlock[2], 0x8);
+        return GXCommon.getBits(conformanceBlock[2], 0x10);
     }
     public final void setGet(boolean value)
     {
-        conformanceBlock[2] = GXCommon.setBits(conformanceBlock[2], 0x8, value);
+        conformanceBlock[2] = GXCommon.setBits(conformanceBlock[2], 0x10, value);
     }
-
 
     /** 
      Checks, if data can be written to the server.
     */
     public final boolean getSet()
     {
-        return GXCommon.getBits(conformanceBlock[2], 0x4);
+        return GXCommon.getBits(conformanceBlock[2], 0x8);
     }
     public final void setSet(boolean value)
     {
-        conformanceBlock[2] = GXCommon.setBits(conformanceBlock[2], 0x4, value);
+        conformanceBlock[2] = GXCommon.setBits(conformanceBlock[2], 0x8, value);
     }
 
+	/*
+	 Can client call actions.
+	*/
     public final boolean getAction()
     {
         return GXCommon.getBits(conformanceBlock[2], 0x2);
@@ -181,10 +183,10 @@ public class GXDLMSLNSettings
     */
     public final boolean getSelectiveAccess()
     {
-        return GXCommon.getBits(conformanceBlock[2], 0x80);
+        return GXCommon.getBits(conformanceBlock[2], 0x4);
     }
     public final void setSelectiveAccess(boolean value)
     {
-        conformanceBlock[2] = GXCommon.setBits(conformanceBlock[2], 0x80, value);
+        conformanceBlock[2] = GXCommon.setBits(conformanceBlock[2], 0x4, value);
     }
 }

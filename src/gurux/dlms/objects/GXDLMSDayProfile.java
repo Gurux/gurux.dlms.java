@@ -59,7 +59,7 @@ public class GXDLMSDayProfile
     }
 
     /** 
-     User defined identifier, identifying the currentday_profile.
+     User defined identifier, identifying the current day_profile.
     */
     public final int getDayId()
     {

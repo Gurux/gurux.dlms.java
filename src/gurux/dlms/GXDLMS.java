@@ -48,9 +48,12 @@ import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.UnsupportedEncodingException;
 import java.lang.reflect.Array;
+import java.util.AbstractMap;
 import java.util.Arrays;
 import java.util.EnumSet;
+import java.util.List;
 import java.util.Random;
+import static javax.management.Query.in;
 
 /** 
  GXDLMS implements methods to communicate with DLMS/COSEM metering devices.
@@ -474,7 +477,7 @@ class GXDLMS
 
      Referencing depends on the device to communicate with.
      Normally, a device supports only either Logical or Short name referencing.
-     The referencing is defined by the device manufacurer.
+     The referencing is defined by the device manufacturer.
      If the referencing is wrong, the SNMR message will fail.
     */
     public final boolean getUseLogicalNameReferencing()
@@ -495,6 +498,7 @@ class GXDLMS
         {
             throw new GXDLMSException("Invalid arguement.");
         }
+        boolean asList = false;
         java.nio.ByteBuffer buff;
         if (name instanceof byte[])
         {
@@ -509,74 +513,112 @@ class GXDLMS
             else if (getUseLogicalNameReferencing())
             {
                 //Interface class.
-                int len = data == null ? 0 : data.length;
-                buff = java.nio.ByteBuffer.allocate(20 + len);
+                int len = data == null ? 0 : data.length;                
                 if (cmd == Command.GetRequest || cmd == Command.SetRequest || cmd == Command.MethodRequest)
                 {
-                    buff.putShort((short) interfaceClass.getValue());
-                    //Add LN
-                    String[] items = ((String)name).split("[.]", -1);
-                    if (items.length != 6)
-                    {
-                        throw new GXDLMSException("Invalid Logical Name.");
-                    }
-                    for (String it : items)
-                    {
-                        buff.put((byte) (Short.parseShort(it) & 0xFF));
-                    }
-                    buff.put((byte) AttributeOrdinal);
-                    //Items count
-                    if (data == null || data.length == 0 || cmd == Command.SetRequest)
-                    {
-                        buff.put((byte)0);                     
+                    if (name instanceof List)
+                    {                        
+                        asList = true;
+                        List<AbstractMap.SimpleEntry<GXDLMSObject, Integer>> tmp = 
+                                (List<AbstractMap.SimpleEntry<GXDLMSObject, Integer>>)name;
+                        buff = java.nio.ByteBuffer.allocate(20 + len + tmp.size() * 10);
+                        //Item count
+                        buff.put((byte)tmp.size());
+                        for(AbstractMap.SimpleEntry<GXDLMSObject, Integer> it : tmp)
+                        {
+                            //Interface class.
+                            GXCommon.setUInt16((short) it.getKey().getObjectType().getValue(), buff);
+                            //Add LN
+                            String[] items = it.getKey().getLogicalName().split("[.]");
+                            if (items.length != 6)
+                            {
+                                throw new GXDLMSException("Invalid Logical Name.");
+                            }
+                            for(String it2 : items)
+                            {
+                                buff.put(Integer.valueOf(it2).byteValue());
+                            }
+                            buff.put(it.getValue().byteValue());
+                            //Add Access type.
+                            buff.put((byte) 0);
+                        }
                     }
                     else
                     {
-                        buff.put((byte)1); //Items count                    
+                        buff = java.nio.ByteBuffer.allocate(20 + len);
+                        buff.putShort((short) interfaceClass.getValue());
+                        //Add LN
+                        String[] items = ((String)name).split("[.]", -1);
+                        if (items.length != 6)
+                        {
+                            throw new GXDLMSException("Invalid Logical Name.");
+                        }
+                        for (String it : items)
+                        {
+                            buff.put((byte) (Short.parseShort(it) & 0xFF));
+                        }
+                        buff.put((byte) AttributeOrdinal);
+                        //Items count
+                        if (data == null || data.length == 0 || cmd == Command.SetRequest)
+                        {
+                            buff.put((byte)0);                     
+                        }
+                        else
+                        {
+                            buff.put((byte)1); //Items count                    
+                        }
                     }
+                }
+                else
+                {
+                    buff = java.nio.ByteBuffer.allocate(20 + len);
                 }
             }
             else
             {
-                int len = data == null ? 0 : data.length;
-                buff = java.nio.ByteBuffer.allocate(11 + len);
-                //Add name count.
-                if (name.getClass().isArray())
-                {
-                    for (int pos = 0; pos != Array.getLength(name); ++pos)
+                int len = data == null ? 0 : data.length;                
+                if (name instanceof List)
+                {                    
+                    List<AbstractMap.SimpleEntry<GXDLMSObject, Integer>> tmp = 
+                                (List<AbstractMap.SimpleEntry<GXDLMSObject, Integer>>)name;
+                    buff = java.nio.ByteBuffer.allocate(10 + tmp.size() * 3);
+                    //Item count
+                    buff.put((byte) tmp.size());
+                    for(AbstractMap.SimpleEntry<GXDLMSObject, Integer> it : tmp)
                     {
-                        Object it = Array.get(name, pos);
-                        buff.put((byte) 2);
-                        int base_address = ((Number)it).shortValue() & 0xFFFF;
-                        base_address += ((AttributeOrdinal - 1) * 8);
+                        //Size
+                        buff.put((byte)2);
+                        int base_address = it.getKey().getShortName();
+                        base_address += ((it.getValue() - 1) * 8);
+                        GXCommon.setUInt16((short) base_address, buff);
+                    }
+                }
+                else
+                {
+                    buff = java.nio.ByteBuffer.allocate(11 + len);
+                    buff.put((byte) 1);                
+                    if (cmd == Command.ReadResponse || cmd == Command.WriteResponse)
+                    {
+                        buff.put((byte) 0x0);
+                    }
+                    else
+                    {
+                        if (data == null || data.length == 0)
+                        {
+                            buff.put((byte) 2);
+                        }
+                        else //if Parameterised Access
+                        {
+                            buff.put((byte) 4);
+                        }  
+                        int base_address = GXCommon.intValue(name);
+                        //AttributeOrdinal is count already for action.
+                        if (AttributeOrdinal != 0)
+                        {
+                            base_address += ((AttributeOrdinal - 1) * 8);
+                        }
                         buff.putShort((short) base_address);
                     }
-                }
-                else
-                {
-                    buff.put((byte) 1);
-                }
-                if (cmd == Command.ReadResponse || cmd == Command.WriteResponse)
-                {
-                    buff.put((byte) 0x0);
-                }
-                else
-                {
-                    if (data == null || data.length == 0)
-                    {
-                        buff.put((byte) 2);
-                    }
-                    else //if Parameterised Access
-                    {
-                        buff.put((byte) 4);
-                    }  
-                    int base_address = GXCommon.intValue(name);
-                    //AttributeOrdinal is count already for action.
-                    if (AttributeOrdinal != 0)
-                    {
-                        base_address += ((AttributeOrdinal - 1) * 8);
-                    }
-                    buff.putShort((short) base_address);
                 }
             }
             if (data != null && data.length != 0)
@@ -584,7 +626,7 @@ class GXDLMS
                 buff.put(data);
             }
         }
-        return splitToBlocks(buff, cmd);
+        return splitToBlocks(buff, cmd, asList);
     }
 
     /** 
@@ -714,6 +756,41 @@ class GXDLMS
         int[] error = new int[1];
         try
         {
+            if (getInterfaceType() == InterfaceType.GENERAL)
+            {
+                if (data.length < 5)
+                {
+                    return false;
+                }
+                boolean compleate = false;
+                //Find start of HDLC frame.
+                for (int index = 0; index < data.length; ++index)
+                {
+                    if (data[index] == GXCommon.HDLCFrameStartEnd)
+                    {
+                        if (2 + data[index + 2] <= data.length)
+                        {
+                            compleate = true;                                
+                        }
+                        break;
+                    }
+                }
+                if (!compleate)
+                {
+                    return false;
+                }
+            }
+            else if (getInterfaceType() == InterfaceType.NET)
+            {
+                if (data.length < 6)
+                {
+                    return false;
+                }
+            }
+            else
+            {
+                throw new Exception("Unknown interface type.");
+            }
             boolean[] packetFull = new boolean[1], wrongCrc = new boolean[1];
             int[] command = new int[1];
             getDataFromFrame(java.nio.ByteBuffer.wrap(data), null, frame, true, 
@@ -923,7 +1000,8 @@ class GXDLMS
     }   
 
     public byte[][] splitToFrames(java.nio.ByteBuffer packet, int blockIndex, 
-                        int[] index, int count, Command cmd, int resultChoice)
+                        int[] index, int count, Command cmd, int resultChoice,
+                        boolean asList)
     {
         ByteArrayOutputStream tmp = new ByteArrayOutputStream();
         if (this.getInterfaceType() == InterfaceType.GENERAL  &&
@@ -950,7 +1028,12 @@ class GXDLMS
             boolean moreBlocks = packet.limit() > getMaxReceivePDUSize() && packet.limit() > index[0] + count;
             //Command, multiple blocks and Invoke ID and priority.
             tmp.write(cmd.getValue());
-            tmp.write((byte)(moreBlocks ? 2 : 1));
+            if (asList){
+                tmp.write((byte)3);
+            }
+            else{
+                tmp.write((byte)(moreBlocks ? 2 : 1));
+            }
             tmp.write(getInvokeIDPriority());
             if (getServer())
             {
@@ -1114,7 +1197,7 @@ class GXDLMS
      @param packet Packet to send.
      @return Array of byte arrays that are sent to device.
     */
-    public final byte[][] splitToBlocks(java.nio.ByteBuffer packet, Command cmd)
+    public final byte[][] splitToBlocks(java.nio.ByteBuffer packet, Command cmd, boolean asList)
     {
         int[] index = new int[1];
         int len = packet.position();
@@ -1122,7 +1205,7 @@ class GXDLMS
         packet.position(0);
         if (!getUseLogicalNameReferencing()) //SN
         {            
-            return splitToFrames(packet, 0, index, len, cmd, 0);
+            return splitToFrames(packet, 0, index, len, cmd, 0, asList);
         }
         //If LN
         //Split to Blocks.
@@ -1132,7 +1215,7 @@ class GXDLMS
         do
         {
             byte[][] frames = splitToFrames(packet, ++blockIndex, index, 
-                    getMaxReceivePDUSize(), cmd, 0);
+                    getMaxReceivePDUSize(), cmd, 0, asList);
             buff.addAll(Arrays.asList(frames));
             if (frames.length != 1)
             {
