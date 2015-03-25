@@ -86,7 +86,7 @@ public GXDLMSRegister(ObjectType type, String ln, int sn)
     */
     public GXDLMSRegister(String ln, int sn)
     {
-        this(ObjectType.REGISTER, ln, 0);
+        this(ObjectType.REGISTER, ln, sn);
     }
 
     /** 
