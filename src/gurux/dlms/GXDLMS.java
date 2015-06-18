@@ -603,7 +603,7 @@ class GXDLMS
                     }
                     else
                     {
-                        if (data == null || data.length == 0)
+                        if (cmd == Command.WriteRequest || data == null || data.length == 0)
                         {
                             buff.put((byte) 2);
                         }
@@ -623,6 +623,10 @@ class GXDLMS
             }
             if (data != null && data.length != 0)
             {
+                if (cmd == Command.WriteRequest)
+                {
+                    buff.put((byte) 1);
+                }
                 buff.put(data);
             }
         }
@@ -764,7 +768,7 @@ class GXDLMS
                 }
                 boolean compleate = false;
                 //Find start of HDLC frame.
-                for (int index = 0; index < data.length; ++index)
+                for (int index = 0; index < data.length - 2; ++index)
                 {
                     if (data[index] == GXCommon.HDLCFrameStartEnd)
                     {
@@ -1309,7 +1313,7 @@ class GXDLMS
     public final Object[][] checkReplyErrors(byte[] sendData, byte[] receivedData) throws Exception
     {
         boolean ret = true;
-        if (sendData != null)
+        if (sendData != null && sendData.length != 0)
         {
             ret = isReplyPacket(sendData, receivedData);
         }
@@ -1332,7 +1336,7 @@ class GXDLMS
         byte[] frame = new byte[1];
         boolean[] packetFull = new boolean[1], wrongCrc = new boolean[1];
         int[] command = new int[1];
-        if (sendData != null)
+        if (sendData != null && sendData.length != 0)
         {            
             getDataFromFrame(java.nio.ByteBuffer.wrap(sendData), null, frame, 
                     false, err, false, packetFull, wrongCrc, command);
@@ -1878,8 +1882,9 @@ class GXDLMS
             if (frame[0] == FrameType.SNRM.getValue() || frame[0] == FrameType.Disconnect.getValue())
             {
                 //Check that CRC match.
+                buff.position(PacketStartID + FrameLen - 1);                
                 int crcRead = buff.getShort() & 0xFFFF;
-                int crcCount = GXFCS16.countFCS16(buff, PacketStartID + 1, len - PacketStartID - 4);
+                int crcCount = GXFCS16.countFCS16(buff, PacketStartID + 1, FrameLen - PacketStartID - 2);
                 if (crcRead != crcCount)
                 {
                     packetFull[0] = false;
@@ -1912,8 +1917,8 @@ class GXDLMS
                     System.out.println("Wrong header CRC.");
                 }
                 //Check that CRC match.
-                crcCount = GXFCS16.countFCS16(buff, PacketStartID + 1, len - PacketStartID - 4);
-                crcRead = buff.getShort(len - 3) & 0xFFFF;
+                crcCount = GXFCS16.countFCS16(buff, PacketStartID + 1, FrameLen - PacketStartID - 2);
+                crcRead = buff.getShort(FrameLen - 1) & 0xFFFF;
                 if (crcRead != crcCount)
                 {
                     System.out.println(GXCommon.toHex(buff.array()));
@@ -1987,7 +1992,9 @@ class GXDLMS
                 else if (data != null)
                 {   
                     int index = buff.position();
-                    data.write(buff.array(), index, buff.limit() - index - 3);                       
+                    data.write(buff.array(), index, FrameLen + PacketStartID - index - 1);
+                    //len = FrameLen + PacketStartID - 1;
+                    //data.write(buff.array(), index, buff.limit() - index - 3);                       
                 }
             }
         }

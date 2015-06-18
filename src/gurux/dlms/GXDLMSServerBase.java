@@ -743,14 +743,7 @@ abstract public class GXDLMSServerBase
         m_Base.expectedFrame = 0;
         m_Base.frameSequence = -1;
         return m_Base.addFrame(m_Base.generateIFrame(), false, buff, 0, buff.position());
-    }
-
-    private void setValue(java.nio.ByteBuffer buff, Object data) throws Exception
-    {
-        byte[] tmp = GXCommon.getAsByteArray(data);
-        buff.put((byte)tmp.length);
-        buff.put(tmp);
-    }
+    }    
 
     /** 
      Parse SNRM Request.
@@ -767,13 +760,13 @@ abstract public class GXDLMSServerBase
         buff.put((byte) 0x80); //GroupID
         buff.put((byte) 0); //len
         buff.put(HDLCInfo.MaxInfoTX);
-        setValue(buff, getLimits().getMaxInfoTX());
+        GXDLMSLimits.setValue(buff, getLimits().getMaxInfoTX());
         buff.put(HDLCInfo.MaxInfoRX);
-        setValue(buff, getLimits().getMaxInfoRX());
+        GXDLMSLimits.setValue(buff, getLimits().getMaxInfoRX());
         buff.put(HDLCInfo.WindowSizeTX);
-        setValue(buff, getLimits().getWindowSizeTX());
+        GXDLMSLimits.setValue(buff, getLimits().getWindowSizeTX());
         buff.put(HDLCInfo.WindowSizeRX);
-        setValue(buff, getLimits().getWindowSizeRX());
+        GXDLMSLimits.setValue(buff, getLimits().getWindowSizeRX());
         int len = (byte)buff.position() - 3;
         buff.put(2, (byte) len); //len
         return m_Base.addFrame((byte)FrameType.UA.getValue(), false, buff, 0, buff.position());
@@ -796,13 +789,13 @@ abstract public class GXDLMSServerBase
         buff.put((byte) 0x80); //GroupID
         buff.put((byte) 0); //len        
         buff.put((byte)HDLCInfo.MaxInfoTX);
-        setValue(buff, getLimits().getMaxInfoTX());
+        GXDLMSLimits.setValue(buff, getLimits().getMaxInfoTX());
         buff.put((byte)HDLCInfo.MaxInfoRX);
-        setValue(buff, getLimits().getMaxInfoRX());
+        GXDLMSLimits.setValue(buff, getLimits().getMaxInfoRX());
         buff.put((byte)HDLCInfo.WindowSizeTX);
-        setValue(buff, getLimits().getWindowSizeTX());
+        GXDLMSLimits.setValue(buff, getLimits().getWindowSizeTX());
         buff.put((byte)HDLCInfo.WindowSizeRX);
-        setValue(buff, getLimits().getWindowSizeRX());
+        GXDLMSLimits.setValue(buff, getLimits().getWindowSizeRX());
         byte len = (byte) (buff.position() - 3);
         buff.put(2, len); //len
         return m_Base.addFrame(FrameType.UA.getValue(), false, buff, 0, buff.position());

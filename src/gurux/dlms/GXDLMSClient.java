@@ -55,6 +55,7 @@ import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.UnsupportedEncodingException;
+import java.nio.ByteBuffer;
 import java.text.ParseException;
 import java.util.AbstractMap;
 import java.util.ArrayList;
@@ -526,7 +527,38 @@ public class GXDLMSClient
         {
             return new byte[0];
         }
-        return m_Base.addFrame(FrameType.SNRM.getValue(), false, (byte[]) null, 0, 0);
+        ByteBuffer tmp = ByteBuffer.allocate(50); 
+        tmp.put((byte)0x81); //FromatID
+        tmp.put((byte) 0x80); //GroupID
+        tmp.put((byte) 0); //len
+
+        //If custom HDLC parameters are used.
+        if (!GXDLMSLimits.DefaultMaxInfoTX.equals(this.getLimits().getMaxInfoTX())){
+            tmp.put((byte) HDLCInfo.MaxInfoTX);
+            GXDLMSLimits.setValue(tmp, getLimits().getMaxInfoTX());
+        }
+        if (!GXDLMSLimits.DefaultMaxInfoRX.equals(this.getLimits().getMaxInfoRX())){
+            tmp.put((byte) HDLCInfo.MaxInfoRX);
+            GXDLMSLimits.setValue(tmp, getLimits().getMaxInfoRX());
+        }
+        if (!GXDLMSLimits.DefaultWindowSizeTX.equals(this.getLimits().getWindowSizeTX())){
+            tmp.put((byte) HDLCInfo.WindowSizeTX);
+            GXDLMSLimits.setValue(tmp, getLimits().getWindowSizeTX());
+        }
+        if (!GXDLMSLimits.DefaultWindowSizeTX.equals(this.getLimits().getWindowSizeRX())){   
+            tmp.put((byte) HDLCInfo.WindowSizeRX);
+            GXDLMSLimits.setValue(tmp, getLimits().getWindowSizeRX());                
+        }
+        //If default HDLC parameters are not used.
+        int cnt = 0;
+        byte[] data = null;
+        if (tmp.position() != 3){
+            byte len = (byte)tmp.position();            
+            tmp.put(2, (byte)(len - 3)); //len
+            cnt = tmp.position();
+            data = tmp.array();
+        }
+        return m_Base.addFrame(FrameType.SNRM.getValue(), false, data, 0, cnt);
     }
 
     /** 
@@ -557,44 +589,45 @@ public class GXDLMSClient
         {
             throw new GXDLMSException("Not a UA response :" + frame[0]);
         }
-        arr.get(); //Skip FromatID
-        arr.get(); //Skip Group ID.
-        arr.get(); //Skip Group len
-        Object val;
-        while (arr.position() < arr.limit())
-        {
-            int id = arr.get();
-            byte len = arr.get();
-            switch (len)
-            {
-                case 1:
-                    val = (short) arr.get() & 0xFF;
-                    break;
-                case 2:
-                    val = (int) arr.getShort() & 0xFFFF;
-                    break;
-                case 4:
-                    val = (long) arr.getInt() & 0xFFFFFFFF;
-                    break;
-                default:
-                    throw new GXDLMSException("Invalid Exception.");
-            }
-            switch (id)
-            {
-                case HDLCInfo.MaxInfoTX:
-                    getLimits().setMaxInfoTX(val);
-                    break;
-                case HDLCInfo.MaxInfoRX:
-                    getLimits().setMaxInfoRX(val);
-                    break;
-                case HDLCInfo.WindowSizeTX:
-                    getLimits().setWindowSizeTX(val);
-                    break;
-                case HDLCInfo.WindowSizeRX:
-                    getLimits().setWindowSizeRX(val);
-                    break;
-                default:
-                    throw new GXDLMSException("Invalid UA response.");
+        if (arr.limit() > 3){
+            arr.get(); //Skip FromatID
+            arr.get(); //Skip Group ID.
+            arr.get(); //Skip Group len
+            Object val;
+            while (arr.position() < arr.limit()){
+                int id = arr.get();
+                byte len = arr.get();
+                
+                switch (len){
+                    case 1:
+                        val = (short) arr.get() & 0xFF;
+                        break;
+                    case 2:
+                        val = (int) arr.getShort() & 0xFFFF;
+                        break;
+                    case 4:
+                        val = (long) arr.getInt() & 0xFFFFFFFF;
+                        break;
+                    default:
+                        throw new GXDLMSException("Invalid Exception.");
+                }
+                
+                switch (id){
+                    case HDLCInfo.MaxInfoTX:
+                        getLimits().setMaxInfoTX(val);
+                        break;
+                    case HDLCInfo.MaxInfoRX:
+                        getLimits().setMaxInfoRX(val);
+                        break;
+                    case HDLCInfo.WindowSizeTX:
+                        getLimits().setWindowSizeTX(val);
+                        break;
+                    case HDLCInfo.WindowSizeRX:
+                        getLimits().setWindowSizeRX(val);
+                        break;
+                    default:
+                        throw new GXDLMSException("Invalid UA response.");
+                }
             }
         }
     }

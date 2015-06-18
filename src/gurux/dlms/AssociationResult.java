@@ -53,7 +53,7 @@ enum AssociationResult
     */
     TRANSIENT_REJECTED(2);
 
-    private int intValue;
+    private final int intValue;
     private static java.util.HashMap<Integer, AssociationResult> mappings;
     private static java.util.HashMap<Integer, AssociationResult> getMappings()
     {

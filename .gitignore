@@ -28,6 +28,8 @@ local.properties
 # PDT-specific
 .buildpath
 
+build.xml
+nbproject/private
 
 #################
 ## Visual Studio
@@ -215,3 +217,4 @@ pip-log.txt
 
 #Mr Developer
 .mr.developer.cfg
+nbproject/private/private.properties

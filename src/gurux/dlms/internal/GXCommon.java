@@ -49,6 +49,8 @@ import java.text.SimpleDateFormat;
 import java.util.Calendar;
 import java.util.Date;
 import java.util.EnumSet;
+import java.util.GregorianCalendar;
+import java.util.TimeZone;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
@@ -956,17 +958,26 @@ public class GXCommon
                 Skip.add(DateTimeSkips.MILLISECOND);
                 ms = 0;
             }          
-            java.util.Calendar tm;
+            java.util.Calendar tm = java.util.Calendar.getInstance();
             if ((deviation & 0xFFFF) != 0x8000)
             {
-                tm = java.util.Calendar.getInstance(java.util.TimeZone.getTimeZone("UTC"));            
-                tm.add(java.util.Calendar.MINUTE, deviation);                                            
+                short tmp = (short) -(tm.getTimeZone().getOffset(tm.getTime().getTime()) / 60000);
+                deviation = tmp - deviation;
+                if (deviation != 0){
+                  java.util.Calendar utc = java.util.Calendar.getInstance(java.util.TimeZone.getTimeZone("UTC"));
+                    tm.set(year, month, day, hour, minute, second);
+                    utc.add(java.util.Calendar.MINUTE, deviation);                    
+                    tm.setTimeInMillis(utc.getTimeInMillis());
+                }
+                else
+                {
+                    tm.set(year, month, day, hour, minute, second);
+                }
             }
             else
-            {
-                tm = java.util.Calendar.getInstance();
-            }            
-            tm.set(year, month, day, hour, minute, second);       
+            {                
+                tm.set(year, month, day, hour, minute, second);
+            }                        
             if (ms != 0)
             {
                 tm.set(Calendar.MILLISECOND, ms);
@@ -1266,6 +1277,7 @@ public class GXCommon
             else if (type == DataType.DATETIME)
             {
                 GXDateTime dt;
+                java.util.Calendar tm = null;
                 if (value instanceof GXDateTime)
                 {
                     dt = (GXDateTime) value;
@@ -1276,7 +1288,8 @@ public class GXCommon
                 }
                 else if(value instanceof java.util.Calendar)
                 {
-                    dt = new GXDateTime(((java.util.Calendar) value).getTime());
+                    tm = (java.util.Calendar) value;
+                    dt = new GXDateTime(tm.getTime());
                 }
                 else if (value instanceof String)
                 {
@@ -1294,9 +1307,12 @@ public class GXCommon
                 {
                     throw new RuntimeException("Invalid date format.");
                 }
+                if (tm == null)
+                {
+                    tm = java.util.Calendar.getInstance();
+                }
                 //Add size
                 buff.write(12);
-                java.util.Calendar tm = java.util.Calendar.getInstance();
                 tm.setTime(dt.getValue());
  
                 //Add year.

@@ -60,7 +60,7 @@ public enum Command
     GloMethodRequest(0xCB),
     GloMethodResponse(0xCF);
 
-    private int intValue;
+    private final int intValue;
     private static java.util.HashMap<Integer, Command> mappings;
     private static java.util.HashMap<Integer, Command> getMappings()
     {

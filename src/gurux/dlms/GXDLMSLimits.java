@@ -34,12 +34,33 @@
 
 package gurux.dlms;
 
+import gurux.dlms.internal.GXCommon;
+import java.lang.reflect.Array;
+import java.util.List;
+
 /** 
  GXDLMSLimits contains commands for retrieving and setting the limits of 
  field length and window size, when communicating with the server. 
 */
 public class GXDLMSLimits
 {
+    static final Object DefaultMaxInfoRX = (byte)128;        
+    static final Object DefaultMaxInfoTX = (byte)128;
+    static final Object DefaultWindowSizeRX = (byte)1;
+    static final Object DefaultWindowSizeTX = (byte)1;
+
+    static void setValue(java.nio.ByteBuffer buff, Object data)
+    {
+        try{
+            byte[] tmp = GXCommon.getAsByteArray(data);
+            buff.put((byte)tmp.length);
+            buff.put(tmp);    
+        }
+        catch(Exception ex){
+            throw new RuntimeException(ex.getMessage());
+        }        
+    }
+         
     private Object MaxInfoTX;
     private Object MaxInfoRX;        
     private Object WindowSizeTX;

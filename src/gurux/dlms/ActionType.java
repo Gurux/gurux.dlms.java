@@ -43,7 +43,7 @@ enum ActionType
     INDEX(1),
     COUNT(2);
 
-    private int intValue;
+    private final int intValue;
     private static java.util.HashMap<Integer, ActionType> mappings;
     private static java.util.HashMap<Integer, ActionType> getMappings()
     {
