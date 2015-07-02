@@ -372,47 +372,34 @@ public class GXCommon
     */
     public static void setObjectCount(int count, ByteArrayOutputStream buff)            
     {
-        if (count > 0x7F)
+        if (count < 0x80)
         {
-            int cnt = 0;
-            while (count >> (7 * ++cnt) > 0)
-            {
-                
-            }
-            buff.write((byte)(0x80 + cnt));
-            java.nio.ByteBuffer tmp = null;
-            if(cnt == 2)
-            {
-                tmp = java.nio.ByteBuffer.allocate(2);
-                tmp.putShort((short)count);
-            }
-            else if(cnt == 3)
-            {
-                tmp = java.nio.ByteBuffer.allocate(3);
-                tmp.put((byte)(count >> 16));
-                tmp.put((byte)((count >> 8) & 0xFF));
-                tmp.put((byte) (count & 0xFF));
-            }
-            else if(cnt == 4)
-            {
-                tmp = java.nio.ByteBuffer.allocate(4);
-                tmp.putInt((int)count);
-            }
-            else
-            {
-                throw new RuntimeException("Invalid object count size.");
-            }
-            try
-            {
-                buff.write(tmp.array());
-            }
-            catch (IOException ex)
-            {
-                throw new RuntimeException(ex.getMessage());
-            }
+        	buff.write(count);
+        }
+        else if (count < 0x100)
+        {
+        	buff.write(0x81);
+        	buff.write(count);
+        }
+        else if (count < 0x10000)
+        {
+        	buff.write(0x82);
+        	buff.write(count >> 8);
+        	buff.write(count);
+        }
+        else if (count < 0x1000000)
+        {
+        	buff.write(0x83);
+        	buff.write(count >> 16);
+        	buff.write(count >> 8);
+        	buff.write(count);
         }
         else
         {
+        	buff.write(0x84);
+        	buff.write(count >> 24);
+            buff.write(count >> 16);
+            buff.write(count >> 8);
             buff.write(count);
         }
     }
@@ -425,28 +412,36 @@ public class GXCommon
     */
     public static void setObjectCount(int count, java.nio.ByteBuffer buff)
     {
-        if (count > 0x7F)
-        {
-            int cnt = 0;
-            while (count >> (7 * ++cnt) > 0)
-            {
-            }
-            buff.put((byte)(0x80 + cnt));
-            java.nio.ByteBuffer tmp = java.nio.ByteBuffer.allocate(1);
-            if(cnt == 2)
-            {
-                tmp.putShort((short)count);
-            }
-            else if(cnt == 4)
-            {
-                tmp.putInt((int)count);
-            }
-            buff.put(tmp);
-        }
-        else
-        {
+    	 if (count < 0x80)
+         {
+    		 buff.put((byte) count);
+         }
+         else if (count < 0x100)
+         {
+        	 buff.put((byte) 0x81);
+         	 buff.put((byte) count);
+         }
+         else if (count < 0x10000)
+         {
+        	 buff.put((byte) 0x82);
+        	 buff.put((byte)(count >> 8));
+        	 buff.put((byte)count);
+         }
+         else if (count < 0x1000000)
+         {
+        	buff.put((byte)(0x83));
+        	buff.put((byte)(count >> 16));
+         	buff.put((byte)(count >> 8));
+         	buff.put((byte)count);
+         }
+         else
+         {
+        	buff.put((byte)0x84);
+         	buff.put((byte)(count >> 24));
+         	buff.put((byte)(count >> 16));
+            buff.put((byte)(count >> 8));
             buff.put((byte)count);
-        }
+         }       
     }
 
     /** 

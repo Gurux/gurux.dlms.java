@@ -191,14 +191,9 @@ public class GXDLMSProfileGeneric extends GXDLMSObject implements IGXDLMSBase
     /** 
      Captured Objects.
     */
-    public final GXDLMSObject[] getCaptureObjects()
+    public final List<AbstractMap.SimpleEntry<GXDLMSObject, GXDLMSCaptureObject>> getCaptureObjects()
     {
-        List<GXDLMSObject> objects = new ArrayList<GXDLMSObject>();
-        for(AbstractMap.SimpleEntry<GXDLMSObject, GXDLMSCaptureObject> it : m_CaptureObjects)
-        {
-            objects.add(it.getKey());
-        }
-        return objects.toArray(new GXDLMSObject[objects.size()]);
+        return m_CaptureObjects;
     }
 
     /** 
@@ -373,21 +368,21 @@ public class GXDLMSProfileGeneric extends GXDLMSObject implements IGXDLMSBase
     {
         try
         {
-            int cnt = m_CaptureObjects.size();        
-            java.nio.ByteBuffer data = java.nio.ByteBuffer.allocate((18 * cnt) + 10);
-            data.put((byte)DataType.ARRAY.getValue());
+            int cnt = m_CaptureObjects.size();  
+            ByteArrayOutputStream data = new ByteArrayOutputStream();
+            data.write(DataType.ARRAY.getValue());
             //Add count
             GXCommon.setObjectCount(cnt, data);            
             for (AbstractMap.SimpleEntry<GXDLMSObject, GXDLMSCaptureObject> it : m_CaptureObjects)
             {
-                data.put((byte) DataType.STRUCTURE.getValue());
-                data.put((byte) 4); //Count
+                data.write(DataType.STRUCTURE.getValue());
+                data.write(4); //Count
                 GXCommon.setData(data, DataType.UINT16, it.getKey().getObjectType().getValue()); //ClassID
                 GXCommon.setData(data, DataType.OCTET_STRING, it.getKey().getLogicalName()); //LN
                 GXCommon.setData(data, DataType.INT8, it.getValue().getAttributeIndex()); //Attribute Index
                 GXCommon.setData(data, DataType.UINT16, it.getValue().getDataIndex()); //Data Index
             }
-            return data.array();
+            return data.toByteArray();
         }
         catch(Exception ex)
         {

@@ -1376,7 +1376,7 @@ abstract public class GXDLMSServerBase
         }
         int index[] = new int[1];
         return m_Base.splitToFrames(java.nio.ByteBuffer.wrap(buff.toByteArray()),
-                1, index, buff.size(), cmd, 0, false);
+                1, index, buff.size(), cmd, 0, false, null);
     }
 
     /** 
@@ -1413,6 +1413,6 @@ abstract public class GXDLMSServerBase
         }        
         int index[] = new int[1];
         return m_Base.splitToFrames(buff, 1, index, buff.position(), 
-                cmd, serviceErrorCode, false);
+                cmd, serviceErrorCode, false, null);
     }
 }

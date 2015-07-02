@@ -130,7 +130,7 @@ class GXDLMS
     public final byte getInvokeIDPriority()
     {
         byte value = 0;
-        if (getPriority() == getPriority().HIGH)
+        if (getPriority() == Priority.HIGH)
         {
             value |= 0x80;
         }
@@ -557,9 +557,24 @@ class GXDLMS
                         {
                             buff.put((byte) (Short.parseShort(it) & 0xFF));
                         }
-                        buff.put((byte) AttributeOrdinal);
+                        buff.put((byte) AttributeOrdinal);                        
+                        if (cmd == Command.SetRequest)
+                        {
+                            //Access selector.
+                            buff.put((byte) 0);
+                            //If data is not fit to PDU size.
+                            if (getUseLogicalNameReferencing() && data.length + buff.position() >= getMaxReceivePDUSize())
+                            {
+                            	byte[] tmp = new byte[buff.position()];
+                            	buff.position(0);
+                            	buff.get(tmp);
+                            	java.nio.ByteBuffer tmp2 = java.nio.ByteBuffer.wrap(data);
+                            	tmp2.position(data.length); 
+                            	return splitToBlocks(tmp2, cmd, false, tmp);
+                            }
+                        }
                         //Items count
-                        if (data == null || data.length == 0 || cmd == Command.SetRequest)
+                        if (data == null || data.length == 0)
                         {
                             buff.put((byte)0);                     
                         }
@@ -630,7 +645,7 @@ class GXDLMS
                 buff.put(data);
             }
         }
-        return splitToBlocks(buff, cmd, asList);
+        return splitToBlocks(buff, cmd, asList, null);
     }
 
     /** 
@@ -1005,7 +1020,7 @@ class GXDLMS
 
     public byte[][] splitToFrames(java.nio.ByteBuffer packet, int blockIndex, 
                         int[] index, int count, Command cmd, int resultChoice,
-                        boolean asList)
+                        boolean asList, byte[] initialData)
     {
         ByteArrayOutputStream tmp = new ByteArrayOutputStream();
         if (this.getInterfaceType() == InterfaceType.GENERAL  &&
@@ -1029,25 +1044,45 @@ class GXDLMS
         }    
         if (cmd != Command.None && this.getUseLogicalNameReferencing())
         {
-            boolean moreBlocks = packet.limit() > getMaxReceivePDUSize() && packet.limit() > index[0] + count;
+        	int len = packet.limit();
+            if (initialData != null && blockIndex == 1)
+            {
+                len += initialData.length;
+            }
+            boolean moreBlocks = len > getMaxReceivePDUSize() && len > index[0] + count;
             //Command, multiple blocks and Invoke ID and priority.
             tmp.write(cmd.getValue());
-            if (asList){
+            if (asList || (cmd == Command.SetRequest && blockIndex != 1)){
                 tmp.write((byte)3);
             }
             else{
                 tmp.write((byte)(moreBlocks ? 2 : 1));
             }
             tmp.write(getInvokeIDPriority());
+            if (initialData != null && blockIndex == 1)
+            {
+            	tmp.write(initialData, 0, initialData.length);
+            }
             if (getServer())
             {
                 tmp.write(resultChoice); // Get-Data-Result choice data
             }
-            if (moreBlocks)
+            if (moreBlocks || blockIndex != 1)
             {
+            	//Last block.
+                tmp.write((byte)(moreBlocks ? 0 : 1));
+                tmp.write((byte) blockIndex >> 24);
+                tmp.write((byte) blockIndex >> 16);
                 tmp.write((byte) blockIndex >> 8);
                 tmp.write((byte) blockIndex & 0xFF);
-                tmp.write((byte) 0);
+                if (index[0] + count > len)
+                {
+                    count = len - index[0];
+                }
+                if (moreBlocks)
+                {
+                    count -= (tmp.size() + 3);
+                }
                 GXCommon.setObjectCount(count, tmp);
             }
         }
@@ -1201,7 +1236,7 @@ class GXDLMS
      @param packet Packet to send.
      @return Array of byte arrays that are sent to device.
     */
-    public final byte[][] splitToBlocks(java.nio.ByteBuffer packet, Command cmd, boolean asList)
+    public final byte[][] splitToBlocks(java.nio.ByteBuffer packet, Command cmd, boolean asList, byte[] initialData)
     {
         int[] index = new int[1];
         int len = packet.position();
@@ -1209,7 +1244,7 @@ class GXDLMS
         packet.position(0);
         if (!getUseLogicalNameReferencing()) //SN
         {            
-            return splitToFrames(packet, 0, index, len, cmd, 0, asList);
+            return splitToFrames(packet, 0, index, len, cmd, 0, asList, null);
         }
         //If LN
         //Split to Blocks.
@@ -1219,7 +1254,7 @@ class GXDLMS
         do
         {
             byte[][] frames = splitToFrames(packet, ++blockIndex, index, 
-                    getMaxReceivePDUSize(), cmd, 0, asList);
+                    getMaxReceivePDUSize(), cmd, 0, asList, initialData);
             buff.addAll(Arrays.asList(frames));
             if (frames.length != 1)
             {

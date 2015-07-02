@@ -90,7 +90,7 @@ enum SourceDiagnostic
     }
 
     /*
-     * Get integer value for enum.
+     * Get integer value for enumeration.
      */
     public int getValue()
     {
@@ -98,7 +98,7 @@ enum SourceDiagnostic
     }
 
     /*
-     * Convert integer for enum value.
+     * Convert integer for enumeration value.
      */
     public static SourceDiagnostic forValue(int value)
     {

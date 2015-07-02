@@ -61,7 +61,7 @@ enum StateError
     }
 
     /*
-     * Get integer value for enum.
+     * Get integer value for enumeration.
      */
     public int getValue()
     {
@@ -69,7 +69,7 @@ enum StateError
     }
 
     /*
-     * Convert integer for enum value.
+     * Convert integer for enumeration value.
      */
     public static StateError forValue(int value)
     {

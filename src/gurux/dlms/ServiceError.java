@@ -62,7 +62,7 @@ enum ServiceError
     }
 
     /*
-     * Get integer value for enum.
+     * Get integer value for enumeration.
      */
     public int getValue()
     {
@@ -70,7 +70,7 @@ enum ServiceError
     }
 
     /*
-     * Convert integer for enum value.
+     * Convert integer for enumeration value.
      */
     public static ServiceError forValue(int value)
     {
