@@ -574,7 +574,7 @@ class GXDLMS
                             }
                         }
                         //Items count
-                        if (data == null || data.length == 0)
+                        else if (data == null || data.length == 0)
                         {
                             buff.put((byte)0);                     
                         }
