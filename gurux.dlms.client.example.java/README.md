@@ -19,13 +19,13 @@ You can use any connection library you want to.
 Gurux.DLMS classes only parse the data.
 
 You can get source codes from http://www.github.com/gurux/gurux.dlms.java or if you use Maven add this to your POM-file:
-
+```java
 <dependency>
   <groupId>org.gurux</groupId>
   <artifactId>gurux.dlms</artifactId>
   <version>1.0.1</version>
 </dependency>
-
+```
 Simple example
 =========================== 
 Before use you must set following device parameters. 
