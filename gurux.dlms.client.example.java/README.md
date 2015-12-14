@@ -13,10 +13,18 @@ DLMS/COSEM [meter/simulator/proxy](http://www.gurux.org/index.php?q=OwnDLMSMeter
 
 If you have problems you can ask your questions in Gurux [Forum](http://www.gurux.org/forum).
 
-You do not necessary need to use Gurux media component like Gurux.Net. 
+
+You do not necessary need to use Gurux media component like gurux.net.java or gurux.serial.java 
 You can use any connection library you want to.
 Gurux.DLMS classes only parse the data.
 
+You can get source codes from http://www.github.com/gurux/gurux.dlms.java or if you use Maven add this to your POM-file:
+
+<dependency>
+  <groupId>org.gurux</groupId>
+  <artifactId>gurux.dlms</artifactId>
+  <version>1.0.1</version>
+</dependency>
 
 Simple example
 =========================== 
