@@ -15,6 +15,12 @@ local.properties
 .classpath
 .settings/
 .loadpath
+doc/
+target/
+gurux.dlms.push.listener.example/target/
+gurux.dlms.client.example.java/target/
+gurux.dlms.server.example.java/target/
+ManufacturerSettings/
 
 # External tool builders
 .externalToolBuilders/

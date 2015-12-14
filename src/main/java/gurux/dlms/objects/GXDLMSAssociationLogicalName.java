@@ -1,0 +1,786 @@
+//
+// --------------------------------------------------------------------------
+//  Gurux Ltd
+// 
+//
+//
+// Filename:        $HeadURL$
+//
+// Version:         $Revision$,
+//                  $Date$
+//                  $Author$
+//
+// Copyright (c) Gurux Ltd
+//
+//---------------------------------------------------------------------------
+//
+//  DESCRIPTION
+//
+// This file is a part of Gurux Device Framework.
+//
+// Gurux Device Framework is Open Source software; you can redistribute it
+// and/or modify it under the terms of the GNU General Public License 
+// as published by the Free Software Foundation; version 2 of the License.
+// Gurux Device Framework is distributed in the hope that it will be useful,
+// but WITHOUT ANY WARRANTY; without even the implied warranty of 
+// MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. 
+// See the GNU General Public License for more details.
+//
+// More information of Gurux products: http://www.gurux.org
+//
+// This code is licensed under the GNU General Public License v2. 
+// Full text may be retrieved at http://www.gnu.org/licenses/gpl-2.0.txt
+//---------------------------------------------------------------------------
+
+package gurux.dlms.objects;
+
+import java.lang.reflect.Array;
+
+import gurux.dlms.GXByteBuffer;
+import gurux.dlms.GXDLMSSettings;
+import gurux.dlms.enums.AccessMode;
+import gurux.dlms.enums.Authentication;
+import gurux.dlms.enums.DataType;
+import gurux.dlms.enums.ErrorCode;
+import gurux.dlms.enums.MethodAccessMode;
+import gurux.dlms.enums.ObjectType;
+import gurux.dlms.internal.GXCommon;
+import gurux.dlms.manufacturersettings.GXAttributeCollection;
+import gurux.dlms.manufacturersettings.GXDLMSAttributeSettings;
+import gurux.dlms.objects.enums.AssociationStatus;
+import gurux.dlms.secure.GXSecure;
+
+public class GXDLMSAssociationLogicalName extends GXDLMSObject
+        implements IGXDLMSBase {
+    private GXDLMSObjectCollection objectList;
+    private short clientSAP;
+    private short serverSAP;
+    private GXApplicationContextName applicationContextName;
+    private GXxDLMSContextType xDLMSContextInfo;
+    private GXAuthenticationMechanismName authenticationMechanismMame;
+    /**
+     * Secret used in Authentication.
+     */
+    private byte[] secret;
+    private AssociationStatus associationStatus =
+            AssociationStatus.NonAssociated;
+    private String securitySetupReference;
+
+    /**
+     * Constructor.
+     */
+    public GXDLMSAssociationLogicalName() {
+        this("0.0.40.0.0.255");
+        applicationContextName = new GXApplicationContextName();
+        xDLMSContextInfo = new GXxDLMSContextType();
+        authenticationMechanismMame = new GXAuthenticationMechanismName();
+        setVersion(1);
+    }
+
+    /**
+     * Constructor.
+     * 
+     * @param ln
+     *            Logical Name of the object.
+     */
+    public GXDLMSAssociationLogicalName(final String ln) {
+        super(ObjectType.ASSOCIATION_LOGICAL_NAME, ln, 0);
+        setLogicalName(ln);
+        objectList = new GXDLMSObjectCollection(this);
+        applicationContextName = new GXApplicationContextName();
+        xDLMSContextInfo = new GXxDLMSContextType();
+        authenticationMechanismMame = new GXAuthenticationMechanismName();
+        setVersion(1);
+    }
+
+    public final GXDLMSObjectCollection getObjectList() {
+        return objectList;
+    }
+
+    public final void setObjectList(final GXDLMSObjectCollection value) {
+        objectList = value;
+    }
+
+    /*
+     * Contains the identifiers of the COSEM client APs within the physical
+     * devices hosting these APs, which belong to the AA modelled by the
+     * Association LN object.
+     */
+    public final short getClientSAP() {
+        return clientSAP;
+    }
+
+    public final void setClientSAP(final short value) {
+        clientSAP = value;
+    }
+
+    /*
+     * Contains the identifiers of the COSEM server (logical device) APs within
+     * the physical devices hosting these APs, which belong to the AA modelled
+     * by the Association LN object.
+     */
+    public final short getServerSAP() {
+        return serverSAP;
+    }
+
+    public final void setServerSAP(final short value) {
+        serverSAP = value;
+    }
+
+    public final GXApplicationContextName getApplicationContextName() {
+        return applicationContextName;
+    }
+
+    public final GXxDLMSContextType getXDLMSContextInfo() {
+        return xDLMSContextInfo;
+    }
+
+    public final GXAuthenticationMechanismName
+            getAuthenticationMechanismMame() {
+        return authenticationMechanismMame;
+    }
+
+    /**
+     * @return Secret used in Authentication.
+     */
+    public final byte[] getSecret() {
+        return secret;
+    }
+
+    /**
+     * @param value
+     *            Secret used in Authentication.
+     */
+    public final void setSecret(final byte[] value) {
+        secret = value;
+    }
+
+    public final AssociationStatus getAssociationStatus() {
+        return associationStatus;
+    }
+
+    public final void setAssociationStatus(final AssociationStatus value) {
+        associationStatus = value;
+    }
+
+    public final String getSecuritySetupReference() {
+        return securitySetupReference;
+    }
+
+    public final void setSecuritySetupReference(final String value) {
+        securitySetupReference = value;
+    }
+
+    @Override
+    public final Object[] getValues() {
+        return new Object[] { getLogicalName(), getObjectList(),
+                clientSAP + "/" + serverSAP, getApplicationContextName(),
+                getXDLMSContextInfo(), getAuthenticationMechanismMame(),
+                getSecret(), getAssociationStatus(),
+                getSecuritySetupReference() };
+    }
+
+    /*
+     * Invokes method.
+     * @param index Method index.
+     */
+    @Override
+    public final byte[] invoke(final GXDLMSSettings settings, final int index,
+            final Object parameters) {
+        // Check reply_to_HLS_authentication
+        if (index == 1) {
+            byte[] serverChallenge =
+                    GXSecure.secure(settings.getAuthentication(),
+                            settings.getStoCChallenge(), secret);
+            byte[] clientChallenge = (byte[]) parameters;
+            int[] pos = new int[1];
+            if (GXCommon.compare(serverChallenge, pos, clientChallenge)) {
+                byte[] tmp = GXSecure.secure(settings.getAuthentication(),
+                        settings.getCtoSChallenge(), secret);
+                GXByteBuffer challenge = new GXByteBuffer();
+                // ReturnParameters.
+                challenge.setUInt8(1);
+                challenge.setUInt8(0);
+                challenge.setUInt8(DataType.OCTET_STRING.getValue());
+                GXCommon.setObjectCount(tmp.length, challenge);
+                challenge.set(tmp);
+                return challenge.array();
+            } else {
+                // Return error.
+                return new byte[] {
+                        (byte) ErrorCode.HARDWARE_FAULT.getValue() };
+            }
+        } else {
+            throw new IllegalArgumentException(
+                    "Invoke failed. Invalid attribute index.");
+        }
+    }
+
+    /*
+     * Returns collection of attributes to read. If attribute is static and
+     * already read or device is returned HW error it is not returned.
+     */
+    @Override
+    public final int[] getAttributeIndexToRead() {
+        java.util.ArrayList<Integer> attributes =
+                new java.util.ArrayList<Integer>();
+        // LN is static and read only once.
+        if (getLogicalName() == null || getLogicalName().compareTo("") == 0) {
+            attributes.add(1);
+        }
+        // ObjectList is static and read only once.
+        if (!isRead(2)) {
+            attributes.add(2);
+        }
+        // associated_partners_id is static and read only once.
+        if (!isRead(3)) {
+            attributes.add(3);
+        }
+        // Application Context Name is static and read only once.
+        if (!isRead(4)) {
+            attributes.add(4);
+        }
+        // xDLMS Context Info
+        if (!isRead(5)) {
+            attributes.add(5);
+        }
+        // Authentication Mechanism Name
+        if (!isRead(6)) {
+            attributes.add(6);
+        }
+        // Secret
+        if (!isRead(7)) {
+            attributes.add(7);
+        }
+        // Association Status
+        if (!isRead(8)) {
+            attributes.add(8);
+        }
+        // Security Setup Reference is from version 1.
+        if (getVersion() > 0 && !isRead(9)) {
+            attributes.add(9);
+        }
+        return GXDLMSObjectHelpers.toIntArray(attributes);
+    }
+
+    @Override
+    public final int getAttributeCount() {
+        // Security Setup Reference is from version 1.
+        if (getVersion() > 0) {
+            return 9;
+        }
+        return 8;
+    }
+
+    /*
+     * Returns amount of methods.
+     */
+    @Override
+    public final int getMethodCount() {
+        return 4;
+    }
+
+    /**
+     * Returns Association View.
+     */
+    private byte[] getObjects() {
+        GXByteBuffer data = new GXByteBuffer();
+        data.setUInt8(DataType.ARRAY.getValue());
+        boolean lnExists =
+                objectList.findByLN(ObjectType.ASSOCIATION_LOGICAL_NAME,
+                        this.getLogicalName()) != null;
+        // Add count
+        int cnt = objectList.size();
+        if (!lnExists) {
+            ++cnt;
+        }
+        GXCommon.setObjectCount(cnt, data);
+        for (GXDLMSObject it : objectList) {
+            data.setUInt8(DataType.STRUCTURE.getValue());
+            // Count
+            data.setUInt8(4);
+            // ClassID
+            GXCommon.setData(data, DataType.UINT16,
+                    it.getObjectType().getValue());
+            // Version
+            GXCommon.setData(data, DataType.UINT8, it.getVersion());
+            // LN
+            GXCommon.setData(data, DataType.OCTET_STRING, it.getLogicalName());
+            getAccessRights(it, data); // Access rights.
+        }
+        if (!lnExists) {
+            data.setUInt8(DataType.STRUCTURE.getValue());
+            // Count
+            data.setUInt8(4);
+            // ClassID
+            GXCommon.setData(data, DataType.UINT16,
+                    this.getObjectType().getValue());
+            // Version
+            GXCommon.setData(data, DataType.UINT8, this.getVersion());
+            // LN
+            GXCommon.setData(data, DataType.OCTET_STRING,
+                    this.getLogicalName());
+            // Access rights.
+            getAccessRights(this, data);
+        }
+        return data.array();
+    }
+
+    private void getAccessRights(final GXDLMSObject item,
+            final GXByteBuffer data) {
+        data.setUInt8(DataType.STRUCTURE.getValue());
+        data.setUInt8(2);
+        data.setUInt8(DataType.ARRAY.getValue());
+        GXAttributeCollection attributes = item.getAttributes();
+        int cnt = item.getAttributeCount();
+        data.setUInt8(cnt);
+        for (int pos = 0; pos != cnt; ++pos) {
+            GXDLMSAttributeSettings att = attributes.find(pos + 1);
+            // attribute_access_item
+            data.setUInt8(DataType.STRUCTURE.getValue());
+            data.setUInt8(3);
+            GXCommon.setData(data, DataType.INT8, pos + 1);
+            /// If attribute is not set return read only.
+            if (att == null) {
+                GXCommon.setData(data, DataType.ENUM,
+                        AccessMode.READ.getValue());
+            } else {
+                GXCommon.setData(data, DataType.ENUM,
+                        att.getAccess().getValue());
+            }
+            GXCommon.setData(data, DataType.NONE, null);
+        }
+        data.setUInt8(DataType.ARRAY.getValue());
+        attributes = item.getMethodAttributes();
+        cnt = item.getMethodCount();
+        data.setUInt8(cnt);
+        for (int pos = 0; pos != cnt; ++pos) {
+            GXDLMSAttributeSettings att = attributes.find(pos + 1);
+            // attribute_access_item
+            data.setUInt8(DataType.STRUCTURE.getValue());
+            data.setUInt8(2);
+            GXCommon.setData(data, DataType.INT8, pos + 1);
+            // If version is 0.
+            if (getVersion() == 0) {
+                if (att == null) {
+                    GXCommon.setData(data, DataType.BOOLEAN, false);
+                } else {
+                    GXCommon.setData(data, DataType.BOOLEAN,
+                            att.getMethodAccess().getValue() != 0);
+                }
+            } else {
+                /// If method attribute is not set return no access.
+                if (att == null) {
+                    GXCommon.setData(data, DataType.ENUM,
+                            MethodAccessMode.NO_ACCESS.getValue());
+                } else {
+                    GXCommon.setData(data, DataType.ENUM,
+                            att.getMethodAccess().getValue());
+                }
+            }
+        }
+    }
+
+    static final void updateAccessRights(final GXDLMSObject obj,
+            final Object[] buff) {
+        for (Object access : (Object[]) Array.get(buff, 0)) {
+            Object[] attributeAccess = (Object[]) access;
+            int id = ((Number) attributeAccess[0]).intValue();
+            int tmp = ((Number) attributeAccess[1]).intValue();
+            AccessMode aMode = AccessMode.forValue(tmp);
+            obj.setAccess(id, aMode);
+        }
+        for (Object access : (Object[]) Array.get(buff, 1)) {
+            Object[] methodAccess = (Object[]) access;
+            int id = ((Number) methodAccess[0]).intValue();
+            int tmp;
+            // If version is 0.
+            if (methodAccess[1] instanceof Boolean) {
+                if (((Boolean) methodAccess[1]).booleanValue()) {
+                    tmp = 1;
+                } else {
+                    tmp = 0;
+                }
+            } else {
+                // If version is 1.
+                tmp = ((Number) methodAccess[1]).intValue();
+            }
+            MethodAccessMode mode = MethodAccessMode.forValue(tmp);
+            obj.setMethodAccess(id, mode);
+        }
+    }
+
+    @Override
+    public final DataType getDataType(final int index) {
+        if (index == 1) {
+            return DataType.OCTET_STRING;
+        }
+        if (index == 2) {
+            return DataType.ARRAY;
+        }
+        if (index == 3) {
+            return DataType.STRUCTURE;
+        }
+        if (index == 4) {
+            return DataType.STRUCTURE;
+        }
+        if (index == 5) {
+            return DataType.STRUCTURE;
+        }
+        if (index == 6) {
+            return DataType.STRUCTURE;
+        }
+        if (index == 7) {
+            return DataType.OCTET_STRING;
+        }
+        if (index == 8) {
+            return DataType.ENUM;
+        }
+        if (index == 9) {
+            return DataType.OCTET_STRING;
+        }
+        throw new IllegalArgumentException(
+                "getDataType failed. Invalid attribute index.");
+    }
+
+    /*
+     * Returns value of given attribute.
+     */
+    @Override
+    public final Object getValue(final GXDLMSSettings settings, final int index,
+            final int selector, final Object parameters) {
+        if (index == 1) {
+            return getLogicalName();
+        }
+        if (index == 2) {
+            return getObjects();
+        }
+        if (index == 3) {
+            GXByteBuffer data = new GXByteBuffer();
+            data.setUInt8(DataType.ARRAY.getValue());
+            // Add count
+            data.setUInt8(2);
+            data.setUInt8(DataType.UINT8.getValue());
+            data.setUInt8(clientSAP);
+            data.setUInt8(DataType.UINT16.getValue());
+            data.setUInt16(serverSAP);
+            return data.array();
+        }
+        if (index == 4) {
+            GXByteBuffer data = new GXByteBuffer();
+            data.setUInt8(DataType.STRUCTURE.getValue());
+            // Add count
+            data.setUInt8(0x7);
+            GXCommon.setData(data, DataType.UINT8,
+                    applicationContextName.getJointIsoCtt());
+            GXCommon.setData(data, DataType.UINT8,
+                    applicationContextName.getCountry());
+            GXCommon.setData(data, DataType.UINT16,
+                    applicationContextName.getCountryName());
+            GXCommon.setData(data, DataType.UINT8,
+                    applicationContextName.getIdentifiedOrganization());
+            GXCommon.setData(data, DataType.UINT8,
+                    applicationContextName.getDlmsUA());
+            GXCommon.setData(data, DataType.UINT8,
+                    applicationContextName.getApplicationContext());
+            GXCommon.setData(data, DataType.UINT8,
+                    applicationContextName.getContextId());
+            return data.array();
+        }
+        if (index == 5) {
+            GXByteBuffer data = new GXByteBuffer();
+            data.setUInt8(DataType.STRUCTURE.getValue());
+            data.setUInt8(6);
+            GXCommon.setData(data, DataType.BITSTRING,
+                    xDLMSContextInfo.getConformance());
+            GXCommon.setData(data, DataType.UINT16,
+                    xDLMSContextInfo.getMaxReceivePduSize());
+            GXCommon.setData(data, DataType.UINT16,
+                    xDLMSContextInfo.getMaxSendPpuSize());
+            GXCommon.setData(data, DataType.UINT8,
+                    xDLMSContextInfo.getDlmsVersionNumber());
+            GXCommon.setData(data, DataType.INT8,
+                    xDLMSContextInfo.getQualityOfService());
+            GXCommon.setData(data, DataType.OCTET_STRING,
+                    xDLMSContextInfo.getCypheringInfo());
+            return data.array();
+        }
+        if (index == 6) {
+            GXByteBuffer data = new GXByteBuffer();
+            data.setUInt8(DataType.STRUCTURE.getValue());
+            // Add count
+            data.setUInt8(0x7);
+            GXCommon.setData(data, DataType.UINT8,
+                    authenticationMechanismMame.getJointIsoCtt());
+            GXCommon.setData(data, DataType.UINT8,
+                    authenticationMechanismMame.getCountry());
+            GXCommon.setData(data, DataType.UINT16,
+                    authenticationMechanismMame.getCountryName());
+            GXCommon.setData(data, DataType.UINT8,
+                    authenticationMechanismMame.getIdentifiedOrganization());
+            GXCommon.setData(data, DataType.UINT8,
+                    authenticationMechanismMame.getDlmsUA());
+            GXCommon.setData(data, DataType.UINT8, authenticationMechanismMame
+                    .getAuthenticationMechanismName());
+            GXCommon.setData(data, DataType.UINT8,
+                    authenticationMechanismMame.getMechanismId().getValue());
+            return data.array();
+        }
+        if (index == 7) {
+            return secret;
+        }
+        if (index == 8) {
+            return getAssociationStatus().ordinal();
+        }
+        if (index == 9) {
+            return getSecuritySetupReference();
+        }
+        throw new IllegalArgumentException(
+                "GetValue failed. Invalid attribute index.");
+    }
+
+    static void updateObjectList(final GXDLMSSettings settings,
+            final GXDLMSObjectCollection target, final Object value) {
+        target.clear();
+        if (value != null) {
+            for (Object item : (Object[]) value) {
+                ObjectType type = ObjectType
+                        .forValue(((Number) Array.get(item, 0)).intValue());
+                int version = ((Number) Array.get(item, 1)).intValue();
+                String ln =
+                        GXDLMSObject.toLogicalName((byte[]) Array.get(item, 2));
+                GXDLMSObject obj = settings.getObjects().findByLN(type, ln);
+                if (obj == null) {
+                    obj = gurux.dlms.GXDLMSClient.createObject(type);
+                    obj.setLogicalName(ln);
+                    obj.setVersion(version);
+                }
+                // Add only known objects.
+                if (obj instanceof IGXDLMSBase) {
+                    updateAccessRights(obj, (Object[]) Array.get(item, 3));
+                    target.add(obj);
+                }
+            }
+        }
+    }
+
+    private void updateApplicationContextName(final Object value) {
+        // Value of the object identifier encoded in BER
+        if (value instanceof byte[]) {
+            GXByteBuffer buff = new GXByteBuffer((byte[]) value);
+            if (buff.getUInt8(0) == 0x60) {
+                applicationContextName.setJointIsoCtt(0);
+                applicationContextName.setCountry(0);
+                applicationContextName.setCountryName(0);
+                buff.position(buff.position() + 3);
+                applicationContextName
+                        .setIdentifiedOrganization(buff.getUInt8());
+                applicationContextName.setDlmsUA(buff.getUInt8());
+                applicationContextName.setApplicationContext(buff.getUInt8());
+                applicationContextName.setContextId(buff.getUInt8());
+            } else {
+                // Get Tag and length.
+                if (buff.getUInt8() != 2 && buff.getUInt8() != 7) {
+                    throw new IllegalArgumentException();
+                }
+                // Get tag
+                if (buff.getUInt8() != 0x11) {
+                    throw new IllegalArgumentException();
+                }
+                applicationContextName.setJointIsoCtt(buff.getUInt8());
+                // Get tag
+                if (buff.getUInt8() != 0x11) {
+                    throw new IllegalArgumentException();
+                }
+                applicationContextName.setCountry(buff.getUInt8());
+                // Get tag
+                if (buff.getUInt8() != 0x12) {
+                    throw new IllegalArgumentException();
+                }
+                applicationContextName.setCountryName(buff.getUInt16());
+                // Get tag
+                if (buff.getUInt8() != 0x11) {
+                    throw new IllegalArgumentException();
+                }
+                applicationContextName
+                        .setIdentifiedOrganization(buff.getUInt8());
+                // Get tag
+                if (buff.getUInt8() != 0x11) {
+                    throw new IllegalArgumentException();
+                }
+                applicationContextName.setDlmsUA(buff.getUInt8());
+                // Get tag
+                if (buff.getUInt8() != 0x11) {
+                    throw new IllegalArgumentException();
+                }
+                applicationContextName.setApplicationContext(buff.getUInt8());
+                // Get tag
+                if (buff.getUInt8() != 0x11) {
+                    throw new IllegalArgumentException();
+                }
+                applicationContextName.setContextId(buff.getUInt8());
+            }
+        } else {
+            if (value != null) {
+                applicationContextName.setJointIsoCtt(
+                        ((Number) Array.get(value, 0)).intValue());
+                applicationContextName
+                        .setCountry(((Number) Array.get(value, 1)).intValue());
+                applicationContextName.setCountryName(
+                        ((Number) Array.get(value, 2)).intValue());
+                applicationContextName.setIdentifiedOrganization(
+                        ((Number) Array.get(value, 3)).intValue());
+                applicationContextName
+                        .setDlmsUA(((Number) Array.get(value, 4)).intValue());
+                applicationContextName.setApplicationContext(
+                        ((Number) Array.get(value, 5)).intValue());
+                applicationContextName.setContextId(
+                        ((Number) Array.get(value, 6)).intValue());
+            }
+        }
+    }
+
+    private void updateAuthenticationMechanismMame(final Object value) {
+        if (value != null) {
+            // Value of the object identifier encoded in BER
+            if (value instanceof byte[]) {
+                GXByteBuffer buff = new GXByteBuffer((byte[]) value);
+                if (buff.getUInt8(0) == 0x60) {
+                    authenticationMechanismMame.setJointIsoCtt(0);
+                    authenticationMechanismMame.setCountry(0);
+                    authenticationMechanismMame.setCountryName(0);
+                    buff.position(buff.position() + 3);
+                    authenticationMechanismMame
+                            .setIdentifiedOrganization(buff.getUInt8());
+                    authenticationMechanismMame.setDlmsUA(buff.getUInt8());
+                    authenticationMechanismMame
+                            .setAuthenticationMechanismName(buff.getUInt8());
+                    authenticationMechanismMame.setMechanismId(
+                            Authentication.forValue(buff.getUInt8()));
+                } else {
+                    // Get Tag and length.
+                    if (buff.getUInt8() != 2 && buff.getUInt8() != 7) {
+                        throw new IllegalArgumentException();
+                    }
+                    // Get tag
+                    if (buff.getUInt8() != 0x11) {
+                        throw new IllegalArgumentException();
+                    }
+                    authenticationMechanismMame.setJointIsoCtt(buff.getUInt8());
+                    // Get tag
+                    if (buff.getUInt8() != 0x11) {
+                        throw new IllegalArgumentException();
+                    }
+                    authenticationMechanismMame.setCountry(buff.getUInt8());
+                    // Get tag
+                    if (buff.getUInt8() != 0x12) {
+                        throw new IllegalArgumentException();
+                    }
+                    authenticationMechanismMame
+                            .setCountryName(buff.getUInt16());
+                    // Get tag
+                    if (buff.getUInt8() != 0x11) {
+                        throw new IllegalArgumentException();
+                    }
+                    authenticationMechanismMame
+                            .setIdentifiedOrganization(buff.getUInt8());
+                    // Get tag
+                    if (buff.getUInt8() != 0x11) {
+                        throw new IllegalArgumentException();
+                    }
+                    authenticationMechanismMame.setDlmsUA(buff.getUInt8());
+                    // Get tag
+                    if (buff.getUInt8() != 0x11) {
+                        throw new IllegalArgumentException();
+                    }
+                    authenticationMechanismMame
+                            .setAuthenticationMechanismName(buff.getUInt8());
+                    // Get tag
+                    if (buff.getUInt8() != 0x11) {
+                        throw new IllegalArgumentException();
+                    }
+                    authenticationMechanismMame.setMechanismId(
+                            Authentication.forValue(buff.getUInt8()));
+                }
+            } else {
+                if (value != null) {
+                    authenticationMechanismMame.setJointIsoCtt(
+                            ((Number) Array.get(value, 0)).intValue());
+                    authenticationMechanismMame.setCountry(
+                            ((Number) Array.get(value, 1)).intValue());
+                    authenticationMechanismMame.setCountryName(
+                            ((Number) Array.get(value, 2)).intValue());
+                    authenticationMechanismMame.setIdentifiedOrganization(
+                            ((Number) Array.get(value, 3)).intValue());
+                    authenticationMechanismMame.setDlmsUA(
+                            ((Number) Array.get(value, 4)).intValue());
+                    authenticationMechanismMame.setAuthenticationMechanismName(
+                            ((Number) Array.get(value, 5)).intValue());
+                    authenticationMechanismMame
+                            .setMechanismId(Authentication.forValue(
+                                    ((Number) Array.get(value, 6)).intValue()));
+                }
+            }
+        }
+    }
+
+    /*
+     * Set value of given attribute.
+     */
+    @Override
+    public final void setValue(final GXDLMSSettings settings, final int index,
+            final Object value) {
+        switch (index) {
+        case 1:
+            super.setValue(settings, index, value);
+            break;
+        case 2:
+            updateObjectList(settings, objectList, value);
+            break;
+        case 3:
+            if (value != null) {
+                clientSAP = ((Number) Array.get(value, 0)).shortValue();
+                serverSAP = ((Number) Array.get(value, 1)).shortValue();
+            }
+            break;
+        case 4:
+            updateApplicationContextName(value);
+            break;
+        case 5:
+            if (value != null) {
+                xDLMSContextInfo.setConformance(Array.get(value, 0).toString());
+                xDLMSContextInfo.setMaxReceivePduSize(
+                        ((Number) Array.get(value, 1)).intValue());
+                xDLMSContextInfo.setMaxSendPpuSize(
+                        ((Number) Array.get(value, 2)).intValue());
+                xDLMSContextInfo.setDlmsVersionNumber(
+                        ((Number) Array.get(value, 3)).intValue());
+                xDLMSContextInfo.setQualityOfService(
+                        ((Number) Array.get(value, 4)).intValue());
+                xDLMSContextInfo.setCypheringInfo((byte[]) Array.get(value, 5));
+            }
+            break;
+        case 6:
+            updateAuthenticationMechanismMame(value);
+            break;
+        case 7:
+            secret = (byte[]) value;
+            break;
+        case 8:
+            if (value == null) {
+                setAssociationStatus(AssociationStatus.NonAssociated);
+            } else {
+                setAssociationStatus(AssociationStatus.values()[((Number) value)
+                        .intValue()]);
+            }
+            break;
+        case 9:
+            setSecuritySetupReference(
+                    GXDLMSObject.toLogicalName((byte[]) value));
+            break;
+        default:
+            throw new IllegalArgumentException(
+                    "SetValue failed. Invalid attribute index.");
+        }
+    }
+}
