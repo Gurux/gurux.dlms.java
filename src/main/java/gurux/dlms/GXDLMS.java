@@ -90,7 +90,7 @@ import gurux.dlms.objects.GXDLMSTcpUdpSetup;
 /**
  * GXDLMS implements methods to communicate with DLMS/COSEM metering devices.
  */
-final class GXDLMS {
+abstract class GXDLMS {
 
     /**
      * Constructor.
@@ -112,136 +112,100 @@ final class GXDLMS {
     }
 
     static GXDLMSObject createObject(final ObjectType type) {
-        if (type == ObjectType.ACTION_SCHEDULE) {
+        // If IC is manufacturer specific or unknown.
+        if (type == null) {
+            return new GXDLMSObject();
+        }
+        switch (type) {
+        case ACTION_SCHEDULE:
             return new GXDLMSActionSchedule();
-        }
-        if (type == ObjectType.ACTIVITY_CALENDAR) {
+        case ACTIVITY_CALENDAR:
             return new GXDLMSActivityCalendar();
-        }
-        if (type == ObjectType.ASSOCIATION_LOGICAL_NAME) {
+        case ASSOCIATION_LOGICAL_NAME:
             return new GXDLMSAssociationLogicalName();
-        }
-        if (type == ObjectType.ASSOCIATION_SHORT_NAME) {
+        case ASSOCIATION_SHORT_NAME:
             return new GXDLMSAssociationShortName();
-        }
-        if (type == ObjectType.AUTO_ANSWER) {
+        case AUTO_ANSWER:
             return new GXDLMSAutoAnswer();
-        }
-        if (type == ObjectType.AUTO_CONNECT) {
+        case AUTO_CONNECT:
             return new GXDLMSAutoConnect();
-        }
-        if (type == ObjectType.CLOCK) {
+        case CLOCK:
             return new GXDLMSClock();
-        }
-        if (type == ObjectType.DATA) {
+        case DATA:
             return new GXDLMSData();
-        }
-        if (type == ObjectType.DEMAND_REGISTER) {
+        case DEMAND_REGISTER:
             return new GXDLMSDemandRegister();
-        }
-        if (type == ObjectType.MAC_ADDRESS_SETUP) {
+        case MAC_ADDRESS_SETUP:
             return new GXDLMSMacAddressSetup();
-        }
-        if (type == ObjectType.EXTENDED_REGISTER) {
+        case EXTENDED_REGISTER:
             return new GXDLMSExtendedRegister();
-        }
-        if (type == ObjectType.GPRS_SETUP) {
+        case GPRS_SETUP:
             return new GXDLMSGprsSetup();
-        }
-        if (type == ObjectType.IEC_HDLC_SETUP) {
+        case IEC_HDLC_SETUP:
             return new GXDLMSHdlcSetup();
-        }
-        if (type == ObjectType.IEC_LOCAL_PORT_SETUP) {
+        case IEC_LOCAL_PORT_SETUP:
             return new GXDLMSIECOpticalPortSetup();
-        }
-        if (type == ObjectType.IEC_TWISTED_PAIR_SETUP) {
+        case IEC_TWISTED_PAIR_SETUP:
             return new GXDLMSIecTwistedPairSetup();
-        }
-        if (type == ObjectType.IP4_SETUP) {
+        case IP4_SETUP:
             return new GXDLMSIp4Setup();
-        }
-        if (type == ObjectType.MBUS_SLAVE_PORT_SETUP) {
+        case MBUS_SLAVE_PORT_SETUP:
             return new GXDLMSMBusSlavePortSetup();
-        }
-        if (type == ObjectType.IMAGE_TRANSFER) {
+        case IMAGE_TRANSFER:
             return new GXDLMSImageTransfer();
-        }
-        if (type == ObjectType.SECURITY_SETUP) {
+        case SECURITY_SETUP:
             return new GXDLMSSecuritySetup();
-        }
-        if (type == ObjectType.DISCONNECT_CONTROL) {
+        case DISCONNECT_CONTROL:
             return new GXDLMSDisconnectControl();
-        }
-        if (type == ObjectType.LIMITER) {
+        case LIMITER:
             return new GXDLMSLimiter();
-        }
-        if (type == ObjectType.MBUS_CLIENT) {
+        case MBUS_CLIENT:
             return new GXDLMSMBusClient();
-        }
-        if (type == ObjectType.MODEM_CONFIGURATION) {
+        case MODEM_CONFIGURATION:
             return new GXDLMSModemConfiguration();
-        }
-        if (type == ObjectType.PPP_SETUP) {
+        case PPP_SETUP:
             return new GXDLMSPppSetup();
-        }
-        if (type == ObjectType.PROFILE_GENERIC) {
+        case PROFILE_GENERIC:
             return new GXDLMSProfileGeneric();
-        }
-        if (type == ObjectType.REGISTER) {
+        case REGISTER:
             return new GXDLMSRegister();
-        }
-        if (type == ObjectType.REGISTER_ACTIVATION) {
+        case REGISTER_ACTIVATION:
             return new GXDLMSRegisterActivation();
-        }
-        if (type == ObjectType.REGISTER_MONITOR) {
+        case REGISTER_MONITOR:
             return new GXDLMSRegisterMonitor();
-        }
-        if (type == ObjectType.REGISTER_TABLE) {
+        case REGISTER_TABLE:
             return new GXDLMSObject();
-        }
-        if (type == ObjectType.ZIG_BEE_SAS_STARTUP) {
+        case ZIG_BEE_SAS_STARTUP:
             return new GXDLMSObject();
-        }
-        if (type == ObjectType.ZIG_BEE_SAS_JOIN) {
+        case ZIG_BEE_SAS_JOIN:
             return new GXDLMSObject();
-        }
-        if (type == ObjectType.SAP_ASSIGNMENT) {
+        case SAP_ASSIGNMENT:
             return new GXDLMSSapAssignment();
-        }
-        if (type == ObjectType.SCHEDULE) {
+        case SCHEDULE:
             return new GXDLMSSchedule();
-        }
-        if (type == ObjectType.SCRIPT_TABLE) {
+        case SCRIPT_TABLE:
             return new GXDLMSScriptTable();
-        }
-        if (type == ObjectType.SMTP_SETUP) {
+        case SMTP_SETUP:
             return new GXDLMSObject();
-        }
-        if (type == ObjectType.SPECIAL_DAYS_TABLE) {
+        case SPECIAL_DAYS_TABLE:
             return new GXDLMSSpecialDaysTable();
-        }
-        if (type == ObjectType.STATUS_MAPPING) {
+        case STATUS_MAPPING:
             return new GXDLMSObject();
-        }
-        if (type == ObjectType.TCP_UDP_SETUP) {
+        case TCP_UDP_SETUP:
             return new GXDLMSTcpUdpSetup();
-        }
-        if (type == ObjectType.ZIG_BEE_SAS_APS_FRAGMENTATION) {
+        case ZIG_BEE_SAS_APS_FRAGMENTATION:
             return new GXDLMSObject();
-        }
-        if (type == ObjectType.UTILITY_TABLES) {
+        case UTILITY_TABLES:
             return new GXDLMSObject();
-        }
-        if (type == ObjectType.MBUS_MASTER_PORT_SETUP) {
+        case MBUS_MASTER_PORT_SETUP:
             return new GXDLMSMBusMasterPortSetup();
-        }
-        if (type == ObjectType.PUSH_SETUP) {
+        case PUSH_SETUP:
             return new GXDLMSPushSetup();
-        }
-        if (type == ObjectType.MESSAGE_HANDLER) {
+        case MESSAGE_HANDLER:
             return new GXDLMSMessageHandler();
+        default:
+            return new GXDLMSObject();
         }
-        return new GXDLMSObject();
     }
 
     /**
@@ -396,10 +360,10 @@ final class GXDLMS {
      */
     static void checkInit(final GXDLMSSettings settings) {
         if (settings.getClientAddress() == 0) {
-            throw new IllegalArgumentException("Invalid Client ID");
+            throw new IllegalArgumentException("Invalid Client Address.");
         }
         if (settings.getServerAddress() == 0) {
-            throw new IllegalArgumentException("Invalid Server ID");
+            throw new IllegalArgumentException("Invalid Server Address.");
         }
     }
 
@@ -608,11 +572,11 @@ final class GXDLMS {
             return (byte) (value << 1 | 1);
         }
         if (value < 0x4000) {
-            return (short) ((value & 0x7F00) << 1 | (value & 0x7F) << 1 | 1);
+            return (short) ((value & 0x3F80) << 2 | (value & 0x7F) << 1 | 1);
         }
         if (value < 0x10000000) {
-            return (int) ((value & 0x7F000000) << 1 | (value & 0x7F0000) << 1
-                    | (value & 0x7F00) << 1 | (value & 0x7F) << 1 | 1);
+            return (int) ((value & 0xFE00000) << 4 | (value & 0x1FC000) << 3
+                    | (value & 0x3F80) << 2 | (value & 0x7F) << 1 | 1);
         }
         throw new IllegalArgumentException("Invalid address.");
     }
@@ -765,8 +729,6 @@ final class GXDLMS {
      *            Is server.
      * @param data
      *            Received data.
-     * @param throwException
-     *            Is exception thrown.
      */
     private static void getLLCBytes(final boolean server,
             final GXByteBuffer data) {
@@ -811,6 +773,7 @@ final class GXDLMS {
         frameLen += ch;
         if (reply.size() - reply.position() + 1 < frameLen) {
             data.setComplete(false);
+            reply.position(packetStartID);
             // Not enough data to parse;
             return 0;
 
@@ -888,48 +851,52 @@ final class GXDLMS {
         int address;
         if (server) {
             // Get Client ID.
-            address = GXCommon.getAdd(reply);
+            address = GXCommon.getHDLCAddress(reply);
             // Check that server addresses match.
             if (settings.getServerAddress() != 0
                     && settings.getServerAddress() != address) {
                 throw new GXDLMSException(
                         "Source addresses do not match. It is "
                                 + String.valueOf(address) + ". It should be "
-                                + String.valueOf(settings.getServerAddress()) + ".");
+                                + String.valueOf(settings.getServerAddress())
+                                + ".");
             } else {
                 data.setServerAddress(address);
             }
 
             // Check that client addresses match.
-            address = GXCommon.getAdd(reply);
+            address = GXCommon.getHDLCAddress(reply);
             if (settings.getClientAddress() != 0
-                    && GXCommon.intValue(settings.getClientAddress()) != address) {
+                    && settings.getClientAddress() != address) {
                 throw new GXDLMSException(
                         "Destination addresses do not match. It is "
                                 + String.valueOf(address) + ". It should be "
-                                + String.valueOf(settings.getClientAddress()) + ".");
+                                + String.valueOf(settings.getClientAddress())
+                                + ".");
             } else {
                 data.setClientAddress(address);
             }
         } else {
             // Get client ID.
-            address = GXCommon.getAdd(reply);
+            address = GXCommon.getHDLCAddress(reply);
             // Check that client addresses match.
             if (settings.getClientAddress() != address) {
                 throw new GXDLMSException(
                         "Destination addresses do not match. It is "
                                 + String.valueOf(address) + ". It should be "
-                                + String.valueOf(settings.getClientAddress()) + ".");
+                                + String.valueOf(settings.getClientAddress())
+                                + ".");
             }
 
             // Get server ID.
-            address = GXCommon.getAdd(reply);
+            address = GXCommon.getHDLCAddress(reply);
             // Check that server addresses match.
             if (settings.getServerAddress() != address) {
                 throw new GXDLMSException(
                         "Source addresses do not match. It is "
                                 + String.valueOf(address) + ". It should be "
-                                + String.valueOf(settings.getServerAddress()) + ".");
+                                + String.valueOf(settings.getServerAddress())
+                                + ".");
 
             }
         }
@@ -938,6 +905,8 @@ final class GXDLMS {
     /**
      * Get data from TCP/IP frame.
      * 
+     * @param settings
+     *            DLMS settigns.
      * @param buff
      *            Received data.
      * @param data
@@ -970,7 +939,8 @@ final class GXDLMS {
                 throw new GXDLMSException(
                         "Source addresses do not match. It is "
                                 + String.valueOf(value) + ". It should be "
-                                + String.valueOf(settings.getClientAddress()) + ".");
+                                + String.valueOf(settings.getClientAddress())
+                                + ".");
             } else {
                 data.setClientAddress(value);
             }
@@ -982,7 +952,8 @@ final class GXDLMS {
                 throw new GXDLMSException(
                         "Destination addresses do not match. It is "
                                 + String.valueOf(value) + ". It should be "
-                                + String.valueOf(settings.getServerAddress()) + ".");
+                                + String.valueOf(settings.getServerAddress())
+                                + ".");
             } else {
                 data.setServerAddress(value);
             }
@@ -994,7 +965,8 @@ final class GXDLMS {
                 throw new GXDLMSException(
                         "Source addresses do not match. It is "
                                 + String.valueOf(value) + ". It should be "
-                                + String.valueOf(settings.getServerAddress()) + ".");
+                                + String.valueOf(settings.getServerAddress())
+                                + ".");
 
             } else {
                 data.setServerAddress(value);
@@ -1007,28 +979,46 @@ final class GXDLMS {
                 throw new GXDLMSException(
                         "Destination addresses do not match. It is "
                                 + String.valueOf(value) + ". It should be "
-                                + String.valueOf(settings.getClientAddress()) + ".");
+                                + String.valueOf(settings.getClientAddress())
+                                + ".");
             } else {
                 data.setClientAddress(value);
             }
         }
     }
 
-    static void handleReadResponse(final GXReplyData data) {
+    /**
+     * Handle read response and get data from block and/or update error status.
+     * 
+     * @param data
+     *            Received data from the client.
+     */
+    static boolean handleReadResponse(final GXReplyData data) {
+        int pos = data.getData().position();
+        if (GXCommon.getObjectCount(data.getData()) != 1) {
+            data.getData().position(pos);
+            return false;
+        }
         short ch;
-        // Get count.
-        ch = data.getData().getUInt8();
         // Get status code.
         ch = data.getData().getUInt8();
         if (ch == 0) {
-            data.setError((short) 0);
+            data.setError((byte) 0);
             getDataFromBlock(data.getData(), 0);
         } else {
             // Get error code.
-            data.setError((short) data.getData().getUInt8());
+            data.setError((byte) data.getData().getUInt8());
         }
+        return true;
     }
 
+    /**
+     * Handle method response and get data from block and/or update error
+     * status.
+     * 
+     * @param data
+     *            Received data from the client.
+     */
     static void handleMethodResponse(final GXDLMSSettings settings,
             final GXReplyData data) {
         short type;
@@ -1037,9 +1027,9 @@ final class GXDLMS {
         type = data.getData().getUInt8();
         // Get invoke ID and priority.
         data.getData().getUInt8();
-        int ret = data.getData().getUInt8();
+        byte ret = (byte) data.getData().getUInt8();
         if (ret != 0) {
-            throw new GXDLMSException(ret);
+            data.setError(ret);
         }
         if (type == 1) {
             // Response normal. Get data if exists.
@@ -1049,7 +1039,7 @@ final class GXDLMS {
                             "parseApplicationAssociationResponse failed. "
                                     + "Invalid tag.");
                 }
-                ret = data.getData().getUInt8();
+                ret = (byte) data.getData().getUInt8();
                 if (ret != 0) {
                     throw new GXDLMSException(ret);
                 }
@@ -1060,8 +1050,13 @@ final class GXDLMS {
         }
     }
 
-    static void handlePush(final GXDLMSSettings settings,
-            final GXReplyData reply) {
+    /**
+     * Handle push and get data from block and/or update error status.
+     * 
+     * @param reply
+     *            Received data from the client.
+     */
+    static void handlePush(final GXReplyData reply) {
         int index = reply.getData().position() - 1;
         // Is last block
         int last = reply.getData().getUInt8();
@@ -1097,10 +1092,22 @@ final class GXDLMS {
         getDataFromBlock(reply.getData(), index);
     }
 
+    /**
+     * Handle set response and update error status.
+     * 
+     * @param reply
+     *            Received data from the client.
+     */
     static void handleSetResponse(final GXDLMSSettings settings,
             final GXReplyData data) {
     }
 
+    /**
+     * Handle write response and update error status.
+     * 
+     * @param reply
+     *            Received data from the client.
+     */
     static void handleWriteResponse(final GXDLMSSettings settings,
             final GXReplyData data) {
         int cnt = GXCommon.getObjectCount(data.getData());
@@ -1108,13 +1115,24 @@ final class GXDLMS {
         for (int pos = 0; pos != cnt; ++pos) {
             ret = data.getData().getUInt8();
             if (ret != 0) {
+                ret = data.getData().getUInt8();
                 data.setError(ret);
                 throw new GXDLMSException(ret);
             }
         }
     }
 
-    static void handleGetResponse(final GXDLMSSettings settings,
+    /**
+     * Handle get response and get data from block and/or update error status.
+     * 
+     * @param settings
+     *            DLMS settings.
+     * @param reply
+     *            Received data from the client.
+     * @param index
+     *            Block index number.
+     */
+    static boolean handleGetResponse(final GXDLMSSettings settings,
             final GXReplyData reply, final int index) {
         long number;
         short ch = 0, type;
@@ -1179,16 +1197,25 @@ final class GXDLMS {
                     }
                 }
             }
+        } else if (type == 3) {
+            // Get response with list.
+            getDataFromBlock(data, 0);
+            return false;
         } else {
             throw new IllegalArgumentException("Invalid Get response.");
         }
+        return true;
     }
 
     /**
      * Get PDU from the packet.
      * 
+     * @param settings
+     *            DLMS settings.
      * @param data
      *            received data.
+     * @param cipher
+     *            Cipher interface.
      */
     public static void getPdu(final GXDLMSSettings settings,
             final GXReplyData data, final GXICipher cipher) {
@@ -1207,10 +1234,14 @@ final class GXDLMS {
             data.setCommand(cmd);
             switch (cmd) {
             case READ_RESPONSE:
-                handleReadResponse(data);
+                if (!handleReadResponse(data)) {
+                    return;
+                }
                 break;
             case GET_RESPONSE:
-                handleGetResponse(settings, data, index);
+                if (!handleGetResponse(settings, data, index)) {
+                    return;
+                }
                 break;
             case SET_RESPONSE:
                 handleSetResponse(settings, data);
@@ -1222,7 +1253,7 @@ final class GXDLMS {
                 handleMethodResponse(settings, data);
                 break;
             case PUSH:
-                handlePush(settings, data);
+                handlePush(data);
                 break;
             case AARQ:
             case AARE:
@@ -1285,10 +1316,8 @@ final class GXDLMS {
     /**
      * Get value from data.
      * 
-     * @param data
+     * @param reply
      *            Received data.
-     * @param cmd
-     *            Last command.
      */
     static void getValueFromData(final GXDLMSSettings settings,
             final GXReplyData reply) {

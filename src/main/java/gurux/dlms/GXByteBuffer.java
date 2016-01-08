@@ -131,22 +131,39 @@ public class GXByteBuffer {
         return getData().length;
     }
 
+    /**
+     * @param value
+     *            Buffer position.
+     */
     public final void position(final int value) {
         this.position = value;
     }
 
+    /**
+     * @return Buffer position.
+     */
     public final int position() {
         return this.position;
     }
 
+    /**
+     * @return Buffer size.
+     */
     public final int size() {
         return this.size;
     }
 
+    /**
+     * @param value
+     *            Buffer size.
+     */
     public final void size(final int value) {
         this.size = value;
     }
 
+    /**
+     * @return Get buffer data as byte array.
+     */
     public final byte[] array() {
         byte[] tmp = new byte[size];
         System.arraycopy(getData(), 0, tmp, 0, size);

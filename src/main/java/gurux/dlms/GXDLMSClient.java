@@ -70,6 +70,9 @@ import gurux.dlms.secure.GXSecure;
  * GXDLMS implements methods to communicate with DLMS/COSEM metering devices.
  */
 public class GXDLMSClient {
+    /**
+     * DLMS settings.
+     */
     private final GXDLMSSettings settings = new GXDLMSSettings(false);
     private GXObisCodeCollection obisCodes;
     /**
@@ -80,7 +83,7 @@ public class GXDLMSClient {
     /**
      * Is authentication required.
      */
-    private boolean authentication = false;
+    private boolean isAuthenticationRequired = false;
 
     /**
      * Constructor.
@@ -432,7 +435,7 @@ public class GXDLMSClient {
      * @return SNRM request as byte array.
      */
     public final byte[] snrmRequest() {
-        authentication = false;
+        isAuthenticationRequired = false;
         settings.setMaxReceivePDUSize(0xFFFF);
         // SNRM request is not used in network connections.
         if (this.getInterfaceType() == InterfaceType.WRAPPER) {
@@ -547,7 +550,7 @@ public class GXDLMSClient {
     public final byte[][] aarqRequest() {
         GXByteBuffer buff = new GXByteBuffer(20);
         GXDLMS.checkInit(settings);
-        GXAPDU aarq = new GXAPDU(null);
+        GXAPDU aarq = new GXAPDU();
         if (getUseLogicalNameReferencing()) {
             settings.setSnSettings(null);
             settings.setLnSettings(
@@ -585,17 +588,13 @@ public class GXDLMSClient {
      * 
      * @param reply
      *            Received data.
-     * @return Collection from unknown tags.
      * @see GXDLMSClient#aarqRequest
      * @see GXDLMSClient#getUseLogicalNameReferencing
      * @see GXDLMSClient#getLNSettings
      * @see GXDLMSClient#getSNSettings
      */
-    public final GXDLMSTagCollection
-            parseAareResponse(final GXByteBuffer reply) {
-        // Parse AARE data.
-        GXDLMSTagCollection tags = new GXDLMSTagCollection();
-        GXAPDU pdu = new GXAPDU(tags);
+    public final void parseAareResponse(final GXByteBuffer reply) {
+        GXAPDU pdu = new GXAPDU();
         pdu.encodeData(settings, reply);
         AssociationResult ret = pdu.getResultComponent();
         if (ret != AssociationResult.ACCEPTED) {
@@ -604,18 +603,18 @@ public class GXDLMSClient {
             throw new GXDLMSException(ret, pdu.getResultDiagnostic());
         }
         SourceDiagnostic res = pdu.getResultDiagnostic();
-        authentication = res == SourceDiagnostic.AUTHENTICATION_REQUIRED;
+        isAuthenticationRequired =
+                res == SourceDiagnostic.AUTHENTICATION_REQUIRED;
         if (getDLMSVersion() != 6) {
             throw new GXDLMSException("Invalid DLMS version number.");
         }
-        return tags;
     }
 
     /**
      * @return Is authentication Required.
      */
     public final boolean getIsAuthenticationRequired() {
-        return authentication;
+        return isAuthenticationRequired;
     }
 
     /**
@@ -779,8 +778,6 @@ public class GXDLMSClient {
      * @param baseName
      * @param logicalName
      * @param accessRights
-     * @param index
-     * @param dataIndex
      */
     final void updateObjectData(final GXDLMSObject obj,
             final ObjectType objectType, final Object version,
@@ -1173,10 +1170,20 @@ public class GXDLMSClient {
             final GXByteBuffer data) {
         Object value;
         GXDataInfo info = new GXDataInfo();
+        int cnt = GXCommon.getObjectCount(data);
+        if (cnt != list.size()) {
+            throw new RuntimeException(
+                    "Invalid reply. Read items count do not match.");
+        }
         for (AbstractMap.SimpleEntry<GXDLMSObject, Integer> it : list) {
-            info.setType(DataType.NONE);
-            value = GXCommon.getData(data, info);
-            it.getKey().setValue(null, it.getValue(), value);
+            int ret = data.getUInt8();
+            if (ret == 0) {
+                value = GXCommon.getData(data, info);
+                it.getKey().setValue(null, it.getValue(), value);
+                info.clear();
+            } else {
+                throw new GXDLMSException(ret);
+            }
         }
     }
 
@@ -1433,11 +1440,7 @@ public class GXDLMSClient {
             // Add data count.
             bb.setUInt8(1);
         }
-        if ((value instanceof byte[])) {
-            bb.set((byte[]) value);
-        } else {
-            GXCommon.setData(bb, type, value);
-        }
+        GXCommon.setData(bb, type, value);
         return GXDLMS.splitPdu(settings, cmd, 1, bb, ErrorCode.OK, cipher)
                 .get(0);
     }
@@ -1734,7 +1737,8 @@ public class GXDLMSClient {
             GXCommon.setData(buff, DataType.UINT16,
                     pg.getSortObject().getObjectType());
             // LN
-            GXCommon.setData(buff, DataType.OCTET_STRING, "0.0.1.0.0.1");
+            GXCommon.setData(buff, DataType.OCTET_STRING,
+                    pg.getSortObject().getName());
             // Add attribute index.
             GXCommon.setData(buff, DataType.INT8, 2);
             // Add version
@@ -1744,7 +1748,7 @@ public class GXDLMSClient {
             // CI
             GXCommon.setData(buff, DataType.UINT16, (short) 8);
             // LN
-            GXCommon.setData(buff, DataType.OCTET_STRING, "0.0.1.0.0.1");
+            GXCommon.setData(buff, DataType.OCTET_STRING, "0.0.1.0.0.255");
             // Add attribute index.
             GXCommon.setData(buff, DataType.INT8, 2);
             // Add version
@@ -1825,5 +1829,26 @@ public class GXDLMSClient {
     public final void getData(final GXByteBuffer reply,
             final GXReplyData data) {
         GXDLMS.getData(settings, reply, data, cipher);
+    }
+
+    /**
+     * Convert physical address and logical address to server address.
+     * 
+     * @param logicalAddress
+     *            Server logical address.
+     * @param physicalAddress
+     *            Server physical address.
+     * @return Server address.
+     */
+    public static int getServerAddress(final int logicalAddress,
+            final int physicalAddress) {
+        if (physicalAddress < 0x80 && logicalAddress < 0x80) {
+            return logicalAddress << 7 | physicalAddress;
+        }
+        if (physicalAddress < 0x4000 && logicalAddress < 0x4000) {
+            return logicalAddress << 14 | physicalAddress;
+        }
+        throw new IllegalArgumentException(
+                "Invalid logical or physical address.");
     }
 }

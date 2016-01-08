@@ -34,9 +34,6 @@
 
 package gurux.dlms.secure;
 
-import java.io.ByteArrayOutputStream;
-import java.io.IOException;
-
 import gurux.dlms.GXByteBuffer;
 import gurux.dlms.GXDLMSException;
 import gurux.dlms.enums.Command;
@@ -170,25 +167,21 @@ final class GXDLMSChippering {
 
     private static byte[] getAuthenticatedData(final Security security,
             final byte[] authenticationKey, final byte[] plainText) {
-        try {
-            if (security == Security.AUTHENTICATION) {
-                ByteArrayOutputStream tmp2 = new ByteArrayOutputStream();
-                tmp2.write((byte) security.getValue());
-                tmp2.write(authenticationKey);
-                tmp2.write(plainText);
-                return tmp2.toByteArray();
-            } else if (security == Security.ENCRYPTION) {
-                return authenticationKey;
-            } else if (security == Security.AUTHENTICATION_ENCRYPTION) {
-                ByteArrayOutputStream tmp2 = new ByteArrayOutputStream();
-                tmp2.write((byte) security.getValue());
-                tmp2.write(authenticationKey);
-                return tmp2.toByteArray();
-            }
-            return null;
-        } catch (IOException ex) {
-            throw new RuntimeException(ex.getMessage());
+        if (security == Security.AUTHENTICATION) {
+            GXByteBuffer tmp2 = new GXByteBuffer();
+            tmp2.setUInt8((byte) security.getValue());
+            tmp2.set(authenticationKey);
+            tmp2.set(plainText);
+            return tmp2.array();
+        } else if (security == Security.ENCRYPTION) {
+            return authenticationKey;
+        } else if (security == Security.AUTHENTICATION_ENCRYPTION) {
+            GXByteBuffer tmp2 = new GXByteBuffer();
+            tmp2.setUInt8((byte) security.getValue());
+            tmp2.set(authenticationKey);
+            return tmp2.array();
         }
+        return null;
     }
 
     /**

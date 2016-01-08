@@ -51,14 +51,6 @@ public class GuruxDlmsServerExample {
             ///////////////////////////////////////////////////////////////////////
             // Create Gurux DLMS server component for Short Name
             // and start listen events.
-            /*
-             * Mikko GXDLMSServerAuto server = new GXDLMSServerAuto();
-             * server.Initialize(4059); System.out.println(
-             * "GEneric DLMS Server in port 4059");
-             */
-            ///////////////////////////////////////////////////////////////////////
-            // Create Gurux DLMS server component for Short Name
-            // and start listen events.
             GXDLMSServerSN SNServer = new GXDLMSServerSN();
             SNServer.Initialize(4060);
             System.out.println("Short Name DLMS Server in port 4060");

@@ -43,23 +43,23 @@ public enum GXDLMSIp4SetupIpOptionType {
      * parameters within its IP Datagrams. The value of the IP-Option- Length
      * Field must be 11, and the IP-Option-Data shall contain the value of the
      * Security, Compartments, Handling Restrictions and Transmission Control
-     * Code values, as specified in STD0005 / RFC791.
+     * code values, as specified in STD0005 / RFC791.
      */
-    Security(0x82),
+    SECURITY(0x82),
     /*
      * If this option is present, the device shall supply routing information to
      * be used by the gateways in forwarding the datagram to the destination,
      * and to record the route information. The IP-Option-length and
      * IP-Option-Data values are specified in STD0005 / RFC 791.
      */
-    LooseSourceAndRecordRoute(0x83),
+    LOOSE_SOURCE_AND_RECORD_ROUTE(0x83),
     /*
      * If this option is present, the device shall supply routing information to
      * be used by the gateways in forwarding the datagram to the destination,
      * and to record the route information. The IP-Option-length and
      * IP-Option-Data values are specified in STD0005 / RFC 791.
      */
-    StrictSourceAndRecordRoute(0x89),
+    STRICT_SOURCE_AND_RECORD_ROUTE(0x89),
     /*
      * If this option is present, the device shall as well: send originated IP
      * Datagrams with that option, providing means to record the route of these
@@ -67,7 +67,7 @@ public enum GXDLMSIp4SetupIpOptionType {
      * adjusted according to this option. The IP-Option-length and
      * IP-Option-Data values are specified in STD0005 / RFC 791.
      */
-    RecordRoute(0x07),
+    RECORD_ROUTE(0x07),
     /*
      * If this option is present, the device shall as well: send originated IP
      * Datagrams with that option, providing means to time-stamp the datagram in
@@ -76,7 +76,7 @@ public enum GXDLMSIp4SetupIpOptionType {
      * IP-Option-length and IP-Option-Data values are specified in STD0005 / RFC
      * 791.
      */
-    InternetTimestamp(0x44);
+    INTERNET_TIMESTAMP(0x44);
 
     private int intValue;
     private static HashMap<Integer, GXDLMSIp4SetupIpOptionType> mappings;

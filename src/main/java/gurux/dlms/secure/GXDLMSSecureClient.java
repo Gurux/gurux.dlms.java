@@ -23,6 +23,9 @@ public class GXDLMSSecureClient extends GXDLMSClient {
         setCipher(ciphering);
     }
 
+    /**
+     * @return Ciphering settings.
+     */
     public final GXCiphering getCiphering() {
         return ciphering;
     }

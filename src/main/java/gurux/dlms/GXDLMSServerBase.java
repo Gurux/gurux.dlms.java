@@ -512,7 +512,7 @@ public abstract class GXDLMSServerBase {
      * @return Reply to the client.
      */
     private byte[][] handleAarqRequest() {
-        GXAPDU aarq = new GXAPDU(null);
+        GXAPDU aarq = new GXAPDU();
         AssociationResult result = AssociationResult.ACCEPTED;
         SourceDiagnostic diagnostic = SourceDiagnostic.NONE;
         settings.setCtoSChallenge(null);
@@ -988,7 +988,8 @@ public abstract class GXDLMSServerBase {
                         GXDLMSObject.toLogicalName(ln));
                 if (obj == null) {
                     // "Access Error : Device reports a undefined object."
-                    error = ErrorCode.UNDEFINED_OBJECT;
+                    bb.setUInt8(1);
+                    bb.setUInt8(ErrorCode.UNDEFINED_OBJECT.getValue());
                 } else {
                     // AccessSelection
                     int selection = data.getUInt8();
@@ -998,9 +999,15 @@ public abstract class GXDLMSServerBase {
                         GXDataInfo info = new GXDataInfo();
                         parameters = GXCommon.getData(data, info);
                     }
-                    Object value = obj.getValue(settings, attributeIndex,
-                            selector, parameters);
-                    GXDLMS.appedData(obj, attributeIndex, bb, value);
+                    try {
+                        Object value = obj.getValue(settings, attributeIndex,
+                                selector, parameters);
+                        bb.setUInt8(ErrorCode.OK.getValue());
+                        GXDLMS.appedData(obj, attributeIndex, bb, value);
+                    } catch (Exception e) {
+                        bb.setUInt8(1);
+                        bb.setUInt8(ErrorCode.HARDWARE_FAULT.getValue());
+                    }
                 }
             }
             serverReply.setReplyMessages(GXDLMS.splitPdu(settings,

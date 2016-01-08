@@ -6,22 +6,27 @@ import gurux.dlms.enums.Priority;
 import gurux.dlms.enums.ServiceClass;
 import gurux.dlms.objects.GXDLMSObjectCollection;
 
+/**
+ * This class includes DLMS communication settings.
+ * 
+ * @author Gurux Ltd.
+ */
 public class GXDLMSSettings {
     /**
      * Server frame sequence starting number.
      */
-    public static final byte SERVER_START_FRAME_SEQUENCE = 0x0F;
+    static final byte SERVER_START_FRAME_SEQUENCE = 0x0F;
     /**
      * Client frame sequence starting number.
      */
-    public static final byte CLIENT_START_FRAME_SEQUENCE = (byte) 0xEE;
+    static final byte CLIENT_START_FRAME_SEQUENCE = (byte) 0xEE;
 
     /**
      * DLMS version number.
      */
-    public static final byte DLMS_VERSION = 6;
+    static final byte DLMS_VERSION = 6;
 
-    public static final int MAX_RECEIVE_PDU_SIZE = 0xFFFF;
+    static final int MAX_RECEIVE_PDU_SIZE = 0xFFFF;
 
     /**
      * Is custom challenges used. If custom challenge is used new challenge is
@@ -231,7 +236,7 @@ public class GXDLMSSettings {
      *            Frame value.
      * @return Increased receiver frame sequence.
      */
-    public static byte increaseReceiverSequence(final byte value) {
+    static byte increaseReceiverSequence(final byte value) {
         return (byte) (value + 0x20 | 0x10 | value & 0xE);
     }
 
@@ -242,14 +247,14 @@ public class GXDLMSSettings {
      *            Frame value.
      * @return Increased sender frame sequence.
      */
-    public static byte increaseSendSequence(final byte value) {
+    static byte increaseSendSequence(final byte value) {
         return (byte) (value & 0xF0 | (value + 0x2) & 0xE);
     }
 
     /**
      * @return Generates next frame.
      */
-    public final byte getNextFrame() {
+    final byte getNextFrame() {
         frame = increaseReceiverSequence(increaseSendSequence(frame));
         return frame;
     }
@@ -257,7 +262,7 @@ public class GXDLMSSettings {
     /**
      * @return Generates send frame.
      */
-    public final byte getNextSend() {
+    final byte getNextSend() {
         frame = increaseSendSequence(frame);
         return frame;
     }
@@ -265,7 +270,7 @@ public class GXDLMSSettings {
     /**
      * @return Generates receive frame.
      */
-    public final byte getNextReceive() {
+    final byte getNextReceive() {
         frame = increaseReceiverSequence(frame);
         return frame;
     }
@@ -273,7 +278,7 @@ public class GXDLMSSettings {
     /**
      * @return Generates receiver ready frame.
      */
-    public final byte getReceiverReady() {
+    final byte getReceiverReady() {
         frame = (byte) (increaseReceiverSequence(frame) & 0xF0 | 1);
         return frame;
     }
@@ -313,7 +318,7 @@ public class GXDLMSSettings {
      * 
      * @return Current block index.
      */
-    public final int getBlockIndex() {
+    final int getBlockIndex() {
         return blockIndex;
     }
 
@@ -323,21 +328,21 @@ public class GXDLMSSettings {
      * @param value
      *            Block index.
      */
-    public final void setBlockIndex(final int value) {
+    final void setBlockIndex(final int value) {
         blockIndex = value;
     }
 
     /**
      * Resets block index to default value.
      */
-    public final void resetBlockIndex() {
+    final void resetBlockIndex() {
         blockIndex = 1;
     }
 
     /**
      * Increases block index.
      */
-    public final void increaseBlockIndex() {
+    final void increaseBlockIndex() {
         blockIndex += 1;
     }
 

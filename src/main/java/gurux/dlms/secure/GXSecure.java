@@ -8,7 +8,6 @@ import gurux.dlms.GXByteBuffer;
 import gurux.dlms.enums.Authentication;
 
 public final class GXSecure {
-
     /**
      * Constructor.
      */
@@ -81,5 +80,4 @@ public final class GXSecure {
         }
         return result;
     }
-
 }

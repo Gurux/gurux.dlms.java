@@ -39,22 +39,43 @@ import java.util.Calendar;
 import java.util.Date;
 import java.util.EnumSet;
 import java.util.List;
+import java.util.TimeZone;
 
 import gurux.dlms.enums.ClockStatus;
 import gurux.dlms.enums.DateTimeSkips;
 
 public class GXDateTime {
+    /**
+     * Clock status.
+     */
     private ClockStatus status;
-    private java.util.Date value = new java.util.Date(0);
+    /**
+     * Clock time.
+     */
+    private java.util.Date time = new java.util.Date(0);
+    /**
+     * Skipped fields.
+     */
     private java.util.Set<DateTimeSkips> skip;
+    /**
+     * Daylight savings begin.
+     */
     private boolean daylightSavingsBegin;
+    /**
+     * Daylight savings end.
+     */
     private boolean daylightSavingsEnd;
+    /**
+     * Deviation.
+     */
+    private int deviation;
 
     /**
      * Constructor.
      */
     public GXDateTime() {
         skip = EnumSet.noneOf(DateTimeSkips.class);
+        deviation = 0x8000;
         status = ClockStatus.OK;
     }
 
@@ -150,19 +171,36 @@ public class GXDateTime {
      * @return Used date time value.
      */
     public final java.util.Date getValue() {
-        return value;
+        return time;
     }
 
     /**
+     * Set date time value.
+     * 
      * @param forvalue
      *            Used date time value.
      */
     public final void setValue(final java.util.Date forvalue) {
-        value = forvalue;
+        setValue(forvalue, java.util.Calendar.getInstance().getTimeZone()
+                .getOffset(time.getTime()) / 60000);
     }
 
     /**
-     * @return Skiped date time fields.
+     * Set date time value.
+     * 
+     * @param forvalue
+     *            Used date time value.
+     * @param forDeviation
+     *            Used deviation.
+     */
+    public final void setValue(final java.util.Date forvalue,
+            final int forDeviation) {
+        time = forvalue;
+        deviation = forDeviation;
+    }
+
+    /**
+     * @return Skipped date time fields.
      */
     public final java.util.Set<DateTimeSkips> getSkip() {
         return skip;
@@ -170,7 +208,7 @@ public class GXDateTime {
 
     /**
      * @param forValue
-     *            Skiped date time fields.
+     *            Skipped date time fields.
      */
     public final void setSkip(final java.util.Set<DateTimeSkips> forValue) {
         skip = forValue;
@@ -215,6 +253,21 @@ public class GXDateTime {
         daylightSavingsEnd = forValue;
     }
 
+    /**
+     * @return Deviation.
+     */
+    public final int getDeviation() {
+        return deviation;
+    }
+
+    /**
+     * @param forValue
+     *            Deviation.
+     */
+    public final void setDeviation(final int forValue) {
+        deviation = forValue;
+    }
+
     /*
      * Status of the clock.
      */
@@ -233,7 +286,7 @@ public class GXDateTime {
             // Separate date and time parts.
             String[] tmp = sd.toPattern().split(" ");
             List<String> date = new ArrayList<String>();
-            List<String> time = new ArrayList<String>();
+            List<String> tm = new ArrayList<String>();
             // Find date time separator.
             char separator = 0;
             for (char it : tmp[0].toCharArray()) {
@@ -245,7 +298,7 @@ public class GXDateTime {
             if (separator != 0) {
                 String sep = "\\" + String.valueOf(separator);
                 date.addAll(Arrays.asList(tmp[0].split(sep)));
-                time.addAll(Arrays.asList(tmp[1].split(":")));
+                tm.addAll(Arrays.asList(tmp[1].split(":")));
                 if (getSkip().contains(DateTimeSkips.YEAR)) {
                     date.remove("yyyy");
                 }
@@ -256,22 +309,22 @@ public class GXDateTime {
                     date.remove("d");
                 }
                 if (getSkip().contains(DateTimeSkips.HOUR)) {
-                    time.remove("H");
-                    time.remove("HH");
+                    tm.remove("H");
+                    tm.remove("HH");
                 }
                 if (getSkip().contains(DateTimeSkips.MINUTE)) {
-                    time.remove("m");
-                    time.remove("mm");
+                    tm.remove("m");
+                    tm.remove("mm");
                 }
                 if (getSkip().contains(DateTimeSkips.SECOND)) {
-                    time.remove("ss");
+                    tm.remove("ss");
                 } else {
-                    time.add("ss");
+                    tm.add("ss");
                 }
                 if (getSkip().contains(DateTimeSkips.MILLISECOND)) {
-                    time.remove("SSS");
+                    tm.remove("SSS");
                 } else {
-                    time.add("SSS");
+                    tm.add("SSS");
                 }
 
                 String format = "";
@@ -285,9 +338,9 @@ public class GXDateTime {
                     }
                     format = sb.toString();
                 }
-                if (!time.isEmpty()) {
+                if (!tm.isEmpty()) {
                     sb.setLength(0);
-                    for (String it : time) {
+                    for (String it : tm) {
                         if (sb.length() != 0) {
                             sb.append(':');
                         }
@@ -302,6 +355,45 @@ public class GXDateTime {
                 return sd.format(getValue());
             }
         }
-        return sd.format(getValue());
+        return sd.format(meterTimeToLocalTime(getMeterCalendar()));
+    }
+
+    public static Date meterTimeToLocalTime(final Calendar calendar) {
+        Calendar tm = Calendar.getInstance();
+        int offset = tm.getTimeZone().getRawOffset();
+        offset -= calendar.getTimeZone().getRawOffset();
+        offset /= 60000;
+        tm.setTime(calendar.getTime());
+        tm.add(Calendar.MINUTE, offset);
+        return tm.getTime();
+    }
+
+    private static String getTimeZone(final int forDeviation) {
+        String tmp = String.format("%02d:%02d", forDeviation / 60,
+                forDeviation % 60);
+        if (forDeviation == 0) {
+            return "GMT";
+        } else if (forDeviation > 0) {
+            return "GMT+" + tmp;
+        }
+        return "GMT" + tmp;
+    }
+
+    /**
+     * Gets a calendar using the meter's time zone.
+     * 
+     * @return Meter's calendar.
+     */
+    public final Calendar getMeterCalendar() {
+        // Add deviation.
+        TimeZone tz;
+        tz = TimeZone.getTimeZone(getTimeZone(deviation));
+        java.util.Calendar tm = java.util.Calendar.getInstance(tz);
+        tm.setTime(time);
+        // Convert to GMT if time zone not found.
+        if (tz.getRawOffset() / 60000 != deviation) {
+            tm.add(Calendar.MINUTE, -deviation);
+        }
+        return tm;
     }
 }

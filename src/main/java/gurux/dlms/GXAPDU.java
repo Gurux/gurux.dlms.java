@@ -51,14 +51,6 @@ import gurux.dlms.internal.GXCommon;
 class GXAPDU {
     private int resultValue;
     private SourceDiagnostic resultDiagnostic;
-    private GXDLMSTagCollection tags;
-
-    /*
-     * Constructor.
-     */
-    GXAPDU(final GXDLMSTagCollection value) {
-        this.tags = value;
-    }
 
     /**
      * AssociationResult
@@ -145,20 +137,6 @@ class GXAPDU {
         GXApplicationContextName.codeData(settings, data, ciphering);
         getAuthenticationString(settings, data, settings.getCtoSChallenge());
         GXUserInformation.codeData(settings, data);
-        // Add extra tags...
-        if (tags != null) {
-            for (int a = 0; a < tags.size(); ++a) {
-                GXDLMSTag tag = tags.get(a);
-                if (tag != null) {
-                    // Add data ID.
-                    data.setUInt8(tag.getID());
-                    // Add data length.
-                    data.setUInt8(tag.getData().length);
-                    // Add data.
-                    data.set(tag.getData());
-                }
-            }
-        }
         data.setUInt8(lenPos, data.size() - lenPos - 1);
     }
 
@@ -234,9 +212,9 @@ class GXAPDU {
                 len = buff.getUInt8();
                 buff.getUInt8();
                 len = buff.getUInt8();
-                byte[] pw = new byte[len];
-                buff.get(pw);
-                settings.setPassword(pw);
+                byte[] challenge = new byte[len];
+                buff.get(challenge);
+                settings.setCtoSChallenge(challenge);
             } else if (tag == 0x8B || tag == 0x89) {
                 // Authentication.
                 tag = buff.getUInt8();
@@ -291,14 +269,7 @@ class GXAPDU {
                 // Unknown tags.
                 tag = buff.getUInt8();
                 len = buff.getUInt8();
-                if (tags != null) {
-                    GXDLMSTag tmp = new GXDLMSTag();
-                    tmp.setID(tag);
-                    byte[] data = new byte[len];
-                    buff.get(data);
-                    tmp.setData(data);
-                    tags.add(tmp);
-                }
+                buff.position(buff.position() + len);
             }
         }
         return true;
