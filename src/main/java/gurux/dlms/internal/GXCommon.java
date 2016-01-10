@@ -324,7 +324,8 @@ public final class GXCommon {
      * @param data
      *            received data.
      * @param info
-     * @return
+     *            Data info.
+     * @return Received data.
      */
     public static Object getData(final GXByteBuffer data,
             final GXDataInfo info) {

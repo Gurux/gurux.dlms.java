@@ -1838,8 +1838,6 @@ public class GXDLMSClient {
      *            Server logical address.
      * @param physicalAddress
      *            Server physical address.
-     * @param addressSize
-     *            Address size in bytes.
      * @return Server address.
      */
     public static int getServerAddress(final int logicalAddress,
