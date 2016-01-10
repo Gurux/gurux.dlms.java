@@ -1146,7 +1146,7 @@ public class GXDLMSClient {
                 } else {
                     System.out.println(String.format("Unknown object : %d %s",
                             classID,
-                            GXDLMSObject.toLogicalName((byte[]) tmp[2])));
+                            GXDLMSObject.toLogicalName((byte[]) tmp[1])));
                 }
             }
         }
@@ -1838,11 +1838,30 @@ public class GXDLMSClient {
      *            Server logical address.
      * @param physicalAddress
      *            Server physical address.
+     * @param addressSize
+     *            Address size in bytes.
      * @return Server address.
      */
     public static int getServerAddress(final int logicalAddress,
             final int physicalAddress) {
-        if (physicalAddress < 0x80 && logicalAddress < 0x80) {
+        return getServerAddress(logicalAddress, physicalAddress, 0);
+    }
+
+    /**
+     * Convert physical address and logical address to server address.
+     * 
+     * @param logicalAddress
+     *            Server logical address.
+     * @param physicalAddress
+     *            Server physical address.
+     * @param addressSize
+     *            Address size in bytes.
+     * @return Server address.
+     */
+    public static int getServerAddress(final int logicalAddress,
+            final int physicalAddress, final int addressSize) {
+        if (addressSize < 4 && physicalAddress < 0x80
+                && logicalAddress < 0x80) {
             return logicalAddress << 7 | physicalAddress;
         }
         if (physicalAddress < 0x4000 && logicalAddress < 0x4000) {

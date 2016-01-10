@@ -151,7 +151,13 @@ final class GXUserInformation {
             throw new RuntimeException("Invalid tag.");
         }
         // Get DLMS version number.
-        settings.setDlmsVersionNumber((byte) data.getUInt8());
+        if (settings.isServer()) {
+            if (data.getUInt8() != 6) {
+                throw new RuntimeException("Invalid DLMS version number.");
+            }
+        } else {
+            settings.setDlmsVersionNumber((byte) data.getUInt8());
+        }
         // Tag for conformance block
         tag = data.getUInt8();
         if (tag != 0x5F) {
@@ -170,14 +176,32 @@ final class GXUserInformation {
             if (settings.getLnSettings() == null) {
                 settings.setLnSettings(new GXDLMSLNSettings());
             }
-            data.get(settings.getLnSettings().getConformanceBlock());
+            if (settings.isServer()) {
+                // Skip settings what client asks.
+                // All server settings are always returned.
+                byte[] tmp = new byte[3];
+                data.get(tmp);
+            } else {
+                data.get(settings.getLnSettings().getConformanceBlock());
+            }
         } else {
             if (settings.getSnSettings() == null) {
                 settings.setSnSettings(new GXDLMSSNSettings());
             }
-            data.get(settings.getSnSettings().getConformanceBlock());
+            if (settings.isServer()) {
+                // Skip settings what client asks.
+                // All server settings are always returned.
+                byte[] tmp = new byte[3];
+                data.get(tmp);
+            } else {
+                data.get(settings.getSnSettings().getConformanceBlock());
+            }
         }
-        settings.setMaxReceivePDUSize(data.getUInt16());
+        if (settings.isServer()) {
+            data.getUInt16();
+        } else {
+            settings.setMaxReceivePDUSize(data.getUInt16());
+        }
         // get VAA Name
         if (response) {
             int vaa = data.getUInt16();

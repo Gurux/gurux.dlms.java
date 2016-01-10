@@ -352,7 +352,7 @@ public class GXDateTime {
                     format += sb.toString();
                 }
                 sd = new SimpleDateFormat(format);
-                return sd.format(getValue());
+                return sd.format(meterTimeToLocalTime(getMeterCalendar()));
             }
         }
         return sd.format(meterTimeToLocalTime(getMeterCalendar()));

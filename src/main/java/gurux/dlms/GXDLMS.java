@@ -778,13 +778,18 @@ abstract class GXDLMS {
             return 0;
 
         }
-        ch = reply.getUInt8(frameLen + packetStartID + 1);
+        int len = frameLen + packetStartID + 1;
+        ch = reply.getUInt8(len);
         if (ch != GXCommon.HDLC_FRAME_START_END) {
             throw new GXDLMSException("Invalid data format.");
         }
 
         // Check addresses.
-        checkHdlcAddress(server, settings, reply, data);
+        if (!checkHdlcAddress(server, settings, reply, data, packetStartID,
+                len)) {
+            // If echo.
+            return getHdlcData(server, settings, reply, data);
+        }
         // Is there more data available.
         if ((frame & 0x8) != 0) {
             data.setMoreData(RequestTypes.forValue(data.getMoreData().getValue()
@@ -845,61 +850,63 @@ abstract class GXDLMS {
         return frame;
     }
 
-    private static void checkHdlcAddress(final boolean server,
+    private static boolean checkHdlcAddress(final boolean server,
             final GXDLMSSettings settings, final GXByteBuffer reply,
-            final GXReplyData data) {
-        int address;
+            final GXReplyData data, int index, int count) {
+        int source, target;
+        // Get destination and source addresses.
+        target = GXCommon.getHDLCAddress(reply);
+        source = GXCommon.getHDLCAddress(reply);
         if (server) {
-            // Get Client ID.
-            address = GXCommon.getHDLCAddress(reply);
             // Check that server addresses match.
             if (settings.getServerAddress() != 0
-                    && settings.getServerAddress() != address) {
+                    && settings.getServerAddress() != target) {
                 throw new GXDLMSException(
-                        "Source addresses do not match. It is "
-                                + String.valueOf(address) + ". It should be "
+                        "Destination addresses do not match. It is "
+                                + String.valueOf(target) + ". It should be "
                                 + String.valueOf(settings.getServerAddress())
                                 + ".");
             } else {
-                data.setServerAddress(address);
+                data.setServerAddress(target);
             }
 
             // Check that client addresses match.
-            address = GXCommon.getHDLCAddress(reply);
             if (settings.getClientAddress() != 0
-                    && settings.getClientAddress() != address) {
+                    && settings.getClientAddress() != source) {
                 throw new GXDLMSException(
-                        "Destination addresses do not match. It is "
-                                + String.valueOf(address) + ". It should be "
+                        "Source addresses do not match. It is "
+                                + String.valueOf(source) + ". It should be "
                                 + String.valueOf(settings.getClientAddress())
                                 + ".");
             } else {
-                data.setClientAddress(address);
+                data.setClientAddress(source);
             }
         } else {
-            // Get client ID.
-            address = GXCommon.getHDLCAddress(reply);
             // Check that client addresses match.
-            if (settings.getClientAddress() != address) {
+            if (settings.getClientAddress() != target) {
+                // If echo.
+                if (settings.getClientAddress() == source
+                        && settings.getServerAddress() == target) {
+                    reply.position(index + count + 1);
+                    return false;
+                }
                 throw new GXDLMSException(
                         "Destination addresses do not match. It is "
-                                + String.valueOf(address) + ". It should be "
+                                + String.valueOf(target) + ". It should be "
                                 + String.valueOf(settings.getClientAddress())
                                 + ".");
             }
-
-            // Get server ID.
-            address = GXCommon.getHDLCAddress(reply);
             // Check that server addresses match.
-            if (settings.getServerAddress() != address) {
+            if (settings.getServerAddress() != source) {
                 throw new GXDLMSException(
                         "Source addresses do not match. It is "
-                                + String.valueOf(address) + ". It should be "
+                                + String.valueOf(source) + ". It should be "
                                 + String.valueOf(settings.getServerAddress())
                                 + ".");
 
             }
         }
+        return true;
     }
 
     /**

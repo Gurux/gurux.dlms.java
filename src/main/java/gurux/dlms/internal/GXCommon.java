@@ -1288,8 +1288,7 @@ public final class GXCommon {
 
         // Add year.
         if (dt.getSkip().contains(DateTimeSkips.YEAR)) {
-            buff.setUInt8(0xFF);
-            buff.setUInt8(0xFF);
+            buff.setUInt16(0xFFFF);
         } else {
             buff.setUInt16(tm.get(java.util.Calendar.YEAR));
         }
