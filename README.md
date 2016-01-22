@@ -22,7 +22,7 @@ You can get source codes from http://www.github.com/gurux/gurux.dlms.java or if 
 <dependency>
   <groupId>org.gurux</groupId>
   <artifactId>gurux.dlms</artifactId>
-  <version>1.0.1</version>
+  <version>1.0.6</version>
 </dependency>
 ```
 
@@ -46,8 +46,8 @@ client.setInterfaceType(InterfaceType.HDLC);
 // to find out how Client and Server addresses are counted.
 // Some manufacturers might use own Server and Client addresses.
 
-client.setClientID(16);
-client.setServerID(1);
+client.setClientAddress(16);
+client.setServerAddress(1);
 
 ```
 
@@ -59,24 +59,26 @@ After that you will send AARQ request and handle AARE response.
 
 ```Java
 
-byte[] data, reply = null;
+GXReplyData reply = new GXReplyData();
+byte[] data;
 data = client.SNRMRequest();
 if (data != null)
 {
-    reply = readDLMSPacket(data);
+    readDLMSPacket(data, reply);
     //Has server accepted client.
-    client.parseUAResponse(reply);
+    client.parseUAResponse(reply.getData());
 }
 
 //Generate AARQ request.
 //Split requests to multiple packets if needed. 
 //If password is used all data might not fit to one packet.
-for (byte[] it : client.AARQRequest(null))
+for (byte[] it : client.AARQRequest())
 {
-    reply = readDLMSPacket(it);
+    reply.clear();
+    readDLMSPacket(it, reply);
 }
 //Parse reply.
-client.parseAAREResponse(reply);
+client.parseAAREResponse(reply.getData());
 
 ```
 
@@ -85,26 +87,28 @@ Next you can read Association view and show all objects that meter can offer.
 
 ```Java
 /// Read Association View from the meter.
-byte[] reply = readDataBlock(client.getObjects());
-GXDLMSObjectCollection objects = client.parseObjects(reply, true);
+GXReplyData reply = new GXReplyData();
+readDataBlock(client.getObjects(), reply);
+GXDLMSObjectCollection objects = client.parseObjects(reply.getData(), true);
 
 ```
 Now you can read wanted objects. After read you must close the connection by sending
 disconnecting request.
 
 ```Java
-readDLMSPacket(client.disconnectRequest());
+GXReplyData reply = new GXReplyData();
+readDLMSPacket(client.disconnectRequest(), reply);
 Media.close();
 
 ```
 
 ```Java
 
-/*
- * Read DLMS Data from the device.
- * If access is denied return null.
- */
- public void readDLMSPacket(byte[] data, GXReplyData reply)
+/**
+* Read DLMS Data from the device.
+* If access is denied return null.
+*/
+public void readDLMSPacket(byte[] data, GXReplyData reply)
         throws Exception {
     if (data == null || data.length == 0) {
         return;
@@ -125,6 +129,7 @@ Media.close();
     p.setWaitTime(WaitTime);
     synchronized (Media.getSynchronous()) {
         while (!succeeded) {
+            writeTrace("<- " + now() + "\t" + GXCommon.toHex(data));
             Media.send(data, null);
             if (p.getEop() == null) {
                 p.setCount(1);
@@ -141,9 +146,8 @@ Media.close();
                         "Failed to receive reply from the device in given time.");
             }
         }
-        dlms.getData(p.getReply(), reply);
         // Loop until whole DLMS packet is received.
-        while (!reply.isComplete()) {
+        while (!dlms.getData(p.getReply(), reply)) {
             if (p.getEop() == null) {
                 p.setCount(1);
             }
@@ -190,12 +194,13 @@ server returns own challenge that client checks.
 
 ```Java
 //Parse reply.
-client.parseAAREResponse(reply);
+client.parseAAREResponse(reply.getData());
 //Get challenge Is HSL authentication is used.
 if (client.IsAuthenticationRequired)
 {
-    reply = readDLMSPacket(client.getApplicationAssociationRequest());
-    client.parseApplicationAssociationResponse(reply);
+    reply.clear();
+    readDLMSPacket(client.getApplicationAssociationRequest(), reply);
+    client.parseApplicationAssociationResponse(reply.getData());
 }
 ``` 
 
@@ -205,7 +210,7 @@ Writing values to the meter is very simple. There are two ways to do this.
 First is using Write -method of GXDLMSClient.
 
 ```Java
-readDLMSPacket(client.write("0.0.1.0.0.255", dateTime, 2, DataType.OCTET_STRING, ObjectType.CLOCK, 2));
+readDLMSPacket(client.write("0.0.1.0.0.255", dateTime, 2, DataType.OCTET_STRING, ObjectType.CLOCK, 2), reply);
 ``` 
 
 
@@ -224,7 +229,7 @@ GXDLMSAutoAnswer item = client.getObject().findByLN("0.0.2.2.0.255", ObjectType.
 item.getListeningWindow().add(new AbstractMap.SimpleEntry<GXDateTime, 
                 GXDateTime>(new GXDateTime(-1, -1, -1, 6, -1, -1, -1), 
                 new GXDateTime(-1, -1, -1, 8, -1, -1, -1)));
-readDLMSPacket(client.write(item, 3));
+readDLMSPacket(client.write(item, 3), reply);
 ``` 
 
 Transport security

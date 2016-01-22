@@ -155,6 +155,8 @@ public class GXCommunicate {
     }
 
     /**
+    * Read DLMS Data from the device.
+    * If access is denied return null.
     */
     public void readDLMSPacket(byte[] data, GXReplyData reply)
             throws Exception {

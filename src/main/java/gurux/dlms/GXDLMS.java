@@ -282,6 +282,9 @@ abstract class GXDLMS {
     static String getDescription(final int errCode) {
         String str;
         switch (ErrorCode.forValue(errCode)) {
+        case REJECTED:
+            str = "Rejected";
+            break;
         case INVALID_HDLC_REPLY:
             str = "Not a reply";
             break;
@@ -799,7 +802,11 @@ abstract class GXDLMS {
                 throw new RuntimeException("Wrong CRC.");
             }
         }
-        if (type == FrameType.DISCONNECT_REQUEST) {
+        if (type == FrameType.REJECTED) {
+            // Get EOP.
+            reply.getUInt8();
+            data.setError((short) ErrorCode.REJECTED.getValue());
+        } else if (type == FrameType.DISCONNECT_REQUEST) {
             // Get EOP.
             reply.getUInt8();
             data.setCommand(Command.DISCONNECT_REQUEST);

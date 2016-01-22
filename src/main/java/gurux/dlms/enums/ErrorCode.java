@@ -8,6 +8,12 @@ import java.util.HashMap;
  * @author Gurux Ltd.
  */
 public enum ErrorCode {
+
+    /**
+     * Connection is rejected.
+     */
+    REJECTED(-2),
+
     /**
      * Not a reply.
      */
