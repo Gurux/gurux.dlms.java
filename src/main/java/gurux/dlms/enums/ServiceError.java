@@ -32,55 +32,81 @@
 // Full text may be retrieved at http://www.gnu.org/licenses/gpl-2.0.txt
 //---------------------------------------------------------------------------
 
-package gurux.dlms.objects.enums;
+package gurux.dlms.enums;
 
-import java.util.HashMap;
+/**
+ * DLMS service errors.
+ * 
+ * @author Gurux Ltd.
+ */
+public enum ServiceError {
+    /**
+     * Operation is not possible
+     */
+    OPERATION_NOT_POSSIBLE(1),
 
-public enum GXDLMSPppSetupIPCPOptionType {
-    /*
-     * 
+    /**
+     * Service is not supported.
      */
-    IP_COMPRESSION_PROTOCOL(2),
-    /*
-     * 
-     */
-    PREF_LOCAL_IP(3),
-    /*
-     * 
-     */
-    PREF_PEER_IP(20),
-    /*
-     * 
-     */
-    GAO(21),
-    /*
-     * 
-     */
-    USIP(22);
+    SERVICE_NOT_SUPPORTED(2),
 
+    /**
+     * Other reason.
+     */
+    OTHER_REASON(3);
+
+    /**
+     * Integer value of enumerator.
+     */
     private int intValue;
-    private static HashMap<Integer, GXDLMSPppSetupIPCPOptionType> mappings;
 
-    private static HashMap<Integer, GXDLMSPppSetupIPCPOptionType>
-            getMappings() {
-        if (mappings == null) {
-            synchronized (GXDLMSPppSetupIPCPOptionType.class) {
-                mappings = new HashMap<Integer, GXDLMSPppSetupIPCPOptionType>();
+    /**
+     * Collection of enumerator values.
+     */
+    private static java.util.HashMap<Integer, ServiceError> mappings;
+
+    /**
+     * Returns collection of enumerator values.
+     * 
+     * @return Enumerator values.
+     */
+    private static java.util.HashMap<Integer, ServiceError> getMappings() {
+        synchronized (ServiceError.class) {
+            if (mappings == null) {
+                mappings = new java.util.HashMap<Integer, ServiceError>();
             }
         }
         return mappings;
     }
 
-    GXDLMSPppSetupIPCPOptionType(final int value) {
+    /**
+     * Constructor.
+     * 
+     * @param value
+     *            Integer value of enumerator.
+     */
+    ServiceError(final int value) {
         intValue = value;
         getMappings().put(value, this);
     }
 
+    /**
+     * Get integer value for enumerator.
+     * 
+     * @return Enumerator integer value.
+     */
     public int getValue() {
         return intValue;
     }
 
-    public static GXDLMSPppSetupIPCPOptionType forValue(final int value) {
+    /**
+     * Returns enumerator value from an integer value.
+     * 
+     * @param value
+     *            Integer value.
+     * @return Enumeration value.
+     */
+    public static ServiceError forValue(final int value) {
         return getMappings().get(value);
     }
 }

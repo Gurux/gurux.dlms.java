@@ -43,12 +43,12 @@
     <dependency>
       <groupId>org.gurux</groupId>
       <artifactId>gurux.net</artifactId>
-      <version>1.0.RELEASE</version>
+      <version>1.0.4</version>
     </dependency>
   <dependency>
     <groupId>org.gurux</groupId>
       <artifactId>gurux.DLMS</artifactId>
-      <version>1.0.RELEASE</version>
+      <version>1.0.6</version>
   </dependency>
   </dependencies>
   <licenses>

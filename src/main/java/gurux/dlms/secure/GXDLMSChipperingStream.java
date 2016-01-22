@@ -695,7 +695,9 @@ class GXDLMSChipperingStream {
      * Shift block to right.
      * 
      * @param block
-     * @param n
+     *            Block list.
+     * @param count
+     *            Blocks to shift.
      */
     public static void shiftRight(final int[] block, final int count) {
         int bit = 0;

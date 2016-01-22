@@ -55,7 +55,7 @@ public class GXDLMSClock extends GXDLMSObject implements IGXDLMSBase {
     private int deviation;
     private boolean enabled;
     private GXDateTime end = new GXDateTime();
-    private ClockStatus status;
+    private java.util.Set<ClockStatus> status;
     private GXDateTime begin = new GXDateTime();
     private int timeZone;
     private GXDateTime time = new GXDateTime();
@@ -65,7 +65,7 @@ public class GXDLMSClock extends GXDLMSObject implements IGXDLMSBase {
      */
     public GXDLMSClock() {
         super(ObjectType.CLOCK, "0.0.1.0.0.255", 0);
-        status = ClockStatus.OK;
+        status = EnumSet.of(ClockStatus.OK);
         deviation = 0;
         java.util.Set<DateTimeSkips> value = EnumSet.of(DateTimeSkips.MONTH);
         value.add(DateTimeSkips.DAY);
@@ -82,7 +82,7 @@ public class GXDLMSClock extends GXDLMSObject implements IGXDLMSBase {
      */
     public GXDLMSClock(final String ln) {
         super(ObjectType.CLOCK, ln, 0);
-        status = ClockStatus.OK;
+        status = EnumSet.of(ClockStatus.OK);
         deviation = 0;
         java.util.Set<DateTimeSkips> value = EnumSet.of(DateTimeSkips.MONTH);
         value.add(DateTimeSkips.DAY);
@@ -101,7 +101,7 @@ public class GXDLMSClock extends GXDLMSObject implements IGXDLMSBase {
      */
     public GXDLMSClock(final String ln, final int sn) {
         super(ObjectType.CLOCK, ln, sn);
-        status = ClockStatus.OK;
+        status = EnumSet.of(ClockStatus.OK);
         deviation = 0;
         java.util.Set<DateTimeSkips> value = EnumSet.of(DateTimeSkips.MONTH);
         value.add(DateTimeSkips.DAY);
@@ -151,7 +151,7 @@ public class GXDLMSClock extends GXDLMSObject implements IGXDLMSBase {
     /**
      * @return Status of COSEM Clock object.
      */
-    public final ClockStatus getStatus() {
+    public final java.util.Set<ClockStatus> getStatus() {
         return status;
     }
 
@@ -159,7 +159,7 @@ public class GXDLMSClock extends GXDLMSObject implements IGXDLMSBase {
      * @param value
      *            Status of COSEM Clock object.
      */
-    public final void setStatus(final ClockStatus value) {
+    public final void setStatus(final java.util.Set<ClockStatus> value) {
         status = value;
     }
 
@@ -462,7 +462,7 @@ public class GXDLMSClock extends GXDLMSObject implements IGXDLMSBase {
             return getTimeZone();
         }
         if (index == 4) {
-            return getStatus().getValue();
+            return ClockStatus.toInteger(status);
         }
         if (index == 5) {
             return getBegin();
@@ -512,7 +512,7 @@ public class GXDLMSClock extends GXDLMSObject implements IGXDLMSBase {
             }
         } else if (index == 4) {
             if (value == null) {
-                setStatus(ClockStatus.OK);
+                setStatus(EnumSet.of(ClockStatus.OK));
             } else {
                 setStatus(ClockStatus.forValue(((Number) value).intValue()));
             }

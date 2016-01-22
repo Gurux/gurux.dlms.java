@@ -50,7 +50,7 @@ final class GXDLMSChippering {
     }
 
     /**
-     * Get Nonse from frame counter and system title.
+     * Get nonse from frame counter and system title.
      * 
      * @param frameCounter
      *            Frame counter.

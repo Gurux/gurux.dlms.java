@@ -1,4 +1,3 @@
-
 // 
 //
 //
@@ -48,7 +47,7 @@ public class GXDateTime {
     /**
      * Clock status.
      */
-    private ClockStatus status;
+    private java.util.Set<ClockStatus> status;
     /**
      * Clock time.
      */
@@ -76,7 +75,7 @@ public class GXDateTime {
     public GXDateTime() {
         skip = EnumSet.noneOf(DateTimeSkips.class);
         deviation = 0x8000;
-        status = ClockStatus.OK;
+        status = EnumSet.of(ClockStatus.OK);
     }
 
     /**
@@ -88,7 +87,7 @@ public class GXDateTime {
     public GXDateTime(final Date forvalue) {
         skip = EnumSet.noneOf(DateTimeSkips.class);
         setValue(forvalue);
-        status = ClockStatus.OK;
+        status = EnumSet.of(ClockStatus.OK);
     }
 
     /**
@@ -119,7 +118,7 @@ public class GXDateTime {
         int min = minute;
         int s = second;
         int ms = millisecond;
-        status = ClockStatus.OK;
+        status = EnumSet.of(ClockStatus.OK);
         skip = EnumSet.noneOf(DateTimeSkips.class);
         if (y < 1 || y == 0xFFFF) {
             skip.add(DateTimeSkips.YEAR);
@@ -271,11 +270,11 @@ public class GXDateTime {
     /*
      * Status of the clock.
      */
-    public final ClockStatus getStatus() {
+    public final java.util.Set<ClockStatus> getStatus() {
         return status;
     }
 
-    public final void setStatus(final ClockStatus forValue) {
+    public final void setStatus(final java.util.Set<ClockStatus> forValue) {
         status = forValue;
     }
 

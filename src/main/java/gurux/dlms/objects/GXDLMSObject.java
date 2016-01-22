@@ -369,14 +369,6 @@ public class GXDLMSObject {
         att.setMethodAccess(access);
     }
 
-    /**
-     * Override this function to update default values for OBIS attributes. This
-     * functionality is added because several manufacturers has different device
-     * and UI values.
-     */
-    public void updateDefaultValueItems() {
-    }
-
     // CHECKSTYLE:OFF
     public DataType getDataType(final int index) {
         GXDLMSAttributeSettings att = attributes.find(index);

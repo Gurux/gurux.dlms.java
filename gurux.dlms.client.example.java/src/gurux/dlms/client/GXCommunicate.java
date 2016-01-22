@@ -194,9 +194,8 @@ public class GXCommunicate {
                             "Failed to receive reply from the device in given time.");
                 }
             }
-            dlms.getData(p.getReply(), reply);
             // Loop until whole DLMS packet is received.
-            while (!reply.isComplete()) {
+            while (!dlms.getData(p.getReply(), reply)) {
                 if (p.getEop() == null) {
                     p.setCount(1);
                 }
@@ -472,7 +471,7 @@ public class GXCommunicate {
         byte[][] data = dlms.readRowsByEntry(pg, index, count);
         GXReplyData reply = new GXReplyData();
         readDataBlock(data, reply);
-        return (Object[]) dlms.updateValue(pg, 2, reply.getData());
+        return (Object[]) dlms.updateValue(pg, 2, reply.getValue());
     }
 
     /**
@@ -490,6 +489,6 @@ public class GXCommunicate {
         GXReplyData reply = new GXReplyData();
         byte[][] data = dlms.readRowsByRange(pg, start, end);
         readDataBlock(data, reply);
-        return (Object[]) dlms.updateValue(pg, 2, reply.getData());
+        return (Object[]) dlms.updateValue(pg, 2, reply.getValue());
     }
 }

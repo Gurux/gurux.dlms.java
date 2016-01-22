@@ -560,9 +560,9 @@ public final class GXCommon {
             ms = 0;
         }
         int deviation = buff.getInt16();
-        ClockStatus status = ClockStatus.forValue(buff.getUInt8());
+        int status = buff.getUInt8();
         GXDateTime dt = new GXDateTime();
-        dt.setStatus(status);
+        dt.setStatus(ClockStatus.forValue(status));
         java.util.Set<DateTimeSkips> skip = EnumSet.noneOf(DateTimeSkips.class);
         if (year < 1 || year == 0xFFFF) {
             skip.add(DateTimeSkips.YEAR);
@@ -608,8 +608,7 @@ public final class GXCommon {
             tm.set(Calendar.MILLISECOND, ms);
         }
         // If summer time.
-        if ((status.getValue()
-                & ClockStatus.DAYLIGHT_SAVE_ACTIVE.getValue()) != 0) {
+        if ((status & ClockStatus.DAYLIGHT_SAVE_ACTIVE.getValue()) != 0) {
             tm.add(Calendar.HOUR, 1);
         }
         dt.setValue(tm.getTime(), deviation);
@@ -925,7 +924,7 @@ public final class GXCommon {
             }
         }
         if (len > 0) {
-            value = buff.getString(buff.position(), len);
+            value = buff.getString(len);
         } else {
             value = "";
         }
@@ -1282,8 +1281,7 @@ public final class GXCommon {
         tm.setTime(dt.getValue());
         // If summer time.
         if (TimeZone.getDefault().inDaylightTime(dt.getValue())
-                || (dt.getStatus().getValue()
-                        & ClockStatus.DAYLIGHT_SAVE_ACTIVE.getValue()) != 0) {
+                || dt.getStatus().contains(ClockStatus.DAYLIGHT_SAVE_ACTIVE)) {
             tm.add(Calendar.HOUR, -1);
         }
 
@@ -1346,10 +1344,10 @@ public final class GXCommon {
         }
         // Add clock_status
         if (TimeZone.getDefault().inDaylightTime(dt.getValue())) {
-            buff.setUInt8(dt.getStatus().getValue()
+            buff.setUInt8(ClockStatus.toInteger(dt.getStatus())
                     | ClockStatus.DAYLIGHT_SAVE_ACTIVE.getValue());
         } else {
-            buff.setUInt8(dt.getStatus().getValue());
+            buff.setUInt8(ClockStatus.toInteger(dt.getStatus()));
         }
     }
 

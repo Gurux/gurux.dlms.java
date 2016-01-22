@@ -133,14 +133,19 @@ public class GXDLMSSecuritySetup extends GXDLMSObject implements IGXDLMSBase {
         if (canRead(3)) {
             attributes.add(3);
         }
-
-        // ClientSystemTitle
-        if (canRead(4)) {
-            attributes.add(4);
-        }
-        // ServerSystemTitle
-        if (canRead(5)) {
-            attributes.add(5);
+        if (getVersion() > 0) {
+            // ClientSystemTitle
+            if (canRead(4)) {
+                attributes.add(4);
+            }
+            // ServerSystemTitle
+            if (canRead(5)) {
+                attributes.add(5);
+            }
+            // Certificates
+            if (canRead(6)) {
+                attributes.add(6);
+            }
         }
         return GXDLMSObjectHelpers.toIntArray(attributes);
     }
@@ -150,7 +155,10 @@ public class GXDLMSSecuritySetup extends GXDLMSObject implements IGXDLMSBase {
      */
     @Override
     public final int getAttributeCount() {
-        return 5;
+        if (getVersion() == 0) {
+            return 3;
+        }
+        return 6;
     }
 
     /*
@@ -158,7 +166,10 @@ public class GXDLMSSecuritySetup extends GXDLMSObject implements IGXDLMSBase {
      */
     @Override
     public final int getMethodCount() {
-        return 2;
+        if (getVersion() == 0) {
+            return 3;
+        }
+        return 8;
     }
 
     @Override
@@ -172,14 +183,22 @@ public class GXDLMSSecuritySetup extends GXDLMSObject implements IGXDLMSBase {
         if (index == 3) {
             return DataType.ENUM;
         }
-        if (index == 4) {
-            return DataType.OCTET_STRING;
+        if (getVersion() > 0) {
+            if (index == 4) {
+                return DataType.OCTET_STRING;
+            }
+            if (index == 5) {
+                return DataType.OCTET_STRING;
+            }
+            if (index == 6) {
+                return DataType.OCTET_STRING;
+            }
+            throw new IllegalArgumentException(
+                    "getDataType failed. Invalid attribute index.");
+        } else {
+            throw new IllegalArgumentException(
+                    "getDataType failed. Invalid attribute index.");
         }
-        if (index == 5) {
-            return DataType.OCTET_STRING;
-        }
-        throw new IllegalArgumentException(
-                "getDataType failed. Invalid attribute index.");
     }
 
     /*
@@ -216,9 +235,11 @@ public class GXDLMSSecuritySetup extends GXDLMSObject implements IGXDLMSBase {
         if (index == 1) {
             super.setValue(settings, index, value);
         } else if (index == 2) {
-            setSecurityPolicy(SecurityPolicy.forValue((Byte) value));
+            setSecurityPolicy(
+                    SecurityPolicy.forValue(((Number) value).byteValue()));
         } else if (index == 3) {
-            setSecuritySuite(SecuritySuite.forValue((Byte) value));
+            setSecuritySuite(
+                    SecuritySuite.forValue(((Number) value).byteValue()));
         } else if (index == 4) {
             setClientSystemTitle((byte[]) value);
         } else if (index == 5) {

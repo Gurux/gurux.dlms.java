@@ -35,7 +35,9 @@
 package gurux.dlms;
 
 import gurux.dlms.enums.AssociationResult;
+import gurux.dlms.enums.ServiceError;
 import gurux.dlms.enums.SourceDiagnostic;
+import gurux.dlms.enums.StateError;
 
 /**
  * DLMS specific exception class that has error description available from
@@ -49,6 +51,8 @@ public class GXDLMSException extends RuntimeException {
     private AssociationResult result = AssociationResult.ACCEPTED;
     private SourceDiagnostic diagnostic = SourceDiagnostic.NONE;
     private int errorCode;
+    private StateError stateError;
+    private ServiceError serviceError;
 
     public GXDLMSException(final int errCode) {
         super(GXDLMS.getDescription(errCode));
@@ -66,6 +70,57 @@ public class GXDLMSException extends RuntimeException {
             final SourceDiagnostic forDiagnostic) {
         super("Connection is " + getResult(forResult) + "\r\n"
                 + getDiagnostic(forDiagnostic));
+    }
+
+    /**
+     * @param stateErr
+     *            State error.
+     * @param serviceErr
+     *            Service error.
+     */
+    GXDLMSException(final StateError stateErr, final ServiceError serviceErr) {
+        super("Meter returns " + getStateError(stateErr) + " exception. "
+                + getServiceError(serviceErr));
+        stateError = stateErr;
+        serviceError = serviceErr;
+    }
+
+    /**
+     * Gets state error description.
+     * 
+     * @param stateError
+     *            State error enumerator value.
+     * @return State error as an string.
+     */
+    private static String getStateError(final StateError stateError) {
+        switch (stateError) {
+        case SERVICE_NOT_ALLOWED:
+            return "Service not allowed";
+        case SERVICE_UNKNOWN:
+            return "Service unknown";
+        default:
+        }
+        return "";
+    }
+
+    /**
+     * Gets service error description.
+     * 
+     * @param serviceError
+     *            Service error enumerator value.
+     * @return Service error as an string.
+     */
+    private static String getServiceError(final ServiceError serviceError) {
+        switch (serviceError) {
+        case OPERATION_NOT_POSSIBLE:
+            return "Operation not possible";
+        case SERVICE_NOT_SUPPORTED:
+            return "Service not supported";
+        case OTHER_REASON:
+            return "Other reason";
+        default:
+        }
+        return "";
     }
 
     /**
@@ -155,5 +210,19 @@ public class GXDLMSException extends RuntimeException {
      */
     final void setDiagnostic(final SourceDiagnostic value) {
         diagnostic = value;
+    }
+
+    /**
+     * @return State error.
+     */
+    final StateError getStateError() {
+        return stateError;
+    }
+
+    /**
+     * @return Service error.
+     */
+    final ServiceError getServiceError() {
+        return serviceError;
     }
 }

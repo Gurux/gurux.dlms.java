@@ -491,8 +491,10 @@ public class GXDLMSLimiter extends GXDLMSObject implements IGXDLMSBase {
         } else if (index == 9) {
             java.util.ArrayList<Integer> list =
                     new java.util.ArrayList<Integer>();
-            for (Object it : (Object[]) value) {
-                list.add(((Number) it).intValue());
+            if (value != null) {
+                for (Object it : (Object[]) value) {
+                    list.add(((Number) it).intValue());
+                }
             }
             emergencyProfileGroupIDs = GXDLMSObjectHelpers.toIntArray(list);
         } else if (index == 10) {

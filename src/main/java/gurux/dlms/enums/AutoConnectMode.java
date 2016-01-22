@@ -39,36 +39,43 @@ package gurux.dlms.enums;
  * timing.
  */
 public enum AutoConnectMode {
-    /*
+    /**
      * No auto dialing,
      */
     NO_AUTO_DIALLING(0),
-    /*
+
+    /**
      * Auto dialing allowed any time,
      */
     AUTO_DIALLING_ALLOWED_ANYTIME(1),
-    /*
+
+    /**
      * Auto dialing allowed within the validity time of the calling window.
      */
     AUTO_DIALLING_ALLOWED_CALLING_WINDOW(2),
-    /*
+
+    /**
      * Regular auto dialing allowed within the validity time of the calling
      * window; alarm initiated auto dialing allowed any time,
      */
     REGULAR_AUTO_DIALLING_ALLOWED_CALLING_WINDOW(3),
-    /*
+
+    /**
      * SMS sending via Public Land Mobile Network (PLMN),
      */
     SMS_SENDING_PLMN(4),
-    /*
+
+    /**
      * SMS sending via PSTN.
      */
     SMS_SENDING_PSTN(5),
-    /*
+
+    /**
      * Email sending.
      */
     EMAIL_SENDING(6),
-    /*
+
+    /**
      * (200..255) manufacturer specific modes
      */
     MANUFACTURE_SPESIFIC(200);

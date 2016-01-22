@@ -39,9 +39,7 @@ import java.io.FileWriter;
 import java.io.PrintWriter;
 import java.lang.reflect.Array;
 import java.text.NumberFormat;
-import java.util.AbstractMap;
-import java.util.ArrayList;
-import java.util.List;
+import java.util.AbstractMap.SimpleEntry;
 
 import gurux.common.IGXMedia;
 import gurux.dlms.GXDLMSClient;
@@ -51,6 +49,7 @@ import gurux.dlms.enums.ObjectType;
 import gurux.dlms.internal.GXCommon;
 import gurux.dlms.manufacturersettings.GXManufacturer;
 import gurux.dlms.manufacturersettings.GXManufacturerCollection;
+import gurux.dlms.objects.GXDLMSCaptureObject;
 import gurux.dlms.objects.GXDLMSDemandRegister;
 import gurux.dlms.objects.GXDLMSObject;
 import gurux.dlms.objects.GXDLMSObjectCollection;
@@ -246,20 +245,15 @@ public class sampleclient {
             GXDLMSObjectCollection objects =
                     dlms.parseObjects(reply.getData(), true);
             GXDLMSObjectCollection objs = objects.getObjects(new ObjectType[] {
-                    ObjectType.REGISTER, ObjectType.DEMAND_REGISTER });
-            // Read and update register scalers first.
-            List<AbstractMap.SimpleEntry<GXDLMSObject, Integer>> list =
-                    new ArrayList<AbstractMap.SimpleEntry<GXDLMSObject, Integer>>();
+                    ObjectType.REGISTER, ObjectType.DEMAND_REGISTER,
+                    ObjectType.EXTENDED_REGISTER });
             for (GXDLMSObject it : objs) {
                 if (it instanceof GXDLMSRegister) {
-                    list.add(new AbstractMap.SimpleEntry<GXDLMSObject, Integer>(
-                            it, 3));
+                    com.readObject(it, 3);
                 } else if (it instanceof GXDLMSDemandRegister) {
-                    list.add(new AbstractMap.SimpleEntry<GXDLMSObject, Integer>(
-                            it, 4));
+                    com.readObject(it, 4);
                 }
             }
-            com.readList(list);
             // Read Profile Generic columns.
             GXDLMSObjectCollection profileGenerics =
                     objects.getObjects(ObjectType.PROFILE_GENERIC);
@@ -269,26 +263,17 @@ public class sampleclient {
                 GXDLMSProfileGeneric pg = (GXDLMSProfileGeneric) it;
                 // Read columns.
                 try {
-                    GXDLMSObject[] columns =
-                            (GXDLMSObject[]) com.readObject(pg, 3);
-                    // Read and update columns scalers.
-                    for (GXDLMSObject it2 : columns) {
-                        if (it2 instanceof GXDLMSRegister) {
-                            com.readObject(it2, 3);
-                        }
-                        if (it2 instanceof GXDLMSDemandRegister) {
-                            com.readObject(it2, 4);
-                        }
-                    }
+                    com.readObject(pg, 3);
                     boolean first = true;
                     StringBuilder sb = new StringBuilder();
-                    for (GXDLMSObject col : columns) {
+                    for (SimpleEntry<GXDLMSObject, GXDLMSCaptureObject> col : pg
+                            .getCaptureObjects()) {
                         if (!first) {
                             sb.append(" | ");
                         }
-                        sb.append(col.getName());
+                        sb.append(col.getKey().getName());
                         sb.append(" ");
-                        String desc = col.getDescription();
+                        String desc = col.getKey().getDescription();
                         if (desc != null) {
                             sb.append(desc);
                         }

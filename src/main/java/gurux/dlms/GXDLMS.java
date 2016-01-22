@@ -47,6 +47,8 @@ import gurux.dlms.enums.ObjectType;
 import gurux.dlms.enums.Priority;
 import gurux.dlms.enums.RequestTypes;
 import gurux.dlms.enums.ServiceClass;
+import gurux.dlms.enums.ServiceError;
+import gurux.dlms.enums.StateError;
 import gurux.dlms.internal.GXCommon;
 import gurux.dlms.internal.GXDataInfo;
 import gurux.dlms.objects.GXDLMSActionSchedule;
@@ -229,8 +231,8 @@ abstract class GXDLMS {
         }
         // Get next block.
         GXByteBuffer bb = new GXByteBuffer(6);
-        settings.increaseBlockIndex();
         bb.setUInt32(settings.getBlockIndex());
+        settings.increaseBlockIndex();
         if (settings.isServer()) {
             return splitPdu(settings, Command.GET_RESPONSE, 2, bb, ErrorCode.OK,
                     cipher).get(0)[0];
@@ -367,42 +369,6 @@ abstract class GXDLMS {
         }
     }
 
-    static void addLLCBytes(final Command command, final GXByteBuffer bb) {
-        switch (command) {
-        case GET_REQUEST:
-        case READ_REQUEST:
-        case AARQ:
-        case SET_REQUEST:
-        case WRITE_REQUEST:
-        case METHOD_REQUEST:
-        case GLO_GET_REQUEST:
-        case GLO_METHOD_REQUEST:
-        case GLO_SET_REQUEST:
-            bb.set(GXCommon.LLC_SEND_BYTES);
-            break;
-        case GET_RESPONSE:
-        case READ_RESPONSE:
-        case AARE:
-        case SET_RESPONSE:
-        case WRITE_RESPONSE:
-        case METHOD_RESPONSE:
-        case GLO_GET_RESPONSE:
-        case GLO_METHOD_RESPONSE:
-        case GLO_SET_RESPONSE:
-            bb.set(GXCommon.LLC_REPLY_BYTES);
-            break;
-        case UA:
-        case DISCONNECT_REQUEST:
-        case DISCONNECT_RESPONSE:
-            // LLC bytes are not added.
-            break;
-        case PUSH:
-        case REJECTED:
-        default:
-            throw new IllegalArgumentException("LLC bytes are added.");
-        }
-    }
-
     static void appedData(final GXDLMSObject obj, final int index,
             final GXByteBuffer bb, final Object value) {
 
@@ -433,10 +399,6 @@ abstract class GXDLMS {
         // For SN there is no need to split data for blocks.
         if (!settings.getUseLogicalNameReferencing()) {
             byte[] tmp = getSnPdus(settings, data, command);
-            // Add LLC bytes.
-            if (settings.getInterfaceType() == InterfaceType.HDLC) {
-                addLLCBytes(command, bb);
-            }
             // If Ciphering is used.
             if (cp != null) {
                 bb.set(cp.encrypt(command, tmp));
@@ -444,7 +406,11 @@ abstract class GXDLMS {
                 bb.set(tmp);
             }
             if (settings.getInterfaceType() == InterfaceType.HDLC) {
-                list.add(splitToHdlcFrames(settings, 0, bb));
+                if (command == Command.AARQ) {
+                    list.add(splitToHdlcFrames(settings, 0x10, bb));
+                } else {
+                    list.add(splitToHdlcFrames(settings, 0, bb));
+                }
             } else {
                 list.add(splitToWrapperFrames(settings, bb));
             }
@@ -452,10 +418,6 @@ abstract class GXDLMS {
             List<byte[]> pdus =
                     getLnPdus(settings, commandParameter, data, command, error);
             for (byte[] it : pdus) {
-                // Add LLC bytes.
-                if (settings.getInterfaceType() == InterfaceType.HDLC) {
-                    addLLCBytes(command, bb);
-                }
                 // If Ciphering is used.
                 if (cp != null) {
                     bb.set(cp.encrypt(command, it));
@@ -463,7 +425,11 @@ abstract class GXDLMS {
                     bb.set(it);
                 }
                 if (settings.getInterfaceType() == InterfaceType.HDLC) {
-                    list.add(splitToHdlcFrames(settings, 0, bb));
+                    if (command == Command.AARQ) {
+                        list.add(splitToHdlcFrames(settings, 0x10, bb));
+                    } else {
+                        list.add(splitToHdlcFrames(settings, 0, bb));
+                    }
                 } else {
                     list.add(splitToWrapperFrames(settings, bb));
                 }
@@ -628,6 +594,17 @@ abstract class GXDLMS {
         frameSize -= 7 + primaryAddress.length + secondaryAddress.length;
         List<byte[]> arr = new ArrayList<byte[]>();
         GXByteBuffer bb = new GXByteBuffer();
+        // Add LLC bytes.
+        byte[] llcBytes = null;
+        int llcByteSize = 0;
+        if ((frame & 1) == 0) {
+            llcByteSize = 3;
+            if (settings.isServer()) {
+                llcBytes = GXCommon.LLC_REPLY_BYTES;
+            } else {
+                llcBytes = GXCommon.LLC_SEND_BYTES;
+            }
+        }
         do {
             // Add BOP
             bb.setUInt8(GXCommon.HDLC_FRAME_START_END);
@@ -636,7 +613,8 @@ abstract class GXDLMS {
                 bb.setUInt8(0xA0);
                 // Skip data CRC from the total size.
                 len = -2;
-            } else if (data.size() - data.position() <= frameSize) {
+            } else if (data.size() - data.position()
+                    + llcByteSize <= frameSize) {
                 // Is last packet.
                 bb.setUInt8(0xA0);
                 len = data.size() - data.position();
@@ -646,25 +624,26 @@ abstract class GXDLMS {
                 len = frameSize;
             }
             // Add length.
-            bb.setUInt8(
-                    7 + primaryAddress.length + secondaryAddress.length + len);
+            bb.setUInt8(7 + primaryAddress.length + secondaryAddress.length
+                    + len + llcByteSize);
             // Add primary address.
             bb.set(primaryAddress);
             // Add secondary address.
             bb.set(secondaryAddress);
             // Generate frame if not generated yet.
             if (frame == 0) {
-                if (arr.size() == 0) {
-                    frame = settings.getNextFrame();
-                } else {
-                    frame = settings.getNextSend();
-                }
+                frame = settings.getNextSend();
             }
             // Add frame.
             bb.setUInt8(frame);
             // Add header CRC.
             int crc = GXFCS16.countFCS16(bb.getData(), 1, bb.size() - 1);
             bb.setUInt16(crc);
+            // Add LLC bytes only once.
+            if (llcByteSize != 0) {
+                bb.set(llcBytes);
+                llcByteSize = 0;
+            }
             // Add data.
             if (data != null && data.size() != 0) {
                 bb.set(data.getData(), data.position(), len);
@@ -800,6 +779,9 @@ abstract class GXDLMS {
         }
         // Get frame type.
         frame = reply.getUInt8();
+        if (!settings.checkFrame(frame)) {
+            throw new RuntimeException("Wrong frame index.");
+        }
         FrameType type = FrameType.forValue(frame & 0xFF);
         // Check that header CRC is correct.
         crc = GXFCS16.countFCS16(reply.getData(), packetStartID + 1,
@@ -808,14 +790,15 @@ abstract class GXDLMS {
         if (crc != crcRead) {
             throw new RuntimeException("Wrong CRC.");
         }
-        // Check that CRC match.
-        crc = GXFCS16.countFCS16(reply.getData(), packetStartID + 1,
-                frameLen - 2);
-        crcRead = reply.getUInt16(packetStartID + frameLen - 1);
-        if (crc != crcRead) {
-            throw new RuntimeException("Wrong CRC.");
+        // Check that packet CRC match only if there is a data part.
+        if (reply.position() != packetStartID + frameLen + 1) {
+            crc = GXFCS16.countFCS16(reply.getData(), packetStartID + 1,
+                    frameLen - 2);
+            crcRead = reply.getUInt16(packetStartID + frameLen - 1);
+            if (crc != crcRead) {
+                throw new RuntimeException("Wrong CRC.");
+            }
         }
-
         if (type == FrameType.DISCONNECT_REQUEST) {
             // Get EOP.
             reply.getUInt8();
@@ -825,6 +808,11 @@ abstract class GXDLMS {
             reply.getUInt8();
             data.setCommand(Command.DISCONNECT_REQUEST);
         } else if (type == FrameType.UA) {
+            if (!settings.isServer()
+                    && reply.position() == packetStartID + frameLen + 1) {
+                // Get EOP.
+                reply.getUInt8();
+            }
             data.setCommand(Command.UA);
         } else if (type == FrameType.SNRM) {
             data.setCommand(Command.SNRM);
@@ -852,7 +840,7 @@ abstract class GXDLMS {
 
     private static boolean checkHdlcAddress(final boolean server,
             final GXDLMSSettings settings, final GXByteBuffer reply,
-            final GXReplyData data, int index, int count) {
+            final GXReplyData data, final int index, final int count) {
         int source, target;
         // Get destination and source addresses.
         target = GXCommon.getHDLCAddress(reply);
@@ -1269,6 +1257,10 @@ abstract class GXDLMS {
                 break;
             case DISCONNECT_RESPONSE:
                 break;
+            case EXCEPTION_RESPONSE:
+                throw new GXDLMSException(
+                        StateError.forValue(data.getData().getUInt8()),
+                        ServiceError.forValue(data.getData().getUInt8()));
             case GET_REQUEST:
             case READ_REQUEST:
             case WRITE_REQUEST:
@@ -1374,7 +1366,7 @@ abstract class GXDLMS {
         }
     }
 
-    public static void getData(final GXDLMSSettings settings,
+    public static boolean getData(final GXDLMSSettings settings,
             final GXByteBuffer reply, final GXReplyData data,
             final GXICipher cipher) {
         short frame = 0;
@@ -1388,24 +1380,25 @@ abstract class GXDLMS {
         }
         // If all data is not read yet.
         if (!data.isComplete()) {
-            return;
+            return false;
         }
 
         getDataFromFrame(reply, data.getData());
 
         // If keepalive or get next frame request.
         if ((frame & 0x1) != 0) {
-            return;
+            return true;
         }
 
         // Get data.
         if (frame != FrameType.SNRM.getValue()
                 && frame != FrameType.UA.getValue()
-                && frame != FrameType.AARQ.getValue()
-                && frame != FrameType.AARE.getValue()
+                && data.getCommand() != Command.AARQ
+                && data.getCommand() != Command.AARQ
                 && frame != FrameType.DISCONNECT_MODE.getValue()) {
             getPdu(settings, data, cipher);
         }
+        return true;
     }
 
     /**

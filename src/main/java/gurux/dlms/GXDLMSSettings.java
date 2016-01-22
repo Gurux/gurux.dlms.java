@@ -13,13 +13,24 @@ import gurux.dlms.objects.GXDLMSObjectCollection;
  */
 public class GXDLMSSettings {
     /**
-     * Server frame sequence starting number.
+     * Server sender frame sequence starting number.
      */
-    static final byte SERVER_START_FRAME_SEQUENCE = 0x0F;
+    static final short SERVER_START_SENDER_FRAME_SEQUENCE = 0x1E;
+
     /**
-     * Client frame sequence starting number.
+     * Server receiver frame sequence starting number.
      */
-    static final byte CLIENT_START_FRAME_SEQUENCE = (byte) 0xEE;
+    static final short SERVER_START_RECEIVER_FRAME_SEQUENCE = 0xFE;
+
+    /**
+     * Client sender frame sequence starting number.
+     */
+    static final short CLIENT_START_SENDER_FRAME_SEQUENCE = 0x10;
+
+    /**
+     * Client receiver frame sequence starting number.
+     */
+    static final short CLIENT_START_RCEIVER_FRAME_SEQUENCE = 0xE;
 
     /**
      * DLMS version number.
@@ -86,10 +97,16 @@ public class GXDLMSSettings {
      * Maximum receivers PDU size.
      */
     private int maxReceivePDUSize = MAX_RECEIVE_PDU_SIZE;
+
     /**
-     * Frame sequence number.
+     * HDLC sender frame sequence number.
      */
-    private byte frame = 0x10;
+    private short senderFrame;
+
+    /**
+     * HDLC receiver frame sequence number.
+     */
+    private short receiverFrame;
 
     /**
      * Is this server or client.
@@ -125,6 +142,7 @@ public class GXDLMSSettings {
         server = isServer;
         objects = new GXDLMSObjectCollection();
         limits = new GXDLMSLimits();
+        resetFrameSequence();
     }
 
     /**
@@ -211,10 +229,46 @@ public class GXDLMSSettings {
      */
     public final void resetFrameSequence() {
         if (server) {
-            frame = SERVER_START_FRAME_SEQUENCE;
+            senderFrame = SERVER_START_SENDER_FRAME_SEQUENCE;
+            receiverFrame = SERVER_START_RECEIVER_FRAME_SEQUENCE;
         } else {
-            frame = CLIENT_START_FRAME_SEQUENCE;
+            senderFrame = CLIENT_START_SENDER_FRAME_SEQUENCE;
+            receiverFrame = CLIENT_START_RCEIVER_FRAME_SEQUENCE;
         }
+    }
+
+    final boolean checkFrame(final short frame) {
+        // If U frame.
+        if ((frame & 0x3) == 3) {
+            resetFrameSequence();
+            return true;
+        }
+        // If S -frame
+        if ((frame & 0x3) == 1) {
+            if ((frame & 0xE0) == ((receiverFrame) & 0xE0)) {
+                receiverFrame = frame;
+                return true;
+            }
+            System.out.println("Frame ID do not match.");
+            return true;
+        }
+
+        // If I frame sent.
+        if ((senderFrame & 0x1) == 0) {
+            if ((frame & 0xE0) == ((receiverFrame + 0x20) & 0xE0)
+                    && (frame & 0xE) == ((receiverFrame + 2) & 0xE)) {
+                receiverFrame = (byte) (frame);
+                return true;
+            }
+        } else if (frame == receiverFrame
+                || ((frame & 0xE0) == (receiverFrame & 0xE0)
+                        && (frame & 0xE) == ((receiverFrame + 2) & 0xE))) {
+            // If S-frame sent.
+            receiverFrame = frame;
+            return true;
+        }
+        System.out.println("Frame ID do not match.");
+        return true;
     }
 
     /**
@@ -223,10 +277,11 @@ public class GXDLMSSettings {
      */
     public final boolean isGenerated() {
         if (server) {
-            return frame != SERVER_START_FRAME_SEQUENCE;
-        } else {
-            return frame != CLIENT_START_FRAME_SEQUENCE;
+            return senderFrame != SERVER_START_SENDER_FRAME_SEQUENCE
+                    || receiverFrame != SERVER_START_RECEIVER_FRAME_SEQUENCE;
         }
+        return senderFrame != CLIENT_START_SENDER_FRAME_SEQUENCE
+                || receiverFrame != CLIENT_START_RCEIVER_FRAME_SEQUENCE;
     }
 
     /**
@@ -252,35 +307,28 @@ public class GXDLMSSettings {
     }
 
     /**
-     * @return Generates next frame.
-     */
-    final byte getNextFrame() {
-        frame = increaseReceiverSequence(increaseSendSequence(frame));
-        return frame;
-    }
-
-    /**
-     * @return Generates send frame.
+     * @return Generates I-frame.
      */
     final byte getNextSend() {
-        frame = increaseSendSequence(frame);
-        return frame;
+        senderFrame = increaseReceiverSequence(
+                increaseSendSequence((byte) senderFrame));
+        return (byte) senderFrame;
     }
 
     /**
-     * @return Generates receive frame.
-     */
-    final byte getNextReceive() {
-        frame = increaseReceiverSequence(frame);
-        return frame;
-    }
-
-    /**
-     * @return Generates receiver ready frame.
+     * @return Generates Receiver Ready S-frame.
      */
     final byte getReceiverReady() {
-        frame = (byte) (increaseReceiverSequence(frame) & 0xF0 | 1);
-        return frame;
+        senderFrame = increaseReceiverSequence((byte) (senderFrame | 1));
+        return (byte) (senderFrame & 0xF1);
+    }
+
+    /**
+     * @return Generates Keep Alive S-frame.
+     */
+    final byte getKeepAlive() {
+        senderFrame = (byte) (senderFrame | 1);
+        return (byte) (senderFrame & 0xF1);
     }
 
     /**

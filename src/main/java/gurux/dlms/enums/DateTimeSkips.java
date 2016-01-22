@@ -44,47 +44,54 @@ public enum DateTimeSkips {
      * Nothing is skipped from date time.
      */
     NONE(0),
-    /*
+
+    /**
      * Year part of date time is skipped.
      */
     YEAR(1),
-    /*
+
+    /**
      * Month part of date time is skipped.
      */
     MONTH(2),
-    /*
+
+    /**
      * Day part is skipped.
      */
     DAY(4),
-    /*
+
+    /**
      * Day of week part of date time is skipped.
      */
     DAY_OF_WEEK(8),
-    /*
+
+    /**
      * Hours part of date time is skipped.
      */
     HOUR(0x10),
-    /*
+
+    /**
      * Minute part of date time is skipped.
      */
     MINUTE(0x20),
-    /*
+
+    /**
      * Second part of date time is skipped.
      */
     SECOND(0x40),
-    /*
+
+    /**
      * Hundreds of seconds part of date time is skipped.
      */
     MILLISECOND(0x80),
 
-    /*
+    /**
      * Devitation is now used on write.
      */
     DEVITATION(0x100);
 
     private int value;
 
-    // @SuppressWarnings("LeakingThisInConstructor")
     /*
      * Constructor.
      */

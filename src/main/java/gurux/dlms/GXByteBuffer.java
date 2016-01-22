@@ -37,6 +37,8 @@ package gurux.dlms;
 import java.io.UnsupportedEncodingException;
 import java.math.BigInteger;
 
+import gurux.dlms.internal.GXCommon;
+
 /**
  * Byte array class is used to save received bytes.
  * 
@@ -339,6 +341,12 @@ public class GXByteBuffer {
         return b;
     }
 
+    public final String getString(final int count) {
+        String str = getString(position, count, "ASCII");
+        position += count;
+        return str;
+    }
+
     public final String getString(final int index, final int count) {
         return getString(index, count, "ASCII");
     }
@@ -434,4 +442,8 @@ public class GXByteBuffer {
         return ret;
     }
 
+    @Override
+    public final String toString() {
+        return GXCommon.toHex(data, 0, size);
+    }
 }

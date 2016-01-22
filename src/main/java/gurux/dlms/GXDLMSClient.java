@@ -569,7 +569,6 @@ public class GXDLMSClient {
         }
         boolean ciphering = cipher != null && cipher.isCiphered();
         aarq.codeData(settings, ciphering, buff);
-        settings.resetFrameSequence();
         return GXDLMS
                 .splitPdu(settings, Command.AARQ, 0, buff, ErrorCode.OK, cipher)
                 .get(0);
@@ -682,13 +681,22 @@ public class GXDLMSClient {
      */
     public final byte[] disconnectRequest() {
         if (this.getInterfaceType() == InterfaceType.HDLC) {
-            return GXDLMS.splitToHdlcFrames(settings,
-                    FrameType.DISCONNECT_REQUEST.getValue(), null)[0];
+            if (settings.isGenerated()) {
+                return GXDLMS.splitToHdlcFrames(settings,
+                        FrameType.DISCONNECT_REQUEST.getValue(), null)[0];
+            }
+            return new byte[0];
         }
-        GXByteBuffer bb = new GXByteBuffer(2);
-        bb.setUInt8(Command.DISCONNECT_REQUEST.getValue());
-        bb.setUInt8(0x0);
-        return GXDLMS.splitToWrapperFrames(settings, bb)[0];
+        // Disconnect request is generated only if connection is made
+        // successfully.
+        if (settings.getSnSettings() != null
+                || settings.getLnSettings() != null) {
+            GXByteBuffer bb = new GXByteBuffer(2);
+            bb.setUInt8(Command.DISCONNECT_REQUEST.getValue());
+            bb.setUInt8(0x0);
+            return GXDLMS.splitToWrapperFrames(settings, bb)[0];
+        }
+        return new byte[0];
     }
 
     /**
@@ -1098,6 +1106,10 @@ public class GXDLMSClient {
         Object val = value;
         if (val instanceof byte[]) {
             DataType type = target.getUIDataType(attributeIndex);
+            if (type == DataType.DATETIME && ((byte[]) val).length == 5) {
+                type = DataType.DATE;
+                target.setUIDataType(attributeIndex, type);
+            }
             if (type != DataType.NONE) {
                 val = changeType((byte[]) value, type);
             }
@@ -1813,9 +1825,10 @@ public class GXDLMSClient {
      *            The received data from the device.
      * @param data
      *            Information from the received data.
+     * @return Is frame complete.
      */
-    public final void getData(final byte[] reply, final GXReplyData data) {
-        GXDLMS.getData(settings, new GXByteBuffer(reply), data, cipher);
+    public final boolean getData(final byte[] reply, final GXReplyData data) {
+        return GXDLMS.getData(settings, new GXByteBuffer(reply), data, cipher);
     }
 
     /**
@@ -1829,6 +1842,41 @@ public class GXDLMSClient {
     public final void getData(final GXByteBuffer reply,
             final GXReplyData data) {
         GXDLMS.getData(settings, reply, data, cipher);
+    }
+
+    /**
+     * Converts meter serial number to server address. Default formula is used.
+     * All meters do not use standard formula or support serial number
+     * addressing at all.
+     * 
+     * @param serialNumber
+     *            Meter serial number
+     * @return Server address.
+     */
+    public static int getServerAddress(final int serialNumber) {
+        return getServerAddress(serialNumber, null);
+    }
+
+    /**
+     * Converts meter serial number to server address. Default formula is used.
+     * All meters do not use standard formula or support serial number
+     * addressing at all.
+     * 
+     * @param serialNumber
+     *            Meter serial number
+     * @param formula
+     *            Formula used to convert serial number to server address.
+     * @return Server address.
+     */
+
+    public static int getServerAddress(final int serialNumber,
+            final String formula) {
+        // If formula is not given use default formula.
+        // This formula is defined in DLMS specification.
+        if (formula == null || formula.length() == 0) {
+            return SerialNumberCounter.count(serialNumber, "SN % 10000 + 1000");
+        }
+        return SerialNumberCounter.count(serialNumber, formula);
     }
 
     /**

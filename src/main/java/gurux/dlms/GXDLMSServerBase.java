@@ -961,7 +961,7 @@ public abstract class GXDLMSServerBase {
             // Get request for next data block
             // Get block index.
             index = (int) data.getUInt32();
-            if (index != settings.getBlockIndex() + 1) {
+            if (index != settings.getBlockIndex()) {
                 LOGGER.severe("handleGetRequest failed. Invalid block number. "
                         + settings.getBlockIndex() + "/" + index);
                 serverReply.setReplyMessages(

@@ -131,6 +131,11 @@ public enum Command {
     DISCONNECT_RESPONSE(0x63),
 
     /**
+     * Exception Response.
+     */
+    EXCEPTION_RESPONSE(0xD8),
+
+    /**
      * Push request.
      */
     PUSH(0xE0),
