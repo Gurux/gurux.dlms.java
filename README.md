@@ -25,6 +25,7 @@ You can get source codes from http://www.github.com/gurux/gurux.dlms.java or if 
   <version>1.0.6</version>
 </dependency>
 ```
+Import new Project selecting "Existing Maven Project". Import examples separately. If you import only main Project, you can't debug or run examples. 
 
 Simple example
 =========================== 

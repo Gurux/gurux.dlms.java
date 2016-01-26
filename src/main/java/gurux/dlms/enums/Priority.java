@@ -41,9 +41,11 @@ public enum Priority {
     /**
      * Normal priority.
      */
-    NORMAL(0), /**
-                * High priority.
-                */
+    NORMAL(0),
+
+    /**
+     * High priority.
+     */
     HIGH(1);
 
     private int intValue;
