@@ -110,6 +110,5 @@ final class GXApplicationContextName {
         }
         // If ciphering is used.
         return buff.compare(GXCommon.SHORT_NAME_OBJECT_ID_WITH_CIPHERING);
-
     }
 };

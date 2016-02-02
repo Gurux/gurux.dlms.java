@@ -168,37 +168,6 @@ public class GXDLMSClient {
     }
 
     /**
-     * Checks, whether the received packet is a reply to the sent packet.
-     * 
-     * @param sendData
-     *            The sent data as a byte array.
-     * @param receivedData
-     *            The received data as a byte array.
-     * @return True, if the received packet is a reply to the sent packet.
-     *         False, if not.
-     */
-    public final boolean isReplyPacket(final GXByteBuffer sendData,
-            final GXByteBuffer receivedData) {
-        return GXDLMS.isReplyPacket(settings, sendData, receivedData);
-    }
-
-    /**
-     * Checks, whether the received packet is a reply to the sent packet.
-     * 
-     * @param sendData
-     *            The sent data as a byte array.
-     * @param receivedData
-     *            The received data as a byte array.
-     * @return True, if the received packet is a reply to the sent packet.
-     *         False, if not.
-     */
-    public final boolean isReplyPacket(final byte[] sendData,
-            final byte[] receivedData) {
-        return GXDLMS.isReplyPacket(settings, new GXByteBuffer(sendData),
-                new GXByteBuffer(receivedData));
-    }
-
-    /**
      * @return Client address.
      */
     public final int getClientAddress() {
@@ -667,7 +636,8 @@ public class GXDLMSClient {
         // If connection is not established, there is no need to send
         // DisconnectRequest.
         if (this.getInterfaceType() == InterfaceType.WRAPPER
-                || !settings.isGenerated()) {
+                || (settings.getLnSettings() == null
+                        && settings.getSnSettings() == null)) {
             return new byte[0];
         }
         return GXDLMS.splitToHdlcFrames(settings,
@@ -680,23 +650,20 @@ public class GXDLMSClient {
      * @return Disconnected request, as byte array.
      */
     public final byte[] disconnectRequest() {
-        if (this.getInterfaceType() == InterfaceType.HDLC) {
-            if (settings.isGenerated()) {
-                return GXDLMS.splitToHdlcFrames(settings,
-                        FrameType.DISCONNECT_REQUEST.getValue(), null)[0];
-            }
+        // If connection is not established, there is no need to send
+        // DisconnectRequest.
+        if (settings.getSnSettings() == null
+                && settings.getLnSettings() == null) {
             return new byte[0];
         }
-        // Disconnect request is generated only if connection is made
-        // successfully.
-        if (settings.getSnSettings() != null
-                || settings.getLnSettings() != null) {
-            GXByteBuffer bb = new GXByteBuffer(2);
-            bb.setUInt8(Command.DISCONNECT_REQUEST.getValue());
-            bb.setUInt8(0x0);
-            return GXDLMS.splitToWrapperFrames(settings, bb)[0];
+        if (this.getInterfaceType() == InterfaceType.HDLC) {
+            return GXDLMS.splitToHdlcFrames(settings,
+                    FrameType.DISCONNECT_REQUEST.getValue(), null)[0];
         }
-        return new byte[0];
+        GXByteBuffer bb = new GXByteBuffer(2);
+        bb.setUInt8(Command.DISCONNECT_REQUEST.getValue());
+        bb.setUInt8(0x0);
+        return GXDLMS.splitToWrapperFrames(settings, bb)[0];
     }
 
     /**
@@ -1733,7 +1700,15 @@ public class GXDLMSClient {
      */
     public final byte[][] readRowsByRange(final GXDLMSProfileGeneric pg,
             final java.util.Date start, final java.util.Date end) {
-        GXByteBuffer buff = new GXByteBuffer(50);
+        GXDLMSObject sort = pg.getSortObject();
+        if (sort == null && pg.getCaptureObjects().size() != 0) {
+            sort = pg.getCaptureObjects().get(0).getKey();
+        }
+        // If sort object is not found or it is not clock object read all.
+        if (sort == null || sort.getObjectType() != ObjectType.CLOCK) {
+            return read(pg, 2);
+        }
+        GXByteBuffer buff = new GXByteBuffer(51);
         // Add AccessSelector value.
         buff.setUInt8(0x01);
         // Add enum tag.
@@ -1744,28 +1719,15 @@ public class GXDLMSClient {
         buff.setUInt8(0x02);
         // Add item count
         buff.setUInt8(0x04);
-        if (pg.getSortObject() != null) {
-            // CI
-            GXCommon.setData(buff, DataType.UINT16,
-                    pg.getSortObject().getObjectType());
-            // LN
-            GXCommon.setData(buff, DataType.OCTET_STRING,
-                    pg.getSortObject().getName());
-            // Add attribute index.
-            GXCommon.setData(buff, DataType.INT8, 2);
-            // Add version
-            GXCommon.setData(buff, DataType.UINT16,
-                    pg.getSortObject().getVersion());
-        } else {
-            // CI
-            GXCommon.setData(buff, DataType.UINT16, (short) 8);
-            // LN
-            GXCommon.setData(buff, DataType.OCTET_STRING, "0.0.1.0.0.255");
-            // Add attribute index.
-            GXCommon.setData(buff, DataType.INT8, 2);
-            // Add version
-            GXCommon.setData(buff, DataType.UINT16, 0);
-        }
+        // CI
+        GXCommon.setData(buff, DataType.UINT16,
+                sort.getObjectType().getValue());
+        // LN
+        GXCommon.setData(buff, DataType.OCTET_STRING, sort.getName());
+        // Add attribute index.
+        GXCommon.setData(buff, DataType.INT8, 2);
+        // Add version
+        GXCommon.setData(buff, DataType.UINT16, sort.getVersion());
         GXCommon.setData(buff, DataType.DATETIME, start); // Add start time
         GXCommon.setData(buff, DataType.DATETIME, end); // Add start time
         // Add array of read columns. Read All...
@@ -1773,26 +1735,6 @@ public class GXDLMSClient {
         // Add item count
         buff.setUInt8(0x00);
         return read(pg.getName(), ObjectType.PROFILE_GENERIC, 2, buff);
-    }
-
-    /**
-     * Count server address from physical and logical addresses.
-     * 
-     * @param physicalAddress
-     *            Physical server address.
-     * @param logicalAddress
-     *            Logical server address.
-     * @return Server address.
-     */
-    public static int countServerAddress(final int physicalAddress,
-            final int logicalAddress) {
-        if (physicalAddress < 0x10) {
-            return logicalAddress << 4 | physicalAddress;
-        }
-        if (physicalAddress < 0x100) {
-            return logicalAddress << 8 | physicalAddress;
-        }
-        return logicalAddress << 16 | physicalAddress;
     }
 
     /**

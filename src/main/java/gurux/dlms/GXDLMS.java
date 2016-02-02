@@ -241,44 +241,6 @@ abstract class GXDLMS {
                 cipher).get(0)[0];
     }
 
-    /**
-     * Checks, whether the received packet is a reply to the sent packet.
-     * 
-     * @param sendData
-     *            The sent data as a byte array.
-     * @param receivedData
-     *            The received data as a byte array.
-     * @return True, if the received packet is a reply to the sent packet.
-     *         False, if not.
-     */
-    public static boolean isReplyPacket(final GXDLMSSettings settings,
-            final GXByteBuffer sendData, final GXByteBuffer receivedData) {
-
-        GXReplyData info = new GXReplyData();
-        if (settings.getInterfaceType() == InterfaceType.WRAPPER) {
-            return true;
-        }
-
-        short sid = getHdlcData(!settings.isServer(), settings, sendData, info);
-        if (!info.isComplete()) {
-            throw new GXDLMSException("Not enought data to parse frame.");
-        }
-
-        short rid =
-                getHdlcData(settings.isServer(), settings, receivedData, info);
-        if (!info.isComplete()) {
-            throw new GXDLMSException("Not enought data to parse frame.");
-        }
-        if (info.getCommand() == Command.REJECTED) {
-            throw new GXDLMSException("Frame rejected.");
-        }
-        boolean ret = rid == FrameType.REJECTED.getValue()
-                || (sid == FrameType.DISCONNECT_REQUEST.getValue()
-                        && rid == FrameType.UA.getValue())
-                || isExpectedFrame(sid, rid);
-        return ret;
-    }
-
     static String getDescription(final int errCode) {
         String str;
         switch (ErrorCode.forValue(errCode)) {
@@ -342,22 +304,6 @@ abstract class GXDLMS {
             break;
         }
         return str;
-    }
-
-    /**
-     * Return true if frame sequences are same. Reserved for internal use.
-     */
-    private static boolean isExpectedFrame(final int send, final int received) {
-        // In keep alive message send ID might be same as receiver ID.
-        // If echo.
-        boolean ret = send == received
-                || ((send >> 5) & 0x7) == ((received >> 1) & 0x7)
-                || ((send & 0x1) == 0x1 || (received & 0x1) == 1);
-        // If U-Frame...
-        if (!ret) {
-            return ret;
-        }
-        return ret;
     }
 
     /**
@@ -845,6 +791,27 @@ abstract class GXDLMS {
         return frame;
     }
 
+    /**
+     * Get physical and logical address from server address.
+     * 
+     * @param address
+     *            Server address.
+     * @param logical
+     *            Logical address.
+     * @param physical
+     *            Physical address.
+     */
+    private static void getServerAddress(final int address, final int[] logical,
+            final int[] physical) {
+        if (address < 0x4000) {
+            logical[0] = address >>> 7;
+            physical[0] = address & 0x7F;
+        } else {
+            logical[0] = address >>> 14;
+            physical[0] = address & 0x3FFF;
+        }
+    }
+
     private static boolean checkHdlcAddress(final boolean server,
             final GXDLMSSettings settings, final GXByteBuffer reply,
             final GXReplyData data, final int index, final int count) {
@@ -893,12 +860,23 @@ abstract class GXDLMS {
             }
             // Check that server addresses match.
             if (settings.getServerAddress() != source) {
-                throw new GXDLMSException(
-                        "Source addresses do not match. It is "
-                                + String.valueOf(source) + ". It should be "
-                                + String.valueOf(settings.getServerAddress())
-                                + ".");
-
+                // Check logical and physical address separately.
+                // This is done because some meters might send four bytes
+                // when only two bytes is needed.
+                int[] readLogical = new int[1], readPhysical = new int[1],
+                        logical = new int[1], physical = new int[1];
+                getServerAddress(source, readLogical, readPhysical);
+                getServerAddress(settings.getServerAddress(), logical,
+                        physical);
+                if (readLogical[0] != logical[0]
+                        || readPhysical[0] != physical[0]) {
+                    throw new GXDLMSException(
+                            "Source addresses do not match. It is "
+                                    + String.valueOf(source) + ". It should be "
+                                    + String.valueOf(
+                                            settings.getServerAddress())
+                                    + ".");
+                }
             }
         }
         return true;
@@ -916,6 +894,12 @@ abstract class GXDLMS {
      */
     static void getTcpData(final GXDLMSSettings settings,
             final GXByteBuffer buff, final GXReplyData data) {
+        // If whole frame is not received yet.
+        if (buff.size() - buff.position() < 8) {
+            data.setComplete(false);
+            return;
+        }
+        int pos = buff.position();
         int value;
         // Get version
         value = buff.getUInt16();
@@ -927,7 +911,11 @@ abstract class GXDLMS {
         checkWrapperAddress(settings, buff, data);
         // Get length.
         value = buff.getUInt16();
-        data.setComplete(!((buff.size() - buff.position()) < value));
+        boolean compleate = !((buff.size() - buff.position()) < value);
+        data.setComplete(compleate);
+        if (!compleate) {
+            buff.position(pos);
+        }
     }
 
     private static void checkWrapperAddress(final GXDLMSSettings settings,

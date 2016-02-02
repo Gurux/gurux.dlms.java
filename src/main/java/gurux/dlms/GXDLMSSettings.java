@@ -272,19 +272,6 @@ public class GXDLMSSettings {
     }
 
     /**
-     * @return Is frame generated. This is used to tell is any packet send to
-     *         the server.
-     */
-    public final boolean isGenerated() {
-        if (server) {
-            return senderFrame != SERVER_START_SENDER_FRAME_SEQUENCE
-                    || receiverFrame != SERVER_START_RECEIVER_FRAME_SEQUENCE;
-        }
-        return senderFrame != CLIENT_START_SENDER_FRAME_SEQUENCE
-                || receiverFrame != CLIENT_START_RCEIVER_FRAME_SEQUENCE;
-    }
-
-    /**
      * Increase receiver sequence.
      * 
      * @param value
