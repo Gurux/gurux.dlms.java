@@ -563,9 +563,8 @@ public abstract class GXDLMSServerBase {
         boolean ciphering = cipher != null && cipher.isCiphered();
         aarq.generateAare(settings, buff, result, diagnostic, ciphering);
         settings.resetFrameSequence();
-        return GXDLMS
-                .splitPdu(settings, Command.AARE, 0, buff, ErrorCode.OK, cipher)
-                .get(0);
+        return GXDLMS.splitPdu(settings, Command.AARE, 0, buff, ErrorCode.OK,
+                null, cipher).get(0);
     }
 
     /**
@@ -608,7 +607,7 @@ public abstract class GXDLMSServerBase {
             buff.setUInt8(0x63);
             buff.setUInt8(0x0);
             return GXDLMS.splitPdu(settings, Command.DISCONNECT_RESPONSE, 0,
-                    buff, ErrorCode.OK, cipher).get(0);
+                    buff, ErrorCode.OK, null, cipher).get(0);
         } else {
             buff = new GXByteBuffer(22);
             buff.setUInt8(0x81); // FromatID
@@ -835,7 +834,7 @@ public abstract class GXDLMSServerBase {
             bb.add(obj.invoke(settings, id, parameters));
         }
         return GXDLMS.splitPdu(settings, Command.METHOD_RESPONSE, 1, bb,
-                ErrorCode.OK, cipher).get(0);
+                ErrorCode.OK, null, cipher).get(0);
     }
 
     /**
@@ -909,9 +908,8 @@ public abstract class GXDLMSServerBase {
             settings.resetBlockIndex();
             error = ErrorCode.HARDWARE_FAULT;
         }
-        return GXDLMS
-                .splitPdu(settings, Command.SET_RESPONSE, 1, bb, error, cipher)
-                .get(0);
+        return GXDLMS.splitPdu(settings, Command.SET_RESPONSE, 1, bb, error,
+                null, cipher).get(0);
     }
 
     private byte[][] handleGetRequest() {
@@ -955,7 +953,7 @@ public abstract class GXDLMSServerBase {
                 GXDLMS.appedData(obj, attributeIndex, bb, value);
             }
             serverReply.setReplyMessages(GXDLMS.splitPdu(settings,
-                    Command.GET_RESPONSE, 1, bb, error, cipher));
+                    Command.GET_RESPONSE, 1, bb, error, null, cipher));
 
         } else if (type == 2) {
             // Get request for next data block
@@ -964,9 +962,9 @@ public abstract class GXDLMSServerBase {
             if (index != settings.getBlockIndex()) {
                 LOGGER.severe("handleGetRequest failed. Invalid block number. "
                         + settings.getBlockIndex() + "/" + index);
-                serverReply.setReplyMessages(
-                        GXDLMS.splitPdu(settings, Command.GET_RESPONSE, 1, bb,
-                                ErrorCode.DATA_BLOCK_NUMBER_INVALID, cipher));
+                serverReply.setReplyMessages(GXDLMS.splitPdu(settings,
+                        Command.GET_RESPONSE, 1, bb,
+                        ErrorCode.DATA_BLOCK_NUMBER_INVALID, null, cipher));
                 index = 0;
                 serverReply.setIndex(index);
             } else {
@@ -1011,14 +1009,14 @@ public abstract class GXDLMSServerBase {
                 }
             }
             serverReply.setReplyMessages(GXDLMS.splitPdu(settings,
-                    Command.GET_RESPONSE, 3, bb, error, cipher));
+                    Command.GET_RESPONSE, 3, bb, error, null, cipher));
         } else {
             LOGGER.severe("handleGetRequest failed. Invalid command type.");
             settings.resetBlockIndex();
             // Access Error : Device reports a hardware fault.
             serverReply.setReplyMessages(
                     GXDLMS.splitPdu(settings, Command.GET_RESPONSE, 1, bb,
-                            ErrorCode.HARDWARE_FAULT, cipher));
+                            ErrorCode.HARDWARE_FAULT, null, cipher));
         }
         serverReply.setIndex(index);
         return serverReply.getReplyMessages().get((int) index);
@@ -1156,7 +1154,7 @@ public abstract class GXDLMSServerBase {
             }
         }
         return GXDLMS.splitPdu(settings, Command.READ_RESPONSE, 1, bb,
-                ErrorCode.OK, cipher).get(0);
+                ErrorCode.OK, null, cipher).get(0);
     }
 
     /**
@@ -1224,6 +1222,6 @@ public abstract class GXDLMSServerBase {
             bb.setUInt8(ret);
         }
         return GXDLMS.splitPdu(settings, Command.WRITE_RESPONSE, 1, bb,
-                ErrorCode.OK, cipher).get(0);
+                ErrorCode.OK, null, cipher).get(0);
     }
 }

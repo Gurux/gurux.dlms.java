@@ -84,7 +84,7 @@ class GXAPDU {
             final GXByteBuffer data, final byte[] challenge) {
         // If authentication is used.
         if (settings.getAuthentication() != Authentication.NONE) {
-            // Add sender ACSE-requirenents field component.
+            // Add sender ACSE-requirements field component.
             data.setUInt8(0x8A);
             data.setUInt8(2);
             data.setUInt16(0x0780);

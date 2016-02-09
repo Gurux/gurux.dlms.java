@@ -37,6 +37,7 @@ package gurux.dlms;
 import java.security.InvalidParameterException;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Date;
 import java.util.List;
 
 import gurux.dlms.enums.Command;
@@ -235,10 +236,10 @@ abstract class GXDLMS {
         settings.increaseBlockIndex();
         if (settings.isServer()) {
             return splitPdu(settings, Command.GET_RESPONSE, 2, bb, ErrorCode.OK,
-                    cipher).get(0)[0];
+                    null, cipher).get(0)[0];
         }
         return splitPdu(settings, Command.GET_REQUEST, 2, bb, ErrorCode.OK,
-                cipher).get(0)[0];
+                null, cipher).get(0)[0];
     }
 
     static String getDescription(final int errCode) {
@@ -340,7 +341,7 @@ abstract class GXDLMS {
 
     static List<byte[][]> splitPdu(final GXDLMSSettings settings,
             final Command command, final int commandParameter,
-            final GXByteBuffer data, final ErrorCode error,
+            final GXByteBuffer data, final ErrorCode error, final Date date,
             final GXICipher cp) {
         GXByteBuffer bb = new GXByteBuffer();
         List<byte[][]> list = new ArrayList<byte[][]>();
@@ -364,8 +365,8 @@ abstract class GXDLMS {
                 list.add(splitToWrapperFrames(settings, bb));
             }
         } else {
-            List<byte[]> pdus =
-                    getLnPdus(settings, commandParameter, data, command, error);
+            List<byte[]> pdus = getLnPdus(settings, commandParameter, data,
+                    command, error, date);
             for (byte[] it : pdus) {
                 // If Ciphering is used.
                 if (cp != null) {
@@ -403,7 +404,7 @@ abstract class GXDLMS {
 
     private static List<byte[]> getLnPdus(final GXDLMSSettings settings,
             final int commandParameter, final GXByteBuffer buff,
-            final Command cmd, final ErrorCode error) {
+            final Command cmd, final ErrorCode error, final Date date) {
         List<byte[]> arr = new ArrayList<byte[]>();
         GXByteBuffer bb;
         int len;
@@ -429,8 +430,34 @@ abstract class GXDLMS {
             if (cmd != Command.AARQ && cmd != Command.AARE) {
                 // Add command.
                 bb.setUInt8(cmd.getValue());
-                // If all data is not fit to one PDU.
-                if (multibleBlocks) {
+                if (cmd == Command.PUSH) {
+                    // Is last block
+                    if (buff.position() + len < buff.size()) {
+                        bb.setUInt8(0);
+                    } else {
+                        bb.setUInt8(0x80);
+                    }
+                    // Set block number sent.
+                    bb.setUInt8(0);
+                    // Set block number acknowledged
+                    bb.setUInt8((byte) ++index);
+                    // Add APU tag.
+                    bb.setUInt8(0);
+                    // Add Addl fields
+                    bb.setUInt8(0);
+                    // Add Data-Notification
+                    bb.setUInt8(0x0F);
+                    // Add Long-Invoke-Id-And-Priority
+                    settings.increaseBlockIndex();
+                    bb.setUInt32(settings.getBlockIndex());
+                    // Add date time.
+                    if (date == null || date == new Date(0)) {
+                        bb.setUInt8(DataType.NONE.getValue());
+                    } else {
+                        GXCommon.setData(bb, DataType.DATETIME, date);
+                    }
+                } else if (multibleBlocks) {
+                    // If all data is not fit to one PDU.
                     bb.setUInt8(2);
                     // Add Invoke Id And Priority.
                     bb.setUInt8(getInvokeIDPriority(settings));
@@ -1389,7 +1416,7 @@ abstract class GXDLMS {
         if (frame != FrameType.SNRM.getValue()
                 && frame != FrameType.UA.getValue()
                 && data.getCommand() != Command.AARQ
-                && data.getCommand() != Command.AARQ
+                && data.getCommand() != Command.AARE
                 && frame != FrameType.DISCONNECT_MODE.getValue()) {
             getPdu(settings, data, cipher);
         }

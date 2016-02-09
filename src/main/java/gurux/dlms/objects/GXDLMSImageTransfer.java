@@ -339,7 +339,7 @@ public class GXDLMSImageTransfer extends GXDLMSObject implements IGXDLMSBase {
             return DataType.UINT32;
         }
         if (index == 3) {
-            return DataType.BITSTRING;
+            return DataType.BIT_STRING;
         }
         if (index == 4) {
             return DataType.UINT32;

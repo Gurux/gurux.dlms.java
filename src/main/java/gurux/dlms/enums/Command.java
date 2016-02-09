@@ -141,6 +141,11 @@ public enum Command {
     PUSH(0xE0),
 
     /**
+     * Data Notification request.
+     */
+    DATA_NOTIFICATION(0x0F),
+
+    /**
      * Glo get request.
      */
     GLO_GET_REQUEST(0xC8),

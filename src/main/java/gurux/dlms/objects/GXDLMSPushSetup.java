@@ -38,7 +38,9 @@ import java.util.AbstractMap.SimpleEntry;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
+import java.util.Map.Entry;
 
+import gurux.dlms.GXByteBuffer;
 import gurux.dlms.GXDLMSClient;
 import gurux.dlms.GXDLMSSettings;
 import gurux.dlms.GXDateTime;
@@ -46,6 +48,7 @@ import gurux.dlms.enums.DataType;
 import gurux.dlms.enums.MessageType;
 import gurux.dlms.enums.ObjectType;
 import gurux.dlms.enums.ServiceType;
+import gurux.dlms.internal.GXCommon;
 
 public class GXDLMSPushSetup extends GXDLMSObject implements IGXDLMSBase {
     private java.util.ArrayList<GXDLMSPushObject> pushObjectList;
@@ -258,14 +261,48 @@ public class GXDLMSPushSetup extends GXDLMSObject implements IGXDLMSBase {
         if (index == 1) {
             return getLogicalName();
         }
+        GXByteBuffer buff = new GXByteBuffer();
         if (index == 2) {
-            return pushObjectList;
+            buff.setUInt8(DataType.ARRAY.getValue());
+            GXCommon.setObjectCount(pushObjectList.size(), buff);
+            for (GXDLMSPushObject it : pushObjectList) {
+                buff.setUInt8(DataType.STRUCTURE.getValue());
+                buff.setUInt8(4);
+                GXCommon.setData(buff, DataType.UINT16,
+                        it.getType().getValue());
+                GXCommon.setData(buff, DataType.OCTET_STRING,
+                        it.getLogicalName());
+                GXCommon.setData(buff, DataType.INT8, it.getAttributeIndex());
+                GXCommon.setData(buff, DataType.UINT16, it.getDataIndex());
+            }
+            return buff.array();
         }
         if (index == 3) {
-            return sendDestinationAndMethod;
+            buff.setUInt8(DataType.STRUCTURE.getValue());
+            buff.setUInt8(3);
+            GXCommon.setData(buff, DataType.UINT8,
+                    sendDestinationAndMethod.getService().getValue());
+            if (sendDestinationAndMethod.getDestination() != null) {
+                GXCommon.setData(buff, DataType.OCTET_STRING,
+                        sendDestinationAndMethod.getDestination().getBytes());
+            } else {
+                GXCommon.setData(buff, DataType.OCTET_STRING, null);
+            }
+            GXCommon.setData(buff, DataType.UINT8,
+                    sendDestinationAndMethod.getMessage());
+            return buff.array();
         }
         if (index == 4) {
-            return communicationWindow;
+            buff.setUInt8(DataType.ARRAY.getValue());
+            GXCommon.setObjectCount(communicationWindow.size(), buff);
+            for (Entry<GXDateTime, GXDateTime> it : communicationWindow) {
+                buff.setUInt8(DataType.STRUCTURE.getValue());
+                buff.setUInt8(2);
+                GXCommon.setData(buff, DataType.DATETIME, it.getKey());
+                GXCommon.setData(buff, DataType.DATETIME, it.getValue());
+            }
+            return buff.array();
+
         }
         if (index == 5) {
             return randomisationStartInterval;
@@ -297,7 +334,7 @@ public class GXDLMSPushSetup extends GXDLMSObject implements IGXDLMSBase {
                     obj.setType(
                             ObjectType.forValue(((Number) tmp[0]).intValue()));
                     obj.setLogicalName(GXDLMSClient
-                            .changeType((byte[]) tmp[1], DataType.BITSTRING)
+                            .changeType((byte[]) tmp[1], DataType.OCTET_STRING)
                             .toString());
                     obj.setAttributeIndex(((Number) tmp[2]).intValue());
                     obj.setDataIndex(((Number) tmp[3]).intValue());

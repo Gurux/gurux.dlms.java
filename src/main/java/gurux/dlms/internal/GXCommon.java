@@ -65,7 +65,7 @@ public final class GXCommon {
     }
 
     /*
-     * HDLC frame start and end charachter.
+     * HDLC frame start and end character.
      */
     public static final byte HDLC_FRAME_START_END = 0x7E;
     public static final byte AARQ_TAG = 0x60;
@@ -356,7 +356,7 @@ public final class GXCommon {
         case BOOLEAN:
             value = getBoolean(data, info);
             break;
-        case BITSTRING:
+        case BIT_STRING:
             value = getBitString(data, info);
             break;
         case INT32:
@@ -389,7 +389,7 @@ public final class GXCommon {
         case UINT16:
             value = getUInt16(data, info);
             break;
-        case COMPACTARRAY:
+        case COMPACT_ARRAY:
             throw new RuntimeException("Invalid data type.");
         case INT64:
             value = getInt64(data, info);
@@ -401,7 +401,7 @@ public final class GXCommon {
             value = getEnum(data, info);
             break;
         case FLOAT32:
-            value = getfloat(data, info);
+            value = getFloat(data, info);
             break;
         case FLOAT64:
             value = getDouble(data, info);
@@ -647,7 +647,7 @@ public final class GXCommon {
      *            Data info.
      * @return Parsed float value.
      */
-    private static Object getfloat(final GXByteBuffer buff,
+    private static Object getFloat(final GXByteBuffer buff,
             final GXDataInfo info) {
         Object value;
         // If there is not enough data available.
@@ -1108,7 +1108,7 @@ public final class GXCommon {
             java.nio.ByteBuffer tmp = java.nio.ByteBuffer.allocate(8);
             tmp.putDouble(((Number) value).doubleValue());
             buff.set(tmp.array());
-        } else if (type == DataType.BITSTRING) {
+        } else if (type == DataType.BIT_STRING) {
             setBitString(buff, value);
         } else if (type == DataType.STRING) {
             setString(buff, value);
@@ -1120,7 +1120,7 @@ public final class GXCommon {
             setArray(buff, value);
         } else if (type == DataType.BCD) {
             setBcd(buff, value);
-        } else if (type == DataType.COMPACTARRAY) {
+        } else if (type == DataType.COMPACT_ARRAY) {
             throw new RuntimeException("Invalid data type.");
         } else if (type == DataType.DATETIME) {
             setDateTime(buff, value);
@@ -1489,6 +1489,7 @@ public final class GXCommon {
         if (value instanceof String) {
             byte val = 0;
             int index = 0;
+            GXByteBuffer tmp = new GXByteBuffer();
             String str = new StringBuilder((String) value).reverse().toString();
             setObjectCount(str.length(), buff);
             for (char it : str.toCharArray()) {
@@ -1501,12 +1502,15 @@ public final class GXCommon {
                 }
                 if (index == 8) {
                     index = 0;
-                    buff.setUInt8(val);
+                    tmp.setUInt8(val);
                     val = 0;
                 }
             }
             if (index != 0) {
-                buff.setUInt8(val);
+                tmp.setUInt8(val);
+            }
+            for (int pos = tmp.size() - 1; pos != -1; --pos) {
+                buff.setUInt8(tmp.getUInt8(pos));
             }
         } else if (value instanceof byte[]) {
             byte[] arr = (byte[]) value;

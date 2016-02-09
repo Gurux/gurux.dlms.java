@@ -52,7 +52,7 @@ public class GXDataInfo {
      *            Items count in array.
      */
     public final void setCount(final int value) {
-        this.count = value;
+        count = value;
     }
 
     /**
@@ -67,7 +67,7 @@ public class GXDataInfo {
      *            Object data type.
      */
     public final void setType(final DataType value) {
-        this.type = value;
+        type = value;
     }
 
     /**
@@ -82,7 +82,7 @@ public class GXDataInfo {
      *            Is data parsed to the end.
      */
     public final void setCompleate(final boolean value) {
-        this.compleate = value;
+        compleate = value;
     }
 
     public final void clear() {

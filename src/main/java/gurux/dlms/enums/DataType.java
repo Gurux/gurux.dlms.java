@@ -51,7 +51,7 @@ public enum DataType {
     /**
      * Data type is Bit string.
      */
-    BITSTRING(4),
+    BIT_STRING(4),
 
     /**
      * Data type is Boolean.
@@ -61,7 +61,7 @@ public enum DataType {
     /**
      * Data type is Compact array.
      */
-    COMPACTARRAY(0x13),
+    COMPACT_ARRAY(0x13),
 
     /**
      * Data type is Date.

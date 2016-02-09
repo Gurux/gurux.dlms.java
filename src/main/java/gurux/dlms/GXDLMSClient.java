@@ -39,7 +39,6 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.util.AbstractMap;
 import java.util.AbstractMap.SimpleEntry;
-import java.util.ArrayList;
 import java.util.List;
 
 import gurux.dlms.enums.AccessMode;
@@ -57,13 +56,10 @@ import gurux.dlms.enums.ServiceClass;
 import gurux.dlms.enums.SourceDiagnostic;
 import gurux.dlms.internal.GXCommon;
 import gurux.dlms.internal.GXDataInfo;
-import gurux.dlms.manufacturersettings.GXObisCode;
 import gurux.dlms.manufacturersettings.GXObisCodeCollection;
-import gurux.dlms.objects.GXDLMSCaptureObject;
 import gurux.dlms.objects.GXDLMSObject;
 import gurux.dlms.objects.GXDLMSObjectCollection;
 import gurux.dlms.objects.GXDLMSProfileGeneric;
-import gurux.dlms.objects.GXDLMSRegister;
 import gurux.dlms.secure.GXSecure;
 
 /**
@@ -134,8 +130,8 @@ public class GXDLMSClient {
         return settings;
     }
 
-    /*
-     * List of meter's objects.
+    /**
+     * @return Get list of meter's objects.
      */
     public final GXDLMSObjectCollection getObjects() {
         return settings.getObjects();
@@ -538,9 +534,8 @@ public class GXDLMSClient {
         }
         boolean ciphering = cipher != null && cipher.isCiphered();
         aarq.codeData(settings, ciphering, buff);
-        return GXDLMS
-                .splitPdu(settings, Command.AARQ, 0, buff, ErrorCode.OK, cipher)
-                .get(0);
+        return GXDLMS.splitPdu(settings, Command.AARQ, 0, buff, ErrorCode.OK,
+                null, cipher).get(0);
     }
 
     /**
@@ -678,21 +673,13 @@ public class GXDLMSClient {
      * @param dataIndex
      * @return
      */
-    private GXDLMSObject createDLMSObject(final int classID,
+    static GXDLMSObject createDLMSObject(final int classID,
             final Object version, final int baseName, final Object ln,
             final Object accessRights) {
         ObjectType type = ObjectType.forValue(classID);
         GXDLMSObject obj = createObject(type);
         updateObjectData(obj, type, version, baseName, (byte[]) ln,
                 accessRights);
-        if (getObisCodes() != null) {
-            GXObisCode code = getObisCodes().findByLN(obj.getObjectType(),
-                    obj.getLogicalName(), null);
-            if (code != null) {
-                obj.setDescription(code.getDescription());
-                obj.getAttributes().addAll(code.getAttributes());
-            }
-        }
         return obj;
     }
 
@@ -754,7 +741,7 @@ public class GXDLMSClient {
      * @param logicalName
      * @param accessRights
      */
-    final void updateObjectData(final GXDLMSObject obj,
+    static void updateObjectData(final GXDLMSObject obj,
             final ObjectType objectType, final Object version,
             final Object baseName, final byte[] logicalName,
             final Object accessRights) {
@@ -996,75 +983,6 @@ public class GXDLMSClient {
         return items;
     }
 
-    /**
-     * Parse data columns from the byte stream.
-     * 
-     * @param data
-     *            received data.
-     * @return Columns of profile generic table.
-     */
-    public final
-            List<AbstractMap.SimpleEntry<GXDLMSObject, GXDLMSCaptureObject>>
-            parseColumns(final GXByteBuffer data) {
-        if (data == null) {
-            throw new GXDLMSException("Invalid parameter.");
-        }
-        byte size = data.getInt8();
-        // Check that data is in the array.
-        if (size != 0x01) {
-            throw new GXDLMSException("Invalid response.");
-        }
-        // get object count
-        int cnt = GXCommon.getObjectCount(data);
-        int objectCnt = 0;
-        List<SimpleEntry<GXDLMSObject, GXDLMSCaptureObject>> items =
-                new ArrayList<SimpleEntry<GXDLMSObject, GXDLMSCaptureObject>>();
-        GXDLMSObjectCollection objects2 = new GXDLMSObjectCollection();
-        GXDataInfo info = new GXDataInfo();
-        while (data.size() != data.position() && cnt != objectCnt) {
-            info.setType(DataType.NONE);
-            info.setIndex(0);
-            info.setCount(0);
-            Object[] objects = (Object[]) GXCommon.getData(data, info);
-            if (objects.length != 4) {
-                throw new GXDLMSException("Invalid structure format.");
-            }
-            ++objectCnt;
-            GXDLMSObject comp = createDLMSObject(
-                    ((Number) objects[0]).shortValue(), null, 0, objects[1], 0);
-            if (comp != null) {
-                GXDLMSCaptureObject co = new GXDLMSCaptureObject(
-                        ((Number) objects[2]).shortValue(),
-                        ((Number) objects[3]).shortValue());
-                items.add(new SimpleEntry<GXDLMSObject, GXDLMSCaptureObject>(
-                        comp, co));
-                objects2.add(comp);
-                // Update data type and scaler unit if register.
-                if (settings.getObjects() != null) {
-                    GXDLMSObject tmp = settings.getObjects().findByLN(
-                            comp.getObjectType(), comp.getLogicalName());
-                    if (tmp != null) {
-                        if (comp instanceof GXDLMSRegister) {
-                            int index2 = co.getAttributeIndex();
-                            // Some meters return zero.
-                            if (index2 == 0) {
-                                index2 = 2;
-                            }
-                            comp.setUIDataType(index2,
-                                    tmp.getUIDataType(index2));
-                            ((GXDLMSRegister) comp).setScaler(
-                                    ((GXDLMSRegister) tmp).getScaler());
-                            ((GXDLMSRegister) comp)
-                                    .setUnit(((GXDLMSRegister) tmp).getUnit());
-                        }
-                    }
-                }
-            }
-        }
-        updateOBISCodes(objects2);
-        return items;
-    }
-
     /*
      * Get Value from byte array received from the meter.
      */
@@ -1095,45 +1013,6 @@ public class GXDLMSClient {
     public final Object getValue(final GXByteBuffer data) {
         GXDataInfo info = new GXDataInfo();
         return GXCommon.getData(data, info);
-    }
-
-    /**
-     * Returns collection of push objects.
-     * 
-     * @param data
-     *            Received data.
-     * @return Array of objects and called indexes.
-     */
-    public final List<AbstractMap.SimpleEntry<GXDLMSObject, Integer>>
-            getPushObjects(final GXByteBuffer data) {
-
-        GXReplyData reply = new GXReplyData();
-        reply.setData(data);
-        List<SimpleEntry<GXDLMSObject, Integer>> items =
-                new ArrayList<AbstractMap.SimpleEntry<GXDLMSObject, Integer>>();
-        GXDLMS.getValueFromData(settings, reply);
-        Object[] list = (Object[]) reply.getValue();
-        for (Object it : (Object[]) list[0]) {
-            Object[] tmp = (Object[]) it;
-            int classID = ((Number) (tmp[0])).intValue() & 0xFFFF;
-            if (classID > 0) {
-                GXDLMSObject comp =
-                        createDLMSObject(classID, 0, 0, tmp[1], null);
-                if (comp.getClass() != GXDLMSObject.class) {
-                    items.add(new SimpleEntry<GXDLMSObject, Integer>(comp,
-                            ((Number) tmp[2]).intValue()));
-                } else {
-                    System.out.println(String.format("Unknown object : %d %s",
-                            classID,
-                            GXDLMSObject.toLogicalName((byte[]) tmp[1])));
-                }
-            }
-        }
-        for (int pos = 0; pos < list.length; ++pos) {
-            items.get(pos).getKey().setValue(settings,
-                    items.get(pos).getValue(), list[pos]);
-        }
-        return items;
     }
 
     /**
@@ -1340,7 +1219,7 @@ public class GXDLMSClient {
         } else {
             GXCommon.setData(bb, type, value);
         }
-        return GXDLMS.splitPdu(settings, cmd, 1, bb, ErrorCode.OK, cipher)
+        return GXDLMS.splitPdu(settings, cmd, 1, bb, ErrorCode.OK, null, cipher)
                 .get(0);
     }
 
@@ -1420,7 +1299,7 @@ public class GXDLMSClient {
             bb.setUInt8(1);
         }
         GXCommon.setData(bb, type, value);
-        return GXDLMS.splitPdu(settings, cmd, 1, bb, ErrorCode.OK, cipher)
+        return GXDLMS.splitPdu(settings, cmd, 1, bb, ErrorCode.OK, null, cipher)
                 .get(0);
     }
 
@@ -1489,7 +1368,7 @@ public class GXDLMSClient {
                 GXCommon.setData(bb, type, value);
             }
         }
-        return GXDLMS.splitPdu(settings, cmd, 4, bb, ErrorCode.OK, cipher)
+        return GXDLMS.splitPdu(settings, cmd, 4, bb, ErrorCode.OK, null, cipher)
                 .get(0);
     }
 
@@ -1570,7 +1449,7 @@ public class GXDLMSClient {
                 bb.set(data.getData(), 0, data.size());
             }
         }
-        return GXDLMS.splitPdu(settings, cmd, 1, bb, ErrorCode.OK, cipher)
+        return GXDLMS.splitPdu(settings, cmd, 1, bb, ErrorCode.OK, null, cipher)
                 .get(0);
     }
 
@@ -1633,7 +1512,7 @@ public class GXDLMSClient {
                 bb.setUInt16(sn);
             }
         }
-        return GXDLMS.splitPdu(settings, cmd, 3, bb, ErrorCode.OK, cipher)
+        return GXDLMS.splitPdu(settings, cmd, 3, bb, ErrorCode.OK, null, cipher)
                 .get(0);
     }
 
