@@ -235,13 +235,6 @@ public abstract class GXDLMSServerBase {
         settings.setUseLogicalNameReferencing(logicalNameReferencing);
         this.setInterfaceType(type);
         reset();
-        if (logicalNameReferencing) {
-            settings.setLnSettings(
-                    new GXDLMSLNSettings(new byte[] { 0x00, 0x7E, 0x1F }));
-        } else {
-            settings.setSnSettings(
-                    new GXDLMSSNSettings(new byte[] { 0x1C, 0x03, 0x20 }));
-        }
     }
 
     /**
@@ -512,12 +505,12 @@ public abstract class GXDLMSServerBase {
      * @return Reply to the client.
      */
     private byte[][] handleAarqRequest() {
-        GXAPDU aarq = new GXAPDU();
         AssociationResult result = AssociationResult.ACCEPTED;
-        SourceDiagnostic diagnostic = SourceDiagnostic.NONE;
         settings.setCtoSChallenge(null);
         settings.setStoCChallenge(null);
-        if (!aarq.encodeData(settings, reply.getData())) {
+        SourceDiagnostic diagnostic =
+                GXAPDU.parsePDU(settings, cipher, reply.getData());
+        if (diagnostic != SourceDiagnostic.NONE) {
             result = AssociationResult.PERMANENT_REJECTED;
             diagnostic = SourceDiagnostic.NOT_SUPPORTED;
         } else {
@@ -558,13 +551,14 @@ public abstract class GXDLMSServerBase {
                 }
             }
         }
+
         // Generate AARE packet.
         GXByteBuffer buff = new GXByteBuffer(150);
-        boolean ciphering = cipher != null && cipher.isCiphered();
-        aarq.generateAare(settings, buff, result, diagnostic, ciphering);
+        GXAPDU.generateAARE(settings, buff, result, diagnostic, cipher);
         settings.resetFrameSequence();
         return GXDLMS.splitPdu(settings, Command.AARE, 0, buff, ErrorCode.OK,
                 null, cipher).get(0);
+
     }
 
     /**
@@ -606,8 +600,7 @@ public abstract class GXDLMSServerBase {
             buff = new GXByteBuffer(2);
             buff.setUInt8(0x63);
             buff.setUInt8(0x0);
-            return GXDLMS.splitPdu(settings, Command.DISCONNECT_RESPONSE, 0,
-                    buff, ErrorCode.OK, null, cipher).get(0);
+            return GXDLMS.splitToWrapperFrames(settings, buff);
         } else {
             buff = new GXByteBuffer(22);
             buff.setUInt8(0x81); // FromatID

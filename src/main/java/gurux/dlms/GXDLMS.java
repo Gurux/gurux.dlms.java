@@ -339,6 +339,62 @@ abstract class GXDLMS {
 
     }
 
+    /**
+     * Get used glo message.
+     * 
+     * @param command
+     *            Executed command.
+     * @return Integer value of glo message.
+     */
+    private static int getGloMessage(final Command command) {
+        Command cmd;
+        switch (command) {
+        case READ_REQUEST:
+        case GET_REQUEST:
+            cmd = Command.GLO_GET_REQUEST;
+            break;
+        case WRITE_REQUEST:
+        case SET_REQUEST:
+            cmd = Command.GLO_SET_REQUEST;
+            break;
+        case METHOD_REQUEST:
+            cmd = Command.GLO_METHOD_REQUEST;
+            break;
+        case READ_RESPONSE:
+        case GET_RESPONSE:
+            cmd = Command.GLO_GET_RESPONSE;
+            break;
+        case WRITE_RESPONSE:
+        case SET_RESPONSE:
+            cmd = Command.GLO_SET_RESPONSE;
+            break;
+        case METHOD_RESPONSE:
+            cmd = Command.GLO_METHOD_RESPONSE;
+            break;
+        default:
+            throw new GXDLMSException("Invalid GLO command.");
+        }
+        return cmd.getValue();
+    }
+
+    /**
+     * Split PDU to blocks and frames.
+     * 
+     * @param settings
+     *            DLMS settings.
+     * @param command
+     *            Command.
+     * @param commandParameter
+     * @param data
+     *            Data to send.
+     * @param error
+     *            Error number.
+     * @param date
+     *            Optional date time value.
+     * @param cp
+     *            Ciphering interface.
+     * @return List of frames to send.
+     */
     static List<byte[][]> splitPdu(final GXDLMSSettings settings,
             final Command command, final int commandParameter,
             final GXByteBuffer data, final ErrorCode error, final Date date,
@@ -350,8 +406,10 @@ abstract class GXDLMS {
         if (!settings.getUseLogicalNameReferencing()) {
             byte[] tmp = getSnPdus(settings, data, command);
             // If Ciphering is used.
-            if (cp != null) {
-                bb.set(cp.encrypt(command, tmp));
+            if (cp != null && command != Command.AARQ
+                    && command != Command.AARE) {
+                bb.set(cp.encrypt(getGloMessage(command), cp.getSystemTitle(),
+                        tmp));
             } else {
                 bb.set(tmp);
             }
@@ -369,8 +427,10 @@ abstract class GXDLMS {
                     command, error, date);
             for (byte[] it : pdus) {
                 // If Ciphering is used.
-                if (cp != null) {
-                    bb.set(cp.encrypt(command, it));
+                if (cp != null && command != Command.AARQ
+                        && command != Command.AARE) {
+                    bb.set(cp.encrypt(getGloMessage(command),
+                            cp.getSystemTitle(), it));
                 } else {
                     bb.set(it);
                 }
@@ -698,7 +758,7 @@ abstract class GXDLMS {
             final GXDLMSSettings settings, final GXByteBuffer reply,
             final GXReplyData data) {
         short ch;
-        int pos, packetStartID = 0, frameLen = 0;
+        int pos, packetStartID = reply.position(), frameLen = 0;
         int crc, crcRead;
         // If whole frame is not received yet.
         if (reply.size() - reply.position() < 9) {
@@ -740,8 +800,7 @@ abstract class GXDLMS {
         }
 
         // Check addresses.
-        if (!checkHdlcAddress(server, settings, reply, data, packetStartID,
-                len)) {
+        if (!checkHdlcAddress(server, settings, reply, data, len)) {
             // If echo.
             return getHdlcData(server, settings, reply, data);
         }
@@ -841,7 +900,7 @@ abstract class GXDLMS {
 
     private static boolean checkHdlcAddress(final boolean server,
             final GXDLMSSettings settings, final GXByteBuffer reply,
-            final GXReplyData data, final int index, final int count) {
+            final GXReplyData data, final int index) {
         int source, target;
         // Get destination and source addresses.
         target = GXCommon.getHDLCAddress(reply);
@@ -876,7 +935,7 @@ abstract class GXDLMS {
                 // If echo.
                 if (settings.getClientAddress() == source
                         && settings.getServerAddress() == target) {
-                    reply.position(index + count + 1);
+                    reply.position(index + 1);
                     return false;
                 }
                 throw new GXDLMSException(
@@ -1182,6 +1241,10 @@ abstract class GXDLMS {
             }
             // Get Block number.
             number = data.getUInt32();
+            // If meter's block index is zero based.
+            if (number == 0 && settings.getBlockIndex() == 1) {
+                settings.setBlockIndex(0);
+            }
             int expectedIndex = settings.getBlockIndex();
             if (number != expectedIndex) {
                 throw new IllegalArgumentException(
@@ -1299,12 +1362,25 @@ abstract class GXDLMS {
                             "Secure connection is not supported.");
                 }
                 data.getData().position(data.getData().position() - 1);
-                cipher.decrypt(data.getData());
+                cipher.decrypt(settings.getSourceSystemTitle(), data.getData());
                 // Get command.
                 ch = data.getData().getUInt8();
                 cmd = Command.forValue(ch);
                 data.setCommand(cmd);
                 // Server handles this.
+                break;
+            case GLO_GET_RESPONSE:
+            case GLO_SET_RESPONSE:
+            case GLO_METHOD_RESPONSE:
+                data.getData().position(data.getData().position() - 1);
+                cipher.decrypt(settings.getSourceSystemTitle(), data.getData());
+                data.setCommand(Command.NONE);
+                getPdu(settings, data, cipher);
+                break;
+            case DATA_NOTIFICATION:
+                // Get invoke id.
+                ch = data.getData().getUInt8();
+                // Client handles this.
                 break;
             default:
                 throw new IllegalArgumentException("Invalid Command.");

@@ -200,6 +200,19 @@ public class GXDLMSNotifyHandler {
     }
 
     /**
+     * Removes the HDLC frame from the packet, and returns COSEM data only.
+     * 
+     * @param reply
+     *            The received data from the device.
+     * @param data
+     *            Information from the received data.
+     * @return Is frame complete.
+     */
+    public final boolean getData(final byte[] reply, final GXReplyData data) {
+        return GXDLMS.getData(settings, new GXByteBuffer(reply), data, cipher);
+    }
+
+    /**
      * Add value of COSEM object to byte buffer. AddData method can be used with
      * GetDataNotificationMessage -method. DLMS specification do not specify the
      * structure of Data-Notification body. So each manufacture can sent

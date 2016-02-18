@@ -31,7 +31,6 @@
 // This code is licensed under the GNU General Public License v2. 
 // Full text may be retrieved at http://www.gnu.org/licenses/gpl-2.0.txt
 //---------------------------------------------------------------------------
-
 package gurux.dlms.client;
 
 import java.io.BufferedWriter;
@@ -45,24 +44,9 @@ import java.util.AbstractMap;
 import java.util.Date;
 import java.util.List;
 
+import gurux.common.GXCommon;
 import gurux.common.IGXMedia;
 import gurux.common.ReceiveParameters;
-import gurux.dlms.GXDLMSClient;
-import gurux.dlms.GXDLMSException;
-import gurux.dlms.GXReplyData;
-import gurux.dlms.enums.Authentication;
-import gurux.dlms.enums.DataType;
-import gurux.dlms.enums.ErrorCode;
-import gurux.dlms.enums.InterfaceType;
-import gurux.dlms.enums.RequestTypes;
-import gurux.dlms.internal.GXCommon;
-import gurux.dlms.manufacturersettings.GXManufacturer;
-import gurux.dlms.manufacturersettings.GXObisCode;
-import gurux.dlms.manufacturersettings.GXServerAddress;
-import gurux.dlms.manufacturersettings.HDLCAddressType;
-import gurux.dlms.objects.GXDLMSCaptureObject;
-import gurux.dlms.objects.GXDLMSObject;
-import gurux.dlms.objects.GXDLMSProfileGeneric;
 import gurux.io.Parity;
 import gurux.io.StopBits;
 import gurux.net.GXNet;

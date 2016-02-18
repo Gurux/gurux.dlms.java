@@ -42,7 +42,6 @@ import java.util.AbstractMap.SimpleEntry;
 import java.util.List;
 
 import gurux.dlms.enums.AccessMode;
-import gurux.dlms.enums.AssociationResult;
 import gurux.dlms.enums.Authentication;
 import gurux.dlms.enums.Command;
 import gurux.dlms.enums.DataType;
@@ -252,6 +251,35 @@ public class GXDLMSClient {
      */
     public final void setUseLogicalNameReferencing(final boolean value) {
         settings.setUseLogicalNameReferencing(value);
+    }
+
+    /// <summary>
+    /// Client to Server custom challenge.
+    /// </summary>
+    /// <remarks>
+    /// This is for debugging purposes. Reset custom challenge settings
+    /// CtoSChallenge to null.
+    /// </remarks>
+
+    /**
+     * Client to Server custom challenge.
+     * 
+     * @return Client to Server custom challenge.
+     */
+    public final byte[] getCtoSChallenge() {
+        return settings.getCtoSChallenge();
+    }
+
+    /**
+     * Client to Server custom challenge. This is for debugging purposes. Reset
+     * custom challenge settings CtoSChallenge to null.
+     * 
+     * @param value
+     *            Client to Server challenge.
+     */
+    public final void setCtoSChallenge(final byte[] value) {
+        settings.setUseCustomChallenge(value != null);
+        settings.setCtoSChallenge(value);
     }
 
     /**
@@ -515,25 +543,15 @@ public class GXDLMSClient {
     public final byte[][] aarqRequest() {
         GXByteBuffer buff = new GXByteBuffer(20);
         GXDLMS.checkInit(settings);
-        GXAPDU aarq = new GXAPDU();
-        if (getUseLogicalNameReferencing()) {
-            settings.setSnSettings(null);
-            settings.setLnSettings(
-                    new GXDLMSLNSettings(new byte[] { 0x00, 0x7E, 0x1F }));
-        } else {
-            settings.setLnSettings(null);
-            settings.setSnSettings(
-                    new GXDLMSSNSettings(new byte[] { 0x1C, 0x03, 0x20 }));
-        }
         settings.setStoCChallenge(null);
+        // If authentication or ciphering is used.
         if (getAuthentication().ordinal() > Authentication.HIGH.ordinal()) {
             settings.setCtoSChallenge(
                     GXSecure.generateChallenge(settings.getAuthentication()));
         } else {
             settings.setCtoSChallenge(null);
         }
-        boolean ciphering = cipher != null && cipher.isCiphered();
-        aarq.codeData(settings, ciphering, buff);
+        GXAPDU.generateAarq(settings, cipher, buff);
         return GXDLMS.splitPdu(settings, Command.AARQ, 0, buff, ErrorCode.OK,
                 null, cipher).get(0);
     }
@@ -557,17 +575,9 @@ public class GXDLMSClient {
      * @see GXDLMSClient#getSNSettings
      */
     public final void parseAareResponse(final GXByteBuffer reply) {
-        GXAPDU pdu = new GXAPDU();
-        pdu.encodeData(settings, reply);
-        AssociationResult ret = pdu.getResultComponent();
-        if (ret != AssociationResult.ACCEPTED) {
-            settings.setLnSettings(null);
-            settings.setSnSettings(null);
-            throw new GXDLMSException(ret, pdu.getResultDiagnostic());
-        }
-        SourceDiagnostic res = pdu.getResultDiagnostic();
-        isAuthenticationRequired =
-                res == SourceDiagnostic.AUTHENTICATION_REQUIRED;
+        settings.setConnected(true);
+        isAuthenticationRequired = GXAPDU.parsePDU(settings, cipher,
+                reply) == SourceDiagnostic.AUTHENTICATION_REQUIRED;
         if (getDLMSVersion() != 6) {
             throw new GXDLMSException("Invalid DLMS version number.");
         }
@@ -956,6 +966,7 @@ public class GXDLMSClient {
         long cnt = GXCommon.getObjectCount(buff);
         for (long objPos = 0; objPos != cnt; ++objPos) {
             // Some meters give wrong item count.
+            // This fix Iskraemeco (MT-880) bug.
             if (buff.position() == buff.size()) {
                 break;
             }
@@ -1037,7 +1048,7 @@ public class GXDLMSClient {
             int ret = data.getUInt8();
             if (ret == 0) {
                 value = GXCommon.getData(data, info);
-                it.getKey().setValue(null, it.getValue(), value);
+                it.getKey().setValue(settings, it.getValue(), value);
                 info.clear();
             } else {
                 throw new GXDLMSException(ret);

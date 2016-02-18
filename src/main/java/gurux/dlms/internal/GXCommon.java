@@ -72,6 +72,8 @@ public final class GXCommon {
     public static final byte AARE_TAG = 0x61;
     public static final byte INITIAL_REQUEST = 0x1;
     public static final byte INITIAL_RESPONSE = 0x8;
+    public static final byte INITIAL_REQUEST_GLO = 0x21;
+    public static final byte INITIAL_RESPONSE_GLO = 0x28;
     public static final byte[] LOGICAL_NAME_OBJECT_ID =
             { 0x60, (byte) 0x85, 0x74, 0x05, 0x08, 0x01, 0x01 };
     public static final byte[] SHORT_NAME_OBJECT_ID =
@@ -1113,7 +1115,7 @@ public final class GXCommon {
         } else if (type == DataType.STRING) {
             setString(buff, value);
         } else if (type == DataType.STRING_UTF8) {
-            setUtcString(buff, value);
+            setUtfString(buff, value);
         } else if (type == DataType.OCTET_STRING) {
             setOctetString(buff, value);
         } else if (type == DataType.ARRAY || type == DataType.STRUCTURE) {
@@ -1436,14 +1438,14 @@ public final class GXCommon {
     }
 
     /**
-     * Convert UTC string to DLMS bytes.
+     * Convert UTF string to DLMS bytes.
      * 
      * @param buff
      *            Byte buffer where data is write.
      * @param value
      *            Added value.
      */
-    private static void setUtcString(final GXByteBuffer buff,
+    private static void setUtfString(final GXByteBuffer buff,
             final Object value) {
         if (value != null) {
             String str = value.toString();

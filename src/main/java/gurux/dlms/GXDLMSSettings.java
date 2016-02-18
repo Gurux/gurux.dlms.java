@@ -1,8 +1,43 @@
+//
+// --------------------------------------------------------------------------
+//  Gurux Ltd
+// 
+//
+//
+// Filename:        $HeadURL$
+//
+// Version:         $Revision$,
+//                  $Date$
+//                  $Author$
+//
+// Copyright (c) Gurux Ltd
+//
+//---------------------------------------------------------------------------
+//
+//  DESCRIPTION
+//
+// This file is a part of Gurux Device Framework.
+//
+// Gurux Device Framework is Open Source software; you can redistribute it
+// and/or modify it under the terms of the GNU General Public License 
+// as published by the Free Software Foundation; version 2 of the License.
+// Gurux Device Framework is distributed in the hope that it will be useful,
+// but WITHOUT ANY WARRANTY; without even the implied warranty of 
+// MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. 
+// See the GNU General Public License for more details.
+//
+// More information of Gurux products: http://www.gurux.org
+//
+// This code is licensed under the GNU General Public License v2. 
+// Full text may be retrieved at http://www.gnu.org/licenses/gpl-2.0.txt
+//---------------------------------------------------------------------------
+
 package gurux.dlms;
 
 import gurux.dlms.enums.Authentication;
 import gurux.dlms.enums.InterfaceType;
 import gurux.dlms.enums.Priority;
+import gurux.dlms.enums.Security;
 import gurux.dlms.enums.ServiceClass;
 import gurux.dlms.objects.GXDLMSObjectCollection;
 
@@ -46,13 +81,24 @@ public class GXDLMSSettings {
     private boolean customChallenges = false;
 
     /**
-     * Client to server challenge.
+     * Source challenge.
      */
     private byte[] ctoSChallenge;
     /**
      * Server to Client challenge.
      */
     private byte[] stoCChallenge;
+
+    /**
+     * Used security.
+     */
+    private Security security = Security.NONE;
+
+    /**
+     * Source system title.
+     */
+    private byte[] sourceSystemTitle;
+
     /**
      * Invoke ID.
      */
@@ -93,6 +139,9 @@ public class GXDLMSSettings {
      * DLMS version number.
      */
     private byte dlmsVersionNumber = DLMS_VERSION;
+
+    private boolean connected = false;
+
     /**
      * Maximum receivers PDU size.
      */
@@ -142,6 +191,12 @@ public class GXDLMSSettings {
         server = isServer;
         objects = new GXDLMSObjectCollection();
         limits = new GXDLMSLimits();
+        if (isServer) {
+            lnSettings = new GXDLMSLNSettings(new byte[] { 0x00, 0x7C, 0x1F });
+        } else {
+            lnSettings = new GXDLMSLNSettings(new byte[] { 0x00, 0x7E, 0x1F });
+        }
+        snSettings = new GXDLMSSNSettings(new byte[] { 0x1C, 0x03, 0x20 });
         resetFrameSequence();
     }
 
@@ -222,6 +277,23 @@ public class GXDLMSSettings {
      */
     public final void setDlmsVersionNumber(final byte value) {
         dlmsVersionNumber = value;
+    }
+
+    /**
+     * Is connected to the meter.
+     * 
+     * @return
+     */
+    final boolean getConnected() {
+        return connected;
+    }
+
+    /**
+     * @param value
+     *            Is connected to the meter.
+     */
+    final void setConnected(final boolean value) {
+        connected = value;
     }
 
     /**
@@ -326,26 +398,10 @@ public class GXDLMSSettings {
     }
 
     /**
-     * @param value
-     *            Logical Name settings.
-     */
-    public final void setLnSettings(final GXDLMSLNSettings value) {
-        lnSettings = value;
-    }
-
-    /**
      * @return Short name settings.
      */
     public final GXDLMSSNSettings getSnSettings() {
         return snSettings;
-    }
-
-    /**
-     * @param value
-     *            Short Name settings.
-     */
-    public final void setSnSettings(final GXDLMSSNSettings value) {
-        snSettings = value;
     }
 
     /**
@@ -556,7 +612,25 @@ public class GXDLMSSettings {
      * @param value
      *            Is custom challenges used.
      */
-    public final void setCustomChallenges(final boolean value) {
+    public final void setUseCustomChallenge(final boolean value) {
         customChallenges = value;
+    }
+
+    /**
+     * @return Source system title.
+     */
+    final byte[] getSourceSystemTitle() {
+        return sourceSystemTitle;
+    }
+
+    /**
+     * @param value
+     *            Source system title.
+     */
+    final void setSourceSystemTitle(final byte[] value) {
+        if (value != null && value.length != 8) {
+            throw new IllegalArgumentException("Invalid client system title.");
+        }
+        sourceSystemTitle = value;
     }
 }

@@ -36,7 +36,6 @@ package gurux.dlms.secure;
 
 import gurux.dlms.GXByteBuffer;
 import gurux.dlms.GXICipher;
-import gurux.dlms.enums.Command;
 import gurux.dlms.enums.Security;
 
 /**
@@ -45,17 +44,23 @@ import gurux.dlms.enums.Security;
 public class GXCiphering implements GXICipher {
     private Security security = Security.NONE;
     private byte[] authenticationKey;
+    /**
+     * System title.
+     */
     private byte[] systemTitle;
+
     private byte[] blockCipherKey;
     private long frameCounter = 0;
 
     /**
      * Constructor. Default values are from the Green Book.
      * 
+     * @param server
+     *            Used Is server or client.
      * @param title
      *            Used system title.
      */
-    public GXCiphering(final byte[] title) {
+    GXCiphering(final byte[] title) {
         setSecurity(Security.NONE);
         setSystemTitle(title);
         setBlockCipherKey(new byte[] { 0x00, 0x01, 0x02, 0x03, 0x04, 0x05, 0x06,
@@ -64,27 +69,6 @@ public class GXCiphering implements GXICipher {
                 (byte) 0xD3, (byte) 0xD4, (byte) 0xD5, (byte) 0xD6, (byte) 0xD7,
                 (byte) 0xD8, (byte) 0xD9, (byte) 0xDA, (byte) 0xDB, (byte) 0xDC,
                 (byte) 0xDD, (byte) 0xDE, (byte) 0xDF });
-    }
-
-    /**
-     * Constructor. Default values are from the Green Book.
-     * 
-     * @param counter
-     *            Default frame counter value. Set to Zero.
-     * @param forSystemTitle
-     *            System title.
-     * @param forBlockCipherKey
-     *            Block cipher key.
-     * @param forAuthenticationKey
-     *            Authentication key.
-     */
-    public GXCiphering(final long counter, final byte[] forSystemTitle,
-            final byte[] forBlockCipherKey, final byte[] forAuthenticationKey) {
-        setSecurity(Security.NONE);
-        setFrameCounter(counter);
-        setSystemTitle(forSystemTitle);
-        setBlockCipherKey(forBlockCipherKey);
-        setAuthenticationKey(forAuthenticationKey);
     }
 
     /**
@@ -97,24 +81,27 @@ public class GXCiphering implements GXICipher {
      * @return Secured data.
      */
     @Override
-    public final byte[] encrypt(final Command command, final byte[] data) {
-
-        if (getSecurity() != Security.NONE && command != Command.AARQ
-                && command != Command.AARE) {
+    public final byte[] encrypt(final int tag, final byte[] title,
+            final byte[] data) {
+        if (getSecurity() != Security.NONE) {
+            AesGcmParameter p =
+                    new AesGcmParameter(tag, getSecurity(), getFrameCounter(),
+                            title, getBlockCipherKey(), getAuthenticationKey());
+            byte[] tmp = GXDLMSChippering.encryptAesGcm(p, data);
             setFrameCounter(getFrameCounter() + 1);
-            return GXDLMSChippering.encryptAesGcm(command, getSecurity(),
-                    getFrameCounter(), getSystemTitle(), getBlockCipherKey(),
-                    getAuthenticationKey(), data);
+            return tmp;
         }
         return data;
     }
 
     @Override
-    public final void decrypt(final GXByteBuffer data) {
-        byte[] tmp = GXDLMSChippering.decryptAesGcm(data, getSystemTitle(),
-                getBlockCipherKey(), getAuthenticationKey());
+    public final Security decrypt(final byte[] title, final GXByteBuffer data) {
+        AesGcmParameter p =
+                new AesGcmParameter(title, blockCipherKey, authenticationKey);
+        byte[] tmp = GXDLMSChippering.decryptAesGcm(p, data);
         data.clear();
         data.set(tmp);
+        return p.getSecurity();
     }
 
     @Override
@@ -167,10 +154,11 @@ public class GXCiphering implements GXICipher {
         return systemTitle;
     }
 
+    /**
+     * @param value
+     *            System title.
+     */
     public final void setSystemTitle(final byte[] value) {
-        if (value != null && value.length != 8) {
-            throw new IllegalArgumentException("Invalid System Title.");
-        }
         systemTitle = value;
     }
 
