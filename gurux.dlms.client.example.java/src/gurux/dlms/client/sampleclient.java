@@ -144,47 +144,47 @@ public class sampleclient {
             String number = null;
             for (String it : args) {
                 String item = it.trim();
-                if (item.compareToIgnoreCase("/u") == 0)// Update
-                {
+                if (item.compareToIgnoreCase("/u") == 0) {
+                    // Update
                     // Get latest manufacturer settings from Gurux web server.
                     GXManufacturerCollection.updateManufactureSettings(path);
-                } else if (item.startsWith("/m="))// Manufacturer
-                {
+                } else if (item.startsWith("/m=")) {
+                    // Manufacturer
                     id = item.replaceFirst("/m=", "");
-                } else if (item.startsWith("/h=")) // Host
-                {
+                } else if (item.startsWith("/h=")) {
+                    // Host
                     host = item.replaceFirst("/h=", "");
-                } else if (item.startsWith("/p="))// TCP/IP Port
-                {
+                } else if (item.startsWith("/p=")) {
+                    // TCP/IP Port
                     media = new gurux.net.GXNet();
                     port = item.replaceFirst("/p=", "");
-                } else if (item.startsWith("/sp="))// Serial Port
-                {
+                } else if (item.startsWith("/sp=")) {
+                    // Serial Port
                     if (media == null) {
                         media = new gurux.serial.GXSerial();
                     }
                     port = item.replaceFirst("/sp=", "");
-                } else if (item.startsWith("/n="))// Phone number for terminal.
-                {
+                } else if (item.startsWith("/n=")) {
+                    // Phone number for terminal.
                     media = new GXTerminal();
                     number = item.replaceFirst("/n=", "");
-                } else if (item.startsWith("/b="))// Baud rate
-                {
+                } else if (item.startsWith("/b=")) {
+                    // Baud rate
                     startBaudRate =
                             Integer.parseInt(item.replaceFirst("/b=", ""));
-                } else if (item.startsWith("/t"))// Are messages traced.
-                {
+                } else if (item.startsWith("/t")) {
+                    // Are messages traced.
                     trace = true;
-                } else if (item.startsWith("/s="))// Start
-                {
+                } else if (item.startsWith("/s=")) {
+                    // Start
                     String tmp = item.replaceFirst("/s=", "");
                     iec = !tmp.toLowerCase().equals("dlms");
-                } else if (item.startsWith("/a="))// Authentication
-                {
+                } else if (item.startsWith("/a=")) {
+                    // Authentication
                     auth = Authentication.valueOf(
                             it.trim().replaceFirst("/a=", "").toUpperCase());
-                } else if (item.startsWith("/pw="))// Password
-                {
+                } else if (item.startsWith("/pw=")) {
+                    // Password
                     pw = it.trim().replaceFirst("/pw=", "");
                 } else {
                     ShowHelp();
@@ -247,6 +247,7 @@ public class sampleclient {
             GXDLMSObjectCollection objs = objects.getObjects(new ObjectType[] {
                     ObjectType.REGISTER, ObjectType.DEMAND_REGISTER,
                     ObjectType.EXTENDED_REGISTER });
+            Thread.sleep(1000);
             for (GXDLMSObject it : objs) {
                 if (it instanceof GXDLMSRegister) {
                     com.readObject(it, 3);
@@ -418,9 +419,15 @@ public class sampleclient {
                     // Continue reading if device returns access denied error.
                 }
             }
-        } catch (Exception ex) {
+        } catch (
+
+        Exception ex)
+
+        {
             System.out.println(ex.toString());
-        } finally {
+        } finally
+
+        {
             if (logFile != null) {
                 logFile.close();
             }

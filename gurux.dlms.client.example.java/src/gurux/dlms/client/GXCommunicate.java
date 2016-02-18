@@ -52,7 +52,9 @@ import gurux.dlms.GXDLMSException;
 import gurux.dlms.GXReplyData;
 import gurux.dlms.enums.Authentication;
 import gurux.dlms.enums.DataType;
+import gurux.dlms.enums.ErrorCode;
 import gurux.dlms.enums.InterfaceType;
+import gurux.dlms.enums.RequestTypes;
 import gurux.dlms.internal.GXCommon;
 import gurux.dlms.manufacturersettings.GXManufacturer;
 import gurux.dlms.manufacturersettings.GXObisCode;
@@ -74,7 +76,7 @@ public class GXCommunicate {
     public GXDLMSClient dlms;
     boolean iec;
     java.nio.ByteBuffer replyBuff;
-    int WaitTime = 5000;
+    int WaitTime = 10000;
 
     public GXCommunicate(int waitTime, gurux.dlms.GXDLMSClient dlms,
             GXManufacturer manufacturer, boolean iec, Authentication auth,
@@ -96,8 +98,8 @@ public class GXCommunicate {
             dlms.setInterfaceType(InterfaceType.WRAPPER);
         } else {
             dlms.setInterfaceType(InterfaceType.HDLC);
-            value = GXDLMSClient.countServerAddress(serv.getPhysicalAddress(),
-                    serv.getLogicalAddress());
+            value = GXDLMSClient.getServerAddress(serv.getLogicalAddress(),
+                    serv.getPhysicalAddress());
         }
         dlms.setServerAddress(value);
         dlms.setAuthentication(auth);
@@ -155,9 +157,8 @@ public class GXCommunicate {
     }
 
     /**
-    * Read DLMS Data from the device.
-    * If access is denied return null.
-    */
+     * Read DLMS Data from the device. If access is denied return null.
+     */
     public void readDLMSPacket(byte[] data, GXReplyData reply)
             throws Exception {
         if (data == null || data.length == 0) {
@@ -197,18 +198,24 @@ public class GXCommunicate {
                 }
             }
             // Loop until whole DLMS packet is received.
-            while (!dlms.getData(p.getReply(), reply)) {
-                if (p.getEop() == null) {
-                    p.setCount(1);
+            try {
+                while (!dlms.getData(p.getReply(), reply)) {
+                    if (p.getEop() == null) {
+                        p.setCount(1);
+                    }
+                    if (!Media.receive(p)) {
+                        throw new Exception(
+                                "Failed to receive reply from the device in given time.");
+                    }
                 }
-                if (!Media.receive(p)) {
-                    throw new Exception(
-                            "Failed to receive reply from the device in given time.");
-                }
+            } catch (Exception e) {
+                writeTrace("-> " + now() + "\t" + GXCommon.toHex(p.getReply()));
+                throw e;
             }
         }
         writeTrace("-> " + now() + "\t" + GXCommon.toHex(p.getReply()));
-        if (reply.getError() != 0) {
+        if (reply.getError() != 0
+                && reply.getError() != ErrorCode.REJECTED.getValue()) {
             throw new GXDLMSException(reply.getError());
         }
     }
@@ -228,11 +235,21 @@ public class GXCommunicate {
      * @throws Exception
      */
     void readDataBlock(byte[] data, GXReplyData reply) throws Exception {
+        RequestTypes rt;
         if (data.length != 0) {
             readDLMSPacket(data, reply);
             while (reply.isMoreData()) {
-                data = dlms.receiverReady(reply.getMoreData());
+                rt = reply.getMoreData();
+                data = dlms.receiverReady(rt);
                 readDLMSPacket(data, reply);
+                if (reply.getError() == ErrorCode.REJECTED.getValue()) {
+                    Thread.sleep(1000);
+                    data = dlms.receiverReady(rt);
+                    readDLMSPacket(data, reply);
+                    if (reply.getError() != 0) {
+                        throw new GXDLMSException(reply.getError());
+                    }
+                }
             }
         }
     }
@@ -441,7 +458,7 @@ public class GXCommunicate {
      * Returns columns of profile Generic.
      */
     public List<AbstractMap.SimpleEntry<GXDLMSObject, GXDLMSCaptureObject>>
-            GetColumns(GXDLMSObject pg) throws Exception {
+            GetColumns(GXDLMSProfileGeneric pg) throws Exception {
         Object entries = readObject(pg, 7);
         GXObisCode code = manufacturer.getObisCodes()
                 .findByLN(pg.getObjectType(), pg.getLogicalName(), null);
@@ -456,7 +473,8 @@ public class GXCommunicate {
         GXReplyData reply = new GXReplyData();
         byte[] data = dlms.read(pg.getName(), pg.getObjectType(), 3)[0];
         readDataBlock(data, reply);
-        return dlms.parseColumns(reply.getData());
+        dlms.updateValue((GXDLMSObject) pg, 3, reply.getValue());
+        return pg.getCaptureObjects();
     }
 
     /**
