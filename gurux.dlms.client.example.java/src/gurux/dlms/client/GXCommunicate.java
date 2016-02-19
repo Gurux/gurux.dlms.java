@@ -47,6 +47,21 @@ import java.util.List;
 import gurux.common.GXCommon;
 import gurux.common.IGXMedia;
 import gurux.common.ReceiveParameters;
+import gurux.dlms.GXDLMSClient;
+import gurux.dlms.GXDLMSException;
+import gurux.dlms.GXReplyData;
+import gurux.dlms.enums.Authentication;
+import gurux.dlms.enums.DataType;
+import gurux.dlms.enums.ErrorCode;
+import gurux.dlms.enums.InterfaceType;
+import gurux.dlms.enums.RequestTypes;
+import gurux.dlms.manufacturersettings.GXManufacturer;
+import gurux.dlms.manufacturersettings.GXObisCode;
+import gurux.dlms.manufacturersettings.GXServerAddress;
+import gurux.dlms.manufacturersettings.HDLCAddressType;
+import gurux.dlms.objects.GXDLMSCaptureObject;
+import gurux.dlms.objects.GXDLMSObject;
+import gurux.dlms.objects.GXDLMSProfileGeneric;
 import gurux.io.Parity;
 import gurux.io.StopBits;
 import gurux.net.GXNet;
@@ -164,7 +179,7 @@ public class GXCommunicate {
         p.setWaitTime(WaitTime);
         synchronized (Media.getSynchronous()) {
             while (!succeeded) {
-                writeTrace("<- " + now() + "\t" + GXCommon.toHex(data));
+                writeTrace("<- " + now() + "\t" + GXCommon.bytesToHex(data));
                 Media.send(data, null);
                 if (p.getEop() == null) {
                     p.setCount(1);
@@ -193,11 +208,12 @@ public class GXCommunicate {
                     }
                 }
             } catch (Exception e) {
-                writeTrace("-> " + now() + "\t" + GXCommon.toHex(p.getReply()));
+                writeTrace("-> " + now() + "\t"
+                        + GXCommon.bytesToHex(p.getReply()));
                 throw e;
             }
         }
-        writeTrace("-> " + now() + "\t" + GXCommon.toHex(p.getReply()));
+        writeTrace("-> " + now() + "\t" + GXCommon.bytesToHex(p.getReply()));
         if (reply.getError() != 0
                 && reply.getError() != ErrorCode.REJECTED.getValue()) {
             throw new GXDLMSException(reply.getError());
@@ -262,13 +278,13 @@ public class GXCommunicate {
                 synchronized (Media.getSynchronous()) {
                     data = "/?!\r\n";
                     writeTrace("<- " + now() + "\t"
-                            + GXCommon.toHex(data.getBytes("ASCII")));
+                            + GXCommon.bytesToHex(data.getBytes("ASCII")));
                     Media.send(data, null);
                     if (!Media.receive(p)) {
                         throw new Exception("Invalid meter type.");
                     }
-                    writeTrace(
-                            "->" + now() + "\t" + GXCommon.toHex(p.getReply()));
+                    writeTrace("->" + now() + "\t"
+                            + GXCommon.bytesToHex(p.getReply()));
                     // If echo is used.
                     replyStr = new String(p.getReply());
                     if (data.equals(replyStr)) {
@@ -277,7 +293,7 @@ public class GXCommunicate {
                             throw new Exception("Invalid meter type.");
                         }
                         writeTrace("-> " + now() + "\t"
-                                + GXCommon.toHex(p.getReply()));
+                                + GXCommon.bytesToHex(p.getReply()));
                         replyStr = new String(p.getReply());
                     }
                 }
@@ -334,11 +350,11 @@ public class GXCommunicate {
                 p.setReply(null);
                 synchronized (Media.getSynchronous()) {
                     Media.send(tmp, null);
-                    writeTrace("<- " + now() + "\t" + GXCommon.toHex(tmp));
+                    writeTrace("<- " + now() + "\t" + GXCommon.bytesToHex(tmp));
                     p.setWaitTime(100);
                     if (Media.receive(p)) {
                         writeTrace("-> " + now() + "\t"
-                                + GXCommon.toHex(p.getReply()));
+                                + GXCommon.bytesToHex(p.getReply()));
                     }
                     Media.close();
                     // This sleep make sure that all meters can be read.

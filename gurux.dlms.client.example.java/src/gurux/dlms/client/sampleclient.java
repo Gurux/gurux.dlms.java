@@ -42,6 +42,19 @@ import java.util.AbstractMap.SimpleEntry;
 
 import gurux.common.GXCommon;
 import gurux.common.IGXMedia;
+import gurux.dlms.GXDLMSClient;
+import gurux.dlms.GXReplyData;
+import gurux.dlms.enums.Authentication;
+import gurux.dlms.enums.ObjectType;
+import gurux.dlms.manufacturersettings.GXManufacturer;
+import gurux.dlms.manufacturersettings.GXManufacturerCollection;
+import gurux.dlms.objects.GXDLMSCaptureObject;
+import gurux.dlms.objects.GXDLMSDemandRegister;
+import gurux.dlms.objects.GXDLMSObject;
+import gurux.dlms.objects.GXDLMSObjectCollection;
+import gurux.dlms.objects.GXDLMSProfileGeneric;
+import gurux.dlms.objects.GXDLMSRegister;
+import gurux.dlms.objects.IGXDLMSBase;
 import gurux.io.Parity;
 import gurux.io.StopBits;
 import gurux.net.GXNet;
@@ -297,7 +310,7 @@ public class sampleclient {
                     try {
                         Object val = com.readObject(it, pos);
                         if (val instanceof byte[]) {
-                            val = GXCommon.toHex((byte[]) val);
+                            val = GXCommon.bytesToHex((byte[]) val);
                         } else if (val instanceof Double) {
                             NumberFormat formatter =
                                     NumberFormat.getNumberInstance();
@@ -311,7 +324,7 @@ public class sampleclient {
                                 }
                                 Object tmp = Array.get(val, pos2);
                                 if (tmp instanceof byte[]) {
-                                    str += GXCommon.toHex((byte[]) tmp);
+                                    str += GXCommon.bytesToHex((byte[]) tmp);
                                 } else {
                                     str += String.valueOf(tmp);
                                 }
@@ -354,7 +367,8 @@ public class sampleclient {
                         for (Object cell : (Object[]) rows) {
                             if (cell instanceof byte[]) {
                                 trace(logFile,
-                                        GXCommon.toHex((byte[]) cell) + " | ");
+                                        GXCommon.bytesToHex((byte[]) cell)
+                                                + " | ");
                             } else {
                                 trace(logFile, cell + " | ");
                             }
@@ -392,7 +406,8 @@ public class sampleclient {
                         for (Object cell : (Object[]) rows) {
                             if (cell instanceof byte[]) {
                                 System.out.print(
-                                        GXCommon.toHex((byte[]) cell) + " | ");
+                                        GXCommon.bytesToHex((byte[]) cell)
+                                                + " | ");
                             } else {
                                 trace(logFile, cell + " | ");
                             }
