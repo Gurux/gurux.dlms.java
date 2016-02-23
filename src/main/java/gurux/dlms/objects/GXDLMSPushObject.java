@@ -32,10 +32,6 @@
 // Full text may be retrieved at http://www.gnu.org/licenses/gpl-2.0.txt
 //---------------------------------------------------------------------------
 
-/*
- * To change this template, choose Tools | Templates
- * and open the template in the editor.
- */
 package gurux.dlms.objects;
 
 import gurux.dlms.enums.ObjectType;

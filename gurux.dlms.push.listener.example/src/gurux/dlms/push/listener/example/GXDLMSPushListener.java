@@ -43,7 +43,7 @@ import gurux.common.PropertyChangedEventArgs;
 import gurux.common.ReceiveEventArgs;
 import gurux.common.TraceEventArgs;
 import gurux.common.enums.TraceLevel;
-import gurux.dlms.GXDLMSClient;
+import gurux.dlms.GXDLMSNotifyHandler;
 import gurux.dlms.GXReplyData;
 import gurux.dlms.enums.InterfaceType;
 import gurux.dlms.objects.GXDLMSObject;
@@ -59,7 +59,7 @@ public class GXDLMSPushListener
     private boolean trace = false;
     private GXNet media;
     GXReplyData data = new GXReplyData();
-    GXDLMSClient client = new GXDLMSClient();
+    GXDLMSNotifyHandler notify;
 
     /**
      * Constructor.
@@ -73,8 +73,7 @@ public class GXDLMSPushListener
         media.addListener(this);
         media.open();
         // TODO; Must set communication specific settings.
-        client.setUseLogicalNameReferencing(true);
-        client.setInterfaceType(InterfaceType.WRAPPER);
+        notify = new GXDLMSNotifyHandler(true, 1, 1, InterfaceType.WRAPPER);
     }
 
     public void close() {
@@ -97,11 +96,11 @@ public class GXDLMSPushListener
                     System.out.println("<- " + gurux.common.GXCommon
                             .bytesToHex((byte[]) e.getData()));
                 }
-                client.getData((byte[]) e.getData(), data);
+                notify.getData((byte[]) e.getData(), data);
                 // If all data is received.
                 if (!data.isMoreData()) {
                     List<AbstractMap.SimpleEntry<GXDLMSObject, Integer>> list;
-                    list = client.getPushObjects(data.getData());
+                    list = notify.parsePushObjects(data.getData());
                     // Print received data.
                     for (AbstractMap.SimpleEntry<GXDLMSObject, Integer> it : list) {
                         // Print LN.
