@@ -349,20 +349,20 @@ public abstract class GXDLMSServerBase {
                     serverIDs.clear();
                 }
                 authentications.add(new GXAuthentication(Authentication.NONE,
-                        GXCommon.getBytes(""), (byte) 0x10));
+                        GXCommon.getBytes(null), 0x10));
                 authentications.add(new GXAuthentication(Authentication.LOW,
-                        GXCommon.getBytes("GuruxLow"), (byte) 0x20));
+                        GXCommon.getBytes("GuruxLow"), 0x11));
                 authentications.add(new GXAuthentication(Authentication.HIGH,
-                        GXCommon.getBytes("GuruxHigh"), (byte) 0x40));
-                authentications.add(new GXAuthentication(
-                        Authentication.HIGH_MD5,
-                        GXCommon.getBytes("GuruxHighMD5"), (byte) 0x41));
-                authentications.add(new GXAuthentication(
-                        Authentication.HIGH_SHA1,
-                        GXCommon.getBytes("GuruxHighSHA1"), (byte) 0x42));
-                authentications.add(new GXAuthentication(
-                        Authentication.HIGH_GMAC,
-                        GXCommon.getBytes("GuruxHighGMAC"), (byte) 0x43));
+                        GXCommon.getBytes("GuruxHigh"), 0x12));
+                authentications
+                        .add(new GXAuthentication(Authentication.HIGH_MD5,
+                                GXCommon.getBytes("GuruxHighMD5"), 0x13));
+                authentications
+                        .add(new GXAuthentication(Authentication.HIGH_SHA1,
+                                GXCommon.getBytes("GuruxHighSHA1"), 0x14));
+                authentications
+                        .add(new GXAuthentication(Authentication.HIGH_GMAC,
+                                GXCommon.getBytes("GuruxHighGMAC"), 0x15));
                 serverIDs.add(1);
             } else {
                 if (authentications == null) {
@@ -372,17 +372,17 @@ public abstract class GXDLMSServerBase {
                     serverIDs.clear();
                 }
                 authentications.add(new GXAuthentication(Authentication.NONE,
-                        GXCommon.getBytes(""), 0x10));
+                        GXCommon.getBytes(null), 1));
                 authentications.add(new GXAuthentication(Authentication.LOW,
-                        GXCommon.getBytes("GuruxLow"), 0x20));
+                        GXCommon.getBytes("GuruxLow"), 1));
                 authentications.add(new GXAuthentication(Authentication.HIGH,
-                        GXCommon.getBytes("GuruxHigh"), 0x40));
+                        GXCommon.getBytes("GuruxHigh"), 1));
                 authentications
                         .add(new GXAuthentication(Authentication.HIGH_MD5,
-                                GXCommon.getBytes("GuruxHighMD5"), 0x41));
+                                GXCommon.getBytes("GuruxHighMD5"), 1));
                 authentications
                         .add(new GXAuthentication(Authentication.HIGH_SHA1,
-                                GXCommon.getBytes("GuruxHighSHA1"), 0x42));
+                                GXCommon.getBytes("GuruxHighSHA1"), 1));
                 authentications
                         .add(new GXAuthentication(Authentication.HIGH_GMAC,
                                 GXCommon.getBytes("GuruxHighGMAC"), 0x43));

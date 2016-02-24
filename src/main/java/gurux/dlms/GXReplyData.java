@@ -41,6 +41,11 @@ import gurux.dlms.enums.RequestTypes;
 public class GXReplyData {
 
     /**
+     * Is received frame echo.
+     */
+    private boolean echo = false;
+
+    /**
      * Is more data available.
      */
     private RequestTypes moreData;
@@ -196,6 +201,21 @@ public class GXReplyData {
 
     public final void setTotalCount(final int value) {
         totalCount = value;
+    }
+
+    /**
+     * @param value
+     *            Is received frame echo.
+     */
+    final void setEcho(final boolean value) {
+        echo = value;
+    }
+
+    /**
+     * @return Is received frame echo.
+     */
+    public final boolean isEcho() {
+        return echo;
     }
 
     /**

@@ -89,7 +89,7 @@ public class GXDLMSBase extends GXDLMSServerBase
         implements IGXMediaListener, gurux.net.IGXNetListener {
 
     boolean Trace = false;
-    private GXNet Media;
+    private GXNet media;
 
     public GXDLMSBase(boolean logicalNameReferencing,
             InterfaceType interfaceType) {
@@ -102,20 +102,20 @@ public class GXDLMSBase extends GXDLMSServerBase
      * @param server
      */
     public void Initialize(int port) throws Exception {
-        Media = new gurux.net.GXNet(NetworkType.TCP, port);
-        Media.setTrace(TraceLevel.VERBOSE);
-        Media.addListener(this);
-        Media.open();
+        media = new gurux.net.GXNet(NetworkType.TCP, port);
+        media.setTrace(TraceLevel.VERBOSE);
+        media.addListener(this);
+        media.open();
         ///////////////////////////////////////////////////////////////////////
         // Add Logical Device Name. 123456 is meter serial number.
         GXDLMSData d = new GXDLMSData("0.0.42.0.0.255");
         d.setValue("Gurux123456");
         // Set access right. Client can't change Device name.
-        d.setAccess(2, AccessMode.READ_WRITE);
+        d.setAccess(2, AccessMode.READ);
         d.setDataType(2, DataType.OCTET_STRING);
         d.setUIDataType(2, DataType.STRING);
         getItems().add(d);
-        // Add Last avarage.
+        // Add Last average.
         GXDLMSRegister r = new GXDLMSRegister("1.1.21.25.0.255");
         // Set access right. Client can't change Device name.
         r.setAccess(2, AccessMode.READ);
@@ -126,7 +126,7 @@ public class GXDLMSBase extends GXDLMSServerBase
         clock.setEnd(new GXDateTime(-1, 3, 1, -1, -1, -1, -1));
         clock.setDeviation(0);
         getItems().add(clock);
-        // Add Tcp Udp setup. Default Logical Name is 0.0.25.0.0.255.
+        // Add TCP/IP UDP setup. Default Logical Name is 0.0.25.0.0.255.
         GXDLMSTcpUdpSetup tcp = new GXDLMSTcpUdpSetup();
         getItems().add(tcp);
         ///////////////////////////////////////////////////////////////////////
@@ -405,7 +405,7 @@ public class GXDLMSBase extends GXDLMSServerBase
                         System.out.println("-> "
                                 + gurux.common.GXCommon.bytesToHex(reply));
                     }
-                    Media.send(reply, e.getSenderInfo());
+                    media.send(reply, e.getSenderInfo());
                 }
             }
         } catch (Exception ex) {

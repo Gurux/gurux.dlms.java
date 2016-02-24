@@ -163,6 +163,7 @@ public class GXCommunicate {
         if (data == null || data.length == 0) {
             return;
         }
+        reply.setError((short) 0);
         Object eop = (byte) 0x7E;
         // In network connection terminator is not used.
         if (dlms.getInterfaceType() == InterfaceType.WRAPPER
@@ -173,7 +174,6 @@ public class GXCommunicate {
         boolean succeeded = false;
         ReceiveParameters<byte[]> p =
                 new ReceiveParameters<byte[]>(byte[].class);
-        p.setAllData(true);
         p.setEop(eop);
         p.setCount(5);
         p.setWaitTime(WaitTime);
@@ -187,13 +187,12 @@ public class GXCommunicate {
                 succeeded = Media.receive(p);
                 if (!succeeded) {
                     // Try to read again...
-                    if (pos++ != 3) {
-                        System.out.println("Data send failed. Try to resend "
-                                + pos.toString() + "/3");
-                        continue;
+                    if (pos++ == 3) {
+                        throw new RuntimeException(
+                                "Failed to receive reply from the device in given time.");
                     }
-                    throw new RuntimeException(
-                            "Failed to receive reply from the device in given time.");
+                    System.out.println("Data send failed. Try to resend "
+                            + pos.toString() + "/3");
                 }
             }
             // Loop until whole DLMS packet is received.
@@ -203,8 +202,17 @@ public class GXCommunicate {
                         p.setCount(1);
                     }
                     if (!Media.receive(p)) {
-                        throw new Exception(
-                                "Failed to receive reply from the device in given time.");
+                        // If echo.
+                        if (reply.isEcho()) {
+                            Media.send(data, null);
+                        }
+                        // Try to read again...
+                        if (++pos == 3) {
+                            throw new Exception(
+                                    "Failed to receive reply from the device in given time.");
+                        }
+                        System.out.println("Data send failed. Try to resend "
+                                + pos.toString() + "/3");
                     }
                 }
             } catch (Exception e) {

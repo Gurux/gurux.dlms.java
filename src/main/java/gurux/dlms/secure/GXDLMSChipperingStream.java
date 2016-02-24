@@ -51,6 +51,7 @@ import java.io.ByteArrayOutputStream;
 
 import gurux.dlms.GXDLMSException;
 import gurux.dlms.enums.Security;
+import gurux.dlms.internal.GXCommon;
 
 /**
  * Implements GMAC. This class is based to this doc:
@@ -141,7 +142,7 @@ class GXDLMSChipperingStream {
      * @return
      */
     private static int toUInt32(final byte[] value, final int offset) {
-        int tmp = value[offset];
+        int tmp = value[offset] & 0xFF;
         tmp |= (value[offset + 1] << 8) & 0xFF00;
         tmp |= (value[offset + 2] << 16) & 0xFF0000;
         tmp |= (value[offset + 3] << 24) & 0xFF000000;
@@ -998,6 +999,8 @@ class GXDLMSChipperingStream {
         xor(generatedTag, s);
         if (!encrypt) {
             if (!tagsEquals(this.tag, generatedTag)) {
+                System.out.println(GXCommon.toHex(tag) + "-"
+                        + GXCommon.toHex(generatedTag));
                 throw new GXDLMSException("Decrypt failed. Invalid tag.");
             }
         } else {

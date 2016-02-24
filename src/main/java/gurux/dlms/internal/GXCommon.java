@@ -358,7 +358,7 @@ public final class GXCommon {
         case BOOLEAN:
             value = getBoolean(data, info);
             break;
-        case BIT_STRING:
+        case BITSTRING:
             value = getBitString(data, info);
             break;
         case INT32:
@@ -451,6 +451,9 @@ public final class GXCommon {
         // Position where last row was found. Cache uses this info.
         int pos = info.getIndex();
         for (; pos != info.getCount(); ++pos) {
+            if (pos == 124) {
+                String mikko = "";
+            }
             GXDataInfo info2 = new GXDataInfo();
             Object tmp = getData(buff, info2);
             if (!info2.isCompleate()) {
@@ -1110,7 +1113,7 @@ public final class GXCommon {
             java.nio.ByteBuffer tmp = java.nio.ByteBuffer.allocate(8);
             tmp.putDouble(((Number) value).doubleValue());
             buff.set(tmp.array());
-        } else if (type == DataType.BIT_STRING) {
+        } else if (type == DataType.BITSTRING) {
             setBitString(buff, value);
         } else if (type == DataType.STRING) {
             setString(buff, value);

@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="utf-8"?>
+<objects>
+<object Type="DATA">
+<SN>160</SN>
+<LN>0.0.42.0.0.255</LN>
+</object>
+<object Type="ASSOCIATION_SHORT_NAME">
+<SN>64000</SN>
+<LN>0.0.40.0.0.255</LN>
+</object>
+</objects>

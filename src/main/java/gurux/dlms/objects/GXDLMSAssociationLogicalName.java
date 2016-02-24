@@ -491,7 +491,7 @@ public class GXDLMSAssociationLogicalName extends GXDLMSObject
             GXByteBuffer data = new GXByteBuffer();
             data.setUInt8(DataType.STRUCTURE.getValue());
             data.setUInt8(6);
-            GXCommon.setData(data, DataType.BIT_STRING,
+            GXCommon.setData(data, DataType.BITSTRING,
                     xDLMSContextInfo.getConformance());
             GXCommon.setData(data, DataType.UINT16,
                     xDLMSContextInfo.getMaxReceivePduSize());

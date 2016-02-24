@@ -34,6 +34,18 @@
 
 package gurux.dlms.objects;
 
+import java.io.FileInputStream;
+import java.io.IOException;
+import java.io.PrintWriter;
+
+import javax.xml.stream.XMLInputFactory;
+import javax.xml.stream.XMLOutputFactory;
+import javax.xml.stream.XMLStreamConstants;
+import javax.xml.stream.XMLStreamException;
+import javax.xml.stream.XMLStreamReader;
+import javax.xml.stream.XMLStreamWriter;
+
+import gurux.dlms.GXDLMSClient;
 import gurux.dlms.enums.ObjectType;
 
 /**
@@ -122,5 +134,108 @@ public class GXDLMSObjectCollection extends java.util.ArrayList<GXDLMSObject>
         }
         sb.append(']');
         return sb.toString();
+    }
+
+    /**
+     * Load COSEM objects from the file.
+     * 
+     * @param path
+     *            File path.
+     * @return Collection of serialized COSEM objects.
+     * @throws XMLStreamException
+     * @throws IOException
+     */
+    public static GXDLMSObjectCollection load(final String path)
+            throws XMLStreamException, IOException {
+        GXDLMSObjectCollection objects = new GXDLMSObjectCollection();
+        try (FileInputStream tmp = new FileInputStream(path)) {
+            XMLInputFactory inputFactory = XMLInputFactory.newInstance();
+            XMLStreamReader xmlStreamReader =
+                    inputFactory.createXMLStreamReader(tmp);
+            GXDLMSObject obj = null;
+            String target;
+            ObjectType type;
+            String data = null;
+            while (xmlStreamReader.hasNext()) {
+                int event = xmlStreamReader.next();
+                if (event == XMLStreamConstants.START_ELEMENT) {
+                    data = null;
+                    target = xmlStreamReader.getLocalName();
+                    if ("object".compareToIgnoreCase(target) == 0) {
+                        type = ObjectType
+                                .valueOf(xmlStreamReader.getAttributeValue(0));
+                        obj = GXDLMSClient.createObject(type);
+                        objects.add(obj);
+                    }
+                } else if (event == XMLStreamConstants.CHARACTERS) {
+                    data = xmlStreamReader.getText();
+                } else if (event == XMLStreamConstants.END_ELEMENT) {
+                    target = xmlStreamReader.getLocalName();
+                    if ("SN".compareToIgnoreCase(target) == 0) {
+                        obj.setShortName(Integer.parseInt(data));
+                    } else if ("LN".compareToIgnoreCase(target) == 0) {
+                        obj.setLogicalName(data);
+                    }
+
+                }
+            }
+        }
+        return objects;
+
+    }
+
+    /**
+     * Save COSEM objects to the file.
+     * 
+     * @param path
+     *            File path.
+     * @throws IOException
+     * @throws XMLStreamException
+     */
+    public final void save(final String path)
+            throws IOException, XMLStreamException {
+        try (PrintWriter pw = new PrintWriter(path, "utf-8")) {
+            String newline = System.getProperty("line.separator");
+            XMLOutputFactory output = XMLOutputFactory.newInstance();
+            XMLStreamWriter writer = output.createXMLStreamWriter(pw);
+            writer.writeStartDocument("utf-8", "1.0");
+            writer.setPrefix("gurux", "http://www.gurux.org");
+            writer.setDefaultNamespace("http://www.gurux.org");
+            writer.writeCharacters(newline);
+            writer.writeStartElement("objects");
+            writer.writeCharacters(newline);
+            for (GXDLMSObject it : this) {
+                writer.writeStartElement("object");
+                writer.writeAttribute("Type",
+                        String.valueOf(it.getObjectType()));
+                writer.writeCharacters(newline);
+                // Add SN
+                if (it.getShortName() != 0) {
+                    writer.writeStartElement("SN");
+                    writer.writeCharacters(String.valueOf(it.getShortName()));
+                    writer.writeEndElement();
+                    writer.writeCharacters(newline);
+                }
+                // Add LN
+                writer.writeStartElement("LN");
+                writer.writeCharacters(it.getLogicalName());
+                writer.writeEndElement();
+                writer.writeCharacters(newline);
+                // Close object.
+                writer.writeEndElement();
+                writer.writeCharacters(newline);
+            }
+            // Close objects
+            writer.writeEndElement();
+            writer.writeEndDocument();
+            pw.flush();
+        }
+        /*
+         * try (FileOutputStream fs = new FileOutputStream(path)) { try
+         * (BufferedOutputStream bs = new BufferedOutputStream(fs)) { try
+         * (XMLEncoder encoder = new XMLEncoder(bs)) {
+         * encoder.writeObject(this); encoder.flush(); bs.flush(); fs.flush();
+         * encoder.close(); bs.close(); fs.close(); } } } }
+         */
     }
 }

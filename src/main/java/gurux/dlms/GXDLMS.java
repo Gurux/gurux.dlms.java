@@ -776,8 +776,12 @@ abstract class GXDLMS {
         }
         // Not a HDLC frame.
         if (reply.position() == reply.size()) {
-            throw new GXDLMSException("Invalid data format.");
+            data.setComplete(false);
+            reply.position(packetStartID);
+            // Not enough data to parse;
+            return 0;
         }
+        data.setEcho(false);
         short frame = reply.getUInt8();
         // Check frame length.
         if ((frame & 0x7) != 0) {
@@ -793,15 +797,16 @@ abstract class GXDLMS {
             return 0;
 
         }
-        int len = frameLen + packetStartID + 1;
-        ch = reply.getUInt8(len);
+        int eopPos = frameLen + packetStartID + 1;
+        ch = reply.getUInt8(eopPos);
         if (ch != GXCommon.HDLC_FRAME_START_END) {
             throw new GXDLMSException("Invalid data format.");
         }
 
         // Check addresses.
-        if (!checkHdlcAddress(server, settings, reply, data, len)) {
+        if (!checkHdlcAddress(server, settings, reply, data, eopPos)) {
             // If echo.
+            data.setEcho(true);
             return getHdlcData(server, settings, reply, data);
         }
         // Is there more data available.
@@ -835,8 +840,7 @@ abstract class GXDLMS {
             }
         }
         if (type == FrameType.REJECTED) {
-            // Get EOP.
-            reply.getUInt8();
+            reply.position(reply.size());
             data.setError((short) ErrorCode.REJECTED.getValue());
         } else if (type == FrameType.DISCONNECT_REQUEST) {
             // Get EOP.
@@ -858,21 +862,22 @@ abstract class GXDLMS {
             // Get EOP.
             reply.getUInt8();
         } else {
-            // If Keep Alive or get next frame
-            if ((frame & 0x1) == 1) {
-                // Get EOP.
-                reply.getUInt8();
-                data.setMoreData(RequestTypes.FRAME);
-            } else {
+            // If I frame.
+            if ((frame & 1) == 0) {
                 getLLCBytes(server, reply);
                 if (type == FrameType.AARQ && settings.isServer()) {
                     data.setCommand(Command.AARQ);
                 }
+            } else {
+                // If U or S frame.
+                // Get EOP.
+                reply.getUInt8();
+                data.setMoreData(RequestTypes.FRAME);
             }
         }
         // Skip data CRC and EOP.
         if (reply.position() != reply.size()) {
-            reply.size(reply.size() - 3);
+            reply.size(eopPos - 2);
         }
         return frame;
     }

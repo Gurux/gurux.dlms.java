@@ -51,7 +51,7 @@ public enum DataType {
     /**
      * Data type is Bit string.
      */
-    BIT_STRING(4),
+    BITSTRING(4),
 
     /**
      * Data type is Boolean.
