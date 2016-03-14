@@ -94,25 +94,21 @@ final class SerialNumberCounter {
             throw new InvalidParameterException(
                     "Invalid serial number formula.");
         }
+        String str;
         int value = getValue(values.get(0), sn);
         for (int index = 1; index != values.size(); index += 2) {
-            switch (values.get(index)) {
-            case "%":
+            str = values.get(index);
+            if ("%".equals(str)) {
                 value = value % getValue(values.get(index + 1), sn);
-                break;
-            case "+":
+            } else if ("+".equals(str)) {
                 value = value + getValue(values.get(index + 1), sn);
-                break;
-            case "-":
+            } else if ("-".equals(str)) {
                 value = value - getValue(values.get(index + 1), sn);
-                break;
-            case "*":
+            } else if ("*".equals(str)) {
                 value = value * getValue(values.get(index + 1), sn);
-                break;
-            case "/":
+            } else if ("/".equals(str)) {
                 value = value / getValue(values.get(index + 1), sn);
-                break;
-            default:
+            } else {
                 throw new InvalidParameterException(
                         "Invalid serial number formula.");
             }

@@ -34,8 +34,8 @@
 
 package gurux.dlms.objects;
 
-import gurux.dlms.enums.MessageType;
-import gurux.dlms.enums.ServiceType;
+import gurux.dlms.objects.enums.MessageType;
+import gurux.dlms.objects.enums.ServiceType;
 
 public class GXSendDestinationAndMethod {
     private ServiceType service;

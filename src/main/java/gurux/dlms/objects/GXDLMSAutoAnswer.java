@@ -44,11 +44,11 @@ import gurux.dlms.GXByteBuffer;
 import gurux.dlms.GXDLMSClient;
 import gurux.dlms.GXDLMSSettings;
 import gurux.dlms.GXDateTime;
-import gurux.dlms.enums.AutoConnectMode;
 import gurux.dlms.enums.DataType;
 import gurux.dlms.enums.ObjectType;
 import gurux.dlms.internal.GXCommon;
 import gurux.dlms.objects.enums.AutoAnswerStatus;
+import gurux.dlms.objects.enums.AutoConnectMode;
 
 public class GXDLMSAutoAnswer extends GXDLMSObject implements IGXDLMSBase {
     private AutoConnectMode mode;

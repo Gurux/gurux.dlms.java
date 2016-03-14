@@ -74,8 +74,10 @@ public class GXCiphering implements GXICipher {
     /**
      * Cipher PDU.
      * 
-     * @param command
-     *            executed command.
+     * @param tag
+     *            Tag.
+     * @param title
+     *            System title.
      * @param data
      *            Plain text.
      * @return Secured data.

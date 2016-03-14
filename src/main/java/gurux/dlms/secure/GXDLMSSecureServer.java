@@ -32,13 +32,38 @@
 // Full text may be retrieved at http://www.gnu.org/licenses/gpl-2.0.txt
 //---------------------------------------------------------------------------
 
-package gurux.dlms.enums;
+package gurux.dlms.secure;
+
+import gurux.dlms.GXDLMSServer;
+import gurux.dlms.enums.InterfaceType;
 
 /**
- *
- * Provides information about the transfer status of each ImageBlock. Each bit
- * in the bit-string provides information about one individual ImageBlock:
+ * Implements secured DLMS server.
+ * 
+ * @author Gurux Ltd.
  */
-public enum ImageTransferredBlocksStatus {
-    NOT_TRANSFERRED, TRANSFERRED
+public abstract class GXDLMSSecureServer extends GXDLMSServer {
+    /**
+     * Ciphering settings.
+     */
+    private GXCiphering ciphering;
+
+    /**
+     * Constructor.
+     * 
+     * @param logicalNameReferencing
+     *            Is logical name referencing used.
+     * @param type
+     *            Interface type.
+     */
+    public GXDLMSSecureServer(final boolean logicalNameReferencing,
+            final InterfaceType type) {
+        super(logicalNameReferencing, type);
+        ciphering = new GXCiphering("ABCDEFGH".getBytes());
+        setCipher(ciphering);
+    }
+
+    public final GXCiphering getCiphering() {
+        return ciphering;
+    }
 }

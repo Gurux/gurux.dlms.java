@@ -516,5 +516,4 @@ public enum Unit {
         return str;
     }
     // CHECKSTYLE:ON
-
 }

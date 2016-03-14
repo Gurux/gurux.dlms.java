@@ -31,20 +31,23 @@
 // This code is licensed under the GNU General Public License v2. 
 // Full text may be retrieved at http://www.gnu.org/licenses/gpl-2.0.txt
 //---------------------------------------------------------------------------
+package gurux.dlms.objects.enums;
 
-package gurux.dlms.enums;
-
-/*
- * Defines whether or not the device has been assigned an address 
- * since last power up of the device.
+/**
+ * Security suite Specifies authentication, encryption and key wrapping
+ * algorithm.
  */
-public enum AddressState {
-    /*
-     * Not assigned an address yet-
+public enum SecuritySuite {
+    /**
+     * AES-GCM-128 for authenticated encryption and AES-128 for key wrapping.
      */
-    NONE,
-    /*
-     * Assigned an address either by manual setting, or by automated method.
-     */
-    ASSIGNED
+    AES_GCM_128;
+
+    public int getValue() {
+        return this.ordinal();
+    }
+
+    public static SecuritySuite forValue(final int value) {
+        return values()[value];
+    }
 }

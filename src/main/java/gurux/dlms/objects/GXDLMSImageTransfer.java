@@ -46,9 +46,9 @@ import gurux.dlms.GXByteBuffer;
 import gurux.dlms.GXDLMSClient;
 import gurux.dlms.GXDLMSSettings;
 import gurux.dlms.enums.DataType;
-import gurux.dlms.enums.ImageTransferStatus;
 import gurux.dlms.enums.ObjectType;
 import gurux.dlms.internal.GXCommon;
+import gurux.dlms.objects.enums.ImageTransferStatus;
 
 public class GXDLMSImageTransfer extends GXDLMSObject implements IGXDLMSBase {
     private long imageSize;

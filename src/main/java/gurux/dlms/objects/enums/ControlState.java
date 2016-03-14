@@ -32,45 +32,43 @@
 // Full text may be retrieved at http://www.gnu.org/licenses/gpl-2.0.txt
 //---------------------------------------------------------------------------
 
-package gurux.dlms.enums;
+package gurux.dlms.objects.enums;
 
 /**
- * Defines the minimum time between the reception of a request (end of request
- * telegram) and the transmission of the response (begin of response telegram).
+ * The internal states of the disconnect control object.
  */
-public enum LocalPortResponseTime {
+public enum ControlState {
     /**
-     * Minimium time is 20 ms.
+     * The output_state is set to false and the consumer is disconnected.
      */
-    ms20(0), /**
-              * Minimium time is 200 ms.
-              */
-    ms200(1);
+    DISCONNECTED,
 
-    private int intValue;
-    private static java.util.HashMap<Integer, LocalPortResponseTime> mappings;
+    /**
+     * The output_state is set to true and the consumer is connected.
+     */
+    CONNECTED,
 
-    private static java.util.HashMap<Integer, LocalPortResponseTime>
-            getMappings() {
-        synchronized (LocalPortResponseTime.class) {
-            if (mappings == null) {
-                mappings =
-                        new java.util.HashMap<Integer, LocalPortResponseTime>();
-            }
+    /**
+     * The output_state is set to false and the consumer is disconnected.
+     */
+    READY_FOR_RECONNECTION;
+
+    @Override
+    public String toString() {
+        String str;
+        switch (ordinal()) {
+        case 0:// DISCONNECTED
+            str = "Disconnected";
+            break;
+        case 1:// CONNECTED
+            str = "Connected";
+            break;
+        case 2:// READY_FOR_RECONNECTION
+            str = "Ready For reconnection";
+            break;
+        default:
+            str = "Unknown";
         }
-        return mappings;
-    }
-
-    LocalPortResponseTime(final int value) {
-        intValue = value;
-        getMappings().put(value, this);
-    }
-
-    public int getValue() {
-        return intValue;
-    }
-
-    public static LocalPortResponseTime forValue(final int value) {
-        return getMappings().get(value);
+        return str;
     }
 }

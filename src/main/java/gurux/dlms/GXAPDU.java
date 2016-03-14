@@ -36,6 +36,7 @@ package gurux.dlms;
 
 import gurux.dlms.enums.AssociationResult;
 import gurux.dlms.enums.Authentication;
+import gurux.dlms.enums.Security;
 import gurux.dlms.enums.SourceDiagnostic;
 import gurux.dlms.internal.GXCommon;
 
@@ -406,6 +407,9 @@ final class GXAPDU {
         }
         if (buff.getUInt8() != 0x6) {
             throw new RuntimeException("Encoding failed. Not an Object ID.");
+        }
+        if (settings.isServer()) {
+            settings.getCipher().setSecurity(Security.NONE);
         }
         // Object ID length.
         len = buff.getUInt8();

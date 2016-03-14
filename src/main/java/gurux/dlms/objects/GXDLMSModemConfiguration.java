@@ -41,10 +41,10 @@ import java.util.List;
 import gurux.dlms.GXByteBuffer;
 import gurux.dlms.GXDLMSClient;
 import gurux.dlms.GXDLMSSettings;
-import gurux.dlms.enums.BaudRate;
 import gurux.dlms.enums.DataType;
 import gurux.dlms.enums.ObjectType;
 import gurux.dlms.internal.GXCommon;
+import gurux.dlms.objects.enums.BaudRate;
 
 public class GXDLMSModemConfiguration extends GXDLMSObject
         implements IGXDLMSBase {

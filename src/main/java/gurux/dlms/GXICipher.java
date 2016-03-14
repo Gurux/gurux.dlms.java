@@ -41,8 +41,8 @@ public interface GXICipher {
     /**
      * Encrypt PDU.
      * 
-     * @param command
-     *            Command.
+     * @param tag
+     *            Tag.
      * @param systemTitle
      *            System Title.
      * @param data

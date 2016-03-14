@@ -36,10 +36,10 @@ package gurux.dlms.objects;
 
 import gurux.dlms.GXDLMSClient;
 import gurux.dlms.GXDLMSSettings;
-import gurux.dlms.enums.ControlMode;
-import gurux.dlms.enums.ControlState;
 import gurux.dlms.enums.DataType;
 import gurux.dlms.enums.ObjectType;
+import gurux.dlms.objects.enums.ControlMode;
+import gurux.dlms.objects.enums.ControlState;
 
 public class GXDLMSDisconnectControl extends GXDLMSObject
         implements IGXDLMSBase {

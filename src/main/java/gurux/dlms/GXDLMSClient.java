@@ -34,11 +34,9 @@
 
 package gurux.dlms;
 
-import java.io.ByteArrayOutputStream;
-import java.io.IOException;
-import java.io.InputStream;
 import java.util.AbstractMap;
 import java.util.AbstractMap.SimpleEntry;
+import java.util.Calendar;
 import java.util.List;
 
 import gurux.dlms.enums.AccessMode;
@@ -70,10 +68,6 @@ public class GXDLMSClient {
      */
     private final GXDLMSSettings settings = new GXDLMSSettings(false);
     private GXObisCodeCollection obisCodes;
-    /**
-     * Cipher interface that is used to cipher PDU.
-     */
-    private GXICipher cipher;
 
     /**
      * Is authentication required.
@@ -119,7 +113,7 @@ public class GXDLMSClient {
      *            Cipher interface that is used to cipher PDU.
      */
     protected final void setCipher(final GXICipher value) {
-        cipher = value;
+        settings.setCipher(value);
     }
 
     /**
@@ -159,7 +153,7 @@ public class GXDLMSClient {
      *            Zero based starting index.
      */
     public final void setStartingPacketIndex(final int value) {
-        settings.setBlockIndex(value);
+        settings.setStartingPacketIndex(value);
     }
 
     /**
@@ -190,6 +184,23 @@ public class GXDLMSClient {
      */
     public final void setServerAddress(final int value) {
         settings.setServerAddress(value);
+    }
+
+    /**
+     * @return Server address size in bytes. If it is Zero it is counted
+     *         automatically.
+     */
+    public final int getServerAddressSize() {
+        return settings.getServerAddressSize();
+    }
+
+    /**
+     * @param value
+     *            Server address size in bytes. If it is Zero it is counted
+     *            automatically.
+     */
+    public final void setServerAddressSize(final int value) {
+        settings.setServerAddressSize(value);
     }
 
     /**
@@ -542,6 +553,7 @@ public class GXDLMSClient {
      */
     public final byte[][] aarqRequest() {
         GXByteBuffer buff = new GXByteBuffer(20);
+        settings.resetBlockIndex();
         GXDLMS.checkInit(settings);
         settings.setStoCChallenge(null);
         // If authentication or ciphering is used.
@@ -551,9 +563,10 @@ public class GXDLMSClient {
         } else {
             settings.setCtoSChallenge(null);
         }
-        GXAPDU.generateAarq(settings, cipher, buff);
-        return GXDLMS.splitPdu(settings, Command.AARQ, 0, buff, ErrorCode.OK,
-                null, cipher).get(0);
+        GXAPDU.generateAarq(settings, settings.getCipher(), buff);
+        return GXDLMS
+                .splitPdu(settings, Command.AARQ, 0, buff, ErrorCode.OK, null)
+                .get(0);
     }
 
     /**
@@ -576,8 +589,9 @@ public class GXDLMSClient {
      */
     public final void parseAareResponse(final GXByteBuffer reply) {
         settings.setConnected(true);
-        isAuthenticationRequired = GXAPDU.parsePDU(settings, cipher,
-                reply) == SourceDiagnostic.AUTHENTICATION_REQUIRED;
+        isAuthenticationRequired =
+                GXAPDU.parsePDU(settings, settings.getCipher(),
+                        reply) == SourceDiagnostic.AUTHENTICATION_REQUIRED;
         if (getDLMSVersion() != 6) {
             throw new GXDLMSException("Invalid DLMS version number.");
         }
@@ -598,6 +612,7 @@ public class GXDLMSClient {
                 || settings.getPassword().length == 0) {
             throw new IllegalArgumentException("Password is invalid.");
         }
+        settings.resetBlockIndex();
         byte[] challenge = GXSecure.secure(getAuthentication(),
                 settings.getStoCChallenge(), settings.getPassword());
         GXByteBuffer bb = new GXByteBuffer();
@@ -675,13 +690,16 @@ public class GXDLMSClient {
      * Reserved for internal use.
      * 
      * @param classID
+     *            Class ID.
      * @param version
+     *            Version number.
      * @param baseName
+     *            Short name.
      * @param ln
+     *            Logical name.
      * @param accessRights
-     * @param AttributeIndex
-     * @param dataIndex
-     * @return
+     *            Array of access rights.
+     * @return Created COSEM object.
      */
     static GXDLMSObject createDLMSObject(final int classID,
             final Object version, final int baseName, final Object ln,
@@ -793,132 +811,6 @@ public class GXDLMSClient {
         obj.setLogicalName(GXDLMSObject.toLogicalName(logicalName));
     }
 
-    static void updateOBISCodes(final GXDLMSObjectCollection objects) {
-        InputStream stream =
-                GXDLMSClient.class.getResourceAsStream("/OBISCodes.txt");
-        if (stream == null) {
-            return;
-        }
-
-        ByteArrayOutputStream buffer = new ByteArrayOutputStream();
-        int nRead;
-        byte[] data = new byte[1000];
-        try {
-            while ((nRead = stream.read(data, 0, data.length)) != -1) {
-                buffer.write(data, 0, nRead);
-            }
-            buffer.flush();
-        } catch (IOException e) {
-            throw new RuntimeException(e.getMessage());
-        }
-        String str = buffer.toString();
-        GXStandardObisCodeCollection codes = new GXStandardObisCodeCollection();
-        String[] rows = str.split("\r\n");
-        for (String it : rows) {
-            String[] items = it.split("[;]", -1);
-            String[] obis = items[0].split("[.]", -1);
-            GXStandardObisCode code =
-                    new GXStandardObisCode(obis,
-                            items[3] + "; " + items[4] + "; " + items[5] + "; "
-                                    + items[6] + "; " + items[7],
-                            items[1], items[2]);
-            codes.add(code);
-        }
-        for (GXDLMSObject it : objects) {
-            if (!(it.getDescription() == null
-                    || it.getDescription().equals(""))) {
-                continue;
-            }
-            String ln = it.getLogicalName();
-            GXStandardObisCode code = codes.find(ln, it.getObjectType());
-            if (code != null) {
-                it.setDescription(code.getDescription());
-                // If string is used
-                if (code.getDataType().contains("10")) {
-                    code.setDataType("10");
-                } else if (code.getDataType().contains("25")
-                        || code.getDataType().contains("26")) {
-                    // If date time is used.
-                    code.setDataType("25");
-                } else if (code.getDataType().contains("9")) {
-                    // Time stamps of the billing periods objects (first scheme
-                    // if there are two)
-                    if ((GXStandardObisCodeCollection
-                            .equalsMask("0.0-64.96.7.10-14.255", ln)
-                            // Time stamps of the billing periods objects
-                            // (second scheme)
-                            || GXStandardObisCodeCollection
-                                    .equalsMask("0.0-64.0.1.5.0-99,255", ln)
-                                    // Time of power failure
-                            || GXStandardObisCodeCollection
-                                    .equalsMask("0.0-64.0.1.2.0-99,255", ln)
-                                    // Time stamps of the billing periods
-                                    // objects (first
-                                    // scheme if there are two)
-                            || GXStandardObisCodeCollection
-                                    .equalsMask("1.0-64.0.1.2.0-99,255", ln)
-                                    // Time stamps of the billing periods
-                                    // objects
-                                    // (second scheme)
-                            || GXStandardObisCodeCollection
-                                    .equalsMask("1.0-64.0.1.5.0-99,255", ln)
-                                    // Time expired since last end of billing
-                                    // period
-                            || GXStandardObisCodeCollection
-                                    .equalsMask("1.0-64.0.9.0.255", ln)
-                                    // Time of last reset
-                            || GXStandardObisCodeCollection
-                                    .equalsMask("1.0-64.0.9.6.255", ln)
-                                    // Date of last reset
-                            || GXStandardObisCodeCollection
-                                    .equalsMask("1.0-64.0.9.7.255", ln)
-                                    // Time expired since last end of billing
-                                    // period
-                                    // (Second billing period scheme)
-                            || GXStandardObisCodeCollection
-                                    .equalsMask("1.0-64.0.9.13.255", ln)
-                                    // Time of last reset (Second billing period
-                                    // scheme)
-                            || GXStandardObisCodeCollection
-                                    .equalsMask("1.0-64.0.9.14.255", ln)
-                                    // Date of last reset (Second billing period
-                                    // scheme)
-                            || GXStandardObisCodeCollection
-                                    .equalsMask("1.0-64.0.9.15.255", ln))) {
-                        code.setDataType("25");
-                    } else if (GXStandardObisCodeCollection
-                            .equalsMask("1.0-64.0.9.1.255", ln)) {
-                        // Local time
-                        code.setDataType("27");
-                    } else if (GXStandardObisCodeCollection
-                            .equalsMask("1.0-64.0.9.2.255", ln)) {
-                        // Local date
-                        code.setDataType("26");
-                    }
-                }
-                if (!code.getDataType().equals("*")
-                        && !code.getDataType().equals("")
-                        && !code.getDataType().contains(",")) {
-                    DataType type = DataType
-                            .forValue(Integer.parseInt(code.getDataType()));
-                    switch (it.getObjectType()) {
-                    case DATA:
-                    case REGISTER:
-                    case REGISTER_ACTIVATION:
-                    case EXTENDED_REGISTER:
-                        it.setUIDataType(2, type);
-                        break;
-                    default:
-                        break;
-                    }
-                }
-            } else {
-                System.out.println("Unknown OBIS Code: " + it.getLogicalName()
-                        + " Type: " + it.getObjectType());
-            }
-        }
-    }
-
     /**
      * Parses the COSEM objects of the received data.
      * 
@@ -939,7 +831,6 @@ public class GXDLMSClient {
         } else {
             objects = parseSNObjects(data, onlyKnownObjects);
         }
-        updateOBISCodes(objects);
         settings.getObjects().addAll(objects);
         return objects;
     }
@@ -1124,6 +1015,7 @@ public class GXDLMSClient {
      */
     public final byte[] getObjectsRequest() {
         Object name;
+        settings.resetBlockIndex();
         if (getUseLogicalNameReferencing()) {
             name = "0.0.40.0.0.255";
         } else {
@@ -1171,6 +1063,7 @@ public class GXDLMSClient {
         if (name == null || methodIndex < 1) {
             throw new IllegalArgumentException("Invalid parameter");
         }
+        settings.resetBlockIndex();
         int index = methodIndex;
         DataType type = dataType;
         if (type == DataType.NONE && value != null) {
@@ -1230,8 +1123,7 @@ public class GXDLMSClient {
         } else {
             GXCommon.setData(bb, type, value);
         }
-        return GXDLMS.splitPdu(settings, cmd, 1, bb, ErrorCode.OK, null, cipher)
-                .get(0);
+        return GXDLMS.splitPdu(settings, cmd, 1, bb, ErrorCode.OK, null).get(0);
     }
 
     /**
@@ -1270,6 +1162,7 @@ public class GXDLMSClient {
         if (index < 1) {
             throw new GXDLMSException("Invalid parameter");
         }
+        settings.resetBlockIndex();
         DataType type = dataType;
         if (type == DataType.NONE && value != null) {
             type = GXCommon.getValueType(value);
@@ -1310,8 +1203,7 @@ public class GXDLMSClient {
             bb.setUInt8(1);
         }
         GXCommon.setData(bb, type, value);
-        return GXDLMS.splitPdu(settings, cmd, 1, bb, ErrorCode.OK, null, cipher)
-                .get(0);
+        return GXDLMS.splitPdu(settings, cmd, 1, bb, ErrorCode.OK, null).get(0);
     }
 
     /**
@@ -1327,6 +1219,7 @@ public class GXDLMSClient {
         }
         Object value;
         Command cmd;
+        settings.resetBlockIndex();
         GXByteBuffer bb = new GXByteBuffer();
         if (this.getUseLogicalNameReferencing()) {
             cmd = Command.SET_REQUEST;
@@ -1379,8 +1272,7 @@ public class GXDLMSClient {
                 GXCommon.setData(bb, type, value);
             }
         }
-        return GXDLMS.splitPdu(settings, cmd, 4, bb, ErrorCode.OK, null, cipher)
-                .get(0);
+        return GXDLMS.splitPdu(settings, cmd, 4, bb, ErrorCode.OK, null).get(0);
     }
 
     /**
@@ -1419,6 +1311,7 @@ public class GXDLMSClient {
         }
         Command cmd;
         GXByteBuffer bb = new GXByteBuffer();
+        settings.resetBlockIndex();
         if (this.getUseLogicalNameReferencing()) {
             cmd = Command.GET_REQUEST;
             // CI
@@ -1460,8 +1353,7 @@ public class GXDLMSClient {
                 bb.set(data.getData(), 0, data.size());
             }
         }
-        return GXDLMS.splitPdu(settings, cmd, 1, bb, ErrorCode.OK, null, cipher)
-                .get(0);
+        return GXDLMS.splitPdu(settings, cmd, 1, bb, ErrorCode.OK, null).get(0);
     }
 
     /**
@@ -1492,6 +1384,7 @@ public class GXDLMSClient {
         }
         Command cmd;
         GXByteBuffer bb = new GXByteBuffer();
+        settings.resetBlockIndex();
         if (this.getUseLogicalNameReferencing()) {
             cmd = Command.GET_REQUEST;
             // Add length.
@@ -1523,8 +1416,7 @@ public class GXDLMSClient {
                 bb.setUInt16(sn);
             }
         }
-        return GXDLMS.splitPdu(settings, cmd, 3, bb, ErrorCode.OK, null, cipher)
-                .get(0);
+        return GXDLMS.splitPdu(settings, cmd, 3, bb, ErrorCode.OK, null).get(0);
     }
 
     /**
@@ -1590,6 +1482,41 @@ public class GXDLMSClient {
      */
     public final byte[][] readRowsByRange(final GXDLMSProfileGeneric pg,
             final java.util.Date start, final java.util.Date end) {
+        return readByRange(pg, start, end);
+    }
+
+    /**
+     * Read rows by range. Use this method to read Profile Generic table between
+     * dates.
+     * 
+     * @param pg
+     *            Profile generic object to read.
+     * @param start
+     *            Start time.
+     * @param end
+     *            End time.
+     * @return Generated read message.
+     */
+    public final byte[][] readRowsByRange(final GXDLMSProfileGeneric pg,
+            final Calendar start, final Calendar end) {
+        return readByRange(pg, start, end);
+    }
+
+    /**
+     * Read rows by range. Use this method to read Profile Generic table between
+     * dates.
+     * 
+     * @param pg
+     *            Profile generic object to read.
+     * @param start
+     *            Start time.
+     * @param end
+     *            End time.
+     * @return Generated read message.
+     */
+    private byte[][] readByRange(final GXDLMSProfileGeneric pg,
+            final Object start, final Object end) {
+        settings.resetBlockIndex();
         GXDLMSObject sort = pg.getSortObject();
         if (sort == null && pg.getCaptureObjects().size() != 0) {
             sort = pg.getCaptureObjects().get(0).getKey();
@@ -1647,7 +1574,7 @@ public class GXDLMSClient {
      * @return Acknowledgment message as byte array.
      */
     public final byte[] receiverReady(final RequestTypes type) {
-        return GXDLMS.receiverReady(settings, type, cipher);
+        return GXDLMS.receiverReady(settings, type);
     }
 
     /**
@@ -1660,7 +1587,7 @@ public class GXDLMSClient {
      * @return Is frame complete.
      */
     public final boolean getData(final byte[] reply, final GXReplyData data) {
-        return GXDLMS.getData(settings, new GXByteBuffer(reply), data, cipher);
+        return GXDLMS.getData(settings, new GXByteBuffer(reply), data);
     }
 
     /**
@@ -1673,7 +1600,7 @@ public class GXDLMSClient {
      */
     public final void getData(final GXByteBuffer reply,
             final GXReplyData data) {
-        GXDLMS.getData(settings, reply, data, cipher);
+        GXDLMS.getData(settings, reply, data);
     }
 
     /**

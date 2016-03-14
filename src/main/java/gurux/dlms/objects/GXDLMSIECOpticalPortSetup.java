@@ -36,11 +36,11 @@ package gurux.dlms.objects;
 
 import gurux.dlms.GXDLMSClient;
 import gurux.dlms.GXDLMSSettings;
-import gurux.dlms.enums.BaudRate;
 import gurux.dlms.enums.DataType;
-import gurux.dlms.enums.LocalPortResponseTime;
 import gurux.dlms.enums.ObjectType;
 import gurux.dlms.internal.GXCommon;
+import gurux.dlms.objects.enums.BaudRate;
+import gurux.dlms.objects.enums.LocalPortResponseTime;
 import gurux.dlms.objects.enums.OpticalProtocolMode;
 
 public class GXDLMSIECOpticalPortSetup extends GXDLMSObject

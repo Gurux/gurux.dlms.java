@@ -37,8 +37,8 @@ package gurux.dlms.objects;
 import gurux.dlms.GXDLMSSettings;
 import gurux.dlms.enums.DataType;
 import gurux.dlms.enums.ObjectType;
-import gurux.dlms.enums.SecurityPolicy;
-import gurux.dlms.enums.SecuritySuite;
+import gurux.dlms.objects.enums.SecurityPolicy;
+import gurux.dlms.objects.enums.SecuritySuite;
 
 public class GXDLMSSecuritySetup extends GXDLMSObject implements IGXDLMSBase {
     private SecurityPolicy securityPolicy;

@@ -34,7 +34,7 @@
 
 package gurux.dlms.objects;
 
-import gurux.dlms.enums.GXDLMSIp4SetupIpOptionType;
+import gurux.dlms.objects.enums.GXDLMSIp4SetupIpOptionType;
 
 public class GXDLMSIp4SetupIpOption {
     private GXDLMSIp4SetupIpOptionType type;

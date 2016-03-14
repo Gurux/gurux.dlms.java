@@ -43,15 +43,15 @@ import java.util.List;
 import gurux.dlms.GXByteBuffer;
 import gurux.dlms.GXDLMSClient;
 import gurux.dlms.GXDLMSException;
-import gurux.dlms.GXDLMSServerBase;
+import gurux.dlms.GXDLMSServer;
 import gurux.dlms.GXDLMSSettings;
 import gurux.dlms.GXDateTime;
 import gurux.dlms.ValueEventArgs;
 import gurux.dlms.enums.DataType;
 import gurux.dlms.enums.ObjectType;
-import gurux.dlms.enums.SortMethod;
 import gurux.dlms.internal.GXCommon;
 import gurux.dlms.internal.GXDataInfo;
+import gurux.dlms.objects.enums.SortMethod;
 
 public class GXDLMSProfileGeneric extends GXDLMSObject implements IGXDLMSBase {
     private ArrayList<Object[]> buffer = new ArrayList<Object[]>();
@@ -310,10 +310,7 @@ public class GXDLMSProfileGeneric extends GXDLMSObject implements IGXDLMSBase {
     }
 
     /**
-     * Returns Association View.
-     * 
-     * @param items
-     * @return
+     * @return Returns captured columns.
      */
     private byte[] getColumns() {
         int cnt = captureObjects.size();
@@ -343,10 +340,9 @@ public class GXDLMSProfileGeneric extends GXDLMSObject implements IGXDLMSBase {
     }
 
     /**
-     * Returns Association View.
-     * 
      * @param table
-     * @return
+     *            Table where rows are get.
+     * @return Buffer rows as byte array.
      */
     private byte[] getData(final Object[] table) {
         GXByteBuffer data = new GXByteBuffer();
@@ -694,7 +690,7 @@ public class GXDLMSProfileGeneric extends GXDLMSObject implements IGXDLMSBase {
      * Copies the values of the objects to capture into the buffer by reading
      * capture objects.
      */
-    public final void capture(final GXDLMSServerBase server) {
+    public final void capture(final GXDLMSServer server) {
         synchronized (this) {
             Object[] values = new Object[captureObjects.size()];
             int pos = -1;
@@ -702,7 +698,7 @@ public class GXDLMSProfileGeneric extends GXDLMSObject implements IGXDLMSBase {
             for (SimpleEntry<GXDLMSObject, GXDLMSCaptureObject> obj : captureObjects) {
                 // CHECKSTYLE:ON
                 ValueEventArgs e = new ValueEventArgs(obj.getKey(),
-                        obj.getValue().getAttributeIndex(), 0);
+                        obj.getValue().getAttributeIndex(), 0, null);
                 server.read(e);
                 if (e.getHandled()) {
                     values[++pos] = e.getValue();

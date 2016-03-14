@@ -124,10 +124,11 @@ public class GXDLMSException extends RuntimeException {
     }
 
     /**
-     * Get resulat as a string.
+     * Get result as a string.
      * 
      * @param result
-     * @return
+     *            Enumeration value of AssociationResult.
+     * @return String description of AssociationResult.
      */
     private static String getResult(final AssociationResult result) {
         if (result == AssociationResult.PERMANENT_REJECTED) {
@@ -143,7 +144,8 @@ public class GXDLMSException extends RuntimeException {
      * Get diagnostic as a string.
      * 
      * @param value
-     * @return
+     *            Enumeration value of SourceDiagnostic.
+     * @return String description of SourceDiagnostic.
      */
     private static String getDiagnostic(final SourceDiagnostic value) {
         if (value == SourceDiagnostic.NO_REASON_GIVEN) {

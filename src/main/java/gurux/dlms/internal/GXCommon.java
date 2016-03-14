@@ -43,7 +43,6 @@ import java.text.SimpleDateFormat;
 import java.util.Calendar;
 import java.util.Date;
 import java.util.EnumSet;
-import java.util.TimeZone;
 
 import gurux.dlms.GXByteBuffer;
 import gurux.dlms.GXDateTime;
@@ -139,8 +138,12 @@ public final class GXCommon {
         return value;
     }
 
-    /*
-     * /// Convert string to byte array.
+    /**
+     * Convert string to byte array.
+     * 
+     * @param value
+     *            Hex string.
+     * @return byte array.
      */
     public static byte[] hexToBytes(final String value) {
         byte[] buffer = new byte[value.length() / 2];
@@ -168,7 +171,6 @@ public final class GXCommon {
         byte[] tmp = new byte[index];
         System.arraycopy(buffer, 0, tmp, 0, index);
         return tmp;
-
     }
 
     /*
@@ -451,9 +453,6 @@ public final class GXCommon {
         // Position where last row was found. Cache uses this info.
         int pos = info.getIndex();
         for (; pos != info.getCount(); ++pos) {
-            if (pos == 124) {
-                String mikko = "";
-            }
             GXDataInfo info2 = new GXDataInfo();
             Object tmp = getData(buff, info2);
             if (!info2.isCompleate()) {
@@ -1265,6 +1264,7 @@ public final class GXCommon {
         } else if (value instanceof java.util.Calendar) {
             tm = (java.util.Calendar) value;
             dt = new GXDateTime(tm.getTime());
+            dt.setDeviation(tm.getTimeZone().getRawOffset() / 60000);
             dt.getSkip().add(DateTimeSkips.MILLISECOND);
         } else if (value instanceof String) {
             DateFormat f = new SimpleDateFormat();
@@ -1281,11 +1281,13 @@ public final class GXCommon {
         if (tm == null) {
             tm = java.util.Calendar.getInstance();
         }
+        Date date = dt.toMeterTime();
+        boolean summertime = tm.getTimeZone().inDaylightTime(date);
         // Add size
         buff.setUInt8(12);
         tm.setTime(dt.getValue());
         // If summer time.
-        if (TimeZone.getDefault().inDaylightTime(dt.getValue())
+        if (summertime
                 || dt.getStatus().contains(ClockStatus.DAYLIGHT_SAVE_ACTIVE)) {
             tm.add(Calendar.HOUR, -1);
         }
@@ -1348,7 +1350,7 @@ public final class GXCommon {
             buff.setUInt16(dt.getDeviation());
         }
         // Add clock_status
-        if (TimeZone.getDefault().inDaylightTime(dt.getValue())) {
+        if (summertime) {
             buff.setUInt8(ClockStatus.toInteger(dt.getStatus())
                     | ClockStatus.DAYLIGHT_SAVE_ACTIVE.getValue());
         } else {

@@ -40,7 +40,7 @@ package gurux.dlms.enums;
  */
 public enum SourceDiagnostic {
     /**
-     * An unknown error has occurred.
+     * OK.
      */
     NONE(0),
     /*

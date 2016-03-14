@@ -50,7 +50,7 @@ import java.util.Arrays;
 import gurux.dlms.enums.ObjectType;
 
 /**
- * Obis Code Collection is used to save all default OBIS Codes.
+ * Standard OBIS code collection is used to save all default OBIS Codes.
  */
 class GXStandardObisCodeCollection
         extends java.util.ArrayList<GXStandardObisCode> {

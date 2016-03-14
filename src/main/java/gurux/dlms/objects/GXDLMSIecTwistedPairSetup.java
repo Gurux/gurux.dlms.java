@@ -44,9 +44,9 @@ import java.util.ArrayList;
 import java.util.List;
 
 import gurux.dlms.GXDLMSSettings;
-import gurux.dlms.enums.BaudRate;
 import gurux.dlms.enums.DataType;
 import gurux.dlms.enums.ObjectType;
+import gurux.dlms.objects.enums.BaudRate;
 import gurux.dlms.objects.enums.IecTwistedPairSetupMode;
 
 public class GXDLMSIecTwistedPairSetup extends GXDLMSObject

@@ -215,12 +215,14 @@ abstract class GXDLMS {
      * Generates an acknowledgment message, with which the server is informed to
      * send next packets.
      * 
+     * @param settings
+     *            DLMS settings.
      * @param type
      *            Frame type
      * @return Acknowledgment message as byte array.
      */
     static byte[] receiverReady(final GXDLMSSettings settings,
-            final RequestTypes type, final GXICipher cipher) {
+            final RequestTypes type) {
         if (type == RequestTypes.NONE) {
             throw new InvalidParameterException(
                     "Invalid receiverReady RequestTypes parameter.");
@@ -236,10 +238,10 @@ abstract class GXDLMS {
         settings.increaseBlockIndex();
         if (settings.isServer()) {
             return splitPdu(settings, Command.GET_RESPONSE, 2, bb, ErrorCode.OK,
-                    null, cipher).get(0)[0];
+                    null).get(0)[0];
         }
         return splitPdu(settings, Command.GET_REQUEST, 2, bb, ErrorCode.OK,
-                null, cipher).get(0)[0];
+                null).get(0)[0];
     }
 
     static String getDescription(final int errCode) {
@@ -391,25 +393,21 @@ abstract class GXDLMS {
      *            Error number.
      * @param date
      *            Optional date time value.
-     * @param cp
-     *            Ciphering interface.
      * @return List of frames to send.
      */
     static List<byte[][]> splitPdu(final GXDLMSSettings settings,
             final Command command, final int commandParameter,
-            final GXByteBuffer data, final ErrorCode error, final Date date,
-            final GXICipher cp) {
+            final GXByteBuffer data, final ErrorCode error, final Date date) {
         GXByteBuffer bb = new GXByteBuffer();
         List<byte[][]> list = new ArrayList<byte[][]>();
-
         // For SN there is no need to split data for blocks.
         if (!settings.getUseLogicalNameReferencing()) {
             byte[] tmp = getSnPdus(settings, data, command);
             // If Ciphering is used.
-            if (cp != null && command != Command.AARQ
+            if (settings.getCipher() != null && command != Command.AARQ
                     && command != Command.AARE) {
-                bb.set(cp.encrypt(getGloMessage(command), cp.getSystemTitle(),
-                        tmp));
+                bb.set(settings.getCipher().encrypt(getGloMessage(command),
+                        settings.getCipher().getSystemTitle(), tmp));
             } else {
                 bb.set(tmp);
             }
@@ -427,10 +425,10 @@ abstract class GXDLMS {
                     command, error, date);
             for (byte[] it : pdus) {
                 // If Ciphering is used.
-                if (cp != null && command != Command.AARQ
+                if (settings.getCipher() != null && command != Command.AARQ
                         && command != Command.AARE) {
-                    bb.set(cp.encrypt(getGloMessage(command),
-                            cp.getSystemTitle(), it));
+                    bb.set(settings.getCipher().encrypt(getGloMessage(command),
+                            settings.getCipher().getSystemTitle(), it));
                 } else {
                     bb.set(it);
                 }
@@ -569,11 +567,11 @@ abstract class GXDLMS {
         return bb.array();
     }
 
-    static Object getAddress(final long value) {
-        if (value < 0x80) {
+    static Object getAddress(final long value, final int size) {
+        if (size < 2 && value < 0x80) {
             return (byte) (value << 1 | 1);
         }
-        if (value < 0x4000) {
+        if (size < 4 && value < 0x4000) {
             return (short) ((value & 0x3F80) << 2 | (value & 0x7F) << 1 | 1);
         }
         if (value < 0x10000000) {
@@ -587,8 +585,8 @@ abstract class GXDLMS {
      * @param value
      * @param bb
      */
-    private static byte[] getAddressBytes(final int value) {
-        Object tmp = getAddress(value);
+    private static byte[] getAddressBytes(final int value, final int size) {
+        Object tmp = getAddress(value, size);
         GXByteBuffer bb = new GXByteBuffer();
         if (tmp instanceof Byte) {
             bb.setUInt8(((Byte) tmp).byteValue());
@@ -618,11 +616,13 @@ abstract class GXDLMS {
         int frame = forFrame;
         byte[] primaryAddress, secondaryAddress;
         if (settings.isServer()) {
-            primaryAddress = getAddressBytes(settings.getClientAddress());
-            secondaryAddress = getAddressBytes(settings.getServerAddress());
+            primaryAddress = getAddressBytes(settings.getClientAddress(), 0);
+            secondaryAddress = getAddressBytes(settings.getServerAddress(),
+                    settings.getServerAddressSize());
         } else {
-            primaryAddress = getAddressBytes(settings.getServerAddress());
-            secondaryAddress = getAddressBytes(settings.getClientAddress());
+            primaryAddress = getAddressBytes(settings.getServerAddress(),
+                    settings.getServerAddressSize());
+            secondaryAddress = getAddressBytes(settings.getClientAddress(), 0);
         }
 
         frameSize = GXCommon.intValue(settings.getLimits().getMaxInfoTX());
@@ -920,7 +920,7 @@ abstract class GXDLMS {
                                 + String.valueOf(settings.getServerAddress())
                                 + ".");
             } else {
-                data.setServerAddress(target);
+                settings.setServerAddress(target);
             }
 
             // Check that client addresses match.
@@ -932,7 +932,7 @@ abstract class GXDLMS {
                                 + String.valueOf(settings.getClientAddress())
                                 + ".");
             } else {
-                data.setClientAddress(source);
+                settings.setClientAddress(source);
             }
         } else {
             // Check that client addresses match.
@@ -1023,7 +1023,7 @@ abstract class GXDLMS {
                                 + String.valueOf(settings.getClientAddress())
                                 + ".");
             } else {
-                data.setClientAddress(value);
+                settings.setClientAddress(value);
             }
 
             value = buff.getUInt16();
@@ -1036,7 +1036,7 @@ abstract class GXDLMS {
                                 + String.valueOf(settings.getServerAddress())
                                 + ".");
             } else {
-                data.setServerAddress(value);
+                settings.setServerAddress(value);
             }
         } else {
             value = buff.getUInt16();
@@ -1050,7 +1050,7 @@ abstract class GXDLMS {
                                 + ".");
 
             } else {
-                data.setServerAddress(value);
+                settings.setServerAddress(value);
             }
 
             value = buff.getUInt16();
@@ -1063,7 +1063,7 @@ abstract class GXDLMS {
                                 + String.valueOf(settings.getClientAddress())
                                 + ".");
             } else {
-                data.setClientAddress(value);
+                settings.setClientAddress(value);
             }
         }
     }
@@ -1299,11 +1299,9 @@ abstract class GXDLMS {
      *            DLMS settings.
      * @param data
      *            received data.
-     * @param cipher
-     *            Cipher interface.
      */
     public static void getPdu(final GXDLMSSettings settings,
-            final GXReplyData data, final GXICipher cipher) {
+            final GXReplyData data) {
         short ch;
         Command cmd = data.getCommand();
         if (data.getCommand() == Command.PUSH && (data.getMoreData().getValue()
@@ -1362,12 +1360,13 @@ abstract class GXDLMS {
             case GLO_GET_REQUEST:
             case GLO_SET_REQUEST:
             case GLO_METHOD_REQUEST:
-                if (cipher == null) {
+                if (settings.getCipher() == null) {
                     throw new RuntimeException(
                             "Secure connection is not supported.");
                 }
                 data.getData().position(data.getData().position() - 1);
-                cipher.decrypt(settings.getSourceSystemTitle(), data.getData());
+                settings.getCipher().decrypt(settings.getSourceSystemTitle(),
+                        data.getData());
                 // Get command.
                 ch = data.getData().getUInt8();
                 cmd = Command.forValue(ch);
@@ -1377,10 +1376,15 @@ abstract class GXDLMS {
             case GLO_GET_RESPONSE:
             case GLO_SET_RESPONSE:
             case GLO_METHOD_RESPONSE:
+                if (settings.getCipher() == null) {
+                    throw new RuntimeException(
+                            "Secure connection is not supported.");
+                }
                 data.getData().position(data.getData().position() - 1);
-                cipher.decrypt(settings.getSourceSystemTitle(), data.getData());
+                settings.getCipher().decrypt(settings.getSourceSystemTitle(),
+                        data.getData());
                 data.setCommand(Command.NONE);
-                getPdu(settings, data, cipher);
+                getPdu(settings, data);
                 break;
             case DATA_NOTIFICATION:
                 // Get invoke id.
@@ -1470,8 +1474,7 @@ abstract class GXDLMS {
     }
 
     public static boolean getData(final GXDLMSSettings settings,
-            final GXByteBuffer reply, final GXReplyData data,
-            final GXICipher cipher) {
+            final GXByteBuffer reply, final GXReplyData data) {
         short frame = 0;
         // If DLMS frame is generated.
         if (settings.getInterfaceType() == InterfaceType.HDLC) {
@@ -1499,7 +1502,7 @@ abstract class GXDLMS {
                 && data.getCommand() != Command.AARQ
                 && data.getCommand() != Command.AARE
                 && frame != FrameType.DISCONNECT_MODE.getValue()) {
-            getPdu(settings, data, cipher);
+            getPdu(settings, data);
         }
         return true;
     }

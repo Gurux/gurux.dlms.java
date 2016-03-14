@@ -43,7 +43,7 @@ import gurux.common.PropertyChangedEventArgs;
 import gurux.common.ReceiveEventArgs;
 import gurux.common.TraceEventArgs;
 import gurux.common.enums.TraceLevel;
-import gurux.dlms.GXDLMSNotifyHandler;
+import gurux.dlms.GXDLMSNotify;
 import gurux.dlms.GXReplyData;
 import gurux.dlms.enums.InterfaceType;
 import gurux.dlms.objects.GXDLMSObject;
@@ -59,7 +59,7 @@ public class GXDLMSPushListener
     private boolean trace = false;
     private GXNet media;
     GXReplyData data = new GXReplyData();
-    GXDLMSNotifyHandler notify;
+    GXDLMSNotify notify;
 
     /**
      * Constructor.
@@ -73,7 +73,7 @@ public class GXDLMSPushListener
         media.addListener(this);
         media.open();
         // TODO; Must set communication specific settings.
-        notify = new GXDLMSNotifyHandler(true, 1, 1, InterfaceType.WRAPPER);
+        notify = new GXDLMSNotify(true, 1, 1, InterfaceType.WRAPPER);
     }
 
     public void close() {

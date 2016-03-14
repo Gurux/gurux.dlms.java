@@ -35,7 +35,7 @@
 package gurux.dlms;
 
 /**
- * OBIS Code class is used to find out default descrition to OBIS Code.
+ * OBIS Code class is used to find out default description to OBIS Code.
  */
 class GXStandardObisCode {
     private String[] obis;

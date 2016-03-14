@@ -45,10 +45,10 @@ import gurux.dlms.GXDLMSClient;
 import gurux.dlms.GXDLMSSettings;
 import gurux.dlms.GXDateTime;
 import gurux.dlms.enums.DataType;
-import gurux.dlms.enums.MessageType;
 import gurux.dlms.enums.ObjectType;
-import gurux.dlms.enums.ServiceType;
 import gurux.dlms.internal.GXCommon;
+import gurux.dlms.objects.enums.MessageType;
+import gurux.dlms.objects.enums.ServiceType;
 
 public class GXDLMSPushSetup extends GXDLMSObject implements IGXDLMSBase {
     private java.util.ArrayList<GXDLMSPushObject> pushObjectList;

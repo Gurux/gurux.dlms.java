@@ -32,29 +32,16 @@
 // Full text may be retrieved at http://www.gnu.org/licenses/gpl-2.0.txt
 //---------------------------------------------------------------------------
 
-package gurux.dlms.enums;
+package gurux.dlms.objects.enums;
 
 /**
- * Security policy Enforces authentication and/or encryption algorithm provided
- * with security_suite.
+ * Holds the status of the Image transfer process.
  */
-public enum SecurityPolicy {
-    NOTHING, /**
-              * All messages to be authenticated.
-              */
-    AUTHENTICATED, /**
-                    * All messages to be encrypted.
-                    */
-    ENCRYPTED, /**
-                * All messages to be authenticated and encrypted.
-                */
-    AUTHENTICATED_ENCRYPTED;
+public enum ImageTransferStatus {
+    IMAGE_TRANSFER_NOT_INITIATED,
 
-    public int getValue() {
-        return this.ordinal();
-    }
-
-    public static SecurityPolicy forValue(final int value) {
-        return values()[value];
-    }
+    IMAGE_TRANSFER_INITIATED, IMAGE_VERIFICATION_INITIATED,
+    IMAGE_VERIFICATION_SUCCESSFUL, IMAGE_VERIFICATION_FAILED,
+    IMAGE_ACTIVATION_INITIATED, IMAGE_ACTIVATION_SUCCESSFUL,
+    IMAGE_ACTIVATION_FAILED
 }

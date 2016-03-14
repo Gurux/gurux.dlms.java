@@ -35,9 +35,9 @@
 package gurux.dlms.objects;
 
 import gurux.dlms.GXDLMSSettings;
-import gurux.dlms.enums.BaudRate;
 import gurux.dlms.enums.DataType;
 import gurux.dlms.enums.ObjectType;
+import gurux.dlms.objects.enums.BaudRate;
 
 public class GXDLMSMBusMasterPortSetup extends GXDLMSObject
         implements IGXDLMSBase {

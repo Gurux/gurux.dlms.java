@@ -398,4 +398,18 @@ public class GXDateTime {
         }
         return tm;
     }
+
+    /**
+     * @return Date time as local time.
+     */
+    public final Date toLocalTime() {
+        return meterTimeToLocalTime(getMeterCalendar());
+    }
+
+    /**
+     * @return Date time as local time.
+     */
+    public final Date toMeterTime() {
+        return getMeterCalendar().getTime();
+    }
 }

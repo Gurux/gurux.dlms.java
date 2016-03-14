@@ -34,7 +34,7 @@
 
 package gurux.dlms;
 
-import gurux.dlms.enums.BaudRate;
+import gurux.dlms.objects.enums.BaudRate;
 
 /**
  * APDU types.

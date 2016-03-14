@@ -2,7 +2,7 @@
   <modelVersion>4.0.0</modelVersion>
   <groupId>org.gurux</groupId>
   <artifactId>gurux.dlms</artifactId>
-  <version>1.0.11</version>
+  <version>1.1.2</version>
   <packaging>jar</packaging>  
  <name>gurux.dlms.java</name>
  <url>http://www.gurux.org</url>
@@ -68,6 +68,14 @@
 			</execution>
 		</executions>
 	   </plugin>
+    </plugins>
+  </build> 
+  
+ <profiles>
+  <profile> 
+    <id>release</id>
+    <build>
+      <plugins>
 	    <!-- Generate java doc. -->
        <plugin>
        <groupId>org.apache.maven.plugins</groupId>
@@ -109,8 +117,11 @@
             <autoReleaseAfterClose>true</autoReleaseAfterClose>
          </configuration>
        </plugin>
-    </plugins>
-  </build> 
+      </plugins>
+    </build>
+  </profile>
+</profiles>
+  
 <dependencies> 
   <dependency>
     <groupId>junit</groupId>

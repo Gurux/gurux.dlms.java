@@ -148,7 +148,9 @@ public class GXDLMSObjectCollection extends java.util.ArrayList<GXDLMSObject>
     public static GXDLMSObjectCollection load(final String path)
             throws XMLStreamException, IOException {
         GXDLMSObjectCollection objects = new GXDLMSObjectCollection();
-        try (FileInputStream tmp = new FileInputStream(path)) {
+        FileInputStream tmp = null;
+        try {
+            tmp = new FileInputStream(path);
             XMLInputFactory inputFactory = XMLInputFactory.newInstance();
             XMLStreamReader xmlStreamReader =
                     inputFactory.createXMLStreamReader(tmp);
@@ -175,13 +177,17 @@ public class GXDLMSObjectCollection extends java.util.ArrayList<GXDLMSObject>
                         obj.setShortName(Integer.parseInt(data));
                     } else if ("LN".compareToIgnoreCase(target) == 0) {
                         obj.setLogicalName(data);
+                    } else if ("Description".compareToIgnoreCase(target) == 0) {
+                        obj.setDescription(data);
                     }
-
                 }
+            }
+        } finally {
+            if (tmp != null) {
+                tmp.close();
             }
         }
         return objects;
-
     }
 
     /**
@@ -194,7 +200,9 @@ public class GXDLMSObjectCollection extends java.util.ArrayList<GXDLMSObject>
      */
     public final void save(final String path)
             throws IOException, XMLStreamException {
-        try (PrintWriter pw = new PrintWriter(path, "utf-8")) {
+        PrintWriter pw = null;
+        try {
+            pw = new PrintWriter(path, "utf-8");
             String newline = System.getProperty("line.separator");
             XMLOutputFactory output = XMLOutputFactory.newInstance();
             XMLStreamWriter writer = output.createXMLStreamWriter(pw);
@@ -221,6 +229,14 @@ public class GXDLMSObjectCollection extends java.util.ArrayList<GXDLMSObject>
                 writer.writeCharacters(it.getLogicalName());
                 writer.writeEndElement();
                 writer.writeCharacters(newline);
+                // Add description if given.
+                if (it.getDescription() != null
+                        && !it.getDescription().isEmpty()) {
+                    writer.writeStartElement("Description");
+                    writer.writeCharacters(it.getDescription());
+                    writer.writeEndElement();
+                    writer.writeCharacters(newline);
+                }
                 // Close object.
                 writer.writeEndElement();
                 writer.writeCharacters(newline);
@@ -229,13 +245,10 @@ public class GXDLMSObjectCollection extends java.util.ArrayList<GXDLMSObject>
             writer.writeEndElement();
             writer.writeEndDocument();
             pw.flush();
+        } finally {
+            if (pw != null) {
+                pw.close();
+            }
         }
-        /*
-         * try (FileOutputStream fs = new FileOutputStream(path)) { try
-         * (BufferedOutputStream bs = new BufferedOutputStream(fs)) { try
-         * (XMLEncoder encoder = new XMLEncoder(bs)) {
-         * encoder.writeObject(this); encoder.flush(); bs.flush(); fs.flush();
-         * encoder.close(); bs.close(); fs.close(); } } } }
-         */
     }
 }

@@ -32,38 +32,19 @@
 // Full text may be retrieved at http://www.gnu.org/licenses/gpl-2.0.txt
 //---------------------------------------------------------------------------
 
-package gurux.dlms.secure;
+package gurux.dlms.objects.enums;
 
-import gurux.dlms.GXDLMSServerBase;
-import gurux.dlms.enums.InterfaceType;
-
-/**
- * Implements secured DLMS server.
- * 
- * @author Gurux Ltd.
+/*
+ * Defines whether or not the device has been assigned an address 
+ * since last power up of the device.
  */
-public abstract class GXDLMSSecureServerBase extends GXDLMSServerBase {
-    /**
-     * Ciphering settings.
+public enum AddressState {
+    /*
+     * Not assigned an address yet-
      */
-    private GXCiphering ciphering;
-
-    /**
-     * Constructor.
-     * 
-     * @param logicalNameReferencing
-     *            Is logical name referencing used.
-     * @param type
-     *            Interface type.
+    NONE,
+    /*
+     * Assigned an address either by manual setting, or by automated method.
      */
-    public GXDLMSSecureServerBase(final boolean logicalNameReferencing,
-            final InterfaceType type) {
-        super(logicalNameReferencing, type);
-        ciphering = new GXCiphering("ABCDEFGH".getBytes());
-        setCipher(ciphering);
-    }
-
-    public final GXCiphering getCiphering() {
-        return ciphering;
-    }
+    ASSIGNED
 }

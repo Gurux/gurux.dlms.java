@@ -38,12 +38,34 @@ import gurux.dlms.enums.DataType;
 import gurux.dlms.objects.GXDLMSObject;
 
 public class ValueEventArgs {
+    /**
+     * Object value.
+     */
     private Object eventValue;
+    /**
+     * Is request handled.
+     */
     private boolean handled;
+    /**
+     * Target DLMS object
+     */
     private GXDLMSObject target;
+    /**
+     * Attribute index.
+     */
     private int index;
+    /**
+     * Data type of the value.
+     */
     private DataType dataType;
-    private int eventSelector;
+    /**
+     * Optional selector.
+     */
+    private int selector;
+    /**
+     * Optional parameters.
+     */
+    private Object parameters;
 
     /**
      * @return Target DLMS object.
@@ -116,7 +138,14 @@ public class ValueEventArgs {
      * @return Optional selector.
      */
     public final int getSelector() {
-        return eventSelector;
+        return selector;
+    }
+
+    /**
+     * @return Optional parameters.
+     */
+    public final Object getParameters() {
+        return parameters;
     }
 
     /**
@@ -126,14 +155,17 @@ public class ValueEventArgs {
      *            Event target.
      * @param eventIndex
      *            Event index.
-     * @param selector
-     *            Optional Event selector.
+     * @param readSelector
+     *            Optional read event selector.
+     * @param forParameters
+     *            Optional parameters.
      */
     public ValueEventArgs(final GXDLMSObject eventTarget, final int eventIndex,
-            final int selector) {
+            final int readSelector, final Object forParameters) {
         this.dataType = DataType.NONE;
         setTarget(eventTarget);
         setIndex(eventIndex);
-        eventSelector = selector;
+        selector = readSelector;
+        parameters = forParameters;
     }
 }

@@ -189,7 +189,7 @@ public class GXDLMSSchedule extends GXDLMSObject implements IGXDLMSBase {
                 GXDLMSScheduleEntry item = new GXDLMSScheduleEntry();
                 Object[] tmp = (Object[]) it;
                 item.setIndex(((Number) tmp[0]).byteValue());
-                item.setEnable((boolean) tmp[1]);
+                item.setEnable((Boolean) tmp[1]);
                 item.setLogicalName(GXDLMSClient
                         .changeType((byte[]) tmp[2], DataType.OCTET_STRING)
                         .toString());

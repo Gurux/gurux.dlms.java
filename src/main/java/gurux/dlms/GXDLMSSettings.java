@@ -119,6 +119,12 @@ public class GXDLMSSettings {
      * Server address.
      */
     private int serverAddress;
+
+    /**
+     * Server address side.
+     */
+    private int serverAddressSize = 0;
+
     /**
      * Is Logical Name referencing used.
      */
@@ -175,6 +181,8 @@ public class GXDLMSSettings {
      */
     private GXDLMSSNSettings snSettings;
 
+    private int startingPacketIndex = 1;
+
     /**
      * Block packet index.
      */
@@ -183,6 +191,11 @@ public class GXDLMSSettings {
      * List of server or client objects.
      */
     private final GXDLMSObjectCollection objects;
+
+    /**
+     * Cipher interface that is used to cipher PDU.
+     */
+    private GXICipher cipher;
 
     /**
      * Constructor.
@@ -198,6 +211,21 @@ public class GXDLMSSettings {
         }
         snSettings = new GXDLMSSNSettings(new byte[] { 0x1C, 0x03, 0x20 });
         resetFrameSequence();
+    }
+
+    /**
+     * @param value
+     *            Cipher interface that is used to cipher PDU.
+     */
+    final void setCipher(final GXICipher value) {
+        cipher = value;
+    }
+
+    /**
+     * @return Cipher interface that is used to cipher PDU.
+     */
+    final GXICipher getCipher() {
+        return cipher;
     }
 
     /**
@@ -280,9 +308,7 @@ public class GXDLMSSettings {
     }
 
     /**
-     * Is connected to the meter.
-     * 
-     * @return
+     * @return Is connected to the meter.
      */
     final boolean getConnected() {
         return connected;
@@ -310,6 +336,10 @@ public class GXDLMSSettings {
     }
 
     final boolean checkFrame(final short frame) {
+        // If server rejects frame.
+        if (frame == 0x97) {
+            return true;
+        }
         // If U frame.
         if ((frame & 0x3) == 3) {
             resetFrameSequence();
@@ -414,6 +444,28 @@ public class GXDLMSSettings {
     }
 
     /**
+     * Gets starting block index in HDLC framing. Default is One based, but some
+     * meters use Zero based value. Usually this is not used.
+     * 
+     * @return Current block index.
+     */
+    final int getStartingPacketIndex() {
+        return startingPacketIndex;
+    }
+
+    /**
+     * Set starting block index in HDLC framing. Default is One based, but some
+     * meters use Zero based value. Usually this is not used.
+     * 
+     * @param value
+     *            Zero based starting index.
+     */
+    public final void setStartingPacketIndex(final int value) {
+        startingPacketIndex = value;
+        resetBlockIndex();
+    }
+
+    /**
      * Sets current block index.
      * 
      * @param value
@@ -427,7 +479,7 @@ public class GXDLMSSettings {
      * Resets block index to default value.
      */
     final void resetBlockIndex() {
-        blockIndex = 1;
+        blockIndex = startingPacketIndex;
     }
 
     /**
@@ -484,6 +536,23 @@ public class GXDLMSSettings {
      */
     public final void setClientAddress(final int value) {
         clientAddress = value;
+    }
+
+    /**
+     * @return Server address size in bytes. If it is Zero it is counted
+     *         automatically.
+     */
+    public final int getServerAddressSize() {
+        return serverAddressSize;
+    }
+
+    /**
+     * @param value
+     *            Server address size in bytes. If it is Zero it is counted
+     *            automatically.
+     */
+    public final void setServerAddressSize(final int value) {
+        serverAddressSize = value;
     }
 
     /**

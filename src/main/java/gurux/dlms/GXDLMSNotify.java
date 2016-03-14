@@ -56,17 +56,12 @@ import gurux.dlms.objects.GXDLMSObjectCollection;
  * 
  * @author Gurux Ltd.
  */
-public class GXDLMSNotifyHandler {
+public class GXDLMSNotify {
 
     /**
      * DLMS settings.
      */
     private final GXDLMSSettings settings = new GXDLMSSettings(false);
-
-    /**
-     * Cipher interface that is used to cipher PDU.
-     */
-    private GXICipher cipher;
 
     /**
      * Constructor.
@@ -80,7 +75,7 @@ public class GXDLMSNotifyHandler {
      * @param interfaceType
      *            Object type.
      */
-    public GXDLMSNotifyHandler(final boolean useLogicalNameReferencing,
+    public GXDLMSNotify(final boolean useLogicalNameReferencing,
             final int clientAddress, final int serverAddress,
             final InterfaceType interfaceType) {
         setUseLogicalNameReferencing(useLogicalNameReferencing);
@@ -94,6 +89,14 @@ public class GXDLMSNotifyHandler {
      */
     protected final GXDLMSSettings getSettings() {
         return settings;
+    }
+
+    /**
+     * @param value
+     *            Cipher interface that is used to cipher PDU.
+     */
+    protected final void setCipher(final GXICipher value) {
+        settings.setCipher(value);
     }
 
     /**
@@ -209,7 +212,7 @@ public class GXDLMSNotifyHandler {
      * @return Is frame complete.
      */
     public final boolean getData(final byte[] reply, final GXReplyData data) {
-        return GXDLMS.getData(settings, new GXByteBuffer(reply), data, cipher);
+        return GXDLMS.getData(settings, new GXByteBuffer(reply), data);
     }
 
     /**
@@ -273,7 +276,7 @@ public class GXDLMSNotifyHandler {
         }
         buff.set(data);
         List<byte[][]> list = GXDLMS.splitPdu(settings,
-                Command.DATA_NOTIFICATION, 0, buff, ErrorCode.OK, null, cipher);
+                Command.DATA_NOTIFICATION, 0, buff, ErrorCode.OK, null);
         List<byte[]> arr = new ArrayList<byte[]>();
         for (byte[][] it : list) {
             arr.addAll(Arrays.asList(it));
@@ -359,7 +362,6 @@ public class GXDLMSNotifyHandler {
                 }
             }
         }
-        GXDLMSClient.updateOBISCodes(settings.getObjects());
         for (int pos = 0; pos < list.length; ++pos) {
             obj = (GXDLMSObject) items.get(pos).getKey();
             value = list[pos];
@@ -407,7 +409,7 @@ public class GXDLMSNotifyHandler {
             GXCommon.setData(buff, dt, value);
         }
         List<byte[][]> list = GXDLMS.splitPdu(settings, Command.PUSH, 0, buff,
-                ErrorCode.OK, null, cipher);
+                ErrorCode.OK, null);
         List<byte[]> arr = new ArrayList<byte[]>();
 
         for (byte[][] it : list) {

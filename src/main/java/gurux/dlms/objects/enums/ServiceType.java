@@ -31,23 +31,60 @@
 // This code is licensed under the GNU General Public License v2. 
 // Full text may be retrieved at http://www.gnu.org/licenses/gpl-2.0.txt
 //---------------------------------------------------------------------------
-package gurux.dlms.enums;
+
+package gurux.dlms.objects.enums;
 
 /**
- * Security suite Specifies authentication, encryption and key wrapping
- * algorithm.
+ * Type of service used to push the data.
+ * 
+ * @author Gurux Ltd.
  */
-public enum SecuritySuite {
+public enum ServiceType {
     /**
-     * AES-GCM-128 for authenticated encryption and AES-128 for key wrapping.
+     * Transport service type is TCP/IP.
      */
-    AES_GCM_128;
+    TCP(0),
+    /**
+     * Transport service type is UDP.
+     */
+    UDP(1),
+    /**
+     * Transport service type is FTP.
+     */
+    FTP(2),
+    /**
+     * Transport service type is SMTP.
+     */
+    SMTP(3),
+    /**
+     * Transport service type is SMS.
+     */
+    SMS(4);
 
-    public int getValue() {
-        return this.ordinal();
+    private int intValue;
+    private static java.util.HashMap<Integer, ServiceType> mappings;
+
+    private static java.util.HashMap<Integer, ServiceType> getMappings() {
+        if (mappings == null) {
+            synchronized (ServiceType.class) {
+                if (mappings == null) {
+                    mappings = new java.util.HashMap<Integer, ServiceType>();
+                }
+            }
+        }
+        return mappings;
     }
 
-    public static SecuritySuite forValue(final int value) {
-        return values()[value];
+    ServiceType(final int value) {
+        intValue = value;
+        getMappings().put(value, this);
+    }
+
+    public int getValue() {
+        return intValue;
+    }
+
+    public static ServiceType forValue(final int value) {
+        return getMappings().get(value);
     }
 }

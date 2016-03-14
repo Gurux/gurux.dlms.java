@@ -32,7 +32,7 @@
 // Full text may be retrieved at http://www.gnu.org/licenses/gpl-2.0.txt
 //---------------------------------------------------------------------------
 
-package gurux.dlms.enums;
+package gurux.dlms.objects.enums;
 
 /*
  * Configures the behaviour of the disconnect control object for all

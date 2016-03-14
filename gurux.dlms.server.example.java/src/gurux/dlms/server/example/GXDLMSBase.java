@@ -43,16 +43,15 @@ import gurux.common.PropertyChangedEventArgs;
 import gurux.common.ReceiveEventArgs;
 import gurux.common.TraceEventArgs;
 import gurux.common.enums.TraceLevel;
-import gurux.dlms.GXDLMSServerBase;
+import gurux.dlms.GXDLMSServer;
 import gurux.dlms.GXDateTime;
 import gurux.dlms.ValueEventArgs;
 import gurux.dlms.enums.AccessMode;
-import gurux.dlms.enums.AutoConnectMode;
-import gurux.dlms.enums.BaudRate;
+import gurux.dlms.enums.Authentication;
 import gurux.dlms.enums.DataType;
 import gurux.dlms.enums.InterfaceType;
-import gurux.dlms.enums.LocalPortResponseTime;
-import gurux.dlms.enums.SortMethod;
+import gurux.dlms.enums.ObjectType;
+import gurux.dlms.enums.SourceDiagnostic;
 import gurux.dlms.objects.GXDLMSActionSchedule;
 import gurux.dlms.objects.GXDLMSActivityCalendar;
 import gurux.dlms.objects.GXDLMSAssociationLogicalName;
@@ -69,6 +68,7 @@ import gurux.dlms.objects.GXDLMSImageTransfer;
 import gurux.dlms.objects.GXDLMSMacAddressSetup;
 import gurux.dlms.objects.GXDLMSModemConfiguration;
 import gurux.dlms.objects.GXDLMSModemInitialisation;
+import gurux.dlms.objects.GXDLMSObject;
 import gurux.dlms.objects.GXDLMSProfileGeneric;
 import gurux.dlms.objects.GXDLMSRegister;
 import gurux.dlms.objects.GXDLMSRegisterMonitor;
@@ -77,15 +77,19 @@ import gurux.dlms.objects.GXDLMSSeasonProfile;
 import gurux.dlms.objects.GXDLMSTcpUdpSetup;
 import gurux.dlms.objects.GXDLMSWeekProfile;
 import gurux.dlms.objects.enums.AutoAnswerStatus;
+import gurux.dlms.objects.enums.AutoConnectMode;
+import gurux.dlms.objects.enums.BaudRate;
+import gurux.dlms.objects.enums.LocalPortResponseTime;
 import gurux.dlms.objects.enums.OpticalProtocolMode;
 import gurux.dlms.objects.enums.SingleActionScheduleType;
+import gurux.dlms.objects.enums.SortMethod;
 import gurux.net.GXNet;
 import gurux.net.enums.NetworkType;
 
 /**
  * All example servers are using same objects.
  */
-public class GXDLMSBase extends GXDLMSServerBase
+public class GXDLMSBase extends GXDLMSServer
         implements IGXMediaListener, gurux.net.IGXNetListener {
 
     boolean Trace = false;
@@ -446,5 +450,53 @@ public class GXDLMSBase extends GXDLMSServerBase
     @Override
     public void onPropertyChanged(Object sender, PropertyChangedEventArgs e) {
 
+    }
+
+    @Override
+    public GXDLMSObject onFindObject(ObjectType objectType, int sn, String ln) {
+        return null;
+    }
+
+    /**
+     * Example server accepts all connections.
+     * 
+     * @param serverAddress
+     *            Server address.
+     * @param clientAddress
+     *            Client address.
+     * @return True.
+     */
+    @Override
+    public final boolean isTarget(final int serverAddress,
+            final int clientAddress) {
+        return true;
+    }
+
+    @Override
+    public final SourceDiagnostic validateAuthentication(
+            final Authentication authentication, final byte[] password) {
+        // Accept all passwords.
+        return SourceDiagnostic.NONE;
+        // Uncomment checkPassword if you want to check password.
+        // Default password is Gurux.
+        // checkPassword(authentication, password);
+    }
+
+    SourceDiagnostic checkPassword(final Authentication authentication,
+            final byte[] password) {
+        byte[] expectedPassword = "Gurux".getBytes();
+        if (authentication == Authentication.LOW && expectedPassword != null) {
+            if (!java.util.Arrays.equals(password, expectedPassword)) {
+                String actual = "";
+                if (getSettings().getPassword() != null) {
+                    actual = new String(password);
+                }
+                String expected = new String(expectedPassword);
+                System.out.println("Password does not match. Actual: '" + actual
+                        + "' Expected: '" + expected + "'");
+                return SourceDiagnostic.AUTHENTICATION_FAILURE;
+            }
+        }
+        return SourceDiagnostic.NONE;
     }
 }

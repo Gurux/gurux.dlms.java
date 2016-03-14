@@ -35,10 +35,10 @@
 package gurux.dlms.objects;
 
 import gurux.dlms.GXDLMSSettings;
-import gurux.dlms.enums.AddressState;
-import gurux.dlms.enums.BaudRate;
 import gurux.dlms.enums.DataType;
 import gurux.dlms.enums.ObjectType;
+import gurux.dlms.objects.enums.AddressState;
+import gurux.dlms.objects.enums.BaudRate;
 
 /**
  * This IC allows modeling and configuring communication channels according to

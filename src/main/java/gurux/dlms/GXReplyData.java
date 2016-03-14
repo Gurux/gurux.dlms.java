@@ -92,15 +92,8 @@ public class GXReplyData {
     private boolean peek;
 
     /**
-     * Client address.
+     * Data type.
      */
-    private int clientAddress;
-
-    /**
-     * Server address.
-     */
-    private int serverAddress;
-
     private DataType dataType = DataType.NONE;
 
     /**
@@ -165,22 +158,6 @@ public class GXReplyData {
 
     public final void setBlockLength(final int value) {
         blockLength = value;
-    }
-
-    public final int getClientAddress() {
-        return clientAddress;
-    }
-
-    public final void setClientAddress(final int value) {
-        clientAddress = value;
-    }
-
-    public final int getServerAddress() {
-        return serverAddress;
-    }
-
-    public final void setServerAddress(final int value) {
-        serverAddress = value;
     }
 
     public final void setCommand(final Command value) {
@@ -299,8 +276,8 @@ public class GXReplyData {
      * be set true.
      * 
      * @return Count of element in the array.
-     * @see peek
-     * @see getCount
+     * @see #setPeek
+     * @see #getCount
      */
     public final int getTotalCount() {
         return totalCount;
@@ -310,8 +287,8 @@ public class GXReplyData {
      * Get count of read elements. If this method is used peek must be set true.
      * 
      * @return Count of read elements.
-     * @see peek
-     * @see getTotalCount
+     * @see #setPeek
+     * @see #getTotalCount
      */
     public final int getCount() {
         if (dataValue instanceof Object[]) {
@@ -324,8 +301,8 @@ public class GXReplyData {
      * Get is value try to peek.
      * 
      * @return Is value try to peek.
-     * @see getCount
-     * @see getTotalCount
+     * @see #getCount
+     * @see #getTotalCount
      */
     public final boolean getPeek() {
         return peek;

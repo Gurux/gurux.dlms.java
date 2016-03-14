@@ -32,26 +32,27 @@
 // Full text may be retrieved at http://www.gnu.org/licenses/gpl-2.0.txt
 //---------------------------------------------------------------------------
 
-package gurux.dlms.enums;
+package gurux.dlms.objects.enums;
 
-public enum ServiceType {
-    TCP(0), UDP(1), FTP(2), SMTP(3), SMS(4);
+public enum MessageType {
+    COSEM_APDU(0), COSEM_APDU_XML(1), MANUFACTURER_SPESIFIC(128);
+    // (128...255) manufacturer specific
 
     private int intValue;
-    private static java.util.HashMap<Integer, ServiceType> mappings;
+    private static java.util.HashMap<Integer, MessageType> mappings;
 
-    private static java.util.HashMap<Integer, ServiceType> getMappings() {
+    private static java.util.HashMap<Integer, MessageType> getMappings() {
         if (mappings == null) {
-            synchronized (ServiceType.class) {
+            synchronized (MessageType.class) {
                 if (mappings == null) {
-                    mappings = new java.util.HashMap<Integer, ServiceType>();
+                    mappings = new java.util.HashMap<Integer, MessageType>();
                 }
             }
         }
         return mappings;
     }
 
-    ServiceType(final int value) {
+    MessageType(final int value) {
         intValue = value;
         getMappings().put(value, this);
     }
@@ -60,7 +61,7 @@ public enum ServiceType {
         return intValue;
     }
 
-    public static ServiceType forValue(final int value) {
+    public static MessageType forValue(final int value) {
         return getMappings().get(value);
     }
 }

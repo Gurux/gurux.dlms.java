@@ -289,10 +289,11 @@ public class GXManufacturerCollection
     }
 
     /**
-     * Reserved for internal use.
+     * Serialize manufacturer from the xml.
      * 
      * @param in
-     * @return
+     *            Input stream.
+     * @return Serialized manufacturer.
      * @throws Exception
      */
     private static GXManufacturer parse(final InputStream in) throws Exception {

@@ -32,7 +32,7 @@
 // Full text may be retrieved at http://www.gnu.org/licenses/gpl-2.0.txt
 //---------------------------------------------------------------------------
 
-package gurux.dlms.enums;
+package gurux.dlms.objects.enums;
 
 /**
  * Sort methods.
@@ -42,21 +42,30 @@ public enum SortMethod {
      * First in first out When circle buffer is full first item is removed.
      */
     FIFO(0),
+
     /**
      * Last in first out. When circle buffer is full last item is removed.
      */
-    LIFO(1), /**
-              * Largest is first.
-              */
-    LARGEST(2), /**
-                 * Smallest is first.
-                 */
-    SMALLEST(3), /**
-                  * Nearst to zero is first.
-                  */
-    NEAREST_TO_ZERO(4), /**
-                         * Farest from zero is first.
-                         */
+    LIFO(1),
+
+    /**
+     * Largest is first.
+     */
+    LARGEST(2),
+
+    /**
+     * Smallest is first.
+     */
+    SMALLEST(3),
+
+    /**
+     * Nearest to zero is first.
+     */
+    NEAREST_TO_ZERO(4),
+
+    /**
+     * Farest from zero is first.
+     */
     FAREST_FROM_ZERO(5);
 
     private int intValue;
