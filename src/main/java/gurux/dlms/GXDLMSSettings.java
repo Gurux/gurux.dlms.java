@@ -159,7 +159,7 @@ public class GXDLMSSettings {
     private short senderFrame;
 
     /**
-     * HDLC receiver frame sequence number.
+     * HDLC receiver block sequence number.
      */
     private short receiverFrame;
 

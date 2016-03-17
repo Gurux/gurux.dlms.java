@@ -252,7 +252,6 @@ public class GXCommunicate {
                 readDLMSPacket(data, reply);
                 if (reply.getError() == ErrorCode.REJECTED.getValue()) {
                     Thread.sleep(1000);
-                    data = dlms.receiverReady(rt);
                     readDLMSPacket(data, reply);
                     if (reply.getError() != 0) {
                         throw new GXDLMSException(reply.getError());

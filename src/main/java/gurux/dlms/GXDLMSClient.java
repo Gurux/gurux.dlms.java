@@ -439,6 +439,8 @@ public class GXDLMSClient {
      * @return SNRM request as byte array.
      */
     public final byte[] snrmRequest() {
+        settings.setConnected(false);
+
         isAuthenticationRequired = false;
         settings.setMaxReceivePDUSize(0xFFFF);
         // SNRM request is not used in network connections.

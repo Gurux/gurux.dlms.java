@@ -562,6 +562,7 @@ public abstract class GXDLMSServer {
      * Reset after connection is closed.
      */
     public final void reset() {
+        settings.setConnected(false);
         connectedServerAddress = 0;
         reply.clear();
         settings.setServerAddress(0);
@@ -689,9 +690,11 @@ public abstract class GXDLMSServer {
             break;
         case AARQ:
             frames = handleAarqRequest();
+            settings.setConnected(true);
             break;
         case DISCONNECT_REQUEST:
             frames = generateDisconnectRequest();
+            settings.setConnected(false);
             break;
         default:
             LOGGER.severe("Invalid command: " + reply.getCommand().toString());

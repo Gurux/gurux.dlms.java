@@ -865,7 +865,8 @@ abstract class GXDLMS {
             // If I frame.
             if ((frame & 1) == 0) {
                 getLLCBytes(server, reply);
-                if (type == FrameType.AARQ && settings.isServer()) {
+                if (type == FrameType.AARQ && !settings.getConnected()
+                        && settings.isServer()) {
                     data.setCommand(Command.AARQ);
                 }
             } else {
@@ -1115,16 +1116,19 @@ abstract class GXDLMS {
         if (type == 1) {
             // Response normal. Get data if exists.
             if (data.getData().position() < data.getData().size()) {
-                if (data.getData().getUInt8() != 1) {
-                    throw new GXDLMSException(
-                            "parseApplicationAssociationResponse failed. "
-                                    + "Invalid tag.");
+                int size = data.getData().getUInt8();
+                if (size != 0) {
+                    if (size != 1) {
+                        throw new GXDLMSException(
+                                "parseApplicationAssociationResponse failed. "
+                                        + "Invalid tag.");
+                    }
+                    ret = (byte) data.getData().getUInt8();
+                    if (ret != 0) {
+                        throw new GXDLMSException(ret);
+                    }
+                    getDataFromBlock(data.getData(), 0);
                 }
-                ret = (byte) data.getData().getUInt8();
-                if (ret != 0) {
-                    throw new GXDLMSException(ret);
-                }
-                getDataFromBlock(data.getData(), 0);
             }
         } else {
             throw new IllegalArgumentException("Invalid Command.");

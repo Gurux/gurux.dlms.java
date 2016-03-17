@@ -76,8 +76,8 @@ public final class GXSecure {
             // Get server Challenge.
             GXByteBuffer challenge = new GXByteBuffer();
             // Get shared secret
-            challenge.set(secret);
             challenge.set(data);
+            challenge.set(secret);
             tmp = challenge.array();
             if (auth == Authentication.HIGH_MD5) {
                 MessageDigest md = MessageDigest.getInstance("MD5");
