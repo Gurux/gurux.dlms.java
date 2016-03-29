@@ -408,7 +408,7 @@ final class GXAPDU {
         if (buff.getUInt8() != 0x6) {
             throw new RuntimeException("Encoding failed. Not an Object ID.");
         }
-        if (settings.isServer()) {
+        if (settings.isServer() && settings.getCipher() != null) {
             settings.getCipher().setSecurity(Security.NONE);
         }
         // Object ID length.

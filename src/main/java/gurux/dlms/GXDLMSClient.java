@@ -1535,7 +1535,7 @@ public class GXDLMSClient {
         // Add item count
         buff.setUInt8(0x04);
         // Add enum tag.
-        buff.setUInt8(0x02);
+        buff.setUInt8(DataType.STRUCTURE.getValue());
         // Add item count
         buff.setUInt8(0x04);
         // CI
@@ -1547,8 +1547,8 @@ public class GXDLMSClient {
         GXCommon.setData(buff, DataType.INT8, 2);
         // Add version
         GXCommon.setData(buff, DataType.UINT16, sort.getVersion());
-        GXCommon.setData(buff, DataType.DATETIME, start); // Add start time
-        GXCommon.setData(buff, DataType.DATETIME, end); // Add start time
+        GXCommon.setData(buff, DataType.OCTET_STRING, start); // Add start time
+        GXCommon.setData(buff, DataType.OCTET_STRING, end); // Add start time
         // Add array of read columns. Read All...
         buff.setUInt8(0x01);
         // Add item count

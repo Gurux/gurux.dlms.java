@@ -177,7 +177,7 @@ public class GXDLMSExtendedRegister extends GXDLMSRegister {
             return super.getDataType(index);
         }
         if (index == 5) {
-            return DataType.DATETIME;
+            return DataType.OCTET_STRING;
         }
         throw new IllegalArgumentException(
                 "getDataType failed. Invalid attribute index.");

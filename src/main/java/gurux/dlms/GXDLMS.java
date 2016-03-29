@@ -335,10 +335,14 @@ abstract class GXDLMS {
         } else {
             if (tp == DataType.NONE) {
                 tp = GXCommon.getValueType(value);
+                // If data type is not defined for Date Time it is write as
+                // octet string.
+                if (tp == DataType.DATETIME) {
+                    tp = DataType.OCTET_STRING;
+                }
             }
         }
         GXCommon.setData(bb, tp, value);
-
     }
 
     /**

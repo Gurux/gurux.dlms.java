@@ -107,8 +107,35 @@ public class GXDLMSProfileGeneric extends GXDLMSObject implements IGXDLMSBase {
      *            Data of profile generic.
      */
     public final void setBuffer(final Object[][] value) {
+        buffer.clear();
         buffer.addAll(Arrays.asList(value));
         entriesInUse = buffer.size();
+    }
+
+    /**
+     * @param value
+     *            Data of profile generic.
+     */
+    public final void addBuffer(final Object[][] value) {
+        buffer.addAll(Arrays.asList(value));
+        entriesInUse = buffer.size();
+    }
+
+    /**
+     * @param value
+     *            Data of profile generic.
+     */
+    public final void addBuffer(final List<Object[]> value) {
+        buffer.addAll(value);
+        entriesInUse = buffer.size();
+    }
+
+    /**
+     * Clear profile generic buffer.
+     */
+    public final void clearBuffer() {
+        buffer.clear();
+        entriesInUse = 0;
     }
 
     /*

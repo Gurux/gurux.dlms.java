@@ -272,7 +272,7 @@ public class GXDLMSNotify {
         if (date == null || date == new Date(0)) {
             buff.setUInt8((byte) DataType.NONE.getValue());
         } else {
-            GXCommon.setData(buff, DataType.DATETIME, date);
+            GXCommon.setData(buff, DataType.OCTET_STRING, date);
         }
         buff.set(data);
         List<byte[][]> list = GXDLMS.splitPdu(settings,
@@ -340,6 +340,7 @@ public class GXDLMSNotify {
                 new ArrayList<SimpleEntry<GXDLMSObject, Integer>>();
         GXDLMS.getValueFromData(settings, reply);
         Object[] list = (Object[]) reply.getValue();
+        GXDLMSConverter c = new GXDLMSConverter();
         for (Object it : (Object[]) list[0]) {
             Object[] tmp = (Object[]) it;
             int classID = ((Number) (tmp[0])).intValue() & 0xFFFF;
@@ -351,6 +352,7 @@ public class GXDLMSNotify {
                     comp = GXDLMSClient.createDLMSObject(classID, 0, 0, tmp[1],
                             null);
                     settings.getObjects().add(comp);
+                    c.updateOBISCodeInformation(comp);
                 }
                 if (comp.getClass() != GXDLMSObject.class) {
                     items.add(new SimpleEntry<GXDLMSObject, Integer>(comp,

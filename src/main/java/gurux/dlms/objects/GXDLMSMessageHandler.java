@@ -39,11 +39,13 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Map.Entry;
 
+import gurux.dlms.GXByteBuffer;
 import gurux.dlms.GXDLMSClient;
 import gurux.dlms.GXDLMSSettings;
 import gurux.dlms.GXDateTime;
 import gurux.dlms.enums.DataType;
 import gurux.dlms.enums.ObjectType;
+import gurux.dlms.internal.GXCommon;
 
 public class GXDLMSMessageHandler extends GXDLMSObject implements IGXDLMSBase {
     private List<Entry<GXDateTime, GXDateTime>> listeningWindow;
@@ -207,13 +209,38 @@ public class GXDLMSMessageHandler extends GXDLMSObject implements IGXDLMSBase {
             return getLogicalName();
         }
         if (index == 2) {
-            return listeningWindow;
+            GXByteBuffer buff = new GXByteBuffer();
+            buff.setUInt8(DataType.ARRAY.getValue());
+            GXCommon.setObjectCount(listeningWindow.size(), buff);
+            for (Entry<GXDateTime, GXDateTime> it : listeningWindow) {
+                buff.setUInt8(DataType.STRUCTURE.getValue());
+                buff.setUInt8(2);
+                GXCommon.setData(buff, DataType.OCTET_STRING, it.getKey());
+                GXCommon.setData(buff, DataType.OCTET_STRING, it.getValue());
+            }
+            return buff.array();
         }
         if (index == 3) {
-            return allowedSenders;
+            GXByteBuffer buff = new GXByteBuffer();
+            buff.setUInt8(DataType.ARRAY.getValue());
+            GXCommon.setObjectCount(allowedSenders.length, buff);
+            for (String it : allowedSenders) {
+                GXCommon.setData(buff, DataType.OCTET_STRING, it.getBytes());
+            }
+            return buff.array();
         }
         if (index == 4) {
-            return sendersAndActions;
+            GXByteBuffer buff = new GXByteBuffer();
+            buff.setUInt8(DataType.ARRAY.getValue());
+            GXCommon.setObjectCount(sendersAndActions.size(), buff);
+            for (Entry<String, Entry<Integer, GXDLMSScriptAction>> it : sendersAndActions) {
+                buff.setUInt8(DataType.STRUCTURE.getValue());
+                buff.setUInt8(2);
+                GXCommon.setData(buff, DataType.OCTET_STRING,
+                        it.getKey().getBytes());
+                // TODO: GXCommon.SetData(buff, DataType.OCTET_STRING,
+            }
+            return buff.array();
         }
         throw new IllegalArgumentException(
                 "GetValue failed. Invalid attribute index.");

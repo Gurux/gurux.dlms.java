@@ -248,10 +248,17 @@ public class sampleclient {
                     ObjectType.EXTENDED_REGISTER });
             Thread.sleep(1000);
             for (GXDLMSObject it : objs) {
-                if (it instanceof GXDLMSRegister) {
-                    com.readObject(it, 3);
-                } else if (it instanceof GXDLMSDemandRegister) {
-                    com.readObject(it, 4);
+                try {
+                    if (it instanceof GXDLMSRegister) {
+                        com.readObject(it, 3);
+                    } else if (it instanceof GXDLMSDemandRegister) {
+                        com.readObject(it, 4);
+                    }
+                } catch (Exception ex) {
+                    traceLn(logFile,
+                            "Err! Failed to read scaler and unit value: "
+                                    + ex.getMessage());
+                    // Continue reading.
                 }
             }
             // Read Profile Generic columns.

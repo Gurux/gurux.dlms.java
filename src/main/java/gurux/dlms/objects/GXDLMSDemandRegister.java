@@ -320,10 +320,10 @@ public class GXDLMSDemandRegister extends GXDLMSObject implements IGXDLMSBase {
             return super.getDataType(index);
         }
         if (index == 6) {
-            return DataType.DATETIME;
+            return DataType.OCTET_STRING;
         }
         if (index == 7) {
-            return DataType.DATETIME;
+            return DataType.OCTET_STRING;
         }
         if (index == 8) {
             return DataType.UINT32;

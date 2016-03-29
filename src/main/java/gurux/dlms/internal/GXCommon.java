@@ -1071,14 +1071,7 @@ public final class GXCommon {
             throw new RuntimeException(
                     "Value can't be enum. Give integer value.");
         }
-        if (type == DataType.OCTET_STRING
-                && (value instanceof GXDateTime || value instanceof Date)) {
-            type = DataType.DATETIME;
-        }
-        if (type == DataType.DATETIME || type == DataType.DATE
-                || type == DataType.TIME) {
-            buff.setUInt8(DataType.OCTET_STRING.getValue());
-        } else if ((type == DataType.ARRAY || type == DataType.STRUCTURE)
+        if ((type == DataType.ARRAY || type == DataType.STRUCTURE)
                 && value instanceof byte[]) {
             // If byte array is added do not add type.
             buff.set((byte[]) value);
@@ -1119,7 +1112,31 @@ public final class GXCommon {
         } else if (type == DataType.STRING_UTF8) {
             setUtfString(buff, value);
         } else if (type == DataType.OCTET_STRING) {
-            setOctetString(buff, value);
+            if (value instanceof GXDateTime) {
+                GXDateTime tmp = (GXDateTime) value;
+                java.util.Set<DateTimeSkips> date = EnumSet.of(
+                        DateTimeSkips.HOUR, DateTimeSkips.MINUTE,
+                        DateTimeSkips.SECOND, DateTimeSkips.MILLISECOND);
+                java.util.Set<DateTimeSkips> time =
+                        EnumSet.of(DateTimeSkips.YEAR, DateTimeSkips.MONTH,
+                                DateTimeSkips.DAY, DateTimeSkips.DAY_OF_WEEK);
+                if (tmp.getSkip().containsAll(date)) {
+                    // If only date part is written.
+                    setDate(buff, value);
+                } else if (tmp.getSkip().containsAll(time)) {
+                    // If only time part is written.
+                    setTime(buff, value);
+                } else {
+                    // Write date and time.
+                    setDateTime(buff, value);
+                }
+            } else if (value instanceof java.util.Date
+                    || value instanceof java.util.Calendar) {
+                // Date an calendar are always written as date time.
+                setDateTime(buff, value);
+            } else {
+                setOctetString(buff, value);
+            }
         } else if (type == DataType.ARRAY || type == DataType.STRUCTURE) {
             setArray(buff, value);
         } else if (type == DataType.BCD) {

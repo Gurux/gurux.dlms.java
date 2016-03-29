@@ -159,7 +159,7 @@ public class GXDLMSSpecialDaysTable extends GXDLMSObject
                 data.setUInt8(DataType.STRUCTURE.getValue());
                 data.setUInt8(3); // Count
                 GXCommon.setData(data, DataType.UINT16, it.getIndex());
-                GXCommon.setData(data, DataType.DATETIME, it.getDate());
+                GXCommon.setData(data, DataType.OCTET_STRING, it.getDate());
                 GXCommon.setData(data, DataType.UINT8, it.getDayId());
             }
             return data.array();

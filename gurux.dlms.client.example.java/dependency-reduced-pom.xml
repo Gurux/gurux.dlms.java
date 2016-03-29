@@ -29,7 +29,7 @@
             <configuration>
               <transformers>
                 <transformer>
-                  <mainClass>gurux.net.example.java.GuruxNetExampleJava</mainClass>
+                  <mainClass>gurux.dlms.client.sampleclient</mainClass>
                 </transformer>
               </transformers>
             </configuration>

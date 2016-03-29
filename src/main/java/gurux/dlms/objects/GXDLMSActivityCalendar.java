@@ -271,7 +271,7 @@ public class GXDLMSActivityCalendar extends GXDLMSObject
             return DataType.ARRAY;
         }
         if (index == 10) {
-            return DataType.DATETIME;
+            return DataType.OCTET_STRING;
         }
         throw new IllegalArgumentException(
                 "getDataType failed. Invalid attribute index.");

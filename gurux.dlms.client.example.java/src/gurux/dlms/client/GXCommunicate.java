@@ -222,9 +222,13 @@ public class GXCommunicate {
             }
         }
         writeTrace("-> " + now() + "\t" + GXCommon.bytesToHex(p.getReply()));
-        if (reply.getError() != 0
-                && reply.getError() != ErrorCode.REJECTED.getValue()) {
-            throw new GXDLMSException(reply.getError());
+        if (reply.getError() != 0) {
+            if (reply.getError() == ErrorCode.REJECTED.getValue()) {
+                Thread.sleep(1000);
+                readDLMSPacket(data, reply);
+            } else {
+                throw new GXDLMSException(reply.getError());
+            }
         }
     }
 
@@ -250,13 +254,6 @@ public class GXCommunicate {
                 rt = reply.getMoreData();
                 data = dlms.receiverReady(rt);
                 readDLMSPacket(data, reply);
-                if (reply.getError() == ErrorCode.REJECTED.getValue()) {
-                    Thread.sleep(1000);
-                    readDLMSPacket(data, reply);
-                    if (reply.getError() != 0) {
-                        throw new GXDLMSException(reply.getError());
-                    }
-                }
             }
         }
     }
