@@ -209,13 +209,13 @@ public class GXByteBuffer {
         data[index + 1] = (byte) (item & 0xFF);
     }
 
-    public final void setUInt32(final int item) {
+    public final void setUInt32(final long item) {
 
         setUInt32(size, item);
         size += 4;
     }
 
-    public final void setUInt32(final int index, final int item) {
+    public final void setUInt32(final int index, final long item) {
 
         if (index + 4 >= capacity()) {
             capacity(index + ARRAY_CAPACITY);

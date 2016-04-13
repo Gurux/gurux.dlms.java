@@ -3,8 +3,10 @@ package gurux.dlms;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
+import java.util.List;
 
 import gurux.dlms.enums.DataType;
+import gurux.dlms.internal.GXCommon;
 import gurux.dlms.objects.GXDLMSObject;
 import gurux.dlms.objects.GXDLMSObjectCollection;
 
@@ -179,15 +181,15 @@ public class GXDLMSConverter {
             throw new RuntimeException(e.getMessage());
         }
         String str = buffer.toString();
-        String[] rows = str.split("\r\n");
+        List<String> rows = GXCommon.split(str, "\r\n");
         for (String it : rows) {
-            String[] items = it.split("[;]", -1);
-            String[] obis = items[0].split("[.]", -1);
-            GXStandardObisCode code =
-                    new GXStandardObisCode(obis,
-                            items[3] + "; " + items[4] + "; " + items[5] + "; "
-                                    + items[6] + "; " + items[7],
-                            items[1], items[2]);
+            List<String> items = GXCommon.split(it, ';');
+            List<String> obis = GXCommon.split(items.get(0), '.');
+            GXStandardObisCode code = new GXStandardObisCode(
+                    obis.toArray(new String[0]),
+                    items.get(3) + "; " + items.get(4) + "; " + items.get(5)
+                            + "; " + items.get(6) + "; " + items.get(7),
+                    items.get(1), items.get(2));
             codes.add(code);
         }
     }

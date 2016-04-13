@@ -34,12 +34,11 @@
 
 package gurux.dlms.objects;
 
-import java.lang.reflect.Array;
-import java.util.AbstractMap;
 import java.util.List;
 
 import gurux.dlms.GXDLMSClient;
 import gurux.dlms.GXDLMSSettings;
+import gurux.dlms.GXSimpleEntry;
 import gurux.dlms.enums.DataType;
 import gurux.dlms.enums.ObjectType;
 
@@ -194,9 +193,11 @@ public class GXDLMSMBusClient extends GXDLMSObject implements IGXDLMSBase {
     @Override
     public final Object[] getValues() {
         return new Object[] { getLogicalName(), mBusPortReference,
-                captureDefinition, capturePeriod, primaryAddress,
-                identificationNumber, manufacturerID, dataHeaderVersion,
-                deviceType, accessNumber, status, alarm };
+                captureDefinition, new Long(capturePeriod),
+                new Integer(primaryAddress), new Long(identificationNumber),
+                new Integer(manufacturerID), new Integer(dataHeaderVersion),
+                new Integer(deviceType), new Integer(accessNumber),
+                new Integer(status), new Integer(alarm) };
     }
 
     /*
@@ -209,51 +210,51 @@ public class GXDLMSMBusClient extends GXDLMSObject implements IGXDLMSBase {
                 new java.util.ArrayList<Integer>();
         // LN is static and read only once.
         if (getLogicalName() == null || getLogicalName().compareTo("") == 0) {
-            attributes.add(1);
+            attributes.add(new Integer(1));
         }
         // MBusPortReference
         if (canRead(2)) {
-            attributes.add(2);
+            attributes.add(new Integer(2));
         }
         // CaptureDefinition
         if (canRead(3)) {
-            attributes.add(3);
+            attributes.add(new Integer(3));
         }
         // CapturePeriod
         if (canRead(4)) {
-            attributes.add(4);
+            attributes.add(new Integer(4));
         }
         // PrimaryAddress
         if (canRead(5)) {
-            attributes.add(5);
+            attributes.add(new Integer(5));
         }
         // IdentificationNumber
         if (canRead(6)) {
-            attributes.add(6);
+            attributes.add(new Integer(6));
         }
         // ManufacturerID
         if (canRead(7)) {
-            attributes.add(7);
+            attributes.add(new Integer(7));
         }
         // Version
         if (canRead(8)) {
-            attributes.add(8);
+            attributes.add(new Integer(8));
         }
         // DeviceType
         if (canRead(9)) {
-            attributes.add(9);
+            attributes.add(new Integer(9));
         }
         // AccessNumber
         if (canRead(10)) {
-            attributes.add(10);
+            attributes.add(new Integer(10));
         }
         // Status
         if (canRead(11)) {
-            attributes.add(11);
+            attributes.add(new Integer(11));
         }
         // Alarm
         if (canRead(12)) {
-            attributes.add(12);
+            attributes.add(new Integer(12));
         }
         return GXDLMSObjectHelpers.toIntArray(attributes);
     }
@@ -333,31 +334,31 @@ public class GXDLMSMBusClient extends GXDLMSObject implements IGXDLMSBase {
             return captureDefinition;
         }
         if (index == 4) {
-            return capturePeriod;
+            return new Long(capturePeriod);
         }
         if (index == 5) {
-            return primaryAddress;
+            return new Integer(primaryAddress);
         }
         if (index == 6) {
-            return identificationNumber;
+            return new Long(identificationNumber);
         }
         if (index == 7) {
-            return manufacturerID;
+            return new Integer(manufacturerID);
         }
         if (index == 8) {
-            return dataHeaderVersion;
+            return new Integer(dataHeaderVersion);
         }
         if (index == 9) {
-            return deviceType;
+            return new Integer(deviceType);
         }
         if (index == 10) {
-            return accessNumber;
+            return new Integer(accessNumber);
         }
         if (index == 11) {
-            return status;
+            return new Integer(status);
         }
         if (index == 12) {
-            return alarm;
+            return new Integer(alarm);
         }
         throw new IllegalArgumentException(
                 "GetValue failed. Invalid attribute index.");
@@ -379,13 +380,13 @@ public class GXDLMSMBusClient extends GXDLMSObject implements IGXDLMSBase {
             captureDefinition.clear();
             for (Object it : (Object[]) value) {
                 captureDefinition
-                        .add(new AbstractMap.SimpleEntry<String, String>(
+                        .add(new GXSimpleEntry<String, String>(
                                 GXDLMSClient
-                                        .changeType((byte[]) Array.get(it, 0),
+                                        .changeType((byte[]) ((Object[]) it)[0],
                                                 DataType.OCTET_STRING)
                                         .toString(),
                                 GXDLMSClient
-                                        .changeType((byte[]) Array.get(it, 1),
+                                        .changeType((byte[]) ((Object[]) it)[1],
                                                 DataType.OCTET_STRING)
                                         .toString()));
             }

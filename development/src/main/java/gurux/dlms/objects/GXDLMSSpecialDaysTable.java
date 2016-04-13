@@ -34,8 +34,6 @@
 
 package gurux.dlms.objects;
 
-import java.lang.reflect.Array;
-
 import gurux.dlms.GXByteBuffer;
 import gurux.dlms.GXDLMSClient;
 import gurux.dlms.GXDLMSSettings;
@@ -103,11 +101,11 @@ public class GXDLMSSpecialDaysTable extends GXDLMSObject
                 new java.util.ArrayList<Integer>();
         // LN is static and read only once.
         if (getLogicalName() == null || getLogicalName().compareTo("") == 0) {
-            attributes.add(1);
+            attributes.add(new Integer(1));
         }
         // Entries
         if (!isRead(2)) {
-            attributes.add(2);
+            attributes.add(new Integer(2));
         }
         return GXDLMSObjectHelpers.toIntArray(attributes);
     }
@@ -158,9 +156,11 @@ public class GXDLMSSpecialDaysTable extends GXDLMSObject
             for (GXDLMSSpecialDay it : entries) {
                 data.setUInt8(DataType.STRUCTURE.getValue());
                 data.setUInt8(3); // Count
-                GXCommon.setData(data, DataType.UINT16, it.getIndex());
-                GXCommon.setData(data, DataType.OCTET_STRING, it.getDate());
-                GXCommon.setData(data, DataType.UINT8, it.getDayId());
+                GXCommon.setData(data, DataType.UINT16,
+                        new Integer(it.getIndex()));
+                GXCommon.setData(data, DataType.DATETIME, it.getDate());
+                GXCommon.setData(data, DataType.UINT8,
+                        new Integer(it.getDayId()));
             }
             return data.array();
         }
@@ -184,10 +184,10 @@ public class GXDLMSSpecialDaysTable extends GXDLMSObject
                 for (Object item : (Object[]) value) {
                     GXDLMSSpecialDay it = new GXDLMSSpecialDay();
 
-                    it.setIndex(((Number) Array.get(item, 0)).intValue());
+                    it.setIndex(((Number) ((Object[]) item)[0]).intValue());
                     it.setDate((GXDateTime) GXDLMSClient.changeType(
-                            (byte[]) Array.get(item, 1), DataType.DATE));
-                    it.setDayId(((Number) Array.get(item, 2)).intValue());
+                            (byte[]) ((Object[]) item)[1], DataType.DATE));
+                    it.setDayId(((Number) ((Object[]) item)[2]).intValue());
                     items.add(it);
                 }
                 entries = items.toArray(new GXDLMSSpecialDay[0]);

@@ -34,16 +34,15 @@
 
 package gurux.dlms.objects;
 
-import java.lang.reflect.Array;
-import java.util.AbstractMap;
-import java.util.AbstractMap.SimpleEntry;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map.Entry;
 
 import gurux.dlms.GXByteBuffer;
 import gurux.dlms.GXDLMSClient;
 import gurux.dlms.GXDLMSSettings;
 import gurux.dlms.GXDateTime;
+import gurux.dlms.GXSimpleEntry;
 import gurux.dlms.enums.DataType;
 import gurux.dlms.enums.ObjectType;
 import gurux.dlms.internal.GXCommon;
@@ -51,7 +50,7 @@ import gurux.dlms.objects.enums.AutoConnectMode;
 
 public class GXDLMSAutoConnect extends GXDLMSObject implements IGXDLMSBase {
     private AutoConnectMode mode;
-    private List<AbstractMap.SimpleEntry<GXDateTime, GXDateTime>> callingWindow;
+    private List<Entry<GXDateTime, GXDateTime>> callingWindow;
     private String[] destinations;
     private int repetitionDelay;
     private int repetitions;
@@ -83,7 +82,7 @@ public class GXDLMSAutoConnect extends GXDLMSObject implements IGXDLMSBase {
      */
     public GXDLMSAutoConnect(final String ln, final int sn) {
         super(ObjectType.AUTO_CONNECT, ln, sn);
-        callingWindow = new ArrayList<SimpleEntry<GXDateTime, GXDateTime>>();
+        callingWindow = new ArrayList<Entry<GXDateTime, GXDateTime>>();
     }
 
     public final AutoConnectMode getMode() {
@@ -110,13 +109,12 @@ public class GXDLMSAutoConnect extends GXDLMSObject implements IGXDLMSBase {
         repetitionDelay = value;
     }
 
-    public final List<AbstractMap.SimpleEntry<GXDateTime, GXDateTime>>
-            getCallingWindow() {
+    public final List<Entry<GXDateTime, GXDateTime>> getCallingWindow() {
         return callingWindow;
     }
 
-    public final void setCallingWindow(
-            final List<AbstractMap.SimpleEntry<GXDateTime, GXDateTime>> value) {
+    public final void
+            setCallingWindow(final List<Entry<GXDateTime, GXDateTime>> value) {
         callingWindow = value;
     }
 
@@ -130,8 +128,10 @@ public class GXDLMSAutoConnect extends GXDLMSObject implements IGXDLMSBase {
 
     @Override
     public final Object[] getValues() {
-        return new Object[] { getLogicalName(), getMode(), getRepetitions(),
-                getRepetitionDelay(), getCallingWindow(), getDestinations() };
+        return new Object[] { getLogicalName(), getMode(),
+                new Integer(getRepetitions()),
+                new Integer(getRepetitionDelay()), getCallingWindow(),
+                getDestinations() };
     }
 
     /*
@@ -144,27 +144,27 @@ public class GXDLMSAutoConnect extends GXDLMSObject implements IGXDLMSBase {
                 new java.util.ArrayList<Integer>();
         // LN is static and read only once.
         if (getLogicalName() == null || getLogicalName().compareTo("") == 0) {
-            attributes.add(1);
+            attributes.add(new Integer(1));
         }
         // Mode
         if (canRead(2)) {
-            attributes.add(2);
+            attributes.add(new Integer(2));
         }
         // Repetitions
         if (canRead(3)) {
-            attributes.add(3);
+            attributes.add(new Integer(3));
         }
         // RepetitionDelay
         if (canRead(4)) {
-            attributes.add(4);
+            attributes.add(new Integer(4));
         }
         // CallingWindow
         if (canRead(5)) {
-            attributes.add(5);
+            attributes.add(new Integer(5));
         }
         // Destinations
         if (canRead(6)) {
-            attributes.add(6);
+            attributes.add(new Integer(6));
         }
         return GXDLMSObjectHelpers.toIntArray(attributes);
     }
@@ -219,13 +219,13 @@ public class GXDLMSAutoConnect extends GXDLMSObject implements IGXDLMSBase {
             return getLogicalName();
         }
         if (index == 2) {
-            return (byte) getMode().getValue();
+            return new Byte((byte) getMode().getValue());
         }
         if (index == 3) {
-            return getRepetitions();
+            return new Integer(getRepetitions());
         }
         if (index == 4) {
-            return getRepetitionDelay();
+            return new Integer(getRepetitionDelay());
         }
         if (index == 5) {
             int cnt = getCallingWindow().size();
@@ -234,7 +234,7 @@ public class GXDLMSAutoConnect extends GXDLMSObject implements IGXDLMSBase {
             // Add count
             GXCommon.setObjectCount(cnt, data);
             if (cnt != 0) {
-                for (SimpleEntry<GXDateTime, GXDateTime> it : callingWindow) {
+                for (Entry<GXDateTime, GXDateTime> it : callingWindow) {
                     data.setUInt8(DataType.STRUCTURE.getValue());
                     // Count
                     data.setUInt8(2);
@@ -287,11 +287,11 @@ public class GXDLMSAutoConnect extends GXDLMSObject implements IGXDLMSBase {
             if (value != null) {
                 for (Object item : (Object[]) value) {
                     GXDateTime start = (GXDateTime) GXDLMSClient.changeType(
-                            (byte[]) Array.get(item, 0), DataType.DATETIME);
+                            (byte[]) ((Object[]) item)[0], DataType.DATETIME);
                     GXDateTime end = (GXDateTime) GXDLMSClient.changeType(
-                            (byte[]) Array.get(item, 1), DataType.DATETIME);
-                    getCallingWindow()
-                            .add(new SimpleEntry<GXDateTime, GXDateTime>(start,
+                            (byte[]) ((Object[]) item)[1], DataType.DATETIME);
+                    getCallingWindow().add(
+                            new GXSimpleEntry<GXDateTime, GXDateTime>(start,
                                     end));
                 }
             }

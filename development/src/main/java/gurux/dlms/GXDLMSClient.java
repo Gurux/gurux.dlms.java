@@ -34,10 +34,9 @@
 
 package gurux.dlms;
 
-import java.util.AbstractMap;
-import java.util.AbstractMap.SimpleEntry;
 import java.util.Calendar;
 import java.util.List;
+import java.util.Map.Entry;
 
 import gurux.dlms.enums.AccessMode;
 import gurux.dlms.enums.Authentication;
@@ -615,8 +614,18 @@ public class GXDLMSClient {
             throw new IllegalArgumentException("Password is invalid.");
         }
         settings.resetBlockIndex();
-        byte[] challenge = GXSecure.secure(getAuthentication(),
-                settings.getStoCChallenge(), settings.getPassword());
+        byte[] pw;
+        if (settings.getAuthentication() == Authentication.HIGH_GMAC) {
+            pw = settings.getCipher().getSystemTitle();
+        } else {
+            pw = settings.getPassword();
+        }
+        long ic = 0;
+        if (settings.getCipher() != null) {
+            ic = settings.getCipher().getFrameCounter();
+        }
+        byte[] challenge = GXSecure.secure(settings, settings.getCipher(), ic,
+                settings.getStoCChallenge(), pw);
         GXByteBuffer bb = new GXByteBuffer();
         bb.setUInt8(DataType.OCTET_STRING.getValue());
         GXCommon.setObjectCount(challenge.length, bb);
@@ -638,9 +647,19 @@ public class GXDLMSClient {
     public final void
             parseApplicationAssociationResponse(final GXByteBuffer reply) {
         GXDataInfo info = new GXDataInfo();
+        byte[] secret;
+        long ic = 0;
         byte[] value = (byte[]) GXCommon.getData(reply, info);
-        byte[] tmp = GXSecure.secure(settings.getAuthentication(),
-                settings.getCtoSChallenge(), settings.getPassword());
+        if (settings.getAuthentication() == Authentication.HIGH_GMAC) {
+            secret = settings.getSourceSystemTitle();
+            GXByteBuffer bb = new GXByteBuffer(value);
+            bb.getUInt8();
+            ic = bb.getUInt32();
+        } else {
+            secret = settings.getPassword();
+        }
+        byte[] tmp = GXSecure.secure(settings, settings.getCipher(), ic,
+                settings.getCtoSChallenge(), secret);
         GXByteBuffer challenge = new GXByteBuffer(tmp);
         if (!challenge.compare(value)) {
             throw new GXDLMSException(
@@ -928,7 +947,7 @@ public class GXDLMSClient {
      *            Received reply from the meter.
      */
     public final void updateValues(
-            final List<AbstractMap.SimpleEntry<GXDLMSObject, Integer>> list,
+            final List<Entry<GXDLMSObject, Integer>> list,
             final GXByteBuffer data) {
         Object value;
         GXDataInfo info = new GXDataInfo();
@@ -937,7 +956,7 @@ public class GXDLMSClient {
             throw new RuntimeException(
                     "Invalid reply. Read items count do not match.");
         }
-        for (AbstractMap.SimpleEntry<GXDLMSObject, Integer> it : list) {
+        for (Entry<GXDLMSObject, Integer> it : list) {
             int ret = data.getUInt8();
             if (ret == 0) {
                 value = GXCommon.getData(data, info);
@@ -958,8 +977,7 @@ public class GXDLMSClient {
      *            Received reply from the meter.
      */
     public final void updateValues(
-            final List<AbstractMap.SimpleEntry<GXDLMSObject, Integer>> list,
-            final byte[] reply) {
+            final List<Entry<GXDLMSObject, Integer>> list, final byte[] reply) {
         updateValues(list, new GXByteBuffer(reply));
     }
 
@@ -1082,8 +1100,8 @@ public class GXDLMSClient {
             // CI
             bb.setUInt16(objectType.getValue());
             // Add LN
-            String[] items = ((String) name).split("[.]", -1);
-            if (items.length != 6) {
+            List<String> items = GXCommon.split((String) name, '.');
+            if (items.size() != 6) {
                 throw new IllegalArgumentException("Invalid Logical Name.");
             }
             for (String it2 : items) {
@@ -1122,7 +1140,7 @@ public class GXDLMSClient {
         }
         if ((value instanceof byte[])) {
             bb.set((byte[]) value);
-        } else {
+        } else if (type != DataType.NONE) {
             GXCommon.setData(bb, type, value);
         }
         return GXDLMS.splitPdu(settings, cmd, 1, bb, ErrorCode.OK, null).get(0);
@@ -1180,8 +1198,8 @@ public class GXDLMSClient {
             // Add CI.
             bb.setUInt16(objectType.getValue());
             // Add LN.
-            String[] items = ((String) name).split("[.]", -1);
-            if (items.length != 6) {
+            List<String> items = GXCommon.split((String) name, '.');
+            if (items.size() != 6) {
                 throw new IllegalArgumentException("Invalid Logical Name.");
             }
             for (String it2 : items) {
@@ -1230,9 +1248,9 @@ public class GXDLMSClient {
             for (GXWriteItem it : list) {
                 // CI.
                 bb.setUInt16(it.getTarget().getObjectType().getValue());
-                String[] items =
-                        it.getTarget().getLogicalName().split("[.]", -1);
-                if (items.length != 6) {
+                List<String> items =
+                        GXCommon.split(it.getTarget().getLogicalName(), '.');
+                if (items.size() != 6) {
                     throw new IllegalArgumentException("Invalid Logical Name.");
                 }
                 for (String it2 : items) {
@@ -1319,8 +1337,8 @@ public class GXDLMSClient {
             // CI
             bb.setUInt16(objectType.getValue());
             // Add LN
-            String[] items = ((String) name).split("[.]", -1);
-            if (items.length != 6) {
+            List<String> items = GXCommon.split((String) name, '.');
+            if (items.size() != 6) {
                 throw new IllegalArgumentException("Invalid Logical Name.");
             }
             for (String it2 : items) {
@@ -1379,8 +1397,8 @@ public class GXDLMSClient {
      *            DLMS objects to read.
      * @return Read request as byte array.
      */
-    public final byte[][] readList(
-            final List<AbstractMap.SimpleEntry<GXDLMSObject, Integer>> list) {
+    public final byte[][]
+            readList(final List<Entry<GXDLMSObject, Integer>> list) {
         if (list == null || list.isEmpty()) {
             throw new IllegalArgumentException("Invalid parameter.");
         }
@@ -1391,11 +1409,12 @@ public class GXDLMSClient {
             cmd = Command.GET_REQUEST;
             // Add length.
             bb.setUInt8(list.size());
-            for (SimpleEntry<GXDLMSObject, Integer> it : list) {
+            for (Entry<GXDLMSObject, Integer> it : list) {
                 // CI.
                 bb.setUInt16(it.getKey().getObjectType().getValue());
-                String[] items = it.getKey().getLogicalName().split("[.]", -1);
-                if (items.length != 6) {
+                List<String> items =
+                        GXCommon.split(it.getKey().getLogicalName(), '.');
+                if (items.size() != 6) {
                     throw new IllegalArgumentException("Invalid Logical Name.");
                 }
                 for (String it2 : items) {
@@ -1410,7 +1429,7 @@ public class GXDLMSClient {
             cmd = Command.READ_REQUEST;
             // Add length.
             bb.setUInt8(list.size());
-            for (SimpleEntry<GXDLMSObject, Integer> it : list) {
+            for (Entry<GXDLMSObject, Integer> it : list) {
                 // Add variable type.
                 bb.setUInt8(2);
                 int sn = GXCommon.intValue(it.getKey().getShortName());
@@ -1542,7 +1561,7 @@ public class GXDLMSClient {
         GXCommon.setData(buff, DataType.UINT16,
                 sort.getObjectType().getValue());
         // LN
-        GXCommon.setData(buff, DataType.OCTET_STRING, sort.getName());
+        GXCommon.setData(buff, DataType.OCTET_STRING, sort.getLogicalName());
         // Add attribute index.
         GXCommon.setData(buff, DataType.INT8, 2);
         // Add version

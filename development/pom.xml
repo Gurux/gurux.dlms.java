@@ -2,7 +2,7 @@
   <modelVersion>4.0.0</modelVersion>
   <groupId>org.gurux</groupId>
   <artifactId>gurux.dlms</artifactId>
-  <version>1.1.5</version>
+  <version>1.1.7</version>
   <packaging>jar</packaging>  
  <name>gurux.dlms.java</name>
  <url>http://www.gurux.org</url>
@@ -50,8 +50,8 @@
         <artifactId>maven-compiler-plugin</artifactId>
         <version>3.3</version>
         <configuration>
-        <source>1.7</source>
-        <target>1.7</target>
+        <source>1.6</source>
+        <target>1.6</target>
         </configuration>
       </plugin>
       <!-- Generate sources. -->

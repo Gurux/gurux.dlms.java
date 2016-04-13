@@ -165,39 +165,39 @@ public class GXDLMSIECOpticalPortSetup extends GXDLMSObject
                 new java.util.ArrayList<Integer>();
         // LN is static and read only once.
         if (getLogicalName() == null || getLogicalName().compareTo("") == 0) {
-            attributes.add(1);
+            attributes.add(new Integer(1));
         }
         // DefaultMode
         if (!isRead(2)) {
-            attributes.add(2);
+            attributes.add(new Integer(2));
         }
         // DefaultBaudrate
         if (!isRead(3)) {
-            attributes.add(3);
+            attributes.add(new Integer(3));
         }
         // ProposedBaudrate
         if (!isRead(4)) {
-            attributes.add(4);
+            attributes.add(new Integer(4));
         }
         // ResponseTime
         if (!isRead(5)) {
-            attributes.add(5);
+            attributes.add(new Integer(5));
         }
         // DeviceAddress
         if (!isRead(6)) {
-            attributes.add(6);
+            attributes.add(new Integer(6));
         }
         // Password1
         if (!isRead(7)) {
-            attributes.add(7);
+            attributes.add(new Integer(7));
         }
         // Password2
         if (!isRead(8)) {
-            attributes.add(8);
+            attributes.add(new Integer(8));
         }
         // Password5
         if (!isRead(9)) {
-            attributes.add(9);
+            attributes.add(new Integer(9));
         }
         return GXDLMSObjectHelpers.toIntArray(attributes);
     }
@@ -261,16 +261,16 @@ public class GXDLMSIECOpticalPortSetup extends GXDLMSObject
             return getLogicalName();
         }
         if (index == 2) {
-            return this.getDefaultMode().getValue();
+            return new Integer(this.getDefaultMode().getValue());
         }
         if (index == 3) {
-            return getDefaultBaudrate().ordinal();
+            return new Integer(getDefaultBaudrate().ordinal());
         }
         if (index == 4) {
-            return getProposedBaudrate().ordinal();
+            return new Integer(getProposedBaudrate().ordinal());
         }
         if (index == 5) {
-            return getResponseTime().ordinal();
+            return new Integer(getResponseTime().ordinal());
         }
         if (index == 6) {
             return GXCommon.getBytes(deviceAddress);

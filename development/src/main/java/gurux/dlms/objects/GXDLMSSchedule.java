@@ -115,19 +115,19 @@ public class GXDLMSSchedule extends GXDLMSObject implements IGXDLMSBase {
                 new java.util.ArrayList<Integer>();
         // LN is static and read only once.
         if (getLogicalName() == null || getLogicalName().compareTo("") == 0) {
-            attributes.add(1);
+            attributes.add(new Integer(1));
         }
         // ExecutedScriptLogicalName is static and read only once.
         if (!isRead(2)) {
-            attributes.add(2);
+            attributes.add(new Integer(2));
         }
         // Type is static and read only once.
         if (!isRead(3)) {
-            attributes.add(3);
+            attributes.add(new Integer(3));
         }
         // ExecutionTime is static and read only once.
         if (!isRead(4)) {
-            attributes.add(4);
+            attributes.add(new Integer(4));
         }
         return GXDLMSObjectHelpers.toIntArray(attributes);
     }
@@ -189,7 +189,7 @@ public class GXDLMSSchedule extends GXDLMSObject implements IGXDLMSBase {
                 GXDLMSScheduleEntry item = new GXDLMSScheduleEntry();
                 Object[] tmp = (Object[]) it;
                 item.setIndex(((Number) tmp[0]).byteValue());
-                item.setEnable((Boolean) tmp[1]);
+                item.setEnable(((Boolean) tmp[1]).booleanValue());
                 item.setLogicalName(GXDLMSClient
                         .changeType((byte[]) tmp[2], DataType.OCTET_STRING)
                         .toString());

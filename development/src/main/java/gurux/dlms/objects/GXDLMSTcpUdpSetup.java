@@ -123,9 +123,10 @@ public class GXDLMSTcpUdpSetup extends GXDLMSObject implements IGXDLMSBase {
 
     @Override
     public final Object[] getValues() {
-        return new Object[] { getLogicalName(), getPort(), getIPReference(),
-                getMaximumSegmentSize(), getMaximumSimultaneousConnections(),
-                getInactivityTimeout() };
+        return new Object[] { getLogicalName(), new Integer(getPort()),
+                getIPReference(), new Integer(getMaximumSegmentSize()),
+                new Integer(getMaximumSimultaneousConnections()),
+                new Integer(getInactivityTimeout()) };
     }
 
     /*
@@ -138,27 +139,27 @@ public class GXDLMSTcpUdpSetup extends GXDLMSObject implements IGXDLMSBase {
                 new java.util.ArrayList<Integer>();
         // LN is static and read only once.
         if (getLogicalName() == null || getLogicalName().compareTo("") == 0) {
-            attributes.add(1);
+            attributes.add(new Integer(1));
         }
         // Port
         if (!isRead(2)) {
-            attributes.add(2);
+            attributes.add(new Integer(2));
         }
         // IPReference
         if (!isRead(3)) {
-            attributes.add(3);
+            attributes.add(new Integer(3));
         }
         // MaximumSegmentSize
         if (!isRead(4)) {
-            attributes.add(4);
+            attributes.add(new Integer(4));
         }
         // MaximumSimultaneousConnections
         if (!isRead(5)) {
-            attributes.add(5);
+            attributes.add(new Integer(5));
         }
         // InactivityTimeout
         if (!isRead(6)) {
-            attributes.add(6);
+            attributes.add(new Integer(6));
         }
         return GXDLMSObjectHelpers.toIntArray(attributes);
     }
@@ -210,19 +211,19 @@ public class GXDLMSTcpUdpSetup extends GXDLMSObject implements IGXDLMSBase {
             return getLogicalName();
         }
         if (index == 2) {
-            return getPort();
+            return new Integer(getPort());
         }
         if (index == 3) {
             return getIPReference();
         }
         if (index == 4) {
-            return getMaximumSegmentSize();
+            return new Integer(getMaximumSegmentSize());
         }
         if (index == 5) {
-            return getMaximumSimultaneousConnections();
+            return new Integer(getMaximumSimultaneousConnections());
         }
         if (index == 6) {
-            return getInactivityTimeout();
+            return new Integer(getInactivityTimeout());
         }
         throw new IllegalArgumentException(
                 "GetValue failed. Invalid attribute index.");

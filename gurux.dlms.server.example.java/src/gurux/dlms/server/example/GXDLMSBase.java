@@ -100,18 +100,10 @@ public class GXDLMSBase extends GXDLMSServer
         super(logicalNameReferencing, interfaceType);
     }
 
-    /**
-     * Add available objects.
-     * 
-     * @param server
+    /*
+     * Add Logical Device Name. 123456 is meter serial number.
      */
-    public void Initialize(int port) throws Exception {
-        media = new gurux.net.GXNet(NetworkType.TCP, port);
-        media.setTrace(TraceLevel.VERBOSE);
-        media.addListener(this);
-        media.open();
-        ///////////////////////////////////////////////////////////////////////
-        // Add Logical Device Name. 123456 is meter serial number.
+    void addLogicalDeviceName() {
         GXDLMSData d = new GXDLMSData("0.0.42.0.0.255");
         d.setValue("Gurux123456");
         // Set access right. Client can't change Device name.
@@ -119,22 +111,43 @@ public class GXDLMSBase extends GXDLMSServer
         d.setDataType(2, DataType.OCTET_STRING);
         d.setUIDataType(2, DataType.STRING);
         getItems().add(d);
+    }
+
+    GXDLMSRegister addRegister() {
         // Add Last average.
         GXDLMSRegister r = new GXDLMSRegister("1.1.21.25.0.255");
         // Set access right. Client can't change Device name.
         r.setAccess(2, AccessMode.READ);
         getItems().add(r);
-        // Add default clock. Clock's Logical Name is 0.0.1.0.0.255.
+        return r;
+    }
+
+    /**
+     * Add default clock. Clock's Logical Name is 0.0.1.0.0.255.
+     */
+    GXDLMSClock addClock() {
         GXDLMSClock clock = new GXDLMSClock();
         clock.setBegin(new GXDateTime(-1, 9, 1, -1, -1, -1, -1));
         clock.setEnd(new GXDateTime(-1, 3, 1, -1, -1, -1, -1));
         clock.setDeviation(0);
         getItems().add(clock);
+        return clock;
+    }
+
+    /**
+     * Add TCP/IP UDP setup object.
+     */
+    void addTcpUdpSetup() {
         // Add TCP/IP UDP setup. Default Logical Name is 0.0.25.0.0.255.
         GXDLMSTcpUdpSetup tcp = new GXDLMSTcpUdpSetup();
         getItems().add(tcp);
-        ///////////////////////////////////////////////////////////////////////
-        // Add Load profile.
+    }
+
+    /*
+     * Add profile generic (historical) object.
+     */
+    GXDLMSProfileGeneric addProfileGeneric(final GXDLMSClock clock,
+            final GXDLMSRegister register) {
         GXDLMSProfileGeneric pg = new GXDLMSProfileGeneric("1.0.99.1.0.255");
         // Set capture period to 60 second.
         pg.setCapturePeriod(60);
@@ -144,10 +157,15 @@ public class GXDLMSBase extends GXDLMSServer
         pg.setSortObject(clock);
         // Add columns.
         pg.addCaptureObject(clock, 2, 0);
-        pg.addCaptureObject(r, 2, 0);
+        pg.addCaptureObject(register, 2, 0);
         getItems().add(pg);
-        ///////////////////////////////////////////////////////////////////////
-        // Add Auto connect object.
+        return pg;
+    }
+
+    /*
+     * Add Auto connect object.
+     */
+    void addAutoConnect() {
         GXDLMSAutoConnect ac = new GXDLMSAutoConnect();
         ac.setMode(AutoConnectMode.AUTO_DIALLING_ALLOWED_ANYTIME);
         ac.setRepetitions(10);
@@ -159,11 +177,15 @@ public class GXDLMSBase extends GXDLMSServer
                         new GXDateTime(-1, -1, -1, 6, 0, 0, -1)));
         ac.setDestinations(new String[] { "www.gurux.org" });
         getItems().add(ac);
-        java.util.Calendar tm = java.util.Calendar
-                .getInstance(java.util.TimeZone.getTimeZone("UTC"));
+    }
+
+    /*
+     * Add Activity Calendar object.
+     */
+    void addActivityCalendar() {
+        java.util.Calendar tm = java.util.Calendar.getInstance();
         java.util.Date now = tm.getTime();
-        ///////////////////////////////////////////////////////////////////////
-        // Add Activity Calendar object.
+
         GXDLMSActivityCalendar activity = new GXDLMSActivityCalendar();
         activity.setCalendarNameActive("Active");
         activity.setSeasonProfileActive(new GXDLMSSeasonProfile[] {
@@ -205,8 +227,12 @@ public class GXDLMSBase extends GXDLMSServer
                                         "0.0.1.0.0.255", 1) }) });
         activity.setTime(new GXDateTime(now));
         getItems().add(activity);
-        ///////////////////////////////////////////////////////////////////////
-        // Add Optical Port Setup object.
+    }
+
+    /*
+     * Add Optical Port Setup object.
+     */
+    void addOpticalPortSetup() {
         GXDLMSIECOpticalPortSetup optical = new GXDLMSIECOpticalPortSetup();
         optical.setDefaultMode(OpticalProtocolMode.DEFAULT);
         optical.setProposedBaudrate(BaudRate.BAUDRATE_9600);
@@ -217,8 +243,14 @@ public class GXDLMSBase extends GXDLMSServer
         optical.setPassword2("Gurux2");
         optical.setPassword5("Gurux5");
         getItems().add(optical);
-        ///////////////////////////////////////////////////////////////////////
-        // Add Demand Register object.
+    }
+
+    /*
+     * Add Demand Register object.
+     */
+    void addDemandRegister() {
+        java.util.Calendar tm = java.util.Calendar.getInstance();
+        java.util.Date now = tm.getTime();
         GXDLMSDemandRegister dr = new GXDLMSDemandRegister();
         dr.setLogicalName("0.0.1.0.0.255");
         dr.setCurrentAvarageValue(10);
@@ -229,17 +261,23 @@ public class GXDLMSBase extends GXDLMSServer
         dr.setPeriod(BigInteger.valueOf(10));
         dr.setNumberOfPeriods(1);
         getItems().add(dr);
+    }
 
-        ///////////////////////////////////////////////////////////////////////
-        // Add Register Monitor object.
+    /*
+     * Add Register Monitor object.
+     */
+    void addRegisterMonitor(GXDLMSRegister register) {
         GXDLMSRegisterMonitor rm = new GXDLMSRegisterMonitor();
         rm.setLogicalName("0.0.1.0.0.255");
         rm.setThresholds(null);
-        rm.getMonitoredValue().update(r, 2);
+        rm.getMonitoredValue().update(register, 2);
         getItems().add(rm);
+    }
 
-        ///////////////////////////////////////////////////////////////////////
-        // Add action schedule object.
+    /*
+     * Add action schedule object.
+     */
+    void addActionSchedule() {
         GXDLMSActionSchedule actionS = new GXDLMSActionSchedule();
         actionS.setLogicalName("0.0.1.0.0.255");
         actionS.setExecutedScriptLogicalName("1.2.3.4.5.6");
@@ -252,17 +290,24 @@ public class GXDLMSBase extends GXDLMSServer
                                         java.util.TimeZone.getTimeZone("UTC"))
                                 .getTime()) });
         getItems().add(actionS);
+    }
 
-        ///////////////////////////////////////////////////////////////////////
-        // Add SAP Assignment object.
+    /*
+     * Add SAP Assignment object.
+     */
+    void addSapAssignment() {
         GXDLMSSapAssignment sap = new GXDLMSSapAssignment();
         sap.getSapAssignmentList()
                 .add(new AbstractMap.SimpleEntry<Integer, String>(1, "Gurux"));
         sap.getSapAssignmentList().add(
                 new AbstractMap.SimpleEntry<Integer, String>(16, "Gurux-2"));
         getItems().add(sap);
-        ///////////////////////////////////////////////////////////////////////
-        // Add Auto Answer object.
+    }
+
+    /**
+     * Add Auto Answer object.
+     */
+    void AddAutoAnswer() {
         GXDLMSAutoAnswer aa = new GXDLMSAutoAnswer();
         aa.setMode(AutoConnectMode.EMAIL_SENDING);
         aa.getListeningWindow()
@@ -274,9 +319,12 @@ public class GXDLMSBase extends GXDLMSServer
         aa.setNumberOfRingsInListeningWindow(1);
         aa.setNumberOfRingsOutListeningWindow(2);
         getItems().add(aa);
+    }
 
-        ///////////////////////////////////////////////////////////////////////
-        // Add Modem Configuration object.
+    /*
+     * Add Modem Configuration object.
+     */
+    void addModemConfiguration() {
         GXDLMSModemConfiguration mc = new GXDLMSModemConfiguration();
         mc.setCommunicationSpeed(BaudRate.BAUDRATE_600);
         GXDLMSModemInitialisation init = new GXDLMSModemInitialisation();
@@ -285,82 +333,140 @@ public class GXDLMSBase extends GXDLMSServer
         init.setDelay(0);
         mc.setInitialisationStrings(new GXDLMSModemInitialisation[] { init });
         getItems().add(mc);
-        ///////////////////////////////////////////////////////////////////////
-        // Add Mac Address Setup object.
+    }
+
+    /**
+     * Add MAC Address Setup object.
+     */
+    void addMacAddressSetup() {
         GXDLMSMacAddressSetup mac = new GXDLMSMacAddressSetup();
         mac.setMacAddress("11:22:33:44:55:66");
         getItems().add(mac);
-        ///////////////////////////////////////////////////////////////////////
-        // Add Image transfer object.
+    }
+
+    /**
+     * Add Image transfer object.
+     */
+    void addImageTransfer() {
         GXDLMSImageTransfer i = new GXDLMSImageTransfer();
         getItems().add(i);
+    }
+
+    /**
+     * Add available objects.
+     * 
+     * @param server
+     */
+    public void Initialize(int port) throws Exception {
+        media = new gurux.net.GXNet(NetworkType.TCP, port);
+        media.setTrace(TraceLevel.VERBOSE);
+        media.addListener(this);
+        media.open();
+        ///////////////////////////////////////////////////////////////////////
+        // Add objects of the meter.
+        addLogicalDeviceName();
+        // Add example register object.
+        GXDLMSRegister register = addRegister();
+        // Add default clock object.
+        GXDLMSClock clock = addClock();
+        // Add TCP/IP UDP setup object.
+        addTcpUdpSetup();
+        // Add profile generic object.
+        GXDLMSProfileGeneric pg = addProfileGeneric(clock, register);
+        // Add Auto connect object.
+        addAutoConnect();
+        // Add Activity Calendar object.
+        addActivityCalendar();
+
+        // Add Optical Port Setup object.
+        addOpticalPortSetup();
+
+        // Add Demand Register object.
+        addDemandRegister();
+
+        // Add Register Monitor object.
+        addRegisterMonitor(register);
+
+        // Add action schedule object.
+        addActionSchedule();
+
+        // Add SAP Assignment object.
+        addSapAssignment();
+        // Add Auto Answer object.
+        AddAutoAnswer();
+
+        // Add Modem Configuration object.
+        addModemConfiguration();
+        // Add MAC Address Setup object.
+        addMacAddressSetup();
+        // Add Image transfer object.
+        addImageTransfer();
         ///////////////////////////////////////////////////////////////////////
         // Server must initialize after all objects are added.
         initialize();
         // Add rows after Initialize.
-        Object[][] rows = new Object[][] { new Object[] { java.util.Calendar
-                .getInstance(java.util.TimeZone.getTimeZone("UTC")).getTime(),
-                10 } };
+        Object[][] rows = new Object[][] { new Object[] {
+                java.util.Calendar.getInstance().getTime(), 10 } };
         pg.setBuffer((Object[][]) rows);
     }
 
-    /**
-     * Generic read handle for all servers.
-     * 
-     * @param server
-     * @param e
-     */
     @Override
-    public void read(ValueEventArgs e) {
-        // Framework will handle Association objects automatically.
-        if (e.getTarget() instanceof GXDLMSAssociationLogicalName
-                || e.getTarget() instanceof GXDLMSAssociationShortName
-                || e.getTarget() instanceof GXDLMSProfileGeneric)
-        // Framework will handle profile generic automatically.
-        {
-            return;
-        }
-        System.out.println(
-                String.format("Client Read value from %s attribute: %d.",
-                        e.getTarget().getName(), e.getIndex()));
-        if ((e.getTarget().getUIDataType(e.getIndex()) == DataType.DATETIME
-                || e.getTarget().getDataType(e.getIndex()) == DataType.DATETIME)
-                && !(e.getTarget() instanceof GXDLMSClock)) {
-            e.setValue(java.util.Calendar
-                    .getInstance(java.util.TimeZone.getTimeZone("UTC"))
-                    .getTime());
-            e.setHandled(true);
-        } else if (e.getTarget() instanceof GXDLMSClock) {
-            // Implement spesific clock handling here.
-            // Otherwice initial values are used.
-            if (e.getIndex() == 2) {
+    public void read(ValueEventArgs[] args) {
+        for (ValueEventArgs e : args) {
+            // Framework will handle Association objects automatically.
+            if (e.getTarget() instanceof GXDLMSAssociationLogicalName
+                    || e.getTarget() instanceof GXDLMSAssociationShortName
+                    || e.getTarget() instanceof GXDLMSProfileGeneric)
+            // Framework will handle profile generic automatically.
+            {
+                continue;
+            }
+            System.out.println(
+                    String.format("Client Read value from %s attribute: %d.",
+                            e.getTarget().getName(), e.getIndex()));
+            if ((e.getTarget().getUIDataType(e.getIndex()) == DataType.DATETIME
+                    || e.getTarget()
+                            .getDataType(e.getIndex()) == DataType.DATETIME)
+                    && !(e.getTarget() instanceof GXDLMSClock)) {
                 e.setValue(java.util.Calendar
                         .getInstance(java.util.TimeZone.getTimeZone("UTC"))
                         .getTime());
                 e.setHandled(true);
-            }
-        } else if (e.getTarget() instanceof GXDLMSRegisterMonitor
-                && e.getIndex() == 2) {
-            // Update Register Monitor Thresholds values.
-            e.setValue(new Object[] { new java.util.Random().nextInt(1000) });
-            e.setHandled(true);
-        } else {
-            // If data is not assigned and value type is unknown return number.
-            Object[] values = e.getTarget().getValues();
-            if (e.getIndex() <= values.length) {
-                if (values[e.getIndex() - 1] == null) {
-                    DataType tp = e.getTarget().getDataType(e.getIndex());
-                    if (tp == DataType.NONE || tp == DataType.INT8
-                            || tp == DataType.INT16 || tp == DataType.INT32
-                            || tp == DataType.INT64 || tp == DataType.UINT8
-                            || tp == DataType.UINT16 || tp == DataType.UINT32
-                            || tp == DataType.UINT64) {
-                        e.setValue(new java.util.Random().nextInt(1000));
-                        e.setHandled(true);
-                    }
-                    if (tp == DataType.STRING) {
-                        e.setValue("Gurux");
-                        e.setHandled(true);
+            } else if (e.getTarget() instanceof GXDLMSClock) {
+                // Implement specific clock handling here.
+                // Otherwise initial values are used.
+                if (e.getIndex() == 2) {
+                    e.setValue(java.util.Calendar
+                            .getInstance(java.util.TimeZone.getTimeZone("UTC"))
+                            .getTime());
+                    e.setHandled(true);
+                }
+            } else if (e.getTarget() instanceof GXDLMSRegisterMonitor
+                    && e.getIndex() == 2) {
+                // Update Register Monitor Thresholds values.
+                e.setValue(
+                        new Object[] { new java.util.Random().nextInt(1000) });
+                e.setHandled(true);
+            } else {
+                // If data is not assigned and value type is unknown return
+                // number.
+                Object[] values = e.getTarget().getValues();
+                if (e.getIndex() <= values.length) {
+                    if (values[e.getIndex() - 1] == null) {
+                        DataType tp = e.getTarget().getDataType(e.getIndex());
+                        if (tp == DataType.NONE || tp == DataType.INT8
+                                || tp == DataType.INT16 || tp == DataType.INT32
+                                || tp == DataType.INT64 || tp == DataType.UINT8
+                                || tp == DataType.UINT16
+                                || tp == DataType.UINT32
+                                || tp == DataType.UINT64) {
+                            e.setValue(new java.util.Random().nextInt(1000));
+                            e.setHandled(true);
+                        }
+                        if (tp == DataType.STRING) {
+                            e.setValue("Gurux");
+                            e.setHandled(true);
+                        }
                     }
                 }
             }
@@ -368,10 +474,12 @@ public class GXDLMSBase extends GXDLMSServer
     }
 
     @Override
-    public void write(ValueEventArgs e) {
-        System.out.println(
-                String.format("Client Write new value %1$s to object: %2$s.",
-                        e.getValue(), e.getTarget().getName()));
+    public void write(ValueEventArgs[] args) {
+        for (ValueEventArgs e : args) {
+            System.out.println(String.format(
+                    "Client Write new value %1$s to object: %2$s.",
+                    e.getValue(), e.getTarget().getName()));
+        }
     }
 
     @Override
@@ -379,7 +487,7 @@ public class GXDLMSBase extends GXDLMSServer
     }
 
     @Override
-    public void action(ValueEventArgs e) {
+    public void action(ValueEventArgs[] args) {
 
     }
 

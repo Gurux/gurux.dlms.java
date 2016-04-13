@@ -34,28 +34,28 @@
 
 package gurux.dlms.objects;
 
-import java.lang.reflect.Array;
-import java.util.AbstractMap.SimpleEntry;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map.Entry;
 
 import gurux.dlms.GXByteBuffer;
 import gurux.dlms.GXDLMSClient;
 import gurux.dlms.GXDLMSSettings;
+import gurux.dlms.GXSimpleEntry;
 import gurux.dlms.enums.DataType;
 import gurux.dlms.enums.ObjectType;
 import gurux.dlms.internal.GXCommon;
 import gurux.dlms.objects.enums.GXDLMSScriptActionType;
 
 public class GXDLMSScriptTable extends GXDLMSObject implements IGXDLMSBase {
-    private List<SimpleEntry<Integer, GXDLMSScriptAction>> scripts;
+    private List<Entry<Integer, GXDLMSScriptAction>> scripts;
 
     /**
      * Constructor.
      */
     public GXDLMSScriptTable() {
         super(ObjectType.SCRIPT_TABLE);
-        scripts = new ArrayList<SimpleEntry<Integer, GXDLMSScriptAction>>();
+        scripts = new ArrayList<Entry<Integer, GXDLMSScriptAction>>();
     }
 
     /**
@@ -66,7 +66,7 @@ public class GXDLMSScriptTable extends GXDLMSObject implements IGXDLMSBase {
      */
     public GXDLMSScriptTable(final String ln) {
         super(ObjectType.SCRIPT_TABLE, ln, 0);
-        scripts = new ArrayList<SimpleEntry<Integer, GXDLMSScriptAction>>();
+        scripts = new ArrayList<Entry<Integer, GXDLMSScriptAction>>();
     }
 
     /**
@@ -79,10 +79,10 @@ public class GXDLMSScriptTable extends GXDLMSObject implements IGXDLMSBase {
      */
     public GXDLMSScriptTable(final String ln, final int sn) {
         super(ObjectType.SCRIPT_TABLE, ln, sn);
-        scripts = new ArrayList<SimpleEntry<Integer, GXDLMSScriptAction>>();
+        scripts = new ArrayList<Entry<Integer, GXDLMSScriptAction>>();
     }
 
-    public final List<SimpleEntry<Integer, GXDLMSScriptAction>> getScripts() {
+    public final List<Entry<Integer, GXDLMSScriptAction>> getScripts() {
         return scripts;
     }
 
@@ -101,11 +101,11 @@ public class GXDLMSScriptTable extends GXDLMSObject implements IGXDLMSBase {
                 new java.util.ArrayList<Integer>();
         // LN is static and read only once.
         if (getLogicalName() == null || getLogicalName().compareTo("") == 0) {
-            attributes.add(1);
+            attributes.add(new Integer(1));
         }
         // Scripts
         if (!isRead(2)) {
-            attributes.add(2);
+            attributes.add(new Integer(2));
         }
         return GXDLMSObjectHelpers.toIntArray(attributes);
     }
@@ -154,7 +154,7 @@ public class GXDLMSScriptTable extends GXDLMSObject implements IGXDLMSBase {
             // Add count
             GXCommon.setObjectCount(cnt, data);
             if (cnt != 0) {
-                for (SimpleEntry<Integer, GXDLMSScriptAction> it : scripts) {
+                for (Entry<Integer, GXDLMSScriptAction> it : scripts) {
                     data.setUInt8(DataType.STRUCTURE.getValue());
                     // Count
                     data.setUInt8(2);
@@ -166,18 +166,19 @@ public class GXDLMSScriptTable extends GXDLMSObject implements IGXDLMSBase {
                     GXDLMSScriptAction tmp = it.getValue();
                     // service_id
                     GXCommon.setData(data, DataType.ENUM,
-                            tmp.getType().ordinal() + 1);
+                            new Integer(tmp.getType().ordinal() + 1));
                     // class_id
                     GXCommon.setData(data, DataType.UINT16,
-                            tmp.getObjectType().getValue());
+                            new Integer(tmp.getObjectType().getValue()));
                     // logical_name
                     GXCommon.setData(data, DataType.OCTET_STRING,
                             tmp.getLogicalName());
                     // index
-                    GXCommon.setData(data, DataType.INT8, tmp.getIndex());
+                    GXCommon.setData(data, DataType.INT8,
+                            new Integer(tmp.getIndex()));
                     // parameter
                     GXCommon.setData(data, tmp.getParameterType(),
-                            tmp.getObjectType().getValue());
+                            new Integer(tmp.getObjectType().getValue()));
                 }
             }
             return data.array();
@@ -196,19 +197,18 @@ public class GXDLMSScriptTable extends GXDLMSObject implements IGXDLMSBase {
         if (index == 1) {
             super.setValue(settings, index, value);
         } else if (index == 2) {
-            SimpleEntry<Integer, GXDLMSScriptAction> tmp;
             scripts.clear();
             // Fix Xemex bug here.
             // Xemex meters do not return array as they shoul be according
             // standard.
-            if (value instanceof Object[] && Array.getLength(value) != 0) {
+            if (value instanceof Object[] && ((Object[]) value).length != 0) {
                 if (((Object[]) value)[0] instanceof Object[]) {
                     for (Object item : (Object[]) value) {
                         int scriptIdentifier =
-                                ((Number) Array.get(item, 0)).intValue();
-                        for (Object arr : (Object[]) Array.get(item, 1)) {
+                                ((Number) ((Object[]) item)[0]).intValue();
+                        for (Object arr : (Object[]) ((Object[]) item)[1]) {
                             GXDLMSScriptAction it = new GXDLMSScriptAction();
-                            int val = ((Number) Array.get(arr, 0)).intValue();
+                            int val = ((Number) ((Object[]) arr)[0]).intValue();
                             GXDLMSScriptActionType type =
                                     GXDLMSScriptActionType.NONE;
                             // Some Iskra meters return -1 here.
@@ -218,38 +218,41 @@ public class GXDLMSScriptTable extends GXDLMSObject implements IGXDLMSBase {
                             }
                             it.setType(type);
                             ObjectType ot = ObjectType.forValue(
-                                    ((Number) Array.get(arr, 1)).intValue());
+                                    ((Number) ((Object[]) arr)[1]).intValue());
                             it.setObjectType(ot);
-                            String ln = GXDLMSObject
-                                    .toLogicalName((byte[]) Array.get(arr, 2));
+                            String ln = GXDLMSObject.toLogicalName(
+                                    (byte[]) ((Object[]) arr)[2]);
                             it.setLogicalName(ln);
                             it.setIndex(
-                                    ((Number) Array.get(arr, 3)).intValue());
-                            it.setParameter(Array.get(arr, 4), DataType.NONE);
-                            tmp = new SimpleEntry<Integer, GXDLMSScriptAction>(
-                                    scriptIdentifier, it);
+                                    ((Number) ((Object[]) arr)[3]).intValue());
+                            it.setParameter(((Object[]) arr)[4], DataType.NONE);
+                            // CHECKSTYLE:OFF
+                            Entry<Integer, GXDLMSScriptAction> tmp =
+                                    new GXSimpleEntry<Integer, GXDLMSScriptAction>(
+                                            scriptIdentifier, it);
+                            // CHECKSTYLE:ON
                             scripts.add(tmp);
                         }
                     }
                 } else {
                     // Read Xemex meter here.
                     int scriptIdentifier =
-                            ((Number) Array.get(value, 0)).intValue();
+                            ((Number) ((Object[]) value)[0]).intValue();
                     Object[] arr = (Object[]) ((Object[]) value)[1];
                     GXDLMSScriptAction it = new GXDLMSScriptAction();
                     GXDLMSScriptActionType type = GXDLMSScriptActionType
-                            .values()[((Number) Array.get(arr, 0)).intValue()
+                            .values()[((Number) ((Object[]) arr)[0]).intValue()
                                     - 1];
                     it.setType(type);
-                    ObjectType ot = ObjectType
-                            .forValue(((Number) Array.get(arr, 1)).intValue());
+                    ObjectType ot = ObjectType.forValue(
+                            ((Number) ((Object[]) arr)[1]).intValue());
                     it.setObjectType(ot);
                     String ln = GXDLMSObject
-                            .toLogicalName((byte[]) Array.get(arr, 2));
+                            .toLogicalName((byte[]) ((Object[]) arr)[2]);
                     it.setLogicalName(ln);
-                    it.setIndex(((Number) Array.get(arr, 3)).intValue());
-                    it.setParameter(Array.get(arr, 4), DataType.NONE);
-                    scripts.add(new SimpleEntry<Integer, GXDLMSScriptAction>(
+                    it.setIndex(((Number) ((Object[]) arr)[3]).intValue());
+                    it.setParameter(((Object[]) arr)[4], DataType.NONE);
+                    scripts.add(new GXSimpleEntry<Integer, GXDLMSScriptAction>(
                             scriptIdentifier, it));
                 }
             }

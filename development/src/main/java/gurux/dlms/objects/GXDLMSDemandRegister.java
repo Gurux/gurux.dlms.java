@@ -34,7 +34,6 @@
 
 package gurux.dlms.objects;
 
-import java.lang.reflect.Array;
 import java.math.BigInteger;
 
 import gurux.dlms.GXByteBuffer;
@@ -224,11 +223,13 @@ public class GXDLMSDemandRegister extends GXDLMSObject implements IGXDLMSBase {
 
     @Override
     public final Object[] getValues() {
-        String str = String.format("Scaler: %1$,.2f Unit: ", getScaler());
+        String str = String.format("Scaler: %1$,.2f Unit: ",
+                new Double(getScaler()));
         str += getUnit().toString();
         return new Object[] { getLogicalName(), getCurrentAvarageValue(),
                 getLastAvarageValue(), str, getStatus(), getCaptureTime(),
-                getStartTimeCurrent(), getPeriod(), getNumberOfPeriods() };
+                getStartTimeCurrent(), getPeriod(),
+                new Integer(getNumberOfPeriods()) };
     }
 
     @Override
@@ -249,39 +250,39 @@ public class GXDLMSDemandRegister extends GXDLMSObject implements IGXDLMSBase {
                 new java.util.ArrayList<Integer>();
         // LN is static and read only once.
         if (getLogicalName() == null || getLogicalName().compareTo("") == 0) {
-            attributes.add(1);
+            attributes.add(new Integer(1));
         }
         // ScalerUnit
         if (!isRead(4)) {
-            attributes.add(4);
+            attributes.add(new Integer(4));
         }
         // CurrentAvarageValue
         if (canRead(2)) {
-            attributes.add(2);
+            attributes.add(new Integer(2));
         }
         // LastAvarageValue
         if (canRead(3)) {
-            attributes.add(3);
+            attributes.add(new Integer(3));
         }
         // Status
         if (canRead(5)) {
-            attributes.add(5);
+            attributes.add(new Integer(5));
         }
         // CaptureTime
         if (canRead(6)) {
-            attributes.add(6);
+            attributes.add(new Integer(6));
         }
         // StartTimeCurrent
         if (canRead(7)) {
-            attributes.add(7);
+            attributes.add(new Integer(7));
         }
         // Period
         if (canRead(8)) {
-            attributes.add(8);
+            attributes.add(new Integer(8));
         }
         // NumberOfPeriods
         if (canRead(9)) {
-            attributes.add(9);
+            attributes.add(new Integer(9));
         }
         return GXDLMSObjectHelpers.toIntArray(attributes);
     }
@@ -320,10 +321,10 @@ public class GXDLMSDemandRegister extends GXDLMSObject implements IGXDLMSBase {
             return super.getDataType(index);
         }
         if (index == 6) {
-            return DataType.OCTET_STRING;
+            return DataType.DATETIME;
         }
         if (index == 7) {
-            return DataType.OCTET_STRING;
+            return DataType.DATETIME;
         }
         if (index == 8) {
             return DataType.UINT32;
@@ -354,8 +355,8 @@ public class GXDLMSDemandRegister extends GXDLMSObject implements IGXDLMSBase {
             GXByteBuffer data = new GXByteBuffer();
             data.setUInt8(DataType.STRUCTURE.getValue());
             data.setUInt8(2);
-            GXCommon.setData(data, DataType.INT8, scaler);
-            GXCommon.setData(data, DataType.ENUM, unit);
+            GXCommon.setData(data, DataType.INT8, new Integer(scaler));
+            GXCommon.setData(data, DataType.ENUM, new Integer(unit));
             return data.array();
         }
         if (index == 5) {
@@ -371,7 +372,7 @@ public class GXDLMSDemandRegister extends GXDLMSObject implements IGXDLMSBase {
             return getPeriod();
         }
         if (index == 9) {
-            return getNumberOfPeriods();
+            return new Integer(getNumberOfPeriods());
         }
         throw new IllegalArgumentException(
                 "GetValue failed. Invalid attribute index.");
@@ -395,12 +396,13 @@ public class GXDLMSDemandRegister extends GXDLMSObject implements IGXDLMSBase {
                 scaler = 0;
                 unit = 0;
             } else {
-                if (Array.getLength(value) != 2) {
+                Object[] arr = (Object[]) value;
+                if (arr.length != 2) {
                     throw new IllegalArgumentException(
                             "setValue failed. Invalid scaler unit value.");
                 }
-                scaler = ((Number) Array.get(value, 0)).intValue();
-                unit = (((Number) Array.get(value, 1)).intValue() & 0xFF);
+                scaler = ((Number) arr[0]).intValue();
+                unit = (((Number) arr[1]).intValue() & 0xFF);
             }
         } else if (index == 5) {
             if (value == null) {

@@ -97,7 +97,7 @@ public enum RequestTypes {
      */
     RequestTypes(final int value) {
         intValue = value;
-        getMappings().put(value, this);
+        getMappings().put(new Integer(value), this);
     }
 
     /**
@@ -117,6 +117,6 @@ public enum RequestTypes {
      * @return Enumeration value.
      */
     public static RequestTypes forValue(final int value) {
-        return getMappings().get(value);
+        return getMappings().get(new Integer(value));
     }
 }

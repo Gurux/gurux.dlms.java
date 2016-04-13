@@ -39,6 +39,7 @@ import java.lang.reflect.Array;
 import gurux.dlms.GXByteBuffer;
 import gurux.dlms.GXDLMSSettings;
 import gurux.dlms.enums.AccessMode;
+import gurux.dlms.enums.Authentication;
 import gurux.dlms.enums.DataType;
 import gurux.dlms.enums.ErrorCode;
 import gurux.dlms.enums.MethodAccessMode;
@@ -128,16 +129,32 @@ public class GXDLMSAssociationShortName extends GXDLMSObject
             final Object parameters) {
         // Check reply_to_HLS_authentication
         if (index == 8) {
+            long ic = 0;
+            byte[] readSecret;
+            if (settings.getAuthentication() == Authentication.HIGH_GMAC) {
+                readSecret = settings.getSourceSystemTitle();
+                GXByteBuffer bb = new GXByteBuffer((byte[]) parameters);
+                bb.getUInt8();
+                ic = bb.getUInt32();
+            } else {
+                readSecret = getSecret();
+            }
             byte[] serverChallenge =
-                    GXSecure.secure(settings.getAuthentication(),
-                            settings.getStoCChallenge(), secret);
+                    GXSecure.secure(settings, settings.getCipher(), ic,
+                            settings.getStoCChallenge(), readSecret);
             byte[] clientChallenge = (byte[]) parameters;
             int[] pos = new int[1];
             if (GXCommon.compare(serverChallenge, pos, clientChallenge)) {
-                byte[] tmp = GXSecure.secure(settings.getAuthentication(),
+                if (settings.getAuthentication() == Authentication.HIGH_GMAC) {
+                    readSecret = settings.getCipher().getSystemTitle();
+                } else {
+                    readSecret = getSecret();
+                }
+                ic = settings.getCipher().getFrameCounter();
+                byte[] tmp = GXSecure.secure(settings, settings.getCipher(), ic,
                         settings.getCtoSChallenge(), secret);
                 GXByteBuffer challenge = new GXByteBuffer();
-                // Add status.
+                // ReturnParameters.
                 challenge.setUInt8(0);
                 challenge.setUInt8(DataType.OCTET_STRING.getValue());
                 GXCommon.setObjectCount(tmp.length, challenge);
@@ -164,19 +181,19 @@ public class GXDLMSAssociationShortName extends GXDLMSObject
                 new java.util.ArrayList<Integer>();
         // LN is static and read only once.
         if (getLogicalName() == null || getLogicalName().compareTo("") == 0) {
-            attributes.add(1);
+            attributes.add(new Integer(1));
         }
         // ObjectList is static and read only once.
         if (!isRead(2)) {
-            attributes.add(2);
+            attributes.add(new Integer(2));
         }
         // AccessRightsList is static and read only once.
         if (!isRead(3)) {
-            attributes.add(3);
+            attributes.add(new Integer(3));
         }
         // SecuritySetupReference is static and read only once.
         if (!isRead(4)) {
-            attributes.add(4);
+            attributes.add(new Integer(4));
         }
         return GXDLMSObjectHelpers.toIntArray(attributes);
     }

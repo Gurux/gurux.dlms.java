@@ -34,7 +34,6 @@
 
 package gurux.dlms.objects;
 
-import java.lang.reflect.Array;
 import java.text.NumberFormat;
 
 import gurux.dlms.GXByteBuffer;
@@ -141,7 +140,8 @@ public class GXDLMSRegister extends GXDLMSObject implements IGXDLMSBase {
      * Reset value.
      */
     public final byte[][] reset(final GXDLMSClient client) {
-        return client.method(getName(), getObjectType(), 1, 0, DataType.UINT8);
+        return client.method(getName(), getObjectType(), 1, new Integer(0),
+                DataType.UINT8);
     }
 
     // CHECKSTYLE:OFF
@@ -189,15 +189,15 @@ public class GXDLMSRegister extends GXDLMSObject implements IGXDLMSBase {
                 new java.util.ArrayList<Integer>();
         // LN is static and read only once.
         if (getLogicalName() == null || getLogicalName().compareTo("") == 0) {
-            attributes.add(1);
+            attributes.add(new Integer(1));
         }
         // ScalerUnit
         if (!isRead(3)) {
-            attributes.add(3);
+            attributes.add(new Integer(3));
         }
         // Value
         if (canRead(2)) {
-            attributes.add(2);
+            attributes.add(new Integer(2));
         }
         return GXDLMSObjectHelpers.toIntArray(attributes);
     }
@@ -258,8 +258,8 @@ public class GXDLMSRegister extends GXDLMSObject implements IGXDLMSBase {
             GXByteBuffer data = new GXByteBuffer();
             data.setUInt8(DataType.STRUCTURE.getValue());
             data.setUInt8(2);
-            GXCommon.setData(data, DataType.INT8, scaler);
-            GXCommon.setData(data, DataType.ENUM, unit);
+            GXCommon.setData(data, DataType.INT8, new Integer(scaler));
+            GXCommon.setData(data, DataType.ENUM, new Integer(unit));
             return data.array();
         }
         throw new IllegalArgumentException(
@@ -280,7 +280,8 @@ public class GXDLMSRegister extends GXDLMSObject implements IGXDLMSBase {
         } else if (index == 2) {
             if (scaler != 0) {
                 try {
-                    objectValue = ((Number) value).doubleValue() * getScaler();
+                    objectValue = new Double(
+                            ((Number) value).doubleValue() * getScaler());
                 } catch (Exception e) {
                     // Sometimes scaler is set for wrong Object type.
                     setValue(value);
@@ -294,12 +295,13 @@ public class GXDLMSRegister extends GXDLMSObject implements IGXDLMSBase {
                 scaler = 0;
                 unit = 0;
             } else {
-                if (Array.getLength(value) != 2) {
+                Object[] arr = (Object[]) value;
+                if (arr == null || arr.length != 2) {
                     scaler = 0;
                     unit = 0;
                 } else {
-                    scaler = ((Number) Array.get(value, 0)).intValue();
-                    unit = (((Number) Array.get(value, 1)).intValue() & 0xFF);
+                    scaler = ((Number) arr[0]).intValue();
+                    unit = (((Number) arr[1]).intValue() & 0xFF);
                 }
             }
         } else {

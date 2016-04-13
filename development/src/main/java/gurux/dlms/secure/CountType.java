@@ -53,7 +53,7 @@ enum CountType {
 
     CountType(final int value) {
         intValue = value;
-        getMappings().put(value, this);
+        getMappings().put(new Integer(value), this);
     }
 
     public int getValue() {
@@ -61,6 +61,6 @@ enum CountType {
     }
 
     public static CountType forValue(final int value) {
-        return getMappings().get(value);
+        return getMappings().get(new Integer(value));
     }
 }

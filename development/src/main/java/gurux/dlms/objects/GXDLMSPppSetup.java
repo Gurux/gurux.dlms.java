@@ -34,8 +34,6 @@
 
 package gurux.dlms.objects;
 
-import java.lang.reflect.Array;
-
 import gurux.dlms.GXByteBuffer;
 import gurux.dlms.GXDLMSClient;
 import gurux.dlms.GXDLMSSettings;
@@ -168,23 +166,23 @@ public class GXDLMSPppSetup extends GXDLMSObject implements IGXDLMSBase {
                 new java.util.ArrayList<Integer>();
         // LN is static and read only once.
         if (getLogicalName() == null || getLogicalName().compareTo("") == 0) {
-            attributes.add(1);
+            attributes.add(new Integer(1));
         }
         // PHYReference
         if (!isRead(2)) {
-            attributes.add(2);
+            attributes.add(new Integer(2));
         }
         // LCPOptions
         if (!isRead(3)) {
-            attributes.add(3);
+            attributes.add(new Integer(3));
         }
         // IPCPOptions
         if (!isRead(4)) {
-            attributes.add(4);
+            attributes.add(new Integer(4));
         }
         // PPPAuthentication
         if (!isRead(5)) {
-            attributes.add(5);
+            attributes.add(new Integer(5));
         }
         return GXDLMSObjectHelpers.toIntArray(attributes);
     }
@@ -249,7 +247,8 @@ public class GXDLMSPppSetup extends GXDLMSObject implements IGXDLMSBase {
                     data.setUInt8((byte) DataType.STRUCTURE.getValue());
                     data.setUInt8((byte) 3);
                     GXCommon.setData(data, DataType.UINT8, it.getType());
-                    GXCommon.setData(data, DataType.UINT8, it.getLength());
+                    GXCommon.setData(data, DataType.UINT8,
+                            new Integer(it.getLength()));
                     GXCommon.setData(data, GXCommon.getValueType(it.getData()),
                             it.getData());
                 }
@@ -267,7 +266,8 @@ public class GXDLMSPppSetup extends GXDLMSObject implements IGXDLMSBase {
                     data.setUInt8((byte) DataType.STRUCTURE.getValue());
                     data.setUInt8((byte) 3);
                     GXCommon.setData(data, DataType.UINT8, it.getType());
-                    GXCommon.setData(data, DataType.UINT8, it.getLength());
+                    GXCommon.setData(data, DataType.UINT8,
+                            new Integer(it.getLength()));
                     GXCommon.setData(data, GXCommon.getValueType(it.getData()),
                             it.getData());
                 }
@@ -308,9 +308,9 @@ public class GXDLMSPppSetup extends GXDLMSObject implements IGXDLMSBase {
                 for (Object item : (Object[]) value) {
                     GXDLMSPppSetupLcpOption it = new GXDLMSPppSetupLcpOption();
                     it.setType(GXDLMSPppSetupLcpOptionType.forValue(
-                            ((Number) Array.get(item, 0)).intValue()));
-                    it.setLength(((Number) Array.get(item, 1)).intValue());
-                    it.setData(Array.get(item, 2));
+                            ((Number) ((Object[]) item)[0]).intValue()));
+                    it.setLength(((Number) ((Object[]) item)[1]).intValue());
+                    it.setData(((Object[]) item)[2]);
                     items.add(it);
                 }
             }
@@ -324,9 +324,9 @@ public class GXDLMSPppSetup extends GXDLMSObject implements IGXDLMSBase {
                     GXDLMSPppSetupIPCPOption it =
                             new GXDLMSPppSetupIPCPOption();
                     it.setType(GXDLMSPppSetupIPCPOptionType.forValue(
-                            ((Number) Array.get(item, 0)).intValue()));
-                    it.setLength(((Number) Array.get(item, 1)).intValue());
-                    it.setData(Array.get(item, 2));
+                            ((Number) ((Object[]) item)[0]).intValue()));
+                    it.setLength(((Number) ((Object[]) item)[1]).intValue());
+                    it.setData(((Object[]) item)[2]);
                     items.add(it);
                 }
             }

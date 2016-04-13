@@ -34,13 +34,13 @@
 
 package gurux.dlms.objects;
 
-import java.lang.reflect.Array;
-import java.util.AbstractMap;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map.Entry;
 
 import gurux.dlms.GXByteBuffer;
 import gurux.dlms.GXDLMSSettings;
+import gurux.dlms.GXSimpleEntry;
 import gurux.dlms.enums.DataType;
 import gurux.dlms.enums.ObjectType;
 import gurux.dlms.internal.GXCommon;
@@ -49,8 +49,8 @@ public class GXDLMSRegisterActivation extends GXDLMSObject
         implements IGXDLMSBase {
     private List<GXDLMSObjectDefinition> registerAssignment =
             new ArrayList<GXDLMSObjectDefinition>();
-    private List<AbstractMap.SimpleEntry<byte[], byte[]>> maskList =
-            new ArrayList<AbstractMap.SimpleEntry<byte[], byte[]>>();
+    private List<Entry<byte[], byte[]>> maskList =
+            new ArrayList<Entry<byte[], byte[]>>();
     private byte[] activeMask;
 
     /**
@@ -92,7 +92,7 @@ public class GXDLMSRegisterActivation extends GXDLMSObject
     /**
      * @return Mask list.
      */
-    public final List<AbstractMap.SimpleEntry<byte[], byte[]>> getMaskList() {
+    public final List<Entry<byte[], byte[]>> getMaskList() {
         return maskList;
     }
 
@@ -148,19 +148,19 @@ public class GXDLMSRegisterActivation extends GXDLMSObject
                 new java.util.ArrayList<Integer>();
         // LN is static and read only once.
         if (getLogicalName() == null || getLogicalName().compareTo("") == 0) {
-            attributes.add(1);
+            attributes.add(new Integer(1));
         }
         // RegisterAssignment
         if (!isRead(2)) {
-            attributes.add(2);
+            attributes.add(new Integer(2));
         }
         // MaskList
         if (!isRead(3)) {
-            attributes.add(3);
+            attributes.add(new Integer(3));
         }
         // ActiveMask
         if (!isRead(4)) {
-            attributes.add(4);
+            attributes.add(new Integer(4));
         }
         return GXDLMSObjectHelpers.toIntArray(attributes);
     }
@@ -216,7 +216,7 @@ public class GXDLMSRegisterActivation extends GXDLMSObject
                 data.setUInt8(DataType.STRUCTURE.getValue());
                 data.setUInt8(2);
                 GXCommon.setData(data, DataType.UINT16,
-                        it.getClassId().getValue());
+                        new Integer(it.getClassId().getValue()));
                 GXCommon.setData(data, DataType.OCTET_STRING,
                         it.getLogicalName());
             }
@@ -226,14 +226,14 @@ public class GXDLMSRegisterActivation extends GXDLMSObject
             GXByteBuffer data = new GXByteBuffer();
             data.setUInt8(DataType.ARRAY.getValue());
             data.setUInt8(maskList.size());
-            for (AbstractMap.SimpleEntry<byte[], byte[]> it : maskList) {
+            for (Entry<byte[], byte[]> it : maskList) {
                 data.setUInt8(DataType.STRUCTURE.getValue());
                 data.setUInt8(2);
                 GXCommon.setData(data, DataType.OCTET_STRING, it.getKey());
                 data.setUInt8(DataType.ARRAY.getValue());
                 data.setUInt8(it.getValue().length);
                 for (byte b : it.getValue()) {
-                    GXCommon.setData(data, DataType.UINT8, b);
+                    GXCommon.setData(data, DataType.UINT8, new Byte(b));
                 }
             }
             return data.array();
@@ -258,10 +258,10 @@ public class GXDLMSRegisterActivation extends GXDLMSObject
             if (value != null) {
                 for (Object it : (Object[]) value) {
                     GXDLMSObjectDefinition item = new GXDLMSObjectDefinition();
-                    item.setClassId(ObjectType
-                            .forValue(((Number) Array.get(it, 0)).intValue()));
+                    item.setClassId(ObjectType.forValue(
+                            ((Number) ((Object[]) it)[0]).intValue()));
                     item.setLogicalName(GXDLMSObject
-                            .toLogicalName((byte[]) Array.get(it, 1)));
+                            .toLogicalName((byte[]) ((Object[]) it)[1]));
                     registerAssignment.add(item);
                 }
             }
@@ -269,14 +269,13 @@ public class GXDLMSRegisterActivation extends GXDLMSObject
             maskList.clear();
             if (value != null) {
                 for (Object it : (Object[]) value) {
-                    byte[] key = (byte[]) Array.get(it, 0);
-                    Object arr = Array.get(it, 1);
-                    byte[] tmp = new byte[Array.getLength(arr)];
+                    byte[] key = (byte[]) ((Object[]) it)[0];
+                    Object arr = ((Object[]) it)[1];
+                    byte[] tmp = new byte[((Object[]) arr).length];
                     for (int pos = 0; pos != tmp.length; ++pos) {
-                        tmp[pos] = ((Number) Array.get(arr, pos)).byteValue();
+                        tmp[pos] = ((Number) ((Object[]) arr)[pos]).byteValue();
                     }
-                    maskList.add(new AbstractMap.SimpleEntry<byte[], byte[]>(
-                            key, tmp));
+                    maskList.add(new GXSimpleEntry<byte[], byte[]>(key, tmp));
                 }
             }
         } else if (index == 4) {

@@ -133,23 +133,23 @@ public class GXDLMSExtendedRegister extends GXDLMSRegister {
                 new java.util.ArrayList<Integer>();
         // LN is static and read only once.
         if (getLogicalName() == null || getLogicalName().compareTo("") == 0) {
-            attributes.add(1);
+            attributes.add(new Integer(1));
         }
         // ScalerUnit
         if (!isRead(3)) {
-            attributes.add(3);
+            attributes.add(new Integer(3));
         }
         // Value
         if (canRead(2)) {
-            attributes.add(2);
+            attributes.add(new Integer(2));
         }
         // Status
         if (canRead(4)) {
-            attributes.add(4);
+            attributes.add(new Integer(4));
         }
         // CaptureTime
         if (canRead(5)) {
-            attributes.add(5);
+            attributes.add(new Integer(5));
         }
         return GXDLMSObjectHelpers.toIntArray(attributes);
     }
@@ -177,7 +177,7 @@ public class GXDLMSExtendedRegister extends GXDLMSRegister {
             return super.getDataType(index);
         }
         if (index == 5) {
-            return DataType.OCTET_STRING;
+            return DataType.DATETIME;
         }
         throw new IllegalArgumentException(
                 "getDataType failed. Invalid attribute index.");

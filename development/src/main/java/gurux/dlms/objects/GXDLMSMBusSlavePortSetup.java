@@ -145,7 +145,8 @@ public class GXDLMSMBusSlavePortSetup extends GXDLMSObject
     @Override
     public final Object[] getValues() {
         return new Object[] { getLogicalName(), getDefaultBaud(),
-                getAvailableBaud(), getAddressState(), getBusAddress() };
+                getAvailableBaud(), getAddressState(),
+                new Integer(getBusAddress()) };
     }
 
     /*
@@ -158,23 +159,23 @@ public class GXDLMSMBusSlavePortSetup extends GXDLMSObject
                 new java.util.ArrayList<Integer>();
         // LN is static and read only once.
         if (getLogicalName() == null || getLogicalName().compareTo("") == 0) {
-            attributes.add(1);
+            attributes.add(new Integer(1));
         }
         // DefaultBaud
         if (!isRead(2)) {
-            attributes.add(2);
+            attributes.add(new Integer(2));
         }
         // AvailableBaud
         if (!isRead(3)) {
-            attributes.add(3);
+            attributes.add(new Integer(3));
         }
         // AddressState
         if (!isRead(4)) {
-            attributes.add(4);
+            attributes.add(new Integer(4));
         }
         // BusAddress
         if (!isRead(5)) {
-            attributes.add(5);
+            attributes.add(new Integer(5));
         }
         return GXDLMSObjectHelpers.toIntArray(attributes);
     }
@@ -223,16 +224,16 @@ public class GXDLMSMBusSlavePortSetup extends GXDLMSObject
             return getLogicalName();
         }
         if (index == 2) {
-            return getDefaultBaud().ordinal();
+            return new Integer(getDefaultBaud().ordinal());
         }
         if (index == 3) {
-            return getAvailableBaud().ordinal();
+            return new Integer(getAvailableBaud().ordinal());
         }
         if (index == 4) {
-            return getAddressState().ordinal();
+            return new Integer(getAddressState().ordinal());
         }
         if (index == 5) {
-            return getBusAddress();
+            return new Integer(getBusAddress());
         }
         throw new IllegalArgumentException(
                 "GetValue failed. Invalid attribute index.");

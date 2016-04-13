@@ -42,12 +42,14 @@ public enum AssociationResult {
     /**
      * Association request is accepted.
      */
-    ACCEPTED(0), /**
-                  * Association request is permanently rejected.
-                  */
-    PERMANENT_REJECTED(1), /**
-                            * Association request is transiently rejected.
-                            */
+    ACCEPTED(0),
+    /**
+     * Association request is permanently rejected.
+     */
+    PERMANENT_REJECTED(1),
+    /**
+     * Association request is transiently rejected.
+     */
     TRANSIENT_REJECTED(2);
 
     private final int intValue;
@@ -64,7 +66,7 @@ public enum AssociationResult {
 
     AssociationResult(final int value) {
         intValue = value;
-        getMappings().put(value, this);
+        getMappings().put(new Integer(value), this);
     }
 
     /*
@@ -78,6 +80,6 @@ public enum AssociationResult {
      * Convert integer for enum value.
      */
     public static AssociationResult forValue(final int value) {
-        return getMappings().get(value);
+        return getMappings().get(new Integer(value));
     }
 }

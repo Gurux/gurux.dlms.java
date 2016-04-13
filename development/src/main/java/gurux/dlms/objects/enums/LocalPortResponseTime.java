@@ -42,9 +42,10 @@ public enum LocalPortResponseTime {
     /**
      * Minimium time is 20 ms.
      */
-    ms20(0), /**
-              * Minimium time is 200 ms.
-              */
+    ms20(0),
+    /**
+     * Minimium time is 200 ms.
+     */
     ms200(1);
 
     private int intValue;
@@ -63,7 +64,7 @@ public enum LocalPortResponseTime {
 
     LocalPortResponseTime(final int value) {
         intValue = value;
-        getMappings().put(value, this);
+        getMappings().put(new Integer(value), this);
     }
 
     public int getValue() {
@@ -71,6 +72,6 @@ public enum LocalPortResponseTime {
     }
 
     public static LocalPortResponseTime forValue(final int value) {
-        return getMappings().get(value);
+        return getMappings().get(new Integer(value));
     }
 }

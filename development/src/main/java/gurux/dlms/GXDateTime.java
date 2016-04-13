@@ -36,15 +36,15 @@ package gurux.dlms;
 
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.Calendar;
 import java.util.Date;
-import java.util.EnumSet;
+import java.util.HashSet;
 import java.util.List;
 import java.util.TimeZone;
 
 import gurux.dlms.enums.ClockStatus;
 import gurux.dlms.enums.DateTimeSkips;
+import gurux.dlms.internal.GXCommon;
 
 public class GXDateTime {
     /**
@@ -76,9 +76,10 @@ public class GXDateTime {
      * Constructor.
      */
     public GXDateTime() {
-        skip = EnumSet.noneOf(DateTimeSkips.class);
+        skip = new HashSet<DateTimeSkips>();
         deviation = 0x8000;
-        status = EnumSet.of(ClockStatus.OK);
+        status = new HashSet<ClockStatus>();
+        status.add(ClockStatus.OK);
     }
 
     /**
@@ -88,9 +89,10 @@ public class GXDateTime {
      *            Date value.
      */
     public GXDateTime(final Date forvalue) {
-        skip = EnumSet.noneOf(DateTimeSkips.class);
+        skip = new HashSet<DateTimeSkips>();
         setValue(forvalue);
-        status = EnumSet.of(ClockStatus.OK);
+        status = new HashSet<ClockStatus>();
+        status.add(ClockStatus.OK);
     }
 
     /**
@@ -121,8 +123,9 @@ public class GXDateTime {
         int min = minute;
         int s = second;
         int ms = millisecond;
-        status = EnumSet.of(ClockStatus.OK);
-        skip = EnumSet.noneOf(DateTimeSkips.class);
+        skip = new HashSet<DateTimeSkips>();
+        status = new HashSet<ClockStatus>();
+        status.add(ClockStatus.OK);
         if (y < 1 || y == 0xFFFF) {
             skip.add(DateTimeSkips.YEAR);
             java.util.Calendar tm = java.util.Calendar.getInstance();
@@ -286,12 +289,12 @@ public class GXDateTime {
         SimpleDateFormat sd = new SimpleDateFormat();
         if (!getSkip().isEmpty()) {
             // Separate date and time parts.
-            String[] tmp = sd.toPattern().split(" ");
+            List<String> tmp = GXCommon.split(sd.toPattern(), " ");
             List<String> date = new ArrayList<String>();
             List<String> tm = new ArrayList<String>();
             // Find date time separator.
             char separator = 0;
-            for (char it : tmp[0].toCharArray()) {
+            for (char it : tmp.get(0).toCharArray()) {
                 if (!Character.isLetter(it)) {
                     separator = it;
                     break;
@@ -299,8 +302,8 @@ public class GXDateTime {
             }
             if (separator != 0) {
                 String sep = "\\" + String.valueOf(separator);
-                date.addAll(Arrays.asList(tmp[0].split(sep)));
-                tm.addAll(Arrays.asList(tmp[1].split(":")));
+                date.addAll(GXCommon.split(tmp.get(0), sep));
+                tm.addAll(GXCommon.split(tmp.get(1), ":"));
                 if (getSkip().contains(DateTimeSkips.YEAR)) {
                     date.remove("yyyy");
                 }
@@ -371,8 +374,8 @@ public class GXDateTime {
     }
 
     private static String getTimeZone(final int forDeviation) {
-        String tmp = String.format("%02d:%02d", forDeviation / 60,
-                forDeviation % 60);
+        String tmp = String.format("%02d:%02d", new Integer(forDeviation / 60),
+                new Integer(forDeviation % 60));
         if (forDeviation == 0) {
             return "GMT";
         } else if (forDeviation > 0) {

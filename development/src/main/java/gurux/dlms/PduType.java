@@ -150,7 +150,7 @@ public enum PduType {
      */
     PduType(final int value) {
         intValue = value;
-        getMappings().put(value, this);
+        getMappings().put(new Integer(value), this);
     }
 
     /**
@@ -170,6 +170,6 @@ public enum PduType {
      * @return Enumeration value.
      */
     public static PduType forValue(final int value) {
-        return getMappings().get(value);
+        return getMappings().get(new Integer(value));
     }
 }

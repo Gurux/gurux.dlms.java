@@ -96,7 +96,7 @@ public enum GXDLMSIp4SetupIpOptionType {
 
     GXDLMSIp4SetupIpOptionType(final int value) {
         intValue = value;
-        getMappings().put(value, this);
+        getMappings().put(new Integer(value), this);
     }
 
     public int getValue() {
@@ -104,6 +104,6 @@ public enum GXDLMSIp4SetupIpOptionType {
     }
 
     public static GXDLMSIp4SetupIpOptionType forValue(final int value) {
-        return getMappings().get(value);
+        return getMappings().get(new Integer(value));
     }
 }

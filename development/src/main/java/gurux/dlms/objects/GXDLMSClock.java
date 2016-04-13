@@ -34,10 +34,10 @@
 
 package gurux.dlms.objects;
 
-import java.lang.reflect.Array;
 import java.util.Calendar;
 import java.util.Date;
-import java.util.EnumSet;
+import java.util.HashSet;
+import java.util.Set;
 
 import gurux.dlms.GXByteBuffer;
 import gurux.dlms.GXDLMSClient;
@@ -65,9 +65,11 @@ public class GXDLMSClock extends GXDLMSObject implements IGXDLMSBase {
      */
     public GXDLMSClock() {
         super(ObjectType.CLOCK, "0.0.1.0.0.255", 0);
-        status = EnumSet.of(ClockStatus.OK);
+        status = new HashSet<ClockStatus>();
+        status.add(ClockStatus.OK);
         deviation = 0;
-        java.util.Set<DateTimeSkips> value = EnumSet.of(DateTimeSkips.MONTH);
+        java.util.Set<DateTimeSkips> value = new HashSet<DateTimeSkips>();
+        value.add(DateTimeSkips.MONTH);
         value.add(DateTimeSkips.DAY);
         begin.setSkip(value);
         end.setSkip(begin.getSkip());
@@ -82,9 +84,11 @@ public class GXDLMSClock extends GXDLMSObject implements IGXDLMSBase {
      */
     public GXDLMSClock(final String ln) {
         super(ObjectType.CLOCK, ln, 0);
-        status = EnumSet.of(ClockStatus.OK);
+        status = new HashSet<ClockStatus>();
+        status.add(ClockStatus.OK);
         deviation = 0;
-        java.util.Set<DateTimeSkips> value = EnumSet.of(DateTimeSkips.MONTH);
+        java.util.Set<DateTimeSkips> value = new HashSet<DateTimeSkips>();
+        value.add(DateTimeSkips.MONTH);
         value.add(DateTimeSkips.DAY);
         begin.setSkip(value);
         end.setSkip(begin.getSkip());
@@ -101,9 +105,11 @@ public class GXDLMSClock extends GXDLMSObject implements IGXDLMSBase {
      */
     public GXDLMSClock(final String ln, final int sn) {
         super(ObjectType.CLOCK, ln, sn);
-        status = EnumSet.of(ClockStatus.OK);
+        status = new HashSet<ClockStatus>();
+        status.add(ClockStatus.OK);
         deviation = 0;
-        java.util.Set<DateTimeSkips> value = EnumSet.of(DateTimeSkips.MONTH);
+        java.util.Set<DateTimeSkips> value = new HashSet<DateTimeSkips>();
+        value.add(DateTimeSkips.MONTH);
         value.add(DateTimeSkips.DAY);
         begin.setSkip(value);
         end.setSkip(begin.getSkip());
@@ -212,8 +218,9 @@ public class GXDLMSClock extends GXDLMSObject implements IGXDLMSBase {
 
     @Override
     public final Object[] getValues() {
-        return new Object[] { getLogicalName(), getTime(), getTimeZone(),
-                getStatus(), getBegin(), getEnd(), getDeviation(), getEnabled(),
+        return new Object[] { getLogicalName(), getTime(),
+                new Integer(getTimeZone()), getStatus(), getBegin(), getEnd(),
+                new Integer(getDeviation()), new Boolean(getEnabled()),
                 getClockBase() };
     }
 
@@ -262,7 +269,7 @@ public class GXDLMSClock extends GXDLMSObject implements IGXDLMSBase {
             // Presets the time to a new value (preset_time) and defines
             // avalidity_interval within which the new time can be activated.
             GXDateTime presetTime = (GXDateTime) GXDLMSClient.changeType(
-                    (byte[]) Array.get(parameters, 0), DataType.DATETIME);
+                    (byte[]) ((Object[]) parameters)[0], DataType.DATETIME);
             // TODO:
             /*
              * GXDateTime validityIntervalStart = (GXDateTime) GXDLMSClient
@@ -293,7 +300,7 @@ public class GXDLMSClock extends GXDLMSObject implements IGXDLMSBase {
      * (*:00, *:15, *:30, *:45).
      */
     public final byte[][] adjustToQuarter(final GXDLMSClient client) {
-        return client.method(this, 1, 0, DataType.INT8);
+        return client.method(this, 1, new Integer(0), DataType.INT8);
     }
 
     /*
@@ -301,7 +308,7 @@ public class GXDLMSClock extends GXDLMSObject implements IGXDLMSBase {
      * period.
      */
     public final byte[][] adjustToMeasuringPeriod(final GXDLMSClient client) {
-        return client.method(this, 2, 0, DataType.INT8);
+        return client.method(this, 2, new Integer(0), DataType.INT8);
     }
 
     /*
@@ -311,7 +318,7 @@ public class GXDLMSClock extends GXDLMSObject implements IGXDLMSBase {
      * incremented if necessary.
      */
     public final byte[][] adjustToMinute(final GXDLMSClient client) {
-        return client.method(this, 3, 0, DataType.INT8);
+        return client.method(this, 3, new Integer(0), DataType.INT8);
     }
 
     /*
@@ -320,7 +327,7 @@ public class GXDLMSClock extends GXDLMSObject implements IGXDLMSBase {
      * validity_interval_end, then time is set to preset_time.
      */
     public final byte[][] adjustToPresetTime(final GXDLMSClient client) {
-        return client.method(this, 4, 0, DataType.INT8);
+        return client.method(this, 4, new Integer(0), DataType.INT8);
     }
 
     /*
@@ -333,9 +340,9 @@ public class GXDLMSClock extends GXDLMSObject implements IGXDLMSBase {
         GXByteBuffer buff = new GXByteBuffer(44);
         buff.setUInt8(DataType.STRUCTURE.getValue());
         buff.setUInt8(3);
-        GXCommon.setData(buff, DataType.OCTET_STRING, presetTime);
-        GXCommon.setData(buff, DataType.OCTET_STRING, validityIntervalStart);
-        GXCommon.setData(buff, DataType.OCTET_STRING, validityIntervalEnd);
+        GXCommon.setData(buff, DataType.DATETIME, presetTime);
+        GXCommon.setData(buff, DataType.DATETIME, validityIntervalStart);
+        GXCommon.setData(buff, DataType.DATETIME, validityIntervalEnd);
         return client.method(this, 5, buff.array(), DataType.OCTET_STRING);
     }
 
@@ -347,7 +354,7 @@ public class GXDLMSClock extends GXDLMSObject implements IGXDLMSBase {
         if (forTime < -900 || forTime > 900) {
             throw new IllegalArgumentException("Invalid shift time.");
         }
-        return client.method(this, 6, forTime, DataType.INT16);
+        return client.method(this, 6, new Integer(forTime), DataType.INT16);
     }
 
     /*
@@ -360,39 +367,39 @@ public class GXDLMSClock extends GXDLMSObject implements IGXDLMSBase {
                 new java.util.ArrayList<Integer>();
         // LN is static and read only once.
         if (getLogicalName() == null || getLogicalName().compareTo("") == 0) {
-            attributes.add(1);
+            attributes.add(new Integer(1));
         }
         // Time
         if (canRead(2)) {
-            attributes.add(2);
+            attributes.add(new Integer(2));
         }
         // TimeZone
         if (!isRead(3)) {
-            attributes.add(3);
+            attributes.add(new Integer(3));
         }
         // Status
         if (canRead(4)) {
-            attributes.add(4);
+            attributes.add(new Integer(4));
         }
         // Begin
         if (!isRead(5)) {
-            attributes.add(5);
+            attributes.add(new Integer(5));
         }
         // End
         if (!isRead(6)) {
-            attributes.add(6);
+            attributes.add(new Integer(6));
         }
         // Deviation
         if (!isRead(7)) {
-            attributes.add(7);
+            attributes.add(new Integer(7));
         }
         // Enabled
         if (!isRead(8)) {
-            attributes.add(8);
+            attributes.add(new Integer(8));
         }
         // ClockBase
         if (!isRead(9)) {
-            attributes.add(9);
+            attributes.add(new Integer(9));
         }
         return GXDLMSObjectHelpers.toIntArray(attributes);
     }
@@ -419,7 +426,7 @@ public class GXDLMSClock extends GXDLMSObject implements IGXDLMSBase {
             return DataType.OCTET_STRING;
         }
         if (index == 2) {
-            return DataType.OCTET_STRING;
+            return DataType.DATETIME;
         }
         if (index == 3) {
             return DataType.INT16;
@@ -428,10 +435,10 @@ public class GXDLMSClock extends GXDLMSObject implements IGXDLMSBase {
             return DataType.UINT8;
         }
         if (index == 5) {
-            return DataType.OCTET_STRING;
+            return DataType.DATETIME;
         }
         if (index == 6) {
-            return DataType.OCTET_STRING;
+            return DataType.DATETIME;
         }
         if (index == 7) {
             return DataType.INT8;
@@ -459,10 +466,10 @@ public class GXDLMSClock extends GXDLMSObject implements IGXDLMSBase {
             return getTime();
         }
         if (index == 3) {
-            return getTimeZone();
+            return new Integer(getTimeZone());
         }
         if (index == 4) {
-            return ClockStatus.toInteger(status);
+            return new Integer(ClockStatus.toInteger(status));
         }
         if (index == 5) {
             return getBegin();
@@ -471,13 +478,13 @@ public class GXDLMSClock extends GXDLMSObject implements IGXDLMSBase {
             return getEnd();
         }
         if (index == 7) {
-            return getDeviation();
+            return new Integer(getDeviation());
         }
         if (index == 8) {
-            return getEnabled();
+            return new Boolean(getEnabled());
         }
         if (index == 9) {
-            return getClockBase().ordinal();
+            return new Integer(getClockBase().ordinal());
         }
         throw new IllegalArgumentException(
                 "GetValue failed. Invalid attribute index.");
@@ -512,7 +519,9 @@ public class GXDLMSClock extends GXDLMSObject implements IGXDLMSBase {
             }
         } else if (index == 4) {
             if (value == null) {
-                setStatus(EnumSet.of(ClockStatus.OK));
+                Set<ClockStatus> val = new HashSet<ClockStatus>();
+                val.add(ClockStatus.OK);
+                setStatus(val);
             } else {
                 setStatus(ClockStatus.forValue(((Number) value).intValue()));
             }
@@ -548,7 +557,7 @@ public class GXDLMSClock extends GXDLMSObject implements IGXDLMSBase {
             if (value == null) {
                 setEnabled(false);
             } else {
-                setEnabled((Boolean) value);
+                setEnabled(((Boolean) value).booleanValue());
             }
         } else if (index == 9) {
             if (value == null) {

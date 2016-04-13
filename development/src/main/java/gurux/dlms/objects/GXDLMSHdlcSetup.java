@@ -160,10 +160,13 @@ public class GXDLMSHdlcSetup extends GXDLMSObject implements IGXDLMSBase {
     @Override
     public final Object[] getValues() {
         return new Object[] { getLogicalName(), getCommunicationSpeed(),
-                getWindowSizeTransmit(), getWindowSizeReceive(),
-                getMaximumInfoLengthTransmit(), getMaximumInfoLengthReceive(),
-                getInterCharachterTimeout(), getInactivityTimeout(),
-                getDeviceAddress() };
+                new Integer(getWindowSizeTransmit()),
+                new Integer(getWindowSizeReceive()),
+                new Integer(getMaximumInfoLengthTransmit()),
+                new Integer(getMaximumInfoLengthReceive()),
+                new Integer(getInterCharachterTimeout()),
+                new Integer(getInactivityTimeout()),
+                new Integer(getDeviceAddress()) };
     }
 
     /*
@@ -176,39 +179,39 @@ public class GXDLMSHdlcSetup extends GXDLMSObject implements IGXDLMSBase {
                 new java.util.ArrayList<Integer>();
         // LN is static and read only once.
         if (getLogicalName() == null || getLogicalName().compareTo("") == 0) {
-            attributes.add(1);
+            attributes.add(new Integer(1));
         }
         // CommunicationSpeed
         if (!isRead(2)) {
-            attributes.add(2);
+            attributes.add(new Integer(2));
         }
         // WindowSizeTransmit
         if (!isRead(3)) {
-            attributes.add(3);
+            attributes.add(new Integer(3));
         }
         // WindowSizeReceive
         if (!isRead(4)) {
-            attributes.add(4);
+            attributes.add(new Integer(4));
         }
         // MaximumInfoLengthTransmit
         if (!isRead(5)) {
-            attributes.add(5);
+            attributes.add(new Integer(5));
         }
         // MaximumInfoLengthReceive
         if (!isRead(6)) {
-            attributes.add(6);
+            attributes.add(new Integer(6));
         }
         // InterCharachterTimeout
         if (!isRead(7)) {
-            attributes.add(7);
+            attributes.add(new Integer(7));
         }
         // InactivityTimeout
         if (!isRead(8)) {
-            attributes.add(8);
+            attributes.add(new Integer(8));
         }
         // DeviceAddress
         if (!isRead(9)) {
-            attributes.add(9);
+            attributes.add(new Integer(9));
         }
         return GXDLMSObjectHelpers.toIntArray(attributes);
     }
@@ -272,28 +275,28 @@ public class GXDLMSHdlcSetup extends GXDLMSObject implements IGXDLMSBase {
             return getLogicalName();
         }
         if (index == 2) {
-            return this.communicationSpeed.ordinal();
+            return new Integer(communicationSpeed.ordinal());
         }
         if (index == 3) {
-            return this.windowSizeTransmit;
+            return new Integer(windowSizeTransmit);
         }
         if (index == 4) {
-            return this.windowSizeReceive;
+            return new Integer(windowSizeReceive);
         }
         if (index == 5) {
-            return this.maximumInfoLengthTransmit;
+            return new Integer(maximumInfoLengthTransmit);
         }
         if (index == 6) {
-            return this.maximumInfoLengthReceive;
+            return new Integer(maximumInfoLengthReceive);
         }
         if (index == 7) {
-            return interCharachterTimeout;
+            return new Integer(interCharachterTimeout);
         }
         if (index == 8) {
-            return inactivityTimeout;
+            return new Integer(inactivityTimeout);
         }
         if (index == 9) {
-            return deviceAddress;
+            return new Integer(deviceAddress);
         }
         throw new IllegalArgumentException(
                 "GetValue failed. Invalid attribute index.");

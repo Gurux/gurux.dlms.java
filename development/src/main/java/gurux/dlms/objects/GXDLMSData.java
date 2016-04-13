@@ -104,11 +104,11 @@ public class GXDLMSData extends GXDLMSObject implements IGXDLMSBase {
                 new java.util.ArrayList<Integer>();
         // LN is static and read only once.
         if (getLogicalName() == null || getLogicalName().compareTo("") == 0) {
-            attributes.add(1);
+            attributes.add(new Integer(1));
         }
         // Value
         if (canRead(2)) {
-            attributes.add(2);
+            attributes.add(new Integer(2));
         }
         return GXDLMSObjectHelpers.toIntArray(attributes);
     }

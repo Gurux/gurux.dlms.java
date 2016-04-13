@@ -31,23 +31,12 @@
 // This code is licensed under the GNU General Public License v2. 
 // Full text may be retrieved at http://www.gnu.org/licenses/gpl-2.0.txt
 //---------------------------------------------------------------------------
-
-//
-// --------------------------------------------------------------------------
-//  Gurux Ltd
-// 
-//
-//
-// Filename:        $HeadURL$
-//
-// Version:         $Revision$,
-//                  $Date$
-//                  $Author$
 package gurux.dlms;
 
-import java.util.Arrays;
+import java.util.List;
 
 import gurux.dlms.enums.ObjectType;
+import gurux.dlms.internal.GXCommon;
 
 /**
  * Standard OBIS code collection is used to save all default OBIS Codes.
@@ -63,17 +52,17 @@ class GXStandardObisCodeCollection
      * Convert Logical name string to bytes.
      */
     static int[] getBytes(final String ln) {
-        String[] tmp = ln.split("[.]", -1);
-        if (tmp.length != 6) {
+        List<String> tmp = GXCommon.split(ln, '.');
+        if (tmp.size() != 6) {
             throw new IllegalArgumentException("Invalid OBIS Code.");
         }
         int[] code = new int[6];
-        code[0] = Integer.parseInt(tmp[0]);
-        code[1] = Integer.parseInt(tmp[1]);
-        code[2] = Integer.parseInt(tmp[2]);
-        code[3] = Integer.parseInt(tmp[3]);
-        code[4] = Integer.parseInt(tmp[4]);
-        code[5] = Integer.parseInt(tmp[5]);
+        code[0] = Integer.parseInt(tmp.get(0));
+        code[1] = Integer.parseInt(tmp.get(1));
+        code[2] = Integer.parseInt(tmp.get(2));
+        code[3] = Integer.parseInt(tmp.get(3));
+        code[4] = Integer.parseInt(tmp.get(4));
+        code[5] = Integer.parseInt(tmp.get(5));
         return code;
     }
 
@@ -93,7 +82,7 @@ class GXStandardObisCodeCollection
         if (it.getInterfaces().equals("*")) {
             return true;
         }
-        return Arrays.asList(it.getInterfaces().split("[,]", -1))
+        return GXCommon.split(it.getInterfaces(), ',')
                 .contains((new Integer(ic)).toString());
     }
 
@@ -103,7 +92,7 @@ class GXStandardObisCodeCollection
     private static boolean equalsMask(final String obis, final int ic) {
         boolean number = true;
         if (obis.indexOf(',') != -1) {
-            String[] tmp = obis.split("[,]", -1);
+            List<String> tmp = GXCommon.split(obis, ',');
             for (String it : tmp) {
                 if (it.indexOf('-') != -1) {
                     if (equalsMask(it, ic)) {
@@ -116,9 +105,9 @@ class GXStandardObisCodeCollection
             return false;
         } else if (obis.indexOf('-') != -1) {
             number = false;
-            String[] tmp = obis.split("[-]", -1);
-            return ic >= Integer.parseInt(tmp[0])
-                    && ic <= Integer.parseInt(tmp[1]);
+            List<String> tmp = GXCommon.split(obis, '-');
+            return ic >= Integer.parseInt(tmp.get(0))
+                    && ic <= Integer.parseInt(tmp.get(1));
         }
         if (number) {
             if (obis.equals("&")) {
@@ -130,7 +119,9 @@ class GXStandardObisCodeCollection
     }
 
     public static boolean equalsMask(final String obisMask, final String ln) {
-        return equalsObisCode(obisMask.split("[.]", -1), getBytes(ln));
+        return equalsObisCode(
+                GXCommon.split(obisMask, '.').toArray(new String[0]),
+                getBytes(ln));
     }
 
     /**
@@ -366,11 +357,11 @@ class GXStandardObisCodeCollection
                     && equalsObisCode(it.getOBIS(), obisCode)) {
                 tmp = new GXStandardObisCode(it.getOBIS(), it.getDescription(),
                         it.getInterfaces(), it.getDataType());
-                String[] tmp2 = it.getDescription().split("[;]", -1);
-                if (tmp2.length > 1) {
-                    String desc = getDescription(tmp2[1].trim());
+                List<String> tmp2 = GXCommon.split(it.getDescription(), ';');
+                if (tmp2.size() > 1) {
+                    String desc = getDescription(tmp2.get(1).trim());
                     if (!desc.equals("")) {
-                        tmp2[1] = desc;
+                        tmp2.set(1, desc);
                         StringBuilder builder = new StringBuilder();
                         for (String s : tmp2) {
                             if (builder.capacity() != 0) {

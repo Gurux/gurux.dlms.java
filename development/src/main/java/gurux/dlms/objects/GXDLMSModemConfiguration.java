@@ -34,7 +34,6 @@
 
 package gurux.dlms.objects;
 
-import java.lang.reflect.Array;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -139,19 +138,19 @@ public class GXDLMSModemConfiguration extends GXDLMSObject
                 new java.util.ArrayList<Integer>();
         // LN is static and read only once.
         if (getLogicalName() == null || getLogicalName().compareTo("") == 0) {
-            attributes.add(1);
+            attributes.add(new Integer(1));
         }
         // CommunicationSpeed
         if (!isRead(2)) {
-            attributes.add(2);
+            attributes.add(new Integer(2));
         }
         // InitialisationStrings
         if (!isRead(3)) {
-            attributes.add(3);
+            attributes.add(new Integer(3));
         }
         // ModemProfile
         if (!isRead(4)) {
-            attributes.add(4);
+            attributes.add(new Integer(4));
         }
         return GXDLMSObjectHelpers.toIntArray(attributes);
     }
@@ -200,7 +199,7 @@ public class GXDLMSModemConfiguration extends GXDLMSObject
             return getLogicalName();
         }
         if (index == 2) {
-            return communicationSpeed.ordinal();
+            return new Integer(communicationSpeed.ordinal());
         }
         if (index == 3) {
             GXByteBuffer data = new GXByteBuffer();
@@ -219,7 +218,8 @@ public class GXDLMSModemConfiguration extends GXDLMSObject
                             GXCommon.getBytes(it.getRequest()));
                     GXCommon.setData(data, DataType.OCTET_STRING,
                             GXCommon.getBytes(it.getResponse()));
-                    GXCommon.setData(data, DataType.UINT16, it.getDelay());
+                    GXCommon.setData(data, DataType.UINT16,
+                            new Integer(it.getDelay()));
                 }
             }
             return data.array();
@@ -264,13 +264,13 @@ public class GXDLMSModemConfiguration extends GXDLMSObject
                     GXDLMSModemInitialisation item =
                             new GXDLMSModemInitialisation();
                     item.setRequest(
-                            GXDLMSClient.changeType((byte[]) Array.get(it, 0),
+                            GXDLMSClient.changeType((byte[]) ((Object[]) it)[0],
                                     DataType.STRING).toString());
                     item.setResponse(
-                            GXDLMSClient.changeType((byte[]) Array.get(it, 1),
+                            GXDLMSClient.changeType((byte[]) ((Object[]) it)[1],
                                     DataType.STRING).toString());
-                    if (Array.getLength(it) > 2) {
-                        item.setDelay(((Number) Array.get(it, 2)).intValue());
+                    if (((Object[]) it).length > 2) {
+                        item.setDelay(((Number) ((Object[]) it)[2]).intValue());
                     }
                     items.add(item);
                 }

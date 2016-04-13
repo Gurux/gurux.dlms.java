@@ -34,7 +34,6 @@
 
 package gurux.dlms.objects;
 
-import java.lang.reflect.Array;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Dictionary;
@@ -208,11 +207,11 @@ public class GXDLMSImageTransfer extends GXDLMSObject implements IGXDLMSBase {
 
     @Override
     public final Object[] getValues() {
-        return new Object[] { getLogicalName(), getImageBlockSize(),
+        return new Object[] { getLogicalName(), new Long(getImageBlockSize()),
                 getImageTransferredBlocksStatus(),
-                getImageFirstNotTransferredBlockNumber(),
-                getImageTransferEnabled(), getImageTransferStatus(),
-                getImageActivateInfo() };
+                new Long(getImageFirstNotTransferredBlockNumber()),
+                new Boolean(getImageTransferEnabled()),
+                getImageTransferStatus(), getImageActivateInfo() };
     }
 
     @Override
@@ -221,31 +220,31 @@ public class GXDLMSImageTransfer extends GXDLMSObject implements IGXDLMSBase {
                 new java.util.ArrayList<Integer>();
         // LN is static and read only once.
         if (getLogicalName() == null || getLogicalName().compareTo("") == 0) {
-            attributes.add(1);
+            attributes.add(new Integer(1));
         }
         // ImageBlockSize
         if (!isRead(2)) {
-            attributes.add(2);
+            attributes.add(new Integer(2));
         }
         // ImageTransferredBlocksStatus
         if (!isRead(3)) {
-            attributes.add(3);
+            attributes.add(new Integer(3));
         }
         // ImageFirstNotTransferredBlockNumber
         if (!isRead(4)) {
-            attributes.add(4);
+            attributes.add(new Integer(4));
         }
         // ImageTransferEnabled
         if (!isRead(5)) {
-            attributes.add(5);
+            attributes.add(new Integer(5));
         }
         // ImageTransferStatus
         if (!isRead(6)) {
-            attributes.add(6);
+            attributes.add(new Integer(6));
         }
         // ImageActivateInfo
         if (!isRead(7)) {
-            attributes.add(7);
+            attributes.add(new Integer(7));
         }
         return GXDLMSObjectHelpers.toIntArray(attributes);
     }
@@ -367,20 +366,19 @@ public class GXDLMSImageTransfer extends GXDLMSObject implements IGXDLMSBase {
             return getLogicalName();
         }
         if (index == 2) {
-            return getImageBlockSize();
+            return new Long(getImageBlockSize());
         }
         if (index == 3) {
             return imageTransferredBlocksStatus;
         }
         if (index == 4) {
-            return getImageFirstNotTransferredBlockNumber();
+            return new Long(getImageFirstNotTransferredBlockNumber());
         }
         if (index == 5) {
-            return getImageTransferEnabled();
-
+            return new Boolean(getImageTransferEnabled());
         }
         if (index == 6) {
-            return getImageTransferStatus().ordinal();
+            return new Integer(getImageTransferStatus().ordinal());
         }
         if (index == 7) {
             GXByteBuffer data = new GXByteBuffer();
@@ -390,7 +388,7 @@ public class GXDLMSImageTransfer extends GXDLMSObject implements IGXDLMSBase {
                 data.setUInt8((byte) DataType.STRUCTURE.getValue());
                 // Item count.
                 data.setUInt8((byte) 3);
-                GXCommon.setData(data, DataType.UINT32, it.getSize());
+                GXCommon.setData(data, DataType.UINT32, new Long(it.getSize()));
                 GXCommon.setData(data, DataType.OCTET_STRING,
                         GXCommon.getBytes(it.getIdentification()));
                 String tmp = it.getSignature();
@@ -438,7 +436,7 @@ public class GXDLMSImageTransfer extends GXDLMSObject implements IGXDLMSBase {
             if (value == null) {
                 setImageTransferEnabled(false);
             } else {
-                setImageTransferEnabled((Boolean) value);
+                setImageTransferEnabled(((Boolean) value).booleanValue());
             }
         } else if (index == 6) {
             if (value == null) {
@@ -456,10 +454,10 @@ public class GXDLMSImageTransfer extends GXDLMSObject implements IGXDLMSBase {
                 for (Object it : (Object[]) value) {
                     GXDLMSImageActivateInfo item =
                             new GXDLMSImageActivateInfo();
-                    item.setSize(((Number) Array.get(it, 0)).longValue());
+                    item.setSize(((Number) ((Object[]) it)[0]).longValue());
                     item.setIdentification(
-                            new String((byte[]) Array.get(it, 1)));
-                    item.setSignature(new String((byte[]) Array.get(it, 2)));
+                            new String((byte[]) ((Object[]) it)[1]));
+                    item.setSignature(new String((byte[]) ((Object[]) it)[2]));
                     list.add(item);
                 }
                 imageActivateInfo =
@@ -481,7 +479,7 @@ public class GXDLMSImageTransfer extends GXDLMSObject implements IGXDLMSBase {
         data.setUInt8(2);
         GXCommon.setData(data, DataType.OCTET_STRING,
                 GXCommon.getBytes(imageIdentifier));
-        GXCommon.setData(data, DataType.UINT32, forImageSize);
+        GXCommon.setData(data, DataType.UINT32, new Long(forImageSize));
         return client.method(this, 1, data.array(), DataType.ARRAY);
     }
 
@@ -499,7 +497,7 @@ public class GXDLMSImageTransfer extends GXDLMSObject implements IGXDLMSBase {
             GXByteBuffer data = new GXByteBuffer();
             data.setUInt8(DataType.STRUCTURE.getValue());
             data.setUInt8(2);
-            GXCommon.setData(data, DataType.UINT32, pos);
+            GXCommon.setData(data, DataType.UINT32, new Integer(pos));
             byte[] tmp;
             int bytes = (int) (imageBlockValue.length
                     - ((pos + 1) * imageBlockSize));
@@ -530,10 +528,10 @@ public class GXDLMSImageTransfer extends GXDLMSObject implements IGXDLMSBase {
     }
 
     public final byte[][] imageVerify(final GXDLMSClient client) {
-        return client.method(this, 3, 0, DataType.INT8);
+        return client.method(this, 3, new Integer(0), DataType.INT8);
     }
 
     public final byte[][] imageActivate(final GXDLMSClient client) {
-        return client.method(this, 4, 0, DataType.INT8);
+        return client.method(this, 4, new Integer(0), DataType.INT8);
     }
 }

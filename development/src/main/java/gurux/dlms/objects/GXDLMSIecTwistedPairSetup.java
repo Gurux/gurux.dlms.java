@@ -194,23 +194,23 @@ public class GXDLMSIecTwistedPairSetup extends GXDLMSObject
                 new java.util.ArrayList<Integer>();
         // LN is static and read only once.
         if (getLogicalName() == null || getLogicalName().compareTo("") == 0) {
-            attributes.add(1);
+            attributes.add(new Integer(1));
         }
         // Mode
         if (canRead(2)) {
-            attributes.add(2);
+            attributes.add(new Integer(2));
         }
         // Speed
         if (canRead(3)) {
-            attributes.add(3);
+            attributes.add(new Integer(3));
         }
         // PrimaryAddresses
         if (canRead(4)) {
-            attributes.add(4);
+            attributes.add(new Integer(4));
         }
         // Tabis
         if (canRead(5)) {
-            attributes.add(5);
+            attributes.add(new Integer(5));
         }
         return GXDLMSObjectHelpers.toIntArray(attributes);
     }
@@ -281,13 +281,13 @@ public class GXDLMSIecTwistedPairSetup extends GXDLMSObject
         } else if (index == 4) {
             List<Byte> list = new ArrayList<Byte>();
             for (Object it : (Object[]) value) {
-                list.add(((Number) it).byteValue());
+                list.add(new Byte(((Number) it).byteValue()));
             }
             setPrimaryAddresses(toByteArray(list));
         } else if (index == 5) {
             List<Byte> list = new ArrayList<Byte>();
             for (Object it : (Object[]) value) {
-                list.add(((Number) it).byteValue());
+                list.add(new Byte(((Number) it).byteValue()));
             }
             setTabis(toByteArray(list));
         } else {

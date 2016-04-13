@@ -32,55 +32,46 @@
 // Full text may be retrieved at http://www.gnu.org/licenses/gpl-2.0.txt
 //---------------------------------------------------------------------------
 
-package gurux.dlms.objects.enums;
+package gurux.dlms;
 
-import java.util.HashMap;
+import java.util.Map;
 
-public enum GXDLMSPppSetupIPCPOptionType {
-    /*
-     * 
-     */
-    IP_COMPRESSION_PROTOCOL(2),
-    /*
-     * 
-     */
-    PREF_LOCAL_IP(3),
-    /*
-     * 
-     */
-    PREF_PEER_IP(20),
-    /*
-     * 
-     */
-    GAO(21),
-    /*
-     * 
-     */
-    USIP(22);
+/**
+ * Java ME is not implementing SimpleEntry.
+ * 
+ * @author Gurux Ltd.
+ */
+public final class GXSimpleEntry<K, V> implements Map.Entry<K, V> {
+    private final K key;
+    private V value;
 
-    private int intValue;
-    private static HashMap<Integer, GXDLMSPppSetupIPCPOptionType> mappings;
-
-    private static HashMap<Integer, GXDLMSPppSetupIPCPOptionType>
-            getMappings() {
-        if (mappings == null) {
-            synchronized (GXDLMSPppSetupIPCPOptionType.class) {
-                mappings = new HashMap<Integer, GXDLMSPppSetupIPCPOptionType>();
-            }
-        }
-        return mappings;
+    /**
+     * Constructor for Parameterized type public GXSimpleEntry(K key, V value)
+     * 
+     * @param forKey
+     *            Key
+     * @param forValue
+     *            Value
+     */
+    public GXSimpleEntry(final K forKey, final V forValue) {
+        this.key = forKey;
+        this.value = forValue;
     }
 
-    GXDLMSPppSetupIPCPOptionType(final int value) {
-        intValue = value;
-        getMappings().put(new Integer(value), this);
+    // @Override
+    public K getKey() {
+        return key;
     }
 
-    public int getValue() {
-        return intValue;
+    // @Override
+    public V getValue() {
+        return value;
     }
 
-    public static GXDLMSPppSetupIPCPOptionType forValue(final int value) {
-        return getMappings().get(new Integer(value));
+    // @Override
+    public V setValue(final V forValue) {
+        V old = value;
+        value = forValue;
+        return old;
     }
 }

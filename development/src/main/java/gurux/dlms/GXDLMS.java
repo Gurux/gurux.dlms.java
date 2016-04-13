@@ -36,7 +36,6 @@ package gurux.dlms;
 
 import java.security.InvalidParameterException;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.Date;
 import java.util.List;
 
@@ -573,14 +572,16 @@ abstract class GXDLMS {
 
     static Object getAddress(final long value, final int size) {
         if (size < 2 && value < 0x80) {
-            return (byte) (value << 1 | 1);
+            return new Byte((byte) (value << 1 | 1));
         }
         if (size < 4 && value < 0x4000) {
-            return (short) ((value & 0x3F80) << 2 | (value & 0x7F) << 1 | 1);
+            return new Short(
+                    (short) ((value & 0x3F80) << 2 | (value & 0x7F) << 1 | 1));
         }
         if (value < 0x10000000) {
-            return (int) ((value & 0xFE00000) << 4 | (value & 0x1FC000) << 3
-                    | (value & 0x3F80) << 2 | (value & 0x7F) << 1 | 1);
+            return new Integer(
+                    (int) ((value & 0xFE00000) << 4 | (value & 0x1FC000) << 3
+                            | (value & 0x3F80) << 2 | (value & 0x7F) << 1 | 1));
         }
         throw new IllegalArgumentException("Invalid address.");
     }
@@ -1182,6 +1183,24 @@ abstract class GXDLMS {
     }
 
     /**
+     * Handle data notification get data from block and/or update error status.
+     * 
+     * @param reply
+     *            Received data from the client.
+     */
+    static void handleDataNotification(final GXReplyData reply) {
+        int index = reply.getData().position() - 1;
+        // Long-Invoke-Id-And-Priority
+        reply.getData().getUInt32();
+        // Get date time and skip it if used.
+        int len = reply.getData().getUInt8();
+        if (len != 0) {
+            reply.getData().position(reply.getData().position() + len);
+        }
+        getDataFromBlock(reply.getData(), index);
+    }
+
+    /**
      * Handle set response and update error status.
      * 
      * @param reply
@@ -1395,9 +1414,7 @@ abstract class GXDLMS {
                 getPdu(settings, data);
                 break;
             case DATA_NOTIFICATION:
-                // Get invoke id.
-                ch = data.getData().getUInt8();
-                // Client handles this.
+                handleDataNotification(data);
                 break;
             default:
                 throw new IllegalArgumentException("Invalid Command.");
@@ -1458,9 +1475,8 @@ abstract class GXDLMS {
                         } else {
                             // Add items to collection.
                             List<Object> list = new ArrayList<Object>();
-                            list.addAll(
-                                    Arrays.asList((Object[]) reply.getValue()));
-                            list.addAll(Arrays.asList((Object[]) value));
+                            GXCommon.addAll(list, (Object[]) reply.getValue());
+                            GXCommon.addAll(list, (Object[]) value);
                             reply.setValue(list.toArray());
                         }
                     }

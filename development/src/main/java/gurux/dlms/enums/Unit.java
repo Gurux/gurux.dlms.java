@@ -35,176 +35,217 @@
 package gurux.dlms.enums;
 
 public enum Unit {
-    NONE(0), YEAR(1), MONTH(2), WEEK(3), DAY(4), HOUR(5), MINUTE(6), SECOND(7),
-    PHASE_ANGLEGEGREE(8), // Phase
-                          // angle
-                          // degree
+
+    /**
+     * No Unit.
+     */
+    NONE(0),
+
+    /**
+     * Year.
+     */
+    YEAR(1),
+
+    /**
+     * Month.
+     */
+    MONTH(2),
+
+    /**
+     * Week.
+     */
+    WEEK(3),
+
+    /**
+     * Day.
+     */
+    DAY(4),
+
+    /**
+     * Hour.
+     */
+    HOUR(5),
+
+    /**
+     * Minute.
+     */
+    MINUTE(6),
+
+    /**
+     * Second.
+     */
+    SECOND(7),
+
+    /**
+     * Phase angle degree.
+     */
+    PHASE_ANGLEGEGREE(8),
     /*
-     * Temperature T degree centigrade
-     */ // rad*180/p
+     * Temperature T degree centigrade, rad*180/p.
+     */
     TEMPERATURE(9),
     /*
-     * Local currency
+     * Local currency.
      */
     LOCAL_CURRENCY(10),
     /*
-     * Length l meter m
+     * Length l meter m.
      */
     LENGTH(11),
     /*
-     * Speed v m/s
+     * Speed v m/s.
      */
     SPEED(12),
     /*
-     * Volume V m3
+     * Volume V m3.
      */
     VOLUME_CUBIC_METER(13),
     /*
-     * Corrected volume m3
+     * Corrected volume m3.
      */
     CORRECTED_VOLUME(14),
     /*
-     * Volume flux m3/60*60s
+     * Volume flux m3/60*60s.
      */
     VOLUME_FLUX_HOUR(15),
     /*
-     * Corrected volume flux m3/60*60s
+     * Corrected volume flux m3/60*60s.
      */
     CORRECTED_VOLUME_FLUX_HOUR(16),
     /*
-     * Volume flux m3/24*60*60s
+     * Volume flux m3/24*60*60s.
      */
     VOLUME_FLUXDAY(17),
     /*
-     * Corrected volume flux m3/24*60*60s
+     * Corrected volume flux m3/24*60*60s.
      */
     CORRECTE_VOLUME_FLUX_DAY(18),
     /*
-     * Volume 10-3 m3
+     * Volume 10-3 m3.
      */
     VOLUME_LITER(19),
     /*
-     * Mass m kilogram kg
+     * Mass m kilogram kg.
      */
     MASS_KG(20),
     /*
-     * return "Force F newton N
+     * return "Force F newton N.
      */
     FORCE(21),
     /*
-     * Energy newtonmeter J = Nm = Ws
+     * Energy newtonmeter J = Nm = Ws.
      */
     ENERGY(22),
     /*
-     * Pressure p pascal N/m2
+     * Pressure p pascal N/m2.
      */
     PRESSURE_PASCAL(23),
     /*
-     * Pressure p bar 10-5 N/m2
+     * Pressure p bar 10-5 N/m2.
      */
     PRESSURE_BAR(24),
     /*
-     * Energy joule J = Nm = Ws
+     * Energy joule J = Nm = Ws.
      */
     ENERGY_JOULE(25),
     /*
-     * Thermal power J/60*60s
+     * Thermal power J/60*60s.
      */
     THERMAL_POWER(26),
     /*
-     * Active power P watt W = J/s
+     * Active power P watt W = J/s.
      */
     ACTIVE_POWER(27),
     /*
-     * Apparent power S
+     * Apparent power S.
      */
     APPARENT_POWER(28),
     /*
-     * Reactive power Q
+     * Reactive power Q.
      */
     REACTIVE_POWER(29),
     /*
-     * Active energy W*60*60s
+     * Active energy W*60*60s.
      */
     ACTIVE_ENERGY(30),
     /*
-     * Apparent energy VA*60*60s
+     * Apparent energy VA*60*60s.
      */
     APPARENT_ENERGY(31),
     /*
-     * Reactive energy var*60*60s
+     * Reactive energy var*60*60s.
      */
     REACTIVE_ENERGY(32),
     /*
-     * Current I ampere A
+     * Current I ampere A.
      */
     CURRENT(33),
     /*
-     * Electrical charge Q coulomb C = As
+     * Electrical charge Q coulomb C = As.
      */
     ELECTRICAL_CHARGE(34),
     /*
-     * Voltage
+     * Voltage.
      */
     VOLTAGE(35),
     /*
-     * Electrical field strength E V/m
+     * Electrical field strength E V/m.
      */
     ELECTRICAL_FIELD_STRENGTH(36),
     /*
-     * Capacity C farad C/V = As/V
+     * Capacity C farad C/V = As/V.
      */
     CAPACITY(37),
     /*
-     * Resistance R ohm = V/A
+     * Resistance R ohm = V/A.
      */
     RESISTANCE(38),
     /*
-     * Resistivity
+     * Resistivity.
      */
     RESISTIVITY(39),
     /*
-     * Magnetic flux F weber Wb = Vs
+     * Magnetic flux F weber Wb = Vs.
      */
     MAGNETIC_FLUX(40),
     /*
-     * Induction T tesla Wb/m2
+     * Induction T tesla Wb/m2.
      */
     INDUCTION(41),
     /*
-     * Magnetic field strength H A/m
+     * Magnetic field strength H A/m.
      */
     MAGNETIC(42),
     /*
-     * Inductivity L henry H = Wb/A
+     * Inductivity L henry H = Wb/A.
      */
     INDUCTIVITY(43),
     /*
-     * Frequency f
+     * Frequency f.
      */
     FREQUENCY(44),
     /*
-     * Active energy meter constant 1/Wh
+     * Active energy meter constant 1/Wh.
      */
     ACTIVE(45),
     /*
-     * Reactive energy meter constant
+     * Reactive energy meter constant.
      */
     REACTIVE(46),
     /*
-     * Apparent energy meter constant
+     * Apparent energy meter constant.
      */
     APPARENT(47),
     /*
-     * V260*60s
+     * V260*60s.
      */
     V260(48),
     /*
-     * A260*60s
+     * A260*60s.
      */
     A260(49),
     /*
-     * Mass flux kg/s
+     * Mass flux kg/s.
      */
     MASS_KG_PER_SECOND(50),
     /*
@@ -228,11 +269,11 @@ public enum Unit {
      */
     CUBIC_METER_RV(55),
     /*
-     * Percentage
+     * Percentage.
      */
     PERCENTAGE(56),
     /*
-     * Ah ampere-hours
+     * Ah ampere hours.
      */
     AMPERE_HOURS(57),
     /*
@@ -245,7 +286,7 @@ public enum Unit {
     WOBBE(61),
     /*
      * Mol % molar fraction of gas composition mole percent (Basic gas
-     * composition unit)
+     * composition unit).
      */
     MOLE_PERCENT(62),
     /*
@@ -262,15 +303,15 @@ public enum Unit {
      */
     JOULE_KILOGRAM(65),
     /*
-     * dBm Signal strength (e.g. of GSM radio systems)
+     * dBm Signal strength (e.g. of GSM radio systems).
      */
     SIGNAL_STRENGTH(70),
     /*
-     * Other Unit
+     * Other Unit.
      */
     OTHER_UNIT(254),
     /*
-     * No Unit
+     * No Unit.
      */
     NO_UNIT(255);
 
@@ -288,7 +329,7 @@ public enum Unit {
 
     Unit(final int value) {
         intValue = value;
-        getMappings().put(value, this);
+        getMappings().put(new Integer(value), this);
     }
 
     /*
@@ -302,7 +343,7 @@ public enum Unit {
      * Convert integer for enum value.
      */
     public static Unit forValue(final int value) {
-        return getMappings().get(value);
+        return getMappings().get(new Integer(value));
     }
 
     // CHECKSTYLE:OFF

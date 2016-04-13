@@ -34,7 +34,8 @@
 
 package gurux.dlms.enums;
 
-import java.util.EnumSet;
+import java.util.HashSet;
+import java.util.Set;
 
 /*
  * DataType enumerates skipped fields from date time.
@@ -107,6 +108,15 @@ public enum DateTimeSkips {
     }
 
     /**
+     * @return Get enumeration constant values.
+     */
+    private static DateTimeSkips[] getEnumConstants() {
+        return new DateTimeSkips[] { NONE, YEAR, MONTH, DAY, DAY_OF_WEEK, HOUR,
+                MINUTE, SECOND, MILLISECOND, DEVITATION };
+
+    }
+
+    /**
      * Converts the integer value to enumerated value.
      * 
      * @param value
@@ -114,8 +124,8 @@ public enum DateTimeSkips {
      * @return The enumerated value, which represents the integer.
      */
     public static java.util.Set<DateTimeSkips> forValue(final int value) {
-        EnumSet<DateTimeSkips> types = EnumSet.noneOf(DateTimeSkips.class);
-        DateTimeSkips[] enums = DateTimeSkips.class.getEnumConstants();
+        Set<DateTimeSkips> types = new HashSet<DateTimeSkips>();
+        DateTimeSkips[] enums = getEnumConstants();
         for (int pos = 0; pos != enums.length; ++pos) {
             if ((enums[pos].value & value) == enums[pos].value) {
                 types.add(enums[pos]);

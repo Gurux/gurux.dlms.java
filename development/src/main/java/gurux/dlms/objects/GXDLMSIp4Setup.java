@@ -34,8 +34,6 @@
 
 package gurux.dlms.objects;
 
-import java.lang.reflect.Array;
-
 import gurux.dlms.GXByteBuffer;
 import gurux.dlms.GXDLMSClient;
 import gurux.dlms.GXDLMSSettings;
@@ -159,9 +157,11 @@ public class GXDLMSIp4Setup extends GXDLMSObject implements IGXDLMSBase {
     @Override
     public final Object[] getValues() {
         return new Object[] { getLogicalName(), getDataLinkLayerReference(),
-                getIPAddress(), getMulticastIPAddress(), getIPOptions(),
-                getSubnetMask(), getGatewayIPAddress(), getUseDHCP(),
-                getPrimaryDNSAddress(), getSecondaryDNSAddress() };
+                new Long(getIPAddress()), getMulticastIPAddress(),
+                getIPOptions(), new Long(getSubnetMask()),
+                new Long(getGatewayIPAddress()), new Boolean(getUseDHCP()),
+                new Long(getPrimaryDNSAddress()),
+                new Long(getSecondaryDNSAddress()) };
     }
 
     /*
@@ -174,43 +174,43 @@ public class GXDLMSIp4Setup extends GXDLMSObject implements IGXDLMSBase {
                 new java.util.ArrayList<Integer>();
         // LN is static and read only once.
         if (getLogicalName() == null || getLogicalName().compareTo("") == 0) {
-            attributes.add(1);
+            attributes.add(new Integer(1));
         }
         // DataLinkLayerReference
         if (!isRead(2)) {
-            attributes.add(2);
+            attributes.add(new Integer(2));
         }
         // IPAddress
         if (canRead(3)) {
-            attributes.add(3);
+            attributes.add(new Integer(3));
         }
         // MulticastIPAddress
         if (canRead(4)) {
-            attributes.add(4);
+            attributes.add(new Integer(4));
         }
         // IPOptions
         if (canRead(5)) {
-            attributes.add(5);
+            attributes.add(new Integer(5));
         }
         // SubnetMask
         if (canRead(6)) {
-            attributes.add(6);
+            attributes.add(new Integer(6));
         }
         // GatewayIPAddress
         if (canRead(7)) {
-            attributes.add(7);
+            attributes.add(new Integer(7));
         }
         // UseDHCP
         if (!isRead(8)) {
-            attributes.add(8);
+            attributes.add(new Integer(8));
         }
         // PrimaryDNSAddress
         if (canRead(9)) {
-            attributes.add(9);
+            attributes.add(new Integer(9));
         }
         // SecondaryDNSAddress
         if (canRead(10)) {
-            attributes.add(10);
+            attributes.add(new Integer(10));
         }
         return GXDLMSObjectHelpers.toIntArray(attributes);
     }
@@ -280,7 +280,7 @@ public class GXDLMSIp4Setup extends GXDLMSObject implements IGXDLMSBase {
             return this.getDataLinkLayerReference();
         }
         if (index == 3) {
-            return this.getIPAddress();
+            return new Long(this.getIPAddress());
         }
         if (index == 4) {
             return this.getMulticastIPAddress();
@@ -296,26 +296,27 @@ public class GXDLMSIp4Setup extends GXDLMSObject implements IGXDLMSBase {
                     data.setUInt8(DataType.STRUCTURE.getValue());
                     data.setUInt8(3);
                     GXCommon.setData(data, DataType.UINT8, it.getType());
-                    GXCommon.setData(data, DataType.UINT8, it.getLength());
+                    GXCommon.setData(data, DataType.UINT8,
+                            new Integer(it.getLength()));
                     GXCommon.setData(data, DataType.OCTET_STRING, it.getData());
                 }
             }
             return data.array();
         }
         if (index == 6) {
-            return this.getSubnetMask();
+            return new Long(this.getSubnetMask());
         }
         if (index == 7) {
-            return this.getGatewayIPAddress();
+            return new Long(this.getGatewayIPAddress());
         }
         if (index == 8) {
-            return this.getUseDHCP();
+            return new Boolean(this.getUseDHCP());
         }
         if (index == 9) {
-            return this.getPrimaryDNSAddress();
+            return new Long(this.getPrimaryDNSAddress());
         }
         if (index == 10) {
-            return this.getSecondaryDNSAddress();
+            return new Long(this.getSecondaryDNSAddress());
         }
         throw new IllegalArgumentException(
                 "GetValue failed. Invalid attribute index.");
@@ -343,7 +344,7 @@ public class GXDLMSIp4Setup extends GXDLMSObject implements IGXDLMSBase {
             java.util.ArrayList<Long> data = new java.util.ArrayList<Long>();
             if (value != null) {
                 for (Object it : (Object[]) value) {
-                    data.add(((Number) it).longValue());
+                    data.add(new Long(((Number) it).longValue()));
                 }
             }
             setMulticastIPAddress(GXDLMSObjectHelpers.toLongArray(data));
@@ -354,9 +355,10 @@ public class GXDLMSIp4Setup extends GXDLMSObject implements IGXDLMSBase {
                 for (Object it : (Object[]) value) {
                     GXDLMSIp4SetupIpOption item = new GXDLMSIp4SetupIpOption();
                     item.setType(GXDLMSIp4SetupIpOptionType.forValue(
-                            ((Number) (Array.get(it, 1))).intValue()));
-                    item.setLength(((Number) (Array.get(it, 1))).shortValue());
-                    item.setData((byte[]) Array.get(it, 2));
+                            ((Number) ((Object[]) it)[0]).intValue()));
+                    item.setLength(
+                            ((Number) (((Object[]) it)[1])).shortValue());
+                    item.setData((byte[]) ((Object[]) it)[2]);
                     data.add(item);
                 }
             }
@@ -366,7 +368,7 @@ public class GXDLMSIp4Setup extends GXDLMSObject implements IGXDLMSBase {
         } else if (index == 7) {
             setGatewayIPAddress(((Number) value).intValue());
         } else if (index == 8) {
-            setUseDHCP((Boolean) value);
+            setUseDHCP(((Boolean) value).booleanValue());
         } else if (index == 9) {
             setPrimaryDNSAddress(((Number) value).intValue());
         } else if (index == 10) {

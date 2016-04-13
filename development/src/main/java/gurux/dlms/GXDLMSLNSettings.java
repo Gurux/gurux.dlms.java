@@ -34,6 +34,8 @@
 
 package gurux.dlms;
 
+import java.security.InvalidParameterException;
+
 import gurux.dlms.internal.GXCommon;
 
 /**
@@ -60,8 +62,16 @@ public class GXDLMSLNSettings {
      *            Conformance block.
      */
     GXDLMSLNSettings(final byte[] value) {
-        // Set default values.
         setConformanceBlock(value);
+    }
+
+    /**
+     * Clear all bits.
+     */
+    public final void clear() {
+        conformanceBlock[0] = 0;
+        conformanceBlock[1] = 0;
+        conformanceBlock[2] = 0;
     }
 
     final void copyTo(final GXDLMSLNSettings target) {
@@ -195,7 +205,7 @@ public class GXDLMSLNSettings {
      * @return Can client call actions (methods).
      */
     public final boolean getAction() {
-        return GXCommon.getBits(getConformanceBlock()[2], 0x2);
+        return GXCommon.getBits(getConformanceBlock()[2], 0x1);
     }
 
     /**
@@ -204,14 +214,14 @@ public class GXDLMSLNSettings {
      */
     public final void setAction(final boolean value) {
         getConformanceBlock()[2] =
-                GXCommon.setBits(getConformanceBlock()[2], 0x2, value);
+                GXCommon.setBits(getConformanceBlock()[2], 0x1, value);
     }
 
     /**
      * @return Is server supporting event notifications.
      */
     public final boolean getEventNotification() {
-        return GXCommon.getBits(getConformanceBlock()[2], 0x1);
+        return GXCommon.getBits(getConformanceBlock()[2], 0x2);
     }
 
     /**
@@ -220,7 +230,7 @@ public class GXDLMSLNSettings {
      */
     public final void setEventNotification(final boolean value) {
         getConformanceBlock()[2] =
-                GXCommon.setBits(getConformanceBlock()[2], 0x1, value);
+                GXCommon.setBits(getConformanceBlock()[2], 0x2, value);
     }
 
     /**
@@ -251,6 +261,9 @@ public class GXDLMSLNSettings {
      *            Conformance block.
      */
     public final void setConformanceBlock(final byte[] value) {
+        if (value == null || value.length != 3) {
+            throw new InvalidParameterException("Invalid conformance block.");
+        }
         conformanceBlock = value;
     }
 }

@@ -35,28 +35,27 @@
 package gurux.dlms.objects;
 
 import java.lang.reflect.Array;
-import java.util.AbstractMap;
-import java.util.AbstractMap.SimpleEntry;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map.Entry;
 
 import gurux.dlms.GXByteBuffer;
 import gurux.dlms.GXDLMSClient;
 import gurux.dlms.GXDLMSSettings;
+import gurux.dlms.GXSimpleEntry;
 import gurux.dlms.enums.DataType;
 import gurux.dlms.enums.ObjectType;
 import gurux.dlms.internal.GXCommon;
 
 public class GXDLMSSapAssignment extends GXDLMSObject implements IGXDLMSBase {
-    private List<AbstractMap.SimpleEntry<Integer, String>> sapAssignmentList;
+    private List<Entry<Integer, String>> sapAssignmentList;
 
     /**
      * Constructor.
      */
     public GXDLMSSapAssignment() {
         super(ObjectType.SAP_ASSIGNMENT, "0.0.41.0.0.255", 0);
-        sapAssignmentList =
-                new ArrayList<AbstractMap.SimpleEntry<Integer, String>>();
+        sapAssignmentList = new ArrayList<Entry<Integer, String>>();
     }
 
     /**
@@ -67,7 +66,7 @@ public class GXDLMSSapAssignment extends GXDLMSObject implements IGXDLMSBase {
      */
     public GXDLMSSapAssignment(final String ln) {
         super(ObjectType.SAP_ASSIGNMENT, ln, 0);
-        sapAssignmentList = new ArrayList<SimpleEntry<Integer, String>>();
+        sapAssignmentList = new ArrayList<Entry<Integer, String>>();
     }
 
     /**
@@ -80,15 +79,15 @@ public class GXDLMSSapAssignment extends GXDLMSObject implements IGXDLMSBase {
      */
     public GXDLMSSapAssignment(final String ln, final int sn) {
         super(ObjectType.SAP_ASSIGNMENT, ln, sn);
-        sapAssignmentList = new ArrayList<SimpleEntry<Integer, String>>();
+        sapAssignmentList = new ArrayList<Entry<Integer, String>>();
     }
 
-    public final List<SimpleEntry<Integer, String>> getSapAssignmentList() {
+    public final List<Entry<Integer, String>> getSapAssignmentList() {
         return sapAssignmentList;
     }
 
-    public final void setSapAssignmentList(
-            final List<AbstractMap.SimpleEntry<Integer, String>> value) {
+    public final void
+            setSapAssignmentList(final List<Entry<Integer, String>> value) {
         sapAssignmentList = value;
     }
 
@@ -107,11 +106,11 @@ public class GXDLMSSapAssignment extends GXDLMSObject implements IGXDLMSBase {
                 new java.util.ArrayList<Integer>();
         // LN is static and read only once.
         if (getLogicalName() == null || getLogicalName().compareTo("") == 0) {
-            attributes.add(1);
+            attributes.add(new Integer(1));
         }
         // SapAssignmentList
         if (!isRead(2)) {
-            attributes.add(2);
+            attributes.add(new Integer(2));
         }
         return GXDLMSObjectHelpers.toIntArray(attributes);
     }
@@ -163,7 +162,7 @@ public class GXDLMSSapAssignment extends GXDLMSObject implements IGXDLMSBase {
             // Add count
             GXCommon.setObjectCount(cnt, data);
             if (cnt != 0) {
-                for (SimpleEntry<Integer, String> it : sapAssignmentList) {
+                for (Entry<Integer, String> it : sapAssignmentList) {
                     data.setUInt8(DataType.STRUCTURE.getValue());
                     data.setUInt8(2); // Count
                     GXCommon.setData(data, DataType.UINT16, it.getKey());
@@ -198,10 +197,8 @@ public class GXDLMSSapAssignment extends GXDLMSObject implements IGXDLMSBase {
                     } else {
                         str = tmp.toString();
                     }
-                    sapAssignmentList
-                            .add(new AbstractMap.SimpleEntry<Integer, String>(
-                                    ((Number) Array.get(item, 0)).intValue(),
-                                    str));
+                    sapAssignmentList.add(new GXSimpleEntry<Integer, String>(
+                            ((Number) Array.get(item, 0)).intValue(), str));
                 }
             }
         } else {

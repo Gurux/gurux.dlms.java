@@ -74,7 +74,7 @@ public enum Security {
 
     Security(final int value) {
         intValue = value;
-        getMappings().put(value, this);
+        getMappings().put(new Integer(value), this);
     }
 
     public int getValue() {
@@ -82,6 +82,6 @@ public enum Security {
     }
 
     public static Security forValue(final int value) {
-        return getMappings().get(value);
+        return getMappings().get(new Integer(value));
     }
 }

@@ -82,7 +82,7 @@ public enum SortMethod {
 
     SortMethod(final int value) {
         intValue = value;
-        getMappings().put(value, this);
+        getMappings().put(new Integer(value), this);
     }
 
     public int getValue() {
@@ -90,6 +90,6 @@ public enum SortMethod {
     }
 
     public static SortMethod forValue(final int value) {
-        return getMappings().get(value);
+        return getMappings().get(new Integer(value));
     }
 }

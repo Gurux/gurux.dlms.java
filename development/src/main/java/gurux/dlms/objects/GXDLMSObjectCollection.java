@@ -37,6 +37,7 @@ package gurux.dlms.objects;
 import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.PrintWriter;
+import java.util.ArrayList;
 
 import javax.xml.stream.XMLInputFactory;
 import javax.xml.stream.XMLOutputFactory;
@@ -51,7 +52,7 @@ import gurux.dlms.enums.ObjectType;
 /**
  * Collection of DLMS objects.
  */
-public class GXDLMSObjectCollection extends java.util.ArrayList<GXDLMSObject>
+public class GXDLMSObjectCollection extends ArrayList<GXDLMSObject>
         implements java.util.List<GXDLMSObject> {
     private static final long serialVersionUID = 1L;
     private Object parent;

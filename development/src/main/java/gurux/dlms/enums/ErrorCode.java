@@ -165,7 +165,7 @@ public enum ErrorCode {
     ErrorCode(final int value) {
         intValue = value;
         synchronized (ErrorCode.class) {
-            getMappings().put(value, this);
+            getMappings().put(new Integer(value), this);
         }
     }
 
@@ -186,6 +186,6 @@ public enum ErrorCode {
      * @return Enumerator value.
      */
     public static ErrorCode forValue(final int value) {
-        return getMappings().get(value);
+        return getMappings().get(new Integer(value));
     }
 }

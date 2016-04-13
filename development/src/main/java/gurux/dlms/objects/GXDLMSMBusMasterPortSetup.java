@@ -101,11 +101,11 @@ public class GXDLMSMBusMasterPortSetup extends GXDLMSObject
                 new java.util.ArrayList<Integer>();
         // LN is static and read only once.
         if (getLogicalName() == null || getLogicalName().compareTo("") == 0) {
-            attributes.add(1);
+            attributes.add(new Integer(1));
         }
         // CommSpeed
         if (canRead(2)) {
-            attributes.add(2);
+            attributes.add(new Integer(2));
         }
         return GXDLMSObjectHelpers.toIntArray(attributes);
     }
@@ -148,7 +148,7 @@ public class GXDLMSMBusMasterPortSetup extends GXDLMSObject
             return getLogicalName();
         }
         if (index == 2) {
-            return commSpeed.ordinal();
+            return new Integer(commSpeed.ordinal());
         }
         throw new IllegalArgumentException(
                 "GetValue failed. Invalid attribute index.");

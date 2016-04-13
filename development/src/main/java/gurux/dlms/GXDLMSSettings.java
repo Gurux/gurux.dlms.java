@@ -224,7 +224,7 @@ public class GXDLMSSettings {
     /**
      * @return Cipher interface that is used to cipher PDU.
      */
-    final GXICipher getCipher() {
+    public final GXICipher getCipher() {
         return cipher;
     }
 
@@ -355,16 +355,14 @@ public class GXDLMSSettings {
             return true;
         }
 
-        // If I frame sent.
-        if ((senderFrame & 0x1) == 0) {
-            if ((frame & 0xE0) == ((receiverFrame + 0x20) & 0xE0)
-                    && (frame & 0xE) == ((receiverFrame + 2) & 0xE)) {
-                receiverFrame = (byte) (frame);
-                return true;
-            }
-        } else if (frame == receiverFrame
-                || ((frame & 0xE0) == (receiverFrame & 0xE0)
-                        && (frame & 0xE) == ((receiverFrame + 2) & 0xE))) {
+        // If I or S frame sent.
+        if ((frame & 0xE0) == ((receiverFrame + 0x20) & 0xE0)
+                && (frame & 0xE) == ((receiverFrame + 2) & 0xE)) {
+            receiverFrame = (byte) (frame);
+            return true;
+        }
+        if (frame == receiverFrame || ((frame & 0xE0) == (receiverFrame & 0xE0)
+                && (frame & 0xE) == ((receiverFrame + 2) & 0xE))) {
             // If S-frame sent.
             receiverFrame = frame;
             return true;
@@ -688,7 +686,7 @@ public class GXDLMSSettings {
     /**
      * @return Source system title.
      */
-    final byte[] getSourceSystemTitle() {
+    public final byte[] getSourceSystemTitle() {
         return sourceSystemTitle;
     }
 

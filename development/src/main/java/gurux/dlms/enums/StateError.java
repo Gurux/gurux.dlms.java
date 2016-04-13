@@ -82,7 +82,7 @@ public enum StateError {
      */
     StateError(final int value) {
         intValue = value;
-        getMappings().put(value, this);
+        getMappings().put(new Integer(value), this);
     }
 
     /**
@@ -102,6 +102,6 @@ public enum StateError {
      * @return Enumeration value.
      */
     public static StateError forValue(final int value) {
-        return getMappings().get(value);
+        return getMappings().get(new Integer(value));
     }
 }

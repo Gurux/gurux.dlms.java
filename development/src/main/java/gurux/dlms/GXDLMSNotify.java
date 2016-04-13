@@ -34,11 +34,11 @@
 
 package gurux.dlms;
 
-import java.util.AbstractMap.SimpleEntry;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Date;
 import java.util.List;
+import java.util.Map.Entry;
 
 import gurux.dlms.enums.Command;
 import gurux.dlms.enums.DataType;
@@ -308,14 +308,14 @@ public class GXDLMSNotify {
      * @return Generated data notification message(s).
      */
     public final byte[][] generateDataNotificationMessage(final Date date,
-            final List<SimpleEntry<GXDLMSObject, Integer>> objects) {
+            final List<Entry<GXDLMSObject, Integer>> objects) {
         if (objects == null) {
             throw new IllegalArgumentException("objects");
         }
         GXByteBuffer buff = new GXByteBuffer();
         buff.setUInt8((byte) DataType.ARRAY.getValue());
         GXCommon.setObjectCount(objects.size(), buff);
-        for (SimpleEntry<GXDLMSObject, Integer> it : objects) {
+        for (Entry<GXDLMSObject, Integer> it : objects) {
             addData(it.getKey(), it.getValue(), buff);
         }
         return getDataNotificationMessage(date, buff);
@@ -328,7 +328,7 @@ public class GXDLMSNotify {
      *            Received data.
      * @return Array of objects and called indexes.
      */
-    public final List<SimpleEntry<GXDLMSObject, Integer>>
+    public final List<Entry<GXDLMSObject, Integer>>
             parsePushObjects(final GXByteBuffer data) {
         GXDLMSObject obj;
         int index;
@@ -336,8 +336,8 @@ public class GXDLMSNotify {
         Object value;
         GXReplyData reply = new GXReplyData();
         reply.setData(data);
-        List<SimpleEntry<GXDLMSObject, Integer>> items =
-                new ArrayList<SimpleEntry<GXDLMSObject, Integer>>();
+        List<Entry<GXDLMSObject, Integer>> items =
+                new ArrayList<Entry<GXDLMSObject, Integer>>();
         GXDLMS.getValueFromData(settings, reply);
         Object[] list = (Object[]) reply.getValue();
         GXDLMSConverter c = new GXDLMSConverter();
@@ -355,7 +355,7 @@ public class GXDLMSNotify {
                     c.updateOBISCodeInformation(comp);
                 }
                 if (comp.getClass() != GXDLMSObject.class) {
-                    items.add(new SimpleEntry<GXDLMSObject, Integer>(comp,
+                    items.add(new GXSimpleEntry<GXDLMSObject, Integer>(comp,
                             ((Number) tmp[2]).intValue()));
                 } else {
                     System.out.println(String.format("Unknown object : %d %s",
@@ -392,7 +392,7 @@ public class GXDLMSNotify {
      * @return Generated push message(s).
      */
     public final byte[][] generatePushMessage(final Date date,
-            final List<SimpleEntry<GXDLMSObject, Integer>> objects) {
+            final List<Entry<GXDLMSObject, Integer>> objects) {
         DataType dt;
         Object value;
         if (objects == null) {
@@ -402,7 +402,7 @@ public class GXDLMSNotify {
         // Add data
         buff.setUInt8(DataType.ARRAY.getValue());
         GXCommon.setObjectCount(objects.size(), buff);
-        for (SimpleEntry<GXDLMSObject, Integer> it : objects) {
+        for (Entry<GXDLMSObject, Integer> it : objects) {
             dt = it.getKey().getDataType(it.getValue());
             value = it.getKey().getValue(settings, it.getValue(), 0, null);
             if (dt == DataType.NONE && value != null) {

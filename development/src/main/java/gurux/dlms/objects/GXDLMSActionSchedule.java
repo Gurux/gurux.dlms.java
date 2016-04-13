@@ -34,7 +34,6 @@
 
 package gurux.dlms.objects;
 
-import java.lang.reflect.Array;
 import java.util.Calendar;
 
 import gurux.dlms.GXByteBuffer;
@@ -131,19 +130,19 @@ public class GXDLMSActionSchedule extends GXDLMSObject implements IGXDLMSBase {
                 new java.util.ArrayList<Integer>();
         // LN is static and read only once.
         if (getLogicalName() == null || getLogicalName().compareTo("") == 0) {
-            attributes.add(1);
+            attributes.add(new Integer(1));
         }
         // ExecutedScriptLogicalName is static and read only once.
         if (!isRead(2)) {
-            attributes.add(2);
+            attributes.add(new Integer(2));
         }
         // Type is static and read only once.
         if (!isRead(3)) {
-            attributes.add(3);
+            attributes.add(new Integer(3));
         }
         // ExecutionTime is static and read only once.
         if (!isRead(4)) {
-            attributes.add(4);
+            attributes.add(new Integer(4));
         }
         return GXDLMSObjectHelpers.toIntArray(attributes);
     }
@@ -197,11 +196,12 @@ public class GXDLMSActionSchedule extends GXDLMSObject implements IGXDLMSBase {
             stream.setUInt8(2);
             GXCommon.setData(stream, DataType.OCTET_STRING,
                     GXCommon.getBytes(executedScriptLogicalName));
-            GXCommon.setData(stream, DataType.UINT16, executedScriptSelector);
+            GXCommon.setData(stream, DataType.UINT16,
+                    new Integer(executedScriptSelector));
             return stream.array();
         }
         if (index == 3) {
-            return this.getType().getValue();
+            return new Integer(this.getType().getValue());
         }
         if (index == 4) {
             GXByteBuffer bb = new GXByteBuffer();
@@ -233,10 +233,10 @@ public class GXDLMSActionSchedule extends GXDLMSObject implements IGXDLMSBase {
             super.setValue(settings, index, value);
         } else if (index == 2) {
             setExecutedScriptLogicalName(
-                    GXDLMSClient.changeType((byte[]) Array.get(value, 0),
+                    GXDLMSClient.changeType((byte[]) ((Object[]) value)[0],
                             DataType.OCTET_STRING).toString());
             setExecutedScriptSelector(
-                    ((Number) Array.get(value, 1)).intValue());
+                    ((Number) ((Object[]) value)[1]).intValue());
         } else if (index == 3) {
             setType(SingleActionScheduleType
                     .forValue(((Number) value).intValue()));
@@ -247,9 +247,9 @@ public class GXDLMSActionSchedule extends GXDLMSObject implements IGXDLMSBase {
                         new java.util.ArrayList<GXDateTime>();
                 for (Object it : (Object[]) value) {
                     GXDateTime dt = (GXDateTime) GXDLMSClient.changeType(
-                            (byte[]) Array.get(it, 0), DataType.TIME);
+                            (byte[]) ((Object[]) it)[0], DataType.TIME);
                     GXDateTime dt2 = (GXDateTime) GXDLMSClient.changeType(
-                            (byte[]) Array.get(it, 1), DataType.DATE);
+                            (byte[]) ((Object[]) it)[1], DataType.DATE);
                     java.util.Calendar tm = Calendar.getInstance();
                     tm.setTime(dt.getValue());
                     java.util.Calendar date = Calendar.getInstance();

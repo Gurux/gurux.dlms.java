@@ -34,7 +34,7 @@
 
 package gurux.dlms.enums;
 
-import java.util.EnumSet;
+import java.util.HashSet;
 
 /**
  * Defines Clock status.
@@ -104,7 +104,7 @@ public enum ClockStatus {
 
     ClockStatus(final int forValue) {
         this.value = forValue;
-        getMappings().put(forValue, this);
+        getMappings().put(new Integer(forValue), this);
     }
 
     /*
@@ -115,6 +115,16 @@ public enum ClockStatus {
     }
 
     /**
+     * @return Get enumeration constant values.
+     */
+    private static ClockStatus[] getEnumConstants() {
+        return new ClockStatus[] { OK, INVALID_VALUE, DOUBTFUL_VALUE,
+                DIFFERENT_CLOCK_BASE, INVALID_CLOCK_STATUS, RESERVED2,
+                RESERVED3, RESERVED4, DAYLIGHT_SAVE_ACTIVE, SKIPPED };
+
+    }
+
+    /**
      * Converts the integer value to enumerated value.
      * 
      * @param value
@@ -122,12 +132,13 @@ public enum ClockStatus {
      * @return The enumerated value, which represents the integer.
      */
     public static java.util.Set<ClockStatus> forValue(final int value) {
-        EnumSet<ClockStatus> types;
+        java.util.Set<ClockStatus> types;
         if (value == 0) {
-            types = EnumSet.of(ClockStatus.OK);
+            types = new HashSet<ClockStatus>();
+            types.add(ClockStatus.OK);
         } else {
-            types = EnumSet.noneOf(ClockStatus.class);
-            ClockStatus[] enums = ClockStatus.class.getEnumConstants();
+            types = new HashSet<ClockStatus>();
+            ClockStatus[] enums = getEnumConstants();
             for (int pos = 0; pos != enums.length; ++pos) {
                 if (enums[pos] != ClockStatus.OK
                         && (enums[pos].value & value) == enums[pos].value) {

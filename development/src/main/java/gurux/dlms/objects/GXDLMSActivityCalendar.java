@@ -34,7 +34,6 @@
 
 package gurux.dlms.objects;
 
-import java.lang.reflect.Array;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -183,44 +182,44 @@ public class GXDLMSActivityCalendar extends GXDLMSObject
                 new java.util.ArrayList<Integer>();
         // LN is static and read only once.
         if (getLogicalName() == null || getLogicalName().compareTo("") == 0) {
-            attributes.add(1);
+            attributes.add(new Integer(1));
         }
         // CalendarNameActive
         if (canRead(2)) {
-            attributes.add(2);
+            attributes.add(new Integer(2));
         }
         // SeasonProfileActive
         if (canRead(3)) {
-            attributes.add(3);
+            attributes.add(new Integer(3));
         }
 
         // WeekProfileTableActive
         if (canRead(4)) {
-            attributes.add(4);
+            attributes.add(new Integer(4));
         }
         // DayProfileTableActive
         if (canRead(5)) {
-            attributes.add(5);
+            attributes.add(new Integer(5));
         }
         // CalendarNamePassive
         if (canRead(6)) {
-            attributes.add(6);
+            attributes.add(new Integer(6));
         }
         // SeasonProfilePassive
         if (canRead(7)) {
-            attributes.add(7);
+            attributes.add(new Integer(7));
         }
         // WeekProfileTablePassive
         if (canRead(8)) {
-            attributes.add(8);
+            attributes.add(new Integer(8));
         }
         // DayProfileTablePassive
         if (canRead(9)) {
-            attributes.add(9);
+            attributes.add(new Integer(9));
         }
         // Time.
         if (canRead(10)) {
-            attributes.add(10);
+            attributes.add(new Integer(10));
         }
         return GXDLMSObjectHelpers.toIntArray(attributes);
     }
@@ -271,7 +270,7 @@ public class GXDLMSActivityCalendar extends GXDLMSObject
             return DataType.ARRAY;
         }
         if (index == 10) {
-            return DataType.OCTET_STRING;
+            return DataType.DATETIME;
         }
         throw new IllegalArgumentException(
                 "getDataType failed. Invalid attribute index.");
@@ -314,13 +313,20 @@ public class GXDLMSActivityCalendar extends GXDLMSObject
                 data.setUInt8(8);
                 GXCommon.setData(data, DataType.OCTET_STRING,
                         GXCommon.getBytes(it.getName()));
-                GXCommon.setData(data, DataType.UINT8, it.getMonday());
-                GXCommon.setData(data, DataType.UINT8, it.getTuesday());
-                GXCommon.setData(data, DataType.UINT8, it.getWednesday());
-                GXCommon.setData(data, DataType.UINT8, it.getThursday());
-                GXCommon.setData(data, DataType.UINT8, it.getFriday());
-                GXCommon.setData(data, DataType.UINT8, it.getSaturday());
-                GXCommon.setData(data, DataType.UINT8, it.getSunday());
+                GXCommon.setData(data, DataType.UINT8,
+                        new Integer(it.getMonday()));
+                GXCommon.setData(data, DataType.UINT8,
+                        new Integer(it.getTuesday()));
+                GXCommon.setData(data, DataType.UINT8,
+                        new Integer(it.getWednesday()));
+                GXCommon.setData(data, DataType.UINT8,
+                        new Integer(it.getThursday()));
+                GXCommon.setData(data, DataType.UINT8,
+                        new Integer(it.getFriday()));
+                GXCommon.setData(data, DataType.UINT8,
+                        new Integer(it.getSaturday()));
+                GXCommon.setData(data, DataType.UINT8,
+                        new Integer(it.getSunday()));
             }
         }
         return data.array();
@@ -338,7 +344,8 @@ public class GXDLMSActivityCalendar extends GXDLMSObject
             for (final GXDLMSDayProfile it : target) {
                 data.setUInt8(DataType.STRUCTURE.getValue());
                 data.setUInt8(2);
-                GXCommon.setData(data, DataType.UINT8, it.getDayId());
+                GXCommon.setData(data, DataType.UINT8,
+                        new Integer(it.getDayId()));
                 data.setUInt8(DataType.ARRAY.getValue());
                 // Add count
                 GXCommon.setObjectCount(it.getDaySchedules().length, data);
@@ -351,7 +358,7 @@ public class GXDLMSActivityCalendar extends GXDLMSObject
                     GXCommon.setData(data, DataType.OCTET_STRING,
                             GXCommon.getBytes(action.getScriptLogicalName()));
                     GXCommon.setData(data, DataType.UINT16,
-                            action.getScriptSelector());
+                            new Integer(action.getScriptSelector()));
                 }
             }
         }
@@ -401,12 +408,13 @@ public class GXDLMSActivityCalendar extends GXDLMSObject
         if (value != null) {
             for (final Object item : (Object[]) value) {
                 final GXDLMSSeasonProfile it = new GXDLMSSeasonProfile();
-                it.setName(GXDLMSClient.changeType((byte[]) Array.get(item, 0),
-                        DataType.STRING).toString());
+                it.setName(
+                        GXDLMSClient.changeType((byte[]) ((Object[]) item)[0],
+                                DataType.STRING).toString());
                 it.setStart((GXDateTime) GXDLMSClient.changeType(
-                        (byte[]) Array.get(item, 1), DataType.DATETIME));
+                        (byte[]) ((Object[]) item)[1], DataType.DATE));
                 it.setWeekName(
-                        GXDLMSClient.changeType((byte[]) Array.get(item, 2),
+                        GXDLMSClient.changeType((byte[]) ((Object[]) item)[2],
                                 DataType.STRING).toString());
                 items.add(it);
             }
@@ -419,16 +427,18 @@ public class GXDLMSActivityCalendar extends GXDLMSObject
                 new ArrayList<GXDLMSWeekProfile>();
         if (value != null) {
             for (final Object item : (Object[]) value) {
+                Object[] arr = ((Object[]) item);
                 final GXDLMSWeekProfile it = new GXDLMSWeekProfile();
-                it.setName(GXDLMSClient.changeType((byte[]) Array.get(item, 0),
-                        DataType.STRING).toString());
-                it.setMonday(((Number) Array.get(item, 1)).intValue());
-                it.setTuesday(((Number) Array.get(item, 2)).intValue());
-                it.setWednesday(((Number) Array.get(item, 3)).intValue());
-                it.setThursday(((Number) Array.get(item, 4)).intValue());
-                it.setFriday(((Number) Array.get(item, 5)).intValue());
-                it.setSaturday(((Number) Array.get(item, 6)).intValue());
-                it.setSunday(((Number) Array.get(item, 7)).intValue());
+                it.setName(GXDLMSClient
+                        .changeType((byte[]) arr[0], DataType.STRING)
+                        .toString());
+                it.setMonday(((Number) arr[1]).intValue());
+                it.setTuesday(((Number) arr[2]).intValue());
+                it.setWednesday(((Number) arr[3]).intValue());
+                it.setThursday(((Number) arr[4]).intValue());
+                it.setFriday(((Number) arr[5]).intValue());
+                it.setSaturday(((Number) arr[6]).intValue());
+                it.setSunday(((Number) arr[7]).intValue());
                 items.add(it);
             }
         }
@@ -440,19 +450,20 @@ public class GXDLMSActivityCalendar extends GXDLMSObject
         if (value != null) {
             for (final Object item : (Object[]) value) {
                 final GXDLMSDayProfile it = new GXDLMSDayProfile();
-                it.setDayId(((Number) Array.get(item, 0)).intValue());
+                it.setDayId(((Number) ((Object[]) item)[0]).intValue());
                 final List<GXDLMSDayProfileAction> actions =
                         new ArrayList<GXDLMSDayProfileAction>();
-                for (final Object it2 : (Object[]) Array.get(item, 1)) {
+                for (final Object it2 : (Object[]) ((Object[]) item)[1]) {
                     final GXDLMSDayProfileAction ac =
                             new GXDLMSDayProfileAction();
                     ac.setStartTime((GXDateTime) GXDLMSClient.changeType(
-                            (byte[]) Array.get(it2, 0), DataType.TIME));
-                    ac.setScriptLogicalName(
-                            GXDLMSClient.changeType((byte[]) Array.get(it2, 1),
-                                    DataType.OCTET_STRING).toString());
+                            (byte[]) ((Object[]) it2)[0], DataType.TIME));
+                    ac.setScriptLogicalName(GXDLMSClient
+                            .changeType((byte[]) ((Object[]) it2)[1],
+                                    DataType.OCTET_STRING)
+                            .toString());
                     ac.setScriptSelector(
-                            ((Number) Array.get(it2, 2)).intValue());
+                            ((Number) ((Object[]) it2)[2]).intValue());
                     actions.add(ac);
                 }
                 it.setDaySchedules(actions

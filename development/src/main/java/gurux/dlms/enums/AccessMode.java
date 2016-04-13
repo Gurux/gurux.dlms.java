@@ -71,7 +71,7 @@ public enum AccessMode {
 
     AccessMode(final int mode) {
         this.value = mode;
-        getMappings().put(mode, this);
+        getMappings().put(new Integer(mode), this);
     }
 
     /*
@@ -85,6 +85,6 @@ public enum AccessMode {
      * Convert integer for enum value.
      */
     public static AccessMode forValue(final int value) {
-        return getMappings().get(value);
+        return getMappings().get(new Integer(value));
     }
 }

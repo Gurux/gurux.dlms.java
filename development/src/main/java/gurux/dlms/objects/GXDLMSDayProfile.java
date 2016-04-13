@@ -86,7 +86,7 @@ public class GXDLMSDayProfile {
 
     @Override
     public final String toString() {
-        String str = String.format("%d", dayId);
+        String str = String.valueOf(dayId);
         for (GXDLMSDayProfileAction it : daySchedules) {
             str += " " + it.toString();
         }

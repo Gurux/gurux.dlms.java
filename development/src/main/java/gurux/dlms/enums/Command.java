@@ -208,7 +208,7 @@ public enum Command {
      */
     Command(final int value) {
         intValue = value;
-        getMappings().put(value, this);
+        getMappings().put(new Integer(value), this);
     }
 
     /**
@@ -228,7 +228,7 @@ public enum Command {
      * @return Enumeration value.
      */
     public static Command forValue(final int value) {
-        Command cmd = getMappings().get(value);
+        Command cmd = getMappings().get(new Integer(value));
         if (cmd == null) {
             throw new IllegalArgumentException("Invalid Command.");
         }

@@ -123,28 +123,28 @@ public class GXDLMSSecuritySetup extends GXDLMSObject implements IGXDLMSBase {
                 new java.util.ArrayList<Integer>();
         // LN is static and read only once.
         if (getLogicalName() == null || getLogicalName().compareTo("") == 0) {
-            attributes.add(1);
+            attributes.add(new Integer(1));
         }
         // SecurityPolicy
         if (canRead(2)) {
-            attributes.add(2);
+            attributes.add(new Integer(2));
         }
         // SecuritySuite
         if (canRead(3)) {
-            attributes.add(3);
+            attributes.add(new Integer(3));
         }
         if (getVersion() > 0) {
             // ClientSystemTitle
             if (canRead(4)) {
-                attributes.add(4);
+                attributes.add(new Integer(4));
             }
             // ServerSystemTitle
             if (canRead(5)) {
-                attributes.add(5);
+                attributes.add(new Integer(5));
             }
             // Certificates
             if (canRead(6)) {
-                attributes.add(6);
+                attributes.add(new Integer(6));
             }
         }
         return GXDLMSObjectHelpers.toIntArray(attributes);
@@ -211,10 +211,10 @@ public class GXDLMSSecuritySetup extends GXDLMSObject implements IGXDLMSBase {
             return getLogicalName();
         }
         if (index == 2) {
-            return getSecurityPolicy().getValue();
+            return new Integer(getSecurityPolicy().getValue());
         }
         if (index == 3) {
-            return getSecuritySuite().getValue();
+            return new Integer(getSecuritySuite().getValue());
         }
         if (index == 4) {
             return getClientSystemTitle();

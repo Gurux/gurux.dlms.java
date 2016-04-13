@@ -34,6 +34,8 @@
 
 package gurux.dlms;
 
+import java.security.InvalidParameterException;
+
 import gurux.dlms.internal.GXCommon;
 
 /**
@@ -57,7 +59,16 @@ public class GXDLMSSNSettings {
      * Constructor.
      */
     GXDLMSSNSettings(final byte[] value) {
-        this.conformanceBlock = value;
+        setConformanceBlock(value);
+    }
+
+    /**
+     * Clear all bits.
+     */
+    public final void clear() {
+        conformanceBlock[0] = 0;
+        conformanceBlock[1] = 0;
+        conformanceBlock[2] = 0;
     }
 
     final void copyTo(final GXDLMSSNSettings target) {
@@ -140,6 +151,9 @@ public class GXDLMSSNSettings {
      *            the conformance block to set
      */
     public final void setConformanceBlock(final byte[] value) {
-        this.conformanceBlock = value;
+        if (value == null || value.length != 3) {
+            throw new InvalidParameterException("Invalid conformance block.");
+        }
+        conformanceBlock = value;
     }
 }

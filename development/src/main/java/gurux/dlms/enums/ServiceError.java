@@ -87,7 +87,7 @@ public enum ServiceError {
      */
     ServiceError(final int value) {
         intValue = value;
-        getMappings().put(value, this);
+        getMappings().put(new Integer(value), this);
     }
 
     /**
@@ -107,6 +107,6 @@ public enum ServiceError {
      * @return Enumeration value.
      */
     public static ServiceError forValue(final int value) {
-        return getMappings().get(value);
+        return getMappings().get(new Integer(value));
     }
 }

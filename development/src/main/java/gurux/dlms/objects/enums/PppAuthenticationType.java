@@ -43,12 +43,14 @@ public enum PppAuthenticationType {
     /**
      * No authentication.
      */
-    None(0), /**
-              * PAP Login
-              */
-    PAP(1), /**
-             * CHAP-algorithm
-             */
+    None(0),
+    /**
+     * PAP Login
+     */
+    PAP(1),
+    /**
+     * CHAP-algorithm
+     */
     CHAP(2);
 
     private int intValue;
@@ -68,7 +70,7 @@ public enum PppAuthenticationType {
 
     PppAuthenticationType(final int value) {
         intValue = value;
-        getMappings().put(value, this);
+        getMappings().put(new Integer(value), this);
     }
 
     public int getValue() {
@@ -76,6 +78,6 @@ public enum PppAuthenticationType {
     }
 
     public static PppAuthenticationType forValue(final int value) {
-        return getMappings().get(value);
+        return getMappings().get(new Integer(value));
     }
 }

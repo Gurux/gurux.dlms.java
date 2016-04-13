@@ -213,7 +213,7 @@ public enum BerType {
      */
     BerType(final int value) {
         intValue = value;
-        getMappings().put(value, this);
+        getMappings().put(new Integer(value), this);
     }
 
     /**
@@ -233,6 +233,6 @@ public enum BerType {
      * @return Enumeration value.
      */
     public static BerType forValue(final int value) {
-        return getMappings().get(value);
+        return getMappings().get(new Integer(value));
     }
 }

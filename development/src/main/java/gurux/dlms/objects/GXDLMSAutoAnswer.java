@@ -34,16 +34,15 @@
 
 package gurux.dlms.objects;
 
-import java.lang.reflect.Array;
-import java.util.AbstractMap;
-import java.util.AbstractMap.SimpleEntry;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map.Entry;
 
 import gurux.dlms.GXByteBuffer;
 import gurux.dlms.GXDLMSClient;
 import gurux.dlms.GXDLMSSettings;
 import gurux.dlms.GXDateTime;
+import gurux.dlms.GXSimpleEntry;
 import gurux.dlms.enums.DataType;
 import gurux.dlms.enums.ObjectType;
 import gurux.dlms.internal.GXCommon;
@@ -52,7 +51,7 @@ import gurux.dlms.objects.enums.AutoConnectMode;
 
 public class GXDLMSAutoAnswer extends GXDLMSObject implements IGXDLMSBase {
     private AutoConnectMode mode;
-    private List<SimpleEntry<GXDateTime, GXDateTime>> listeningWindow;
+    private List<Entry<GXDateTime, GXDateTime>> listeningWindow;
     private AutoAnswerStatus status = AutoAnswerStatus.INACTIVE;
     private int numberOfCalls;
     private int numberOfRingsInListeningWindow, numberOfRingsOutListeningWindow;
@@ -62,7 +61,7 @@ public class GXDLMSAutoAnswer extends GXDLMSObject implements IGXDLMSBase {
      */
     public GXDLMSAutoAnswer() {
         super(ObjectType.AUTO_ANSWER, "0.0.2.2.0.255", 0);
-        listeningWindow = new ArrayList<SimpleEntry<GXDateTime, GXDateTime>>();
+        listeningWindow = new ArrayList<Entry<GXDateTime, GXDateTime>>();
     }
 
     /**
@@ -73,7 +72,7 @@ public class GXDLMSAutoAnswer extends GXDLMSObject implements IGXDLMSBase {
      */
     public GXDLMSAutoAnswer(final String ln) {
         super(ObjectType.AUTO_ANSWER, ln, 0);
-        listeningWindow = new ArrayList<SimpleEntry<GXDateTime, GXDateTime>>();
+        listeningWindow = new ArrayList<Entry<GXDateTime, GXDateTime>>();
     }
 
     /**
@@ -86,7 +85,7 @@ public class GXDLMSAutoAnswer extends GXDLMSObject implements IGXDLMSBase {
      */
     public GXDLMSAutoAnswer(final String ln, final int sn) {
         super(ObjectType.AUTO_ANSWER, ln, sn);
-        listeningWindow = new ArrayList<SimpleEntry<GXDateTime, GXDateTime>>();
+        listeningWindow = new ArrayList<Entry<GXDateTime, GXDateTime>>();
     }
 
     public final AutoConnectMode getMode() {
@@ -97,13 +96,12 @@ public class GXDLMSAutoAnswer extends GXDLMSObject implements IGXDLMSBase {
         mode = value;
     }
 
-    public final List<AbstractMap.SimpleEntry<GXDateTime, GXDateTime>>
-            getListeningWindow() {
+    public final List<Entry<GXDateTime, GXDateTime>> getListeningWindow() {
         return listeningWindow;
     }
 
     public final void setListeningWindow(
-            final List<AbstractMap.SimpleEntry<GXDateTime, GXDateTime>> value) {
+            final List<Entry<GXDateTime, GXDateTime>> value) {
         listeningWindow = value;
     }
 
@@ -147,10 +145,10 @@ public class GXDLMSAutoAnswer extends GXDLMSObject implements IGXDLMSBase {
 
     @Override
     public final Object[] getValues() {
-        String str = String.format("%d/%d", numberOfRingsInListeningWindow,
-                numberOfRingsOutListeningWindow);
+        String str = String.valueOf(numberOfRingsInListeningWindow) + "/"
+                + String.valueOf(numberOfRingsOutListeningWindow);
         return new Object[] { getLogicalName(), getMode(), getListeningWindow(),
-                getStatus(), getNumberOfCalls(), str };
+                getStatus(), new Integer(getNumberOfCalls()), str };
     }
 
     /*
@@ -163,28 +161,28 @@ public class GXDLMSAutoAnswer extends GXDLMSObject implements IGXDLMSBase {
                 new java.util.ArrayList<Integer>();
         // LN is static and read only once.
         if (getLogicalName() == null || getLogicalName().compareTo("") == 0) {
-            attributes.add(1);
+            attributes.add(new Integer(1));
         }
         // Mode is static and read only once.
         if (!isRead(2)) {
-            attributes.add(2);
+            attributes.add(new Integer(2));
         }
         // ListeningWindow is static and read only once.
         if (!isRead(3)) {
-            attributes.add(3);
+            attributes.add(new Integer(3));
         }
         // Status is not static.
         if (canRead(4)) {
-            attributes.add(4);
+            attributes.add(new Integer(4));
         }
 
         // NumberOfCalls is static and read only once.
         if (!isRead(5)) {
-            attributes.add(5);
+            attributes.add(new Integer(5));
         }
         // NumberOfRingsInListeningWindow is static and read only once.
         if (!isRead(6)) {
-            attributes.add(6);
+            attributes.add(new Integer(6));
         }
         return GXDLMSObjectHelpers.toIntArray(attributes);
     }
@@ -239,7 +237,7 @@ public class GXDLMSAutoAnswer extends GXDLMSObject implements IGXDLMSBase {
             return getLogicalName();
         }
         if (index == 2) {
-            return getMode().ordinal();
+            return new Integer(getMode().ordinal());
         }
         if (index == 3) {
             int cnt = getListeningWindow().size();
@@ -248,7 +246,7 @@ public class GXDLMSAutoAnswer extends GXDLMSObject implements IGXDLMSBase {
             // Add count
             GXCommon.setObjectCount(cnt, buff);
             if (cnt != 0) {
-                for (SimpleEntry<GXDateTime, GXDateTime> it : listeningWindow) {
+                for (Entry<GXDateTime, GXDateTime> it : listeningWindow) {
                     buff.setUInt8(DataType.STRUCTURE.getValue());
                     // Count
                     buff.setUInt8(2);
@@ -262,19 +260,19 @@ public class GXDLMSAutoAnswer extends GXDLMSObject implements IGXDLMSBase {
             return buff.array();
         }
         if (index == 4) {
-            return getStatus().getValue();
+            return new Integer(getStatus().getValue());
         }
         if (index == 5) {
-            return getNumberOfCalls();
+            return new Integer(getNumberOfCalls());
         }
         if (index == 6) {
             GXByteBuffer buff = new GXByteBuffer();
             buff.setUInt8(DataType.STRUCTURE.getValue());
             GXCommon.setObjectCount(2, buff);
             GXCommon.setData(buff, DataType.UINT8,
-                    numberOfRingsInListeningWindow);
+                    new Integer(numberOfRingsInListeningWindow));
             GXCommon.setData(buff, DataType.UINT8,
-                    numberOfRingsOutListeningWindow);
+                    new Integer(numberOfRingsOutListeningWindow));
             return buff.array();
         }
         throw new IllegalArgumentException(
@@ -297,11 +295,11 @@ public class GXDLMSAutoAnswer extends GXDLMSObject implements IGXDLMSBase {
             if (value != null) {
                 for (Object item : (Object[]) value) {
                     GXDateTime start = (GXDateTime) GXDLMSClient.changeType(
-                            (byte[]) Array.get(item, 0), DataType.DATETIME);
+                            (byte[]) ((Object[]) item)[0], DataType.DATETIME);
                     GXDateTime end = (GXDateTime) GXDLMSClient.changeType(
-                            (byte[]) Array.get(item, 1), DataType.DATETIME);
-                    getListeningWindow()
-                            .add(new SimpleEntry<GXDateTime, GXDateTime>(start,
+                            (byte[]) ((Object[]) item)[1], DataType.DATETIME);
+                    getListeningWindow().add(
+                            new GXSimpleEntry<GXDateTime, GXDateTime>(start,
                                     end));
                 }
             }
@@ -314,9 +312,9 @@ public class GXDLMSAutoAnswer extends GXDLMSObject implements IGXDLMSBase {
             numberOfRingsOutListeningWindow = 0;
             if (value != null) {
                 numberOfRingsInListeningWindow =
-                        ((Number) Array.get(value, 0)).intValue();
+                        ((Number) ((Object[]) value)[0]).intValue();
                 numberOfRingsOutListeningWindow =
-                        ((Number) Array.get(value, 1)).intValue();
+                        ((Number) ((Object[]) value)[1]).intValue();
             }
         } else {
             throw new IllegalArgumentException(

@@ -102,7 +102,7 @@ enum FrameType {
 
     FrameType(final int value) {
         intValue = value;
-        getMappings().put(value, this);
+        getMappings().put(new Integer(value), this);
     }
 
     /*
@@ -116,6 +116,6 @@ enum FrameType {
      * Convert integer for enum value.
      */
     public static FrameType forValue(final int value) {
-        return getMappings().get(value);
+        return getMappings().get(new Integer(value));
     }
 }

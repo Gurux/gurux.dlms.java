@@ -39,7 +39,10 @@ import java.security.NoSuchAlgorithmException;
 import java.util.Random;
 
 import gurux.dlms.GXByteBuffer;
+import gurux.dlms.GXDLMSSettings;
+import gurux.dlms.GXICipher;
 import gurux.dlms.enums.Authentication;
+import gurux.dlms.enums.Security;
 
 public final class GXSecure {
     /**
@@ -60,12 +63,14 @@ public final class GXSecure {
      *            Secret.
      * @return Chiphered text.
      */
-    public static byte[] secure(final Authentication auth, final byte[] data,
+    public static byte[] secure(final GXDLMSSettings settings,
+            final GXICipher cipher, final long ic, final byte[] data,
             final byte[] secret) {
+
         try {
 
             byte[] tmp;
-            if (auth == Authentication.HIGH) {
+            if (settings.getAuthentication() == Authentication.HIGH) {
                 tmp = new byte[data.length + (16 - (data.length % 16))];
                 System.arraycopy(data, 0, tmp, 0, data.length);
                 for (int pos = 0; pos < tmp.length / 16; ++pos) {
@@ -76,21 +81,39 @@ public final class GXSecure {
             // Get server Challenge.
             GXByteBuffer challenge = new GXByteBuffer();
             // Get shared secret
-            challenge.set(data);
-            challenge.set(secret);
+            if (settings.getAuthentication() == Authentication.HIGH_GMAC) {
+                challenge.set(data);
+            } else {
+                challenge.set(data);
+                challenge.set(secret);
+            }
             tmp = challenge.array();
-            if (auth == Authentication.HIGH_MD5) {
+            if (settings.getAuthentication() == Authentication.HIGH_MD5) {
                 MessageDigest md = MessageDigest.getInstance("MD5");
                 return md.digest(tmp);
-            }
-            if (auth == Authentication.HIGH_SHA1) {
+            } else if (settings
+                    .getAuthentication() == Authentication.HIGH_SHA1) {
                 MessageDigest md = MessageDigest.getInstance("SHA-1");
                 return md.digest(tmp);
+            } else if (settings
+                    .getAuthentication() == Authentication.HIGH_GMAC) {
+                // SC is always Security.Authentication.
+                AesGcmParameter p =
+                        new AesGcmParameter(0, Security.AUTHENTICATION, ic,
+                                secret, cipher.getBlockCipherKey(),
+                                cipher.getAuthenticationKey());
+                p.setType(CountType.TAG);
+                challenge.clear();
+                challenge.setUInt8((byte) Security.AUTHENTICATION.getValue());
+                challenge.setUInt32(p.getFrameCounter());
+                challenge.set(GXDLMSChippering.encryptAesGcm(p, tmp));
+                tmp = challenge.array();
+                return tmp;
             }
+            return data;
         } catch (NoSuchAlgorithmException ex) {
             throw new RuntimeException(ex.getMessage());
         }
-        return data;
     }
 
     /**

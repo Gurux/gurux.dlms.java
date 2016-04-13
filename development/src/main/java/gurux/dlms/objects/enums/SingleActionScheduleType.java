@@ -55,10 +55,11 @@ public enum SingleActionScheduleType {
      * Size of execution_time = n. Time values may be different, wildcards in
      * date not allowed,
      */
-    SingleActionScheduleType4(3), /**
-                                   * Size of execution_time = n. Time values may
-                                   * be different, wildcards in date are allowed
-                                   */
+    SingleActionScheduleType4(3),
+    /**
+     * Size of execution_time = n. Time values may be different, wildcards in
+     * date are allowed
+     */
     SingleActionScheduleType5(4);
 
     private int intValue;
@@ -76,7 +77,7 @@ public enum SingleActionScheduleType {
 
     SingleActionScheduleType(final int value) {
         intValue = value;
-        getMappings().put(value, this);
+        getMappings().put(new Integer(value), this);
     }
 
     public int getValue() {
@@ -84,6 +85,6 @@ public enum SingleActionScheduleType {
     }
 
     public static SingleActionScheduleType forValue(final int value) {
-        return getMappings().get(value);
+        return getMappings().get(new Integer(value));
     }
 }

@@ -36,25 +36,12 @@ package gurux.dlms.client;
 import java.io.BufferedWriter;
 import java.io.FileWriter;
 import java.io.PrintWriter;
-import java.lang.reflect.Array;
-import java.text.NumberFormat;
-import java.util.AbstractMap.SimpleEntry;
 
-import gurux.common.GXCommon;
 import gurux.common.IGXMedia;
 import gurux.dlms.GXDLMSClient;
-import gurux.dlms.GXReplyData;
 import gurux.dlms.enums.Authentication;
-import gurux.dlms.enums.ObjectType;
 import gurux.dlms.manufacturersettings.GXManufacturer;
 import gurux.dlms.manufacturersettings.GXManufacturerCollection;
-import gurux.dlms.objects.GXDLMSCaptureObject;
-import gurux.dlms.objects.GXDLMSDemandRegister;
-import gurux.dlms.objects.GXDLMSObject;
-import gurux.dlms.objects.GXDLMSObjectCollection;
-import gurux.dlms.objects.GXDLMSProfileGeneric;
-import gurux.dlms.objects.GXDLMSRegister;
-import gurux.dlms.objects.IGXDLMSBase;
 import gurux.io.Parity;
 import gurux.io.StopBits;
 import gurux.net.GXNet;
@@ -63,6 +50,45 @@ import gurux.serial.GXSerial;
 import gurux.terminal.GXTerminal;
 
 public class sampleclient {
+    /**
+     * @param args
+     *            the command line arguments
+     */
+    public static void main(String[] args) {
+        GXCommunicate com = null;
+        PrintWriter logFile = null;
+        try {
+            logFile = new PrintWriter(
+                    new BufferedWriter(new FileWriter("logFile.txt")));
+            // Gurux example server parameters.
+            // /m=lgz /h=localhost /p=4060
+            // /m=grx /h=localhost /p=4061
+            com = getManufactureSettings(args);
+            // If help is shown.
+            if (com == null) {
+                return;
+            }
+            com.initializeConnection();
+            com.readAllObjects(logFile);
+        } catch (Exception e) {
+            System.out.println(e.toString());
+        } finally {
+            if (logFile != null) {
+                logFile.close();
+            }
+            try {
+                ///////////////////////////////////////////////////////////////
+                // Disconnect.
+                if (com != null) {
+                    com.close();
+                }
+            } catch (Exception Ex2) {
+                System.out.println(Ex2.toString());
+            }
+        }
+        System.out.println("Done!");
+    }
+
     /**
      * Show help.
      */
@@ -91,364 +117,133 @@ public class sampleclient {
         System.out.println("GuruxDlmsSample /m=lgz /sp=COM1 /s=DLMS");
     }
 
-    static void trace(PrintWriter logFile, String text) {
-        logFile.write(text);
-        System.out.print(text);
-    }
-
-    static void traceLn(PrintWriter logFile, String text) {
-        logFile.write(text + "\r\n");
-        System.out.print(text + "\r\n");
-    }
-
     /**
+     * Get manufacturer settings from Gurux web service if not installed yet.
+     * This is something that you do not necessary seed. You can // hard code
+     * the settings. This is only for demonstration. Use hard coded settings
+     * like this:
+     * <p/>
+     * GXDLMSClient cl = new GXDLMSClient(true, 16, 1, Authentication.NONE,
+     * null, InterfaceType.HDLC);
+     * 
      * @param args
-     *            the command line arguments
+     *            Command line argumens.
+     * @return
+     * @throws Exception
      */
-    public static void main(String[] args) {
-        // Gurux example server parameters.
-        // /m=lgz /h=localhost /p=4060
-        // /m=grx /h=localhost /p=4061
-        GXCommunicate com = null;
-        PrintWriter logFile = null;
+    static GXCommunicate getManufactureSettings(String[] args)
+            throws Exception {
+        IGXMedia media = null;
+        GXCommunicate com;
+        String path = "ManufacturerSettings";
         try {
-            IGXMedia media = null;
-            logFile = new PrintWriter(
-                    new BufferedWriter(new FileWriter("logFile.txt")));
-            String path = "ManufacturerSettings";
-            // Get manufacturer settings from Gurux web service if not installed
-            // yet.
-            // This is something that you do not necessary seed. You can
-            // hard code the settings. This is only for demonstration.
-            // Use hard coded settings like this:
-            // GXDLMSClient cl = new GXDLMSClient(true,
-            // 16,
-            // 1,
-            // Authentication.NONE,
-            // null,
-            // InterfaceType.HDLC);
-
-            try {
-                if (GXManufacturerCollection.isFirstRun(path)) {
-                    GXManufacturerCollection.updateManufactureSettings(path);
-                }
-            } catch (Exception ex) {
-                System.out.println(ex.toString());
+            if (GXManufacturerCollection.isFirstRun(path)) {
+                GXManufacturerCollection.updateManufactureSettings(path);
             }
-            // 4059 is Official DLMS port.
-            String id = "", host = "", port = "4059", pw = "";
-            boolean trace = false, iec = true;
-            Authentication auth = Authentication.NONE;
-            int startBaudRate = 9600;
-            String number = null;
-            for (String it : args) {
-                String item = it.trim();
-                if (item.compareToIgnoreCase("/u") == 0) {
-                    // Update
-                    // Get latest manufacturer settings from Gurux web server.
-                    GXManufacturerCollection.updateManufactureSettings(path);
-                } else if (item.startsWith("/m=")) {
-                    // Manufacturer
-                    id = item.replaceFirst("/m=", "");
-                } else if (item.startsWith("/h=")) {
-                    // Host
-                    host = item.replaceFirst("/h=", "");
-                } else if (item.startsWith("/p=")) {
-                    // TCP/IP Port
-                    media = new gurux.net.GXNet();
-                    port = item.replaceFirst("/p=", "");
-                } else if (item.startsWith("/sp=")) {
-                    // Serial Port
-                    if (media == null) {
-                        media = new gurux.serial.GXSerial();
-                    }
-                    port = item.replaceFirst("/sp=", "");
-                } else if (item.startsWith("/n=")) {
-                    // Phone number for terminal.
-                    media = new GXTerminal();
-                    number = item.replaceFirst("/n=", "");
-                } else if (item.startsWith("/b=")) {
-                    // Baud rate
-                    startBaudRate =
-                            Integer.parseInt(item.replaceFirst("/b=", ""));
-                } else if (item.startsWith("/t")) {
-                    // Are messages traced.
-                    trace = true;
-                } else if (item.startsWith("/s=")) {
-                    // Start
-                    String tmp = item.replaceFirst("/s=", "");
-                    iec = !tmp.toLowerCase().equals("dlms");
-                } else if (item.startsWith("/a=")) {
-                    // Authentication
-                    auth = Authentication.valueOf(
-                            it.trim().replaceFirst("/a=", "").toUpperCase());
-                } else if (item.startsWith("/pw=")) {
-                    // Password
-                    pw = it.trim().replaceFirst("/pw=", "");
-                } else {
-                    ShowHelp();
-                    return;
-                }
-            }
-            if (id.isEmpty() || port.isEmpty()
-                    || (media instanceof gurux.net.GXNet && host.isEmpty())) {
-                ShowHelp();
-                return;
-            }
-            ////////////////////////////////////////
-            // Initialize connection settings.
-            if (media instanceof GXSerial) {
-                GXSerial serial = (GXSerial) media;
-                serial.setPortName(port);
-                if (iec) {
-                    serial.setBaudRate(300);
-                    serial.setDataBits(7);
-                    serial.setParity(Parity.EVEN);
-                    serial.setStopBits(StopBits.ONE);
-                } else {
-                    serial.setBaudRate(startBaudRate);
-                    serial.setDataBits(8);
-                    serial.setParity(Parity.NONE);
-                    serial.setStopBits(StopBits.ONE);
-                }
-            } else if (media instanceof GXNet) {
-                GXNet net = (GXNet) media;
-                net.setPort(Integer.parseInt(port));
-                net.setHostName(host);
-                net.setProtocol(NetworkType.TCP);
-            } else if (media instanceof GXTerminal) {
-                GXTerminal terminal = (GXTerminal) media;
-                terminal.setPortName(port);
-                terminal.setBaudRate(startBaudRate);
-                terminal.setDataBits(8);
-                terminal.setParity(gurux.io.Parity.NONE);
-                terminal.setStopBits(gurux.io.StopBits.ONE);
-                terminal.setPhoneNumber(number);
-            } else {
-                throw new Exception("Unknown media type.");
-            }
-            GXDLMSClient dlms = new GXDLMSClient();
-            GXManufacturerCollection items = new GXManufacturerCollection();
-            GXManufacturerCollection.readManufacturerSettings(items, path);
-            GXManufacturer man = items.findByIdentification(id);
-            if (man == null) {
-                throw new RuntimeException("Invalid manufacturer.");
-            }
-            dlms.setObisCodes(man.getObisCodes());
-            com = new GXCommunicate(5000, dlms, man, iec, auth, pw, media);
-            com.Trace = trace;
-            com.initializeConnection();
-            System.out.println("Reading association view");
-            GXReplyData reply = new GXReplyData();
-            com.readDataBlock(dlms.getObjectsRequest(), reply);
-            GXDLMSObjectCollection objects =
-                    dlms.parseObjects(reply.getData(), true);
-            GXDLMSObjectCollection objs = objects.getObjects(new ObjectType[] {
-                    ObjectType.REGISTER, ObjectType.DEMAND_REGISTER,
-                    ObjectType.EXTENDED_REGISTER });
-            Thread.sleep(1000);
-            for (GXDLMSObject it : objs) {
-                try {
-                    if (it instanceof GXDLMSRegister) {
-                        com.readObject(it, 3);
-                    } else if (it instanceof GXDLMSDemandRegister) {
-                        com.readObject(it, 4);
-                    }
-                } catch (Exception ex) {
-                    traceLn(logFile,
-                            "Err! Failed to read scaler and unit value: "
-                                    + ex.getMessage());
-                    // Continue reading.
-                }
-            }
-            // Read Profile Generic columns.
-            GXDLMSObjectCollection profileGenerics =
-                    objects.getObjects(ObjectType.PROFILE_GENERIC);
-            for (GXDLMSObject it : profileGenerics) {
-                traceLn(logFile,
-                        "Profile Generic " + it.getName() + " Columns:");
-                GXDLMSProfileGeneric pg = (GXDLMSProfileGeneric) it;
-                // Read columns.
-                try {
-                    com.readObject(pg, 3);
-                    boolean first = true;
-                    StringBuilder sb = new StringBuilder();
-                    for (SimpleEntry<GXDLMSObject, GXDLMSCaptureObject> col : pg
-                            .getCaptureObjects()) {
-                        if (!first) {
-                            sb.append(" | ");
-                        }
-                        sb.append(col.getKey().getName());
-                        sb.append(" ");
-                        String desc = col.getKey().getDescription();
-                        if (desc != null) {
-                            sb.append(desc);
-                        }
-                        first = false;
-                    }
-                    traceLn(logFile, sb.toString());
-                } catch (Exception ex) {
-                    traceLn(logFile,
-                            "Err! Failed to read columns:" + ex.getMessage());
-                    // Continue reading.
-                }
-            }
-
-            // Read all attributes from all objects.
-            for (GXDLMSObject it : objects) {
-                if (!(it instanceof IGXDLMSBase)) {
-                    // If interface is not implemented.
-                    System.out.println("Unknown Interface: "
-                            + it.getObjectType().toString());
-                    continue;
-                }
-
-                if (it instanceof GXDLMSProfileGeneric) {
-                    // Profile generic are read later
-                    // because it might take so long time
-                    // and this is only a example.
-                    continue;
-                }
-                traceLn(logFile,
-                        "-------- Reading " + it.getClass().getSimpleName()
-                                + " " + it.getName().toString() + " "
-                                + it.getDescription());
-                for (int pos : ((IGXDLMSBase) it).getAttributeIndexToRead()) {
-                    try {
-                        Object val = com.readObject(it, pos);
-                        if (val instanceof byte[]) {
-                            val = GXCommon.bytesToHex((byte[]) val);
-                        } else if (val instanceof Double) {
-                            NumberFormat formatter =
-                                    NumberFormat.getNumberInstance();
-                            val = formatter.format(val);
-                        } else if (val != null && val.getClass().isArray()) {
-                            String str = "";
-                            for (int pos2 = 0; pos2 != Array
-                                    .getLength(val); ++pos2) {
-                                if (!str.equals("")) {
-                                    str += ", ";
-                                }
-                                Object tmp = Array.get(val, pos2);
-                                if (tmp instanceof byte[]) {
-                                    str += GXCommon.bytesToHex((byte[]) tmp);
-                                } else {
-                                    str += String.valueOf(tmp);
-                                }
-                            }
-                            val = str;
-                        }
-                        traceLn(logFile, "Index: " + pos + " Value: "
-                                + String.valueOf(val));
-                    } catch (Exception ex) {
-                        traceLn(logFile,
-                                "Error! Index: " + pos + " " + ex.getMessage());
-                        // Continue reading.
-                    }
-                }
-            }
-            ///////////////////////////////////////////////////////////////////
-            // Get data of profile generics.
-            Object[] cells;
-            for (GXDLMSObject it : profileGenerics) {
-                traceLn(logFile,
-                        "-------- Reading " + it.getClass().getSimpleName()
-                                + " " + it.getName().toString() + " "
-                                + it.getDescription());
-
-                long entriesInUse =
-                        ((Number) com.readObject(it, 7)).longValue();
-                long entries = ((Number) com.readObject(it, 8)).longValue();
-                traceLn(logFile, "Entries: " + String.valueOf(entriesInUse)
-                        + "/" + String.valueOf(entries));
-                GXDLMSProfileGeneric pg = (GXDLMSProfileGeneric) it;
-                // If there are no columns.
-                if (entriesInUse == 0 || pg.getCaptureObjects().size() == 0) {
-                    continue;
-                }
-                ///////////////////////////////////////////////////////////////////
-                // Read first item.
-                try {
-                    cells = com.readRowsByEntry(pg, 1, 1);
-                    for (Object rows : cells) {
-                        for (Object cell : (Object[]) rows) {
-                            if (cell instanceof byte[]) {
-                                trace(logFile,
-                                        GXCommon.bytesToHex((byte[]) cell)
-                                                + " | ");
-                            } else {
-                                trace(logFile, cell + " | ");
-                            }
-                        }
-                        traceLn(logFile, "");
-                    }
-                } catch (Exception ex) {
-                    traceLn(logFile, "Error! Failed to read first row: "
-                            + ex.getMessage());
-                    // Continue reading if device returns access denied error.
-                }
-                ///////////////////////////////////////////////////////////////////
-                // Read last day.
-                try {
-                    java.util.Calendar start = java.util.Calendar
-                            .getInstance(java.util.TimeZone.getTimeZone("UTC"));
-                    start.set(java.util.Calendar.HOUR_OF_DAY, 0); // set hour to
-                                                                  // midnight
-                    start.set(java.util.Calendar.MINUTE, 0); // set minute in
-                                                             // hour
-                    start.set(java.util.Calendar.SECOND, 0); // set second in
-                                                             // minute
-                    start.set(java.util.Calendar.MILLISECOND, 0);
-                    start.add(java.util.Calendar.DATE, -1);
-
-                    java.util.Calendar end = java.util.Calendar
-                            .getInstance(java.util.TimeZone.getTimeZone("UTC"));
-                    end.set(java.util.Calendar.MINUTE, 0); // set minute in hour
-                    end.set(java.util.Calendar.SECOND, 0); // set second in
-                                                           // minute
-                    end.set(java.util.Calendar.MILLISECOND, 0);
-                    cells = com.readRowsByRange((GXDLMSProfileGeneric) it,
-                            start.getTime(), end.getTime());
-                    for (Object rows : cells) {
-                        for (Object cell : (Object[]) rows) {
-                            if (cell instanceof byte[]) {
-                                System.out.print(
-                                        GXCommon.bytesToHex((byte[]) cell)
-                                                + " | ");
-                            } else {
-                                trace(logFile, cell + " | ");
-                            }
-                        }
-                        traceLn(logFile, "");
-                    }
-                } catch (Exception ex) {
-                    traceLn(logFile, "Error! Failed to read last day: "
-                            + ex.getMessage());
-                    // Continue reading if device returns access denied error.
-                }
-            }
-        } catch (
-
-        Exception ex)
-
-        {
+        } catch (Exception ex) {
             System.out.println(ex.toString());
-        } finally
-
-        {
-            if (logFile != null) {
-                logFile.close();
-            }
-            try {
-                ///////////////////////////////////////////////////////////////
-                // Disconnect.
-                if (com != null) {
-                    com.close();
+        }
+        // 4059 is Official DLMS port.
+        String id = "", host = "", port = "4059", pw = "";
+        boolean trace = false, iec = true;
+        Authentication auth = Authentication.NONE;
+        int startBaudRate = 9600;
+        String number = null;
+        for (String it : args) {
+            String item = it.trim();
+            if (item.compareToIgnoreCase("/u") == 0) {
+                // Update
+                // Get latest manufacturer settings from Gurux web server.
+                GXManufacturerCollection.updateManufactureSettings(path);
+            } else if (item.startsWith("/m=")) {
+                // Manufacturer
+                id = item.replaceFirst("/m=", "");
+            } else if (item.startsWith("/h=")) {
+                // Host
+                host = item.replaceFirst("/h=", "");
+            } else if (item.startsWith("/p=")) {
+                // TCP/IP Port
+                media = new gurux.net.GXNet();
+                port = item.replaceFirst("/p=", "");
+            } else if (item.startsWith("/sp=")) {
+                // Serial Port
+                if (media == null) {
+                    media = new gurux.serial.GXSerial();
                 }
-            } catch (Exception Ex2) {
-                System.out.println(Ex2.toString());
+                port = item.replaceFirst("/sp=", "");
+            } else if (item.startsWith("/n=")) {
+                // Phone number for terminal.
+                media = new GXTerminal();
+                number = item.replaceFirst("/n=", "");
+            } else if (item.startsWith("/b=")) {
+                // Baud rate
+                startBaudRate = Integer.parseInt(item.replaceFirst("/b=", ""));
+            } else if (item.startsWith("/t")) {
+                // Are messages traced.
+                trace = true;
+            } else if (item.startsWith("/s=")) {
+                // Start
+                String tmp = item.replaceFirst("/s=", "");
+                iec = !tmp.toLowerCase().equals("dlms");
+            } else if (item.startsWith("/a=")) {
+                // Authentication
+                auth = Authentication.valueOf(
+                        it.trim().replaceFirst("/a=", "").toUpperCase());
+            } else if (item.startsWith("/pw=")) {
+                // Password
+                pw = it.trim().replaceFirst("/pw=", "");
+            } else {
+                ShowHelp();
+                return null;
             }
         }
-        System.out.println("Done!");
+        if (id.isEmpty() || port.isEmpty()
+                || (media instanceof gurux.net.GXNet && host.isEmpty())) {
+            ShowHelp();
+            return null;
+        }
+        ////////////////////////////////////////
+        // Initialize connection settings.
+        if (media instanceof GXSerial) {
+            GXSerial serial = (GXSerial) media;
+            serial.setPortName(port);
+            if (iec) {
+                serial.setBaudRate(300);
+                serial.setDataBits(7);
+                serial.setParity(Parity.EVEN);
+                serial.setStopBits(StopBits.ONE);
+            } else {
+                serial.setBaudRate(startBaudRate);
+                serial.setDataBits(8);
+                serial.setParity(Parity.NONE);
+                serial.setStopBits(StopBits.ONE);
+            }
+        } else if (media instanceof GXNet) {
+            GXNet net = (GXNet) media;
+            net.setPort(Integer.parseInt(port));
+            net.setHostName(host);
+            net.setProtocol(NetworkType.TCP);
+        } else if (media instanceof GXTerminal) {
+            GXTerminal terminal = (GXTerminal) media;
+            terminal.setPortName(port);
+            terminal.setBaudRate(startBaudRate);
+            terminal.setDataBits(8);
+            terminal.setParity(gurux.io.Parity.NONE);
+            terminal.setStopBits(gurux.io.StopBits.ONE);
+            terminal.setPhoneNumber(number);
+        } else {
+            throw new Exception("Unknown media type.");
+        }
+        GXDLMSClient dlms = new GXDLMSClient();
+        GXManufacturerCollection items = new GXManufacturerCollection();
+        GXManufacturerCollection.readManufacturerSettings(items, path);
+        GXManufacturer man = items.findByIdentification(id);
+        if (man == null) {
+            throw new RuntimeException("Invalid manufacturer.");
+        }
+        dlms.setObisCodes(man.getObisCodes());
+        com = new GXCommunicate(5000, dlms, man, iec, auth, pw, media);
+        com.Trace = trace;
+        return com;
     }
 }

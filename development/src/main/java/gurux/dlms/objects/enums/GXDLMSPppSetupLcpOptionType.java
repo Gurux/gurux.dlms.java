@@ -70,7 +70,7 @@ public enum GXDLMSPppSetupLcpOptionType {
 
     GXDLMSPppSetupLcpOptionType(final int value) {
         intValue = value;
-        getMappings().put(value, this);
+        getMappings().put(new Integer(value), this);
     }
 
     public int getValue() {
@@ -78,6 +78,6 @@ public enum GXDLMSPppSetupLcpOptionType {
     }
 
     public static GXDLMSPppSetupLcpOptionType forValue(final int value) {
-        return getMappings().get(value);
+        return getMappings().get(new Integer(value));
     }
 }

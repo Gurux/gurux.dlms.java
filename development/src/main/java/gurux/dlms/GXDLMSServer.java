@@ -223,20 +223,20 @@ public abstract class GXDLMSServer {
             String ln);
 
     /**
-     * Read selected item.
+     * Read selected item(s).
      * 
-     * @param e
-     *            Read parameters.
+     * @param args
+     *            Handled read requests.
      */
-    public abstract void read(ValueEventArgs e);
+    public abstract void read(ValueEventArgs[] args);
 
     /**
-     * Write selected item.
+     * Write selected item(s).
      * 
-     * @param e
-     *            Write parameters.
+     * @param args
+     *            Handled write requests.
      */
-    public abstract void write(ValueEventArgs e);
+    public abstract void write(ValueEventArgs[] args);
 
     /**
      * Client attempts to connect with the wrong server or client address.
@@ -249,10 +249,10 @@ public abstract class GXDLMSServer {
     /**
      * Action is occurred.
      * 
-     * @param e
-     *            Action parameters.
+     * @param args
+     *            Handled action requests.
      */
-    public abstract void action(ValueEventArgs e);
+    public abstract void action(ValueEventArgs[] e);
 
     /**
      * Constructor.
@@ -466,8 +466,10 @@ public abstract class GXDLMSServer {
             result = AssociationResult.PERMANENT_REJECTED;
             diagnostic = SourceDiagnostic.NOT_SUPPORTED;
         } else {
-            diagnostic = validateAuthentication(settings.getAuthentication(),
-                    settings.getPassword());
+            if (settings.getAuthentication() == Authentication.LOW) {
+                diagnostic = validateAuthentication(
+                        settings.getAuthentication(), settings.getPassword());
+            }
             if (diagnostic != SourceDiagnostic.NONE) {
                 result = AssociationResult.PERMANENT_REJECTED;
             } else if (settings.getAuthentication()
@@ -814,7 +816,7 @@ public abstract class GXDLMSServer {
                         ValueEventArgs e =
                                 new ValueEventArgs(obj, index, 0, null);
                         e.setValue(value);
-                        write(e);
+                        write(new ValueEventArgs[] { e });
                         if (!e.getHandled()) {
                             obj.setValue(settings, index, value);
                         }
@@ -877,7 +879,7 @@ public abstract class GXDLMSServer {
                 }
                 ValueEventArgs e = new ValueEventArgs(obj, attributeIndex,
                         selector, parameters);
-                read(e);
+                read(new ValueEventArgs[] { e });
                 Object value;
                 if (!e.getHandled()) {
                     value = obj.getValue(settings, attributeIndex, selector,
@@ -911,6 +913,7 @@ public abstract class GXDLMSServer {
             // Get request with a list.
             int cnt = GXCommon.getObjectCount(data);
             GXCommon.setObjectCount(cnt, bb);
+            List<ValueEventArgs> list = new ArrayList<ValueEventArgs>();
             for (int pos = 0; pos != cnt; ++pos) {
                 ObjectType ci = ObjectType.forValue(data.getUInt16());
                 byte[] ln = new byte[6];
@@ -936,24 +939,27 @@ public abstract class GXDLMSServer {
                         GXDataInfo info = new GXDataInfo();
                         parameters = GXCommon.getData(data, info);
                     }
-                    try {
-                        ValueEventArgs e = new ValueEventArgs(obj,
-                                attributeIndex, selector, parameters);
-                        read(e);
-                        Object value;
-                        if (!e.getHandled()) {
-                            value = obj.getValue(settings, attributeIndex,
-                                    selector, parameters);
-                        } else {
-                            value = e.getValue();
-                        }
-                        bb.setUInt8(ErrorCode.OK.getValue());
-                        GXDLMS.appedData(obj, attributeIndex, bb, value);
-                    } catch (Exception e) {
-                        bb.setUInt8(1);
-                        bb.setUInt8(ErrorCode.HARDWARE_FAULT.getValue());
-                    }
+                    ValueEventArgs e = new ValueEventArgs(obj, attributeIndex,
+                            selector, parameters);
+                    list.add(e);
                 }
+            }
+            try {
+                read(list.toArray(new ValueEventArgs[list.size()]));
+                Object value;
+                for (ValueEventArgs e : list) {
+                    if (!e.getHandled()) {
+                        value = e.getTarget().getValue(settings, e.getIndex(),
+                                e.getSelector(), e.getParameters());
+                    } else {
+                        value = e.getValue();
+                    }
+                    bb.setUInt8(ErrorCode.OK.getValue());
+                    GXDLMS.appedData(e.getTarget(), e.getIndex(), bb, value);
+                }
+            } catch (Exception e) {
+                bb.setUInt8(1);
+                bb.setUInt8(ErrorCode.HARDWARE_FAULT.getValue());
             }
             serverReply.setReplyMessages(GXDLMS.splitPdu(settings,
                     Command.GET_RESPONSE, 3, bb, error, null));
@@ -978,14 +984,16 @@ public abstract class GXDLMSServer {
         GXSNInfo info = new GXSNInfo();
         for (Map.Entry<Integer, GXDLMSObject> it : sortedItems.entrySet()) {
             int aCnt = ((IGXDLMSBase) it.getValue()).getAttributeCount();
-            if (sn >= it.getKey() && sn <= (it.getKey() + (8 * aCnt))) {
+            if (sn >= it.getKey().intValue()
+                    && sn <= (it.getKey().intValue() + (8 * aCnt))) {
                 info.setAction(false);
                 info.setItem(it.getValue());
                 info.setIndex(((sn - info.getItem().getShortName()) / 8) + 1);
                 LOGGER.info(String.format("Reading %d, attribute index %d",
-                        info.getItem().getName(), info.getIndex()));
+                        info.getItem().getName(),
+                        new Integer(info.getIndex())));
                 break;
-            } else if (sn >= it.getKey() + aCnt
+            } else if (sn >= it.getKey().intValue() + aCnt
                     && ((IGXDLMSBase) it.getValue()).getMethodCount() != 0) {
                 // Check if action.
 
@@ -993,7 +1001,7 @@ public abstract class GXDLMSServer {
                 int[] value2 = new int[1], count = new int[1];
                 GXDLMS.getActionInfo(it.getValue().getObjectType(), value2,
                         count);
-                if (sn <= it.getKey() + value2[0] + (8 * count[0])) {
+                if (sn <= it.getKey().intValue() + value2[0] + (8 * count[0])) {
                     info.setItem(it.getValue());
                     info.setAction(true);
                     info.setIndex(
@@ -1035,7 +1043,7 @@ public abstract class GXDLMSServer {
                 if (!info.isAction()) {
                     ValueEventArgs e = new ValueEventArgs(info.getItem(),
                             info.getIndex(), 0, null);
-                    read(e);
+                    read(new ValueEventArgs[] { e });
                     if (e.getHandled()) {
                         value = e.getValue();
                     } else {
@@ -1049,7 +1057,7 @@ public abstract class GXDLMSServer {
                 } else {
                     ValueEventArgs e = new ValueEventArgs(info.getItem(),
                             info.getIndex(), 0, null);
-                    action(e);
+                    action(new ValueEventArgs[] { e });
                     if (e.getHandled()) {
                         value = e.getValue();
                     } else {
@@ -1075,7 +1083,7 @@ public abstract class GXDLMSServer {
                 if (!info.isAction()) {
                     ValueEventArgs e = new ValueEventArgs(info.getItem(),
                             info.getIndex(), 0, null);
-                    read(e);
+                    read(new ValueEventArgs[] { e });
                     if (e.getHandled()) {
                         value = e.getValue();
                     } else {
@@ -1090,7 +1098,7 @@ public abstract class GXDLMSServer {
                     ValueEventArgs e = new ValueEventArgs(info.getItem(),
                             info.getIndex(), 0, null);
                     e.setValue(parameters);
-                    action(e);
+                    action(new ValueEventArgs[] { e });
                     if (e.getHandled()) {
                         value = e.getValue();
                     } else {
@@ -1159,7 +1167,7 @@ public abstract class GXDLMSServer {
                     ValueEventArgs e = new ValueEventArgs(target.getItem(),
                             target.getIndex(), 0, null);
                     e.setValue(value);
-                    write(e);
+                    write(new ValueEventArgs[] { e });
                     if (!e.getHandled()) {
                         target.getItem().setValue(settings, target.getIndex(),
                                 value);

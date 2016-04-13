@@ -266,9 +266,10 @@ public class GXDLMSLimiter extends GXDLMSObject implements IGXDLMSBase {
     @Override
     public final Object[] getValues() {
         return new Object[] { getLogicalName(), monitoredValue, thresholdActive,
-                thresholdNormal, thresholdEmergency, minOverThresholdDuration,
-                minUnderThresholdDuration, emergencyProfile,
-                emergencyProfileGroupIDs, emergencyProfileActive,
+                thresholdNormal, thresholdEmergency,
+                new Long(minOverThresholdDuration),
+                new Long(minUnderThresholdDuration), emergencyProfile,
+                emergencyProfileGroupIDs, new Boolean(emergencyProfileActive),
                 new Object[] { actionOverThreshold, actionUnderThreshold } };
     }
 
@@ -278,54 +279,54 @@ public class GXDLMSLimiter extends GXDLMSObject implements IGXDLMSBase {
                 new java.util.ArrayList<Integer>();
         // LN is static and read only once.
         if (getLogicalName() == null || getLogicalName().compareTo("") == 0) {
-            attributes.add(1);
+            attributes.add(new Integer(1));
         }
         // MonitoredValue
         if (canRead(2)) {
-            attributes.add(2);
+            attributes.add(new Integer(2));
         }
 
         // ThresholdActive
         if (canRead(3)) {
-            attributes.add(3);
+            attributes.add(new Integer(3));
         }
 
         // ThresholdNormal
         if (canRead(4)) {
-            attributes.add(4);
+            attributes.add(new Integer(4));
         }
 
         // ThresholdEmergency
         if (canRead(5)) {
-            attributes.add(5);
+            attributes.add(new Integer(5));
         }
 
         // MinOverThresholdDuration
         if (canRead(6)) {
-            attributes.add(6);
+            attributes.add(new Integer(6));
         }
 
         // MinUnderThresholdDuration
         if (canRead(7)) {
-            attributes.add(7);
+            attributes.add(new Integer(7));
         }
 
         // EmergencyProfile
         if (canRead(8)) {
-            attributes.add(8);
+            attributes.add(new Integer(8));
         }
         // EmergencyProfileGroup
         if (canRead(9)) {
-            attributes.add(9);
+            attributes.add(new Integer(9));
         }
 
         // EmergencyProfileActive
         if (canRead(10)) {
-            attributes.add(10);
+            attributes.add(new Integer(10));
         }
         // Actions
         if (canRead(11)) {
-            attributes.add(11);
+            attributes.add(new Integer(11));
         }
         return GXDLMSObjectHelpers.toIntArray(attributes);
     }
@@ -398,7 +399,7 @@ public class GXDLMSLimiter extends GXDLMSObject implements IGXDLMSBase {
             data.setUInt8(DataType.STRUCTURE.getValue());
             data.setUInt8(3);
             GXCommon.setData(data, DataType.INT16,
-                    monitoredValue.getObjectType().getValue());
+                    new Integer(monitoredValue.getObjectType().getValue()));
             GXCommon.setData(data, DataType.OCTET_STRING,
                     monitoredValue.getLogicalName());
             // TODO: GXCommon.setData(data, DataType.UINT8,
@@ -411,18 +412,19 @@ public class GXDLMSLimiter extends GXDLMSObject implements IGXDLMSBase {
         } else if (index == 5) {
             return thresholdEmergency;
         } else if (index == 6) {
-            return minOverThresholdDuration;
+            return new Long(minOverThresholdDuration);
         } else if (index == 7) {
-            return minUnderThresholdDuration;
+            return new Long(minUnderThresholdDuration);
         } else if (index == 8) {
             GXByteBuffer data = new GXByteBuffer();
             data.setUInt8(DataType.STRUCTURE.getValue());
             data.setUInt8(3);
-            GXCommon.setData(data, DataType.UINT16, emergencyProfile.getID());
-            GXCommon.setData(data, DataType.OCTET_STRING,
+            GXCommon.setData(data, DataType.UINT16,
+                    new Integer(emergencyProfile.getID()));
+            GXCommon.setData(data, DataType.DATETIME,
                     emergencyProfile.getActivationTime());
             GXCommon.setData(data, DataType.UINT32,
-                    emergencyProfile.getDuration());
+                    new Long(emergencyProfile.getDuration()));
             return data.array();
         } else if (index == 9) {
             GXByteBuffer data = new GXByteBuffer();
@@ -433,7 +435,7 @@ public class GXDLMSLimiter extends GXDLMSObject implements IGXDLMSBase {
             }
             return data.array();
         } else if (index == 10) {
-            return emergencyProfileActive;
+            return new Boolean(emergencyProfileActive);
         } else if (index == 11) {
             GXByteBuffer data = new GXByteBuffer();
             data.setUInt8(DataType.STRUCTURE.getValue());
@@ -443,13 +445,13 @@ public class GXDLMSLimiter extends GXDLMSObject implements IGXDLMSBase {
             GXCommon.setData(data, DataType.OCTET_STRING,
                     actionOverThreshold.getLogicalName());
             GXCommon.setData(data, DataType.UINT16,
-                    actionOverThreshold.getScriptSelector());
+                    new Integer(actionOverThreshold.getScriptSelector()));
             data.setUInt8(DataType.STRUCTURE.getValue());
             data.setUInt8(2);
             GXCommon.setData(data, DataType.OCTET_STRING,
                     actionUnderThreshold.getLogicalName());
             GXCommon.setData(data, DataType.UINT16,
-                    actionUnderThreshold.getScriptSelector());
+                    new Integer(actionUnderThreshold.getScriptSelector()));
             return data.array();
         }
         throw new IllegalArgumentException(
@@ -487,18 +489,18 @@ public class GXDLMSLimiter extends GXDLMSObject implements IGXDLMSBase {
             emergencyProfile.setID(((Number) tmp[0]).intValue());
             emergencyProfile.setActivationTime((GXDateTime) GXDLMSClient
                     .changeType((byte[]) tmp[1], DataType.DATETIME));
-            emergencyProfile.setDuration((Long) tmp[2]);
+            emergencyProfile.setDuration(((Long) tmp[2]).longValue());
         } else if (index == 9) {
             java.util.ArrayList<Integer> list =
                     new java.util.ArrayList<Integer>();
             if (value != null) {
                 for (Object it : (Object[]) value) {
-                    list.add(((Number) it).intValue());
+                    list.add(new Integer(((Number) it).intValue()));
                 }
             }
             emergencyProfileGroupIDs = GXDLMSObjectHelpers.toIntArray(list);
         } else if (index == 10) {
-            emergencyProfileActive = (Boolean) value;
+            emergencyProfileActive = ((Boolean) value).booleanValue();
         } else if (index == 11) {
             Object[] tmp = (Object[]) value;
             Object[] tmp1 = (Object[]) tmp[0];

@@ -87,4 +87,18 @@ public interface GXICipher {
      */
     byte[] getSystemTitle();
 
+    /**
+     * @return Block cipher key.
+     */
+    byte[] getBlockCipherKey();
+
+    /**
+     * @return Authentication key.
+     */
+    byte[] getAuthenticationKey();
+
+    /**
+     * @return Frame counter. Invocation counter.
+     */
+    long getFrameCounter();
 }

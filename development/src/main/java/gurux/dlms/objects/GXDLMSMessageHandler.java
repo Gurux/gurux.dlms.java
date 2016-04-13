@@ -34,7 +34,6 @@
 
 package gurux.dlms.objects;
 
-import java.util.AbstractMap.SimpleEntry;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map.Entry;
@@ -43,6 +42,7 @@ import gurux.dlms.GXByteBuffer;
 import gurux.dlms.GXDLMSClient;
 import gurux.dlms.GXDLMSSettings;
 import gurux.dlms.GXDateTime;
+import gurux.dlms.GXSimpleEntry;
 import gurux.dlms.enums.DataType;
 import gurux.dlms.enums.ObjectType;
 import gurux.dlms.internal.GXCommon;
@@ -145,19 +145,19 @@ public class GXDLMSMessageHandler extends GXDLMSObject implements IGXDLMSBase {
         List<Integer> attributes = new ArrayList<Integer>();
         // LN is static and read only once.
         if (getLogicalName() == null || getLogicalName().compareTo("") == 0) {
-            attributes.add(1);
+            attributes.add(new Integer(1));
         }
         // ListeningWindow
         if (canRead(2)) {
-            attributes.add(2);
+            attributes.add(new Integer(2));
         }
         // AllowedSenders
         if (canRead(3)) {
-            attributes.add(3);
+            attributes.add(new Integer(3));
         }
         // SendersAndActions
         if (canRead(4)) {
-            attributes.add(4);
+            attributes.add(new Integer(4));
         }
         return GXDLMSObjectHelpers.toIntArray(attributes);
     }
@@ -215,8 +215,8 @@ public class GXDLMSMessageHandler extends GXDLMSObject implements IGXDLMSBase {
             for (Entry<GXDateTime, GXDateTime> it : listeningWindow) {
                 buff.setUInt8(DataType.STRUCTURE.getValue());
                 buff.setUInt8(2);
-                GXCommon.setData(buff, DataType.OCTET_STRING, it.getKey());
-                GXCommon.setData(buff, DataType.OCTET_STRING, it.getValue());
+                GXCommon.setData(buff, DataType.DATETIME, it.getKey());
+                GXCommon.setData(buff, DataType.DATETIME, it.getValue());
             }
             return buff.array();
         }
@@ -233,7 +233,9 @@ public class GXDLMSMessageHandler extends GXDLMSObject implements IGXDLMSBase {
             GXByteBuffer buff = new GXByteBuffer();
             buff.setUInt8(DataType.ARRAY.getValue());
             GXCommon.setObjectCount(sendersAndActions.size(), buff);
-            for (Entry<String, Entry<Integer, GXDLMSScriptAction>> it : sendersAndActions) {
+            for (Entry<String, Entry<Integer, GXDLMSScriptAction>> it
+
+            : sendersAndActions) {
                 buff.setUInt8(DataType.STRUCTURE.getValue());
                 buff.setUInt8(2);
                 GXCommon.setData(buff, DataType.OCTET_STRING,
@@ -263,8 +265,9 @@ public class GXDLMSMessageHandler extends GXDLMSObject implements IGXDLMSBase {
                             .changeType((byte[]) tmp[0], DataType.DATETIME);
                     GXDateTime end = (GXDateTime) GXDLMSClient
                             .changeType((byte[]) tmp[1], DataType.DATETIME);
-                    listeningWindow.add(new SimpleEntry<GXDateTime, GXDateTime>(
-                            start, end));
+                    listeningWindow.add(
+                            new GXSimpleEntry<GXDateTime, GXDateTime>(start,
+                                    end));
                 }
             }
 

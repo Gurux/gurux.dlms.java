@@ -126,7 +126,7 @@ public class GXDLMSDisconnectControl extends GXDLMSObject
      * disconnection is enabled (control mode > 0).
      */
     public final byte[][] remoteDisconnect(final GXDLMSClient client) {
-        return client.method(this, 1, 0, DataType.UINT8);
+        return client.method(this, 1, new Integer(0), DataType.UINT8);
     }
 
     /*
@@ -136,12 +136,12 @@ public class GXDLMSDisconnectControl extends GXDLMSObject
      * a direct remote reconnection is enabled (control_mode = 2, 4).
      */
     public final byte[][] remoteReconnect(final GXDLMSClient client) {
-        return client.method(this, 2, 0, DataType.UINT8);
+        return client.method(this, 2, new Integer(0), DataType.UINT8);
     }
 
     @Override
     public final Object[] getValues() {
-        return new Object[] { getLogicalName(), getOutputState(),
+        return new Object[] { getLogicalName(), new Boolean(getOutputState()),
                 getControlState(), getControlMode() };
     }
 
@@ -151,19 +151,19 @@ public class GXDLMSDisconnectControl extends GXDLMSObject
                 new java.util.ArrayList<Integer>();
         // LN is static and read only once.
         if (getLogicalName() == null || getLogicalName().compareTo("") == 0) {
-            attributes.add(1);
+            attributes.add(new Integer(1));
         }
         // OutputState
         if (canRead(2)) {
-            attributes.add(2);
+            attributes.add(new Integer(2));
         }
         // ControlState
         if (canRead(3)) {
-            attributes.add(3);
+            attributes.add(new Integer(3));
         }
         // ControlMode
         if (canRead(4)) {
-            attributes.add(4);
+            attributes.add(new Integer(4));
         }
         return GXDLMSObjectHelpers.toIntArray(attributes);
     }
@@ -203,13 +203,13 @@ public class GXDLMSDisconnectControl extends GXDLMSObject
             return getLogicalName();
         }
         if (index == 2) {
-            return getOutputState();
+            return new Boolean(getOutputState());
         }
         if (index == 3) {
-            return getControlState().ordinal();
+            return new Integer(getControlState().ordinal());
         }
         if (index == 4) {
-            return getControlMode().ordinal();
+            return new Integer(getControlMode().ordinal());
         }
         throw new IllegalArgumentException(
                 "GetValue failed. Invalid attribute index.");
@@ -226,7 +226,7 @@ public class GXDLMSDisconnectControl extends GXDLMSObject
             if (value == null) {
                 setOutputState(false);
             } else {
-                setOutputState((Boolean) value);
+                setOutputState(((Boolean) value).booleanValue());
             }
         } else if (index == 3) {
             if (value == null) {

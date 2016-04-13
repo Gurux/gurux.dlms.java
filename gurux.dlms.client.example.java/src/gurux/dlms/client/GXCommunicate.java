@@ -37,31 +37,39 @@ import java.io.BufferedWriter;
 import java.io.FileWriter;
 import java.io.IOException;
 import java.io.PrintWriter;
+import java.lang.reflect.Array;
 import java.nio.file.Files;
 import java.nio.file.Paths;
+import java.text.NumberFormat;
 import java.text.SimpleDateFormat;
-import java.util.AbstractMap;
 import java.util.Date;
 import java.util.List;
+import java.util.Map.Entry;
 
 import gurux.common.GXCommon;
 import gurux.common.IGXMedia;
 import gurux.common.ReceiveParameters;
 import gurux.dlms.GXDLMSClient;
+import gurux.dlms.GXDLMSConverter;
 import gurux.dlms.GXDLMSException;
 import gurux.dlms.GXReplyData;
 import gurux.dlms.enums.Authentication;
 import gurux.dlms.enums.DataType;
 import gurux.dlms.enums.ErrorCode;
 import gurux.dlms.enums.InterfaceType;
+import gurux.dlms.enums.ObjectType;
 import gurux.dlms.enums.RequestTypes;
 import gurux.dlms.manufacturersettings.GXManufacturer;
 import gurux.dlms.manufacturersettings.GXObisCode;
 import gurux.dlms.manufacturersettings.GXServerAddress;
 import gurux.dlms.manufacturersettings.HDLCAddressType;
 import gurux.dlms.objects.GXDLMSCaptureObject;
+import gurux.dlms.objects.GXDLMSDemandRegister;
 import gurux.dlms.objects.GXDLMSObject;
+import gurux.dlms.objects.GXDLMSObjectCollection;
 import gurux.dlms.objects.GXDLMSProfileGeneric;
+import gurux.dlms.objects.GXDLMSRegister;
+import gurux.dlms.objects.IGXDLMSBase;
 import gurux.io.Parity;
 import gurux.io.StopBits;
 import gurux.net.GXNet;
@@ -76,6 +84,16 @@ public class GXCommunicate {
     boolean iec;
     java.nio.ByteBuffer replyBuff;
     int WaitTime = 10000;
+
+    static void trace(PrintWriter logFile, String text) {
+        logFile.write(text);
+        System.out.print(text);
+    }
+
+    static void traceLn(PrintWriter logFile, String text) {
+        logFile.write(text + "\r\n");
+        System.out.print(text + "\r\n");
+    }
 
     public GXCommunicate(int waitTime, gurux.dlms.GXDLMSClient dlms,
             GXManufacturer manufacturer, boolean iec, Authentication auth,
@@ -434,9 +452,8 @@ public class GXCommunicate {
     /*
      * /// Read list of attributes.
      */
-    public void
-            readList(List<AbstractMap.SimpleEntry<GXDLMSObject, Integer>> list)
-                    throws Exception {
+    public void readList(List<Entry<GXDLMSObject, Integer>> list)
+            throws Exception {
         byte[][] data = dlms.readList(list);
         GXReplyData reply = new GXReplyData();
         for (byte[] it : data) {
@@ -461,7 +478,7 @@ public class GXCommunicate {
     /*
      * Returns columns of profile Generic.
      */
-    public List<AbstractMap.SimpleEntry<GXDLMSObject, GXDLMSCaptureObject>>
+    public List<Entry<GXDLMSObject, GXDLMSCaptureObject>>
             GetColumns(GXDLMSProfileGeneric pg) throws Exception {
         Object entries = readObject(pg, 7);
         GXObisCode code = manufacturer.getObisCodes()
@@ -508,11 +525,239 @@ public class GXCommunicate {
      * @return
      * @throws Exception
      */
-    public Object[] readRowsByRange(GXDLMSProfileGeneric pg, Date start,
-            Date end) throws Exception {
+    public Object[] readRowsByRange(final GXDLMSProfileGeneric pg,
+            final Date start, final Date end) throws Exception {
         GXReplyData reply = new GXReplyData();
         byte[][] data = dlms.readRowsByRange(pg, start, end);
         readDataBlock(data, reply);
         return (Object[]) dlms.updateValue(pg, 2, reply.getValue());
+    }
+
+    /*
+     * Read Scalers and units from the register objects.
+     */
+    void readScalerAndUnits(final GXDLMSObjectCollection objects,
+            final PrintWriter logFile) {
+        GXDLMSObjectCollection objs = objects.getObjects(new ObjectType[] {
+                ObjectType.REGISTER, ObjectType.DEMAND_REGISTER,
+                ObjectType.EXTENDED_REGISTER });
+        for (GXDLMSObject it : objs) {
+            try {
+                if (it instanceof GXDLMSRegister) {
+                    readObject(it, 3);
+                } else if (it instanceof GXDLMSDemandRegister) {
+                    readObject(it, 4);
+                }
+            } catch (Exception ex) {
+                traceLn(logFile, "Err! Failed to read scaler and unit value: "
+                        + ex.getMessage());
+                // Continue reading.
+            }
+        }
+    }
+
+    /*
+     * Read profile generic columns from the meter.
+     */
+    void readProfileGenericColumns(final GXDLMSObjectCollection objects,
+            final PrintWriter logFile) {
+        GXDLMSObjectCollection profileGenerics =
+                objects.getObjects(ObjectType.PROFILE_GENERIC);
+        for (GXDLMSObject it : profileGenerics) {
+            traceLn(logFile, "Profile Generic " + it.getName() + " Columns:");
+            GXDLMSProfileGeneric pg = (GXDLMSProfileGeneric) it;
+            // Read columns.
+            try {
+                readObject(pg, 3);
+                boolean first = true;
+                StringBuilder sb = new StringBuilder();
+                for (Entry<GXDLMSObject, GXDLMSCaptureObject> col : pg
+                        .getCaptureObjects()) {
+                    if (!first) {
+                        sb.append(" | ");
+                    }
+                    sb.append(col.getKey().getName());
+                    sb.append(" ");
+                    String desc = col.getKey().getDescription();
+                    if (desc != null) {
+                        sb.append(desc);
+                    }
+                    first = false;
+                }
+                traceLn(logFile, sb.toString());
+            } catch (Exception ex) {
+                traceLn(logFile,
+                        "Err! Failed to read columns:" + ex.getMessage());
+                // Continue reading.
+            }
+        }
+    }
+
+    /**
+     * Read all data from the meter except profile generic (Historical) data.
+     */
+    void readValues(final GXDLMSObjectCollection objects,
+            final PrintWriter logFile) {
+        for (GXDLMSObject it : objects) {
+            if (!(it instanceof IGXDLMSBase)) {
+                // If interface is not implemented.
+                System.out.println(
+                        "Unknown Interface: " + it.getObjectType().toString());
+                continue;
+            }
+
+            if (it instanceof GXDLMSProfileGeneric) {
+                // Profile generic are read later
+                // because it might take so long time
+                // and this is only a example.
+                continue;
+            }
+            traceLn(logFile,
+                    "-------- Reading " + it.getClass().getSimpleName() + " "
+                            + it.getName().toString() + " "
+                            + it.getDescription());
+            for (int pos : ((IGXDLMSBase) it).getAttributeIndexToRead()) {
+                try {
+                    Object val = readObject(it, pos);
+                    if (val instanceof byte[]) {
+                        val = GXCommon.bytesToHex((byte[]) val);
+                    } else if (val instanceof Double) {
+                        NumberFormat formatter =
+                                NumberFormat.getNumberInstance();
+                        val = formatter.format(val);
+                    } else if (val != null && val.getClass().isArray()) {
+                        String str = "";
+                        for (int pos2 = 0; pos2 != Array
+                                .getLength(val); ++pos2) {
+                            if (!str.equals("")) {
+                                str += ", ";
+                            }
+                            Object tmp = Array.get(val, pos2);
+                            if (tmp instanceof byte[]) {
+                                str += GXCommon.bytesToHex((byte[]) tmp);
+                            } else {
+                                str += String.valueOf(tmp);
+                            }
+                        }
+                        val = str;
+                    }
+                    traceLn(logFile,
+                            "Index: " + pos + " Value: " + String.valueOf(val));
+                } catch (Exception ex) {
+                    traceLn(logFile,
+                            "Error! Index: " + pos + " " + ex.getMessage());
+                    // Continue reading.
+                }
+            }
+        }
+    }
+
+    /**
+     * Read profile generic (Historical) data.
+     */
+    void readProfileGenerics(final GXDLMSObjectCollection objects,
+            final PrintWriter logFile) throws Exception {
+        Object[] cells;
+        GXDLMSObjectCollection profileGenerics =
+                objects.getObjects(ObjectType.PROFILE_GENERIC);
+        for (GXDLMSObject it : profileGenerics) {
+            traceLn(logFile,
+                    "-------- Reading " + it.getClass().getSimpleName() + " "
+                            + it.getName().toString() + " "
+                            + it.getDescription());
+
+            long entriesInUse = ((Number) readObject(it, 7)).longValue();
+            long entries = ((Number) readObject(it, 8)).longValue();
+            traceLn(logFile, "Entries: " + String.valueOf(entriesInUse) + "/"
+                    + String.valueOf(entries));
+            GXDLMSProfileGeneric pg = (GXDLMSProfileGeneric) it;
+            // If there are no columns.
+            if (entriesInUse == 0 || pg.getCaptureObjects().size() == 0) {
+                continue;
+            }
+            ///////////////////////////////////////////////////////////////////
+            // Read first item.
+            try {
+                cells = readRowsByEntry(pg, 1, 1);
+                for (Object rows : cells) {
+                    for (Object cell : (Object[]) rows) {
+                        if (cell instanceof byte[]) {
+                            trace(logFile,
+                                    GXCommon.bytesToHex((byte[]) cell) + " | ");
+                        } else {
+                            trace(logFile, cell + " | ");
+                        }
+                    }
+                    traceLn(logFile, "");
+                }
+            } catch (Exception ex) {
+                traceLn(logFile,
+                        "Error! Failed to read first row: " + ex.getMessage());
+                // Continue reading if device returns access denied error.
+            }
+            ///////////////////////////////////////////////////////////////////
+            // Read last day.
+            try {
+                java.util.Calendar start = java.util.Calendar
+                        .getInstance(java.util.TimeZone.getTimeZone("UTC"));
+                start.set(java.util.Calendar.HOUR_OF_DAY, 0); // set hour to
+                                                              // midnight
+                start.set(java.util.Calendar.MINUTE, 0); // set minute in
+                                                         // hour
+                start.set(java.util.Calendar.SECOND, 0); // set second in
+                                                         // minute
+                start.set(java.util.Calendar.MILLISECOND, 0);
+                start.add(java.util.Calendar.DATE, -1);
+
+                java.util.Calendar end = java.util.Calendar.getInstance();
+                end.set(java.util.Calendar.MINUTE, 0); // set minute in hour
+                end.set(java.util.Calendar.SECOND, 0); // set second in
+                                                       // minute
+                end.set(java.util.Calendar.MILLISECOND, 0);
+                cells = readRowsByRange((GXDLMSProfileGeneric) it,
+                        start.getTime(), end.getTime());
+                for (Object rows : cells) {
+                    for (Object cell : (Object[]) rows) {
+                        if (cell instanceof byte[]) {
+                            System.out.print(
+                                    GXCommon.bytesToHex((byte[]) cell) + " | ");
+                        } else {
+                            trace(logFile, cell + " | ");
+                        }
+                    }
+                    traceLn(logFile, "");
+                }
+            } catch (Exception ex) {
+                traceLn(logFile,
+                        "Error! Failed to read last day: " + ex.getMessage());
+                // Continue reading if device returns access denied error.
+            }
+        }
+    }
+
+    /*
+     * Read all objects from the meter. This is only example. Usually there is
+     * no need to read all data from the meter.
+     */
+    void readAllObjects(PrintWriter logFile) throws Exception {
+        System.out.println("Reading association view");
+        GXReplyData reply = new GXReplyData();
+        // Get Association view from the meter.
+        readDataBlock(dlms.getObjectsRequest(), reply);
+        GXDLMSObjectCollection objects =
+                dlms.parseObjects(reply.getData(), true);
+
+        // Get description of the objects.
+        GXDLMSConverter converter = new GXDLMSConverter();
+        converter.updateOBISCodeInformation(objects);
+
+        // Read Scalers and units from the register objects.
+        readScalerAndUnits(objects, logFile);
+        // Read Profile Generic columns.
+        readProfileGenericColumns(objects, logFile);
+        // Read all attributes from all objects.
+        readValues(objects, logFile);
+        // Read historical data.
+        readProfileGenerics(objects, logFile);
     }
 }

@@ -45,6 +45,7 @@ import gurux.dlms.enums.AccessMode;
 import gurux.dlms.enums.DataType;
 import gurux.dlms.enums.MethodAccessMode;
 import gurux.dlms.enums.ObjectType;
+import gurux.dlms.internal.GXCommon;
 import gurux.dlms.manufacturersettings.GXAttributeCollection;
 import gurux.dlms.manufacturersettings.GXDLMSAttributeSettings;
 
@@ -86,8 +87,8 @@ public class GXDLMSObject {
         setObjectType(type);
         this.setShortName(sn);
         if (ln != null) {
-            String[] items = ln.split("[.]", -1);
-            if (items.length != 6) {
+            List<String> items = GXCommon.split(ln, '.');
+            if (items.size() != 6) {
                 throw new GXDLMSException("Invalid Logical Name.");
             }
         }
@@ -331,7 +332,6 @@ public class GXDLMSObject {
      */
     // CHECKSTYLE:OFF
     public int getMethodCount() {
-        assert (false);
         throw new UnsupportedOperationException("getMethodCount");
     }
     // CHECKSTYLE:ON
@@ -394,7 +394,6 @@ public class GXDLMSObject {
      */
     // CHECKSTYLE:OFF
     public int getAttributeCount() {
-        assert (false);
         throw new UnsupportedOperationException("getAttributeCount");
     }
     // CHECKSTYLE:ON
@@ -404,7 +403,6 @@ public class GXDLMSObject {
      */
     // CHECKSTYLE:OFF
     public Object[] getValues() {
-        assert (false);
         throw new UnsupportedOperationException("getValues");
     }
     // CHECKSTYLE:ON
@@ -425,7 +423,6 @@ public class GXDLMSObject {
     // CHECKSTYLE:OFF
     public Object getValue(final GXDLMSSettings settings, final int index,
             final int selector, final Object parameters) {
-        assert (false);
         throw new UnsupportedOperationException("getValue");
     }
     // CHECKSTYLE:ON
@@ -450,7 +447,6 @@ public class GXDLMSObject {
                 setLogicalName(GXDLMSObject.toLogicalName((byte[]) value));
             }
         } else {
-            assert (false);
             throw new UnsupportedOperationException("setValue");
         }
     }
@@ -470,7 +466,6 @@ public class GXDLMSObject {
     // CHECKSTYLE:OFF
     public byte[] invoke(final GXDLMSSettings settings, final int index,
             final Object parameters) {
-        assert (false);
         throw new UnsupportedOperationException("invoke");
     }
     // CHECKSTYLE:ON
