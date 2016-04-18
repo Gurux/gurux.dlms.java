@@ -147,10 +147,10 @@ public class GXDLMSAssociationShortName extends GXDLMSObject
             if (GXCommon.compare(serverChallenge, pos, clientChallenge)) {
                 if (settings.getAuthentication() == Authentication.HIGH_GMAC) {
                     readSecret = settings.getCipher().getSystemTitle();
+                    ic = settings.getCipher().getFrameCounter();
                 } else {
                     readSecret = getSecret();
                 }
-                ic = settings.getCipher().getFrameCounter();
                 byte[] tmp = GXSecure.secure(settings, settings.getCipher(), ic,
                         settings.getCtoSChallenge(), secret);
                 GXByteBuffer challenge = new GXByteBuffer();

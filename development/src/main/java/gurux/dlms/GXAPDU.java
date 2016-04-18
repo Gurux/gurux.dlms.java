@@ -83,8 +83,15 @@ final class GXAPDU {
             data.set(p);
             // Add Calling authentication information.
             int len = 0;
-            if (settings.getPassword() != null) {
-                len = settings.getPassword().length;
+            byte[] callingAuthenticationValue = null;
+            if (settings.getAuthentication() == Authentication.LOW) {
+                if (settings.getPassword() != null) {
+                    callingAuthenticationValue = settings.getPassword();
+                    len = callingAuthenticationValue.length;
+                }
+            } else {
+                callingAuthenticationValue = settings.getCtoSChallenge();
+                len = callingAuthenticationValue.length;
             }
             // 0xAC
             data.setUInt8(
@@ -97,7 +104,7 @@ final class GXAPDU {
             // Len.
             data.setUInt8(len);
             if (len != 0) {
-                data.set(settings.getPassword());
+                data.set(callingAuthenticationValue);
             }
         }
     }
@@ -139,7 +146,8 @@ final class GXAPDU {
             }
         }
         // Add system title.
-        if (!settings.isServer() && ciphered) {
+        if (!settings.isServer() && (ciphered
+                || settings.getAuthentication() == Authentication.HIGH_GMAC)) {
             if (cipher.getSystemTitle() == null
                     || cipher.getSystemTitle().length == 0) {
                 throw new IllegalArgumentException("SystemTitle");
@@ -169,18 +177,10 @@ final class GXAPDU {
         // Tag for xDLMS-Initiate request
         data.setUInt8(GXCommon.INITIAL_REQUEST);
         // Usage field for the response allowed component.
-        if (settings.getCtoSChallenge() == null
-                || settings.getCtoSChallenge().length == 0) {
-            // Usage field for dedicated-key component. Not used
-            data.setUInt8(0x00);
-        } else {
-            // Usage field for dedicated-key component.
-            data.setUInt8(0x01);
-            // Add dedicated key len.
-            data.setUInt8(settings.getCtoSChallenge().length);
-            // Add dedicated key.
-            data.set(settings.getCtoSChallenge());
-        }
+
+        // Usage field for dedicated-key component. Not used
+        data.setUInt8(0x00);
+
         // encoding of the response-allowed component (BOOLEAN DEFAULT TRUE)
         // usage flag (FALSE, default value TRUE conveyed)
         data.setUInt8(0);
@@ -556,9 +556,8 @@ final class GXAPDU {
                 if (buff.getUInt8() != BerType.OBJECT_DESCRIPTOR.getValue()) {
                     throw new RuntimeException("Invalid tag.");
                 }
-                if (buff.getUInt8() != 0x80) {
-                    throw new RuntimeException("Invalid tag.");
-                }
+                //Get only value because client app is sending system title with LOW authentication.
+                buff.getUInt8();
                 break;
             // BerType.CONTEXT | PduType.MECHANISMNAME or
             case 0x8B:
@@ -603,7 +602,11 @@ final class GXAPDU {
         len = buff.getUInt8();
         tmp = new byte[len];
         buff.get(tmp);
-        settings.setPassword(tmp);
+        if (settings.getAuthentication() == Authentication.LOW) {
+            settings.setPassword(tmp);
+        } else {
+            settings.setCtoSChallenge(tmp);
+        }
     }
 
     private static void updateAuthentication(final GXDLMSSettings settings,
@@ -701,7 +704,9 @@ final class GXAPDU {
         // diagnostic
         data.setUInt8(diagnostic.getValue());
         // SystemTitle
-        if (cipher != null && cipher.isCiphered()) {
+        if (cipher != null
+                && (settings.getAuthentication() == Authentication.HIGH_GMAC
+                        || cipher.isCiphered())) {
             data.setUInt8(
                     BerType.CONTEXT.getValue() | BerType.CONSTRUCTED.getValue()
                             | PduType.CalledApInvocationId.getValue());

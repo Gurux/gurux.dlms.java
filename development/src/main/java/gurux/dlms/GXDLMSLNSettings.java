@@ -79,6 +79,38 @@ public class GXDLMSLNSettings {
     }
 
     /**
+     * @return Is general protection supported.
+     */
+    public final boolean getGeneralProtection() {
+        return GXCommon.getBits(getConformanceBlock()[0], 0x40);
+    }
+
+    /**
+     * @param value
+     *            Is general protection supported.
+     */
+    public final void setGeneralProtection(final boolean value) {
+        getConformanceBlock()[1] =
+                GXCommon.setBits(getConformanceBlock()[0], 0x40, value);
+    }
+
+    /**
+     * @return Is general block transfer supported.
+     */
+    public final boolean getGeneralBlockTransfer() {
+        return GXCommon.getBits(getConformanceBlock()[0], 0x20);
+    }
+
+    /**
+     * @param value
+     *            Is general block transfer supported.
+     */
+    public final void setGeneralBlockTransfer(final boolean value) {
+        getConformanceBlock()[1] =
+                GXCommon.setBits(getConformanceBlock()[0], 0x20, value);
+    }
+
+    /**
      * @return Can COSEM object set with one message.
      */
     public final boolean getAttribute0SetReferencing() {
@@ -94,10 +126,17 @@ public class GXDLMSLNSettings {
                 GXCommon.setBits(getConformanceBlock()[1], 0x80, value);
     }
 
+    /**
+     * @return Is priority management supported.
+     */
     public final boolean getPriorityManagement() {
         return GXCommon.getBits(getConformanceBlock()[1], 0x40);
     }
 
+    /**
+     * @param value
+     *            Is priority management supported.
+     */
     public final void setPriorityManagement(final boolean value) {
         getConformanceBlock()[1] =
                 GXCommon.setBits(getConformanceBlock()[1], 0x40, value);
@@ -151,22 +190,68 @@ public class GXDLMSLNSettings {
                 GXCommon.setBits(getConformanceBlock()[1], 0x8, value);
     }
 
+    /**
+     * @return Is Action block transfer supported.
+     */
     public final boolean getActionBlockTransfer() {
         return GXCommon.getBits(getConformanceBlock()[1], 0x4);
     }
 
+    /**
+     * @param value
+     *            Is Action block transfer supported.
+     */
     public final void setActionBlockTransfer(final boolean value) {
         getConformanceBlock()[1] =
                 GXCommon.setBits(getConformanceBlock()[1], 0x4, value);
     }
 
+    /**
+     * @return Is Short Name referencing also supported.
+     */
     public final boolean getMultipleReferences() {
         return GXCommon.getBits(getConformanceBlock()[1], 0x2);
     }
 
+    /**
+     * @param value
+     *            Is Short Name referencing also supported.
+     */
     public final void setMultipleReferences(final boolean value) {
         getConformanceBlock()[1] =
                 GXCommon.setBits(getConformanceBlock()[1], 0x2, value);
+    }
+
+    /**
+     * @return Is data notification supported.
+     */
+    public final boolean getDataNotification() {
+        return GXCommon.getBits(getConformanceBlock()[2], 0x80);
+    }
+
+    /**
+     * @param value
+     *            Is data notification supported.
+     */
+    public final void setDataNotification(final boolean value) {
+        getConformanceBlock()[2] =
+                GXCommon.setBits(getConformanceBlock()[2], 0x80, value);
+    }
+
+    /**
+     * @return Is access used.
+     */
+    public final boolean getAccess() {
+        return GXCommon.getBits(getConformanceBlock()[2], 0x40);
+    }
+
+    /**
+     * @param value
+     *            Is access used.
+     */
+    public final void setAccess(final boolean value) {
+        getConformanceBlock()[2] =
+                GXCommon.setBits(getConformanceBlock()[2], 0x40, value);
     }
 
     /**
@@ -202,19 +287,19 @@ public class GXDLMSLNSettings {
     }
 
     /**
-     * @return Can client call actions (methods).
+     * @return Is selective access supported.
      */
-    public final boolean getAction() {
-        return GXCommon.getBits(getConformanceBlock()[2], 0x1);
+    public final boolean getSelectiveAccess() {
+        return GXCommon.getBits(getConformanceBlock()[2], 0x4);
     }
 
     /**
      * @param value
-     *            Can client call actions (methods).
+     *            Is selective access supported.
      */
-    public final void setAction(final boolean value) {
+    public final void setSelectiveAccess(final boolean value) {
         getConformanceBlock()[2] =
-                GXCommon.setBits(getConformanceBlock()[2], 0x1, value);
+                GXCommon.setBits(getConformanceBlock()[2], 0x4, value);
     }
 
     /**
@@ -234,19 +319,19 @@ public class GXDLMSLNSettings {
     }
 
     /**
-     * @return Is selective access supported.
+     * @return Can client call actions (methods).
      */
-    public final boolean getSelectiveAccess() {
-        return GXCommon.getBits(getConformanceBlock()[2], 0x4);
+    public final boolean getAction() {
+        return GXCommon.getBits(getConformanceBlock()[2], 0x1);
     }
 
     /**
      * @param value
-     *            Is selective access supported.
+     *            Can client call actions (methods).
      */
-    public final void setSelectiveAccess(final boolean value) {
+    public final void setAction(final boolean value) {
         getConformanceBlock()[2] =
-                GXCommon.setBits(getConformanceBlock()[2], 0x4, value);
+                GXCommon.setBits(getConformanceBlock()[2], 0x1, value);
     }
 
     /**

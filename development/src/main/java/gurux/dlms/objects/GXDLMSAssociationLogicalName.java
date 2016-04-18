@@ -90,6 +90,7 @@ public class GXDLMSAssociationLogicalName extends GXDLMSObject
         applicationContextName = new GXApplicationContextName();
         xDLMSContextInfo = new GXxDLMSContextType();
         authenticationMechanismMame = new GXAuthenticationMechanismName();
+        secret = "Gurux".getBytes();
         setVersion(1);
     }
 
@@ -207,10 +208,10 @@ public class GXDLMSAssociationLogicalName extends GXDLMSObject
             if (GXCommon.compare(serverChallenge, pos, clientChallenge)) {
                 if (settings.getAuthentication() == Authentication.HIGH_GMAC) {
                     readSecret = settings.getCipher().getSystemTitle();
+                    ic = settings.getCipher().getFrameCounter();
                 } else {
                     readSecret = getSecret();
                 }
-                ic = settings.getCipher().getFrameCounter();
                 byte[] tmp = GXSecure.secure(settings, settings.getCipher(), ic,
                         settings.getCtoSChallenge(), readSecret);
                 GXByteBuffer challenge = new GXByteBuffer();

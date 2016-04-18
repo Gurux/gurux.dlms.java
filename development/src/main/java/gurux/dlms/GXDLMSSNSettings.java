@@ -76,6 +76,38 @@ public class GXDLMSSNSettings {
     }
 
     /**
+     * @return Is general protection supported.
+     */
+    public final boolean getGeneralProtection() {
+        return GXCommon.getBits(getConformanceBlock()[0], 0x40);
+    }
+
+    /**
+     * @param value
+     *            Is general protection supported.
+     */
+    public final void setGeneralProtection(final boolean value) {
+        getConformanceBlock()[1] =
+                GXCommon.setBits(getConformanceBlock()[0], 0x40, value);
+    }
+
+    /**
+     * @return Is general block transfer supported.
+     */
+    public final boolean getGeneralBlockTransfer() {
+        return GXCommon.getBits(getConformanceBlock()[0], 0x20);
+    }
+
+    /**
+     * @param value
+     *            Is general block transfer supported.
+     */
+    public final void setGeneralBlockTransfer(final boolean value) {
+        getConformanceBlock()[1] =
+                GXCommon.setBits(getConformanceBlock()[0], 0x20, value);
+    }
+
+    /**
      * @return Is read supported.
      */
     public final boolean getRead() {
@@ -106,34 +138,110 @@ public class GXDLMSSNSettings {
         conformanceBlock[0] = GXCommon.setBits(conformanceBlock[0], 0x8, value);
     }
 
+    /**
+     * @return Is unconfirmed write supported.
+     */
     public final boolean getUnconfirmedWrite() {
         return GXCommon.getBits(conformanceBlock[0], 0x4);
     }
 
+    /**
+     * @param value
+     *            Is unconfirmed write supported.
+     */
     public final void setUnconfirmedWrite(final boolean value) {
         conformanceBlock[0] = GXCommon.setBits(conformanceBlock[0], 0x4, value);
     }
 
-    public final boolean getInformationReport() {
-        return GXCommon.getBits(conformanceBlock[1], 0x1);
+    /**
+     * @return Can data read in blocks.
+     */
+    public final boolean getReadBlockTransfer() {
+        return GXCommon.getBits(getConformanceBlock()[1], 0x10);
     }
 
-    public final void setInformationReport(final boolean value) {
-        conformanceBlock[1] = GXCommon.setBits(conformanceBlock[1], 0x1, value);
+    /**
+     * @param value
+     *            Can data read in blocks.
+     */
+    public final void setReadBlockTransfer(final boolean value) {
+        getConformanceBlock()[1] =
+                GXCommon.setBits(getConformanceBlock()[1], 0x10, value);
     }
 
+    /**
+     * @return Can data write in blocks.
+     */
+    public final boolean getWriteBlockTransfer() {
+        return GXCommon.getBits(getConformanceBlock()[1], 0x8);
+    }
+
+    /**
+     * @param value
+     *            Can data write in blocks.
+     */
+    public final void setWriteBlockTransfer(final boolean value) {
+        getConformanceBlock()[1] =
+                GXCommon.setBits(getConformanceBlock()[1], 0x8, value);
+    }
+
+    /**
+     * @return Is Logical Name referencing also supported.
+     */
     public final boolean getMultipleReferences() {
         return GXCommon.getBits(conformanceBlock[1], 0x2);
     }
 
+    /**
+     * @param value
+     *            Is Logical Name referencing also supported.
+     */
     public final void setMultipleReferences(final boolean value) {
         conformanceBlock[1] = GXCommon.setBits(conformanceBlock[1], 0x2, value);
     }
 
+    /**
+     * @return Is information report supported.
+     */
+    public final boolean getInformationReport() {
+        return GXCommon.getBits(conformanceBlock[1], 0x1);
+    }
+
+    /**
+     * @param value
+     *            Is information report supported.
+     */
+    public final void setInformationReport(final boolean value) {
+        conformanceBlock[1] = GXCommon.setBits(conformanceBlock[1], 0x1, value);
+    }
+
+    /**
+     * @return Is data notification supported.
+     */
+    public final boolean getDataNotification() {
+        return GXCommon.getBits(getConformanceBlock()[2], 0x80);
+    }
+
+    /**
+     * @param value
+     *            Is data notification supported.
+     */
+    public final void setDataNotification(final boolean value) {
+        getConformanceBlock()[2] =
+                GXCommon.setBits(getConformanceBlock()[2], 0x80, value);
+    }
+
+    /**
+     * @return Is parameterize access used.
+     */
     public final boolean getParameterizedAccess() {
         return GXCommon.getBits(conformanceBlock[2], 0x20);
     }
 
+    /**
+     * @param value
+     *            Is parameterize access used.
+     */
     public final void setParameterizedAccess(final boolean value) {
         conformanceBlock[2] =
                 GXCommon.setBits(conformanceBlock[2], 0x20, value);

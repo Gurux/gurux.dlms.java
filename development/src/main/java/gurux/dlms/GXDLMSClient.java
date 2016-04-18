@@ -796,7 +796,8 @@ public class GXDLMSClient {
             final Object accessRights) {
         obj.setObjectType(objectType);
         // Check access rights.
-        if (accessRights != null && accessRights.getClass().isArray()) {
+        if (accessRights instanceof Object[]
+                && ((Object[]) accessRights).length == 2) {
             // access_rights: access_right
             Object[] access = (Object[]) accessRights;
             for (Object attributeAccess : (Object[]) access[0]) {

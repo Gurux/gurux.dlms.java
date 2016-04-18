@@ -252,7 +252,7 @@ public abstract class GXDLMSServer {
      * @param args
      *            Handled action requests.
      */
-    public abstract void action(ValueEventArgs[] e);
+    public abstract void action(ValueEventArgs[] args);
 
     /**
      * Constructor.
