@@ -42,7 +42,6 @@ import gurux.dlms.enums.AccessMode;
 import gurux.dlms.enums.Authentication;
 import gurux.dlms.enums.Command;
 import gurux.dlms.enums.DataType;
-import gurux.dlms.enums.ErrorCode;
 import gurux.dlms.enums.InterfaceType;
 import gurux.dlms.enums.MethodAccessMode;
 import gurux.dlms.enums.ObjectType;
@@ -565,9 +564,7 @@ public class GXDLMSClient {
             settings.setCtoSChallenge(null);
         }
         GXAPDU.generateAarq(settings, settings.getCipher(), buff);
-        return GXDLMS
-                .splitPdu(settings, Command.AARQ, 0, buff, ErrorCode.OK, null)
-                .get(0);
+        return GXDLMS.splitPdu(settings, Command.AARQ, 0, buff, null).get(0);
     }
 
     /**
@@ -1144,7 +1141,7 @@ public class GXDLMSClient {
         } else if (type != DataType.NONE) {
             GXCommon.setData(bb, type, value);
         }
-        return GXDLMS.splitPdu(settings, cmd, 1, bb, ErrorCode.OK, null).get(0);
+        return GXDLMS.splitPdu(settings, cmd, 1, bb, null).get(0);
     }
 
     /**
@@ -1224,7 +1221,7 @@ public class GXDLMSClient {
             bb.setUInt8(1);
         }
         GXCommon.setData(bb, type, value);
-        return GXDLMS.splitPdu(settings, cmd, 1, bb, ErrorCode.OK, null).get(0);
+        return GXDLMS.splitPdu(settings, cmd, 1, bb, null).get(0);
     }
 
     /**
@@ -1293,7 +1290,7 @@ public class GXDLMSClient {
                 GXCommon.setData(bb, type, value);
             }
         }
-        return GXDLMS.splitPdu(settings, cmd, 4, bb, ErrorCode.OK, null).get(0);
+        return GXDLMS.splitPdu(settings, cmd, 4, bb, null).get(0);
     }
 
     /**
@@ -1374,7 +1371,7 @@ public class GXDLMSClient {
                 bb.set(data.getData(), 0, data.size());
             }
         }
-        return GXDLMS.splitPdu(settings, cmd, 1, bb, ErrorCode.OK, null).get(0);
+        return GXDLMS.splitPdu(settings, cmd, 1, bb, null).get(0);
     }
 
     /**
@@ -1438,7 +1435,7 @@ public class GXDLMSClient {
                 bb.setUInt16(sn);
             }
         }
-        return GXDLMS.splitPdu(settings, cmd, 3, bb, ErrorCode.OK, null).get(0);
+        return GXDLMS.splitPdu(settings, cmd, 3, bb, null).get(0);
     }
 
     /**

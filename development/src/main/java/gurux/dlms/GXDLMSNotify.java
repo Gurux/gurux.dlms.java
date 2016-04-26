@@ -42,7 +42,6 @@ import java.util.Map.Entry;
 
 import gurux.dlms.enums.Command;
 import gurux.dlms.enums.DataType;
-import gurux.dlms.enums.ErrorCode;
 import gurux.dlms.enums.InterfaceType;
 import gurux.dlms.enums.ObjectType;
 import gurux.dlms.enums.Priority;
@@ -276,7 +275,7 @@ public class GXDLMSNotify {
         }
         buff.set(data);
         List<byte[][]> list = GXDLMS.splitPdu(settings,
-                Command.DATA_NOTIFICATION, 0, buff, ErrorCode.OK, null);
+                Command.DATA_NOTIFICATION, 0, buff, null);
         List<byte[]> arr = new ArrayList<byte[]>();
         for (byte[][] it : list) {
             arr.addAll(Arrays.asList(it));
@@ -410,8 +409,8 @@ public class GXDLMSNotify {
             }
             GXCommon.setData(buff, dt, value);
         }
-        List<byte[][]> list = GXDLMS.splitPdu(settings, Command.PUSH, 0, buff,
-                ErrorCode.OK, null);
+        List<byte[][]> list =
+                GXDLMS.splitPdu(settings, Command.PUSH, 0, buff, null);
         List<byte[]> arr = new ArrayList<byte[]>();
 
         for (byte[][] it : list) {

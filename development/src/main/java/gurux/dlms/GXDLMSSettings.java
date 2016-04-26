@@ -141,6 +141,12 @@ public class GXDLMSSettings {
      * User password.
      */
     private byte[] password;
+
+    /**
+     * Key Encrypting Key, also known as Master key.
+     */
+    private byte[] kek;
+
     /**
      * DLMS version number.
      */
@@ -699,5 +705,20 @@ public class GXDLMSSettings {
             throw new IllegalArgumentException("Invalid client system title.");
         }
         sourceSystemTitle = value;
+    }
+
+    /**
+     * @return Key Encrypting Key, also known as Master key.
+     */
+    public final byte[] getKek() {
+        return kek;
+    }
+
+    /**
+     * @param value
+     *            Key Encrypting Key, also known as Master key.
+     */
+    public final void setKek(final byte[] value) {
+        kek = value;
     }
 }

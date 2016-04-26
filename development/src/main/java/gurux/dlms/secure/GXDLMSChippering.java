@@ -215,7 +215,7 @@ final class GXDLMSChippering {
         }
         byte[] aad = getAuthenticatedData(security, p.getAuthenticationKey(),
                 ciphertext);
-        GXDLMSChipperingStream gcm = new GXDLMSChipperingStream(security, false,
+        GXDLMSChipperingStream gcm = new GXDLMSChipperingStream(security, true,
                 p.getBlockCipherKey(), aad,
                 getNonse(frameCounter, p.getSystemTitle()), tag);
         gcm.write(ciphertext);

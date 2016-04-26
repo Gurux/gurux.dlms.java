@@ -143,8 +143,7 @@ public class GXDLMSAssociationShortName extends GXDLMSObject
                     GXSecure.secure(settings, settings.getCipher(), ic,
                             settings.getStoCChallenge(), readSecret);
             byte[] clientChallenge = (byte[]) parameters;
-            int[] pos = new int[1];
-            if (GXCommon.compare(serverChallenge, pos, clientChallenge)) {
+            if (GXCommon.compare(serverChallenge, clientChallenge)) {
                 if (settings.getAuthentication() == Authentication.HIGH_GMAC) {
                     readSecret = settings.getCipher().getSystemTitle();
                     ic = settings.getCipher().getFrameCounter();
@@ -155,19 +154,16 @@ public class GXDLMSAssociationShortName extends GXDLMSObject
                         settings.getCtoSChallenge(), secret);
                 GXByteBuffer challenge = new GXByteBuffer();
                 // ReturnParameters.
-                challenge.setUInt8(0);
                 challenge.setUInt8(DataType.OCTET_STRING.getValue());
                 GXCommon.setObjectCount(tmp.length, challenge);
                 challenge.set(tmp);
                 return challenge.array();
             } else {
-                // Return error.
-                return new byte[] {
-                        (byte) ErrorCode.HARDWARE_FAULT.getValue() };
+                return new byte[] { 0 };
             }
         } else {
-            throw new IllegalArgumentException(
-                    "Invoke failed. Invalid attribute index.");
+            // Return error.
+            return new byte[] { (byte) ErrorCode.READ_WRITE_DENIED.getValue() };
         }
     }
 

@@ -32,53 +32,26 @@
 // Full text may be retrieved at http://www.gnu.org/licenses/gpl-2.0.txt
 //---------------------------------------------------------------------------
 
-package gurux.dlms.secure;
-
-import gurux.dlms.GXDLMSServer;
-import gurux.dlms.enums.InterfaceType;
+package gurux.dlms.objects.enums;
 
 /**
- * Implements secured DLMS server.
- * 
- * @author Gurux Ltd.
+ * Global key types.
  */
-public abstract class GXDLMSSecureServer extends GXDLMSServer {
+public enum GlobalKeyType {
     /**
-     * Ciphering settings.
+     * Global unicast encryption key.
      */
-    private GXCiphering ciphering;
-
+    UNICAST_ENCRYPTION,
     /**
-     * Constructor.
-     * 
-     * @param logicalNameReferencing
-     *            Is logical name referencing used.
-     * @param type
-     *            Interface type.
+     * Global broadcast encryption key.
      */
-    public GXDLMSSecureServer(final boolean logicalNameReferencing,
-            final InterfaceType type) {
-        super(logicalNameReferencing, type);
-        ciphering = new GXCiphering("ABCDEFGH".getBytes());
-        setCipher(ciphering);
-    }
-
-    public final GXCiphering getCiphering() {
-        return ciphering;
-    }
-
+    BROADCAST_ENCRYPTION,
     /**
-     * @return Key Encrypting Key, also known as Master key.
+     * Authentication key.
      */
-    public final byte[] getKek() {
-        return getSettings().getKek();
-    }
-
+    AUTHENTICATION,
     /**
-     * @param value
-     *            Key Encrypting Key, also known as Master key.
+     * Key Encrypting Key, also known as Master key.
      */
-    public final void setKek(final byte[] value) {
-        getSettings().setKek(value);
-    }
+    KEK;
 }

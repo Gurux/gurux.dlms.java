@@ -195,7 +195,7 @@ public class GXDLMSActionSchedule extends GXDLMSObject implements IGXDLMSBase {
             stream.setUInt8(DataType.STRUCTURE.getValue());
             stream.setUInt8(2);
             GXCommon.setData(stream, DataType.OCTET_STRING,
-                    GXCommon.getBytes(executedScriptLogicalName));
+                    executedScriptLogicalName);
             GXCommon.setData(stream, DataType.UINT16,
                     new Integer(executedScriptSelector));
             return stream.array();

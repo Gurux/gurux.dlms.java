@@ -34,8 +34,8 @@
 
 package gurux.dlms.push.listener.example;
 
-import java.util.AbstractMap;
 import java.util.List;
+import java.util.Map.Entry;
 
 import gurux.common.IGXMediaListener;
 import gurux.common.MediaStateEventArgs;
@@ -99,10 +99,10 @@ public class GXDLMSPushListener
                 notify.getData((byte[]) e.getData(), data);
                 // If all data is received.
                 if (!data.isMoreData()) {
-                    List<AbstractMap.SimpleEntry<GXDLMSObject, Integer>> list;
+                    List<Entry<GXDLMSObject, Integer>> list;
                     list = notify.parsePushObjects(data.getData());
                     // Print received data.
-                    for (AbstractMap.SimpleEntry<GXDLMSObject, Integer> it : list) {
+                    for (Entry<GXDLMSObject, Integer> it : list) {
                         // Print LN.
                         System.out.println(it.getKey().toString());
                         // Print Value.

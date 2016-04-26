@@ -317,18 +317,16 @@ public final class GXCommon {
      * @param arr2 Second array to compare.
      * @return True, if arrays are similar. False, if the arrays differ.
      */
-    public static boolean compare(final byte[] arr1, final int[] index,
-            final byte[] arr2) {
-        if (arr1.length - index[0] < arr2.length) {
+    public static boolean compare(final byte[] arr1, final byte[] arr2) {
+        if (arr1.length != arr2.length) {
             return false;
         }
         int pos;
         for (pos = 0; pos != arr2.length; ++pos) {
-            if (arr1[pos + index[0]] != arr2[pos]) {
+            if (arr1[pos] != arr2[pos]) {
                 return false;
             }
         }
-        index[0] += pos;
         return true;
     }
 

@@ -607,4 +607,13 @@ public class GXDLMSBase extends GXDLMSServer
         }
         return SourceDiagnostic.NONE;
     }
+
+    public void connected() {
+        // TODO Auto-generated method stub
+
+    }
+
+    @Override
+    public void disconnected() {
+    }
 }

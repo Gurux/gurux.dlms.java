@@ -98,6 +98,12 @@ public interface GXICipher {
     byte[] getAuthenticationKey();
 
     /**
+     * @param value
+     *            Authentication key.
+     */
+    void setAuthenticationKey(byte[] value);
+
+    /**
      * @return Frame counter. Invocation counter.
      */
     long getFrameCounter();

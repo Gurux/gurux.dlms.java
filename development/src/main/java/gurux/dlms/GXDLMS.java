@@ -236,11 +236,10 @@ abstract class GXDLMS {
         bb.setUInt32(settings.getBlockIndex());
         settings.increaseBlockIndex();
         if (settings.isServer()) {
-            return splitPdu(settings, Command.GET_RESPONSE, 2, bb, ErrorCode.OK,
-                    null).get(0)[0];
+            return splitPdu(settings, Command.GET_RESPONSE, 2, bb, null)
+                    .get(0)[0];
         }
-        return splitPdu(settings, Command.GET_REQUEST, 2, bb, ErrorCode.OK,
-                null).get(0)[0];
+        return splitPdu(settings, Command.GET_REQUEST, 2, bb, null).get(0)[0];
     }
 
     static String getDescription(final int errCode) {
@@ -392,15 +391,13 @@ abstract class GXDLMS {
      * @param commandParameter
      * @param data
      *            Data to send.
-     * @param error
-     *            Error number.
      * @param date
      *            Optional date time value.
      * @return List of frames to send.
      */
     static List<byte[][]> splitPdu(final GXDLMSSettings settings,
             final Command command, final int commandParameter,
-            final GXByteBuffer data, final ErrorCode error, final Date date) {
+            final GXByteBuffer data, final Date date) {
         GXByteBuffer bb = new GXByteBuffer();
         List<byte[][]> list = new ArrayList<byte[][]>();
         // For SN there is no need to split data for blocks.
@@ -424,8 +421,8 @@ abstract class GXDLMS {
                 list.add(splitToWrapperFrames(settings, bb));
             }
         } else {
-            List<byte[]> pdus = getLnPdus(settings, commandParameter, data,
-                    command, error, date);
+            List<byte[]> pdus =
+                    getLnPdus(settings, commandParameter, data, command, date);
             for (byte[] it : pdus) {
                 // If Ciphering is used.
                 if (settings.getCipher() != null && command != Command.AARQ
@@ -465,7 +462,7 @@ abstract class GXDLMS {
 
     private static List<byte[]> getLnPdus(final GXDLMSSettings settings,
             final int commandParameter, final GXByteBuffer buff,
-            final Command cmd, final ErrorCode error, final Date date) {
+            final Command cmd, final Date date) {
         List<byte[]> arr = new ArrayList<byte[]>();
         GXByteBuffer bb;
         int len;
@@ -540,11 +537,6 @@ abstract class GXDLMS {
                     bb.setUInt8(commandParameter);
                     // Add Invoke Id And Priority.
                     bb.setUInt8(getInvokeIDPriority(settings));
-                    // Add error code if reply and not Get Response With List.
-                    if (isReplyMessage(cmd) && !(cmd == Command.GET_RESPONSE
-                            && commandParameter == 3)) {
-                        bb.setUInt8(error.getValue());
-                    }
                 }
             }
 

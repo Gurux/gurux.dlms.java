@@ -356,7 +356,7 @@ public class GXDLMSActivityCalendar extends GXDLMSObject
                     GXCommon.setData(data, DataType.TIME,
                             action.getStartTime());
                     GXCommon.setData(data, DataType.OCTET_STRING,
-                            GXCommon.getBytes(action.getScriptLogicalName()));
+                            action.getScriptLogicalName());
                     GXCommon.setData(data, DataType.UINT16,
                             new Integer(action.getScriptSelector()));
                 }

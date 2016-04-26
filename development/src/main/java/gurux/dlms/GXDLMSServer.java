@@ -239,6 +239,17 @@ public abstract class GXDLMSServer {
     public abstract void write(ValueEventArgs[] args);
 
     /**
+     * Accepted connection is made for the server. All initialization is done
+     * here.
+     */
+    public abstract void connected();
+
+    /**
+     * Server has close the connection. All clean up is made here.
+     */
+    public abstract void disconnected();
+
+    /**
      * Client attempts to connect with the wrong server or client address.
      * 
      * @param e
@@ -487,9 +498,7 @@ public abstract class GXDLMSServer {
         GXAPDU.generateAARE(settings, buff, result, diagnostic,
                 settings.getCipher());
         settings.resetFrameSequence();
-        return GXDLMS
-                .splitPdu(settings, Command.AARE, 0, buff, ErrorCode.OK, null)
-                .get(0);
+        return GXDLMS.splitPdu(settings, Command.AARE, 0, buff, null).get(0);
     }
 
     /**
@@ -693,10 +702,12 @@ public abstract class GXDLMSServer {
         case AARQ:
             frames = handleAarqRequest();
             settings.setConnected(true);
+            connected();
             break;
         case DISCONNECT_REQUEST:
             frames = generateDisconnectRequest();
             settings.setConnected(false);
+            disconnected();
             break;
         default:
             LOGGER.severe("Invalid command: " + reply.getCommand().toString());
@@ -743,10 +754,22 @@ public abstract class GXDLMSServer {
             addError(ErrorCode.UNDEFINED_OBJECT, bb);
             LOGGER.severe("Undefined object.");
         } else {
-            bb.add(obj.invoke(settings, id, parameters));
+            ValueEventArgs e = new ValueEventArgs(obj, id, 0, parameters);
+            action(new ValueEventArgs[] { e });
+            byte[] actionReply;
+            if (e.getHandled()) {
+                actionReply = (byte[]) e.getValue();
+            } else {
+                actionReply = obj.invoke(settings, id, parameters);
+            }
+            // Set default action reply if not given.
+            if (actionReply == null) {
+                actionReply = new byte[] { (byte) ErrorCode.OK.getValue() };
+            }
+            bb.add(actionReply);
         }
-        return GXDLMS.splitPdu(settings, Command.METHOD_RESPONSE, 1, bb,
-                ErrorCode.OK, null).get(0);
+        return GXDLMS.splitPdu(settings, Command.METHOD_RESPONSE, 1, bb, null)
+                .get(0);
     }
 
     /**
@@ -772,7 +795,6 @@ public abstract class GXDLMSServer {
      * @return Reply to the client.
      */
     private byte[][] handleSetRequest() {
-        ErrorCode error = ErrorCode.OK;
         GXByteBuffer data = reply.getData();
         GXDataInfo info = new GXDataInfo();
         GXByteBuffer bb = new GXByteBuffer();
@@ -804,13 +826,13 @@ public abstract class GXDLMSServer {
             if (obj == null) {
                 LOGGER.severe("Undefined object.");
                 // Device reports a undefined object.
-                error = ErrorCode.UNDEFINED_OBJECT;
+                bb.setUInt8(ErrorCode.UNDEFINED_OBJECT.getValue());
             } else {
                 AccessMode am = obj.getAccess(index);
                 // If write is denied.
                 if (am != AccessMode.WRITE && am != AccessMode.READ_WRITE) {
                     LOGGER.severe("Read Write denied.");
-                    error = ErrorCode.READ_WRITE_DENIED;
+                    bb.setUInt8(ErrorCode.READ_WRITE_DENIED.getValue());
                 } else {
                     try {
                         ValueEventArgs e =
@@ -822,22 +844,20 @@ public abstract class GXDLMSServer {
                         }
                     } catch (Exception e) {
                         LOGGER.severe(e.getMessage());
-                        error = ErrorCode.HARDWARE_FAULT;
+                        bb.setUInt8(ErrorCode.HARDWARE_FAULT.getValue());
                     }
                 }
             }
         } else {
             LOGGER.severe("handleSetRequest failed. Unknown command.");
             settings.resetBlockIndex();
-            error = ErrorCode.HARDWARE_FAULT;
+            bb.setUInt8(ErrorCode.HARDWARE_FAULT.getValue());
         }
-        return GXDLMS
-                .splitPdu(settings, Command.SET_RESPONSE, 1, bb, error, null)
+        return GXDLMS.splitPdu(settings, Command.SET_RESPONSE, 1, bb, null)
                 .get(0);
     }
 
     private byte[][] handleGetRequest() {
-        ErrorCode error = ErrorCode.OK;
         GXByteBuffer data = reply.getData();
         GXByteBuffer bb = new GXByteBuffer();
         short type;
@@ -867,7 +887,7 @@ public abstract class GXDLMSServer {
             }
             if (obj == null) {
                 // "Access Error : Device reports a undefined object."
-                error = ErrorCode.UNDEFINED_OBJECT;
+                bb.setUInt8(ErrorCode.UNDEFINED_OBJECT.getValue());
             } else {
                 // AccessSelection
                 int selection = data.getUInt8();
@@ -888,9 +908,18 @@ public abstract class GXDLMSServer {
                     value = e.getValue();
                 }
                 GXDLMS.appedData(obj, attributeIndex, bb, value);
+                // Add status if not multiple blocks.
+                boolean multibleBlocks =
+                        bb.size() > settings.getMaxReceivePDUSize();
+                if (!multibleBlocks) {
+                    GXByteBuffer tmp = new GXByteBuffer();
+                    tmp.setUInt8(ErrorCode.OK.getValue());
+                    tmp.set(bb.array());
+                    bb = tmp;
+                }
             }
             serverReply.setReplyMessages(GXDLMS.splitPdu(settings,
-                    Command.GET_RESPONSE, 1, bb, error, null));
+                    Command.GET_RESPONSE, 1, bb, null));
 
         } else if (type == 2) {
             // Get request for next data block
@@ -899,9 +928,10 @@ public abstract class GXDLMSServer {
             if (index != settings.getBlockIndex()) {
                 LOGGER.severe("handleGetRequest failed. Invalid block number. "
                         + settings.getBlockIndex() + "/" + index);
-                serverReply.setReplyMessages(
-                        GXDLMS.splitPdu(settings, Command.GET_RESPONSE, 1, bb,
-                                ErrorCode.DATA_BLOCK_NUMBER_INVALID, null));
+                bb.setUInt8(ErrorCode.DATA_BLOCK_NUMBER_INVALID.getValue());
+
+                serverReply.setReplyMessages(GXDLMS.splitPdu(settings,
+                        Command.GET_RESPONSE, 1, bb, null));
                 index = 0;
                 serverReply.setIndex(index);
             } else {
@@ -962,14 +992,14 @@ public abstract class GXDLMSServer {
                 bb.setUInt8(ErrorCode.HARDWARE_FAULT.getValue());
             }
             serverReply.setReplyMessages(GXDLMS.splitPdu(settings,
-                    Command.GET_RESPONSE, 3, bb, error, null));
+                    Command.GET_RESPONSE, 3, bb, null));
         } else {
             LOGGER.severe("handleGetRequest failed. Invalid command type.");
             settings.resetBlockIndex();
             // Access Error : Device reports a hardware fault.
-            serverReply.setReplyMessages(
-                    GXDLMS.splitPdu(settings, Command.GET_RESPONSE, 1, bb,
-                            ErrorCode.HARDWARE_FAULT, null));
+            bb.setUInt8(ErrorCode.HARDWARE_FAULT.getValue());
+            serverReply.setReplyMessages(GXDLMS.splitPdu(settings,
+                    Command.GET_RESPONSE, 1, bb, null));
         }
         serverReply.setIndex(index);
         return serverReply.getReplyMessages().get((int) index);
@@ -1105,15 +1135,17 @@ public abstract class GXDLMSServer {
                         value = ((IGXDLMSBase) info.getItem()).invoke(settings,
                                 info.getIndex(), parameters);
                     }
+                    // Set status.
+                    bb.setUInt8(0);
                     // Add value
                     bb.add(value);
                 }
             } else {
-                throw new IllegalArgumentException("Invalid Command.");
+                bb.setUInt8(ErrorCode.READ_WRITE_DENIED.getValue());
             }
         }
-        return GXDLMS.splitPdu(settings, Command.READ_RESPONSE, 1, bb,
-                ErrorCode.OK, null).get(0);
+        return GXDLMS.splitPdu(settings, Command.READ_RESPONSE, 1, bb, null)
+                .get(0);
     }
 
     /**
@@ -1186,7 +1218,7 @@ public abstract class GXDLMSServer {
             }
             bb.setUInt8(ret);
         }
-        return GXDLMS.splitPdu(settings, Command.WRITE_RESPONSE, 1, bb,
-                ErrorCode.OK, null).get(0);
+        return GXDLMS.splitPdu(settings, Command.WRITE_RESPONSE, 1, bb, null)
+                .get(0);
     }
 }

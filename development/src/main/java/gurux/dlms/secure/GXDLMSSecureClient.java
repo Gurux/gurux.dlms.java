@@ -91,4 +91,59 @@ public class GXDLMSSecureClient extends GXDLMSClient {
     public final GXCiphering getCiphering() {
         return ciphering;
     }
+
+    /**
+     * Encrypt data using Key Encrypting Key.
+     * 
+     * @param kek
+     *            Key Encrypting Key, also known as Master key.
+     * @param data
+     *            Data to encrypt.
+     * @return Encrypt data.
+     */
+    public static byte[] encrypt(final byte[] kek, final byte[] data) {
+        if (kek == null) {
+            throw new NullPointerException("Key Encrypting Key");
+        }
+        if (kek.length < 16) {
+            throw new IllegalArgumentException("Key Encrypting Key");
+        }
+        if (kek.length % 8 != 0) {
+            throw new IllegalArgumentException("Key Encrypting Key");
+        }
+        GXDLMSChipperingStream gcm = new GXDLMSChipperingStream(true, kek);
+        return gcm.encryptAes(data);
+    }
+
+    /**
+     * Decrypt data using Key Encrypting Key.
+     * 
+     * @param kek
+     *            Key Encrypting Key, also known as Master key.
+     * @param data
+     *            Data to decrypt.
+     * @return Decrypted data.
+     */
+    public static byte[] decrypt(final byte[] kek, final byte[] data) {
+        if (kek == null) {
+            throw new NullPointerException("Key Encrypting Key");
+        }
+        if (kek.length < 16) {
+            throw new IllegalArgumentException("Key Encrypting Key");
+        }
+        if (kek.length % 8 != 0) {
+            throw new IllegalArgumentException("Key Encrypting Key");
+        }
+        if (data == null) {
+            throw new NullPointerException("data");
+        }
+        if (data.length < 16) {
+            throw new IllegalArgumentException("data");
+        }
+        if (data.length % 8 != 0) {
+            throw new IllegalArgumentException("data");
+        }
+        GXDLMSChipperingStream gcm = new GXDLMSChipperingStream(false, kek);
+        return gcm.decryptAes(data);
+    }
 }
