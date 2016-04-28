@@ -129,6 +129,18 @@ public abstract class GXDLMSServer {
     }
 
     /**
+     * Server to Client custom challenge. This is for debugging purposes. Reset
+     * custom challenge settings StoCChallenge to null.
+     * 
+     * @param value
+     *            Server to Client challenge.
+     */
+    public final void setStoCChallenge(final byte[] value) {
+        settings.setUseCustomChallenge(value != null);
+        settings.setStoCChallenge(value);
+    }
+
+    /**
      * Set starting packet index. Default is One based, but some meters use Zero
      * based value. Usually this is not used.
      * 

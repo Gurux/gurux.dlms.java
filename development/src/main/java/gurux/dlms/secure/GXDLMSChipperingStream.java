@@ -471,7 +471,7 @@ class GXDLMSChipperingStream {
     /**
      * Encrypt data block.
      * 
-     * @param KW
+     * @param key
      */
     private void encryptBlock(final int[][] key) {
         int r;

@@ -37,6 +37,7 @@ package gurux.dlms;
 import java.util.Calendar;
 import java.util.List;
 import java.util.Map.Entry;
+import java.util.logging.Logger;
 
 import gurux.dlms.enums.AccessMode;
 import gurux.dlms.enums.Authentication;
@@ -66,6 +67,8 @@ public class GXDLMSClient {
      */
     private final GXDLMSSettings settings = new GXDLMSSettings(false);
     private GXObisCodeCollection obisCodes;
+    private static final Logger LOGGER =
+            Logger.getLogger(GXDLMSClient.class.getName());
 
     /**
      * Is authentication required.
@@ -644,21 +647,32 @@ public class GXDLMSClient {
     public final void
             parseApplicationAssociationResponse(final GXByteBuffer reply) {
         GXDataInfo info = new GXDataInfo();
+        boolean equals = false;
         byte[] secret;
         long ic = 0;
         byte[] value = (byte[]) GXCommon.getData(reply, info);
-        if (settings.getAuthentication() == Authentication.HIGH_GMAC) {
-            secret = settings.getSourceSystemTitle();
-            GXByteBuffer bb = new GXByteBuffer(value);
-            bb.getUInt8();
-            ic = bb.getUInt32();
+        if (value != null) {
+            if (settings.getAuthentication() == Authentication.HIGH_GMAC) {
+                secret = settings.getSourceSystemTitle();
+                GXByteBuffer bb = new GXByteBuffer(value);
+                bb.getUInt8();
+                ic = bb.getUInt32();
+            } else {
+                secret = settings.getPassword();
+            }
+            byte[] tmp = GXSecure.secure(settings, settings.getCipher(), ic,
+                    settings.getCtoSChallenge(), secret);
+            GXByteBuffer challenge = new GXByteBuffer(tmp);
+            equals = challenge.compare(value);
+            if (!equals) {
+                LOGGER.info("Invalid StoC:" + GXCommon.toHex(value) + "-"
+                        + GXCommon.toHex(tmp));
+            }
         } else {
-            secret = settings.getPassword();
+            LOGGER.info("Server did not accept CtoS.");
         }
-        byte[] tmp = GXSecure.secure(settings, settings.getCipher(), ic,
-                settings.getCtoSChallenge(), secret);
-        GXByteBuffer challenge = new GXByteBuffer(tmp);
-        if (!challenge.compare(value)) {
+
+        if (!equals) {
             throw new GXDLMSException(
                     "parseApplicationAssociationResponse failed. "
                             + " Server to Client do not match.");

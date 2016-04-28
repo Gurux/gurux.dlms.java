@@ -35,6 +35,7 @@
 package gurux.dlms.objects;
 
 import java.lang.reflect.Array;
+import java.util.logging.Logger;
 
 import gurux.dlms.GXByteBuffer;
 import gurux.dlms.GXDLMSSettings;
@@ -52,6 +53,8 @@ import gurux.dlms.secure.GXSecure;
 
 public class GXDLMSAssociationLogicalName extends GXDLMSObject
         implements IGXDLMSBase {
+    private static final Logger LOGGER =
+            Logger.getLogger(GXDLMSAssociationLogicalName.class.getName());
     private GXDLMSObjectCollection objectList;
     private short clientSAP;
     private short serverSAP;
@@ -223,6 +226,8 @@ public class GXDLMSAssociationLogicalName extends GXDLMSObject
                 challenge.set(tmp);
                 return challenge.array();
             } else {
+                LOGGER.info("Invalid CtoS:" + GXCommon.toHex(serverChallenge)
+                        + "-" + GXCommon.toHex(clientChallenge));
                 return new byte[] { (byte) 0 };
             }
         } else {
@@ -398,30 +403,32 @@ public class GXDLMSAssociationLogicalName extends GXDLMSObject
 
     static final void updateAccessRights(final GXDLMSObject obj,
             final Object[] buff) {
-        for (Object access : (Object[]) Array.get(buff, 0)) {
-            Object[] attributeAccess = (Object[]) access;
-            int id = ((Number) attributeAccess[0]).intValue();
-            int tmp = ((Number) attributeAccess[1]).intValue();
-            AccessMode aMode = AccessMode.forValue(tmp);
-            obj.setAccess(id, aMode);
-        }
-        for (Object access : (Object[]) Array.get(buff, 1)) {
-            Object[] methodAccess = (Object[]) access;
-            int id = ((Number) methodAccess[0]).intValue();
-            int tmp;
-            // If version is 0.
-            if (methodAccess[1] instanceof Boolean) {
-                if (((Boolean) methodAccess[1]).booleanValue()) {
-                    tmp = 1;
-                } else {
-                    tmp = 0;
-                }
-            } else {
-                // If version is 1.
-                tmp = ((Number) methodAccess[1]).intValue();
+        if (buff != null) {
+            for (Object access : (Object[]) Array.get(buff, 0)) {
+                Object[] attributeAccess = (Object[]) access;
+                int id = ((Number) attributeAccess[0]).intValue();
+                int tmp = ((Number) attributeAccess[1]).intValue();
+                AccessMode aMode = AccessMode.forValue(tmp);
+                obj.setAccess(id, aMode);
             }
-            MethodAccessMode mode = MethodAccessMode.forValue(tmp);
-            obj.setMethodAccess(id, mode);
+            for (Object access : (Object[]) Array.get(buff, 1)) {
+                Object[] methodAccess = (Object[]) access;
+                int id = ((Number) methodAccess[0]).intValue();
+                int tmp;
+                // If version is 0.
+                if (methodAccess[1] instanceof Boolean) {
+                    if (((Boolean) methodAccess[1]).booleanValue()) {
+                        tmp = 1;
+                    } else {
+                        tmp = 0;
+                    }
+                } else {
+                    // If version is 1.
+                    tmp = ((Number) methodAccess[1]).intValue();
+                }
+                MethodAccessMode mode = MethodAccessMode.forValue(tmp);
+                obj.setMethodAccess(id, mode);
+            }
         }
     }
 

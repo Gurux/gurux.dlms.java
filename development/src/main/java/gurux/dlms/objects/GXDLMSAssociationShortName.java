@@ -35,6 +35,7 @@
 package gurux.dlms.objects;
 
 import java.lang.reflect.Array;
+import java.util.logging.Logger;
 
 import gurux.dlms.GXByteBuffer;
 import gurux.dlms.GXDLMSSettings;
@@ -50,6 +51,8 @@ import gurux.dlms.secure.GXSecure;
 
 public class GXDLMSAssociationShortName extends GXDLMSObject
         implements IGXDLMSBase {
+    private static final Logger LOGGER =
+            Logger.getLogger(GXDLMSAssociationShortName.class.getName());
     private Object accessRightsList;
     private GXDLMSObjectCollection objectList;
     private String securitySetupReference;
@@ -159,6 +162,8 @@ public class GXDLMSAssociationShortName extends GXDLMSObject
                 challenge.set(tmp);
                 return challenge.array();
             } else {
+                LOGGER.info("Invalid CtoS:" + GXCommon.toHex(serverChallenge)
+                        + "-" + GXCommon.toHex(clientChallenge));
                 return new byte[] { 0 };
             }
         } else {
