@@ -43,7 +43,9 @@ import gurux.dlms.GXDLMSClient;
 import gurux.dlms.GXDLMSSettings;
 import gurux.dlms.GXDateTime;
 import gurux.dlms.GXSimpleEntry;
+import gurux.dlms.ValueEventArgs;
 import gurux.dlms.enums.DataType;
+import gurux.dlms.enums.ErrorCode;
 import gurux.dlms.enums.ObjectType;
 import gurux.dlms.internal.GXCommon;
 import gurux.dlms.objects.enums.AutoConnectMode;
@@ -213,21 +215,21 @@ public class GXDLMSAutoConnect extends GXDLMSObject implements IGXDLMSBase {
      * Returns value of given attribute.
      */
     @Override
-    public final Object getValue(final GXDLMSSettings settings, final int index,
-            final int selector, final Object parameters) {
-        if (index == 1) {
+    public final Object getValue(final GXDLMSSettings settings,
+            final ValueEventArgs e) {
+        if (e.getIndex() == 1) {
             return getLogicalName();
         }
-        if (index == 2) {
+        if (e.getIndex() == 2) {
             return new Byte((byte) getMode().getValue());
         }
-        if (index == 3) {
+        if (e.getIndex() == 3) {
             return new Integer(getRepetitions());
         }
-        if (index == 4) {
+        if (e.getIndex() == 4) {
             return new Integer(getRepetitionDelay());
         }
-        if (index == 5) {
+        if (e.getIndex() == 5) {
             int cnt = getCallingWindow().size();
             GXByteBuffer data = new GXByteBuffer();
             data.setUInt8((byte) DataType.ARRAY.getValue());
@@ -247,7 +249,7 @@ public class GXDLMSAutoConnect extends GXDLMSObject implements IGXDLMSBase {
             }
             return data.array();
         }
-        if (index == 6) {
+        if (e.getIndex() == 6) {
             GXByteBuffer data = new GXByteBuffer();
             data.setUInt8(DataType.ARRAY.getValue());
             if (getDestinations() == null) {
@@ -264,28 +266,29 @@ public class GXDLMSAutoConnect extends GXDLMSObject implements IGXDLMSBase {
             }
             return data.array();
         }
-        throw new IllegalArgumentException(
-                "GetValue failed. Invalid attribute index.");
+        e.setError(ErrorCode.READ_WRITE_DENIED);
+        return null;
     }
 
     /*
      * Set value of given attribute.
      */
     @Override
-    public final void setValue(final GXDLMSSettings settings, final int index,
-            final Object value) {
-        if (index == 1) {
-            super.setValue(settings, index, value);
-        } else if (index == 2) {
-            setMode(AutoConnectMode.forValue(((Number) value).intValue()));
-        } else if (index == 3) {
-            setRepetitions(((Number) value).intValue());
-        } else if (index == 4) {
-            setRepetitionDelay(((Number) value).intValue());
-        } else if (index == 5) {
+    public final void setValue(final GXDLMSSettings settings,
+            final ValueEventArgs e) {
+        if (e.getIndex() == 1) {
+            super.setValue(settings, e);
+        } else if (e.getIndex() == 2) {
+            setMode(AutoConnectMode
+                    .forValue(((Number) e.getValue()).intValue()));
+        } else if (e.getIndex() == 3) {
+            setRepetitions(((Number) e.getValue()).intValue());
+        } else if (e.getIndex() == 4) {
+            setRepetitionDelay(((Number) e.getValue()).intValue());
+        } else if (e.getIndex() == 5) {
             getCallingWindow().clear();
-            if (value != null) {
-                for (Object item : (Object[]) value) {
+            if (e.getValue() != null) {
+                for (Object item : (Object[]) e.getValue()) {
                     GXDateTime start = (GXDateTime) GXDLMSClient.changeType(
                             (byte[]) ((Object[]) item)[0], DataType.DATETIME);
                     GXDateTime end = (GXDateTime) GXDLMSClient.changeType(
@@ -295,11 +298,11 @@ public class GXDLMSAutoConnect extends GXDLMSObject implements IGXDLMSBase {
                                     end));
                 }
             }
-        } else if (index == 6) {
+        } else if (e.getIndex() == 6) {
             setDestinations(null);
-            if (value != null) {
+            if (e.getValue() != null) {
                 List<String> items = new ArrayList<String>();
-                for (Object item : (Object[]) value) {
+                for (Object item : (Object[]) e.getValue()) {
                     String it = GXDLMSClient
                             .changeType((byte[]) item, DataType.STRING)
                             .toString();
@@ -308,8 +311,7 @@ public class GXDLMSAutoConnect extends GXDLMSObject implements IGXDLMSBase {
                 setDestinations(items.toArray(new String[items.size()]));
             }
         } else {
-            throw new IllegalArgumentException(
-                    "GetValue failed. Invalid attribute index.");
+            e.setError(ErrorCode.READ_WRITE_DENIED);
         }
     }
 }

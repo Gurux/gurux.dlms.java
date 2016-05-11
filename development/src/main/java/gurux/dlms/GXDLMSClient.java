@@ -484,8 +484,8 @@ public class GXDLMSClient {
         } else {
             data = null;
         }
-        return GXDLMS.splitToHdlcFrames(settings, FrameType.SNRM.getValue(),
-                data)[0];
+        return GXDLMS.getHdlcFrame(settings, (byte) Command.SNRM.getValue(),
+                null);
     }
 
     /**
@@ -567,7 +567,7 @@ public class GXDLMSClient {
             settings.setCtoSChallenge(null);
         }
         GXAPDU.generateAarq(settings, settings.getCipher(), buff);
-        return GXDLMS.splitPdu(settings, Command.AARQ, 0, buff, null).get(0);
+        return GXDLMS.getMessages(settings, Command.AARQ, 0, buff, null);
     }
 
     /**
@@ -680,23 +680,6 @@ public class GXDLMSClient {
     }
 
     /**
-     * Generates a disconnect mode request.
-     * 
-     * @return Disconnect mode request, as byte array.
-     */
-    public final byte[] disconnectedModeRequest() {
-        // If connection is not established, there is no need to send
-        // DisconnectRequest.
-        if (this.getInterfaceType() == InterfaceType.WRAPPER
-                || (settings.getLnSettings() == null
-                        && settings.getSnSettings() == null)) {
-            return new byte[0];
-        }
-        return GXDLMS.splitToHdlcFrames(settings,
-                FrameType.DISCONNECT_MODE.getValue(), null)[0];
-    }
-
-    /**
      * Generates a disconnect request.
      * 
      * @return Disconnected request, as byte array.
@@ -709,13 +692,13 @@ public class GXDLMSClient {
             return new byte[0];
         }
         if (this.getInterfaceType() == InterfaceType.HDLC) {
-            return GXDLMS.splitToHdlcFrames(settings,
-                    FrameType.DISCONNECT_REQUEST.getValue(), null)[0];
+            return GXDLMS.getHdlcFrame(settings, (byte) Command.DISC.getValue(),
+                    null);
         }
         GXByteBuffer bb = new GXByteBuffer(2);
         bb.setUInt8(Command.DISCONNECT_REQUEST.getValue());
         bb.setUInt8(0x0);
-        return GXDLMS.splitToWrapperFrames(settings, bb)[0];
+        return GXDLMS.getWrapperFrame(settings, bb);
     }
 
     /**
@@ -934,7 +917,9 @@ public class GXDLMSClient {
                 val = changeType((byte[]) value, type);
             }
         }
-        target.setValue(settings, attributeIndex, val);
+        ValueEventArgs e = new ValueEventArgs(target, attributeIndex, 0, null);
+        e.setValue(val);
+        target.setValue(settings, e);
         return target.getValues()[attributeIndex - 1];
     }
 
@@ -972,7 +957,10 @@ public class GXDLMSClient {
             int ret = data.getUInt8();
             if (ret == 0) {
                 value = GXCommon.getData(data, info);
-                it.getKey().setValue(settings, it.getValue(), value);
+                ValueEventArgs e =
+                        new ValueEventArgs(it.getKey(), it.getValue(), 0, null);
+                e.setValue(value);
+                it.getKey().setValue(settings, e);
                 info.clear();
             } else {
                 throw new GXDLMSException(ret);
@@ -1155,7 +1143,7 @@ public class GXDLMSClient {
         } else if (type != DataType.NONE) {
             GXCommon.setData(bb, type, value);
         }
-        return GXDLMS.splitPdu(settings, cmd, 1, bb, null).get(0);
+        return GXDLMS.getMessages(settings, cmd, 1, bb, null);
     }
 
     /**
@@ -1168,7 +1156,8 @@ public class GXDLMSClient {
      * @return Generated write message(s).
      */
     public final byte[][] write(final GXDLMSObject item, final int index) {
-        Object value = item.getValue(null, index, 0, null);
+        ValueEventArgs e = new ValueEventArgs(item, index, 0, null);
+        Object value = item.getValue(settings, e);
         DataType type = item.getDataType(index);
         return write(item.getName(), value, type, item.getObjectType(), index);
     }
@@ -1235,7 +1224,7 @@ public class GXDLMSClient {
             bb.setUInt8(1);
         }
         GXCommon.setData(bb, type, value);
-        return GXDLMS.splitPdu(settings, cmd, 1, bb, null).get(0);
+        return GXDLMS.getMessages(settings, cmd, 1, bb, null);
     }
 
     /**
@@ -1288,8 +1277,9 @@ public class GXDLMSClient {
         // Write values.
         bb.setUInt8(list.size());
         for (GXWriteItem it : list) {
-            value = it.getTarget().getValue(settings, it.getIndex(),
+            ValueEventArgs e = new ValueEventArgs(it.getTarget(), it.getIndex(),
                     it.getSelector(), it.getParameters());
+            value = it.getTarget().getValue(settings, e);
             if ((value instanceof byte[])) {
                 bb.set((byte[]) value);
             } else {
@@ -1304,7 +1294,7 @@ public class GXDLMSClient {
                 GXCommon.setData(bb, type, value);
             }
         }
-        return GXDLMS.splitPdu(settings, cmd, 4, bb, null).get(0);
+        return GXDLMS.getMessages(settings, cmd, 4, bb, null);
     }
 
     /**
@@ -1385,7 +1375,7 @@ public class GXDLMSClient {
                 bb.set(data.getData(), 0, data.size());
             }
         }
-        return GXDLMS.splitPdu(settings, cmd, 1, bb, null).get(0);
+        return GXDLMS.getMessages(settings, cmd, 1, bb, null);
     }
 
     /**
@@ -1449,7 +1439,7 @@ public class GXDLMSClient {
                 bb.setUInt16(sn);
             }
         }
-        return GXDLMS.splitPdu(settings, cmd, 3, bb, null).get(0);
+        return GXDLMS.getMessages(settings, cmd, 3, bb, null);
     }
 
     /**
@@ -1463,8 +1453,7 @@ public class GXDLMSClient {
         if (this.getInterfaceType() == InterfaceType.WRAPPER) {
             return new byte[0];
         }
-        return GXDLMS.splitToHdlcFrames(settings, settings.getReceiverReady(),
-                null)[0];
+        return GXDLMS.getHdlcFrame(settings, settings.getReceiverReady(), null);
     }
 
     /**

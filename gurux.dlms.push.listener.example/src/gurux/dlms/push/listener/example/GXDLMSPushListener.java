@@ -100,7 +100,7 @@ public class GXDLMSPushListener
                 // If all data is received.
                 if (!data.isMoreData()) {
                     List<Entry<GXDLMSObject, Integer>> list;
-                    list = notify.parsePushObjects(data.getData());
+                    list = notify.parsePush(data.getData());
                     // Print received data.
                     for (Entry<GXDLMSObject, Integer> it : list) {
                         // Print LN.

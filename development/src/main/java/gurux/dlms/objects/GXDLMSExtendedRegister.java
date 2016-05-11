@@ -39,6 +39,7 @@ import java.text.NumberFormat;
 import gurux.dlms.GXDLMSClient;
 import gurux.dlms.GXDLMSSettings;
 import gurux.dlms.GXDateTime;
+import gurux.dlms.ValueEventArgs;
 import gurux.dlms.enums.DataType;
 import gurux.dlms.enums.ObjectType;
 
@@ -187,40 +188,40 @@ public class GXDLMSExtendedRegister extends GXDLMSRegister {
      * Returns value of given attribute.
      */
     @Override
-    public final Object getValue(final GXDLMSSettings settings, final int index,
-            final int selector, final Object parameters) {
-        if (index == 4) {
+    public final Object getValue(final GXDLMSSettings settings,
+            final ValueEventArgs e) {
+        if (e.getIndex() == 4) {
             return getStatus();
         }
-        if (index == 5) {
+        if (e.getIndex() == 5) {
             return getCaptureTime();
         }
-        return super.getValue(settings, index, selector, parameters);
+        return super.getValue(settings, e);
     }
 
     /*
      * Set value of given attribute.
      */
     @Override
-    public final void setValue(final GXDLMSSettings settings, final int index,
-            final Object value) {
-        if (index == 4) {
-            setStatus(value);
-        } else if (index == 5) {
-            if (value == null) {
+    public final void setValue(final GXDLMSSettings settings,
+            final ValueEventArgs e) {
+        if (e.getIndex() == 4) {
+            setStatus(e.getValue());
+        } else if (e.getIndex() == 5) {
+            if (e.getValue() == null) {
                 setCaptureTime(new GXDateTime());
             } else {
                 GXDateTime tmp;
-                if (value instanceof byte[]) {
-                    tmp = (GXDateTime) GXDLMSClient.changeType((byte[]) value,
-                            DataType.DATETIME);
+                if (e.getValue() instanceof byte[]) {
+                    tmp = (GXDateTime) GXDLMSClient.changeType(
+                            (byte[]) e.getValue(), DataType.DATETIME);
                 } else {
-                    tmp = (GXDateTime) value;
+                    tmp = (GXDateTime) e.getValue();
                 }
                 setCaptureTime(tmp);
             }
         } else {
-            super.setValue(settings, index, value);
+            super.setValue(settings, e);
         }
     }
 }

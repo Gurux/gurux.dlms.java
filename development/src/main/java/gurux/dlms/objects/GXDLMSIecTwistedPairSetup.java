@@ -44,7 +44,9 @@ import java.util.ArrayList;
 import java.util.List;
 
 import gurux.dlms.GXDLMSSettings;
+import gurux.dlms.ValueEventArgs;
 import gurux.dlms.enums.DataType;
+import gurux.dlms.enums.ErrorCode;
 import gurux.dlms.enums.ObjectType;
 import gurux.dlms.objects.enums.BaudRate;
 import gurux.dlms.objects.enums.IecTwistedPairSetupMode;
@@ -256,43 +258,42 @@ public class GXDLMSIecTwistedPairSetup extends GXDLMSObject
      * Returns value of given attribute.
      */
     @Override
-    public final Object getValue(final GXDLMSSettings settings, final int index,
-            final int selector, final Object parameters) {
-        if (index == 1) {
+    public final Object getValue(final GXDLMSSettings settings,
+            final ValueEventArgs e) {
+        if (e.getIndex() == 1) {
             return getLogicalName();
         }
-        throw new IllegalArgumentException(
-                "GetValue failed. Invalid attribute index.");
+        e.setError(ErrorCode.READ_WRITE_DENIED);
+        return null;
     }
 
     /*
      * Set value of given attribute.
      */
     @Override
-    public final void setValue(final GXDLMSSettings settings, final int index,
-            final Object value) {
-        if (index == 1) {
-            super.setValue(settings, index, value);
-        } else if (index == 2) {
-            setMode(IecTwistedPairSetupMode.values()[((Number) value)
+    public final void setValue(final GXDLMSSettings settings,
+            final ValueEventArgs e) {
+        if (e.getIndex() == 1) {
+            super.setValue(settings, e);
+        } else if (e.getIndex() == 2) {
+            setMode(IecTwistedPairSetupMode.values()[((Number) e.getValue())
                     .intValue()]);
-        } else if (index == 3) {
-            setSpeed(BaudRate.values()[((Number) value).intValue()]);
-        } else if (index == 4) {
+        } else if (e.getIndex() == 3) {
+            setSpeed(BaudRate.values()[((Number) e.getValue()).intValue()]);
+        } else if (e.getIndex() == 4) {
             List<Byte> list = new ArrayList<Byte>();
-            for (Object it : (Object[]) value) {
+            for (Object it : (Object[]) e.getValue()) {
                 list.add(new Byte(((Number) it).byteValue()));
             }
             setPrimaryAddresses(toByteArray(list));
-        } else if (index == 5) {
+        } else if (e.getIndex() == 5) {
             List<Byte> list = new ArrayList<Byte>();
-            for (Object it : (Object[]) value) {
+            for (Object it : (Object[]) e.getValue()) {
                 list.add(new Byte(((Number) it).byteValue()));
             }
             setTabis(toByteArray(list));
         } else {
-            throw new IllegalArgumentException(
-                    "GetValue failed. Invalid attribute index.");
+            e.setError(ErrorCode.READ_WRITE_DENIED);
         }
     }
 }

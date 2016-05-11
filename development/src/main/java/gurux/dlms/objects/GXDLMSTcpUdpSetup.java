@@ -36,7 +36,9 @@ package gurux.dlms.objects;
 
 import gurux.dlms.GXDLMSClient;
 import gurux.dlms.GXDLMSSettings;
+import gurux.dlms.ValueEventArgs;
 import gurux.dlms.enums.DataType;
+import gurux.dlms.enums.ErrorCode;
 import gurux.dlms.enums.ObjectType;
 
 public class GXDLMSTcpUdpSetup extends GXDLMSObject implements IGXDLMSBase {
@@ -205,77 +207,77 @@ public class GXDLMSTcpUdpSetup extends GXDLMSObject implements IGXDLMSBase {
      * Returns value of given attribute.
      */
     @Override
-    public final Object getValue(final GXDLMSSettings settings, final int index,
-            final int selector, final Object parameters) {
-        if (index == 1) {
+    public final Object getValue(final GXDLMSSettings settings,
+            final ValueEventArgs e) {
+        if (e.getIndex() == 1) {
             return getLogicalName();
         }
-        if (index == 2) {
+        if (e.getIndex() == 2) {
             return new Integer(getPort());
         }
-        if (index == 3) {
+        if (e.getIndex() == 3) {
             return getIPReference();
         }
-        if (index == 4) {
+        if (e.getIndex() == 4) {
             return new Integer(getMaximumSegmentSize());
         }
-        if (index == 5) {
+        if (e.getIndex() == 5) {
             return new Integer(getMaximumSimultaneousConnections());
         }
-        if (index == 6) {
+        if (e.getIndex() == 6) {
             return new Integer(getInactivityTimeout());
         }
-        throw new IllegalArgumentException(
-                "GetValue failed. Invalid attribute index.");
+        e.setError(ErrorCode.READ_WRITE_DENIED);
+        return null;
     }
 
     /*
      * Set value of given attribute.
      */
     @Override
-    public final void setValue(final GXDLMSSettings settings, final int index,
-            final Object value) {
-        if (index == 1) {
-            super.setValue(settings, index, value);
-        } else if (index == 2) {
-            if (value == null) {
+    public final void setValue(final GXDLMSSettings settings,
+            final ValueEventArgs e) {
+        if (e.getIndex() == 1) {
+            super.setValue(settings, e);
+        } else if (e.getIndex() == 2) {
+            if (e.getValue() == null) {
                 setPort(4059);
             } else {
-                setPort(((Number) value).intValue());
+                setPort(((Number) e.getValue()).intValue());
             }
-        } else if (index == 3) {
-            if (value == null) {
+        } else if (e.getIndex() == 3) {
+            if (e.getValue() == null) {
                 setIPReference(null);
             } else {
-                if (value instanceof byte[]) {
-                    setIPReference(GXDLMSClient
-                            .changeType((byte[]) value, DataType.OCTET_STRING)
-                            .toString());
+                if (e.getValue() instanceof byte[]) {
+                    setIPReference(
+                            GXDLMSClient.changeType((byte[]) e.getValue(),
+                                    DataType.OCTET_STRING).toString());
                 } else {
-                    setIPReference(String.valueOf(value));
+                    setIPReference(String.valueOf(e.getValue()));
                 }
             }
-        } else if (index == 4) {
-            if (value == null) {
+        } else if (e.getIndex() == 4) {
+            if (e.getValue() == null) {
                 setMaximumSegmentSize(576);
             } else {
-                setMaximumSegmentSize(((Number) value).intValue());
+                setMaximumSegmentSize(((Number) e.getValue()).intValue());
             }
-        } else if (index == 5) {
-            if (value == null) {
+        } else if (e.getIndex() == 5) {
+            if (e.getValue() == null) {
                 setMaximumSimultaneousConnections(1);
             } else {
-                setMaximumSimultaneousConnections(((Number) value).intValue());
+                setMaximumSimultaneousConnections(
+                        ((Number) e.getValue()).intValue());
             }
-        } else if (index == 6) {
-            if (value == null) {
+        } else if (e.getIndex() == 6) {
+            if (e.getValue() == null) {
                 setInactivityTimeout(180);
             } else {
-                setInactivityTimeout(((Number) value).intValue());
+                setInactivityTimeout(((Number) e.getValue()).intValue());
             }
         } else {
-            throw new IllegalArgumentException(
-                    "SetValue failed. Invalid attribute index.");
+            e.setError(ErrorCode.READ_WRITE_DENIED);
         }
     }
 }

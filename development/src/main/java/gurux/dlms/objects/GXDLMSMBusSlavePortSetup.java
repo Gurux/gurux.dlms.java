@@ -35,7 +35,9 @@
 package gurux.dlms.objects;
 
 import gurux.dlms.GXDLMSSettings;
+import gurux.dlms.ValueEventArgs;
 import gurux.dlms.enums.DataType;
+import gurux.dlms.enums.ErrorCode;
 import gurux.dlms.enums.ObjectType;
 import gurux.dlms.objects.enums.AddressState;
 import gurux.dlms.objects.enums.BaudRate;
@@ -218,64 +220,64 @@ public class GXDLMSMBusSlavePortSetup extends GXDLMSObject
      * Returns value of given attribute.
      */
     @Override
-    public final Object getValue(final GXDLMSSettings settings, final int index,
-            final int selector, final Object parameters) {
-        if (index == 1) {
+    public final Object getValue(final GXDLMSSettings settings,
+            final ValueEventArgs e) {
+        if (e.getIndex() == 1) {
             return getLogicalName();
         }
-        if (index == 2) {
+        if (e.getIndex() == 2) {
             return new Integer(getDefaultBaud().ordinal());
         }
-        if (index == 3) {
+        if (e.getIndex() == 3) {
             return new Integer(getAvailableBaud().ordinal());
         }
-        if (index == 4) {
+        if (e.getIndex() == 4) {
             return new Integer(getAddressState().ordinal());
         }
-        if (index == 5) {
+        if (e.getIndex() == 5) {
             return new Integer(getBusAddress());
         }
-        throw new IllegalArgumentException(
-                "GetValue failed. Invalid attribute index.");
+        e.setError(ErrorCode.READ_WRITE_DENIED);
+        return null;
     }
 
     /*
      * Set value of given attribute.
      */
     @Override
-    public final void setValue(final GXDLMSSettings settings, final int index,
-            final Object value) {
-        if (index == 1) {
-            super.setValue(settings, index, value);
-        } else if (index == 2) {
-            if (value == null) {
+    public final void setValue(final GXDLMSSettings settings,
+            final ValueEventArgs e) {
+        if (e.getIndex() == 1) {
+            super.setValue(settings, e);
+        } else if (e.getIndex() == 2) {
+            if (e.getValue() == null) {
                 setDefaultBaud(BaudRate.BAUDRATE_300);
             } else {
-                setDefaultBaud(BaudRate.values()[((Number) value).intValue()]);
+                setDefaultBaud(
+                        BaudRate.values()[((Number) e.getValue()).intValue()]);
             }
-        } else if (index == 3) {
-            if (value == null) {
+        } else if (e.getIndex() == 3) {
+            if (e.getValue() == null) {
                 setAvailableBaud(BaudRate.BAUDRATE_300);
             } else {
                 setAvailableBaud(
-                        BaudRate.values()[((Number) value).intValue()]);
+                        BaudRate.values()[((Number) e.getValue()).intValue()]);
             }
-        } else if (index == 4) {
-            if (value == null) {
+        } else if (e.getIndex() == 4) {
+            if (e.getValue() == null) {
                 setAddressState(AddressState.NONE);
             } else {
-                setAddressState(
-                        AddressState.values()[((Number) value).intValue()]);
+                setAddressState(AddressState.values()[((Number) e.getValue())
+                        .intValue()]);
             }
-        } else if (index == 5) {
-            if (value == null) {
+        } else if (e.getIndex() == 5) {
+            if (e.getValue() == null) {
                 setBusAddress(0);
             } else {
-                setBusAddress(((Number) value).intValue());
+                setBusAddress(((Number) e.getValue()).intValue());
             }
         } else {
-            throw new IllegalArgumentException(
-                    "GetValue failed. Invalid attribute index.");
+            e.setError(ErrorCode.READ_WRITE_DENIED);
         }
     }
 }

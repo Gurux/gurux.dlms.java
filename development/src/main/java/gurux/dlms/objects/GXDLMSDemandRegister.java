@@ -40,7 +40,9 @@ import gurux.dlms.GXByteBuffer;
 import gurux.dlms.GXDLMSClient;
 import gurux.dlms.GXDLMSSettings;
 import gurux.dlms.GXDateTime;
+import gurux.dlms.ValueEventArgs;
 import gurux.dlms.enums.DataType;
+import gurux.dlms.enums.ErrorCode;
 import gurux.dlms.enums.ObjectType;
 import gurux.dlms.enums.Unit;
 import gurux.dlms.internal.GXCommon;
@@ -340,18 +342,18 @@ public class GXDLMSDemandRegister extends GXDLMSObject implements IGXDLMSBase {
      * Returns value of given attribute.
      */
     @Override
-    public final Object getValue(final GXDLMSSettings settings, final int index,
-            final int selector, final Object parameters) {
-        if (index == 1) {
+    public final Object getValue(final GXDLMSSettings settings,
+            final ValueEventArgs e) {
+        if (e.getIndex() == 1) {
             return getLogicalName();
         }
-        if (index == 2) {
+        if (e.getIndex() == 2) {
             return getCurrentAvarageValue();
         }
-        if (index == 3) {
+        if (e.getIndex() == 3) {
             return getLastAvarageValue();
         }
-        if (index == 4) {
+        if (e.getIndex() == 4) {
             GXByteBuffer data = new GXByteBuffer();
             data.setUInt8(DataType.STRUCTURE.getValue());
             data.setUInt8(2);
@@ -359,44 +361,44 @@ public class GXDLMSDemandRegister extends GXDLMSObject implements IGXDLMSBase {
             GXCommon.setData(data, DataType.ENUM, new Integer(unit));
             return data.array();
         }
-        if (index == 5) {
+        if (e.getIndex() == 5) {
             return getStatus();
         }
-        if (index == 6) {
+        if (e.getIndex() == 6) {
             return getCaptureTime();
         }
-        if (index == 7) {
+        if (e.getIndex() == 7) {
             return getStartTimeCurrent();
         }
-        if (index == 8) {
+        if (e.getIndex() == 8) {
             return getPeriod();
         }
-        if (index == 9) {
+        if (e.getIndex() == 9) {
             return new Integer(getNumberOfPeriods());
         }
-        throw new IllegalArgumentException(
-                "GetValue failed. Invalid attribute index.");
+        e.setError(ErrorCode.READ_WRITE_DENIED);
+        return null;
     }
 
     /*
      * Set value of given attribute.
      */
     @Override
-    public final void setValue(final GXDLMSSettings settings, final int index,
-            final Object value) {
-        if (index == 1) {
-            super.setValue(settings, index, value);
-        } else if (index == 2) {
-            setCurrentAvarageValue(value);
-        } else if (index == 3) {
-            setLastAvarageValue(value);
-        } else if (index == 4) {
+    public final void setValue(final GXDLMSSettings settings,
+            final ValueEventArgs e) {
+        if (e.getIndex() == 1) {
+            super.setValue(settings, e);
+        } else if (e.getIndex() == 2) {
+            setCurrentAvarageValue(e.getValue());
+        } else if (e.getIndex() == 3) {
+            setLastAvarageValue(e.getValue());
+        } else if (e.getIndex() == 4) {
             // Set default values.
-            if (value == null) {
+            if (e.getValue() == null) {
                 scaler = 0;
                 unit = 0;
             } else {
-                Object[] arr = (Object[]) value;
+                Object[] arr = (Object[]) e.getValue();
                 if (arr.length != 2) {
                     throw new IllegalArgumentException(
                             "setValue failed. Invalid scaler unit value.");
@@ -404,53 +406,53 @@ public class GXDLMSDemandRegister extends GXDLMSObject implements IGXDLMSBase {
                 scaler = ((Number) arr[0]).intValue();
                 unit = (((Number) arr[1]).intValue() & 0xFF);
             }
-        } else if (index == 5) {
-            if (value == null) {
+        } else if (e.getIndex() == 5) {
+            if (e.getValue() == null) {
                 setStatus(null);
             } else {
-                setStatus(value);
+                setStatus(e.getValue());
             }
-        } else if (index == 6) {
-            if (value == null) {
+        } else if (e.getIndex() == 6) {
+            if (e.getValue() == null) {
                 setCaptureTime(new GXDateTime());
             } else {
                 GXDateTime tmp;
-                if (value instanceof byte[]) {
-                    tmp = (GXDateTime) GXDLMSClient.changeType((byte[]) value,
-                            DataType.DATETIME);
+                if (e.getValue() instanceof byte[]) {
+                    tmp = (GXDateTime) GXDLMSClient.changeType(
+                            (byte[]) e.getValue(), DataType.DATETIME);
                 } else {
-                    tmp = (GXDateTime) value;
+                    tmp = (GXDateTime) e.getValue();
                 }
                 setCaptureTime(tmp);
             }
-        } else if (index == 7) {
-            if (value == null) {
+        } else if (e.getIndex() == 7) {
+            if (e.getValue() == null) {
                 setStartTimeCurrent(new GXDateTime());
             } else {
                 GXDateTime tmp;
-                if (value instanceof byte[]) {
-                    tmp = (GXDateTime) GXDLMSClient.changeType((byte[]) value,
-                            DataType.DATETIME);
+                if (e.getValue() instanceof byte[]) {
+                    tmp = (GXDateTime) GXDLMSClient.changeType(
+                            (byte[]) e.getValue(), DataType.DATETIME);
                 } else {
-                    tmp = (GXDateTime) value;
+                    tmp = (GXDateTime) e.getValue();
                 }
                 setStartTimeCurrent(tmp);
             }
-        } else if (index == 8) {
-            if (value == null) {
+        } else if (e.getIndex() == 8) {
+            if (e.getValue() == null) {
                 setPeriod(BigInteger.valueOf(0));
             } else {
-                setPeriod(BigInteger.valueOf(((Number) value).longValue()));
+                setPeriod(BigInteger
+                        .valueOf(((Number) e.getValue()).longValue()));
             }
-        } else if (index == 9) {
-            if (value == null) {
+        } else if (e.getIndex() == 9) {
+            if (e.getValue() == null) {
                 setNumberOfPeriods(1);
             } else {
-                setNumberOfPeriods(((Number) value).intValue());
+                setNumberOfPeriods(((Number) e.getValue()).intValue());
             }
         } else {
-            throw new IllegalArgumentException(
-                    "GetValue failed. Invalid attribute index.");
+            e.setError(ErrorCode.READ_WRITE_DENIED);
         }
     }
 }

@@ -39,7 +39,9 @@ import java.util.List;
 import gurux.dlms.GXDLMSClient;
 import gurux.dlms.GXDLMSSettings;
 import gurux.dlms.GXSimpleEntry;
+import gurux.dlms.ValueEventArgs;
 import gurux.dlms.enums.DataType;
+import gurux.dlms.enums.ErrorCode;
 import gurux.dlms.enums.ObjectType;
 
 public class GXDLMSMBusClient extends GXDLMSObject implements IGXDLMSBase {
@@ -321,64 +323,64 @@ public class GXDLMSMBusClient extends GXDLMSObject implements IGXDLMSBase {
      * Returns value of given attribute.
      */
     @Override
-    public final Object getValue(final GXDLMSSettings settings, final int index,
-            final int selector, final Object parameters) {
-        if (index == 1) {
+    public final Object getValue(final GXDLMSSettings settings,
+            final ValueEventArgs e) {
+        if (e.getIndex() == 1) {
             return getLogicalName();
         }
-        if (index == 2) {
+        if (e.getIndex() == 2) {
             return mBusPortReference;
         }
-        if (index == 3) {
+        if (e.getIndex() == 3) {
             // TODO;
             return captureDefinition;
         }
-        if (index == 4) {
+        if (e.getIndex() == 4) {
             return new Long(capturePeriod);
         }
-        if (index == 5) {
+        if (e.getIndex() == 5) {
             return new Integer(primaryAddress);
         }
-        if (index == 6) {
+        if (e.getIndex() == 6) {
             return new Long(identificationNumber);
         }
-        if (index == 7) {
+        if (e.getIndex() == 7) {
             return new Integer(manufacturerID);
         }
-        if (index == 8) {
+        if (e.getIndex() == 8) {
             return new Integer(dataHeaderVersion);
         }
-        if (index == 9) {
+        if (e.getIndex() == 9) {
             return new Integer(deviceType);
         }
-        if (index == 10) {
+        if (e.getIndex() == 10) {
             return new Integer(accessNumber);
         }
-        if (index == 11) {
+        if (e.getIndex() == 11) {
             return new Integer(status);
         }
-        if (index == 12) {
+        if (e.getIndex() == 12) {
             return new Integer(alarm);
         }
-        throw new IllegalArgumentException(
-                "GetValue failed. Invalid attribute index.");
+        e.setError(ErrorCode.READ_WRITE_DENIED);
+        return null;
     }
 
     /*
      * Set value of given attribute.
      */
     @Override
-    public final void setValue(final GXDLMSSettings settings, final int index,
-            final Object value) {
-        if (index == 1) {
-            super.setValue(settings, index, value);
-        } else if (index == 2) {
+    public final void setValue(final GXDLMSSettings settings,
+            final ValueEventArgs e) {
+        if (e.getIndex() == 1) {
+            super.setValue(settings, e);
+        } else if (e.getIndex() == 2) {
             mBusPortReference = GXDLMSClient
-                    .changeType((byte[]) value, DataType.OCTET_STRING)
+                    .changeType((byte[]) e.getValue(), DataType.OCTET_STRING)
                     .toString();
-        } else if (index == 3) {
+        } else if (e.getIndex() == 3) {
             captureDefinition.clear();
-            for (Object it : (Object[]) value) {
+            for (Object it : (Object[]) e.getValue()) {
                 captureDefinition
                         .add(new GXSimpleEntry<String, String>(
                                 GXDLMSClient
@@ -390,27 +392,26 @@ public class GXDLMSMBusClient extends GXDLMSObject implements IGXDLMSBase {
                                                 DataType.OCTET_STRING)
                                         .toString()));
             }
-        } else if (index == 4) {
-            capturePeriod = ((Number) value).longValue();
-        } else if (index == 5) {
-            primaryAddress = ((Number) value).intValue();
-        } else if (index == 6) {
-            identificationNumber = ((Number) value).longValue();
-        } else if (index == 7) {
-            manufacturerID = ((Number) value).intValue();
-        } else if (index == 8) {
-            dataHeaderVersion = ((Number) value).intValue();
-        } else if (index == 9) {
-            deviceType = ((Number) value).intValue();
-        } else if (index == 10) {
-            accessNumber = ((Number) value).intValue();
-        } else if (index == 11) {
-            status = ((Number) value).intValue();
-        } else if (index == 12) {
-            alarm = ((Number) value).intValue();
+        } else if (e.getIndex() == 4) {
+            capturePeriod = ((Number) e.getValue()).longValue();
+        } else if (e.getIndex() == 5) {
+            primaryAddress = ((Number) e.getValue()).intValue();
+        } else if (e.getIndex() == 6) {
+            identificationNumber = ((Number) e.getValue()).longValue();
+        } else if (e.getIndex() == 7) {
+            manufacturerID = ((Number) e.getValue()).intValue();
+        } else if (e.getIndex() == 8) {
+            dataHeaderVersion = ((Number) e.getValue()).intValue();
+        } else if (e.getIndex() == 9) {
+            deviceType = ((Number) e.getValue()).intValue();
+        } else if (e.getIndex() == 10) {
+            accessNumber = ((Number) e.getValue()).intValue();
+        } else if (e.getIndex() == 11) {
+            status = ((Number) e.getValue()).intValue();
+        } else if (e.getIndex() == 12) {
+            alarm = ((Number) e.getValue()).intValue();
         } else {
-            throw new IllegalArgumentException(
-                    "GetValue failed. Invalid attribute index.");
+            e.setError(ErrorCode.READ_WRITE_DENIED);
         }
     }
 }

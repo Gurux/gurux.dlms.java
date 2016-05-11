@@ -37,70 +37,37 @@ package gurux.dlms;
 import gurux.dlms.enums.AssociationResult;
 
 /**
- * Reserved for internal use.
+ * HDLC frame types.
  */
-enum FrameType {
+enum HdlcFrameType {
     /**
-     * This command is used to set the secondary station in connected mode and
-     * reset its sequence number variables.
+     * I-Frame. Information frames are used to transport user data.
      */
-    SNRM(0x93), // Set Normal Response Mode (SNRM)
-
+    I_FRAME(0x0),
     /**
-     * This response is used to confirm that the secondary received and acted on
-     * an SNRM or DISC command.
+     * S-frame. Supervisory Frames are used for flow and error control.
+     * Rejected, RNR and RR.
      */
-    UA(0x73), // Unnumbered Acknowledge (UA)
-
+    S_FRAME(0x1),
     /**
-     * This command and response is used to transfer a block of data together
-     * with its sequence number.The command also includes the sequence number of
-     * the next frame the transmitting station expects to see. This way, it
-     * works as an RR. Like RR, it enables transmission of I frames from the
-     * opposite side.
+     * U-frame. Unnumbered frames are used for link management. Example SNRM and
+     * UA.
      */
-    AARQ(0x10),
-
-    /**
-     * AARE frame.
-     */
-    AARE(0x30),
-
-    /**
-     * This response is used to indicate an error condition. The two most likely
-     * error conditions are: Invalid command or Sequence number problem.
-     */
-    REJECTED(0x97),
-
-    /**
-     * This command is used to terminate the connection.
-     */
-    DISCONNECT_REQUEST(0x53),
-
-    /**
-     * This command is used to terminate the connection.
-     */
-    DISCONNECT_RESPONSE(0x52),
-
-    /**
-     * This response is used to inform the primary station that the secondary is
-     * disconnected.
-     */
-    DISCONNECT_MODE(0x1F); // Disconnected Mode
+    U_FRAME(0x3);
 
     private final int intValue;
-    private static java.util.HashMap<Integer, FrameType> mappings;
+    private static java.util.HashMap<Integer, HdlcFrameType> mappings;
 
-    private static java.util.HashMap<Integer, FrameType> getMappings() {
+    private static java.util.HashMap<Integer, HdlcFrameType> getMappings() {
         synchronized (AssociationResult.class) {
             if (mappings == null) {
-                mappings = new java.util.HashMap<Integer, FrameType>();
+                mappings = new java.util.HashMap<Integer, HdlcFrameType>();
             }
         }
         return mappings;
     }
 
-    FrameType(final int value) {
+    HdlcFrameType(final int value) {
         intValue = value;
         getMappings().put(new Integer(value), this);
     }
@@ -115,7 +82,7 @@ enum FrameType {
     /*
      * Convert integer for enum value.
      */
-    public static FrameType forValue(final int value) {
+    public static HdlcFrameType forValue(final int value) {
         return getMappings().get(new Integer(value));
     }
 }

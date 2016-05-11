@@ -37,7 +37,9 @@ package gurux.dlms.objects;
 import gurux.dlms.GXByteBuffer;
 import gurux.dlms.GXDLMSClient;
 import gurux.dlms.GXDLMSSettings;
+import gurux.dlms.ValueEventArgs;
 import gurux.dlms.enums.DataType;
+import gurux.dlms.enums.ErrorCode;
 import gurux.dlms.enums.ObjectType;
 import gurux.dlms.internal.GXCommon;
 import gurux.dlms.objects.enums.GXDLMSPppSetupIPCPOptionType;
@@ -228,15 +230,15 @@ public class GXDLMSPppSetup extends GXDLMSObject implements IGXDLMSBase {
      * Returns value of given attribute.
      */
     @Override
-    public final Object getValue(final GXDLMSSettings settings, final int index,
-            final int selector, final Object parameters) {
-        if (index == 1) {
+    public final Object getValue(final GXDLMSSettings settings,
+            final ValueEventArgs e) {
+        if (e.getIndex() == 1) {
             return getLogicalName();
         }
-        if (index == 2) {
+        if (e.getIndex() == 2) {
             return phyReference;
         }
-        if (index == 3) {
+        if (e.getIndex() == 3) {
             GXByteBuffer data = new GXByteBuffer();
             data.setUInt8((byte) DataType.ARRAY.getValue());
             if (lcpOptions == null) {
@@ -255,7 +257,7 @@ public class GXDLMSPppSetup extends GXDLMSObject implements IGXDLMSBase {
             }
             return data.array();
         }
-        if (index == 4) {
+        if (e.getIndex() == 4) {
             GXByteBuffer data = new GXByteBuffer();
             data.setUInt8((byte) DataType.ARRAY.getValue());
             if (ipcpOptions == null) {
@@ -273,7 +275,7 @@ public class GXDLMSPppSetup extends GXDLMSObject implements IGXDLMSBase {
                 }
             }
             return data.array();
-        } else if (index == 5) {
+        } else if (e.getIndex() == 5) {
             GXByteBuffer data = new GXByteBuffer();
             data.setUInt8((byte) DataType.STRUCTURE.getValue());
             data.setUInt8(2);
@@ -281,31 +283,30 @@ public class GXDLMSPppSetup extends GXDLMSObject implements IGXDLMSBase {
             GXCommon.setData(data, DataType.OCTET_STRING, password);
             return data.array();
         }
-        throw new IllegalArgumentException(
-                "GetValue failed. Invalid attribute index.");
+        e.setError(ErrorCode.READ_WRITE_DENIED);
+        return null;
     }
 
     /*
      * Set value of given attribute.
      */
     @Override
-    public final void setValue(final GXDLMSSettings settings, final int index,
-            final Object value) {
-        if (index == 1) {
-            super.setValue(settings, index, value);
-        } else if (index == 2) {
-            if (value instanceof String) {
-                phyReference = value.toString();
+    public final void setValue(final GXDLMSSettings settings,
+            final ValueEventArgs e) {
+        if (e.getIndex() == 1) {
+            super.setValue(settings, e);
+        } else if (e.getIndex() == 2) {
+            if (e.getValue() instanceof String) {
+                phyReference = e.getValue().toString();
             } else {
-                phyReference = GXDLMSClient
-                        .changeType((byte[]) value, DataType.OCTET_STRING)
-                        .toString();
+                phyReference = GXDLMSClient.changeType((byte[]) e.getValue(),
+                        DataType.OCTET_STRING).toString();
             }
-        } else if (index == 3) {
+        } else if (e.getIndex() == 3) {
             java.util.ArrayList<GXDLMSPppSetupLcpOption> items =
                     new java.util.ArrayList<GXDLMSPppSetupLcpOption>();
-            if (value instanceof Object[]) {
-                for (Object item : (Object[]) value) {
+            if (e.getValue() instanceof Object[]) {
+                for (Object item : (Object[]) e.getValue()) {
                     GXDLMSPppSetupLcpOption it = new GXDLMSPppSetupLcpOption();
                     it.setType(GXDLMSPppSetupLcpOptionType.forValue(
                             ((Number) ((Object[]) item)[0]).intValue()));
@@ -316,11 +317,11 @@ public class GXDLMSPppSetup extends GXDLMSObject implements IGXDLMSBase {
             }
             lcpOptions =
                     items.toArray(new GXDLMSPppSetupLcpOption[items.size()]);
-        } else if (index == 4) {
+        } else if (e.getIndex() == 4) {
             java.util.ArrayList<GXDLMSPppSetupIPCPOption> items =
                     new java.util.ArrayList<GXDLMSPppSetupIPCPOption>();
-            if (value instanceof Object[]) {
-                for (Object item : (Object[]) value) {
+            if (e.getValue() instanceof Object[]) {
+                for (Object item : (Object[]) e.getValue()) {
                     GXDLMSPppSetupIPCPOption it =
                             new GXDLMSPppSetupIPCPOption();
                     it.setType(GXDLMSPppSetupIPCPOptionType.forValue(
@@ -332,12 +333,11 @@ public class GXDLMSPppSetup extends GXDLMSObject implements IGXDLMSBase {
             }
             ipcpOptions =
                     items.toArray(new GXDLMSPppSetupIPCPOption[items.size()]);
-        } else if (index == 5) {
-            userName = (byte[]) ((Object[]) value)[0];
-            password = (byte[]) ((Object[]) value)[1];
+        } else if (e.getIndex() == 5) {
+            userName = (byte[]) ((Object[]) e.getValue())[0];
+            password = (byte[]) ((Object[]) e.getValue())[1];
         } else {
-            throw new IllegalArgumentException(
-                    "GetValue failed. Invalid attribute index.");
+            e.setError(ErrorCode.READ_WRITE_DENIED);
         }
     }
 }

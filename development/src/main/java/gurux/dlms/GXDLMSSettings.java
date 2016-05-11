@@ -102,7 +102,12 @@ public class GXDLMSSettings {
     /**
      * Invoke ID.
      */
-    private int invokeID = 0x1;
+    private byte invokeID = 0x1;
+    /**
+     * Long Invoke ID.
+     */
+    private int longInvokeID = 0x1;
+
     /**
      * Priority.
      */
@@ -146,6 +151,16 @@ public class GXDLMSSettings {
      * Key Encrypting Key, also known as Master key.
      */
     private byte[] kek;
+
+    /**
+     * Long data count.
+     */
+    private int count;
+
+    /**
+     * Long data index.
+     */
+    private int index;
 
     /**
      * DLMS version number.
@@ -342,39 +357,34 @@ public class GXDLMSSettings {
     }
 
     final boolean checkFrame(final short frame) {
-        // If server rejects frame.
-        if (frame == 0x97) {
-            return true;
-        }
         // If U frame.
-        if ((frame & 0x3) == 3) {
-            resetFrameSequence();
-            return true;
-        }
-        // If S -frame
-        if ((frame & 0x3) == 1) {
-            if ((frame & 0xE0) == ((receiverFrame) & 0xE0)) {
-                receiverFrame = frame;
+        if ((frame & HdlcFrameType.U_FRAME.getValue()) == HdlcFrameType.U_FRAME
+                .getValue()) {
+            if (frame == 0x73 || frame == 0x93) {
+                resetFrameSequence();
                 return true;
             }
-            System.out.println("Frame ID do not match.");
+        }
+        // If S -frame.
+        if ((frame & HdlcFrameType.S_FRAME.getValue()) == HdlcFrameType.S_FRAME
+                .getValue()) {
+            receiverFrame = increaseReceiverSequence(receiverFrame);
             return true;
         }
-
-        // If I or S frame sent.
-        if ((frame & 0xE0) == ((receiverFrame + 0x20) & 0xE0)
-                && (frame & 0xE) == ((receiverFrame + 2) & 0xE)) {
-            receiverFrame = (byte) (frame);
+        // Handle I-frame.
+        if (frame == increaseReceiverSequence(
+                increaseSendSequence(receiverFrame))) {
+            receiverFrame = frame;
             return true;
         }
-        if (frame == receiverFrame || ((frame & 0xE0) == (receiverFrame & 0xE0)
-                && (frame & 0xE) == ((receiverFrame + 2) & 0xE))) {
-            // If S-frame sent.
+        // If answer for RR.
+        if (frame == increaseSendSequence(receiverFrame)) {
             receiverFrame = frame;
             return true;
         }
         System.out.println("Frame ID do not match.");
         return true;
+        // TODO: unit test must fix first. return false;
     }
 
     /**
@@ -384,7 +394,7 @@ public class GXDLMSSettings {
      *            Frame value.
      * @return Increased receiver frame sequence.
      */
-    static byte increaseReceiverSequence(final byte value) {
+    static byte increaseReceiverSequence(final short value) {
         return (byte) (value + 0x20 | 0x10 | value & 0xE);
     }
 
@@ -395,7 +405,7 @@ public class GXDLMSSettings {
      *            Frame value.
      * @return Increased sender frame sequence.
      */
-    static byte increaseSendSequence(final byte value) {
+    static byte increaseSendSequence(final short value) {
         return (byte) (value & 0xF0 | (value + 0x2) & 0xE);
     }
 
@@ -664,7 +674,25 @@ public class GXDLMSSettings {
         if (value > 0xF) {
             throw new IllegalArgumentException("Invalid InvokeID");
         }
-        invokeID = value;
+        invokeID = (byte) value;
+    }
+
+    /**
+     * @return Invoke ID.
+     */
+    public final int getLongInvokeID() {
+        return longInvokeID;
+    }
+
+    /**
+     * @param value
+     *            Invoke ID.
+     */
+    public final void setLongInvokeID(final int value) {
+        if (value > 0xFFFFFF) {
+            throw new IllegalArgumentException("Invalid InvokeID");
+        }
+        longInvokeID = value;
     }
 
     /**
@@ -720,5 +748,35 @@ public class GXDLMSSettings {
      */
     public final void setKek(final byte[] value) {
         kek = value;
+    }
+
+    /**
+     * @return Long data count.
+     */
+    public final int getCount() {
+        return count;
+    }
+
+    /**
+     * @param count
+     *            Long data count.
+     */
+    public final void setCount(final int value) {
+        count = value;
+    }
+
+    /**
+     * @return Long data index.
+     */
+    public final int getIndex() {
+        return index;
+    }
+
+    /**
+     * @param index
+     *            Long data index
+     */
+    public final void setIndex(final int value) {
+        index = value;
     }
 }

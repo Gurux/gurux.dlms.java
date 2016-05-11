@@ -36,7 +36,9 @@ package gurux.dlms.objects;
 
 import gurux.dlms.GXDLMSClient;
 import gurux.dlms.GXDLMSSettings;
+import gurux.dlms.ValueEventArgs;
 import gurux.dlms.enums.DataType;
+import gurux.dlms.enums.ErrorCode;
 import gurux.dlms.enums.ObjectType;
 
 public class GXDLMSMacAddressSetup extends GXDLMSObject implements IGXDLMSBase {
@@ -142,38 +144,37 @@ public class GXDLMSMacAddressSetup extends GXDLMSObject implements IGXDLMSBase {
      * Returns value of given attribute.
      */
     @Override
-    public final Object getValue(final GXDLMSSettings settings, final int index,
-            final int selector, final Object parameters) {
-        if (index == 1) {
+    public final Object getValue(final GXDLMSSettings settings,
+            final ValueEventArgs e) {
+        if (e.getIndex() == 1) {
             return getLogicalName();
         }
-        if (index == 2) {
+        if (e.getIndex() == 2) {
             if (macAddress == null) {
                 return macAddress;
             }
             return getMacAddress().replaceAll(":", ".");
         }
-        throw new IllegalArgumentException(
-                "GetValue failed. Invalid attribute index.");
+        e.setError(ErrorCode.READ_WRITE_DENIED);
+        return null;
     }
 
     /*
      * Set value of given attribute.
      */
     @Override
-    public final void setValue(final GXDLMSSettings settings, final int index,
-            final Object value) {
-        if (index == 1) {
-            super.setValue(settings, index, value);
-        } else if (index == 2) {
+    public final void setValue(final GXDLMSSettings settings,
+            final ValueEventArgs e) {
+        if (e.getIndex() == 1) {
+            super.setValue(settings, e);
+        } else if (e.getIndex() == 2) {
             String add = GXDLMSClient
-                    .changeType((byte[]) value, DataType.OCTET_STRING)
+                    .changeType((byte[]) e.getValue(), DataType.OCTET_STRING)
                     .toString();
             add = add.replaceAll(".", ":");
             setMacAddress(add);
         } else {
-            throw new IllegalArgumentException(
-                    "GetValue failed. Invalid attribute index.");
+            e.setError(ErrorCode.READ_WRITE_DENIED);
         }
     }
 }

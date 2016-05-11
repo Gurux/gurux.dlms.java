@@ -40,6 +40,7 @@ import gurux.dlms.GXByteBuffer;
 import gurux.dlms.GXDLMSClient;
 import gurux.dlms.GXDLMSSettings;
 import gurux.dlms.GXSimpleEntry;
+import gurux.dlms.ValueEventArgs;
 import gurux.dlms.enums.DataType;
 import gurux.dlms.enums.ErrorCode;
 import gurux.dlms.enums.ObjectType;
@@ -186,10 +187,10 @@ public class GXDLMSSecuritySetup extends GXDLMSObject implements IGXDLMSBase {
     }
 
     @Override
-    public final byte[] invoke(final GXDLMSSettings settings, final int index,
-            final Object parameters) {
-        if (index == 2) {
-            for (Object tmp : (Object[]) parameters) {
+    public final byte[] invoke(final GXDLMSSettings settings,
+            final ValueEventArgs e) {
+        if (e.getIndex() == 2) {
+            for (Object tmp : (Object[]) e.getParameters()) {
                 Object[] item = (Object[]) tmp;
                 GlobalKeyType type =
                         GlobalKeyType.values()[((Number) item[0]).intValue()];
@@ -198,8 +199,7 @@ public class GXDLMSSecuritySetup extends GXDLMSObject implements IGXDLMSBase {
                 case UNICAST_ENCRYPTION:
                 case BROADCAST_ENCRYPTION:
                     // Invalid type
-                    return new byte[] {
-                            (byte) ErrorCode.READ_WRITE_DENIED.getValue() };
+                    e.setError(ErrorCode.READ_WRITE_DENIED);
                 case AUTHENTICATION:
                     // if settings.Cipher is null non secure server is used.
                     settings.getCipher().setAuthenticationKey(GXDLMSSecureClient
@@ -210,9 +210,7 @@ public class GXDLMSSecuritySetup extends GXDLMSObject implements IGXDLMSBase {
                             .decrypt(settings.getKek(), data));
                     break;
                 default:
-                    // Invalid type
-                    return new byte[] {
-                            (byte) ErrorCode.READ_WRITE_DENIED.getValue() };
+                    e.setError(ErrorCode.READ_WRITE_DENIED);
                 }
             }
             // Return standard reply.
@@ -310,48 +308,47 @@ public class GXDLMSSecuritySetup extends GXDLMSObject implements IGXDLMSBase {
      * Returns value of given attribute.
      */
     @Override
-    public final Object getValue(final GXDLMSSettings settings, final int index,
-            final int selector, final Object parameters) {
-        if (index == 1) {
+    public final Object getValue(final GXDLMSSettings settings,
+            final ValueEventArgs e) {
+        if (e.getIndex() == 1) {
             return getLogicalName();
         }
-        if (index == 2) {
+        if (e.getIndex() == 2) {
             return new Integer(getSecurityPolicy().getValue());
         }
-        if (index == 3) {
+        if (e.getIndex() == 3) {
             return new Integer(getSecuritySuite().getValue());
         }
-        if (index == 4) {
+        if (e.getIndex() == 4) {
             return getClientSystemTitle();
         }
-        if (index == 5) {
+        if (e.getIndex() == 5) {
             return getServerSystemTitle();
         }
-        throw new IllegalArgumentException(
-                "GetValue failed. Invalid attribute index.");
+        e.setError(ErrorCode.READ_WRITE_DENIED);
+        return null;
     }
 
     /*
      * Set value of given attribute.
      */
     @Override
-    public final void setValue(final GXDLMSSettings settings, final int index,
-            final Object value) {
-        if (index == 1) {
-            super.setValue(settings, index, value);
-        } else if (index == 2) {
-            setSecurityPolicy(
-                    SecurityPolicy.forValue(((Number) value).byteValue()));
-        } else if (index == 3) {
-            setSecuritySuite(
-                    SecuritySuite.forValue(((Number) value).byteValue()));
-        } else if (index == 4) {
-            setClientSystemTitle((byte[]) value);
-        } else if (index == 5) {
-            setServerSystemTitle((byte[]) value);
+    public final void setValue(final GXDLMSSettings settings,
+            final ValueEventArgs e) {
+        if (e.getIndex() == 1) {
+            super.setValue(settings, e);
+        } else if (e.getIndex() == 2) {
+            setSecurityPolicy(SecurityPolicy
+                    .forValue(((Number) e.getValue()).byteValue()));
+        } else if (e.getIndex() == 3) {
+            setSecuritySuite(SecuritySuite
+                    .forValue(((Number) e.getValue()).byteValue()));
+        } else if (e.getIndex() == 4) {
+            setClientSystemTitle((byte[]) e.getValue());
+        } else if (e.getIndex() == 5) {
+            setServerSystemTitle((byte[]) e.getValue());
         } else {
-            throw new IllegalArgumentException(
-                    "GetValue failed. Invalid attribute index.");
+            e.setError(ErrorCode.READ_WRITE_DENIED);
         }
     }
 }

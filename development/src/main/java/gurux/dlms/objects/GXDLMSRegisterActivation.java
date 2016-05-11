@@ -41,7 +41,9 @@ import java.util.Map.Entry;
 import gurux.dlms.GXByteBuffer;
 import gurux.dlms.GXDLMSSettings;
 import gurux.dlms.GXSimpleEntry;
+import gurux.dlms.ValueEventArgs;
 import gurux.dlms.enums.DataType;
+import gurux.dlms.enums.ErrorCode;
 import gurux.dlms.enums.ObjectType;
 import gurux.dlms.internal.GXCommon;
 
@@ -203,12 +205,12 @@ public class GXDLMSRegisterActivation extends GXDLMSObject
      * Returns value of given attribute.
      */
     @Override
-    public final Object getValue(final GXDLMSSettings settings, final int index,
-            final int selector, final Object parameters) {
-        if (index == 1) {
+    public final Object getValue(final GXDLMSSettings settings,
+            final ValueEventArgs e) {
+        if (e.getIndex() == 1) {
             return getLogicalName();
         }
-        if (index == 2) {
+        if (e.getIndex() == 2) {
             GXByteBuffer data = new GXByteBuffer();
             data.setUInt8(DataType.ARRAY.getValue());
             data.setUInt8(getRegisterAssignment().size());
@@ -222,7 +224,7 @@ public class GXDLMSRegisterActivation extends GXDLMSObject
             }
             return data.array();
         }
-        if (index == 3) {
+        if (e.getIndex() == 3) {
             GXByteBuffer data = new GXByteBuffer();
             data.setUInt8(DataType.ARRAY.getValue());
             data.setUInt8(maskList.size());
@@ -238,25 +240,25 @@ public class GXDLMSRegisterActivation extends GXDLMSObject
             }
             return data.array();
         }
-        if (index == 4) {
+        if (e.getIndex() == 4) {
             return getActiveMask();
         }
-        throw new IllegalArgumentException(
-                "GetValue failed. Invalid attribute index.");
+        e.setError(ErrorCode.READ_WRITE_DENIED);
+        return null;
     }
 
     /*
      * Set value of given attribute.
      */
     @Override
-    public final void setValue(final GXDLMSSettings settings, final int index,
-            final Object value) {
-        if (index == 1) {
-            super.setValue(settings, index, value);
-        } else if (index == 2) {
+    public final void setValue(final GXDLMSSettings settings,
+            final ValueEventArgs e) {
+        if (e.getIndex() == 1) {
+            super.setValue(settings, e);
+        } else if (e.getIndex() == 2) {
             registerAssignment.clear();
-            if (value != null) {
-                for (Object it : (Object[]) value) {
+            if (e.getValue() != null) {
+                for (Object it : (Object[]) e.getValue()) {
                     GXDLMSObjectDefinition item = new GXDLMSObjectDefinition();
                     item.setClassId(ObjectType.forValue(
                             ((Number) ((Object[]) it)[0]).intValue()));
@@ -265,10 +267,10 @@ public class GXDLMSRegisterActivation extends GXDLMSObject
                     registerAssignment.add(item);
                 }
             }
-        } else if (index == 3) {
+        } else if (e.getIndex() == 3) {
             maskList.clear();
-            if (value != null) {
-                for (Object it : (Object[]) value) {
+            if (e.getValue() != null) {
+                for (Object it : (Object[]) e.getValue()) {
                     byte[] key = (byte[]) ((Object[]) it)[0];
                     Object arr = ((Object[]) it)[1];
                     byte[] tmp = new byte[((Object[]) arr).length];
@@ -278,15 +280,14 @@ public class GXDLMSRegisterActivation extends GXDLMSObject
                     maskList.add(new GXSimpleEntry<byte[], byte[]>(key, tmp));
                 }
             }
-        } else if (index == 4) {
-            if (value == null) {
+        } else if (e.getIndex() == 4) {
+            if (e.getValue() == null) {
                 setActiveMask(null);
             } else {
-                setActiveMask((byte[]) value);
+                setActiveMask((byte[]) e.getValue());
             }
         } else {
-            throw new IllegalArgumentException(
-                    "GetValue failed. Invalid attribute index.");
+            e.setError(ErrorCode.READ_WRITE_DENIED);
         }
     }
 }

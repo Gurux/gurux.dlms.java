@@ -43,7 +43,9 @@ import gurux.dlms.GXDLMSClient;
 import gurux.dlms.GXDLMSSettings;
 import gurux.dlms.GXDateTime;
 import gurux.dlms.GXSimpleEntry;
+import gurux.dlms.ValueEventArgs;
 import gurux.dlms.enums.DataType;
+import gurux.dlms.enums.ErrorCode;
 import gurux.dlms.enums.ObjectType;
 import gurux.dlms.internal.GXCommon;
 
@@ -203,12 +205,12 @@ public class GXDLMSMessageHandler extends GXDLMSObject implements IGXDLMSBase {
      * Returns value of given attribute.
      */
     @Override
-    public final Object getValue(final GXDLMSSettings settings, final int index,
-            final int selector, final Object parameters) {
-        if (index == 1) {
+    public final Object getValue(final GXDLMSSettings settings,
+            final ValueEventArgs e) {
+        if (e.getIndex() == 1) {
             return getLogicalName();
         }
-        if (index == 2) {
+        if (e.getIndex() == 2) {
             GXByteBuffer buff = new GXByteBuffer();
             buff.setUInt8(DataType.ARRAY.getValue());
             GXCommon.setObjectCount(listeningWindow.size(), buff);
@@ -220,7 +222,7 @@ public class GXDLMSMessageHandler extends GXDLMSObject implements IGXDLMSBase {
             }
             return buff.array();
         }
-        if (index == 3) {
+        if (e.getIndex() == 3) {
             GXByteBuffer buff = new GXByteBuffer();
             buff.setUInt8(DataType.ARRAY.getValue());
             GXCommon.setObjectCount(allowedSenders.length, buff);
@@ -229,7 +231,7 @@ public class GXDLMSMessageHandler extends GXDLMSObject implements IGXDLMSBase {
             }
             return buff.array();
         }
-        if (index == 4) {
+        if (e.getIndex() == 4) {
             GXByteBuffer buff = new GXByteBuffer();
             buff.setUInt8(DataType.ARRAY.getValue());
             GXCommon.setObjectCount(sendersAndActions.size(), buff);
@@ -244,22 +246,22 @@ public class GXDLMSMessageHandler extends GXDLMSObject implements IGXDLMSBase {
             }
             return buff.array();
         }
-        throw new IllegalArgumentException(
-                "GetValue failed. Invalid attribute index.");
+        e.setError(ErrorCode.READ_WRITE_DENIED);
+        return null;
     }
 
     /*
      * Set value of given attribute.
      */
     @Override
-    public final void setValue(final GXDLMSSettings settings, final int index,
-            final Object value) {
-        if (index == 1) {
-            super.setValue(settings, index, value);
-        } else if (index == 2) {
+    public final void setValue(final GXDLMSSettings settings,
+            final ValueEventArgs e) {
+        if (e.getIndex() == 1) {
+            super.setValue(settings, e);
+        } else if (e.getIndex() == 2) {
             listeningWindow.clear();
-            if (value instanceof Object[]) {
-                for (Object it : (Object[]) value) {
+            if (e.getValue() instanceof Object[]) {
+                for (Object it : (Object[]) e.getValue()) {
                     Object[] tmp = (Object[]) it;
                     GXDateTime start = (GXDateTime) GXDLMSClient
                             .changeType((byte[]) tmp[0], DataType.DATETIME);
@@ -271,17 +273,17 @@ public class GXDLMSMessageHandler extends GXDLMSObject implements IGXDLMSBase {
                 }
             }
 
-        } else if (index == 3) {
-            if (value instanceof Object[]) {
+        } else if (e.getIndex() == 3) {
+            if (e.getValue() instanceof Object[]) {
                 List<String> tmp = new ArrayList<String>();
-                for (Object it : (Object[]) value) {
+                for (Object it : (Object[]) e.getValue()) {
                     tmp.add(new String((byte[]) it));
                 }
                 allowedSenders = tmp.toArray(new String[tmp.size()]);
             } else {
                 allowedSenders = new String[0];
             }
-        } else if (index == 4) {
+        } else if (e.getIndex() == 4) {
             sendersAndActions.clear();
             // TODO:
             /*
@@ -295,8 +297,7 @@ public class GXDLMSMessageHandler extends GXDLMSObject implements IGXDLMSBase {
              * GXDateTime)); } }
              */
         } else {
-            throw new IllegalArgumentException(
-                    "GetValue failed. Invalid attribute index.");
+            e.setError(ErrorCode.READ_WRITE_DENIED);
         }
     }
 }

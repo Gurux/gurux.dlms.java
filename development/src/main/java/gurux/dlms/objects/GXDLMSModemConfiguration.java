@@ -40,7 +40,9 @@ import java.util.List;
 import gurux.dlms.GXByteBuffer;
 import gurux.dlms.GXDLMSClient;
 import gurux.dlms.GXDLMSSettings;
+import gurux.dlms.ValueEventArgs;
 import gurux.dlms.enums.DataType;
+import gurux.dlms.enums.ErrorCode;
 import gurux.dlms.enums.ObjectType;
 import gurux.dlms.internal.GXCommon;
 import gurux.dlms.objects.enums.BaudRate;
@@ -193,15 +195,15 @@ public class GXDLMSModemConfiguration extends GXDLMSObject
      * Returns value of given attribute.
      */
     @Override
-    public final Object getValue(final GXDLMSSettings settings, final int index,
-            final int selector, final Object parameters) {
-        if (index == 1) {
+    public final Object getValue(final GXDLMSSettings settings,
+            final ValueEventArgs e) {
+        if (e.getIndex() == 1) {
             return getLogicalName();
         }
-        if (index == 2) {
+        if (e.getIndex() == 2) {
             return new Integer(communicationSpeed.ordinal());
         }
-        if (index == 3) {
+        if (e.getIndex() == 3) {
             GXByteBuffer data = new GXByteBuffer();
             data.setUInt8(DataType.ARRAY.getValue());
             // Add count
@@ -224,7 +226,7 @@ public class GXDLMSModemConfiguration extends GXDLMSObject
             }
             return data.array();
         }
-        if (index == 4) {
+        if (e.getIndex() == 4) {
             GXByteBuffer data = new GXByteBuffer();
             data.setUInt8(DataType.ARRAY.getValue());
             // Add count
@@ -241,26 +243,27 @@ public class GXDLMSModemConfiguration extends GXDLMSObject
             }
             return data.array();
         }
-        throw new IllegalArgumentException(
-                "GetValue failed. Invalid attribute index.");
+        e.setError(ErrorCode.READ_WRITE_DENIED);
+        return null;
     }
 
     /*
      * Set value of given attribute.
      */
     @Override
-    public final void setValue(final GXDLMSSettings settings, final int index,
-            final Object value) {
-        if (index == 1) {
-            super.setValue(settings, index, value);
-        } else if (index == 2) {
-            communicationSpeed = BaudRate.values()[((Number) value).intValue()];
-        } else if (index == 3) {
+    public final void setValue(final GXDLMSSettings settings,
+            final ValueEventArgs e) {
+        if (e.getIndex() == 1) {
+            super.setValue(settings, e);
+        } else if (e.getIndex() == 2) {
+            communicationSpeed =
+                    BaudRate.values()[((Number) e.getValue()).intValue()];
+        } else if (e.getIndex() == 3) {
             initialisationStrings = null;
-            if (value != null) {
+            if (e.getValue() != null) {
                 List<GXDLMSModemInitialisation> items =
                         new ArrayList<GXDLMSModemInitialisation>();
-                for (Object it : (Object[]) value) {
+                for (Object it : (Object[]) e.getValue()) {
                     GXDLMSModemInitialisation item =
                             new GXDLMSModemInitialisation();
                     item.setRequest(
@@ -277,11 +280,11 @@ public class GXDLMSModemConfiguration extends GXDLMSObject
                 initialisationStrings = items
                         .toArray(new GXDLMSModemInitialisation[items.size()]);
             }
-        } else if (index == 4) {
+        } else if (e.getIndex() == 4) {
             modemProfile = null;
-            if (value != null) {
+            if (e.getValue() != null) {
                 List<String> items = new ArrayList<String>();
-                for (Object it : (Object[]) value) {
+                for (Object it : (Object[]) e.getValue()) {
                     items.add(GXDLMSClient
                             .changeType((byte[]) it, DataType.STRING)
                             .toString());
@@ -289,8 +292,7 @@ public class GXDLMSModemConfiguration extends GXDLMSObject
                 modemProfile = items.toArray(new String[items.size()]);
             }
         } else {
-            throw new IllegalArgumentException(
-                    "GetValue failed. Invalid attribute index.");
+            e.setError(ErrorCode.READ_WRITE_DENIED);
         }
     }
 }

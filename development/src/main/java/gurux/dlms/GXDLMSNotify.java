@@ -35,7 +35,6 @@
 package gurux.dlms;
 
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.Date;
 import java.util.List;
 import java.util.Map.Entry;
@@ -81,6 +80,28 @@ public class GXDLMSNotify {
         settings.setClientAddress(clientAddress);
         settings.setServerAddress(serverAddress);
         settings.setInterfaceType(interfaceType);
+    }
+
+    /**
+     * @return Is General block transfer supported.
+     */
+    public final boolean getGeneralBlockTransfer() {
+        if (settings.getUseLogicalNameReferencing()) {
+            return settings.getLnSettings().getGeneralBlockTransfer();
+        }
+        return settings.getSnSettings().getGeneralBlockTransfer();
+    }
+
+    /**
+     * @param value
+     *            Is General block transfer supported.
+     */
+    public final void setGeneralBlockTransfer(final boolean value) {
+        if (settings.getUseLogicalNameReferencing()) {
+            settings.getLnSettings().setGeneralBlockTransfer(value);
+        } else {
+            settings.getSnSettings().setGeneralBlockTransfer(value);
+        }
     }
 
     /**
@@ -197,7 +218,7 @@ public class GXDLMSNotify {
      * @param value
      *            Invoke ID.
      */
-    public final void setInvokeID(final int value) {
+    public final void setInvokeID(final byte value) {
         settings.setInvokeID(value);
     }
 
@@ -230,7 +251,8 @@ public class GXDLMSNotify {
     public final void addData(final GXDLMSObject obj, final int index,
             final GXByteBuffer buff) {
         DataType dt;
-        Object value = obj.getValue(settings, index, 0, null);
+        ValueEventArgs e = new ValueEventArgs(obj, index, 0, null);
+        Object value = obj.getValue(settings, e);
         dt = obj.getDataType(index);
         if (dt == DataType.NONE && value != null) {
             dt = GXCommon.getValueType(value);
@@ -265,22 +287,10 @@ public class GXDLMSNotify {
      *            Notification body.
      * @return Generated data notification message(s).
      */
-    public final byte[][] getDataNotificationMessage(final Date date,
+    public final byte[][] getDataNotificationMessages(final Date date,
             final byte[] data) {
-        GXByteBuffer buff = new GXByteBuffer();
-        if (date == null || date == new Date(0)) {
-            buff.setUInt8((byte) DataType.NONE.getValue());
-        } else {
-            GXCommon.setData(buff, DataType.OCTET_STRING, date);
-        }
-        buff.set(data);
-        List<byte[][]> list = GXDLMS.splitPdu(settings,
-                Command.DATA_NOTIFICATION, 0, buff, null);
-        List<byte[]> arr = new ArrayList<byte[]>();
-        for (byte[][] it : list) {
-            arr.addAll(Arrays.asList(it));
-        }
-        return arr.toArray(new byte[arr.size()][0]);
+        return GXDLMS.getMessages(settings, Command.DATA_NOTIFICATION, 0,
+                new GXByteBuffer(data), date);
     }
 
     /**
@@ -292,9 +302,10 @@ public class GXDLMSNotify {
      *            Notification body.
      * @return Generated data notification message(s).
      */
-    public final byte[][] getDataNotificationMessage(final Date date,
+    public final byte[][] getDataNotificationMessages(final Date date,
             final GXByteBuffer data) {
-        return getDataNotificationMessage(date, data.array());
+        return GXDLMS.getMessages(settings, Command.DATA_NOTIFICATION, 0, data,
+                date);
     }
 
     /**
@@ -306,18 +317,18 @@ public class GXDLMSNotify {
      *            List of objects and attribute indexes to notify.
      * @return Generated data notification message(s).
      */
-    public final byte[][] generateDataNotificationMessage(final Date date,
+    public final byte[][] generateDataNotificationMessages(final Date date,
             final List<Entry<GXDLMSObject, Integer>> objects) {
         if (objects == null) {
             throw new IllegalArgumentException("objects");
         }
         GXByteBuffer buff = new GXByteBuffer();
-        buff.setUInt8((byte) DataType.ARRAY.getValue());
+        buff.setUInt8((byte) DataType.STRUCTURE.getValue());
         GXCommon.setObjectCount(objects.size(), buff);
         for (Entry<GXDLMSObject, Integer> it : objects) {
             addData(it.getKey(), it.getValue(), buff);
         }
-        return getDataNotificationMessage(date, buff);
+        return getDataNotificationMessages(date, buff);
     }
 
     /**
@@ -328,7 +339,7 @@ public class GXDLMSNotify {
      * @return Array of objects and called indexes.
      */
     public final List<Entry<GXDLMSObject, Integer>>
-            parsePushObjects(final GXByteBuffer data) {
+            parsePush(final GXByteBuffer data) {
         GXDLMSObject obj;
         int index;
         DataType dt;
@@ -373,49 +384,16 @@ public class GXDLMSNotify {
                     value = GXDLMSClient.changeType((byte[]) value, dt);
                 }
             }
-            obj.setValue(settings, index, value);
+            ValueEventArgs e = new ValueEventArgs(obj, index, 0, null);
+            e.setValue(value);
+            obj.setValue(settings, e);
+            e.setValue(value);
 
-            items.get(pos).getKey().setValue(settings,
-                    items.get(pos).getValue(), list[pos]);
+            e = new ValueEventArgs(items.get(pos).getKey(),
+                    items.get(pos).getValue(), 0, null);
+            e.setValue(list[pos]);
+            items.get(pos).getKey().setValue(settings, e);
         }
         return items;
-    }
-
-    /**
-     * Generates Push message.
-     * 
-     * @param date
-     *            Date time. Set To Min or Max if not added.
-     * @param objects
-     *            List of objects and attribute indexes to push.
-     * @return Generated push message(s).
-     */
-    public final byte[][] generatePushMessage(final Date date,
-            final List<Entry<GXDLMSObject, Integer>> objects) {
-        DataType dt;
-        Object value;
-        if (objects == null) {
-            throw new IllegalArgumentException("objects");
-        }
-        GXByteBuffer buff = new GXByteBuffer();
-        // Add data
-        buff.setUInt8(DataType.ARRAY.getValue());
-        GXCommon.setObjectCount(objects.size(), buff);
-        for (Entry<GXDLMSObject, Integer> it : objects) {
-            dt = it.getKey().getDataType(it.getValue());
-            value = it.getKey().getValue(settings, it.getValue(), 0, null);
-            if (dt == DataType.NONE && value != null) {
-                dt = GXCommon.getValueType(value);
-            }
-            GXCommon.setData(buff, dt, value);
-        }
-        List<byte[][]> list =
-                GXDLMS.splitPdu(settings, Command.PUSH, 0, buff, null);
-        List<byte[]> arr = new ArrayList<byte[]>();
-
-        for (byte[][] it : list) {
-            arr.addAll(Arrays.asList(it));
-        }
-        return arr.toArray(new byte[arr.size()][0]);
     }
 }

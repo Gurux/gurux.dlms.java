@@ -289,6 +289,25 @@ public final class GXCommon {
         return cnt;
     }
 
+    /**
+     * Return how many bytes object count takes.
+     * 
+     * @param count
+     *            Value
+     * @return Value size in bytes.
+     */
+    public static int getObjectCountSizeInBytes(final int count) {
+        if (count < 0x80) {
+            return 1;
+        } else if (count < 0x100) {
+            return 2;
+        } else if (count < 0x10000) {
+            return 3;
+        } else {
+            return 5;
+        }
+    }
+
     /*
      * Set item count.
      * @param count
@@ -1133,13 +1152,9 @@ public final class GXCommon {
         } else if (type == DataType.INT64 || type == DataType.UINT64) {
             buff.setUInt64(((Number) value).longValue());
         } else if (type == DataType.FLOAT32) {
-            java.nio.ByteBuffer tmp = java.nio.ByteBuffer.allocateDirect(4);
-            tmp.putFloat(((Number) value).floatValue());
-            buff.set(tmp.array());
+            buff.setFloat(((Number) value).floatValue());
         } else if (type == DataType.FLOAT64) {
-            java.nio.ByteBuffer tmp = java.nio.ByteBuffer.allocateDirect(8);
-            tmp.putDouble(((Number) value).doubleValue());
-            buff.set(tmp.array());
+            buff.setDouble(((Number) value).doubleValue());
         } else if (type == DataType.BITSTRING) {
             setBitString(buff, value);
         } else if (type == DataType.STRING) {

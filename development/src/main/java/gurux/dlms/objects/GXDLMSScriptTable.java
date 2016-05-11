@@ -40,7 +40,9 @@ import java.util.List;
 import gurux.dlms.GXByteBuffer;
 import gurux.dlms.GXDLMSClient;
 import gurux.dlms.GXDLMSSettings;
+import gurux.dlms.ValueEventArgs;
 import gurux.dlms.enums.DataType;
+import gurux.dlms.enums.ErrorCode;
 import gurux.dlms.enums.ObjectType;
 import gurux.dlms.internal.GXCommon;
 import gurux.dlms.objects.enums.GXDLMSScriptActionType;
@@ -139,12 +141,12 @@ public class GXDLMSScriptTable extends GXDLMSObject implements IGXDLMSBase {
      * Returns value of given attribute.
      */
     @Override
-    public final Object getValue(final GXDLMSSettings settings, final int index,
-            final int selector, final Object parameters) {
-        if (index == 1) {
+    public final Object getValue(final GXDLMSSettings settings,
+            final ValueEventArgs e) {
+        if (e.getIndex() == 1) {
             return getLogicalName();
         }
-        if (index == 2) {
+        if (e.getIndex() == 2) {
             int cnt = scripts.size();
             GXByteBuffer data = new GXByteBuffer();
             data.setUInt8(DataType.ARRAY.getValue());
@@ -176,13 +178,13 @@ public class GXDLMSScriptTable extends GXDLMSObject implements IGXDLMSBase {
                             new Integer(a.getIndex()));
                     // parameter
                     GXCommon.setData(data, a.getParameterType(),
-                            new Integer(a.getObjectType().getValue()));
+                            a.getParameter());
                 }
             }
             return data.array();
         }
-        throw new IllegalArgumentException(
-                "GetValue failed. Invalid attribute index.");
+        e.setError(ErrorCode.READ_WRITE_DENIED);
+        return null;
 
     }
 
@@ -190,18 +192,19 @@ public class GXDLMSScriptTable extends GXDLMSObject implements IGXDLMSBase {
      * Set value of given attribute.
      */
     @Override
-    public final void setValue(final GXDLMSSettings settings, final int index,
-            final Object value) {
-        if (index == 1) {
-            super.setValue(settings, index, value);
-        } else if (index == 2) {
+    public final void setValue(final GXDLMSSettings settings,
+            final ValueEventArgs e) {
+        if (e.getIndex() == 1) {
+            super.setValue(settings, e);
+        } else if (e.getIndex() == 2) {
             scripts.clear();
             // Fix Xemex bug here.
             // Xemex meters do not return array as they shoul be according
             // standard.
-            if (value instanceof Object[] && ((Object[]) value).length != 0) {
-                if (((Object[]) value)[0] instanceof Object[]) {
-                    for (Object item : (Object[]) value) {
+            if (e.getValue() instanceof Object[]
+                    && ((Object[]) e.getValue()).length != 0) {
+                if (((Object[]) e.getValue())[0] instanceof Object[]) {
+                    for (Object item : (Object[]) e.getValue()) {
                         GXDLMSScript script = new GXDLMSScript();
                         script.setId(
                                 ((Number) ((Object[]) item)[0]).intValue());
@@ -232,8 +235,9 @@ public class GXDLMSScriptTable extends GXDLMSObject implements IGXDLMSBase {
                 } else {
                     // Read Xemex meter here.
                     GXDLMSScript script = new GXDLMSScript();
-                    script.setId(((Number) ((Object[]) value)[0]).intValue());
-                    Object[] arr = (Object[]) ((Object[]) value)[1];
+                    script.setId(
+                            ((Number) ((Object[]) e.getValue())[0]).intValue());
+                    Object[] arr = (Object[]) ((Object[]) e.getValue())[1];
                     GXDLMSScriptAction it = new GXDLMSScriptAction();
                     GXDLMSScriptActionType type = GXDLMSScriptActionType
                             .values()[((Number) ((Object[]) arr)[0]).intValue()
@@ -251,8 +255,7 @@ public class GXDLMSScriptTable extends GXDLMSObject implements IGXDLMSBase {
                 }
             }
         } else {
-            throw new IllegalArgumentException(
-                    "GetValue failed. Invalid attribute index.");
+            e.setError(ErrorCode.READ_WRITE_DENIED);
         }
     }
 

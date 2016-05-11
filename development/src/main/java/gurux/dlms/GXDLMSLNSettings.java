@@ -90,7 +90,7 @@ public class GXDLMSLNSettings {
      *            Is general protection supported.
      */
     public final void setGeneralProtection(final boolean value) {
-        getConformanceBlock()[1] =
+        getConformanceBlock()[0] =
                 GXCommon.setBits(getConformanceBlock()[0], 0x40, value);
     }
 
@@ -106,7 +106,7 @@ public class GXDLMSLNSettings {
      *            Is general block transfer supported.
      */
     public final void setGeneralBlockTransfer(final boolean value) {
-        getConformanceBlock()[1] =
+        getConformanceBlock()[0] =
                 GXCommon.setBits(getConformanceBlock()[0], 0x20, value);
     }
 

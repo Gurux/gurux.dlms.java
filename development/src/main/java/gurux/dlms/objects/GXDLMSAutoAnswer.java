@@ -43,7 +43,9 @@ import gurux.dlms.GXDLMSClient;
 import gurux.dlms.GXDLMSSettings;
 import gurux.dlms.GXDateTime;
 import gurux.dlms.GXSimpleEntry;
+import gurux.dlms.ValueEventArgs;
 import gurux.dlms.enums.DataType;
+import gurux.dlms.enums.ErrorCode;
 import gurux.dlms.enums.ObjectType;
 import gurux.dlms.internal.GXCommon;
 import gurux.dlms.objects.enums.AutoAnswerStatus;
@@ -231,15 +233,15 @@ public class GXDLMSAutoAnswer extends GXDLMSObject implements IGXDLMSBase {
      * Returns value of given attribute.
      */
     @Override
-    public final Object getValue(final GXDLMSSettings settings, final int index,
-            final int selector, final Object parameters) {
-        if (index == 1) {
+    public final Object getValue(final GXDLMSSettings settings,
+            final ValueEventArgs e) {
+        if (e.getIndex() == 1) {
             return getLogicalName();
         }
-        if (index == 2) {
+        if (e.getIndex() == 2) {
             return new Integer(getMode().ordinal());
         }
-        if (index == 3) {
+        if (e.getIndex() == 3) {
             int cnt = getListeningWindow().size();
             GXByteBuffer buff = new GXByteBuffer();
             buff.setUInt8(DataType.ARRAY.getValue());
@@ -259,13 +261,13 @@ public class GXDLMSAutoAnswer extends GXDLMSObject implements IGXDLMSBase {
             }
             return buff.array();
         }
-        if (index == 4) {
+        if (e.getIndex() == 4) {
             return new Integer(getStatus().getValue());
         }
-        if (index == 5) {
+        if (e.getIndex() == 5) {
             return new Integer(getNumberOfCalls());
         }
-        if (index == 6) {
+        if (e.getIndex() == 6) {
             GXByteBuffer buff = new GXByteBuffer();
             buff.setUInt8(DataType.STRUCTURE.getValue());
             GXCommon.setObjectCount(2, buff);
@@ -275,25 +277,25 @@ public class GXDLMSAutoAnswer extends GXDLMSObject implements IGXDLMSBase {
                     new Integer(numberOfRingsOutListeningWindow));
             return buff.array();
         }
-        throw new IllegalArgumentException(
-                "GetValue failed. Invalid attribute index.");
+        e.setError(ErrorCode.READ_WRITE_DENIED);
+        return null;
     }
 
     /*
      * Set value of given attribute.
      */
     @Override
-    public final void setValue(final GXDLMSSettings settings, final int index,
-            final Object value) {
-        if (index == 1) {
-            super.setValue(settings, index, value);
-        } else if (index == 2) {
+    public final void setValue(final GXDLMSSettings settings,
+            final ValueEventArgs e) {
+        if (e.getIndex() == 1) {
+            super.setValue(settings, e);
+        } else if (e.getIndex() == 2) {
             setMode(AutoConnectMode
-                    .forValue(((Number) value).byteValue() & 0xFF));
-        } else if (index == 3) {
+                    .forValue(((Number) e.getValue()).byteValue() & 0xFF));
+        } else if (e.getIndex() == 3) {
             getListeningWindow().clear();
-            if (value != null) {
-                for (Object item : (Object[]) value) {
+            if (e.getValue() != null) {
+                for (Object item : (Object[]) e.getValue()) {
                     GXDateTime start = (GXDateTime) GXDLMSClient.changeType(
                             (byte[]) ((Object[]) item)[0], DataType.DATETIME);
                     GXDateTime end = (GXDateTime) GXDLMSClient.changeType(
@@ -303,22 +305,22 @@ public class GXDLMSAutoAnswer extends GXDLMSObject implements IGXDLMSBase {
                                     end));
                 }
             }
-        } else if (index == 4) {
-            setStatus(AutoAnswerStatus.forValue(((Number) value).intValue()));
-        } else if (index == 5) {
-            setNumberOfCalls(((Number) value).intValue());
-        } else if (index == 6) {
+        } else if (e.getIndex() == 4) {
+            setStatus(AutoAnswerStatus
+                    .forValue(((Number) e.getValue()).intValue()));
+        } else if (e.getIndex() == 5) {
+            setNumberOfCalls(((Number) e.getValue()).intValue());
+        } else if (e.getIndex() == 6) {
             numberOfRingsInListeningWindow = 0;
             numberOfRingsOutListeningWindow = 0;
-            if (value != null) {
+            if (e.getValue() != null) {
                 numberOfRingsInListeningWindow =
-                        ((Number) ((Object[]) value)[0]).intValue();
+                        ((Number) ((Object[]) e.getValue())[0]).intValue();
                 numberOfRingsOutListeningWindow =
-                        ((Number) ((Object[]) value)[1]).intValue();
+                        ((Number) ((Object[]) e.getValue())[1]).intValue();
             }
         } else {
-            throw new IllegalArgumentException(
-                    "GetValue failed. Invalid attribute index.");
+            e.setError(ErrorCode.READ_WRITE_DENIED);
         }
     }
 }

@@ -39,6 +39,7 @@ import java.util.logging.Logger;
 
 import gurux.dlms.GXByteBuffer;
 import gurux.dlms.GXDLMSSettings;
+import gurux.dlms.ValueEventArgs;
 import gurux.dlms.enums.AccessMode;
 import gurux.dlms.enums.Authentication;
 import gurux.dlms.enums.DataType;
@@ -74,10 +75,6 @@ public class GXDLMSAssociationLogicalName extends GXDLMSObject
      */
     public GXDLMSAssociationLogicalName() {
         this("0.0.40.0.0.255");
-        applicationContextName = new GXApplicationContextName();
-        xDLMSContextInfo = new GXxDLMSContextType();
-        authenticationMechanismMame = new GXAuthenticationMechanismName();
-        setVersion(1);
     }
 
     /**
@@ -189,15 +186,15 @@ public class GXDLMSAssociationLogicalName extends GXDLMSObject
      * @param index Method index.
      */
     @Override
-    public final byte[] invoke(final GXDLMSSettings settings, final int index,
-            final Object parameters) {
+    public final byte[] invoke(final GXDLMSSettings settings,
+            final ValueEventArgs e) {
         // Check reply_to_HLS_authentication
-        if (index == 1) {
+        if (e.getIndex() == 1) {
             long ic = 0;
             byte[] readSecret;
             if (settings.getAuthentication() == Authentication.HIGH_GMAC) {
                 readSecret = settings.getSourceSystemTitle();
-                GXByteBuffer bb = new GXByteBuffer((byte[]) parameters);
+                GXByteBuffer bb = new GXByteBuffer((byte[]) e.getParameters());
                 bb.getUInt8();
                 ic = bb.getUInt32();
             } else {
@@ -206,7 +203,7 @@ public class GXDLMSAssociationLogicalName extends GXDLMSObject
             byte[] serverChallenge =
                     GXSecure.secure(settings, settings.getCipher(), ic,
                             settings.getStoCChallenge(), readSecret);
-            byte[] clientChallenge = (byte[]) parameters;
+            byte[] clientChallenge = (byte[]) e.getParameters();
             if (GXCommon.compare(serverChallenge, clientChallenge)) {
                 if (settings.getAuthentication() == Authentication.HIGH_GMAC) {
                     readSecret = settings.getCipher().getSystemTitle();
@@ -216,23 +213,15 @@ public class GXDLMSAssociationLogicalName extends GXDLMSObject
                 }
                 byte[] tmp = GXSecure.secure(settings, settings.getCipher(), ic,
                         settings.getCtoSChallenge(), readSecret);
-                GXByteBuffer challenge = new GXByteBuffer();
-                // ReturnParameters.
-                challenge.setUInt8(0);
-                challenge.setUInt8(1);
-                challenge.setUInt8(0);
-                challenge.setUInt8((byte) DataType.OCTET_STRING.getValue());
-                GXCommon.setObjectCount(tmp.length, challenge);
-                challenge.set(tmp);
-                return challenge.array();
+                return tmp;
             } else {
                 LOGGER.info("Invalid CtoS:" + GXCommon.toHex(serverChallenge)
                         + "-" + GXCommon.toHex(clientChallenge));
-                return new byte[] { (byte) 0 };
+                return null;
             }
         } else {
-            // Return error.
-            return new byte[] { (byte) ErrorCode.READ_WRITE_DENIED.getValue() };
+            e.setError(ErrorCode.READ_WRITE_DENIED);
+            return null;
         }
     }
 
@@ -469,15 +458,15 @@ public class GXDLMSAssociationLogicalName extends GXDLMSObject
      * Returns value of given attribute.
      */
     @Override
-    public final Object getValue(final GXDLMSSettings settings, final int index,
-            final int selector, final Object parameters) {
-        if (index == 1) {
+    public final Object getValue(final GXDLMSSettings settings,
+            final ValueEventArgs e) {
+        if (e.getIndex() == 1) {
             return getLogicalName();
         }
-        if (index == 2) {
+        if (e.getIndex() == 2) {
             return getObjects();
         }
-        if (index == 3) {
+        if (e.getIndex() == 3) {
             GXByteBuffer data = new GXByteBuffer();
             data.setUInt8(DataType.ARRAY.getValue());
             // Add count
@@ -488,7 +477,7 @@ public class GXDLMSAssociationLogicalName extends GXDLMSObject
             data.setUInt16(serverSAP);
             return data.array();
         }
-        if (index == 4) {
+        if (e.getIndex() == 4) {
             GXByteBuffer data = new GXByteBuffer();
             data.setUInt8(DataType.STRUCTURE.getValue());
             // Add count
@@ -509,7 +498,7 @@ public class GXDLMSAssociationLogicalName extends GXDLMSObject
                     applicationContextName.getContextId());
             return data.array();
         }
-        if (index == 5) {
+        if (e.getIndex() == 5) {
             GXByteBuffer data = new GXByteBuffer();
             data.setUInt8(DataType.STRUCTURE.getValue());
             data.setUInt8(6);
@@ -527,7 +516,7 @@ public class GXDLMSAssociationLogicalName extends GXDLMSObject
                     xDLMSContextInfo.getCypheringInfo());
             return data.array();
         }
-        if (index == 6) {
+        if (e.getIndex() == 6) {
             GXByteBuffer data = new GXByteBuffer();
             data.setUInt8(DataType.STRUCTURE.getValue());
             // Add count
@@ -548,17 +537,17 @@ public class GXDLMSAssociationLogicalName extends GXDLMSObject
                     authenticationMechanismMame.getMechanismId().getValue());
             return data.array();
         }
-        if (index == 7) {
+        if (e.getIndex() == 7) {
             return secret;
         }
-        if (index == 8) {
+        if (e.getIndex() == 8) {
             return getAssociationStatus().ordinal();
         }
-        if (index == 9) {
+        if (e.getIndex() == 9) {
             return getSecuritySetupReference();
         }
-        throw new IllegalArgumentException(
-                "GetValue failed. Invalid attribute index.");
+        e.setError(ErrorCode.READ_WRITE_DENIED);
+        return null;
     }
 
     static void updateObjectList(final GXDLMSSettings settings,
@@ -750,59 +739,60 @@ public class GXDLMSAssociationLogicalName extends GXDLMSObject
      * Set value of given attribute.
      */
     @Override
-    public final void setValue(final GXDLMSSettings settings, final int index,
-            final Object value) {
-        switch (index) {
+    public final void setValue(final GXDLMSSettings settings,
+            final ValueEventArgs e) {
+        switch (e.getIndex()) {
         case 1:
-            super.setValue(settings, index, value);
+            super.setValue(settings, e);
             break;
         case 2:
-            updateObjectList(settings, objectList, value);
+            updateObjectList(settings, objectList, e.getValue());
             break;
         case 3:
-            if (value != null) {
-                clientSAP = ((Number) Array.get(value, 0)).shortValue();
-                serverSAP = ((Number) Array.get(value, 1)).shortValue();
+            if (e.getValue() != null) {
+                clientSAP = ((Number) Array.get(e.getValue(), 0)).shortValue();
+                serverSAP = ((Number) Array.get(e.getValue(), 1)).shortValue();
             }
             break;
         case 4:
-            updateApplicationContextName(value);
+            updateApplicationContextName(e.getValue());
             break;
         case 5:
-            if (value != null) {
-                xDLMSContextInfo.setConformance(Array.get(value, 0).toString());
+            if (e.getValue() != null) {
+                xDLMSContextInfo
+                        .setConformance(Array.get(e.getValue(), 0).toString());
                 xDLMSContextInfo.setMaxReceivePduSize(
-                        ((Number) Array.get(value, 1)).intValue());
+                        ((Number) Array.get(e.getValue(), 1)).intValue());
                 xDLMSContextInfo.setMaxSendPpuSize(
-                        ((Number) Array.get(value, 2)).intValue());
+                        ((Number) Array.get(e.getValue(), 2)).intValue());
                 xDLMSContextInfo.setDlmsVersionNumber(
-                        ((Number) Array.get(value, 3)).intValue());
+                        ((Number) Array.get(e.getValue(), 3)).intValue());
                 xDLMSContextInfo.setQualityOfService(
-                        ((Number) Array.get(value, 4)).intValue());
-                xDLMSContextInfo.setCypheringInfo((byte[]) Array.get(value, 5));
+                        ((Number) Array.get(e.getValue(), 4)).intValue());
+                xDLMSContextInfo
+                        .setCypheringInfo((byte[]) Array.get(e.getValue(), 5));
             }
             break;
         case 6:
-            updateAuthenticationMechanismMame(value);
+            updateAuthenticationMechanismMame(e.getValue());
             break;
         case 7:
-            secret = (byte[]) value;
+            secret = (byte[]) e.getValue();
             break;
         case 8:
-            if (value == null) {
+            if (e.getValue() == null) {
                 setAssociationStatus(AssociationStatus.NonAssociated);
             } else {
-                setAssociationStatus(AssociationStatus.values()[((Number) value)
-                        .intValue()]);
+                setAssociationStatus(AssociationStatus
+                        .values()[((Number) e.getValue()).intValue()]);
             }
             break;
         case 9:
             setSecuritySetupReference(
-                    GXDLMSObject.toLogicalName((byte[]) value));
+                    GXDLMSObject.toLogicalName((byte[]) e.getValue()));
             break;
         default:
-            throw new IllegalArgumentException(
-                    "SetValue failed. Invalid attribute index.");
+            e.setError(ErrorCode.READ_WRITE_DENIED);
         }
     }
 }

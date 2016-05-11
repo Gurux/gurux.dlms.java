@@ -36,7 +36,9 @@ package gurux.dlms.objects;
 
 import gurux.dlms.GXDLMSClient;
 import gurux.dlms.GXDLMSSettings;
+import gurux.dlms.ValueEventArgs;
 import gurux.dlms.enums.DataType;
+import gurux.dlms.enums.ErrorCode;
 import gurux.dlms.enums.ObjectType;
 import gurux.dlms.objects.enums.ControlMode;
 import gurux.dlms.objects.enums.ControlState;
@@ -197,55 +199,52 @@ public class GXDLMSDisconnectControl extends GXDLMSObject
     }
 
     @Override
-    public final Object getValue(final GXDLMSSettings settings, final int index,
-            final int selector, final Object parameters) {
-        if (index == 1) {
+    public final Object getValue(final GXDLMSSettings settings,
+            final ValueEventArgs e) {
+        if (e.getIndex() == 1) {
             return getLogicalName();
         }
-        if (index == 2) {
+        if (e.getIndex() == 2) {
             return new Boolean(getOutputState());
         }
-        if (index == 3) {
+        if (e.getIndex() == 3) {
             return new Integer(getControlState().ordinal());
         }
-        if (index == 4) {
+        if (e.getIndex() == 4) {
             return new Integer(getControlMode().ordinal());
         }
-        throw new IllegalArgumentException(
-                "GetValue failed. Invalid attribute index.");
+        e.setError(ErrorCode.READ_WRITE_DENIED);
+        return null;
     }
 
     @Override
-    public final void setValue(final GXDLMSSettings settings, final int index,
-            final Object value) {
-        if (index == 1) {
-            if (value != null) {
-                super.setValue(settings, index, value);
-            }
-        } else if (index == 2) {
-            if (value == null) {
+    public final void setValue(final GXDLMSSettings settings,
+            final ValueEventArgs e) {
+        if (e.getIndex() == 1) {
+            super.setValue(settings, e);
+        } else if (e.getIndex() == 2) {
+            if (e.getValue() == null) {
                 setOutputState(false);
             } else {
-                setOutputState(((Boolean) value).booleanValue());
+                setOutputState(((Boolean) e.getValue()).booleanValue());
             }
-        } else if (index == 3) {
-            if (value == null) {
+        } else if (e.getIndex() == 3) {
+            if (e.getValue() == null) {
                 setControlState(ControlState.DISCONNECTED);
             } else {
-                setControlState(
-                        ControlState.values()[((Number) value).intValue()]);
+                setControlState(ControlState.values()[((Number) e.getValue())
+                        .intValue()]);
             }
-        } else if (index == 4) {
-            if (value == null) {
+        } else if (e.getIndex() == 4) {
+            if (e.getValue() == null) {
                 setControlMode(ControlMode.NONE);
             } else {
-                setControlMode(
-                        ControlMode.values()[((Number) value).intValue()]);
+                setControlMode(ControlMode.values()[((Number) e.getValue())
+                        .intValue()]);
             }
 
         } else {
-            throw new IllegalArgumentException(
-                    "GetValue failed. Invalid attribute index.");
+            e.setError(ErrorCode.READ_WRITE_DENIED);
         }
     }
 }

@@ -39,6 +39,7 @@ import java.util.logging.Logger;
 
 import gurux.dlms.GXByteBuffer;
 import gurux.dlms.GXDLMSSettings;
+import gurux.dlms.ValueEventArgs;
 import gurux.dlms.enums.AccessMode;
 import gurux.dlms.enums.Authentication;
 import gurux.dlms.enums.DataType;
@@ -80,6 +81,7 @@ public class GXDLMSAssociationShortName extends GXDLMSObject
     public GXDLMSAssociationShortName(final String ln, final int sn) {
         super(ObjectType.ASSOCIATION_SHORT_NAME, ln, sn);
         objectList = new GXDLMSObjectCollection(this);
+        secret = "Gurux".getBytes();
     }
 
     /**
@@ -128,15 +130,15 @@ public class GXDLMSAssociationShortName extends GXDLMSObject
      * @param index Method index.
      */
     @Override
-    public final byte[] invoke(final GXDLMSSettings settings, final int index,
-            final Object parameters) {
+    public final byte[] invoke(final GXDLMSSettings settings,
+            final ValueEventArgs e) {
         // Check reply_to_HLS_authentication
-        if (index == 8) {
+        if (e.getIndex() == 8) {
             long ic = 0;
             byte[] readSecret;
             if (settings.getAuthentication() == Authentication.HIGH_GMAC) {
                 readSecret = settings.getSourceSystemTitle();
-                GXByteBuffer bb = new GXByteBuffer((byte[]) parameters);
+                GXByteBuffer bb = new GXByteBuffer((byte[]) e.getParameters());
                 bb.getUInt8();
                 ic = bb.getUInt32();
             } else {
@@ -145,7 +147,7 @@ public class GXDLMSAssociationShortName extends GXDLMSObject
             byte[] serverChallenge =
                     GXSecure.secure(settings, settings.getCipher(), ic,
                             settings.getStoCChallenge(), readSecret);
-            byte[] clientChallenge = (byte[]) parameters;
+            byte[] clientChallenge = (byte[]) e.getParameters();
             if (GXCommon.compare(serverChallenge, clientChallenge)) {
                 if (settings.getAuthentication() == Authentication.HIGH_GMAC) {
                     readSecret = settings.getCipher().getSystemTitle();
@@ -153,22 +155,16 @@ public class GXDLMSAssociationShortName extends GXDLMSObject
                 } else {
                     readSecret = getSecret();
                 }
-                byte[] tmp = GXSecure.secure(settings, settings.getCipher(), ic,
-                        settings.getCtoSChallenge(), secret);
-                GXByteBuffer challenge = new GXByteBuffer();
-                // ReturnParameters.
-                challenge.setUInt8(DataType.OCTET_STRING.getValue());
-                GXCommon.setObjectCount(tmp.length, challenge);
-                challenge.set(tmp);
-                return challenge.array();
+                return GXSecure.secure(settings, settings.getCipher(), ic,
+                        settings.getCtoSChallenge(), readSecret);
             } else {
                 LOGGER.info("Invalid CtoS:" + GXCommon.toHex(serverChallenge)
                         + "-" + GXCommon.toHex(clientChallenge));
-                return new byte[] { 0 };
+                return null;
             }
         } else {
-            // Return error.
-            return new byte[] { (byte) ErrorCode.READ_WRITE_DENIED.getValue() };
+            e.setError(ErrorCode.READ_WRITE_DENIED);
+            return null;
         }
     }
 
@@ -258,12 +254,12 @@ public class GXDLMSAssociationShortName extends GXDLMSObject
      * Returns value of given attribute.
      */
     @Override
-    public final Object getValue(final GXDLMSSettings settings, final int index,
-            final int selector, final Object parameters) {
+    public final Object getValue(final GXDLMSSettings settings,
+            final ValueEventArgs e) {
         GXByteBuffer bb = new GXByteBuffer();
-        if (index == 1) {
+        if (e.getIndex() == 1) {
             return getLogicalName();
-        } else if (index == 2) {
+        } else if (e.getIndex() == 2) {
             int cnt = objectList.size();
             bb.setUInt8((byte) DataType.ARRAY.getValue());
             // Add count
@@ -301,7 +297,7 @@ public class GXDLMSAssociationShortName extends GXDLMSObject
                 }
             }
             return bb.array();
-        } else if (index == 3) {
+        } else if (e.getIndex() == 3) {
             boolean lnExists = objectList.findBySN(this.getShortName()) != null;
             // Add count
             int cnt = objectList.size();
@@ -317,11 +313,11 @@ public class GXDLMSAssociationShortName extends GXDLMSObject
                 getAccessRights(this, bb);
             }
             return bb.array();
-        } else if (index == 4) {
+        } else if (e.getIndex() == 4) {
             return GXCommon.getBytes(securitySetupReference);
         }
-        throw new IllegalArgumentException(
-                "GetValue failed. Invalid attribute index.");
+        e.setError(ErrorCode.READ_WRITE_DENIED);
+        return null;
     }
 
     final void updateAccessRights(final Object[] buff) {
@@ -352,14 +348,14 @@ public class GXDLMSAssociationShortName extends GXDLMSObject
      * Set value of given attribute.
      */
     @Override
-    public final void setValue(final GXDLMSSettings settings, final int index,
-            final Object value) {
-        if (index == 1) {
-            super.setValue(settings, index, value);
-        } else if (index == 2) {
+    public final void setValue(final GXDLMSSettings settings,
+            final ValueEventArgs e) {
+        if (e.getIndex() == 1) {
+            super.setValue(settings, e);
+        } else if (e.getIndex() == 2) {
             objectList.clear();
-            if (value != null) {
-                for (Object item : (Object[]) value) {
+            if (e.getValue() != null) {
+                for (Object item : (Object[]) e.getValue()) {
                     int sn = ((Number) Array.get(item, 0)).intValue() & 0xFFFF;
                     ObjectType type = ObjectType
                             .forValue(((Number) Array.get(item, 1)).intValue());
@@ -374,25 +370,24 @@ public class GXDLMSAssociationShortName extends GXDLMSObject
                     objectList.add(obj);
                 }
             }
-        } else if (index == 3) {
-            if (value == null) {
+        } else if (e.getIndex() == 3) {
+            if (e.getValue() == null) {
                 for (GXDLMSObject it : objectList) {
                     for (int pos = 1; pos != it.getAttributeCount(); ++pos) {
                         it.setAccess(pos, AccessMode.NO_ACCESS);
                     }
                 }
             } else {
-                updateAccessRights((Object[]) value);
+                updateAccessRights((Object[]) e.getValue());
             }
-        } else if (index == 4) {
-            if (value instanceof String) {
-                securitySetupReference = value.toString();
-            } else if (value != null) {
-                securitySetupReference = new String((byte[]) value);
+        } else if (e.getIndex() == 4) {
+            if (e.getValue() instanceof String) {
+                securitySetupReference = e.getValue().toString();
+            } else if (e.getValue() != null) {
+                securitySetupReference = new String((byte[]) e.getValue());
             }
         } else {
-            throw new IllegalArgumentException(
-                    "GetValue failed. Invalid attribute index.");
+            e.setError(ErrorCode.READ_WRITE_DENIED);
         }
     }
 }

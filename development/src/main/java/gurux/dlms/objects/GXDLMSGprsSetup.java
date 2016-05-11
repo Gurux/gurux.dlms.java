@@ -37,7 +37,9 @@ package gurux.dlms.objects;
 import gurux.dlms.GXByteBuffer;
 import gurux.dlms.GXDLMSClient;
 import gurux.dlms.GXDLMSSettings;
+import gurux.dlms.ValueEventArgs;
 import gurux.dlms.enums.DataType;
+import gurux.dlms.enums.ErrorCode;
 import gurux.dlms.enums.ObjectType;
 import gurux.dlms.internal.GXCommon;
 
@@ -178,18 +180,18 @@ public class GXDLMSGprsSetup extends GXDLMSObject implements IGXDLMSBase {
      * Returns value of given attribute.
      */
     @Override
-    public final Object getValue(final GXDLMSSettings settings, final int index,
-            final int selector, final Object parameters) {
-        if (index == 1) {
+    public final Object getValue(final GXDLMSSettings settings,
+            final ValueEventArgs e) {
+        if (e.getIndex() == 1) {
             return getLogicalName();
         }
-        if (index == 2) {
+        if (e.getIndex() == 2) {
             return getAPN();
         }
-        if (index == 3) {
+        if (e.getIndex() == 3) {
             return new Long(getPINCode());
         }
-        if (index == 4) {
+        if (e.getIndex() == 4) {
             GXByteBuffer data = new GXByteBuffer();
             data.setUInt8(DataType.STRUCTURE.getValue());
             data.setUInt8(2);
@@ -218,29 +220,30 @@ public class GXDLMSGprsSetup extends GXDLMSObject implements IGXDLMSBase {
                     new Integer(requestedQualityOfService.getMeanThroughput()));
             return data.array();
         }
-        throw new IllegalArgumentException(
-                "GetValue failed. Invalid attribute index.");
+        e.setError(ErrorCode.READ_WRITE_DENIED);
+        return null;
     }
 
     /*
      * Set value of given attribute.
      */
     @Override
-    public final void setValue(final GXDLMSSettings settings, final int index,
-            final Object value) {
-        if (index == 1) {
-            super.setValue(settings, index, value);
-        } else if (index == 2) {
-            if (value instanceof String) {
-                setAPN(value.toString());
+    public final void setValue(final GXDLMSSettings settings,
+            final ValueEventArgs e) {
+        if (e.getIndex() == 1) {
+            super.setValue(settings, e);
+        } else if (e.getIndex() == 2) {
+            if (e.getValue() instanceof String) {
+                setAPN(e.getValue().toString());
             } else {
-                setAPN(GXDLMSClient.changeType((byte[]) value, DataType.STRING)
+                setAPN(GXDLMSClient
+                        .changeType((byte[]) e.getValue(), DataType.STRING)
                         .toString());
             }
-        } else if (index == 3) {
-            setPINCode(((Number) value).intValue());
-        } else if (index == 4) {
-            Object[] arr = (Object[]) ((Object[]) value)[0];
+        } else if (e.getIndex() == 3) {
+            setPINCode(((Number) e.getValue()).intValue());
+        } else if (e.getIndex() == 4) {
+            Object[] arr = (Object[]) ((Object[]) e.getValue())[0];
             defaultQualityOfService.setPrecedence(((Number) arr[0]).intValue());
             defaultQualityOfService.setDelay(((Number) arr[1]).intValue());
             defaultQualityOfService
@@ -249,7 +252,7 @@ public class GXDLMSGprsSetup extends GXDLMSObject implements IGXDLMSBase {
                     .setPeakThroughput(((Number) arr[3]).intValue());
             defaultQualityOfService
                     .setMeanThroughput(((Number) arr[4]).intValue());
-            arr = (Object[]) ((Object[]) value)[1];
+            arr = (Object[]) ((Object[]) e.getValue())[1];
             requestedQualityOfService
                     .setPrecedence(((Number) arr[0]).intValue());
             requestedQualityOfService.setDelay(((Number) arr[1]).intValue());
@@ -260,8 +263,7 @@ public class GXDLMSGprsSetup extends GXDLMSObject implements IGXDLMSBase {
             requestedQualityOfService
                     .setMeanThroughput(((Number) arr[4]).intValue());
         } else {
-            throw new IllegalArgumentException(
-                    "GetValue failed. Invalid attribute index.");
+            e.setError(ErrorCode.READ_WRITE_DENIED);
         }
     }
 }

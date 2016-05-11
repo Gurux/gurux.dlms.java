@@ -34,6 +34,8 @@
 
 package gurux.dlms;
 
+import java.util.Date;
+
 import gurux.dlms.enums.Command;
 import gurux.dlms.enums.DataType;
 import gurux.dlms.enums.RequestTypes;
@@ -95,6 +97,21 @@ public class GXReplyData {
      * Data type.
      */
     private DataType dataType = DataType.NONE;
+
+    /**
+     * Cipher index is position where data is decrypted.
+     */
+    private int cipherIndex = 0;
+
+    /**
+     * Is received message General Block Transfer message.
+     */
+    private boolean gbt = false;
+
+    /**
+     * Data notification date time.
+     */
+    private Date time = null;
 
     /**
      * Constructor.
@@ -207,8 +224,11 @@ public class GXReplyData {
         totalCount = 0;
         dataValue = null;
         readPosition = 0;
+        gbt = false;
         blockLength = 0;
         dataType = DataType.NONE;
+        cipherIndex = 0;
+        time = null;
     }
 
     /**
@@ -316,6 +336,51 @@ public class GXReplyData {
      */
     public final void setPeek(final boolean forValue) {
         peek = forValue;
+    }
+
+    /**
+     * @return Cipher index is position where data is decrypted.
+     */
+    public final int getCipherIndex() {
+        return cipherIndex;
+    }
+
+    /**
+     * @param cipherIndex
+     *            Cipher index is position where data is decrypted.
+     */
+    public final void setCipherIndex(final int value) {
+        cipherIndex = value;
+    }
+
+    /**
+     * @return Is received message General Block Transfer message.
+     */
+    public final boolean getGbt() {
+        return gbt;
+    }
+
+    /**
+     * @param Is
+     *            received message General Block Transfer message.
+     */
+    public final void setGbt(final boolean value) {
+        gbt = value;
+    }
+
+    /**
+     * @return Data notification date time.
+     */
+    public final Date getTime() {
+        return time;
+    }
+
+    /**
+     * @param time
+     *            Data notification date time.
+     */
+    public final void setTime(final Date value) {
+        time = value;
     }
 
 }

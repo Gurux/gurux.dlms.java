@@ -121,6 +121,11 @@ public enum Command {
     AARE(0x61),
 
     /**
+     * Disconnect request for HDLC framing.
+     */
+    DISC(0x53),
+
+    /**
      * Disconnect request.
      */
     DISCONNECT_REQUEST(0x62),
@@ -136,9 +141,9 @@ public enum Command {
     EXCEPTION_RESPONSE(0xD8),
 
     /**
-     * Push request.
+     * General Block Transfer.
      */
-    PUSH(0xE0),
+    GENERAL_BLOCK_TRANSFER(0xE0),
 
     /**
      * Data Notification request.

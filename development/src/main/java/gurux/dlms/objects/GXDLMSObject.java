@@ -41,8 +41,10 @@ import java.util.List;
 
 import gurux.dlms.GXDLMSException;
 import gurux.dlms.GXDLMSSettings;
+import gurux.dlms.ValueEventArgs;
 import gurux.dlms.enums.AccessMode;
 import gurux.dlms.enums.DataType;
+import gurux.dlms.enums.ErrorCode;
 import gurux.dlms.enums.MethodAccessMode;
 import gurux.dlms.enums.ObjectType;
 import gurux.dlms.internal.GXCommon;
@@ -421,8 +423,7 @@ public class GXDLMSObject {
      * @return Value of given attribute.
      */
     // CHECKSTYLE:OFF
-    public Object getValue(final GXDLMSSettings settings, final int index,
-            final int selector, final Object parameters) {
+    public Object getValue(final GXDLMSSettings settings, ValueEventArgs e) {
         throw new UnsupportedOperationException("getValue");
     }
     // CHECKSTYLE:ON
@@ -438,13 +439,13 @@ public class GXDLMSObject {
      *            Attribute value.
      */
     // CHECKSTYLE:OFF
-    public void setValue(final GXDLMSSettings settings, final int index,
-            final Object value) {
-        if (index == 1) {
-            if (value instanceof String) {
-                setLogicalName(value.toString());
+    public void setValue(final GXDLMSSettings settings, ValueEventArgs e) {
+        if (e.getIndex() == 1) {
+            if (e.getValue() instanceof String) {
+                setLogicalName(e.getValue().toString());
             } else {
-                setLogicalName(GXDLMSObject.toLogicalName((byte[]) value));
+                setLogicalName(
+                        GXDLMSObject.toLogicalName((byte[]) e.getValue()));
             }
         } else {
             throw new UnsupportedOperationException("setValue");
@@ -464,9 +465,10 @@ public class GXDLMSObject {
      * @return Invoke reply.
      */
     // CHECKSTYLE:OFF
-    public byte[] invoke(final GXDLMSSettings settings, final int index,
-            final Object parameters) {
-        throw new UnsupportedOperationException("invoke");
+    public byte[] invoke(final GXDLMSSettings settings,
+            final ValueEventArgs e) {
+        e.setError(ErrorCode.READ_WRITE_DENIED);
+        return null;
     }
     // CHECKSTYLE:ON
 

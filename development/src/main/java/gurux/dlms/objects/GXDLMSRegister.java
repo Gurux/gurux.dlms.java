@@ -39,7 +39,9 @@ import java.text.NumberFormat;
 import gurux.dlms.GXByteBuffer;
 import gurux.dlms.GXDLMSClient;
 import gurux.dlms.GXDLMSSettings;
+import gurux.dlms.ValueEventArgs;
 import gurux.dlms.enums.DataType;
+import gurux.dlms.enums.ErrorCode;
 import gurux.dlms.enums.ObjectType;
 import gurux.dlms.enums.Unit;
 import gurux.dlms.internal.GXCommon;
@@ -156,15 +158,15 @@ public class GXDLMSRegister extends GXDLMSObject implements IGXDLMSBase {
     // CHECKSTYLE:ON
 
     @Override
-    public final byte[] invoke(final GXDLMSSettings settings, final int index,
-            final Object parameters) {
+    public final byte[] invoke(final GXDLMSSettings settings,
+            final ValueEventArgs e) {
         // Resets the value to the default value.
         // The default value is an instance specific constant.
-        if (index == 1) {
+        if (e.getIndex() == 1) {
             setValue(null);
         } else {
-            throw new IllegalArgumentException(
-                    "Invoke failed. Invalid attribute index.");
+            e.setError(ErrorCode.READ_WRITE_DENIED);
+            return null;
         }
         return null;
     }
@@ -245,16 +247,16 @@ public class GXDLMSRegister extends GXDLMSObject implements IGXDLMSBase {
      * Returns value of given attribute.
      */
     // CHECKSTYLE:OFF
-    public Object getValue(final GXDLMSSettings settings, final int index,
-            final int selector, final Object parameters) {
+    public Object getValue(final GXDLMSSettings settings,
+            final ValueEventArgs e) {
         // CHECKSTYLE:ON
-        if (index == 1) {
+        if (e.getIndex() == 1) {
             return getLogicalName();
         }
-        if (index == 2) {
+        if (e.getIndex() == 2) {
             return getValue();
         }
-        if (index == 3) {
+        if (e.getIndex() == 3) {
             GXByteBuffer data = new GXByteBuffer();
             data.setUInt8(DataType.STRUCTURE.getValue());
             data.setUInt8(2);
@@ -262,8 +264,8 @@ public class GXDLMSRegister extends GXDLMSObject implements IGXDLMSBase {
             GXCommon.setData(data, DataType.ENUM, new Integer(unit));
             return data.array();
         }
-        throw new IllegalArgumentException(
-                "GetValue failed. Invalid attribute index.");
+        e.setError(ErrorCode.READ_WRITE_DENIED);
+        return null;
     }
 
     /*
@@ -271,31 +273,32 @@ public class GXDLMSRegister extends GXDLMSObject implements IGXDLMSBase {
      */
     // CHECKSTYLE:OFF
     @Override
-    public void setValue(final GXDLMSSettings settings, final int index,
-            final Object value) {
+    public void setValue(final GXDLMSSettings settings,
+            final ValueEventArgs e) {
         // CHECKSTYLE:ON
 
-        if (index == 1) {
-            super.setValue(settings, index, value);
-        } else if (index == 2) {
+        if (e.getIndex() == 1) {
+            super.setValue(settings, e);
+        } else if (e.getIndex() == 2) {
             if (scaler != 0) {
                 try {
-                    objectValue = new Double(
-                            ((Number) value).doubleValue() * getScaler());
-                } catch (Exception e) {
+                    objectValue =
+                            new Double(((Number) e.getValue()).doubleValue()
+                                    * getScaler());
+                } catch (Exception e1) {
                     // Sometimes scaler is set for wrong Object type.
-                    setValue(value);
+                    setValue(e.getValue());
                 }
             } else {
-                setValue(value);
+                setValue(e.getValue());
             }
-        } else if (index == 3) {
+        } else if (e.getIndex() == 3) {
             // Set default values.
-            if (value == null) {
+            if (e.getValue() == null) {
                 scaler = 0;
                 unit = 0;
             } else {
-                Object[] arr = (Object[]) value;
+                Object[] arr = (Object[]) e.getValue();
                 if (arr == null || arr.length != 2) {
                     scaler = 0;
                     unit = 0;
@@ -305,8 +308,7 @@ public class GXDLMSRegister extends GXDLMSObject implements IGXDLMSBase {
                 }
             }
         } else {
-            throw new IllegalArgumentException(
-                    "GetValue failed. Invalid attribute index.");
+            e.setError(ErrorCode.READ_WRITE_DENIED);
         }
     }
 }

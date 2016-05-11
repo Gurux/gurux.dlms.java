@@ -37,7 +37,9 @@ package gurux.dlms.objects;
 import gurux.dlms.GXByteBuffer;
 import gurux.dlms.GXDLMSClient;
 import gurux.dlms.GXDLMSSettings;
+import gurux.dlms.ValueEventArgs;
 import gurux.dlms.enums.DataType;
+import gurux.dlms.enums.ErrorCode;
 import gurux.dlms.enums.ObjectType;
 import gurux.dlms.internal.GXCommon;
 import gurux.dlms.objects.enums.GXDLMSIp4SetupIpOptionType;
@@ -271,21 +273,21 @@ public class GXDLMSIp4Setup extends GXDLMSObject implements IGXDLMSBase {
      * Returns value of given attribute.
      */
     @Override
-    public final Object getValue(final GXDLMSSettings settings, final int index,
-            final int selector, final Object parameters) {
-        if (index == 1) {
+    public final Object getValue(final GXDLMSSettings settings,
+            final ValueEventArgs e) {
+        if (e.getIndex() == 1) {
             return getLogicalName();
         }
-        if (index == 2) {
+        if (e.getIndex() == 2) {
             return this.getDataLinkLayerReference();
         }
-        if (index == 3) {
+        if (e.getIndex() == 3) {
             return new Long(this.getIPAddress());
         }
-        if (index == 4) {
+        if (e.getIndex() == 4) {
             return this.getMulticastIPAddress();
         }
-        if (index == 5) {
+        if (e.getIndex() == 5) {
             GXByteBuffer data = new GXByteBuffer();
             data.setUInt8(DataType.ARRAY.getValue());
             if (ipOptions == null) {
@@ -303,56 +305,56 @@ public class GXDLMSIp4Setup extends GXDLMSObject implements IGXDLMSBase {
             }
             return data.array();
         }
-        if (index == 6) {
+        if (e.getIndex() == 6) {
             return new Long(this.getSubnetMask());
         }
-        if (index == 7) {
+        if (e.getIndex() == 7) {
             return new Long(this.getGatewayIPAddress());
         }
-        if (index == 8) {
+        if (e.getIndex() == 8) {
             return new Boolean(this.getUseDHCP());
         }
-        if (index == 9) {
+        if (e.getIndex() == 9) {
             return new Long(this.getPrimaryDNSAddress());
         }
-        if (index == 10) {
+        if (e.getIndex() == 10) {
             return new Long(this.getSecondaryDNSAddress());
         }
-        throw new IllegalArgumentException(
-                "GetValue failed. Invalid attribute index.");
+        e.setError(ErrorCode.READ_WRITE_DENIED);
+        return null;
     }
 
     /*
      * Set value of given attribute.
      */
     @Override
-    public final void setValue(final GXDLMSSettings settings, final int index,
-            final Object value) {
-        if (index == 1) {
-            super.setValue(settings, index, value);
-        } else if (index == 2) {
-            if (value instanceof String) {
-                this.setDataLinkLayerReference(value.toString());
+    public final void setValue(final GXDLMSSettings settings,
+            final ValueEventArgs e) {
+        if (e.getIndex() == 1) {
+            super.setValue(settings, e);
+        } else if (e.getIndex() == 2) {
+            if (e.getValue() instanceof String) {
+                this.setDataLinkLayerReference(e.getValue().toString());
             } else {
-                this.setDataLinkLayerReference(GXDLMSClient
-                        .changeType((byte[]) value, DataType.OCTET_STRING)
-                        .toString());
+                this.setDataLinkLayerReference(
+                        GXDLMSClient.changeType((byte[]) e.getValue(),
+                                DataType.OCTET_STRING).toString());
             }
-        } else if (index == 3) {
-            setIPAddress(((Number) value).intValue());
-        } else if (index == 4) {
+        } else if (e.getIndex() == 3) {
+            setIPAddress(((Number) e.getValue()).intValue());
+        } else if (e.getIndex() == 4) {
             java.util.ArrayList<Long> data = new java.util.ArrayList<Long>();
-            if (value != null) {
-                for (Object it : (Object[]) value) {
+            if (e.getValue() != null) {
+                for (Object it : (Object[]) e.getValue()) {
                     data.add(new Long(((Number) it).longValue()));
                 }
             }
             setMulticastIPAddress(GXDLMSObjectHelpers.toLongArray(data));
-        } else if (index == 5) {
+        } else if (e.getIndex() == 5) {
             java.util.ArrayList<GXDLMSIp4SetupIpOption> data =
                     new java.util.ArrayList<GXDLMSIp4SetupIpOption>();
-            if (value != null) {
-                for (Object it : (Object[]) value) {
+            if (e.getValue() != null) {
+                for (Object it : (Object[]) e.getValue()) {
                     GXDLMSIp4SetupIpOption item = new GXDLMSIp4SetupIpOption();
                     item.setType(GXDLMSIp4SetupIpOptionType.forValue(
                             ((Number) ((Object[]) it)[0]).intValue()));
@@ -363,19 +365,18 @@ public class GXDLMSIp4Setup extends GXDLMSObject implements IGXDLMSBase {
                 }
             }
             setIPOptions(data.toArray(new GXDLMSIp4SetupIpOption[data.size()]));
-        } else if (index == 6) {
-            setSubnetMask(((Number) value).intValue());
-        } else if (index == 7) {
-            setGatewayIPAddress(((Number) value).intValue());
-        } else if (index == 8) {
-            setUseDHCP(((Boolean) value).booleanValue());
-        } else if (index == 9) {
-            setPrimaryDNSAddress(((Number) value).intValue());
-        } else if (index == 10) {
-            setSecondaryDNSAddress(((Number) value).intValue());
+        } else if (e.getIndex() == 6) {
+            setSubnetMask(((Number) e.getValue()).intValue());
+        } else if (e.getIndex() == 7) {
+            setGatewayIPAddress(((Number) e.getValue()).intValue());
+        } else if (e.getIndex() == 8) {
+            setUseDHCP(((Boolean) e.getValue()).booleanValue());
+        } else if (e.getIndex() == 9) {
+            setPrimaryDNSAddress(((Number) e.getValue()).intValue());
+        } else if (e.getIndex() == 10) {
+            setSecondaryDNSAddress(((Number) e.getValue()).intValue());
         } else {
-            throw new IllegalArgumentException(
-                    "GetValue failed. Invalid attribute index.");
+            e.setError(ErrorCode.READ_WRITE_DENIED);
         }
     }
 }

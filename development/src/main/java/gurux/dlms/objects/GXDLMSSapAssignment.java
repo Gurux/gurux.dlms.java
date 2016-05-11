@@ -43,7 +43,9 @@ import gurux.dlms.GXByteBuffer;
 import gurux.dlms.GXDLMSClient;
 import gurux.dlms.GXDLMSSettings;
 import gurux.dlms.GXSimpleEntry;
+import gurux.dlms.ValueEventArgs;
 import gurux.dlms.enums.DataType;
+import gurux.dlms.enums.ErrorCode;
 import gurux.dlms.enums.ObjectType;
 import gurux.dlms.internal.GXCommon;
 
@@ -147,12 +149,12 @@ public class GXDLMSSapAssignment extends GXDLMSObject implements IGXDLMSBase {
      * Returns value of given attribute.
      */
     @Override
-    public final Object getValue(final GXDLMSSettings settings, final int index,
-            final int selector, final Object parameters) {
-        if (index == 1) {
+    public final Object getValue(final GXDLMSSettings settings,
+            final ValueEventArgs e) {
+        if (e.getIndex() == 1) {
             return getLogicalName();
         }
-        if (index == 2) {
+        if (e.getIndex() == 2) {
             int cnt = 0;
             if (sapAssignmentList != null) {
                 cnt = sapAssignmentList.size();
@@ -172,22 +174,22 @@ public class GXDLMSSapAssignment extends GXDLMSObject implements IGXDLMSBase {
             }
             return data.array();
         }
-        throw new IllegalArgumentException(
-                "GetValue failed. Invalid attribute index.");
+        e.setError(ErrorCode.READ_WRITE_DENIED);
+        return null;
     }
 
     /*
      * Set value of given attribute.
      */
     @Override
-    public final void setValue(final GXDLMSSettings settings, final int index,
-            final Object value) {
-        if (index == 1) {
-            super.setValue(settings, index, value);
-        } else if (index == 2) {
+    public final void setValue(final GXDLMSSettings settings,
+            final ValueEventArgs e) {
+        if (e.getIndex() == 1) {
+            super.setValue(settings, e);
+        } else if (e.getIndex() == 2) {
             sapAssignmentList.clear();
-            if (value != null) {
-                for (Object item : (Object[]) value) {
+            if (e.getValue() != null) {
+                for (Object item : (Object[]) e.getValue()) {
                     String str;
                     Object tmp = Array.get(item, 1);
                     if (tmp instanceof byte[]) {
@@ -202,8 +204,7 @@ public class GXDLMSSapAssignment extends GXDLMSObject implements IGXDLMSBase {
                 }
             }
         } else {
-            throw new IllegalArgumentException(
-                    "GetValue failed. Invalid attribute index.");
+            e.setError(ErrorCode.READ_WRITE_DENIED);
         }
     }
 }

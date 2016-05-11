@@ -36,7 +36,9 @@ package gurux.dlms.objects;
 
 import gurux.dlms.GXDLMSClient;
 import gurux.dlms.GXDLMSSettings;
+import gurux.dlms.ValueEventArgs;
 import gurux.dlms.enums.DataType;
+import gurux.dlms.enums.ErrorCode;
 import gurux.dlms.enums.ObjectType;
 import gurux.dlms.internal.GXCommon;
 import gurux.dlms.objects.enums.BaudRate;
@@ -255,72 +257,77 @@ public class GXDLMSIECOpticalPortSetup extends GXDLMSObject
      * Returns value of given attribute.
      */
     @Override
-    public final Object getValue(final GXDLMSSettings settings, final int index,
-            final int selector, final Object parameters) {
-        if (index == 1) {
+    public final Object getValue(final GXDLMSSettings settings,
+            final ValueEventArgs e) {
+        if (e.getIndex() == 1) {
             return getLogicalName();
         }
-        if (index == 2) {
+        if (e.getIndex() == 2) {
             return new Integer(this.getDefaultMode().getValue());
         }
-        if (index == 3) {
+        if (e.getIndex() == 3) {
             return new Integer(getDefaultBaudrate().ordinal());
         }
-        if (index == 4) {
+        if (e.getIndex() == 4) {
             return new Integer(getProposedBaudrate().ordinal());
         }
-        if (index == 5) {
+        if (e.getIndex() == 5) {
             return new Integer(getResponseTime().ordinal());
         }
-        if (index == 6) {
+        if (e.getIndex() == 6) {
             return GXCommon.getBytes(deviceAddress);
         }
-        if (index == 7) {
+        if (e.getIndex() == 7) {
             return GXCommon.getBytes(password1);
         }
-        if (index == 8) {
+        if (e.getIndex() == 8) {
             return GXCommon.getBytes(password2);
         }
-        if (index == 9) {
+        if (e.getIndex() == 9) {
             return GXCommon.getBytes(password5);
         }
-        throw new IllegalArgumentException(
-                "GetValue failed. Invalid attribute index.");
+        e.setError(ErrorCode.READ_WRITE_DENIED);
+        return null;
     }
 
     /*
      * Set value of given attribute.
      */
     @Override
-    public final void setValue(final GXDLMSSettings settings, final int index,
-            final Object value) {
-        if (index == 1) {
-            super.setValue(settings, index, value);
-        } else if (index == 2) {
-            setDefaultMode(
-                    OpticalProtocolMode.forValue(((Number) value).intValue()));
-        } else if (index == 3) {
-            setDefaultBaudrate(BaudRate.values()[((Number) value).intValue()]);
-        } else if (index == 4) {
-            setProposedBaudrate(BaudRate.values()[((Number) value).intValue()]);
-        } else if (index == 5) {
-            setResponseTime(LocalPortResponseTime.values()[((Number) value)
-                    .intValue()]);
-        } else if (index == 6) {
+    public final void setValue(final GXDLMSSettings settings,
+            final ValueEventArgs e) {
+        if (e.getIndex() == 1) {
+            super.setValue(settings, e);
+        } else if (e.getIndex() == 2) {
+            setDefaultMode(OpticalProtocolMode
+                    .forValue(((Number) e.getValue()).intValue()));
+        } else if (e.getIndex() == 3) {
+            setDefaultBaudrate(
+                    BaudRate.values()[((Number) e.getValue()).intValue()]);
+        } else if (e.getIndex() == 4) {
+            setProposedBaudrate(
+                    BaudRate.values()[((Number) e.getValue()).intValue()]);
+        } else if (e.getIndex() == 5) {
+            setResponseTime(LocalPortResponseTime
+                    .values()[((Number) e.getValue()).intValue()]);
+        } else if (e.getIndex() == 6) {
             setDeviceAddress(GXDLMSClient
-                    .changeType((byte[]) value, DataType.STRING).toString());
-        } else if (index == 7) {
+                    .changeType((byte[]) e.getValue(), DataType.STRING)
+                    .toString());
+        } else if (e.getIndex() == 7) {
             setPassword1(GXDLMSClient
-                    .changeType((byte[]) value, DataType.STRING).toString());
-        } else if (index == 8) {
+                    .changeType((byte[]) e.getValue(), DataType.STRING)
+                    .toString());
+        } else if (e.getIndex() == 8) {
             setPassword2(GXDLMSClient
-                    .changeType((byte[]) value, DataType.STRING).toString());
-        } else if (index == 9) {
+                    .changeType((byte[]) e.getValue(), DataType.STRING)
+                    .toString());
+        } else if (e.getIndex() == 9) {
             setPassword5(GXDLMSClient
-                    .changeType((byte[]) value, DataType.STRING).toString());
+                    .changeType((byte[]) e.getValue(), DataType.STRING)
+                    .toString());
         } else {
-            throw new IllegalArgumentException(
-                    "GetValue failed. Invalid attribute index.");
+            e.setError(ErrorCode.READ_WRITE_DENIED);
         }
     }
 }

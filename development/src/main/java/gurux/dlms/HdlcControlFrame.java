@@ -32,60 +32,59 @@
 // Full text may be retrieved at http://www.gnu.org/licenses/gpl-2.0.txt
 //---------------------------------------------------------------------------
 
-package gurux.dlms.objects;
+package gurux.dlms;
 
-import gurux.dlms.GXDLMSSettings;
-import gurux.dlms.ValueEventArgs;
+import gurux.dlms.enums.AssociationResult;
 
-public interface IGXDLMSBase {
-
+/**
+ * HDLC control frame types.
+ */
+enum HdlcControlFrame {
     /**
-     * Returns collection of attributes to read. If attribute is static and
-     * already read or device is returned HW error it is not returned.
-     * 
-     * @return Collection of attributes to read.
+     * Receive is ready.
      */
-    int[] getAttributeIndexToRead();
-
+    RECEIVE_READY(0),
     /**
-     * @return Amount of attributes.
+     * Receive is not ready.
      */
-    int getAttributeCount();
-
+    RECEIVE_NOT_READY(0x1),
     /**
-     * @return Amount of methods.
+     * Frame is rejected.
      */
-    int getMethodCount();
-
+    REJECT(2),
     /**
-     * Returns value of given attribute.
-     * 
-     * @param settings
-     *            DLMS settings.
-     * @param e
-     *            Get parameter.
-     * @return Returned value.
+     * Frame is selective rejected. Not all meters support this.
      */
-    Object getValue(GXDLMSSettings settings, ValueEventArgs e);
+    SELECTIVE_REJECT(3);
 
-    /**
-     * Set value of given attribute.
-     * 
-     * @param settings
-     *            DLMS settings.
-     * @param e
-     *            Set parameter.
-     */
-    void setValue(GXDLMSSettings settings, ValueEventArgs e);
+    private final int intValue;
+    private static java.util.HashMap<Integer, HdlcControlFrame> mappings;
 
-    /**
-     * Server calls invoke method.
-     * 
-     * @param settings
-     *            Server settings.
-     * @param e
-     *            Invoke parameter.
-     * @return Reply for the client.
+    private static java.util.HashMap<Integer, HdlcControlFrame> getMappings() {
+        synchronized (AssociationResult.class) {
+            if (mappings == null) {
+                mappings = new java.util.HashMap<Integer, HdlcControlFrame>();
+            }
+        }
+        return mappings;
+    }
+
+    HdlcControlFrame(final int value) {
+        intValue = value;
+        getMappings().put(new Integer(value), this);
+    }
+
+    /*
+     * Get integer value for enum.
      */
-    byte[] invoke(GXDLMSSettings settings, ValueEventArgs e);
+    public int getValue() {
+        return intValue;
+    }
+
+    /*
+     * Convert integer for enum value.
+     */
+    public static HdlcControlFrame forValue(final int value) {
+        return getMappings().get(new Integer(value));
+    }
 }

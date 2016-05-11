@@ -43,7 +43,6 @@ import gurux.common.PropertyChangedEventArgs;
 import gurux.common.ReceiveEventArgs;
 import gurux.common.TraceEventArgs;
 import gurux.common.enums.TraceLevel;
-import gurux.dlms.GXDLMSServer;
 import gurux.dlms.GXDateTime;
 import gurux.dlms.ValueEventArgs;
 import gurux.dlms.enums.AccessMode;
@@ -83,13 +82,14 @@ import gurux.dlms.objects.enums.LocalPortResponseTime;
 import gurux.dlms.objects.enums.OpticalProtocolMode;
 import gurux.dlms.objects.enums.SingleActionScheduleType;
 import gurux.dlms.objects.enums.SortMethod;
+import gurux.dlms.secure.GXDLMSSecureServer;
 import gurux.net.GXNet;
 import gurux.net.enums.NetworkType;
 
 /**
  * All example servers are using same objects.
  */
-public class GXDLMSBase extends GXDLMSServer
+public class GXDLMSBase extends GXDLMSSecureServer
         implements IGXMediaListener, gurux.net.IGXNetListener {
 
     boolean Trace = false;
@@ -107,7 +107,7 @@ public class GXDLMSBase extends GXDLMSServer
         GXDLMSData d = new GXDLMSData("0.0.42.0.0.255");
         d.setValue("Gurux123456");
         // Set access right. Client can't change Device name.
-        d.setAccess(2, AccessMode.READ);
+        d.setAccess(2, AccessMode.READ_WRITE);
         d.setDataType(2, DataType.OCTET_STRING);
         d.setUIDataType(2, DataType.STRING);
         getItems().add(d);

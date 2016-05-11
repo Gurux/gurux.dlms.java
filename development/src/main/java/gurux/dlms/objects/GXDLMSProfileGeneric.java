@@ -48,6 +48,7 @@ import gurux.dlms.GXDateTime;
 import gurux.dlms.GXSimpleEntry;
 import gurux.dlms.ValueEventArgs;
 import gurux.dlms.enums.DataType;
+import gurux.dlms.enums.ErrorCode;
 import gurux.dlms.enums.ObjectType;
 import gurux.dlms.internal.GXCommon;
 import gurux.dlms.internal.GXDataInfo;
@@ -499,24 +500,24 @@ public class GXDLMSProfileGeneric extends GXDLMSObject implements IGXDLMSBase {
      * Returns value of given attribute.
      */
     @Override
-    public final Object getValue(final GXDLMSSettings settings, final int index,
-            final int selector, final Object parameters) {
-        if (index == 1) {
+    public final Object getValue(final GXDLMSSettings settings,
+            final ValueEventArgs e) {
+        if (e.getIndex() == 1) {
             return getLogicalName();
         }
-        if (index == 2) {
-            return getProfileGenericData(selector, parameters);
+        if (e.getIndex() == 2) {
+            return getProfileGenericData(e.getSelector(), e.getParameters());
         }
-        if (index == 3) {
+        if (e.getIndex() == 3) {
             return getColumns();
         }
-        if (index == 4) {
+        if (e.getIndex() == 4) {
             return getCapturePeriod();
         }
-        if (index == 5) {
+        if (e.getIndex() == 5) {
             return getSortMethod().getValue();
         }
-        if (index == 6) {
+        if (e.getIndex() == 6) {
             GXByteBuffer data = new GXByteBuffer();
             data.setUInt8((byte) DataType.STRUCTURE.getValue());
             data.setUInt8((byte) 4); // Count
@@ -543,32 +544,32 @@ public class GXDLMSProfileGeneric extends GXDLMSObject implements IGXDLMSBase {
             }
             return data.array();
         }
-        if (index == 7) {
+        if (e.getIndex() == 7) {
             return getEntriesInUse();
         }
-        if (index == 8) {
+        if (e.getIndex() == 8) {
             return getProfileEntries();
         }
-        throw new IllegalArgumentException(
-                "GetValue failed. Invalid attribute index.");
+        e.setError(ErrorCode.READ_WRITE_DENIED);
+        return null;
     }
 
     /**
      * Set value of given attribute.
      */
     @Override
-    public final void setValue(final GXDLMSSettings settings, final int index,
-            final Object value) {
-        if (index == 1) {
-            super.setValue(settings, index, value);
-        } else if (index == 2) {
-            setBuffer(value);
-        } else if (index == 3) {
+    public final void setValue(final GXDLMSSettings settings,
+            final ValueEventArgs e) {
+        if (e.getIndex() == 1) {
+            super.setValue(settings, e);
+        } else if (e.getIndex() == 2) {
+            setBuffer(e.getValue());
+        } else if (e.getIndex() == 3) {
             captureObjects.clear();
             buffer.clear();
             entriesInUse = buffer.size();
-            if (value != null) {
-                for (Object it : (Object[]) value) {
+            if (e.getValue() != null) {
+                for (Object it : (Object[]) e.getValue()) {
                     Object[] tmp = (Object[]) it;
                     if (tmp.length != 4) {
                         throw new GXDLMSException("Invalid structure format.");
@@ -588,25 +589,26 @@ public class GXDLMSProfileGeneric extends GXDLMSObject implements IGXDLMSBase {
                             ((Number) tmp[3]).intValue());
                 }
             }
-        } else if (index == 4) {
-            if (value == null) {
+        } else if (e.getIndex() == 4) {
+            if (e.getValue() == null) {
                 capturePeriod = 0;
             } else {
-                capturePeriod = ((Number) value).intValue();
+                capturePeriod = ((Number) e.getValue()).intValue();
             }
 
-        } else if (index == 5) {
-            if (value == null) {
+        } else if (e.getIndex() == 5) {
+            if (e.getValue() == null) {
                 sortMethod = SortMethod.FIFO;
             } else {
-                sortMethod = SortMethod.forValue(((Number) value).intValue());
+                sortMethod =
+                        SortMethod.forValue(((Number) e.getValue()).intValue());
             }
 
-        } else if (index == 6) {
-            if (value == null) {
+        } else if (e.getIndex() == 6) {
+            if (e.getValue() == null) {
                 sortObject = null;
             } else {
-                Object[] tmp = (Object[]) value;
+                Object[] tmp = (Object[]) e.getValue();
                 if (tmp.length != 4) {
                     throw new IllegalArgumentException(
                             "Invalid structure format.");
@@ -624,21 +626,20 @@ public class GXDLMSProfileGeneric extends GXDLMSObject implements IGXDLMSBase {
                 sortObjectAttributeIndex = attributeIndex;
                 sortObjectDataIndex = dataIndex;
             }
-        } else if (index == 7) {
-            if (value == null) {
+        } else if (e.getIndex() == 7) {
+            if (e.getValue() == null) {
                 entriesInUse = 0;
             } else {
-                entriesInUse = ((Number) value).intValue();
+                entriesInUse = ((Number) e.getValue()).intValue();
             }
-        } else if (index == 8) {
-            if (value == null) {
+        } else if (e.getIndex() == 8) {
+            if (e.getValue() == null) {
                 profileEntries = 0;
             } else {
-                profileEntries = ((Number) value).intValue();
+                profileEntries = ((Number) e.getValue()).intValue();
             }
         } else {
-            throw new IllegalArgumentException(
-                    "SetValue failed. Invalid attribute index.");
+            e.setError(ErrorCode.READ_WRITE_DENIED);
         }
     }
 
@@ -745,8 +746,7 @@ public class GXDLMSProfileGeneric extends GXDLMSObject implements IGXDLMSBase {
                 if (e.getHandled()) {
                     values[++pos] = e.getValue();
                 } else {
-                    values[++pos] = obj.getKey().getValue(null,
-                            obj.getValue().getAttributeIndex() - 1, 0, null);
+                    values[++pos] = obj.getKey().getValue(null, e);
                 }
             }
             synchronized (this) {

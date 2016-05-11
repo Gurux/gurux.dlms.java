@@ -35,6 +35,7 @@
 package gurux.dlms;
 
 import gurux.dlms.enums.DataType;
+import gurux.dlms.enums.ErrorCode;
 import gurux.dlms.objects.GXDLMSObject;
 
 public class ValueEventArgs {
@@ -66,6 +67,16 @@ public class ValueEventArgs {
      * Optional parameters.
      */
     private Object parameters;
+
+    /**
+     * Occurred error.
+     */
+    private ErrorCode error = ErrorCode.OK;
+
+    /**
+     * Is action. This is reserved for internal use.
+     */
+    private boolean action;
 
     /**
      * @return Target DLMS object.
@@ -167,5 +178,35 @@ public class ValueEventArgs {
         setIndex(eventIndex);
         selector = readSelector;
         parameters = forParameters;
+    }
+
+    /**
+     * @return Occurred error.
+     */
+    public final ErrorCode getError() {
+        return error;
+    }
+
+    /**
+     * @param error
+     *            Occurred error.
+     */
+    public final void setError(final ErrorCode value) {
+        error = value;
+    }
+
+    /**
+     * @return Is action.
+     */
+    public final boolean isAction() {
+        return action;
+    }
+
+    /**
+     * @param value
+     *            Is action.
+     */
+    public final void setAction(final boolean value) {
+        action = value;
     }
 }

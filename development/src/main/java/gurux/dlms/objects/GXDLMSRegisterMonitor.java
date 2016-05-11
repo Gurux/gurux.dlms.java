@@ -40,7 +40,9 @@ import java.util.List;
 import gurux.dlms.GXByteBuffer;
 import gurux.dlms.GXDLMSClient;
 import gurux.dlms.GXDLMSSettings;
+import gurux.dlms.ValueEventArgs;
 import gurux.dlms.enums.DataType;
+import gurux.dlms.enums.ErrorCode;
 import gurux.dlms.enums.ObjectType;
 import gurux.dlms.internal.GXCommon;
 
@@ -182,15 +184,15 @@ public class GXDLMSRegisterMonitor extends GXDLMSObject implements IGXDLMSBase {
      * Returns value of given attribute.
      */
     @Override
-    public final Object getValue(final GXDLMSSettings settings, final int index,
-            final int selector, final Object parameters) {
-        if (index == 1) {
+    public final Object getValue(final GXDLMSSettings settings,
+            final ValueEventArgs e) {
+        if (e.getIndex() == 1) {
             return getLogicalName();
         }
-        if (index == 2) {
+        if (e.getIndex() == 2) {
             return getThresholds();
         }
-        if (index == 3) {
+        if (e.getIndex() == 3) {
             GXByteBuffer stream = new GXByteBuffer();
             stream.setUInt8(DataType.STRUCTURE.getValue());
             stream.setUInt8(3);
@@ -205,7 +207,7 @@ public class GXDLMSRegisterMonitor extends GXDLMSObject implements IGXDLMSBase {
                     new Integer(monitoredValue.getAttributeIndex()));
             return stream.array();
         }
-        if (index == 4) {
+        if (e.getIndex() == 4) {
             GXByteBuffer bb = new GXByteBuffer();
             bb.setUInt8(DataType.STRUCTURE.getValue());
             if (actions == null) {
@@ -235,36 +237,41 @@ public class GXDLMSRegisterMonitor extends GXDLMSObject implements IGXDLMSBase {
             }
             return bb.array();
         }
-        throw new IllegalArgumentException(
-                "GetValue failed. Invalid attribute index.");
+        e.setError(ErrorCode.READ_WRITE_DENIED);
+        return null;
     }
 
     /*
      * Set value of given attribute.
      */
     @Override
-    public final void setValue(final GXDLMSSettings settings, final int index,
-            final Object value) {
-        if (index == 1) {
-            super.setValue(settings, index, value);
-        } else if (index == 2) {
-            setThresholds((Object[]) value);
-        } else if (index == 3) {
+    public final void setValue(final GXDLMSSettings settings,
+            final ValueEventArgs e) {
+        if (e.getIndex() == 1) {
+            super.setValue(settings, e);
+        } else if (e.getIndex() == 2) {
+            setThresholds((Object[]) e.getValue());
+        } else if (e.getIndex() == 3) {
             if (getMonitoredValue() == null) {
                 setMonitoredValue(new GXDLMSMonitoredValue());
             }
-            getMonitoredValue().setObjectType(ObjectType
-                    .forValue(((Number) ((Object[]) value)[0]).intValue()));
-            getMonitoredValue().setLogicalName(
-                    GXDLMSClient.changeType((byte[]) ((Object[]) value)[1],
-                            DataType.OCTET_STRING).toString());
+            getMonitoredValue().setObjectType(ObjectType.forValue(
+                    ((Number) ((Object[]) e.getValue())[0]).intValue()));
+            getMonitoredValue()
+                    .setLogicalName(
+                            GXDLMSClient
+                                    .changeType(
+                                            (byte[]) ((Object[]) e
+                                                    .getValue())[1],
+                                            DataType.OCTET_STRING)
+                                    .toString());
             getMonitoredValue().setAttributeIndex(
-                    ((Number) ((Object[]) value)[2]).intValue());
-        } else if (index == 4) {
+                    ((Number) ((Object[]) e.getValue())[2]).intValue());
+        } else if (e.getIndex() == 4) {
             setActions(new GXDLMSActionSet[0]);
-            if (value != null) {
+            if (e.getValue() != null) {
                 List<GXDLMSActionSet> items = new ArrayList<GXDLMSActionSet>();
-                for (Object as : (Object[]) value) {
+                for (Object as : (Object[]) e.getValue()) {
                     GXDLMSActionSet set = new GXDLMSActionSet();
                     Object[] target = (Object[]) ((Object[]) as)[0];
                     set.getActionUp()
@@ -289,8 +296,7 @@ public class GXDLMSRegisterMonitor extends GXDLMSObject implements IGXDLMSBase {
                 setActions(items.toArray(new GXDLMSActionSet[items.size()]));
             }
         } else {
-            throw new IllegalArgumentException(
-                    "GetValue failed. Invalid attribute index.");
+            e.setError(ErrorCode.READ_WRITE_DENIED);
         }
     }
 }

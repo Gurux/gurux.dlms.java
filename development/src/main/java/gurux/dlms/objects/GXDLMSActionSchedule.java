@@ -40,8 +40,10 @@ import gurux.dlms.GXByteBuffer;
 import gurux.dlms.GXDLMSClient;
 import gurux.dlms.GXDLMSSettings;
 import gurux.dlms.GXDateTime;
+import gurux.dlms.ValueEventArgs;
 import gurux.dlms.enums.DataType;
 import gurux.dlms.enums.DateTimeSkips;
+import gurux.dlms.enums.ErrorCode;
 import gurux.dlms.enums.ObjectType;
 import gurux.dlms.internal.GXCommon;
 import gurux.dlms.objects.enums.SingleActionScheduleType;
@@ -185,12 +187,12 @@ public class GXDLMSActionSchedule extends GXDLMSObject implements IGXDLMSBase {
      * Returns value of given attribute.
      */
     @Override
-    public final Object getValue(final GXDLMSSettings settings, final int index,
-            final int selector, final Object parameters) {
-        if (index == 1) {
+    public final Object getValue(final GXDLMSSettings settings,
+            final ValueEventArgs e) {
+        if (e.getIndex() == 1) {
             return getLogicalName();
         }
-        if (index == 2) {
+        if (e.getIndex() == 2) {
             GXByteBuffer stream = new GXByteBuffer();
             stream.setUInt8(DataType.STRUCTURE.getValue());
             stream.setUInt8(2);
@@ -200,10 +202,10 @@ public class GXDLMSActionSchedule extends GXDLMSObject implements IGXDLMSBase {
                     new Integer(executedScriptSelector));
             return stream.array();
         }
-        if (index == 3) {
+        if (e.getIndex() == 3) {
             return new Integer(this.getType().getValue());
         }
-        if (index == 4) {
+        if (e.getIndex() == 4) {
             GXByteBuffer bb = new GXByteBuffer();
             bb.setUInt8(DataType.ARRAY.getValue());
             if (getExecutionTime() == null) {
@@ -219,33 +221,34 @@ public class GXDLMSActionSchedule extends GXDLMSObject implements IGXDLMSBase {
             }
             return bb.array();
         }
-        throw new IllegalArgumentException(
-                "GetValue failed. Invalid attribute index.");
+        e.setError(ErrorCode.READ_WRITE_DENIED);
+        return null;
     }
 
     /*
      * Set value of given attribute.
      */
     @Override
-    public final void setValue(final GXDLMSSettings settings, final int index,
-            final Object value) {
-        if (index == 1) {
-            super.setValue(settings, index, value);
-        } else if (index == 2) {
-            setExecutedScriptLogicalName(
-                    GXDLMSClient.changeType((byte[]) ((Object[]) value)[0],
-                            DataType.OCTET_STRING).toString());
+    public final void setValue(final GXDLMSSettings settings,
+            final ValueEventArgs e) {
+        if (e.getIndex() == 1) {
+            super.setValue(settings, e);
+        } else if (e.getIndex() == 2) {
+            setExecutedScriptLogicalName(GXDLMSClient
+                    .changeType((byte[]) ((Object[]) e.getValue())[0],
+                            DataType.OCTET_STRING)
+                    .toString());
             setExecutedScriptSelector(
-                    ((Number) ((Object[]) value)[1]).intValue());
-        } else if (index == 3) {
+                    ((Number) ((Object[]) e.getValue())[1]).intValue());
+        } else if (e.getIndex() == 3) {
             setType(SingleActionScheduleType
-                    .forValue(((Number) value).intValue()));
-        } else if (index == 4) {
+                    .forValue(((Number) e.getValue()).intValue()));
+        } else if (e.getIndex() == 4) {
             setExecutionTime(null);
-            if (value != null) {
+            if (e.getValue() != null) {
                 java.util.ArrayList<GXDateTime> items =
                         new java.util.ArrayList<GXDateTime>();
-                for (Object it : (Object[]) value) {
+                for (Object it : (Object[]) e.getValue()) {
                     GXDateTime dt = (GXDateTime) GXDLMSClient.changeType(
                             (byte[]) ((Object[]) it)[0], DataType.TIME);
                     GXDateTime dt2 = (GXDateTime) GXDLMSClient.changeType(
@@ -269,8 +272,7 @@ public class GXDLMSActionSchedule extends GXDLMSObject implements IGXDLMSBase {
                 setExecutionTime(items.toArray(new GXDateTime[items.size()]));
             }
         } else {
-            throw new IllegalArgumentException(
-                    "GetValue failed. Invalid attribute index.");
+            e.setError(ErrorCode.READ_WRITE_DENIED);
         }
     }
 }

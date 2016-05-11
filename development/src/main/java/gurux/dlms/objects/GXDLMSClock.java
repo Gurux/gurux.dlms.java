@@ -43,9 +43,11 @@ import gurux.dlms.GXByteBuffer;
 import gurux.dlms.GXDLMSClient;
 import gurux.dlms.GXDLMSSettings;
 import gurux.dlms.GXDateTime;
+import gurux.dlms.ValueEventArgs;
 import gurux.dlms.enums.ClockStatus;
 import gurux.dlms.enums.DataType;
 import gurux.dlms.enums.DateTimeSkips;
+import gurux.dlms.enums.ErrorCode;
 import gurux.dlms.enums.ObjectType;
 import gurux.dlms.internal.GXCommon;
 import gurux.dlms.objects.enums.ClockBase;
@@ -225,11 +227,11 @@ public class GXDLMSClock extends GXDLMSObject implements IGXDLMSBase {
     }
 
     @Override
-    public final byte[] invoke(final GXDLMSSettings settings, final int index,
-            final Object parameters) {
+    public final byte[] invoke(final GXDLMSSettings settings,
+            final ValueEventArgs e) {
         // Resets the value to the default value.
         // The default value is an instance specific constant.
-        if (index == 1) {
+        if (e.getIndex() == 1) {
             GXDateTime dt = getTime();
             java.util.Calendar tm = Calendar.getInstance();
             tm.setTime(dt.getValue());
@@ -251,7 +253,7 @@ public class GXDLMSClock extends GXDLMSObject implements IGXDLMSBase {
             tm.set(java.util.Calendar.MILLISECOND, 0);
             dt.setValue(tm.getTime());
             setTime(dt);
-        } else if (index == 3) {
+        } else if (e.getIndex() == 3) {
             // Sets the meter's time to the nearest minute.
             GXDateTime dt = getTime();
             java.util.Calendar tm = Calendar.getInstance();
@@ -265,11 +267,12 @@ public class GXDLMSClock extends GXDLMSObject implements IGXDLMSBase {
             dt.setValue(tm.getTime());
             setTime(dt);
 
-        } else if (index == 5) {
+        } else if (e.getIndex() == 5) {
             // Presets the time to a new value (preset_time) and defines
             // avalidity_interval within which the new time can be activated.
             GXDateTime presetTime = (GXDateTime) GXDLMSClient.changeType(
-                    (byte[]) ((Object[]) parameters)[0], DataType.DATETIME);
+                    (byte[]) ((Object[]) e.getParameters())[0],
+                    DataType.DATETIME);
             // TODO:
             /*
              * GXDateTime validityIntervalStart = (GXDateTime) GXDLMSClient
@@ -279,9 +282,9 @@ public class GXDLMSClock extends GXDLMSObject implements IGXDLMSBase {
              * DataType.DATETIME);
              */
             setTime(presetTime);
-        } else if (index == 6) {
+        } else if (e.getIndex() == 6) {
             // Shifts the time.
-            int shift = ((Number) parameters).intValue();
+            int shift = ((Number) e.getParameters()).intValue();
             GXDateTime dt = getTime();
             java.util.Calendar tm = Calendar.getInstance();
             tm.setTime(dt.getValue());
@@ -289,8 +292,7 @@ public class GXDLMSClock extends GXDLMSObject implements IGXDLMSBase {
             dt.setValue(tm.getTime());
             setTime(dt);
         } else {
-            throw new IllegalArgumentException(
-                    "Invoke failed. Invalid attribute index.");
+            e.setError(ErrorCode.READ_WRITE_DENIED);
         }
         return null;
     }
@@ -457,117 +459,118 @@ public class GXDLMSClock extends GXDLMSObject implements IGXDLMSBase {
      * Returns value of given attribute.
      */
     @Override
-    public final Object getValue(final GXDLMSSettings settings, final int index,
-            final int selector, final Object parameters) {
-        if (index == 1) {
+    public final Object getValue(final GXDLMSSettings settings,
+            final ValueEventArgs e) {
+        if (e.getIndex() == 1) {
             return getLogicalName();
         }
-        if (index == 2) {
+        if (e.getIndex() == 2) {
             return getTime();
         }
-        if (index == 3) {
+        if (e.getIndex() == 3) {
             return new Integer(getTimeZone());
         }
-        if (index == 4) {
+        if (e.getIndex() == 4) {
             return new Integer(ClockStatus.toInteger(status));
         }
-        if (index == 5) {
+        if (e.getIndex() == 5) {
             return getBegin();
         }
-        if (index == 6) {
+        if (e.getIndex() == 6) {
             return getEnd();
         }
-        if (index == 7) {
+        if (e.getIndex() == 7) {
             return new Integer(getDeviation());
         }
-        if (index == 8) {
+        if (e.getIndex() == 8) {
             return new Boolean(getEnabled());
         }
-        if (index == 9) {
+        if (e.getIndex() == 9) {
             return new Integer(getClockBase().ordinal());
         }
-        throw new IllegalArgumentException(
-                "GetValue failed. Invalid attribute index.");
+        e.setError(ErrorCode.READ_WRITE_DENIED);
+        return null;
     }
 
     /*
      * Set value of given attribute.
      */
     @Override
-    public final void setValue(final GXDLMSSettings settings, final int index,
-            final Object value) {
-        if (index == 1) {
-            super.setValue(settings, index, value);
-        } else if (index == 2) {
-            if (value == null) {
+    public final void setValue(final GXDLMSSettings settings,
+            final ValueEventArgs e) {
+        if (e.getIndex() == 1) {
+            super.setValue(settings, e);
+        } else if (e.getIndex() == 2) {
+            if (e.getValue() == null) {
                 setTime(new GXDateTime());
             } else {
                 GXDateTime tmp;
-                if (value instanceof byte[]) {
-                    tmp = (GXDateTime) GXDLMSClient.changeType((byte[]) value,
-                            DataType.DATETIME);
+                if (e.getValue() instanceof byte[]) {
+                    tmp = (GXDateTime) GXDLMSClient.changeType(
+                            (byte[]) e.getValue(), DataType.DATETIME);
                 } else {
-                    tmp = (GXDateTime) value;
+                    tmp = (GXDateTime) e.getValue();
                 }
                 setTime(tmp);
             }
-        } else if (index == 3) {
-            if (value == null) {
+        } else if (e.getIndex() == 3) {
+            if (e.getValue() == null) {
                 setTimeZone(0);
             } else {
-                setTimeZone(((Number) value).intValue());
+                setTimeZone(((Number) e.getValue()).intValue());
             }
-        } else if (index == 4) {
-            if (value == null) {
+        } else if (e.getIndex() == 4) {
+            if (e.getValue() == null) {
                 Set<ClockStatus> val = new HashSet<ClockStatus>();
                 val.add(ClockStatus.OK);
                 setStatus(val);
             } else {
-                setStatus(ClockStatus.forValue(((Number) value).intValue()));
+                setStatus(ClockStatus
+                        .forValue(((Number) e.getValue()).intValue()));
             }
-        } else if (index == 5) {
-            if (value == null) {
+        } else if (e.getIndex() == 5) {
+            if (e.getValue() == null) {
                 setBegin(new GXDateTime());
-            } else if (value instanceof byte[]) {
+            } else if (e.getValue() instanceof byte[]) {
                 GXDateTime tmp;
-                tmp = (GXDateTime) GXDLMSClient.changeType((byte[]) value,
-                        DataType.DATETIME);
+                tmp = (GXDateTime) GXDLMSClient
+                        .changeType((byte[]) e.getValue(), DataType.DATETIME);
                 setBegin(tmp);
             } else {
-                setBegin((GXDateTime) value);
+                setBegin((GXDateTime) e.getValue());
             }
-        } else if (index == 6) {
-            if (value == null) {
+        } else if (e.getIndex() == 6) {
+            if (e.getValue() == null) {
                 setEnd(new GXDateTime());
-            } else if (value instanceof byte[]) {
+            } else if (e.getValue() instanceof byte[]) {
                 GXDateTime tmp;
-                tmp = (GXDateTime) GXDLMSClient.changeType((byte[]) value,
-                        DataType.DATETIME);
+                tmp = (GXDateTime) GXDLMSClient
+                        .changeType((byte[]) e.getValue(), DataType.DATETIME);
                 setEnd(tmp);
             } else {
-                setEnd((GXDateTime) value);
+                setEnd((GXDateTime) e.getValue());
             }
-        } else if (index == 7) {
-            if (value == null) {
+        } else if (e.getIndex() == 7) {
+            if (e.getValue() == null) {
                 setDeviation(0);
             } else {
-                setDeviation(((Number) value).intValue());
+                setDeviation(((Number) e.getValue()).intValue());
             }
-        } else if (index == 8) {
-            if (value == null) {
+        } else if (e.getIndex() == 8) {
+            if (e.getValue() == null) {
                 setEnabled(false);
             } else {
-                setEnabled(((Boolean) value).booleanValue());
+                setEnabled(((Boolean) e.getValue()).booleanValue());
             }
-        } else if (index == 9) {
-            if (value == null) {
+        } else if (e.getIndex() == 9) {
+            if (e.getValue() == null) {
                 setClockBase(ClockBase.NONE);
             } else {
-                setClockBase(ClockBase.values()[((Number) value).intValue()]);
+                setClockBase(
+                        ClockBase.values()[((Number) e.getValue()).intValue()]);
             }
         } else {
-            throw new IllegalArgumentException(
-                    "GetValue failed. Invalid attribute index.");
+            e.setError(ErrorCode.READ_WRITE_DENIED);
         }
     }
 }

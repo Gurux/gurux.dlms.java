@@ -39,10 +39,10 @@ package gurux.dlms;
  * length and window size, when communicating with the server.
  */
 public class GXDLMSLimits {
+    static final Object DEFAULT_MAX_INFO_TX = new Short((short) 128);
     static final Object DEFAULT_MAX_INFO_RX = new Byte((byte) 62);
-    static final Object DEFAULT_MAX_INFO_TX = new Byte((byte) 128);
-    static final Object DEFAULT_WINDOWS_SIZE_RX = new Integer(1);
     static final Object DEFAULT_WINDOWS_SIZE_TX = new Integer(1);
+    static final Object DEFAULT_WINDOWS_SIZE_RX = new Integer(1);
 
     /**
      * The maximum information field length in transmit. DefaultValue is 128.

@@ -90,6 +90,17 @@ public class GXByteBuffer {
     }
 
     /**
+     * Constructor.
+     * 
+     * @param value
+     *            Byte array to attach.
+     */
+    public GXByteBuffer(final GXByteBuffer value) {
+        capacity(value.size - value.position);
+        set(value);
+    }
+
+    /**
      * Clear buffer but do not release memory.
      */
     public final void clear() {
@@ -169,9 +180,53 @@ public class GXByteBuffer {
      * @return Get buffer data as byte array.
      */
     public final byte[] array() {
-        byte[] tmp = new byte[size];
-        System.arraycopy(getData(), 0, tmp, 0, size);
+        return subArray(0, size);
+    }
+
+    /**
+     * Returns data as byte array.
+     * 
+     * @return Byte buffer as a byte array.
+     */
+    public final byte[] subArray(final int index, final int count) {
+        byte[] tmp = new byte[count];
+        System.arraycopy(data, index, tmp, 0, count);
         return tmp;
+    }
+
+    /**
+     * Move content from source to destination.
+     * 
+     * @param srcPos
+     *            Source position.
+     * @param destPos
+     *            Destination position.
+     * @param count
+     *            Item count.
+     */
+    public final void move(final int srcPos, final int destPos,
+            final int count) {
+        if (count < 0) {
+            throw new IllegalArgumentException("count");
+        }
+        if (count != 0) {
+            System.arraycopy(data, srcPos, data, destPos, count);
+            size = (short) (destPos + count);
+            position = (short) destPos;
+        } else {
+            size = 0;
+        }
+    }
+
+    /**
+     * Remove handled bytes. This can be used in debugging to remove handled
+     * bytes.
+     */
+    public final void trim() {
+        move(position, 0, size - position);
+        if (position > size) {
+            position = size;
+        }
     }
 
     /**
@@ -245,6 +300,28 @@ public class GXByteBuffer {
         data[size + 5] = (byte) ((item >> 16) & 0xFF);
         data[size + 6] = (byte) ((item >> 8) & 0xFF);
         data[size + 7] = (byte) (item & 0xFF);
+    }
+
+    public final void setFloat(final float value) {
+        int tmp = Float.floatToIntBits(value);
+        setUInt32(size, tmp);
+        size += 4;
+    }
+
+    public final void setFloat(final int index, final float value) {
+        int tmp = Float.floatToIntBits(value);
+        setUInt32(index, tmp);
+    }
+
+    public final void setDouble(final double value) {
+        long tmp = Double.doubleToLongBits(value);
+        setUInt64(size, tmp);
+        size += 8;
+    }
+
+    public final void setDouble(final int index, final double value) {
+        long tmp = Double.doubleToLongBits(value);
+        setUInt64(index, tmp);
     }
 
     public final short getUInt8() {
@@ -371,6 +448,32 @@ public class GXByteBuffer {
         }
     }
 
+    /**
+     * Push the given byte array into this buffer at the current position, and
+     * then increments the position.
+     * 
+     * @param index
+     *            Byte index.
+     * @param value
+     *            The value to be added.
+     */
+    public final void set(final int index, final byte[] value) {
+        if (value != null) {
+            move(index, value.length, size - index);
+            set(value, index, value.length);
+        }
+    }
+
+    /**
+     * Set new value to byte array.
+     * 
+     * @param value
+     *            Byte array to add.
+     * @param index
+     *            Byte index.
+     * @param count
+     *            Byte count.
+     */
     public final void set(final byte[] value, final int index,
             final int count) {
         if (value != null && count != 0) {
@@ -379,6 +482,29 @@ public class GXByteBuffer {
             }
             System.arraycopy(value, index, getData(), size, count);
             size += count;
+        }
+    }
+
+    public final void set(final GXByteBuffer value) {
+        set(value, value.size() - value.position());
+    }
+
+    /**
+     * Set new value to byte array.
+     * 
+     * @param value
+     *            Byte array to add.
+     * @param count
+     *            Byte count.
+     */
+    public final void set(final GXByteBuffer value, final int count) {
+        if (size + count > capacity()) {
+            capacity(size + count + ARRAY_CAPACITY);
+        }
+        if (count != 0) {
+            System.arraycopy(value.data, value.position, data, size, count);
+            size += count;
+            value.position += count;
         }
     }
 

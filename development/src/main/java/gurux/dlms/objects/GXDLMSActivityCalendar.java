@@ -41,7 +41,9 @@ import gurux.dlms.GXByteBuffer;
 import gurux.dlms.GXDLMSClient;
 import gurux.dlms.GXDLMSSettings;
 import gurux.dlms.GXDateTime;
+import gurux.dlms.ValueEventArgs;
 import gurux.dlms.enums.DataType;
+import gurux.dlms.enums.ErrorCode;
 import gurux.dlms.enums.ObjectType;
 import gurux.dlms.internal.GXCommon;
 
@@ -369,9 +371,9 @@ public class GXDLMSActivityCalendar extends GXDLMSObject
      * Returns value of given attribute.
      */
     @Override
-    public final Object getValue(final GXDLMSSettings settings, final int index,
-            final int selector, final Object parameters) {
-        switch (index) {
+    public final Object getValue(final GXDLMSSettings settings,
+            final ValueEventArgs e) {
+        switch (e.getIndex()) {
         case 1:
             return getLogicalName();
         case 2:
@@ -397,8 +399,8 @@ public class GXDLMSActivityCalendar extends GXDLMSObject
         case 10:
             return getTime();
         default:
-            throw new IllegalArgumentException(
-                    "GetValue failed. Invalid attribute index.");
+            e.setError(ErrorCode.READ_WRITE_DENIED);
+            return null;
         }
     }
 
@@ -478,49 +480,50 @@ public class GXDLMSActivityCalendar extends GXDLMSObject
      * Set value of given attribute.
      */
     @Override
-    public final void setValue(final GXDLMSSettings settings, final int index,
-            final Object value) {
-        switch (index) {
+    public final void setValue(final GXDLMSSettings settings,
+            final ValueEventArgs e) {
+        switch (e.getIndex()) {
         case 1:
-            super.setValue(settings, index, value);
+            super.setValue(settings, e);
             break;
         case 2:
             setCalendarNameActive(GXDLMSClient
-                    .changeType((byte[]) value, DataType.STRING).toString());
+                    .changeType((byte[]) e.getValue(), DataType.STRING)
+                    .toString());
             break;
         case 3:
-            setSeasonProfileActive(getSeasonProfile(value));
+            setSeasonProfileActive(getSeasonProfile(e.getValue()));
             break;
         case 4:
-            setWeekProfileTableActive(getWeekProfileTable(value));
+            setWeekProfileTableActive(getWeekProfileTable(e.getValue()));
             break;
         case 5:
-            setDayProfileTableActive(getDayProfileTable(value));
+            setDayProfileTableActive(getDayProfileTable(e.getValue()));
             break;
         case 6:
             setCalendarNamePassive(GXDLMSClient
-                    .changeType((byte[]) value, DataType.STRING).toString());
+                    .changeType((byte[]) e.getValue(), DataType.STRING)
+                    .toString());
             break;
         case 7:
-            setSeasonProfilePassive(getSeasonProfile(value));
+            setSeasonProfilePassive(getSeasonProfile(e.getValue()));
             break;
         case 8:
-            setWeekProfileTablePassive(getWeekProfileTable(value));
+            setWeekProfileTablePassive(getWeekProfileTable(e.getValue()));
             break;
         case 9:
-            setDayProfileTablePassive(getDayProfileTable(value));
+            setDayProfileTablePassive(getDayProfileTable(e.getValue()));
             break;
         case 10:
-            if (value instanceof GXDateTime) {
-                setTime((GXDateTime) value);
+            if (e.getValue() instanceof GXDateTime) {
+                setTime((GXDateTime) e.getValue());
             } else {
-                setTime((GXDateTime) GXDLMSClient.changeType((byte[]) value,
-                        DataType.DATETIME));
+                setTime((GXDateTime) GXDLMSClient
+                        .changeType((byte[]) e.getValue(), DataType.DATETIME));
             }
             break;
         default:
-            throw new IllegalArgumentException(
-                    "GetValue failed. Invalid attribute index.");
+            e.setError(ErrorCode.READ_WRITE_DENIED);
         }
     }
 }

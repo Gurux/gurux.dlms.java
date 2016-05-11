@@ -35,12 +35,10 @@
 package gurux.dlms.enums;
 
 public enum Unit {
-
     /**
      * No Unit.
      */
     NONE(0),
-
     /**
      * Year.
      */
@@ -299,7 +297,7 @@ public enum Unit {
     PASCAL_SECOND(64),
     /*
      * J/kg Specific energy NOTE The amount of energy per unit of mass of a
-     * substance Joule / kilogram m2 . kg . s -2 / kg = m2 . s –2
+     * substance Joule / kilogram m2 . kg . s -2 / kg = m2.
      */
     JOULE_KILOGRAM(65),
     /*
@@ -368,6 +366,7 @@ public enum Unit {
             break;
         case 5: // HOUR
             str = "Hour";
+            break;
         case 6: // MINUTE
             str = "Minute";
             break;

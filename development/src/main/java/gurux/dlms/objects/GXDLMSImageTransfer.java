@@ -44,7 +44,9 @@ import java.util.List;
 import gurux.dlms.GXByteBuffer;
 import gurux.dlms.GXDLMSClient;
 import gurux.dlms.GXDLMSSettings;
+import gurux.dlms.ValueEventArgs;
 import gurux.dlms.enums.DataType;
+import gurux.dlms.enums.ErrorCode;
 import gurux.dlms.enums.ObjectType;
 import gurux.dlms.internal.GXCommon;
 import gurux.dlms.objects.enums.ImageTransferStatus;
@@ -260,14 +262,14 @@ public class GXDLMSImageTransfer extends GXDLMSObject implements IGXDLMSBase {
     }
 
     @Override
-    public final byte[] invoke(final GXDLMSSettings settings, final int index,
-            final Object parameters) {
+    public final byte[] invoke(final GXDLMSSettings settings,
+            final ValueEventArgs e) {
         imageTransferStatus = ImageTransferStatus.IMAGE_TRANSFER_NOT_INITIATED;
         // Image transfer initiate
-        if (index == 1) {
+        if (e.getIndex() == 1) {
             imageFirstNotTransferredBlockNumber = 0;
             imageTransferredBlocksStatus = "";
-            Object[] value = (Object[]) parameters;
+            Object[] value = (Object[]) e.getParameters();
             String imageIdentifier = new String((byte[]) value[0]);
             imageSize = ((Number) value[1]).longValue();
             imageTransferStatus = ImageTransferStatus.IMAGE_TRANSFER_INITIATED;
@@ -285,10 +287,10 @@ public class GXDLMSImageTransfer extends GXDLMSObject implements IGXDLMSBase {
                 sb.append('0');
             }
             imageTransferredBlocksStatus = sb.toString();
-            return new byte[] { 0 };
-        } else if (index == 2) {
+            return null;
+        } else if (e.getIndex() == 2) {
             // Image block transfer
-            Object[] value = (Object[]) parameters;
+            Object[] value = (Object[]) e.getParameters();
             long imageIndex = ((Number) value[0]).longValue();
             byte[] tmp = imageTransferredBlocksStatus.getBytes();
             tmp[(int) imageIndex] = '1';
@@ -296,8 +298,8 @@ public class GXDLMSImageTransfer extends GXDLMSObject implements IGXDLMSBase {
             imageFirstNotTransferredBlockNumber = imageIndex + 1;
             imageData.put(imageIndex, (byte[]) value[1]);
             imageTransferStatus = ImageTransferStatus.IMAGE_TRANSFER_INITIATED;
-            return new byte[] { 0 };
-        } else if (index == 3) {
+            return null;
+        } else if (e.getIndex() == 3) {
             // Image verify
             imageTransferStatus =
                     ImageTransferStatus.IMAGE_VERIFICATION_INITIATED;
@@ -317,15 +319,15 @@ public class GXDLMSImageTransfer extends GXDLMSObject implements IGXDLMSBase {
             }
             imageTransferStatus =
                     ImageTransferStatus.IMAGE_VERIFICATION_SUCCESSFUL;
-            return new byte[] { 0 };
-        } else if (index == 4) {
+            return null;
+        } else if (e.getIndex() == 4) {
             // Image activate.
             imageTransferStatus =
                     ImageTransferStatus.IMAGE_ACTIVATION_SUCCESSFUL;
-            return new byte[] { 0 };
+            return null;
         } else {
-            throw new RuntimeException(
-                    "Invoke failed. Invalid attribute index.");
+            e.setError(ErrorCode.READ_WRITE_DENIED);
+            return null;
         }
     }
 
@@ -360,27 +362,27 @@ public class GXDLMSImageTransfer extends GXDLMSObject implements IGXDLMSBase {
      * Returns value of given attribute.
      */
     @Override
-    public final Object getValue(final GXDLMSSettings settings, final int index,
-            final int selector, final Object parameters) {
-        if (index == 1) {
+    public final Object getValue(final GXDLMSSettings settings,
+            final ValueEventArgs e) {
+        if (e.getIndex() == 1) {
             return getLogicalName();
         }
-        if (index == 2) {
+        if (e.getIndex() == 2) {
             return new Long(getImageBlockSize());
         }
-        if (index == 3) {
+        if (e.getIndex() == 3) {
             return imageTransferredBlocksStatus;
         }
-        if (index == 4) {
+        if (e.getIndex() == 4) {
             return new Long(getImageFirstNotTransferredBlockNumber());
         }
-        if (index == 5) {
+        if (e.getIndex() == 5) {
             return new Boolean(getImageTransferEnabled());
         }
-        if (index == 6) {
+        if (e.getIndex() == 6) {
             return new Integer(getImageTransferStatus().ordinal());
         }
-        if (index == 7) {
+        if (e.getIndex() == 7) {
             GXByteBuffer data = new GXByteBuffer();
             data.setUInt8((byte) DataType.ARRAY.getValue());
             data.setUInt8((byte) imageActivateInfo.length); // Count
@@ -401,57 +403,58 @@ public class GXDLMSImageTransfer extends GXDLMSObject implements IGXDLMSBase {
             }
             return data.array();
         }
-        throw new IllegalArgumentException(
-                "GetValue failed. Invalid attribute index.");
+        e.setError(ErrorCode.READ_WRITE_DENIED);
+        return null;
     }
 
     /*
      * Set value of given attribute.
      */
     @Override
-    public final void setValue(final GXDLMSSettings settings, final int index,
-            final Object value) {
-        if (index == 1) {
-            super.setValue(settings, index, value);
-        } else if (index == 2) {
-            if (value == null) {
+    public final void setValue(final GXDLMSSettings settings,
+            final ValueEventArgs e) {
+        if (e.getIndex() == 1) {
+            super.setValue(settings, e);
+        } else if (e.getIndex() == 2) {
+            if (e.getValue() == null) {
                 setImageBlockSize(0);
             } else {
-                setImageBlockSize(((Number) value).intValue());
+                setImageBlockSize(((Number) e.getValue()).intValue());
             }
-        } else if (index == 3) {
-            if (value == null) {
+        } else if (e.getIndex() == 3) {
+            if (e.getValue() == null) {
                 imageTransferredBlocksStatus = "";
             } else {
-                imageTransferredBlocksStatus = value.toString();
+                imageTransferredBlocksStatus = e.getValue().toString();
             }
-        } else if (index == 4) {
-            if (value == null) {
+        } else if (e.getIndex() == 4) {
+            if (e.getValue() == null) {
                 setImageFirstNotTransferredBlockNumber(0);
             } else {
                 setImageFirstNotTransferredBlockNumber(
-                        ((Number) value).intValue());
+                        ((Number) e.getValue()).intValue());
             }
-        } else if (index == 5) {
-            if (value == null) {
+        } else if (e.getIndex() == 5) {
+            if (e.getValue() == null) {
                 setImageTransferEnabled(false);
             } else {
-                setImageTransferEnabled(((Boolean) value).booleanValue());
+                setImageTransferEnabled(
+                        ((Boolean) e.getValue()).booleanValue());
             }
-        } else if (index == 6) {
-            if (value == null) {
+        } else if (e.getIndex() == 6) {
+            if (e.getValue() == null) {
                 setImageTransferStatus(
                         ImageTransferStatus.IMAGE_TRANSFER_NOT_INITIATED);
             } else {
                 setImageTransferStatus(ImageTransferStatus
-                        .values()[((Number) value).intValue()]);
+                        .values()[((Number) e.getValue()).intValue()]);
             }
-        } else if (index == 7) {
+        } else if (e.getIndex() == 7) {
             imageActivateInfo = new GXDLMSImageActivateInfo[0];
-            if (value != null) {
+            if (e.getValue() != null) {
                 List<GXDLMSImageActivateInfo> list =
                         new ArrayList<GXDLMSImageActivateInfo>();
-                for (Object it : (Object[]) value) {
+                for (Object it : (Object[]) e.getValue()) {
                     GXDLMSImageActivateInfo item =
                             new GXDLMSImageActivateInfo();
                     item.setSize(((Number) ((Object[]) it)[0]).longValue());
@@ -464,8 +467,7 @@ public class GXDLMSImageTransfer extends GXDLMSObject implements IGXDLMSBase {
                         list.toArray(new GXDLMSImageActivateInfo[list.size()]);
             }
         } else {
-            throw new IllegalArgumentException(
-                    "GetValue failed. Invalid attribute index.");
+            e.setError(ErrorCode.READ_WRITE_DENIED);
         }
     }
 

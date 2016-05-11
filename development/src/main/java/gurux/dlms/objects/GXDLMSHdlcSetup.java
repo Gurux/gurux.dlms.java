@@ -35,7 +35,9 @@
 package gurux.dlms.objects;
 
 import gurux.dlms.GXDLMSSettings;
+import gurux.dlms.ValueEventArgs;
 import gurux.dlms.enums.DataType;
+import gurux.dlms.enums.ErrorCode;
 import gurux.dlms.enums.ObjectType;
 import gurux.dlms.objects.enums.BaudRate;
 
@@ -269,66 +271,66 @@ public class GXDLMSHdlcSetup extends GXDLMSObject implements IGXDLMSBase {
      * Returns value of given attribute.
      */
     @Override
-    public final Object getValue(final GXDLMSSettings settings, final int index,
-            final int selector, final Object parameters) {
-        if (index == 1) {
+    public final Object getValue(final GXDLMSSettings settings,
+            final ValueEventArgs e) {
+        if (e.getIndex() == 1) {
             return getLogicalName();
         }
-        if (index == 2) {
+        if (e.getIndex() == 2) {
             return new Integer(communicationSpeed.ordinal());
         }
-        if (index == 3) {
+        if (e.getIndex() == 3) {
             return new Integer(windowSizeTransmit);
         }
-        if (index == 4) {
+        if (e.getIndex() == 4) {
             return new Integer(windowSizeReceive);
         }
-        if (index == 5) {
+        if (e.getIndex() == 5) {
             return new Integer(maximumInfoLengthTransmit);
         }
-        if (index == 6) {
+        if (e.getIndex() == 6) {
             return new Integer(maximumInfoLengthReceive);
         }
-        if (index == 7) {
+        if (e.getIndex() == 7) {
             return new Integer(interCharachterTimeout);
         }
-        if (index == 8) {
+        if (e.getIndex() == 8) {
             return new Integer(inactivityTimeout);
         }
-        if (index == 9) {
+        if (e.getIndex() == 9) {
             return new Integer(deviceAddress);
         }
-        throw new IllegalArgumentException(
-                "GetValue failed. Invalid attribute index.");
+        e.setError(ErrorCode.READ_WRITE_DENIED);
+        return null;
     }
 
     /*
      * Set value of given attribute.
      */
     @Override
-    public final void setValue(final GXDLMSSettings settings, final int index,
-            final Object value) {
-        if (index == 1) {
-            super.setValue(settings, index, value);
-        } else if (index == 2) {
-            communicationSpeed = BaudRate.values()[((Number) value).intValue()];
-        } else if (index == 3) {
-            windowSizeTransmit = ((Number) value).intValue();
-        } else if (index == 4) {
-            windowSizeReceive = ((Number) value).intValue();
-        } else if (index == 5) {
-            maximumInfoLengthTransmit = ((Number) value).intValue();
-        } else if (index == 6) {
-            maximumInfoLengthReceive = ((Number) value).intValue();
-        } else if (index == 7) {
-            interCharachterTimeout = ((Number) value).intValue();
-        } else if (index == 8) {
-            inactivityTimeout = ((Number) value).intValue();
-        } else if (index == 9) {
-            deviceAddress = ((Number) value).intValue();
+    public final void setValue(final GXDLMSSettings settings,
+            final ValueEventArgs e) {
+        if (e.getIndex() == 1) {
+            super.setValue(settings, e);
+        } else if (e.getIndex() == 2) {
+            communicationSpeed =
+                    BaudRate.values()[((Number) e.getValue()).intValue()];
+        } else if (e.getIndex() == 3) {
+            windowSizeTransmit = ((Number) e.getValue()).intValue();
+        } else if (e.getIndex() == 4) {
+            windowSizeReceive = ((Number) e.getValue()).intValue();
+        } else if (e.getIndex() == 5) {
+            maximumInfoLengthTransmit = ((Number) e.getValue()).intValue();
+        } else if (e.getIndex() == 6) {
+            maximumInfoLengthReceive = ((Number) e.getValue()).intValue();
+        } else if (e.getIndex() == 7) {
+            interCharachterTimeout = ((Number) e.getValue()).intValue();
+        } else if (e.getIndex() == 8) {
+            inactivityTimeout = ((Number) e.getValue()).intValue();
+        } else if (e.getIndex() == 9) {
+            deviceAddress = ((Number) e.getValue()).intValue();
         } else {
-            throw new IllegalArgumentException(
-                    "GetValue failed. Invalid attribute index.");
+            e.setError(ErrorCode.READ_WRITE_DENIED);
         }
     }
 }

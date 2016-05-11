@@ -32,60 +32,70 @@
 // Full text may be retrieved at http://www.gnu.org/licenses/gpl-2.0.txt
 //---------------------------------------------------------------------------
 
-package gurux.dlms.objects;
+package gurux.dlms;
 
-import gurux.dlms.GXDLMSSettings;
-import gurux.dlms.ValueEventArgs;
+import gurux.dlms.enums.Command;
 
-public interface IGXDLMSBase {
+/**
+ * Long get or set information is saved here.
+ */
+public class GXDLMSLongTransaction {
+    /**
+     * Executed command.
+     */
+    private Command command;
 
     /**
-     * Returns collection of attributes to read. If attribute is static and
-     * already read or device is returned HW error it is not returned.
+     * Targets.
+     */
+    private ValueEventArgs[] targets;
+
+    /**
+     * Extra data from PDU.
+     */
+    private GXByteBuffer data;
+
+    /**
+     * Constructor.
      * 
-     * @return Collection of attributes to read.
+     * @param forTarget
+     * @param forCommand
+     * @param forType
      */
-    int[] getAttributeIndexToRead();
+    public GXDLMSLongTransaction(final ValueEventArgs[] forTargets,
+            final Command forCommand, final GXByteBuffer forData) {
+        targets = forTargets;
+        command = forCommand;
+        data = forData;
+    }
 
     /**
-     * @return Amount of attributes.
+     * @return Executed command.
      */
-    int getAttributeCount();
+    public final Command getCommand() {
+        return command;
+    }
 
     /**
-     * @return Amount of methods.
+     * @return Targets.
      */
-    int getMethodCount();
+    public final ValueEventArgs[] getTargets() {
+        return targets;
+    }
 
     /**
-     * Returns value of given attribute.
-     * 
-     * @param settings
-     *            DLMS settings.
-     * @param e
-     *            Get parameter.
-     * @return Returned value.
+     * @return data.
      */
-    Object getValue(GXDLMSSettings settings, ValueEventArgs e);
+    public final GXByteBuffer getData() {
+        return data;
+    }
 
     /**
-     * Set value of given attribute.
-     * 
-     * @param settings
-     *            DLMS settings.
-     * @param e
-     *            Set parameter.
+     * @param value
+     *            New data.
      */
-    void setValue(GXDLMSSettings settings, ValueEventArgs e);
+    public final void setData(final GXByteBuffer value) {
+        data = value;
+    }
 
-    /**
-     * Server calls invoke method.
-     * 
-     * @param settings
-     *            Server settings.
-     * @param e
-     *            Invoke parameter.
-     * @return Reply for the client.
-     */
-    byte[] invoke(GXDLMSSettings settings, ValueEventArgs e);
 }
