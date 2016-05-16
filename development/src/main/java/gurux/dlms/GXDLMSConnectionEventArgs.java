@@ -34,7 +34,7 @@
 
 package gurux.dlms;
 
-public class ConnectionEventArgs {
+public class GXDLMSConnectionEventArgs {
     /**
      * Server ID that client try to use to make connection.
      */
@@ -44,17 +44,7 @@ public class ConnectionEventArgs {
         return serverID;
     }
 
-    private void setServerID(final long value) {
+    public final void setServerID(final long value) {
         serverID = value;
-    }
-
-    /**
-     * Constructor.
-     * 
-     * @param serverId
-     *            Server address.
-     */
-    public ConnectionEventArgs(final long serverId) {
-        setServerID(serverId);
     }
 }

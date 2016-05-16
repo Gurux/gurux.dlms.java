@@ -331,7 +331,7 @@ public class GXDLMSSettings {
     /**
      * @return Is connected to the meter.
      */
-    final boolean getConnected() {
+    public final boolean getConnected() {
         return connected;
     }
 
@@ -339,7 +339,7 @@ public class GXDLMSSettings {
      * @param value
      *            Is connected to the meter.
      */
-    final void setConnected(final boolean value) {
+    public final void setConnected(final boolean value) {
         connected = value;
     }
 

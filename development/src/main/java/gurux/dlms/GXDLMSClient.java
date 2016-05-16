@@ -1655,9 +1655,10 @@ public class GXDLMSClient {
         // If formula is not given use default formula.
         // This formula is defined in DLMS specification.
         if (formula == null || formula.length() == 0) {
-            return SerialNumberCounter.count(serialNumber, "SN % 10000 + 1000");
+            return 0x4000 | SerialNumberCounter.count(serialNumber,
+                    "SN % 10000 + 1000");
         }
-        return SerialNumberCounter.count(serialNumber, formula);
+        return 0x4000 | SerialNumberCounter.count(serialNumber, formula);
     }
 
     /**

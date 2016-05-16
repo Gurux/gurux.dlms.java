@@ -350,7 +350,7 @@ public class GXDLMSObject {
         if (att != null) {
             return att.getMethodAccess();
         }
-        return MethodAccessMode.NO_ACCESS;
+        return MethodAccessMode.ACCESS;
     }
 
     /**

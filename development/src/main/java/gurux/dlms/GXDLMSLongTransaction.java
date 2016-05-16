@@ -60,7 +60,7 @@ public class GXDLMSLongTransaction {
      * 
      * @param forTarget
      * @param forCommand
-     * @param forType
+     * @param forData
      */
     public GXDLMSLongTransaction(final ValueEventArgs[] forTargets,
             final Command forCommand, final GXByteBuffer forData) {
@@ -97,5 +97,4 @@ public class GXDLMSLongTransaction {
     public final void setData(final GXByteBuffer value) {
         data = value;
     }
-
 }

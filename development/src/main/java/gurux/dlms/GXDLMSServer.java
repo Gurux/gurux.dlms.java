@@ -45,6 +45,7 @@ import gurux.dlms.enums.Command;
 import gurux.dlms.enums.DataType;
 import gurux.dlms.enums.ErrorCode;
 import gurux.dlms.enums.InterfaceType;
+import gurux.dlms.enums.MethodAccessMode;
 import gurux.dlms.enums.ObjectType;
 import gurux.dlms.enums.Priority;
 import gurux.dlms.enums.RequestTypes;
@@ -248,15 +249,29 @@ public abstract class GXDLMSServer {
     /**
      * Accepted connection is made for the server. All initialization is done
      * here.
+     * 
+     * @param connectionInfo
+     *            Connection info.
      */
-    protected abstract void connected();
+    protected abstract void connected(GXDLMSConnectionEventArgs connectionInfo);
 
-    protected abstract void invalidConnection(gurux.dlms.ConnectionEventArgs e);
+    /**
+     * Client has try to made invalid connection. Password is incorrect.
+     * 
+     * @param connectionInfo
+     *            Connection info.
+     */
+    protected abstract void
+            invalidConnection(GXDLMSConnectionEventArgs connectionInfo);
 
     /**
      * Server has close the connection. All clean up is made here.
+     * 
+     * @param connectionInfo
+     *            Connection info.
      */
-    protected abstract void disconnected();
+    protected abstract void
+            disconnected(GXDLMSConnectionEventArgs connectionInfo);
 
     /**
      * Action is occurred.
@@ -451,7 +466,8 @@ public abstract class GXDLMSServer {
      * 
      * @return Reply to the client.
      */
-    private void handleAarqRequest(final GXByteBuffer data) {
+    private void handleAarqRequest(final GXByteBuffer data,
+            final GXDLMSConnectionEventArgs connectionInfo) {
         AssociationResult result = AssociationResult.ACCEPTED;
         settings.setCtoSChallenge(null);
         settings.setStoCChallenge(null);
@@ -460,6 +476,7 @@ public abstract class GXDLMSServer {
         if (diagnostic != SourceDiagnostic.NONE) {
             result = AssociationResult.PERMANENT_REJECTED;
             diagnostic = SourceDiagnostic.NOT_SUPPORTED;
+            invalidConnection(connectionInfo);
         } else {
             diagnostic = validateAuthentication(settings.getAuthentication(),
                     settings.getPassword());
@@ -472,13 +489,12 @@ public abstract class GXDLMSServer {
                         .generateChallenge(settings.getAuthentication()));
                 result = AssociationResult.ACCEPTED;
                 diagnostic = SourceDiagnostic.AUTHENTICATION_REQUIRED;
+            } else {
+                settings.setConnected(true);
             }
         }
 
         // Generate AARE packet.
-        GXByteBuffer buff = new GXByteBuffer(150);
-        GXAPDU.generateAARE(settings, buff, result, diagnostic,
-                settings.getCipher());
         settings.resetFrameSequence();
         GXAPDU.generateAARE(settings, replyData, result, diagnostic,
                 settings.getCipher());
@@ -540,7 +556,7 @@ public abstract class GXDLMSServer {
             replyData.setUInt8(GXCommon.getSize(getLimits().getWindowSizeRX()));
             replyData.add(getLimits().getWindowSizeRX());
 
-            int len = replyData.position() - 3;
+            int len = replyData.size() - 3;
             replyData.setUInt8(2, len); // Length.
         }
     }
@@ -573,6 +589,21 @@ public abstract class GXDLMSServer {
      *         not complete.
      */
     public final byte[] handleRequest(final byte[] buff) {
+        return handleRequest(buff, new GXDLMSConnectionEventArgs());
+    }
+
+    /**
+     * Handles client request.
+     * 
+     * @param buff
+     *            Received data from the client.
+     * @param connectionInfo
+     *            Connection info.
+     * @return Response to the request. Response is null if request packet is
+     *         not complete.
+     */
+    public final byte[] handleRequest(final byte[] buff,
+            final GXDLMSConnectionEventArgs connectionInfo) {
 
         if (buff == null || buff.length == 0) {
             return null;
@@ -582,12 +613,24 @@ public abstract class GXDLMSServer {
         }
         try {
             receivedData.set(buff);
+            boolean first = settings.getServerAddress() == 0
+                    && settings.getClientAddress() == 0;
             GXDLMS.getData(settings, receivedData, info);
             // If all data is not received yet.
             if (!info.isComplete()) {
                 return null;
             }
             receivedData.clear();
+
+            if (first) {
+                // Check is data send to this server.
+                if (!isTarget(settings.getServerAddress(),
+                        settings.getClientAddress())) {
+                    info.clear();
+                    return null;
+                }
+            }
+
             // If client want next frame.
             if ((info.getMoreData().getValue()
                     & RequestTypes.FRAME.getValue()) == RequestTypes.FRAME
@@ -601,10 +644,13 @@ public abstract class GXDLMSServer {
                     info.setCommand(transaction.getCommand());
                 }
             }
-            byte[] reply = handleCommand(info.getCommand(), info.getData());
+            byte[] reply = handleCommand(info.getCommand(), info.getData(),
+                    connectionInfo);
             info.clear();
             return reply;
-        } catch (Exception e) {
+        } catch (
+
+        Exception e) {
             LOGGER.severe(e.toString());
             if (info.getCommand() != Command.NONE) {
                 return reportError(info.getCommand(), ErrorCode.HARDWARE_FAULT);
@@ -612,7 +658,7 @@ public abstract class GXDLMSServer {
                 reset();
                 if (settings.getConnected()) {
                     settings.setConnected(false);
-                    disconnected();
+                    disconnected(connectionInfo);
                 }
                 return null;
             }
@@ -647,7 +693,7 @@ public abstract class GXDLMSServer {
                     false, true, null);
         } else {
             GXByteBuffer bb = new GXByteBuffer();
-            bb.add(error.getValue());
+            bb.setUInt8(error.getValue());
             GXDLMS.getSNPdu(settings, cmd, bb, replyData);
         }
         if (settings.getInterfaceType() == InterfaceType.WRAPPER) {
@@ -659,8 +705,17 @@ public abstract class GXDLMSServer {
 
     /**
      * Handle received command.
+     * 
+     * @param cmd
+     *            Executed command.
+     * @param data
+     *            Received data from the client.
+     * @param connectionInfo
+     *            Connection info.
+     * @return Response for the client.
      */
-    private byte[] handleCommand(final Command cmd, final GXByteBuffer data) {
+    private byte[] handleCommand(final Command cmd, final GXByteBuffer data,
+            final GXDLMSConnectionEventArgs connectionInfo) {
         byte frame = 0;
         switch (cmd) {
         case SET_REQUEST:
@@ -678,22 +733,21 @@ public abstract class GXDLMSServer {
             handleReadRequest(data);
             break;
         case METHOD_REQUEST:
-            handleMethodRequest(data);
+            handleMethodRequest(data, connectionInfo);
             break;
         case SNRM:
             handleSnrmRequest();
             frame = (byte) Command.UA.getValue();
             break;
         case AARQ:
-            handleAarqRequest(data);
-            settings.setConnected(true);
-            connected();
+            handleAarqRequest(data, connectionInfo);
+            connected(connectionInfo);
             break;
         case DISCONNECT_REQUEST:
         case DISC:
             generateDisconnectRequest();
             settings.setConnected(false);
-            disconnected();
+            disconnected(connectionInfo);
             frame = (byte) Command.UA.getValue();
             break;
         default:
@@ -713,7 +767,9 @@ public abstract class GXDLMSServer {
      *            Received data from the client.
      * @return Reply.
      */
-    private void handleMethodRequest(final GXByteBuffer data) {
+    private void handleMethodRequest(final GXByteBuffer data,
+            final GXDLMSConnectionEventArgs connectionInfo) {
+        ErrorCode error = ErrorCode.OK;
         GXByteBuffer bb = new GXByteBuffer();
         // Get type.
         data.getUInt8();
@@ -738,32 +794,38 @@ public abstract class GXDLMSServer {
         }
         if (obj == null) {
             // Device reports a undefined object.
-            GXDLMS.getLNPdu(settings, Command.METHOD_RESPONSE, 1, bb, replyData,
-                    ErrorCode.UNDEFINED_OBJECT.getValue(), false, true, null);
+            error = ErrorCode.UNDEFINED_OBJECT;
         } else {
             ValueEventArgs e = new ValueEventArgs(obj, id, 0, parameters);
-            action(new ValueEventArgs[] { e });
-            byte[] actionReply;
-            if (e.getHandled()) {
-                actionReply = (byte[]) e.getValue();
+            if (obj.getMethodAccess(id) == MethodAccessMode.NO_ACCESS) {
+                error = ErrorCode.READ_WRITE_DENIED;
             } else {
-                actionReply = obj.invoke(settings, e);
+                action(new ValueEventArgs[] { e });
+                byte[] actionReply;
+                if (e.getHandled()) {
+                    actionReply = (byte[]) e.getValue();
+                } else {
+                    actionReply = obj.invoke(settings, e);
+                }
+                // Set default action reply if not given.
+                if (actionReply != null || e.getError() == ErrorCode.OK) {
+                    // Add return parameters
+                    bb.setUInt8(1);
+                    // Add parameters error code.
+                    // bb.SetUInt8(0);
+                    GXCommon.setData(bb, GXCommon.getValueType(actionReply),
+                            actionReply);
+                } else {
+                    error = e.getError();
+                }
             }
-            // Set default action reply if not given.
-            if (actionReply == null || e.getError() != ErrorCode.OK) {
-                GXDLMS.getLNPdu(settings, Command.METHOD_RESPONSE, 1, bb,
-                        replyData, (byte) e.getError().getValue(), false, true,
-                        null);
-            } else {
-                // Add return parameters
-                bb.setUInt8(1);
-                // Add parameters error code.
-                // bb.SetUInt8(0);
-                GXCommon.setData(bb, GXCommon.getValueType(actionReply),
-                        actionReply);
-                GXDLMS.getLNPdu(settings, Command.METHOD_RESPONSE, 1, bb,
-                        replyData, 0, false, true, null);
-            }
+        }
+        GXDLMS.getLNPdu(settings, Command.METHOD_RESPONSE, 1, bb, replyData,
+                error.getValue(), false, true, null);
+        // If High level authentication fails.
+        if (!settings.getConnected()
+                && obj instanceof GXDLMSAssociationLogicalName && id == 1) {
+            invalidConnection(connectionInfo);
         }
     }
 
@@ -838,6 +900,7 @@ public abstract class GXDLMSServer {
     }
 
     private void handleGetRequest(final GXByteBuffer data) {
+        ErrorCode error = ErrorCode.OK;
         ValueEventArgs e = null;
         GXByteBuffer bb = new GXByteBuffer();
         int index = 0;
@@ -861,38 +924,43 @@ public abstract class GXDLMSServer {
             }
             if (obj == null) {
                 // "Access Error : Device reports a undefined object."
-                bb.setUInt8(ErrorCode.UNDEFINED_OBJECT.getValue());
+                error = ErrorCode.UNDEFINED_OBJECT;
             } else {
-                // AccessSelection
-                int selection = data.getUInt8();
-                int selector = 0;
-                Object parameters = null;
-                if (selection != 0) {
-                    selector = data.getUInt8();
-                    GXDataInfo i = new GXDataInfo();
-                    parameters = GXCommon.getData(data, i);
-                }
-
-                e = new ValueEventArgs(obj, attributeIndex, selector,
-                        parameters);
-                read(new ValueEventArgs[] { e });
-                Object value;
-                if (e.getHandled()) {
-                    value = e.getValue();
+                if (obj.getAccess(attributeIndex) == AccessMode.NO_ACCESS) {
+                    error = ErrorCode.READ_WRITE_DENIED;
                 } else {
-                    value = obj.getValue(settings, e);
+                    // AccessSelection
+                    int selection = data.getUInt8();
+                    int selector = 0;
+                    Object parameters = null;
+                    if (selection != 0) {
+                        selector = data.getUInt8();
+                        GXDataInfo i = new GXDataInfo();
+                        parameters = GXCommon.getData(data, i);
+                    }
+
+                    e = new ValueEventArgs(obj, attributeIndex, selector,
+                            parameters);
+                    read(new ValueEventArgs[] { e });
+                    Object value;
+                    if (e.getHandled()) {
+                        value = e.getValue();
+                    } else {
+                        value = obj.getValue(settings, e);
+                    }
+                    GXDLMS.appendData(obj, attributeIndex, bb, value);
+                    error = e.getError();
                 }
-                GXDLMS.appendData(obj, attributeIndex, bb, value);
             }
             if (settings.getCount() != settings.getIndex()
                     || GXDLMS.multipleBlocks(settings, bb)) {
                 GXDLMS.getLNPdu(settings, Command.GET_RESPONSE, 2, bb,
-                        replyData, ErrorCode.OK.getValue(), true, false, null);
+                        replyData, error.getValue(), true, false, null);
                 transaction = new GXDLMSLongTransaction(
                         new ValueEventArgs[] { e }, Command.GET_REQUEST, bb);
             } else {
                 GXDLMS.getLNPdu(settings, Command.GET_RESPONSE, 1, bb,
-                        replyData, ErrorCode.OK.getValue(), false, false, null);
+                        replyData, error.getValue(), false, false, null);
             }
         } else if (type == 2) {
             // Get request for next data block
@@ -974,18 +1042,24 @@ public abstract class GXDLMSServer {
                     e.setError(ErrorCode.UNDEFINED_OBJECT);
                     list.add(e);
                 } else {
-                    // AccessSelection
-                    int selection = data.getUInt8();
-                    int selector = 0;
-                    Object parameters = null;
-                    if (selection != 0) {
-                        selector = data.getUInt8();
-                        GXDataInfo info = new GXDataInfo();
-                        parameters = GXCommon.getData(data, info);
+                    if (obj.getAccess(attributeIndex) == AccessMode.NO_ACCESS) {
+                        e = new ValueEventArgs(obj, attributeIndex, 0, 0);
+                        e.setError(ErrorCode.READ_WRITE_DENIED);
+                        list.add(e);
+                    } else {
+                        // AccessSelection
+                        int selection = data.getUInt8();
+                        int selector = 0;
+                        Object parameters = null;
+                        if (selection != 0) {
+                            selector = data.getUInt8();
+                            GXDataInfo i = new GXDataInfo();
+                            parameters = GXCommon.getData(data, i);
+                        }
+                        ValueEventArgs arg = new ValueEventArgs(obj,
+                                attributeIndex, selector, parameters);
+                        list.add(arg);
                     }
-                    ValueEventArgs arg = new ValueEventArgs(obj, attributeIndex,
-                            selector, parameters);
-                    list.add(arg);
                 }
             }
             read(list.toArray(new ValueEventArgs[list.size()]));
@@ -1078,7 +1152,7 @@ public abstract class GXDLMSServer {
             transaction = null;
             int cnt = GXCommon.getObjectCount(data);
             GXCommon.setObjectCount(cnt, bb);
-            GXSNInfo info;
+            GXSNInfo i;
             List<ValueEventArgs> reads = new ArrayList<ValueEventArgs>();
             List<ValueEventArgs> actions = new ArrayList<ValueEventArgs>();
             for (int pos = 0; pos != cnt; ++pos) {
@@ -1086,16 +1160,23 @@ public abstract class GXDLMSServer {
                 if (type == 2) {
                     // GetRequest normal
                     int sn = data.getUInt16();
-                    info = findSNObject(sn);
-                    ValueEventArgs e = new ValueEventArgs(info.getItem(),
-                            info.getIndex(), 0, null);
-                    e.setAction(info.isAction());
+                    i = findSNObject(sn);
+                    ValueEventArgs e = new ValueEventArgs(i.getItem(),
+                            i.getIndex(), 0, null);
+                    e.setAction(i.isAction());
                     list.add(new GXSimpleEntry<ValueEventArgs, Boolean>(e,
                             e.isAction()));
-                    if (e.isAction()) {
-                        actions.add(e);
+                    if ((!e.isAction() && i.getItem()
+                            .getAccess(i.getIndex()) == AccessMode.NO_ACCESS)
+                            || (e.isAction() && i.getItem().getMethodAccess(i
+                                    .getIndex()) == MethodAccessMode.NO_ACCESS)) {
+                        e.setError(ErrorCode.READ_WRITE_DENIED);
                     } else {
-                        reads.add(e);
+                        if (e.isAction()) {
+                            actions.add(e);
+                        } else {
+                            reads.add(e);
+                        }
                     }
                 } else if (type == 4) {
                     // Parameterised access.
@@ -1103,16 +1184,23 @@ public abstract class GXDLMSServer {
                     int selector = data.getUInt8();
                     GXDataInfo di = new GXDataInfo();
                     Object parameters = GXCommon.getData(data, di);
-                    info = findSNObject(sn);
-                    ValueEventArgs e = new ValueEventArgs(info.getItem(),
-                            info.getIndex(), selector, parameters);
-                    e.setAction(info.isAction());
+                    i = findSNObject(sn);
+                    ValueEventArgs e = new ValueEventArgs(i.getItem(),
+                            i.getIndex(), selector, parameters);
+                    e.setAction(i.isAction());
                     list.add(new GXSimpleEntry<ValueEventArgs, Boolean>(e,
                             e.isAction()));
-                    if (e.isAction()) {
-                        actions.add(e);
+                    if ((!e.isAction() && i.getItem()
+                            .getAccess(i.getIndex()) == AccessMode.NO_ACCESS)
+                            || (e.isAction() && i.getItem().getMethodAccess(i
+                                    .getIndex()) == MethodAccessMode.NO_ACCESS)) {
+                        e.setError(ErrorCode.READ_WRITE_DENIED);
                     } else {
-                        reads.add(e);
+                        if (e.isAction()) {
+                            actions.add(e);
+                        } else {
+                            reads.add(e);
+                        }
                     }
                 }
             }

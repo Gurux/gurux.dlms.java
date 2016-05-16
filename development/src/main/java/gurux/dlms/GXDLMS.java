@@ -571,7 +571,7 @@ abstract class GXDLMS {
                 }
             } else if (status != 0xFF) {
                 // If error has occurred.
-                if (status != 0 && command == Command.GET_REQUEST) {
+                if (status != 0 && command != Command.METHOD_RESPONSE) {
                     bb.setUInt8(1);
                 }
                 bb.setUInt8(status);
@@ -791,10 +791,13 @@ abstract class GXDLMS {
         // Add EOP
         bb.setUInt8(GXCommon.HDLC_FRAME_START_END);
         // Remove sent data.
-        if (data.size() == data.position()) {
-            data.clear();
-        } else {
-            data.move(data.position(), 0, data.size() - data.position());
+        if (data != null) {
+            if (data.size() == data.position()) {
+                data.clear();
+            } else {
+                data.move(data.position(), 0, data.size() - data.position());
+            }
+
         }
         return bb.array();
     }
@@ -1274,6 +1277,7 @@ abstract class GXDLMS {
      */
     static void handleSetResponse(final GXDLMSSettings settings,
             final GXReplyData data) {
+        // TODO:
     }
 
     /**

@@ -181,10 +181,6 @@ public class GXDLMSAssociationLogicalName extends GXDLMSObject
                 getSecuritySetupReference() };
     }
 
-    /*
-     * Invokes method.
-     * @param index Method index.
-     */
     @Override
     public final byte[] invoke(final GXDLMSSettings settings,
             final ValueEventArgs e) {
@@ -213,10 +209,12 @@ public class GXDLMSAssociationLogicalName extends GXDLMSObject
                 }
                 byte[] tmp = GXSecure.secure(settings, settings.getCipher(), ic,
                         settings.getCtoSChallenge(), readSecret);
+                settings.setConnected(true);
                 return tmp;
             } else {
                 LOGGER.info("Invalid CtoS:" + GXCommon.toHex(serverChallenge)
                         + "-" + GXCommon.toHex(clientChallenge));
+                settings.setConnected(false);
                 return null;
             }
         } else {
@@ -392,7 +390,7 @@ public class GXDLMSAssociationLogicalName extends GXDLMSObject
 
     static final void updateAccessRights(final GXDLMSObject obj,
             final Object[] buff) {
-        if (buff != null) {
+        if (buff != null && buff.length != 0) {
             for (Object access : (Object[]) Array.get(buff, 0)) {
                 Object[] attributeAccess = (Object[]) access;
                 int id = ((Number) attributeAccess[0]).intValue();
