@@ -212,9 +212,9 @@ public class GXByteBuffer {
         if (count != 0) {
             System.arraycopy(data, srcPos, data, destPos, count);
             size = (short) (destPos + count);
-            position = (short) destPos;
-        } else {
-            size = 0;
+            if (position > size) {
+                position = size;
+            }
         }
     }
 
@@ -223,10 +223,12 @@ public class GXByteBuffer {
      * bytes.
      */
     public final void trim() {
-        move(position, 0, size - position);
-        if (position > size) {
-            position = size;
+        if (size == position) {
+            size = 0;
+        } else {
+            move(position, 0, size - position);
         }
+        position = 0;
     }
 
     /**

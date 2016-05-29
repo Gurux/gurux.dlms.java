@@ -495,7 +495,6 @@ public abstract class GXDLMSServer {
         }
 
         // Generate AARE packet.
-        settings.resetFrameSequence();
         GXAPDU.generateAARE(settings, replyData, result, diagnostic,
                 settings.getCipher());
     }
@@ -750,6 +749,9 @@ public abstract class GXDLMSServer {
             disconnected(connectionInfo);
             frame = (byte) Command.UA.getValue();
             break;
+        case NONE:
+            // Client wants to get next block.
+            break;
         default:
             LOGGER.severe("Invalid command: " + cmd.toString());
         }
@@ -808,15 +810,18 @@ public abstract class GXDLMSServer {
                     actionReply = obj.invoke(settings, e);
                 }
                 // Set default action reply if not given.
-                if (actionReply != null || e.getError() == ErrorCode.OK) {
+                if (actionReply != null && e.getError() == ErrorCode.OK) {
                     // Add return parameters
                     bb.setUInt8(1);
                     // Add parameters error code.
-                    // bb.SetUInt8(0);
+                    bb.setUInt8(0);
                     GXCommon.setData(bb, GXCommon.getValueType(actionReply),
                             actionReply);
                 } else {
+                    // Add parameters error code.
                     error = e.getError();
+                    // Add return parameters
+                    bb.setUInt8(0);
                 }
             }
         }
@@ -910,6 +915,8 @@ public abstract class GXDLMSServer {
         data.getUInt8();
         // GetRequest normal
         if (type == 1) {
+            settings.setCount(0);
+            settings.setIndex(0);
             settings.resetBlockIndex();
             // CI
             ObjectType ci = ObjectType.forValue(data.getUInt16());

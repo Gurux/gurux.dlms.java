@@ -55,7 +55,7 @@ public class GXDLMSSettings {
     /**
      * Server receiver frame sequence starting number.
      */
-    static final short SERVER_START_RECEIVER_FRAME_SEQUENCE = 0xFE;
+    static final short SERVER_START_RECEIVER_FRAME_SEQUENCE = 0xEE;
 
     /**
      * Client sender frame sequence starting number.

@@ -560,7 +560,7 @@ public class GXDLMSClient {
         GXDLMS.checkInit(settings);
         settings.setStoCChallenge(null);
         // If authentication or ciphering is used.
-        if (getAuthentication().ordinal() > Authentication.HIGH.ordinal()) {
+        if (getAuthentication().ordinal() > Authentication.LOW.ordinal()) {
             settings.setCtoSChallenge(
                     GXSecure.generateChallenge(settings.getAuthentication()));
         } else {

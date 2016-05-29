@@ -46,8 +46,11 @@ import gurux.dlms.enums.ObjectType;
 import gurux.dlms.enums.Priority;
 import gurux.dlms.enums.ServiceClass;
 import gurux.dlms.internal.GXCommon;
+import gurux.dlms.internal.GXDataInfo;
+import gurux.dlms.objects.GXDLMSCaptureObject;
 import gurux.dlms.objects.GXDLMSObject;
 import gurux.dlms.objects.GXDLMSObjectCollection;
+import gurux.dlms.objects.GXDLMSPushSetup;
 
 /**
  * This class is used to send data notify and push messages to the clients.
@@ -262,7 +265,7 @@ public class GXDLMSNotify {
 
     /**
      * Add value of COSEM object to byte buffer. AddData method can be used with
-     * GetDataNotificationMessage -method. DLMS spesification do not specify the
+     * GetDataNotificationMessage -method. DLMS specification do not specify the
      * structure of Data-Notification body. So each manufacture can sent
      * different data.
      * 
@@ -287,7 +290,7 @@ public class GXDLMSNotify {
      *            Notification body.
      * @return Generated data notification message(s).
      */
-    public final byte[][] getDataNotificationMessages(final Date date,
+    public final byte[][] generateDataNotificationMessages(final Date date,
             final byte[] data) {
         return GXDLMS.getMessages(settings, Command.DATA_NOTIFICATION, 0,
                 new GXByteBuffer(data), date);
@@ -302,7 +305,7 @@ public class GXDLMSNotify {
      *            Notification body.
      * @return Generated data notification message(s).
      */
-    public final byte[][] getDataNotificationMessages(final Date date,
+    public final byte[][] generateDataNotificationMessages(final Date date,
             final GXByteBuffer data) {
         return GXDLMS.getMessages(settings, Command.DATA_NOTIFICATION, 0, data,
                 date);
@@ -328,11 +331,36 @@ public class GXDLMSNotify {
         for (Entry<GXDLMSObject, Integer> it : objects) {
             addData(it.getKey(), it.getValue(), buff);
         }
-        return getDataNotificationMessages(date, buff);
+        return generateDataNotificationMessages(date, buff);
     }
 
     /**
-     * Returns collection of push objects.
+     * Generates push setup message.
+     * 
+     * @param date
+     *            Date time. Set To Min or Max if not added.
+     * @param objects
+     *            List of objects and attribute indexes to notify.
+     * @return Generated data notification message(s).
+     */
+    public final byte[][] generatePushSetupMessages(final Date date,
+            final GXDLMSPushSetup push) {
+        if (push == null) {
+            throw new IllegalArgumentException("push");
+        }
+        GXByteBuffer buff = new GXByteBuffer();
+        buff.setUInt8((byte) DataType.STRUCTURE.getValue());
+        GXCommon.setObjectCount(push.getPushObjectList().size(), buff);
+        for (Entry<GXDLMSObject, GXDLMSCaptureObject> it : push
+                .getPushObjectList()) {
+            addData(it.getKey(), it.getValue().getAttributeIndex(), buff);
+        }
+        return generateDataNotificationMessages(date, buff);
+    }
+
+    /**
+     * Returns collection of push objects. If this method is used Push object
+     * must be set for first object on push object list.
      * 
      * @param data
      *            Received data.
@@ -350,34 +378,81 @@ public class GXDLMSNotify {
                 new ArrayList<Entry<GXDLMSObject, Integer>>();
         GXDLMS.getValueFromData(settings, reply);
         Object[] list = (Object[]) reply.getValue();
-        GXDLMSConverter c = new GXDLMSConverter();
-        for (Object it : (Object[]) list[0]) {
-            Object[] tmp = (Object[]) it;
-            int classID = ((Number) (tmp[0])).intValue() & 0xFFFF;
-            if (classID > 0) {
-                GXDLMSObject comp;
-                comp = getObjects().findByLN(ObjectType.forValue(classID),
-                        GXDLMSObject.toLogicalName((byte[]) tmp[1]));
-                if (comp == null) {
-                    comp = GXDLMSClient.createDLMSObject(classID, 0, 0, tmp[1],
-                            null);
-                    settings.getObjects().add(comp);
-                    c.updateOBISCodeInformation(comp);
-                }
-                if (comp.getClass() != GXDLMSObject.class) {
-                    items.add(new GXSimpleEntry<GXDLMSObject, Integer>(comp,
-                            ((Number) tmp[2]).intValue()));
-                } else {
-                    System.out.println(String.format("Unknown object : %d %s",
-                            classID,
-                            GXDLMSObject.toLogicalName((byte[]) tmp[1])));
+        if (list != null) {
+            GXDLMSConverter c = new GXDLMSConverter();
+            for (Object it : (Object[]) list[0]) {
+                Object[] tmp = (Object[]) it;
+                int classID = ((Number) (tmp[0])).intValue() & 0xFFFF;
+                if (classID > 0) {
+                    GXDLMSObject comp;
+                    comp = getObjects().findByLN(ObjectType.forValue(classID),
+                            GXDLMSObject.toLogicalName((byte[]) tmp[1]));
+                    if (comp == null) {
+                        comp = GXDLMSClient.createDLMSObject(classID, 0, 0,
+                                tmp[1], null);
+                        settings.getObjects().add(comp);
+                        c.updateOBISCodeInformation(comp);
+                    }
+                    if (comp.getClass() != GXDLMSObject.class) {
+                        items.add(new GXSimpleEntry<GXDLMSObject, Integer>(comp,
+                                ((Number) tmp[2]).intValue()));
+                    } else {
+                        System.out.println(String.format(
+                                "Unknown object : %d %s", classID,
+                                GXDLMSObject.toLogicalName((byte[]) tmp[1])));
+                    }
                 }
             }
+            for (int pos = 0; pos < list.length; ++pos) {
+                obj = (GXDLMSObject) items.get(pos).getKey();
+                value = list[pos];
+                index = items.get(pos).getValue();
+                if (value instanceof byte[]) {
+                    dt = obj.getUIDataType(index);
+                    if (dt != DataType.NONE) {
+                        value = GXDLMSClient.changeType((byte[]) value, dt);
+                    }
+                }
+                ValueEventArgs e = new ValueEventArgs(obj, index, 0, null);
+                e.setValue(value);
+                obj.setValue(settings, e);
+                e.setValue(value);
+
+                e = new ValueEventArgs(items.get(pos).getKey(),
+                        items.get(pos).getValue(), 0, null);
+                e.setValue(list[pos]);
+                items.get(pos).getKey().setValue(settings, e);
+            }
+        }
+        return items;
+    }
+
+    /**
+     * Returns collection of push objects.
+     * 
+     * @param data
+     *            Received data.
+     * @return Array of objects and called indexes.
+     */
+    public final void parsePush(
+            final List<Entry<GXDLMSObject, Integer>> objects,
+            final GXByteBuffer data) {
+        GXDLMSObject obj;
+        int index;
+        DataType dt;
+        GXDataInfo info = new GXDataInfo();
+        Object value = GXCommon.getData(data, info);
+        if (!(value instanceof Object[])) {
+            throw new IllegalArgumentException("Invalid push message.");
+        }
+        Object[] list = (Object[]) value;
+        if (list.length != objects.size()) {
+            throw new IllegalArgumentException("Push arguments do not match.");
         }
         for (int pos = 0; pos < list.length; ++pos) {
-            obj = (GXDLMSObject) items.get(pos).getKey();
+            obj = (GXDLMSObject) objects.get(pos).getKey();
             value = list[pos];
-            index = items.get(pos).getValue();
+            index = objects.get(pos).getValue();
             if (value instanceof byte[]) {
                 dt = obj.getUIDataType(index);
                 if (dt != DataType.NONE) {
@@ -388,12 +463,6 @@ public class GXDLMSNotify {
             e.setValue(value);
             obj.setValue(settings, e);
             e.setValue(value);
-
-            e = new ValueEventArgs(items.get(pos).getKey(),
-                    items.get(pos).getValue(), 0, null);
-            e.setValue(list[pos]);
-            items.get(pos).getKey().setValue(settings, e);
         }
-        return items;
     }
 }

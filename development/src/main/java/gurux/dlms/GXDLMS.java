@@ -124,10 +124,10 @@ abstract class GXDLMS {
     private static long getLongInvokeIDPriority(final GXDLMSSettings settings) {
         long value = 0;
         if (settings.getPriority() == Priority.HIGH) {
-            value = 0x800000;
+            value = 0x80000000;
         }
         if (settings.getServiceClass() == ServiceClass.CONFIRMED) {
-            value |= 0x400000;
+            value |= 0x40000000;
         }
         value |= (int) (settings.getLongInvokeID() & 0xFFFFFF);
         settings.setLongInvokeID(settings.getLongInvokeID() + 1);
@@ -397,6 +397,10 @@ abstract class GXDLMS {
         case METHOD_RESPONSE:
             cmd = Command.GLO_METHOD_RESPONSE;
             break;
+        case DATA_NOTIFICATION:
+            cmd = Command.GLO_EVENT_NOTIFICATION_REQUEST;
+            break;
+
         default:
             throw new GXDLMSException("Invalid GLO command.");
         }
@@ -539,7 +543,10 @@ abstract class GXDLMS {
             if (date == null || date.equals(new Date(0))) {
                 bb.setUInt8(DataType.NONE.getValue());
             } else {
+                // Data is send in octet string. Remove data type.
+                int pos = bb.size();
                 GXCommon.setData(bb, DataType.OCTET_STRING, date);
+                bb.move(pos + 1, pos, bb.size() - pos - 1);
             }
         }
 
@@ -571,7 +578,8 @@ abstract class GXDLMS {
                 }
             } else if (status != 0xFF) {
                 // If error has occurred.
-                if (status != 0 && command != Command.METHOD_RESPONSE) {
+                if (status != 0 && command != Command.METHOD_RESPONSE
+                        && command != Command.SET_RESPONSE) {
                     bb.setUInt8(1);
                 }
                 bb.setUInt8(status);
@@ -715,6 +723,7 @@ abstract class GXDLMS {
             data.clear();
         } else {
             data.move(data.position(), 0, data.size() - data.position());
+            data.position(0);
         }
         return bb.array();
     }
@@ -796,8 +805,8 @@ abstract class GXDLMS {
                 data.clear();
             } else {
                 data.move(data.position(), 0, data.size() - data.position());
+                data.position(0);
             }
-
         }
         return bb.array();
     }
@@ -1183,8 +1192,7 @@ abstract class GXDLMS {
         byte ret = (byte) data.getData().getUInt8();
         if (ret != 0) {
             data.setError(ret);
-        }
-        if (type == 1) {
+        } else if (type == 1) {
             // Response normal. Get data if exists.
             if (data.getData().position() < data.getData().size()) {
                 int size = data.getData().getUInt8();
@@ -1194,11 +1202,12 @@ abstract class GXDLMS {
                                 "parseApplicationAssociationResponse failed. "
                                         + "Invalid tag.");
                     }
-                    GXDataInfo info = new GXDataInfo();
-                    int pos = data.getData().position();
-                    data.setValue(GXCommon.getData(data.getData(), info));
-                    data.getData().position(pos);
-                    getDataFromBlock(data.getData(), 0);
+                    ret = (byte) data.getData().getUInt8();
+                    if (ret != 0) {
+                        data.setError(data.getData().getUInt8());
+                    } else {
+                        getDataFromBlock(data.getData(), 0);
+                    }
                 }
             }
         } else {
@@ -1259,10 +1268,12 @@ abstract class GXDLMS {
         // Get invoke id.
         reply.getData().getUInt32();
         // Get Date time.
-        GXDataInfo info = new GXDataInfo();
         reply.setTime(null);
-        byte[] tmp = (byte[]) GXCommon.getData(reply.getData(), info);
-        if (tmp != null) {
+        int len = reply.getData().getUInt8();
+        // If date time is given.
+        if (len != 0) {
+            byte[] tmp = new byte[len];
+            reply.getData().get(tmp);
             reply.setTime(((GXDateTime) GXDLMSClient.changeType(tmp,
                     DataType.DATETIME)).getValue());
         }
@@ -1399,7 +1410,7 @@ abstract class GXDLMS {
             final GXReplyData data) {
         data.setGbt(true);
         int index = data.getData().position() - 1;
-        byte ch = (byte) data.getData().getUInt8();
+        short ch = data.getData().getUInt8();
         // Is Last block,
         if ((ch & 0x80) == 0) {
             data.setMoreData(RequestTypes.forValue(data.getMoreData().getValue()
@@ -1433,6 +1444,16 @@ abstract class GXDLMS {
         }
         getPdu(settings, data);
         getDataFromBlock(data.getData(), index);
+        // Get data if all data is read or we want to peek data.
+        if (data.getData().position() != data.getData().size()
+                && (data.getCommand() == Command.READ_RESPONSE
+                        || data.getCommand() == Command.GET_RESPONSE
+                        || data.getCommand() == Command.DATA_NOTIFICATION)
+                && (data.getMoreData() == RequestTypes.NONE
+                        || data.getPeek())) {
+            getValueFromData(settings, data);
+        }
+
     }
 
     /**
@@ -1529,6 +1550,7 @@ abstract class GXDLMS {
             case GLO_GET_RESPONSE:
             case GLO_SET_RESPONSE:
             case GLO_METHOD_RESPONSE:
+            case GLO_EVENT_NOTIFICATION_REQUEST:
                 if (settings.getCipher() == null) {
                     throw new RuntimeException(
                             "Secure connection is not supported.");
@@ -1540,8 +1562,11 @@ abstract class GXDLMS {
                     GXByteBuffer bb = new GXByteBuffer(data.getData());
                     data.getData().position(index);
                     data.getData().size(index);
-                    settings.getCipher()
-                            .decrypt(settings.getSourceSystemTitle(), bb);
+                    byte[] systemTitle = settings.getSourceSystemTitle();
+                    if (cmd == Command.GLO_EVENT_NOTIFICATION_REQUEST) {
+                        systemTitle = settings.getCipher().getSystemTitle();
+                    }
+                    settings.getCipher().decrypt(systemTitle, bb);
                     data.getData().set(bb);
                     data.setCommand(Command.NONE);
                     getPdu(settings, data);
@@ -1575,6 +1600,7 @@ abstract class GXDLMS {
                 case GLO_GET_REQUEST:
                 case GLO_SET_REQUEST:
                 case GLO_METHOD_REQUEST:
+                case GLO_EVENT_NOTIFICATION_REQUEST:
                     data.setCommand(Command.NONE);
                     data.getData().position(data.getCipherIndex());
                     getPdu(settings, data);
@@ -1600,8 +1626,9 @@ abstract class GXDLMS {
         }
 
         // Get data if all data is read or we want to peek data.
-        if (data.getData().position() != data.getData().size()
-                && (cmd == Command.READ_RESPONSE || cmd == Command.GET_RESPONSE)
+        if (!data.getGbt() && data.getData().position() != data.getData().size()
+                && (cmd == Command.READ_RESPONSE || cmd == Command.GET_RESPONSE
+                        || cmd == Command.DATA_NOTIFICATION)
                 && (data.getMoreData() == RequestTypes.NONE
                         || data.getPeek())) {
             getValueFromData(settings, data);
@@ -1656,7 +1683,9 @@ abstract class GXDLMS {
         // If last data frame of the data block is read.
         if (reply.getMoreData() == RequestTypes.NONE) {
             // If all blocks are read.
-            settings.resetBlockIndex();
+            if (settings != null) {
+                settings.resetBlockIndex();
+            }
             data.position(0);
         }
     }

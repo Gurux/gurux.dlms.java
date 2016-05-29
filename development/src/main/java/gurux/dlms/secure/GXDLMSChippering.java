@@ -176,7 +176,8 @@ final class GXDLMSChippering {
                     || cmd == Command.GLO_SET_REQUEST
                     || cmd == Command.GLO_SET_RESPONSE
                     || cmd == Command.GLO_METHOD_REQUEST
-                    || cmd == Command.GLO_METHOD_RESPONSE)) {
+                    || cmd == Command.GLO_METHOD_RESPONSE
+                    || cmd == Command.GLO_EVENT_NOTIFICATION_REQUEST)) {
                 throw new IllegalArgumentException("cryptedData");
             }
         }

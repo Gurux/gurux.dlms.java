@@ -43,6 +43,7 @@ import gurux.common.PropertyChangedEventArgs;
 import gurux.common.ReceiveEventArgs;
 import gurux.common.TraceEventArgs;
 import gurux.common.enums.TraceLevel;
+import gurux.dlms.GXDLMSConnectionEventArgs;
 import gurux.dlms.GXDateTime;
 import gurux.dlms.ValueEventArgs;
 import gurux.dlms.enums.AccessMode;
@@ -483,10 +484,6 @@ public class GXDLMSBase extends GXDLMSSecureServer
     }
 
     @Override
-    public void invalidConnection(gurux.dlms.ConnectionEventArgs e) {
-    }
-
-    @Override
     public void action(ValueEventArgs[] args) {
 
     }
@@ -608,12 +605,21 @@ public class GXDLMSBase extends GXDLMSSecureServer
         return SourceDiagnostic.NONE;
     }
 
-    public void connected() {
+    @Override
+    protected void connected(GXDLMSConnectionEventArgs connectionInfo) {
         // TODO Auto-generated method stub
 
     }
 
     @Override
-    public void disconnected() {
+    protected void invalidConnection(GXDLMSConnectionEventArgs connectionInfo) {
+        // TODO Auto-generated method stub
+
+    }
+
+    @Override
+    protected void disconnected(GXDLMSConnectionEventArgs connectionInfo) {
+        // TODO Auto-generated method stub
+
     }
 }

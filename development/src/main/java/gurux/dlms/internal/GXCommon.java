@@ -923,7 +923,7 @@ public final class GXCommon {
     }
 
     /**
-     * Get octect string value from DLMS data.
+     * Get octet string value from DLMS data.
      * 
      * @param buff
      *            Received DLMS data.

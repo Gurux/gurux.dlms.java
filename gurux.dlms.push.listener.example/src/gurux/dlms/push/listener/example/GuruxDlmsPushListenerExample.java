@@ -34,6 +34,22 @@
 
 package gurux.dlms.push.listener.example;
 
+import java.util.ArrayList;
+import java.util.Calendar;
+import java.util.List;
+import java.util.Map.Entry;
+
+import gurux.dlms.GXDLMSNotify;
+import gurux.dlms.GXDateTime;
+import gurux.dlms.GXSimpleEntry;
+import gurux.dlms.enums.InterfaceType;
+import gurux.dlms.objects.GXDLMSCaptureObject;
+import gurux.dlms.objects.GXDLMSClock;
+import gurux.dlms.objects.GXDLMSObject;
+import gurux.dlms.objects.GXDLMSPushSetup;
+import gurux.net.GXNet;
+import gurux.net.enums.NetworkType;
+
 /**
  * @author Gurux Ltd
  */
@@ -46,11 +62,44 @@ public class GuruxDlmsPushListenerExample {
      *            the command line arguments
      */
     public static void main(String[] args) {
-
-        try (GXDLMSPushListener SNServer = new GXDLMSPushListener(4061)) {
-            System.out.println("Starting to listen Push messages in port 4060");
-            System.out.println("Press any key to close.");
-            System.in.read();
+        int port = 4061;
+        GXNet media = new GXNet(NetworkType.TCP, "localhost", port);
+        GXDLMSNotify cl = new GXDLMSNotify(true, 1, 1, InterfaceType.WRAPPER);
+        GXDLMSPushSetup p = new GXDLMSPushSetup();
+        List<Entry<GXDLMSObject, Integer>> objects =
+                new ArrayList<Entry<GXDLMSObject, Integer>>();
+        objects.add(new GXSimpleEntry<GXDLMSObject, Integer>(p, 2));
+        GXDLMSClock clock = new GXDLMSClock();
+        p.getPushObjectList()
+                .add(new GXSimpleEntry<GXDLMSObject, GXDLMSCaptureObject>(p,
+                        new GXDLMSCaptureObject(2, 0)));
+        p.getPushObjectList()
+                .add(new GXSimpleEntry<GXDLMSObject, GXDLMSCaptureObject>(clock,
+                        new GXDLMSCaptureObject(2, 0)));
+        try (GXDLMSPushListener SNServer = new GXDLMSPushListener(port)) {
+            System.out.println(
+                    "Starting to listen Push messages in port " + port);
+            System.out.println(
+                    "Press X to close and Enter to send a Push message.");
+            int ret = 10;
+            while ((ret = System.in.read()) != -1) {
+                // Send push.
+                if (ret == 10) {
+                    System.out.println(ret);
+                    media.open();
+                    clock.setTime(
+                            new GXDateTime(Calendar.getInstance().getTime()));
+                    for (byte[] it : cl.generatePushSetupMessages(null, p)) {
+                        media.send(it, null);
+                    }
+                    media.close();
+                }
+                // Close app.
+                if (ret == 'x' || ret == 'X') {
+                    break;
+                }
+            }
+            media.close();
         } catch (Exception ex) {
             System.out.println(ex.getMessage());
         }
