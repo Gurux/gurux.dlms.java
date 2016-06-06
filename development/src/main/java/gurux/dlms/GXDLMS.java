@@ -421,7 +421,7 @@ abstract class GXDLMS {
         if (!settings.getUseLogicalNameReferencing()) {
             return false;
         }
-        return bb.size() > settings.getMaxReceivePDUSize();
+        return bb.size() - bb.position() > settings.getMaxReceivePDUSize();
     }
 
     public static int getMaxPduSize(final GXDLMSSettings settings,
@@ -430,28 +430,30 @@ abstract class GXDLMS {
         if (bb != null) {
             offset = bb.size();
         }
-        int value;
-        if (data.size() + offset > settings.getMaxReceivePDUSize()) {
-            value = settings.getMaxReceivePDUSize() - offset;
-            value -= GXCommon.getObjectCountSizeInBytes(value);
-        } else if (data.size()
-                + GXCommon.getObjectCountSizeInBytes(data.size()) > settings
-                        .getMaxReceivePDUSize()) {
-            value = (data.size()
-                    - GXCommon.getObjectCountSizeInBytes(data.size()));
-        } else {
-            value = data.size();
+        int size = data.size() - data.position();
+        if (size + offset > settings.getMaxReceivePDUSize()) {
+            size = settings.getMaxReceivePDUSize() - offset;
+            size -= GXCommon.getObjectCountSizeInBytes(size);
+        } else if (size + GXCommon.getObjectCountSizeInBytes(size) > settings
+                .getMaxReceivePDUSize()) {
+            size = (size - GXCommon.getObjectCountSizeInBytes(size));
         }
-        return (short) value;
+        return (short) size;
     }
 
     public static byte[][] getMessages(final GXDLMSSettings settings,
             final Command command, final int commandType,
             final GXByteBuffer data, final java.util.Date time) {
+        // Save original position.
+        int pos = data.position();
+        byte[][] reply;
         if (settings.getUseLogicalNameReferencing()) {
-            return getLnMessages(settings, command, commandType, data, time);
+            reply = getLnMessages(settings, command, commandType, data, time);
+        } else {
+            reply = getSnMessages(settings, command, commandType, data, time);
         }
-        return getSnMessages(settings, command, commandType, data, time);
+        data.position(pos);
+        return reply;
     }
 
     private static byte[][] getLnMessages(final GXDLMSSettings settings,
@@ -463,6 +465,7 @@ abstract class GXDLMS {
         if (command == Command.AARQ) {
             frame = 0x10;
         }
+        boolean multipleBlocks = multipleBlocks(settings, data);
         do {
             if (command == Command.AARQ) {
                 if (settings.getInterfaceType() == InterfaceType.HDLC) {
@@ -470,7 +473,6 @@ abstract class GXDLMS {
                 }
                 bb.set(data);
             } else {
-                boolean multipleBlocks = multipleBlocks(settings, data);
                 getLNPdu(settings, command, commandType, data, bb, 0xFF,
                         multipleBlocks, true, time);
             }
@@ -496,6 +498,7 @@ abstract class GXDLMS {
         boolean ciphering = settings.getCipher() != null
                 && settings.getCipher().getSecurity() != Security.NONE;
         int offset = 0;
+        int len = 0;
         if (settings.getInterfaceType() == InterfaceType.HDLC) {
             if (settings.isServer()) {
                 bb.set(0, GXCommon.LLC_REPLY_BYTES);
@@ -504,7 +507,8 @@ abstract class GXDLMS {
             }
             offset = 3;
         }
-        if (settings.getLnSettings().getGeneralBlockTransfer()) {
+        if (multipleBlocks
+                && settings.getLnSettings().getGeneralBlockTransfer()) {
             bb.setUInt8(Command.GENERAL_BLOCK_TRANSFER.getValue());
             // If multiple blocks.
             if (multipleBlocks) {
@@ -550,7 +554,8 @@ abstract class GXDLMS {
             }
         }
 
-        if (!settings.getLnSettings().getGeneralBlockTransfer()) {
+        if (command != Command.DATA_NOTIFICATION
+                && !settings.getLnSettings().getGeneralBlockTransfer()) {
             // If multiple blocks.
             if (multipleBlocks) {
                 // If this is a last block make sure that all data is fit to it.
@@ -573,8 +578,8 @@ abstract class GXDLMS {
                 bb.setUInt8(status);
                 // Block size.
                 if (bb != null && bb.size() != 0) {
-                    GXCommon.setObjectCount(getMaxPduSize(settings, data, bb),
-                            bb);
+                    len = getMaxPduSize(settings, data, bb);
+                    GXCommon.setObjectCount(len, bb);
                 }
             } else if (status != 0xFF) {
                 // If error has occurred.
@@ -584,15 +589,21 @@ abstract class GXDLMS {
                 }
                 bb.setUInt8(status);
             }
+        } else if (bb != null && bb.size() != 0) {
+            // Block size.
+            len = getMaxPduSize(settings, data, bb);
         }
+
         // Add data
         if (data != null && data.size() != 0) {
-            int len = data.size() - data.position();
-            if (len > settings.getMaxReceivePDUSize() - bb.size()) {
-                len = settings.getMaxReceivePDUSize() - bb.size();
+            if (len == 0) {
+                len = data.size() - data.position();
+                if (len > settings.getMaxReceivePDUSize() - bb.size()) {
+                    len = settings.getMaxReceivePDUSize() - bb.size();
+                }
             }
             bb.set(data, len);
-            data.trim();
+            // Mikko data.trim();
         }
         if (ciphering) {
             byte[] tmp =
@@ -718,12 +729,14 @@ abstract class GXDLMS {
             // Data
             bb.set(data);
         }
-        // Remove sent data.
-        if (data.size() == data.position()) {
-            data.clear();
-        } else {
-            data.move(data.position(), 0, data.size() - data.position());
-            data.position(0);
+        // Remove sent data in server side.
+        if (settings.isServer()) {
+            if (data.size() == data.position()) {
+                data.clear();
+            } else {
+                data.move(data.position(), 0, data.size() - data.position());
+                data.position(0);
+            }
         }
         return bb.array();
     }
@@ -799,13 +812,16 @@ abstract class GXDLMS {
         }
         // Add EOP
         bb.setUInt8(GXCommon.HDLC_FRAME_START_END);
-        // Remove sent data.
-        if (data != null) {
-            if (data.size() == data.position()) {
-                data.clear();
-            } else {
-                data.move(data.position(), 0, data.size() - data.position());
-                data.position(0);
+        // Remove sent data in server side.
+        if (settings.isServer()) {
+            if (data != null) {
+                if (data.size() == data.position()) {
+                    data.clear();
+                } else {
+                    data.move(data.position(), 0,
+                            data.size() - data.position());
+                    data.position(0);
+                }
             }
         }
         return bb.array();
@@ -1264,10 +1280,11 @@ abstract class GXDLMS {
      *            Received data from the client.
      */
     private static void handleDataNotification(final GXReplyData reply) {
-        int index = reply.getData().position() - 1;
+        // Previous message data end position.
+        int pos = reply.getData().position() - 1;
         // Get invoke id.
         reply.getData().getUInt32();
-        // Get Date time.
+        // Get date time.
         reply.setTime(null);
         int len = reply.getData().getUInt8();
         // If date time is given.
@@ -1277,7 +1294,7 @@ abstract class GXDLMS {
             reply.setTime(((GXDateTime) GXDLMSClient.changeType(tmp,
                     DataType.DATETIME)).getValue());
         }
-        getDataFromBlock(reply.getData(), index);
+        getDataFromBlock(reply.getData(), pos);
     }
 
     /**
@@ -1411,14 +1428,6 @@ abstract class GXDLMS {
         data.setGbt(true);
         int index = data.getData().position() - 1;
         short ch = data.getData().getUInt8();
-        // Is Last block,
-        if ((ch & 0x80) == 0) {
-            data.setMoreData(RequestTypes.forValue(data.getMoreData().getValue()
-                    | RequestTypes.DATABLOCK.getValue()));
-        } else {
-            data.setMoreData(RequestTypes.forValue(data.getMoreData().getValue()
-                    & ~RequestTypes.DATABLOCK.getValue()));
-        }
         // Is streaming active.
         boolean streaming = (ch & 0x40) == 1;
         byte window = (byte) (ch & 0x3F);
@@ -1444,6 +1453,14 @@ abstract class GXDLMS {
         }
         getPdu(settings, data);
         getDataFromBlock(data.getData(), index);
+        // Is Last block,
+        if ((ch & 0x80) == 0) {
+            data.setMoreData(RequestTypes.forValue(data.getMoreData().getValue()
+                    | RequestTypes.DATABLOCK.getValue()));
+        } else {
+            data.setMoreData(RequestTypes.forValue(data.getMoreData().getValue()
+                    & ~RequestTypes.DATABLOCK.getValue()));
+        }
         // Get data if all data is read or we want to peek data.
         if (data.getData().position() != data.getData().size()
                 && (data.getCommand() == Command.READ_RESPONSE

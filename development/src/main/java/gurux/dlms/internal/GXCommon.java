@@ -308,6 +308,24 @@ public final class GXCommon {
         }
     }
 
+    /**
+     * Add string to byte buffer.
+     * 
+     * @param value
+     *            String to add.
+     * @param bb
+     *            Byte buffer where string is added.
+     */
+    public static void addString(final String value, final GXByteBuffer bb) {
+        bb.setUInt8((byte) DataType.OCTET_STRING.getValue());
+        if (value == null) {
+            setObjectCount(0, bb);
+        } else {
+            setObjectCount(value.length(), bb);
+            bb.set(value.getBytes());
+        }
+    }
+
     /*
      * Set item count.
      * @param count

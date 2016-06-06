@@ -37,44 +37,25 @@ package gurux.dlms.objects.enums;
 import java.util.HashMap;
 
 /**
- * Security policy Enforces authentication and/or encryption algorithm provided
- * with security_suite.
+ * Certificate entity.
  */
-public enum SecurityPolicy {
-
+public enum CertificateEntity {
     /**
-     * Security is not used.
+     * Certificate entity is server
      */
-    NOTHING(0),
+    SERVER(0),
     /**
-     * Request is authenticated.
+     * Certificate entity is client
      */
-    AUTHENTICATED_REQUEST(0x4),
-
+    CLIENT(1),
     /**
-     * Request is encrypted.
+     * Certificate entity is certification authority
      */
-    ENCRYPTED_REQUEST(0x8),
-
+    CERTIFICATION_AUTHORITY(2),
     /**
-     * Request is digitally signed.
+     * Certificate entity is other.
      */
-    DIGITALLY_SIGNED_REQUEST(0x10),
-
-    /**
-     * Response authenticated.
-     */
-    AUTHENTICATED_RESPONSE(0x20),
-
-    /**
-     * Response encrypted.
-     */
-    ENCRYPTED_RESPONSE(0x40),
-
-    /**
-     * Response is digitally signed.
-     */
-    DIGITALLY_SIGNED_RESPONSE(0x80);
+    OTHER(3);
 
     /**
      * Integer value of enumeration.
@@ -84,17 +65,17 @@ public enum SecurityPolicy {
     /**
      * Collection of integer and enumeration values.
      */
-    private static java.util.HashMap<Integer, SecurityPolicy> mappings;
+    private static java.util.HashMap<Integer, CertificateEntity> mappings;
 
     /**
      * Get mappings.
      * 
      * @return Hash map of enumeration and integer values.
      */
-    private static HashMap<Integer, SecurityPolicy> getMappings() {
-        synchronized (SecurityPolicy.class) {
+    private static HashMap<Integer, CertificateEntity> getMappings() {
+        synchronized (CertificateEntity.class) {
             if (mappings == null) {
-                mappings = new HashMap<Integer, SecurityPolicy>();
+                mappings = new HashMap<Integer, CertificateEntity>();
             }
         }
         return mappings;
@@ -106,9 +87,9 @@ public enum SecurityPolicy {
      * @param value
      *            Integer value for enumerator.
      */
-    SecurityPolicy(final int value) {
+    CertificateEntity(final int value) {
         intValue = value;
-        synchronized (SecurityPolicy.class) {
+        synchronized (CertificateEntity.class) {
             getMappings().put(value, this);
         }
     }
@@ -129,7 +110,7 @@ public enum SecurityPolicy {
      *            integer value.
      * @return Enumerator value.
      */
-    public static SecurityPolicy forValue(final int value) {
+    public static CertificateEntity forValue(final int value) {
         return getMappings().get(value);
     }
 }

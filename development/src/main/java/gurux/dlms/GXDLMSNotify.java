@@ -254,7 +254,7 @@ public class GXDLMSNotify {
     public final void addData(final GXDLMSObject obj, final int index,
             final GXByteBuffer buff) {
         DataType dt;
-        ValueEventArgs e = new ValueEventArgs(obj, index, 0, null);
+        ValueEventArgs e = new ValueEventArgs(settings, obj, index, 0, null);
         Object value = obj.getValue(settings, e);
         dt = obj.getDataType(index);
         if (dt == DataType.NONE && value != null) {
@@ -307,8 +307,13 @@ public class GXDLMSNotify {
      */
     public final byte[][] generateDataNotificationMessages(final Date date,
             final GXByteBuffer data) {
-        return GXDLMS.getMessages(settings, Command.DATA_NOTIFICATION, 0, data,
-                date);
+        byte[][] reply = GXDLMS.getMessages(settings, Command.DATA_NOTIFICATION,
+                0, data, date);
+        if (!getGeneralBlockTransfer() && reply.length != 1) {
+            throw new IllegalArgumentException(
+                    "Data is not fit to one PDU. Use general block transfer.");
+        }
+        return reply;
     }
 
     /**
@@ -413,12 +418,13 @@ public class GXDLMSNotify {
                         value = GXDLMSClient.changeType((byte[]) value, dt);
                     }
                 }
-                ValueEventArgs e = new ValueEventArgs(obj, index, 0, null);
+                ValueEventArgs e =
+                        new ValueEventArgs(settings, obj, index, 0, null);
                 e.setValue(value);
                 obj.setValue(settings, e);
                 e.setValue(value);
 
-                e = new ValueEventArgs(items.get(pos).getKey(),
+                e = new ValueEventArgs(settings, items.get(pos).getKey(),
                         items.get(pos).getValue(), 0, null);
                 e.setValue(list[pos]);
                 items.get(pos).getKey().setValue(settings, e);
@@ -459,7 +465,8 @@ public class GXDLMSNotify {
                     value = GXDLMSClient.changeType((byte[]) value, dt);
                 }
             }
-            ValueEventArgs e = new ValueEventArgs(obj, index, 0, null);
+            ValueEventArgs e =
+                    new ValueEventArgs(settings, obj, index, 0, null);
             e.setValue(value);
             obj.setValue(settings, e);
             e.setValue(value);

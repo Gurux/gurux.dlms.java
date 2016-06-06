@@ -79,6 +79,11 @@ public class ValueEventArgs {
     private boolean action;
 
     /**
+     * Is action. This is reserved for internal use.
+     */
+    private GXDLMSSettings settings;
+
+    /**
      * @return Target DLMS object.
      */
     public final GXDLMSObject getTarget() {
@@ -171,9 +176,32 @@ public class ValueEventArgs {
      * @param forParameters
      *            Optional parameters.
      */
+    public ValueEventArgs(final GXDLMSSettings s,
+            final GXDLMSObject eventTarget, final int eventIndex,
+            final int readSelector, final Object forParameters) {
+        settings = s;
+        dataType = DataType.NONE;
+        setTarget(eventTarget);
+        setIndex(eventIndex);
+        selector = readSelector;
+        parameters = forParameters;
+    }
+
+    /**
+     * Constructor.
+     * 
+     * @param eventTarget
+     *            Event target.
+     * @param eventIndex
+     *            Event index.
+     * @param readSelector
+     *            Optional read event selector.
+     * @param forParameters
+     *            Optional parameters.
+     */
     public ValueEventArgs(final GXDLMSObject eventTarget, final int eventIndex,
             final int readSelector, final Object forParameters) {
-        this.dataType = DataType.NONE;
+        dataType = DataType.NONE;
         setTarget(eventTarget);
         setIndex(eventIndex);
         selector = readSelector;
@@ -208,5 +236,12 @@ public class ValueEventArgs {
      */
     public final void setAction(final boolean value) {
         action = value;
+    }
+
+    /**
+     * @return DLMS settings.
+     */
+    public final GXDLMSSettings getSettings() {
+        return settings;
     }
 }

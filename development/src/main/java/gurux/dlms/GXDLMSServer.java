@@ -354,7 +354,7 @@ public abstract class GXDLMSServer {
     /**
      * @return Get settings.
      */
-    protected final GXDLMSSettings getSettings() {
+    public final GXDLMSSettings getSettings() {
         return settings;
     }
 
@@ -798,7 +798,8 @@ public abstract class GXDLMSServer {
             // Device reports a undefined object.
             error = ErrorCode.UNDEFINED_OBJECT;
         } else {
-            ValueEventArgs e = new ValueEventArgs(obj, id, 0, parameters);
+            ValueEventArgs e =
+                    new ValueEventArgs(settings, obj, id, 0, parameters);
             if (obj.getMethodAccess(id) == MethodAccessMode.NO_ACCESS) {
                 error = ErrorCode.READ_WRITE_DENIED;
             } else {
@@ -883,8 +884,8 @@ public abstract class GXDLMSServer {
                                         dt);
                             }
                         }
-                        ValueEventArgs e =
-                                new ValueEventArgs(obj, index, 0, null);
+                        ValueEventArgs e = new ValueEventArgs(settings, obj,
+                                index, 0, null);
                         e.setValue(value);
                         write(new ValueEventArgs[] { e });
                         if (!e.getHandled()) {
@@ -946,8 +947,8 @@ public abstract class GXDLMSServer {
                         parameters = GXCommon.getData(data, i);
                     }
 
-                    e = new ValueEventArgs(obj, attributeIndex, selector,
-                            parameters);
+                    e = new ValueEventArgs(settings, obj, attributeIndex,
+                            selector, parameters);
                     read(new ValueEventArgs[] { e });
                     Object value;
                     if (e.getHandled()) {
@@ -1045,12 +1046,13 @@ public abstract class GXDLMSServer {
                 }
                 if (obj == null) {
                     // "Access Error : Device reports a undefined object."
-                    e = new ValueEventArgs(obj, attributeIndex, 0, 0);
+                    e = new ValueEventArgs(settings, obj, attributeIndex, 0, 0);
                     e.setError(ErrorCode.UNDEFINED_OBJECT);
                     list.add(e);
                 } else {
                     if (obj.getAccess(attributeIndex) == AccessMode.NO_ACCESS) {
-                        e = new ValueEventArgs(obj, attributeIndex, 0, 0);
+                        e = new ValueEventArgs(settings, obj, attributeIndex, 0,
+                                0);
                         e.setError(ErrorCode.READ_WRITE_DENIED);
                         list.add(e);
                     } else {
@@ -1063,7 +1065,7 @@ public abstract class GXDLMSServer {
                             GXDataInfo i = new GXDataInfo();
                             parameters = GXCommon.getData(data, i);
                         }
-                        ValueEventArgs arg = new ValueEventArgs(obj,
+                        ValueEventArgs arg = new ValueEventArgs(settings, obj,
                                 attributeIndex, selector, parameters);
                         list.add(arg);
                     }
@@ -1168,7 +1170,7 @@ public abstract class GXDLMSServer {
                     // GetRequest normal
                     int sn = data.getUInt16();
                     i = findSNObject(sn);
-                    ValueEventArgs e = new ValueEventArgs(i.getItem(),
+                    ValueEventArgs e = new ValueEventArgs(settings, i.getItem(),
                             i.getIndex(), 0, null);
                     e.setAction(i.isAction());
                     list.add(new GXSimpleEntry<ValueEventArgs, Boolean>(e,
@@ -1192,7 +1194,7 @@ public abstract class GXDLMSServer {
                     GXDataInfo di = new GXDataInfo();
                     Object parameters = GXCommon.getData(data, di);
                     i = findSNObject(sn);
-                    ValueEventArgs e = new ValueEventArgs(i.getItem(),
+                    ValueEventArgs e = new ValueEventArgs(settings, i.getItem(),
                             i.getIndex(), selector, parameters);
                     e.setAction(i.isAction());
                     list.add(new GXSimpleEntry<ValueEventArgs, Boolean>(e,
@@ -1318,8 +1320,8 @@ public abstract class GXDLMSServer {
                     results.setUInt8(pos,
                             ErrorCode.READ_WRITE_DENIED.getValue());
                 } else {
-                    ValueEventArgs e = new ValueEventArgs(target.getItem(),
-                            target.getIndex(), 0, null);
+                    ValueEventArgs e = new ValueEventArgs(settings,
+                            target.getItem(), target.getIndex(), 0, null);
                     e.setValue(value);
                     write(new ValueEventArgs[] { e });
                     if (!e.getHandled()) {

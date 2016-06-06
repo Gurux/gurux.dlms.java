@@ -917,7 +917,8 @@ public class GXDLMSClient {
                 val = changeType((byte[]) value, type);
             }
         }
-        ValueEventArgs e = new ValueEventArgs(target, attributeIndex, 0, null);
+        ValueEventArgs e =
+                new ValueEventArgs(settings, target, attributeIndex, 0, null);
         e.setValue(val);
         target.setValue(settings, e);
         return target.getValues()[attributeIndex - 1];
@@ -957,8 +958,8 @@ public class GXDLMSClient {
             int ret = data.getUInt8();
             if (ret == 0) {
                 value = GXCommon.getData(data, info);
-                ValueEventArgs e =
-                        new ValueEventArgs(it.getKey(), it.getValue(), 0, null);
+                ValueEventArgs e = new ValueEventArgs(settings, it.getKey(),
+                        it.getValue(), 0, null);
                 e.setValue(value);
                 it.getKey().setValue(settings, e);
                 info.clear();
@@ -1156,7 +1157,7 @@ public class GXDLMSClient {
      * @return Generated write message(s).
      */
     public final byte[][] write(final GXDLMSObject item, final int index) {
-        ValueEventArgs e = new ValueEventArgs(item, index, 0, null);
+        ValueEventArgs e = new ValueEventArgs(settings, item, index, 0, null);
         Object value = item.getValue(settings, e);
         DataType type = item.getDataType(index);
         return write(item.getName(), value, type, item.getObjectType(), index);
@@ -1277,8 +1278,8 @@ public class GXDLMSClient {
         // Write values.
         bb.setUInt8(list.size());
         for (GXWriteItem it : list) {
-            ValueEventArgs e = new ValueEventArgs(it.getTarget(), it.getIndex(),
-                    it.getSelector(), it.getParameters());
+            ValueEventArgs e = new ValueEventArgs(settings, it.getTarget(),
+                    it.getIndex(), it.getSelector(), it.getParameters());
             value = it.getTarget().getValue(settings, e);
             if ((value instanceof byte[])) {
                 bb.set((byte[]) value);

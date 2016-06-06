@@ -740,8 +740,9 @@ public class GXDLMSProfileGeneric extends GXDLMSObject implements IGXDLMSBase {
             // CHECKSTYLE:OFF
             for (Entry<GXDLMSObject, GXDLMSCaptureObject> obj : captureObjects) {
                 // CHECKSTYLE:ON
-                ValueEventArgs e = new ValueEventArgs(obj.getKey(),
-                        obj.getValue().getAttributeIndex(), 0, null);
+                ValueEventArgs e =
+                        new ValueEventArgs(server.getSettings(), obj.getKey(),
+                                obj.getValue().getAttributeIndex(), 0, null);
                 server.read(new ValueEventArgs[] { e });
                 if (e.getHandled()) {
                     values[++pos] = e.getValue();
