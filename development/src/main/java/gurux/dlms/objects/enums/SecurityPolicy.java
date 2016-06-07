@@ -49,32 +49,32 @@ public enum SecurityPolicy {
     /**
      * Request is authenticated.
      */
-    AUTHENTICATED_REQUEST(0x4),
+    AUTHENTICATED_REQUEST(0x20),
 
     /**
      * Request is encrypted.
      */
-    ENCRYPTED_REQUEST(0x8),
+    ENCRYPTED_REQUEST(0x10),
 
     /**
      * Request is digitally signed.
      */
-    DIGITALLY_SIGNED_REQUEST(0x10),
+    DIGITALLY_SIGNED_REQUEST(0x8),
 
     /**
      * Response authenticated.
      */
-    AUTHENTICATED_RESPONSE(0x20),
+    AUTHENTICATED_RESPONSE(0x4),
 
     /**
      * Response encrypted.
      */
-    ENCRYPTED_RESPONSE(0x40),
+    ENCRYPTED_RESPONSE(0x2),
 
     /**
      * Response is digitally signed.
      */
-    DIGITALLY_SIGNED_RESPONSE(0x80);
+    DIGITALLY_SIGNED_RESPONSE(0x1);
 
     /**
      * Integer value of enumeration.

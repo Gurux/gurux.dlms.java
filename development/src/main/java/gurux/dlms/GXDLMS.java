@@ -1205,27 +1205,42 @@ abstract class GXDLMS {
         type = data.getData().getUInt8();
         // Get invoke ID and priority.
         data.getData().getUInt8();
-        byte ret = (byte) data.getData().getUInt8();
-        if (ret != 0) {
-            data.setError(ret);
-        } else if (type == 1) {
-            // Response normal. Get data if exists.
+        if (type == 1) {
+            // Get Action-Result
+            short ret = data.getData().getUInt8();
+            if (ret != 0) {
+                data.setError(ret);
+            }
+            // Action-Response-Normal. Get data if exists. All meters do not
+            // return data here.
             if (data.getData().position() < data.getData().size()) {
-                int size = data.getData().getUInt8();
-                if (size != 0) {
-                    if (size != 1) {
-                        throw new GXDLMSException(
-                                "parseApplicationAssociationResponse failed. "
-                                        + "Invalid tag.");
-                    }
+                // Get-Data-Result
+                ret = data.getData().getUInt8();
+                if (ret == 0) {
+                    getDataFromBlock(data.getData(), 0);
+                } else if (ret == 1) {
+                    // Get Data-Access-Result.
                     ret = (byte) data.getData().getUInt8();
                     if (ret != 0) {
                         data.setError(data.getData().getUInt8());
                     } else {
                         getDataFromBlock(data.getData(), 0);
                     }
+                } else {
+                    throw new GXDLMSException(
+                            "parseApplicationAssociationResponse failed. "
+                                    + "Invalid tag.");
                 }
             }
+        } else if (type == 2) {
+            // Action-Response-With-Pblock
+            throw new IllegalArgumentException("Invalid Command.");
+        } else if (type == 3) {
+            // Action-Response-With-List.
+            throw new IllegalArgumentException("Invalid Command.");
+        } else if (type == 4) {
+            // Action-Response-Next-Pblock
+            throw new IllegalArgumentException("Invalid Command.");
         } else {
             throw new IllegalArgumentException("Invalid Command.");
         }
