@@ -34,102 +34,27 @@
 
 package gurux.dlms.objects.enums;
 
-import java.util.HashMap;
-
 /**
  * Security policy Enforces authentication and/or encryption algorithm provided
- * with security_suite.
+ * with security suite. This enumeration is used for version 0.
  */
 public enum SecurityPolicy {
-
     /**
      * Security is not used.
      */
-    NOTHING(0),
+    NOTHING,
     /**
-     * Request is authenticated.
+     * All messages are authenticated.
      */
-    AUTHENTICATED_REQUEST(0x20),
+    AUTHENTICATED,
 
     /**
-     * Request is encrypted.
+     * All messages are encrypted.
      */
-    ENCRYPTED_REQUEST(0x10),
+    ENCRYPTED,
 
     /**
-     * Request is digitally signed.
+     * All messages are authenticated and encrypted.
      */
-    DIGITALLY_SIGNED_REQUEST(0x8),
-
-    /**
-     * Response authenticated.
-     */
-    AUTHENTICATED_RESPONSE(0x4),
-
-    /**
-     * Response encrypted.
-     */
-    ENCRYPTED_RESPONSE(0x2),
-
-    /**
-     * Response is digitally signed.
-     */
-    DIGITALLY_SIGNED_RESPONSE(0x1);
-
-    /**
-     * Integer value of enumeration.
-     */
-    private int intValue;
-
-    /**
-     * Collection of integer and enumeration values.
-     */
-    private static java.util.HashMap<Integer, SecurityPolicy> mappings;
-
-    /**
-     * Get mappings.
-     * 
-     * @return Hash map of enumeration and integer values.
-     */
-    private static HashMap<Integer, SecurityPolicy> getMappings() {
-        synchronized (SecurityPolicy.class) {
-            if (mappings == null) {
-                mappings = new HashMap<Integer, SecurityPolicy>();
-            }
-        }
-        return mappings;
-    }
-
-    /**
-     * Constructor.
-     * 
-     * @param value
-     *            Integer value for enumerator.
-     */
-    SecurityPolicy(final int value) {
-        intValue = value;
-        synchronized (SecurityPolicy.class) {
-            getMappings().put(value, this);
-        }
-    }
-
-    /**
-     * Get enemerator's integer value.
-     * 
-     * @return Integer value of enumerator.
-     */
-    public int getValue() {
-        return intValue;
-    }
-
-    /**
-     * Get enumerator from integer value.
-     * 
-     * @param value
-     *            integer value.
-     * @return Enumerator value.
-     */
-    public static SecurityPolicy forValue(final int value) {
-        return getMappings().get(value);
-    }
+    AUTHENTICATED_ENCRYPTED
 }

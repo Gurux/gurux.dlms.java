@@ -34,6 +34,8 @@
 
 package gurux.dlms;
 
+import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Calendar;
 import java.util.List;
 import java.util.Map.Entry;
@@ -949,11 +951,6 @@ public class GXDLMSClient {
             final GXByteBuffer data) {
         Object value;
         GXDataInfo info = new GXDataInfo();
-        int cnt = GXCommon.getObjectCount(data);
-        if (cnt != list.size()) {
-            throw new RuntimeException(
-                    "Invalid reply. Read items count do not match.");
-        }
         for (Entry<GXDLMSObject, Integer> it : list) {
             int ret = data.getUInt8();
             if (ret == 0) {
@@ -1406,12 +1403,23 @@ public class GXDLMSClient {
             throw new IllegalArgumentException("Invalid parameter.");
         }
         Command cmd;
+        List<byte[]> messages = new ArrayList<byte[]>();
         GXByteBuffer bb = new GXByteBuffer();
         settings.resetBlockIndex();
         if (this.getUseLogicalNameReferencing()) {
             cmd = Command.GET_REQUEST;
+
+            // Request service primitive shall always fit in a single APDU.
+            int pos = 0, count = (settings.getMaxReceivePDUSize() - 12) / 10;
+            if (list.size() < count) {
+                count = list.size();
+            }
+            // All meters can handle 10 items.
+            if (count > 10) {
+                count = 10;
+            }
             // Add length.
-            bb.setUInt8(list.size());
+            GXCommon.setObjectCount(count, bb);
             for (Entry<GXDLMSObject, Integer> it : list) {
                 // CI.
                 bb.setUInt16(it.getKey().getObjectType().getValue());
@@ -1427,6 +1435,18 @@ public class GXDLMSClient {
                 bb.setUInt8(it.getValue());
                 // Attribute selector is not used.
                 bb.setUInt8(0);
+
+                ++pos;
+                if (pos % count == 0 && list.size() != pos) {
+                    messages.addAll(Arrays.asList(
+                            GXDLMS.getMessages(settings, cmd, 3, bb, null)));
+                    bb.clear();
+                    if (list.size() - pos < count) {
+                        GXCommon.setObjectCount(list.size() - pos, bb);
+                    } else {
+                        GXCommon.setObjectCount(count, bb);
+                    }
+                }
             }
         } else {
             cmd = Command.READ_REQUEST;
@@ -1440,7 +1460,10 @@ public class GXDLMSClient {
                 bb.setUInt16(sn);
             }
         }
-        return GXDLMS.getMessages(settings, cmd, 3, bb, null);
+
+        messages.addAll(
+                Arrays.asList(GXDLMS.getMessages(settings, cmd, 3, bb, null)));
+        return messages.toArray(new byte[0][0]);
     }
 
     /**

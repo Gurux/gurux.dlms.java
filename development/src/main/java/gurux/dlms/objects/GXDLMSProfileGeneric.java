@@ -701,7 +701,7 @@ public class GXDLMSProfileGeneric extends GXDLMSObject implements IGXDLMSBase {
                             && item.getValue().getAttributeIndex() == 2) {
                         double scaler =
                                 ((GXDLMSRegister) item.getKey()).getScaler();
-                        if (scaler != 1) {
+                        if (scaler != 1 && data != null) {
                             try {
                                 data = ((Number) data).doubleValue() * scaler;
                                 row[a] = data;

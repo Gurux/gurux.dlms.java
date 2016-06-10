@@ -54,7 +54,7 @@ public class GXDLMSScriptTable extends GXDLMSObject implements IGXDLMSBase {
      * Constructor.
      */
     public GXDLMSScriptTable() {
-        super(ObjectType.SCRIPT_TABLE);
+        this(null);
     }
 
     /**
@@ -64,8 +64,7 @@ public class GXDLMSScriptTable extends GXDLMSObject implements IGXDLMSBase {
      *            Logical Name of the object.
      */
     public GXDLMSScriptTable(final String ln) {
-        super(ObjectType.SCRIPT_TABLE, ln, 0);
-        scripts = new ArrayList<GXDLMSScript>();
+        this(ln, 0);
     }
 
     /**

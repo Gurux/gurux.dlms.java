@@ -37,7 +37,6 @@ package gurux.dlms;
 import gurux.dlms.enums.Authentication;
 import gurux.dlms.enums.InterfaceType;
 import gurux.dlms.enums.Priority;
-import gurux.dlms.enums.Security;
 import gurux.dlms.enums.ServiceClass;
 import gurux.dlms.objects.GXDLMSObjectCollection;
 
@@ -88,11 +87,6 @@ public class GXDLMSSettings {
      * Server to Client challenge.
      */
     private byte[] stoCChallenge;
-
-    /**
-     * Used security.
-     */
-    private Security security = Security.NONE;
 
     /**
      * Source system title.

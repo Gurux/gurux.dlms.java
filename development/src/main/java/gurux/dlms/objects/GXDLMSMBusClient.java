@@ -380,17 +380,14 @@ public class GXDLMSMBusClient extends GXDLMSObject implements IGXDLMSBase {
                     .toString();
         } else if (e.getIndex() == 3) {
             captureDefinition.clear();
-            for (Object it : (Object[]) e.getValue()) {
-                captureDefinition
-                        .add(new GXSimpleEntry<String, String>(
-                                GXDLMSClient
-                                        .changeType((byte[]) ((Object[]) it)[0],
-                                                DataType.OCTET_STRING)
-                                        .toString(),
-                                GXDLMSClient
-                                        .changeType((byte[]) ((Object[]) it)[1],
-                                                DataType.OCTET_STRING)
-                                        .toString()));
+            if (e.getValue() != null) {
+                for (Object it : (Object[]) e.getValue()) {
+                    captureDefinition.add(new GXSimpleEntry<String, String>(
+                            GXDLMSClient.changeType((byte[]) ((Object[]) it)[0],
+                                    DataType.OCTET_STRING).toString(),
+                            GXDLMSClient.changeType((byte[]) ((Object[]) it)[1],
+                                    DataType.OCTET_STRING).toString()));
+                }
             }
         } else if (e.getIndex() == 4) {
             capturePeriod = ((Number) e.getValue()).longValue();

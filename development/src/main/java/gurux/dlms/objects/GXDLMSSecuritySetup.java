@@ -36,6 +36,7 @@ package gurux.dlms.objects;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Set;
 
 import gurux.dlms.GXByteBuffer;
 import gurux.dlms.GXDLMSClient;
@@ -51,6 +52,7 @@ import gurux.dlms.objects.enums.CertificateEntity;
 import gurux.dlms.objects.enums.CertificateType;
 import gurux.dlms.objects.enums.GlobalKeyType;
 import gurux.dlms.objects.enums.SecurityPolicy;
+import gurux.dlms.objects.enums.SecurityPolicy1;
 import gurux.dlms.objects.enums.SecuritySuite;
 import gurux.dlms.secure.GXDLMSSecureClient;
 
@@ -59,7 +61,7 @@ public class GXDLMSSecuritySetup extends GXDLMSObject implements IGXDLMSBase {
     /**
      * Security policy.
      */
-    private SecurityPolicy securityPolicy;
+    private int securityPolicy = 0;
 
     /**
      * Security suite.
@@ -108,24 +110,48 @@ public class GXDLMSSecuritySetup extends GXDLMSObject implements IGXDLMSBase {
      */
     public GXDLMSSecuritySetup(final String ln, final int sn) {
         super(ObjectType.SECURITY_SETUP, ln, sn);
-        securityPolicy = SecurityPolicy.NOTHING;
+        securityPolicy = 0;
         securitySuite = SecuritySuite.AES_GCM_128;
         certificates = new ArrayList<GXDLMSCertificateInfo>();
     }
 
     /**
-     * @return Security policy.
+     * @return Security policy for version 1.
      */
-    public final SecurityPolicy getSecurityPolicy() {
-        return securityPolicy;
+    public final Set<SecurityPolicy1> getSecurityPolicy1() {
+        return SecurityPolicy1.forValue(securityPolicy);
     }
 
     /**
      * @param value
-     *            Security policy.
+     *            Security policy for version 1.
+     */
+    public final void setSecurityPolicy1(final Set<SecurityPolicy1> value) {
+        securityPolicy = SecurityPolicy1.toInteger(value);
+    }
+
+    /**
+     * @return Security policy for version 0.
+     */
+    public final SecurityPolicy getSecurityPolicy() {
+        return SecurityPolicy.values()[securityPolicy];
+    }
+
+    /**
+     * @param value
+     *            Security policy for version 0.
      */
     public final void setSecurityPolicy(final SecurityPolicy value) {
-        securityPolicy = value;
+        switch (value) {
+        case NOTHING:
+        case AUTHENTICATED:
+        case ENCRYPTED:
+        case AUTHENTICATED_ENCRYPTED:
+            securityPolicy = value.ordinal();
+            break;
+        default:
+            throw new IllegalArgumentException();
+        }
     }
 
     /**
@@ -195,7 +221,8 @@ public class GXDLMSSecuritySetup extends GXDLMSObject implements IGXDLMSBase {
     }
 
     /**
-     * Activates and strengthens the security policy.
+     * Activates and strengthens the security policy for version 0 Security
+     * Setup Object.
      * 
      * @param client
      *            DLMS client that is used to generate action.
@@ -204,25 +231,24 @@ public class GXDLMSSecuritySetup extends GXDLMSObject implements IGXDLMSBase {
      * @return Generated action.
      */
     public final byte[][] activate(final GXDLMSClient client,
-            final Security security) {
-        int value = 0;
-        switch (security) {
-        case NONE:
-            value = 0;
-            break;
-        case AUTHENTICATION:
-            value = 1;
-            break;
-        case ENCRYPTION:
-            value = 2;
-            break;
-        case AUTHENTICATION_ENCRYPTION:
-            value = 3;
-            break;
-        default:
-            throw new IllegalArgumentException();
-        }
-        return client.method(this, 1, value, DataType.ENUM);
+            final SecurityPolicy security) {
+        return client.method(this, 1, security.ordinal(), DataType.ENUM);
+    }
+
+    /**
+     * Activates and strengthens the security policy for version 1 Security
+     * Setup Object.
+     * 
+     * @param client
+     *            DLMS client that is used to generate action.
+     * @param security
+     *            New security level.
+     * @return Generated action.
+     */
+    public final byte[][] activate(final GXDLMSClient client,
+            final Set<SecurityPolicy1> security) {
+        return client.method(this, 1, SecurityPolicy1.toInteger(security),
+                DataType.ENUM);
     }
 
     /**
@@ -458,7 +484,37 @@ public class GXDLMSSecuritySetup extends GXDLMSObject implements IGXDLMSBase {
     @Override
     public final byte[] invoke(final GXDLMSSettings settings,
             final ValueEventArgs e) {
-        if (e.getIndex() == 2) {
+        // Increase security level.
+        if (e.getIndex() == 1) {
+            Security security = settings.getCipher().getSecurity();
+            if (getVersion() == 0) {
+                SecurityPolicy policy = SecurityPolicy
+                        .values()[((Number) e.getParameters()).byteValue()];
+                setSecurityPolicy(policy);
+                if (policy == SecurityPolicy.AUTHENTICATED) {
+                    settings.getCipher().setSecurity(Security.AUTHENTICATION);
+                } else if (policy == SecurityPolicy.ENCRYPTED) {
+                    settings.getCipher().setSecurity(Security.ENCRYPTION);
+                } else if (policy == SecurityPolicy.AUTHENTICATED_ENCRYPTED) {
+                    settings.getCipher()
+                            .setSecurity(Security.AUTHENTICATION_ENCRYPTION);
+                }
+            } else if (getVersion() == 1) {
+                java.util.Set<SecurityPolicy1> policy = SecurityPolicy1
+                        .forValue(((Number) e.getParameters()).byteValue());
+                setSecurityPolicy1(policy);
+                if (policy.contains(SecurityPolicy1.AUTHENTICATED_RESPONSE)) {
+                    security = Security.forValue(security.getValue()
+                            | Security.AUTHENTICATION.getValue());
+                    settings.getCipher().setSecurity(security);
+                }
+                if (policy.contains(SecurityPolicy1.ENCRYPTED_RESPONSE)) {
+                    security = Security.forValue(security.getValue()
+                            | Security.ENCRYPTION.getValue());
+                    settings.getCipher().setSecurity(security);
+                }
+            }
+        } else if (e.getIndex() == 2) {
             for (Object tmp : (Object[]) e.getParameters()) {
                 Object[] item = (Object[]) tmp;
                 GlobalKeyType type =
@@ -482,11 +538,12 @@ public class GXDLMSSecuritySetup extends GXDLMSObject implements IGXDLMSBase {
                     e.setError(ErrorCode.READ_WRITE_DENIED);
                 }
             }
-            // Return standard reply.
-            return null;
         } else {
-            return new byte[] { (byte) ErrorCode.READ_WRITE_DENIED.getValue() };
+            // Invalid type
+            e.setError(ErrorCode.READ_WRITE_DENIED);
         }
+        // Return standard reply.
+        return null;
     }
 
     @Override
@@ -607,7 +664,7 @@ public class GXDLMSSecuritySetup extends GXDLMSObject implements IGXDLMSBase {
             return getLogicalName();
         }
         if (e.getIndex() == 2) {
-            return new Integer(getSecurityPolicy().getValue());
+            return new Integer(securityPolicy);
         }
         if (e.getIndex() == 3) {
             return new Integer(getSecuritySuite().getValue());
@@ -650,8 +707,12 @@ public class GXDLMSSecuritySetup extends GXDLMSObject implements IGXDLMSBase {
         if (e.getIndex() == 1) {
             super.setValue(settings, e);
         } else if (e.getIndex() == 2) {
-            setSecurityPolicy(SecurityPolicy
-                    .forValue(((Number) e.getValue()).byteValue()));
+            // Security level is set with action.
+            if (settings.isServer()) {
+                e.setError(ErrorCode.READ_WRITE_DENIED);
+            } else {
+                this.securityPolicy = (Short) e.getValue();
+            }
         } else if (e.getIndex() == 3) {
             setSecuritySuite(SecuritySuite
                     .forValue(((Number) e.getValue()).byteValue()));

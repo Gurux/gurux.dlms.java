@@ -603,7 +603,6 @@ abstract class GXDLMS {
                 }
             }
             bb.set(data, len);
-            // Mikko data.trim();
         }
         if (ciphering) {
             byte[] tmp =
@@ -1172,9 +1171,8 @@ abstract class GXDLMS {
      *            Received data from the client.
      */
     static boolean handleReadResponse(final GXReplyData data) {
-        int pos = data.getData().position();
-        if (GXCommon.getObjectCount(data.getData()) != 1) {
-            data.getData().position(pos);
+        int cnt = GXCommon.getObjectCount(data.getData());
+        if (cnt != 1) {
             return false;
         }
         short ch;
@@ -1422,6 +1420,8 @@ abstract class GXDLMS {
             }
         } else if (type == 3) {
             // Get response with list.
+            // Get count.
+            data.getUInt8();
             getDataFromBlock(data, 0);
             return false;
         } else {
