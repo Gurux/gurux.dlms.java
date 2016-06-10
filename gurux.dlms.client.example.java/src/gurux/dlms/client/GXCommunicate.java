@@ -42,6 +42,7 @@ import java.nio.file.Files;
 import java.nio.file.Paths;
 import java.text.NumberFormat;
 import java.text.SimpleDateFormat;
+import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 import java.util.Map.Entry;
@@ -49,10 +50,12 @@ import java.util.Map.Entry;
 import gurux.common.GXCommon;
 import gurux.common.IGXMedia;
 import gurux.common.ReceiveParameters;
+import gurux.dlms.GXByteBuffer;
 import gurux.dlms.GXDLMSClient;
 import gurux.dlms.GXDLMSConverter;
 import gurux.dlms.GXDLMSException;
 import gurux.dlms.GXReplyData;
+import gurux.dlms.GXSimpleEntry;
 import gurux.dlms.enums.Authentication;
 import gurux.dlms.enums.DataType;
 import gurux.dlms.enums.ErrorCode;
@@ -454,12 +457,17 @@ public class GXCommunicate {
      */
     public void readList(List<Entry<GXDLMSObject, Integer>> list)
             throws Exception {
+        GXByteBuffer bb = new GXByteBuffer();
         byte[][] data = dlms.readList(list);
         GXReplyData reply = new GXReplyData();
         for (byte[] it : data) {
+            reply.clear();
             readDataBlock(it, reply);
+            if (reply.isComplete()) {
+                bb.set(reply.getData());
+            }
         }
-        dlms.updateValues(list, reply.getData());
+        dlms.updateValues(list, bb);
     }
 
     /**
@@ -541,17 +549,33 @@ public class GXCommunicate {
         GXDLMSObjectCollection objs = objects.getObjects(new ObjectType[] {
                 ObjectType.REGISTER, ObjectType.DEMAND_REGISTER,
                 ObjectType.EXTENDED_REGISTER });
-        for (GXDLMSObject it : objs) {
-            try {
+
+        try {
+            List<Entry<GXDLMSObject, Integer>> list =
+                    new ArrayList<Entry<GXDLMSObject, Integer>>();
+            for (GXDLMSObject it : objs) {
                 if (it instanceof GXDLMSRegister) {
-                    readObject(it, 3);
-                } else if (it instanceof GXDLMSDemandRegister) {
-                    readObject(it, 4);
+                    list.add(new GXSimpleEntry<GXDLMSObject, Integer>(it, 3));
                 }
-            } catch (Exception ex) {
-                traceLn(logFile, "Err! Failed to read scaler and unit value: "
-                        + ex.getMessage());
-                // Continue reading.
+                if (it instanceof GXDLMSDemandRegister) {
+                    list.add(new GXSimpleEntry<GXDLMSObject, Integer>(it, 4));
+                }
+            }
+            readList(list);
+        } catch (Exception ex) {
+            for (GXDLMSObject it : objs) {
+                try {
+                    if (it instanceof GXDLMSRegister) {
+                        readObject(it, 3);
+                    } else if (it instanceof GXDLMSDemandRegister) {
+                        readObject(it, 4);
+                    }
+                } catch (Exception e) {
+                    traceLn(logFile,
+                            "Err! Failed to read scaler and unit value: "
+                                    + e.getMessage());
+                    // Continue reading.
+                }
             }
         }
     }
