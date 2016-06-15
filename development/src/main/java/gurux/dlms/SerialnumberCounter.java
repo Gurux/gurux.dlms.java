@@ -60,7 +60,7 @@ final class SerialNumberCounter {
             case '-':
             case '*':
             case '/':
-                values.add(expressions.substring(last, index - last));
+                values.add(expressions.substring(last, index));
                 values.add(String.valueOf(ch));
                 last = index + 1;
                 break;
@@ -70,13 +70,13 @@ final class SerialNumberCounter {
             ++index;
         }
         if (index != last) {
-            values.add(expressions.substring(last, index - last));
+            values.add(expressions.substring(last, index));
         }
         return values;
     }
 
     static int getValue(final String value, final int sn) {
-        if (value == "sn") {
+        if ("sn".equals(value)) {
             return sn;
         }
         return Integer.parseInt(value);

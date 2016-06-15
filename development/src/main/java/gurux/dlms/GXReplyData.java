@@ -84,9 +84,9 @@ public class GXReplyData {
     private int readPosition;
 
     /**
-     * Block length.
+     * Packet length.
      */
-    private int blockLength = 0;
+    private int packetLength = 0;
 
     /**
      * Try get value.
@@ -169,12 +169,19 @@ public class GXReplyData {
         readPosition = value;
     }
 
-    public final int getBlockLength() {
-        return blockLength;
+    /**
+     * @return Packet length.
+     */
+    public final int getPacketLength() {
+        return packetLength;
     }
 
-    public final void setBlockLength(final int value) {
-        blockLength = value;
+    /**
+     * @param value
+     *            Packet length.
+     */
+    public final void setPacketLength(final int value) {
+        packetLength = value;
     }
 
     public final void setCommand(final Command value) {
@@ -225,7 +232,7 @@ public class GXReplyData {
         dataValue = null;
         readPosition = 0;
         gbt = false;
-        blockLength = 0;
+        packetLength = 0;
         dataType = DataType.NONE;
         cipherIndex = 0;
         time = null;

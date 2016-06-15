@@ -438,7 +438,7 @@ abstract class GXDLMS {
                 .getMaxReceivePDUSize()) {
             size = (size - GXCommon.getObjectCountSizeInBytes(size));
         }
-        return (short) size;
+        return size;
     }
 
     public static byte[][] getMessages(final GXDLMSSettings settings,
@@ -929,6 +929,10 @@ abstract class GXDLMS {
             if (crc != crcRead) {
                 throw new GXDLMSException("Wrong CRC.");
             }
+            // Remove CRC and EOP from packet length.
+            data.setPacketLength(eopPos - 2);
+        } else {
+            data.setPacketLength(reply.size());
         }
 
         if ((frame & HdlcFrameType.U_FRAME.getValue()) == HdlcFrameType.U_FRAME
@@ -970,10 +974,6 @@ abstract class GXDLMS {
             } else {
                 getLLCBytes(server, reply);
             }
-        }
-        // Skip data CRC and EOP.
-        if (reply.position() != reply.size()) {
-            reply.size(eopPos - 2);
         }
         return frame;
     }
@@ -1102,6 +1102,8 @@ abstract class GXDLMS {
         data.setComplete(compleate);
         if (!compleate) {
             buff.position(pos);
+        } else {
+            data.setPacketLength(buff.position() + value);
         }
     }
 
@@ -1398,13 +1400,12 @@ abstract class GXDLMS {
                 reply.setError(data.getUInt8());
             } else {
                 // Get data size.
-                reply.setBlockLength(GXCommon.getObjectCount(data));
+                int blockLength = GXCommon.getObjectCount(data);
                 // if whole block is read.
                 if ((reply.getMoreData().getValue()
                         & RequestTypes.FRAME.getValue()) == 0) {
                     // Check Block length.
-                    if (reply.getBlockLength() > data.size()
-                            - data.position()) {
+                    if (blockLength > data.size() - data.position()) {
                         throw new OutOfMemoryError();
                     }
                     reply.setCommand(Command.NONE);
@@ -1483,9 +1484,9 @@ abstract class GXDLMS {
                         || data.getCommand() == Command.DATA_NOTIFICATION)
                 && (data.getMoreData() == RequestTypes.NONE
                         || data.getPeek())) {
+            data.getData().position(0);
             getValueFromData(settings, data);
         }
-
     }
 
     /**
@@ -1738,7 +1739,7 @@ abstract class GXDLMS {
             return false;
         }
 
-        getDataFromFrame(reply, data.getData());
+        getDataFromFrame(reply, data);
 
         // If keepalive or get next frame request.
         if ((frame & 0x1) != 0) {
@@ -1753,13 +1754,14 @@ abstract class GXDLMS {
      * 
      * @param reply
      *            Received data that includes HDLC frame.
-     * @param data
-     *            Stored data.
+     * @param info
+     *            Reply data.
      */
     private static void getDataFromFrame(final GXByteBuffer reply,
-            final GXByteBuffer data) {
+            final GXReplyData info) {
+        GXByteBuffer data = info.getData();
         int offset = data.size();
-        int cnt = reply.size() - reply.position();
+        int cnt = info.getPacketLength() - reply.position();
         if (cnt != 0) {
             data.capacity(offset + cnt);
             data.set(reply.getData(), reply.position(), cnt);
