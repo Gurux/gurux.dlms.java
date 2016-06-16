@@ -1291,12 +1291,14 @@ abstract class GXDLMS {
     /**
      * Handle data notification get data from block and/or update error status.
      * 
+     * @param settings
+     *            DLMS settings.
      * @param reply
      *            Received data from the client.
      */
-    private static void handleDataNotification(final GXReplyData reply) {
-        // Previous message data end position.
-        int pos = reply.getData().position() - 1;
+    private static void handleDataNotification(final GXDLMSSettings settings,
+            final GXReplyData reply) {
+        int start = reply.getData().position() - 1;
         // Get invoke id.
         reply.getData().getUInt32();
         // Get date time.
@@ -1309,7 +1311,8 @@ abstract class GXDLMS {
             reply.setTime(((GXDateTime) GXDLMSClient.changeType(tmp,
                     DataType.DATETIME)).getValue());
         }
-        getDataFromBlock(reply.getData(), pos);
+        getDataFromBlock(reply.getData(), start);
+        getValueFromData(settings, reply);
     }
 
     /**
@@ -1467,9 +1470,9 @@ abstract class GXDLMS {
                 return;
             }
         }
-        getPdu(settings, data);
         getDataFromBlock(data.getData(), index);
-        // Is Last block,
+        getPdu(settings, data);
+        // Update Is Last block for GBT again. Get PDU might change it.
         if ((ch & 0x80) == 0) {
             data.setMoreData(RequestTypes.forValue(data.getMoreData().getValue()
                     | RequestTypes.DATABLOCK.getValue()));
@@ -1480,8 +1483,7 @@ abstract class GXDLMS {
         // Get data if all data is read or we want to peek data.
         if (data.getData().position() != data.getData().size()
                 && (data.getCommand() == Command.READ_RESPONSE
-                        || data.getCommand() == Command.GET_RESPONSE
-                        || data.getCommand() == Command.DATA_NOTIFICATION)
+                        || data.getCommand() == Command.GET_RESPONSE)
                 && (data.getMoreData() == RequestTypes.NONE
                         || data.getPeek())) {
             data.getData().position(0);
@@ -1607,7 +1609,7 @@ abstract class GXDLMS {
                 }
                 break;
             case DATA_NOTIFICATION:
-                handleDataNotification(data);
+                handleDataNotification(settings, data);
                 // Client handles this.
                 break;
             default:
@@ -1660,8 +1662,7 @@ abstract class GXDLMS {
 
         // Get data if all data is read or we want to peek data.
         if (!data.getGbt() && data.getData().position() != data.getData().size()
-                && (cmd == Command.READ_RESPONSE || cmd == Command.GET_RESPONSE
-                        || cmd == Command.DATA_NOTIFICATION)
+                && (cmd == Command.READ_RESPONSE || cmd == Command.GET_RESPONSE)
                 && (data.getMoreData() == RequestTypes.NONE
                         || data.getPeek())) {
             getValueFromData(settings, data);
@@ -1692,6 +1693,9 @@ abstract class GXDLMS {
                     reply.setValueType(info.getType());
                     reply.setValue(value);
                     reply.setTotalCount(0);
+                    if (reply.getCommand() == Command.DATA_NOTIFICATION) {
+                        reply.setReadPosition(data.position());
+                    }
                 } else {
                     if (((Object[]) value).length != 0) {
                         if (reply.getValue() == null) {
@@ -1708,13 +1712,19 @@ abstract class GXDLMS {
                     // Element count.
                     reply.setTotalCount(info.getCount());
                 }
+            } else if (info.isCompleate()
+                    && reply.getCommand() == Command.DATA_NOTIFICATION) {
+                // If last item is null. This is a special case.
+                reply.setReadPosition(data.position());
             }
         } finally {
             data.position(index);
         }
 
         // If last data frame of the data block is read.
-        if (reply.getMoreData() == RequestTypes.NONE) {
+        if (reply.getCommand() != Command.DATA_NOTIFICATION
+                && info.isCompleate()
+                && reply.getMoreData() == RequestTypes.NONE) {
             // If all blocks are read.
             if (settings != null) {
                 settings.resetBlockIndex();
@@ -1746,6 +1756,18 @@ abstract class GXDLMS {
             return true;
         }
         getPdu(settings, data);
+        if (data.getCommand() == Command.DATA_NOTIFICATION) {
+            // Check is there more messages left. This is Push message special
+            // case.
+            if (reply.position() == reply.size()) {
+                reply.clear();
+            } else {
+                int cnt = reply.size() - reply.position();
+                reply.move(reply.position(), 0, cnt);
+                reply.position(0);
+            }
+        }
+
         return true;
     }
 
@@ -1765,6 +1787,7 @@ abstract class GXDLMS {
         if (cnt != 0) {
             data.capacity(offset + cnt);
             data.set(reply.getData(), reply.position(), cnt);
+            reply.position(reply.position() + cnt);
         }
         // Set position to begin of new data.
         data.position(offset);

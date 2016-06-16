@@ -129,6 +129,7 @@ public class GXByteBuffer {
                     System.arraycopy(tmp, 0, getData(), 0, size);
                 } else {
                     System.arraycopy(tmp, 0, getData(), 0, capacity);
+                    size = capacity;
                 }
             }
         }

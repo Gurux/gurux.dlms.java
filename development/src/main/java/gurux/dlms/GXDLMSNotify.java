@@ -46,7 +46,6 @@ import gurux.dlms.enums.ObjectType;
 import gurux.dlms.enums.Priority;
 import gurux.dlms.enums.ServiceClass;
 import gurux.dlms.internal.GXCommon;
-import gurux.dlms.internal.GXDataInfo;
 import gurux.dlms.objects.GXDLMSCaptureObject;
 import gurux.dlms.objects.GXDLMSObject;
 import gurux.dlms.objects.GXDLMSObjectCollection;
@@ -234,8 +233,9 @@ public class GXDLMSNotify {
      *            Information from the received data.
      * @return Is frame complete.
      */
-    public final boolean getData(final byte[] reply, final GXReplyData data) {
-        return GXDLMS.getData(settings, new GXByteBuffer(reply), data);
+    public final boolean getData(final GXByteBuffer reply,
+            final GXReplyData data) {
+        return GXDLMS.getData(settings, reply, data);
     }
 
     /**
@@ -368,24 +368,20 @@ public class GXDLMSNotify {
      * must be set for first object on push object list.
      * 
      * @param data
-     *            Received data.
+     *            Received value.
      * @return Array of objects and called indexes.
      */
     public final List<Entry<GXDLMSObject, Integer>>
-            parsePush(final GXByteBuffer data) {
+            parsePush(final Object[] data) {
         GXDLMSObject obj;
         int index;
         DataType dt;
         Object value;
-        GXReplyData reply = new GXReplyData();
-        reply.setData(data);
         List<Entry<GXDLMSObject, Integer>> items =
                 new ArrayList<Entry<GXDLMSObject, Integer>>();
-        GXDLMS.getValueFromData(settings, reply);
-        Object[] list = (Object[]) reply.getValue();
-        if (list != null) {
+        if (data != null) {
             GXDLMSConverter c = new GXDLMSConverter();
-            for (Object it : (Object[]) list[0]) {
+            for (Object it : (Object[]) data[0]) {
                 Object[] tmp = (Object[]) it;
                 int classID = ((Number) (tmp[0])).intValue() & 0xFFFF;
                 if (classID > 0) {
@@ -408,9 +404,9 @@ public class GXDLMSNotify {
                     }
                 }
             }
-            for (int pos = 0; pos < list.length; ++pos) {
+            for (int pos = 0; pos < data.length; ++pos) {
                 obj = (GXDLMSObject) items.get(pos).getKey();
-                value = list[pos];
+                value = data[pos];
                 index = items.get(pos).getValue();
                 if (value instanceof byte[]) {
                     dt = obj.getUIDataType(index);
@@ -426,7 +422,7 @@ public class GXDLMSNotify {
 
                 e = new ValueEventArgs(settings, items.get(pos).getKey(),
                         items.get(pos).getValue(), 0, null);
-                e.setValue(list[pos]);
+                e.setValue(data[pos]);
                 items.get(pos).getKey().setValue(settings, e);
             }
         }
@@ -442,22 +438,20 @@ public class GXDLMSNotify {
      */
     public final void parsePush(
             final List<Entry<GXDLMSObject, Integer>> objects,
-            final GXByteBuffer data) {
+            final Object[] data) {
         GXDLMSObject obj;
         int index;
         DataType dt;
-        GXDataInfo info = new GXDataInfo();
-        Object value = GXCommon.getData(data, info);
-        if (!(value instanceof Object[])) {
+        Object value;
+        if (data == null) {
             throw new IllegalArgumentException("Invalid push message.");
         }
-        Object[] list = (Object[]) value;
-        if (list.length != objects.size()) {
+        if (data.length != objects.size()) {
             throw new IllegalArgumentException("Push arguments do not match.");
         }
-        for (int pos = 0; pos < list.length; ++pos) {
+        for (int pos = 0; pos < data.length; ++pos) {
             obj = (GXDLMSObject) objects.get(pos).getKey();
-            value = list[pos];
+            value = data[pos];
             index = objects.get(pos).getValue();
             if (value instanceof byte[]) {
                 dt = obj.getUIDataType(index);
