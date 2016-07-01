@@ -152,7 +152,7 @@ public class GXByteBuffer {
      *            Buffer position.
      */
     public final void position(final int value) {
-        this.position = value;
+        position = value;
     }
 
     /**
@@ -166,7 +166,7 @@ public class GXByteBuffer {
      * @return Buffer size.
      */
     public final int size() {
-        return this.size;
+        return size;
     }
 
     /**
@@ -174,7 +174,10 @@ public class GXByteBuffer {
      *            Buffer size.
      */
     public final void size(final int value) {
-        this.size = value;
+        size = value;
+        if (position > size) {
+            position = size;
+        }
     }
 
     /**

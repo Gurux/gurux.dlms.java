@@ -34,10 +34,7 @@
 
 package gurux.dlms.push.listener.example;
 
-import java.util.ArrayList;
 import java.util.Calendar;
-import java.util.List;
-import java.util.Map.Entry;
 
 import gurux.dlms.GXDLMSNotify;
 import gurux.dlms.GXDateTime;
@@ -66,9 +63,6 @@ public class GuruxDlmsPushListenerExample {
         GXNet media = new GXNet(NetworkType.TCP, "localhost", port);
         GXDLMSNotify cl = new GXDLMSNotify(true, 1, 1, InterfaceType.WRAPPER);
         GXDLMSPushSetup p = new GXDLMSPushSetup();
-        List<Entry<GXDLMSObject, Integer>> objects =
-                new ArrayList<Entry<GXDLMSObject, Integer>>();
-        objects.add(new GXSimpleEntry<GXDLMSObject, Integer>(p, 2));
         GXDLMSClock clock = new GXDLMSClock();
         p.getPushObjectList()
                 .add(new GXSimpleEntry<GXDLMSObject, GXDLMSCaptureObject>(p,
@@ -85,7 +79,7 @@ public class GuruxDlmsPushListenerExample {
             while ((ret = System.in.read()) != -1) {
                 // Send push.
                 if (ret == 10) {
-                    System.out.println(ret);
+                    System.out.println("Sending Push message.");
                     media.open();
                     clock.setTime(
                             new GXDateTime(Calendar.getInstance().getTime()));

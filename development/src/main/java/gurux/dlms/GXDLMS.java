@@ -398,7 +398,7 @@ abstract class GXDLMS {
             cmd = Command.GLO_METHOD_RESPONSE;
             break;
         case DATA_NOTIFICATION:
-            cmd = Command.GLO_EVENT_NOTIFICATION_REQUEST;
+            cmd = Command.GLO_GENERAL_CIPHERING;
             break;
 
         default:
@@ -610,7 +610,19 @@ abstract class GXDLMS {
                             settings.getCipher().getSystemTitle(),
                             bb.subArray(offset, bb.size() - offset));
             bb.size(offset);
-            bb.set(tmp);
+            if (command == Command.DATA_NOTIFICATION) {
+                // Add command.
+                bb.setUInt8(tmp[0]);
+                // Add system title.
+                GXCommon.setObjectCount(
+                        settings.getCipher().getSystemTitle().length, bb);
+                bb.set(settings.getCipher().getSystemTitle());
+                // Add data.
+                bb.set(tmp, 1, tmp.length - 1);
+
+            } else {
+                bb.set(tmp);
+            }
         }
     }
 
@@ -1323,7 +1335,16 @@ abstract class GXDLMS {
      */
     static void handleSetResponse(final GXDLMSSettings settings,
             final GXReplyData data) {
-        // TODO:
+        short ret = data.getData().getUInt8();
+        // SetResponseNormal
+        if (ret == 1) {
+            // Invoke ID and priority.
+            data.getData().getUInt8();
+            ret = data.getData().getUInt8();
+            if (ret != 0) {
+                data.setError(ret);
+            }
+        }
     }
 
     /**
@@ -1585,6 +1606,7 @@ abstract class GXDLMS {
             case GLO_GET_RESPONSE:
             case GLO_SET_RESPONSE:
             case GLO_METHOD_RESPONSE:
+            case GLO_GENERAL_CIPHERING:
             case GLO_EVENT_NOTIFICATION_REQUEST:
                 if (settings.getCipher() == null) {
                     throw new RuntimeException(
@@ -1598,9 +1620,6 @@ abstract class GXDLMS {
                     data.getData().position(index);
                     data.getData().size(index);
                     byte[] systemTitle = settings.getSourceSystemTitle();
-                    if (cmd == Command.GLO_EVENT_NOTIFICATION_REQUEST) {
-                        systemTitle = settings.getCipher().getSystemTitle();
-                    }
                     settings.getCipher().decrypt(systemTitle, bb);
                     data.getData().set(bb);
                     data.setCommand(Command.NONE);

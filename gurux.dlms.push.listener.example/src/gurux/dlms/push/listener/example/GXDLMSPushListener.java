@@ -44,24 +44,37 @@ import gurux.common.ReceiveEventArgs;
 import gurux.common.TraceEventArgs;
 import gurux.common.enums.TraceLevel;
 import gurux.dlms.GXByteBuffer;
-import gurux.dlms.GXDLMSNotify;
 import gurux.dlms.GXReplyData;
 import gurux.dlms.enums.InterfaceType;
 import gurux.dlms.objects.GXDLMSObject;
+import gurux.dlms.secure.GXDLMSSecureNotify;
 import gurux.net.GXNet;
 import gurux.net.enums.NetworkType;
 
 /**
  * All example servers are using same objects.
  */
-public class GXDLMSPushListener
+public class GXDLMSPushListener extends GXDLMSSecureNotify
         implements IGXMediaListener, gurux.net.IGXNetListener, AutoCloseable {
 
+    /**
+     * Are messages traced.
+     */
     private boolean trace = false;
+    /**
+     * TCP/IP port to listen.
+     */
     private GXNet media;
+    /**
+     * Received data is saved to reply buffer because whole message is not
+     * always received in one packet.
+     */
     private GXByteBuffer reply = new GXByteBuffer();
+    /**
+     * Received data. This is used if GBT is used and data is received on
+     * several data blocks.
+     */
     private GXReplyData data = new GXReplyData();
-    private GXDLMSNotify notify;
 
     /**
      * Constructor.
@@ -70,14 +83,17 @@ public class GXDLMSPushListener
      *            Listener port.
      */
     public GXDLMSPushListener(int port) throws Exception {
+        super(true, 1, 1, InterfaceType.WRAPPER);
         media = new gurux.net.GXNet(NetworkType.TCP, port);
         media.setTrace(TraceLevel.VERBOSE);
         media.addListener(this);
         media.open();
         // TODO; Must set communication specific settings.
-        notify = new GXDLMSNotify(true, 1, 1, InterfaceType.WRAPPER);
     }
 
+    /**
+     * Listener is closed.
+     */
     public void close() {
         media.close();
     }
@@ -99,18 +115,24 @@ public class GXDLMSPushListener
                             .bytesToHex((byte[]) e.getData()));
                 }
                 reply.set((byte[]) e.getData());
-                notify.getData(reply, data);
+                getData(reply, data);
                 // If all data is received.
-                if (!data.isMoreData()) {
-                    List<Entry<GXDLMSObject, Integer>> list;
-                    list = notify.parsePush((Object[]) data.getValue());
-                    // Print received data.
-                    for (Entry<GXDLMSObject, Integer> it : list) {
-                        // Print LN.
-                        System.out.println(it.getKey().toString());
-                        // Print Value.
-                        System.out.println(String.valueOf(
-                                it.getKey().getValues()[it.getValue() - 1]));
+                if (data.isComplete() && !data.isMoreData()) {
+                    try {
+                        List<Entry<GXDLMSObject, Integer>> list;
+                        list = parsePush((Object[]) data.getValue());
+                        // Print received data.
+                        for (Entry<GXDLMSObject, Integer> it : list) {
+                            // Print LN.
+                            System.out.println(it.getKey().toString());
+                            // Print Value.
+                            System.out.println(String.valueOf(it.getKey()
+                                    .getValues()[it.getValue() - 1]));
+                        }
+                    } catch (Exception ex) {
+                        System.out.println(ex.getMessage());
+                    } finally {
+                        data.clear();
                     }
                 }
             }

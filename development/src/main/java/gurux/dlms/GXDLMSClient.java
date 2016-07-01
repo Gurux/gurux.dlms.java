@@ -798,9 +798,13 @@ public class GXDLMSClient {
             Object[] access = (Object[]) accessRights;
             for (Object attributeAccess : (Object[]) access[0]) {
                 int id = ((Number) ((Object[]) attributeAccess)[0]).intValue();
-                int tmp = ((Number) ((Object[]) attributeAccess)[1]).intValue();
-                AccessMode mode = AccessMode.forValue(tmp);
-                obj.setAccess(id, mode);
+                // Kamstrup is returning -1 here.
+                if (id > 0) {
+                    int tmp = ((Number) ((Object[]) attributeAccess)[1])
+                            .intValue();
+                    AccessMode mode = AccessMode.forValue(tmp);
+                    obj.setAccess(id, mode);
+                }
             }
             for (Object methodAccess : (Object[]) access[1]) {
                 int id = ((Number) ((Object[]) methodAccess)[0]).intValue();

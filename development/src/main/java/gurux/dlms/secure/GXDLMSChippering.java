@@ -171,7 +171,12 @@ final class GXDLMSChippering {
         int ch = data.getUInt8();
         if (!(ch == 0x21 || ch == 0x28)) {
             Command cmd = Command.forValue(ch);
-            if (!(cmd == Command.GLO_GET_REQUEST
+            if (cmd == Command.GLO_GENERAL_CIPHERING) {
+                int len = GXCommon.getObjectCount(data);
+                byte[] title = new byte[len];
+                data.get(title);
+                p.setSystemTitle(title);
+            } else if (!(cmd == Command.GLO_GET_REQUEST
                     || cmd == Command.GLO_GET_RESPONSE
                     || cmd == Command.GLO_SET_REQUEST
                     || cmd == Command.GLO_SET_RESPONSE

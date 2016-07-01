@@ -41,32 +41,32 @@ public enum SortMethod {
     /**
      * First in first out When circle buffer is full first item is removed.
      */
-    FIFO(0),
+    FIFO(1),
 
     /**
      * Last in first out. When circle buffer is full last item is removed.
      */
-    LIFO(1),
+    LIFO(2),
 
     /**
      * Largest is first.
      */
-    LARGEST(2),
+    LARGEST(3),
 
     /**
      * Smallest is first.
      */
-    SMALLEST(3),
+    SMALLEST(4),
 
     /**
      * Nearest to zero is first.
      */
-    NEAREST_TO_ZERO(4),
+    NEAREST_TO_ZERO(5),
 
     /**
      * Farest from zero is first.
      */
-    FAREST_FROM_ZERO(5);
+    FAREST_FROM_ZERO(6);
 
     private int intValue;
     private static java.util.HashMap<Integer, SortMethod> mappings;

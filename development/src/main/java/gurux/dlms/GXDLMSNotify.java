@@ -285,7 +285,7 @@ public class GXDLMSNotify {
      * Generates data notification message.
      * 
      * @param date
-     *            Date time. Set Date(0) if not added.
+     *            Date time. Set to null or Date(0) if not used
      * @param data
      *            Notification body.
      * @return Generated data notification message(s).
@@ -343,9 +343,9 @@ public class GXDLMSNotify {
      * Generates push setup message.
      * 
      * @param date
-     *            Date time. Set To Min or Max if not added.
-     * @param objects
-     *            List of objects and attribute indexes to notify.
+     *            Date time. Set to null or Date(0) if not used.
+     * @param push
+     *            Target Push object.
      * @return Generated data notification message(s).
      */
     public final byte[][] generatePushSetupMessages(final Date date,

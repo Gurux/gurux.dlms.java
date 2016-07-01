@@ -171,6 +171,11 @@ public enum Command {
     GLO_SET_RESPONSE(0xCD),
 
     /**
+     * Glo general ciphering.
+     */
+    GLO_GENERAL_CIPHERING(0xDB),
+
+    /**
      * Glo event notification request.
      */
     GLO_EVENT_NOTIFICATION_REQUEST(0xCA),
