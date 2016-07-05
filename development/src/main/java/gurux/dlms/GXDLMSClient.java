@@ -529,17 +529,17 @@ public class GXDLMSClient {
             default:
                 throw new GXDLMSException("Invalid Exception.");
             }
-            switch (id) {
-            case HDLCInfo.MAX_INFO_TX:
+            switch (id) { // RX / TX are delivered from the partner's point of view => reversed to ours
+            case HDLCInfo.MAX_INFO_RX:
                 getLimits().setMaxInfoTX(val);
                 break;
-            case HDLCInfo.MAX_INFO_RX:
+            case HDLCInfo.MAX_INFO_TX:
                 getLimits().setMaxInfoRX(val);
                 break;
-            case HDLCInfo.WINDOW_SIZE_TX:
+            case HDLCInfo.WINDOW_SIZE_RX:
                 getLimits().setWindowSizeTX(val);
                 break;
-            case HDLCInfo.WINDOW_SIZE_RX:
+            case HDLCInfo.WINDOW_SIZE_TX:
                 getLimits().setWindowSizeRX(val);
                 break;
             default:
