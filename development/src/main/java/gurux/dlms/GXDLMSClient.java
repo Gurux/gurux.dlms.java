@@ -529,7 +529,9 @@ public class GXDLMSClient {
             default:
                 throw new GXDLMSException("Invalid Exception.");
             }
-            switch (id) { // RX / TX are delivered from the partner's point of view => reversed to ours
+            // RX / TX are delivered from the partner's point of view =>
+            // reversed to ours
+            switch (id) {
             case HDLCInfo.MAX_INFO_RX:
                 getLimits().setMaxInfoTX(val);
                 break;
