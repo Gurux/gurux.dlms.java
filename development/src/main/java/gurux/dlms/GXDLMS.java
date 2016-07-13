@@ -266,65 +266,70 @@ abstract class GXDLMS {
 
     static String getDescription(final int errCode) {
         String str;
-        switch (ErrorCode.forValue(errCode)) {
-        case REJECTED:
-            str = "Rejected";
-            break;
-        case INVALID_HDLC_REPLY:
-            str = "Not a reply";
-            break;
-        case OK:
+        ErrorCode errorCode = ErrorCode.forValue(errCode);
+        if (errorCode != null) {
+            switch (errorCode) {
+                case REJECTED:
+                    str = "Rejected";
+                    break;
+                case INVALID_HDLC_REPLY:
+                    str = "Not a reply";
+                    break;
+                case OK:
+                    str = "";
+                    break;
+                case HARDWARE_FAULT:
+                    str = "Access Error : Device reports a hardware fault.";
+                    break;
+                case TEMPORARY_FAILURE:
+                    str = "Access Error : Device reports a temporary failure.";
+                    break;
+                case READ_WRITE_DENIED:
+                    str = "Access Error : Device reports Read-Write denied.";
+                    break;
+                case UNDEFINED_OBJECT:
+                    str = "Access Error : Device reports a undefined object.";
+                    break;
+                case INCONSISTENT_CLASS:
+                    str = "Access Error : "
+                            + "Device reports a inconsistent Class or object.";
+                    break;
+                case UNAVAILABLE_OBJECT:
+                    str = "Access Error : Device reports a unavailable object.";
+                    break;
+                case UNMATCHED_TYPE:
+                    str = "Access Error : Device reports a unmatched type.";
+                    break;
+                case ACCESS_VIOLATED:
+                    str = "Access Error : Device reports scope of access violated.";
+                    break;
+                case DATA_BLOCK_UNAVAILABLE:
+                    str = "Access Error : Data Block Unavailable.";
+                    break;
+                case LONG_GET_OR_READ_ABORTED:
+                    str = "Access Error : Long Get Or Read Aborted.";
+                    break;
+                case NO_LONG_GET_OR_READ_IN_PROGRESS:
+                    str = "Access Error : No Long Get Or Read In Progress.";
+                    break;
+                case LONG_SET_OR_WRITE_ABORTED:
+                    str = "Access Error : Long Set Or Write Aborted.";
+                    break;
+                case NO_LONG_SET_OR_WRITE_IN_PROGRESS:
+                    str = "Access Error : No Long Set Or Write In Progress.";
+                    break;
+                case DATA_BLOCK_NUMBER_INVALID:
+                    str = "Access Error : Data Block Number Invalid.";
+                    break;
+                case OTHER_REASON:
+                    str = "Access Error : Other Reason.";
+                    break;
+                default:
+                    str = "Access Error : Unknown error.";
+                    break;
+            }
+        } else {
             str = "";
-            break;
-        case HARDWARE_FAULT:
-            str = "Access Error : Device reports a hardware fault.";
-            break;
-        case TEMPORARY_FAILURE:
-            str = "Access Error : Device reports a temporary failure.";
-            break;
-        case READ_WRITE_DENIED:
-            str = "Access Error : Device reports Read-Write denied.";
-            break;
-        case UNDEFINED_OBJECT:
-            str = "Access Error : Device reports a undefined object.";
-            break;
-        case INCONSISTENT_CLASS:
-            str = "Access Error : "
-                    + "Device reports a inconsistent Class or object.";
-            break;
-        case UNAVAILABLE_OBJECT:
-            str = "Access Error : Device reports a unavailable object.";
-            break;
-        case UNMATCHED_TYPE:
-            str = "Access Error : Device reports a unmatched type.";
-            break;
-        case ACCESS_VIOLATED:
-            str = "Access Error : Device reports scope of access violated.";
-            break;
-        case DATA_BLOCK_UNAVAILABLE:
-            str = "Access Error : Data Block Unavailable.";
-            break;
-        case LONG_GET_OR_READ_ABORTED:
-            str = "Access Error : Long Get Or Read Aborted.";
-            break;
-        case NO_LONG_GET_OR_READ_IN_PROGRESS:
-            str = "Access Error : No Long Get Or Read In Progress.";
-            break;
-        case LONG_SET_OR_WRITE_ABORTED:
-            str = "Access Error : Long Set Or Write Aborted.";
-            break;
-        case NO_LONG_SET_OR_WRITE_IN_PROGRESS:
-            str = "Access Error : No Long Set Or Write In Progress.";
-            break;
-        case DATA_BLOCK_NUMBER_INVALID:
-            str = "Access Error : Data Block Number Invalid.";
-            break;
-        case OTHER_REASON:
-            str = "Access Error : Other Reason.";
-            break;
-        default:
-            str = "Access Error : Unknown error.";
-            break;
         }
         return str;
     }
