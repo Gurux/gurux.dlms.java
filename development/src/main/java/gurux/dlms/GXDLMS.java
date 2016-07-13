@@ -329,7 +329,7 @@ abstract class GXDLMS {
                     break;
             }
         } else {
-            str = "";
+            str = "Access Error : Unknown error.";
         }
         return str;
     }
