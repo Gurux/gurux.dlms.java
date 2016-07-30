@@ -353,7 +353,7 @@ public class GXReplyData {
     }
 
     /**
-     * @param cipherIndex
+     * @param value
      *            Cipher index is position where data is decrypted.
      */
     public final void setCipherIndex(final int value) {
@@ -368,8 +368,8 @@ public class GXReplyData {
     }
 
     /**
-     * @param Is
-     *            received message General Block Transfer message.
+     * @param value
+     *            Is received message General Block Transfer message.
      */
     public final void setGbt(final boolean value) {
         gbt = value;
@@ -383,7 +383,7 @@ public class GXReplyData {
     }
 
     /**
-     * @param time
+     * @param value
      *            Data notification date time.
      */
     public final void setTime(final Date value) {

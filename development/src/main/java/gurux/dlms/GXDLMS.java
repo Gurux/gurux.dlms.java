@@ -1823,11 +1823,15 @@ abstract class GXDLMS {
      */
     private static int getDataFromBlock(final GXByteBuffer data,
             final int index) {
+        if (data.size() == data.position()) {
+            data.clear();
+            return 0;
+        }
         int len = data.position() - index;
         System.arraycopy(data.getData(), data.position(), data.getData(),
                 data.position() - len, data.size() - data.position());
-        data.size(data.size() - len);
         data.position(data.position() - len);
+        data.size(data.size() - len);
         return len;
     }
 

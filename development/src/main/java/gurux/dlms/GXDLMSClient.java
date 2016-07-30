@@ -55,6 +55,7 @@ import gurux.dlms.enums.SourceDiagnostic;
 import gurux.dlms.internal.GXCommon;
 import gurux.dlms.internal.GXDataInfo;
 import gurux.dlms.manufacturersettings.GXObisCodeCollection;
+import gurux.dlms.objects.GXDLMSCaptureObject;
 import gurux.dlms.objects.GXDLMSObject;
 import gurux.dlms.objects.GXDLMSObjectCollection;
 import gurux.dlms.objects.GXDLMSProfileGeneric;
@@ -909,11 +910,38 @@ public class GXDLMSClient {
         return items;
     }
 
-    /*
-     * Get Value from byte array received from the meter.
+    /**
+     * Update value from byte array received from the meter.
+     * 
+     * @param target
+     *            COSEM object.
+     * @param attributeIndex
+     *            Attribute index.
+     * @param value
+     *            Value to update.
+     * @return Updated value.
      */
     public final Object updateValue(final GXDLMSObject target,
             final int attributeIndex, final Object value) {
+        return updateValue(target, attributeIndex, value, null);
+    }
+
+    /**
+     * Update value from byte array received from the meter.
+     * 
+     * @param target
+     *            COSEM object.
+     * @param attributeIndex
+     *            Attribute index.
+     * @param value
+     *            Value to update.
+     * @param parameters
+     *            Optional parameters.
+     * @return Updated value.
+     */
+    public final Object updateValue(final GXDLMSObject target,
+            final int attributeIndex, final Object value,
+            final Object parameters) {
         Object val = value;
         if (val instanceof byte[]) {
             DataType type = target.getUIDataType(attributeIndex);
@@ -925,8 +953,8 @@ public class GXDLMSClient {
                 val = changeType((byte[]) value, type);
             }
         }
-        ValueEventArgs e =
-                new ValueEventArgs(settings, target, attributeIndex, 0, null);
+        ValueEventArgs e = new ValueEventArgs(settings, target, attributeIndex,
+                0, parameters);
         e.setValue(val);
         target.setValue(settings, e);
         return target.getValues()[attributeIndex - 1];
@@ -1499,6 +1527,25 @@ public class GXDLMSClient {
      */
     public final byte[][] readRowsByEntry(final GXDLMSProfileGeneric pg,
             final int index, final int count) {
+        return readRowsByEntry(pg, index, count, null);
+    }
+
+    /**
+     * Read rows by entry.
+     * 
+     * @param pg
+     *            Profile generic object to read.
+     * @param index
+     *            One based start index.
+     * @param count
+     *            Rows count to read.
+     * @param columns
+     *            Columns to read.
+     * @return Read message as byte array.
+     */
+    public final byte[][] readRowsByEntry(final GXDLMSProfileGeneric pg,
+            final int index, final int count,
+            final List<Entry<GXDLMSObject, GXDLMSCaptureObject>> columns) {
         GXByteBuffer buff = new GXByteBuffer(19);
         // Add AccessSelector value
         buff.setUInt8(0x02);
@@ -1510,13 +1557,50 @@ public class GXDLMSClient {
         GXCommon.setData(buff, DataType.UINT32, index);
         // Add Count
         GXCommon.setData(buff, DataType.UINT32, count);
-        // Read all columns.
-        if (this.getUseLogicalNameReferencing()) {
-            GXCommon.setData(buff, DataType.UINT16, 1);
-        } else {
-            GXCommon.setData(buff, DataType.UINT16, 0);
+
+        int columnIndex = 1;
+        int columnCount = 0;
+        int pos = 0;
+        // If columns are given find indexes.
+        if (columns != null && columns.size() != 0) {
+            if (pg.getCaptureObjects() == null
+                    || pg.getCaptureObjects().size() == 0) {
+                throw new RuntimeException("Read capture objects first.");
+            }
+            columnIndex = pg.getCaptureObjects().size();
+            columnCount = 1;
+            for (Entry<GXDLMSObject, GXDLMSCaptureObject> c : columns) {
+                pos = 0;
+                boolean found = false;
+                for (Entry<GXDLMSObject, GXDLMSCaptureObject> it : pg
+                        .getCaptureObjects()) {
+                    ++pos;
+                    if (it.getKey().getObjectType() == c.getKey()
+                            .getObjectType()
+                            && it.getKey().getLogicalName()
+                                    .compareTo(c.getKey().getLogicalName()) == 0
+                            && it.getValue().getAttributeIndex() == c.getValue()
+                                    .getAttributeIndex()
+                            && it.getValue().getDataIndex() == c.getValue()
+                                    .getDataIndex()) {
+                        found = true;
+                        if (pos < columnIndex) {
+                            columnIndex = pos;
+                        }
+                        columnCount = pos - columnIndex + 1;
+                        break;
+                    }
+                }
+                if (!found) {
+                    throw new RuntimeException(
+                            "Invalid column: " + c.getKey().getLogicalName());
+                }
+            }
         }
-        GXCommon.setData(buff, DataType.UINT16, 0);
+
+        // Select columns to read.
+        GXCommon.setData(buff, DataType.UINT16, columnIndex);
+        GXCommon.setData(buff, DataType.UINT16, columnCount);
         return read(pg.getName(), ObjectType.PROFILE_GENERIC, 2, buff);
     }
 
@@ -1534,7 +1618,27 @@ public class GXDLMSClient {
      */
     public final byte[][] readRowsByRange(final GXDLMSProfileGeneric pg,
             final java.util.Date start, final java.util.Date end) {
-        return readByRange(pg, start, end);
+        return readByRange(pg, start, end, null);
+    }
+
+    /**
+     * Read rows by range. Use this method to read Profile Generic table between
+     * dates.
+     * 
+     * @param pg
+     *            Profile generic object to read.
+     * @param start
+     *            Start time.
+     * @param end
+     *            End time.
+     * @param columns
+     *            Columns to read.
+     * @return Generated read message.
+     */
+    public final byte[][] readRowsByRange(final GXDLMSProfileGeneric pg,
+            final java.util.Date start, final java.util.Date end,
+            final List<Entry<GXDLMSObject, GXDLMSCaptureObject>> columns) {
+        return readByRange(pg, start, end, columns);
     }
 
     /**
@@ -1551,7 +1655,27 @@ public class GXDLMSClient {
      */
     public final byte[][] readRowsByRange(final GXDLMSProfileGeneric pg,
             final Calendar start, final Calendar end) {
-        return readByRange(pg, start, end);
+        return readByRange(pg, start, end, null);
+    }
+
+    /**
+     * Read rows by range. Use this method to read Profile Generic table between
+     * dates.
+     * 
+     * @param pg
+     *            Profile generic object to read.
+     * @param start
+     *            Start time.
+     * @param end
+     *            End time.
+     * @param columns
+     *            Columns to read.
+     * @return Generated read message.
+     */
+    public final byte[][] readRowsByRange(final GXDLMSProfileGeneric pg,
+            final Calendar start, final Calendar end,
+            final List<Entry<GXDLMSObject, GXDLMSCaptureObject>> columns) {
+        return readByRange(pg, start, end, columns);
     }
 
     /**
@@ -1567,7 +1691,8 @@ public class GXDLMSClient {
      * @return Generated read message.
      */
     private byte[][] readByRange(final GXDLMSProfileGeneric pg,
-            final Object start, final Object end) {
+            final Object start, final Object end,
+            final List<Entry<GXDLMSObject, GXDLMSCaptureObject>> columns) {
         settings.resetBlockIndex();
         GXDLMSObject sort = pg.getSortObject();
         if (sort == null && pg.getCaptureObjects().size() != 0) {
@@ -1599,10 +1724,31 @@ public class GXDLMSClient {
         GXCommon.setData(buff, DataType.UINT16, sort.getVersion());
         GXCommon.setData(buff, DataType.OCTET_STRING, start); // Add start time
         GXCommon.setData(buff, DataType.OCTET_STRING, end); // Add start time
-        // Add array of read columns. Read All...
-        buff.setUInt8(0x01);
-        // Add item count
-        buff.setUInt8(0x00);
+        // Add array of read columns.
+        buff.setUInt8(DataType.ARRAY.getValue());
+        if (columns == null) {
+            // Add item count
+            buff.setUInt8(0x00);
+        } else {
+            GXCommon.setObjectCount(columns.size(), buff);
+            for (Entry<GXDLMSObject, GXDLMSCaptureObject> it : columns) {
+                buff.setUInt8(DataType.STRUCTURE.getValue());
+                // Add items count.
+                buff.setUInt8(4);
+                // CI
+                GXCommon.setData(buff, DataType.UINT16,
+                        it.getKey().getObjectType().getValue());
+                // LN
+                GXCommon.setData(buff, DataType.OCTET_STRING,
+                        it.getKey().getLogicalName());
+                // Add attribute index.
+                GXCommon.setData(buff, DataType.INT8,
+                        it.getValue().getAttributeIndex());
+                // Add data index.
+                GXCommon.setData(buff, DataType.INT16,
+                        it.getValue().getDataIndex());
+            }
+        }
         return read(pg.getName(), ObjectType.PROFILE_GENERIC, 2, buff);
     }
 

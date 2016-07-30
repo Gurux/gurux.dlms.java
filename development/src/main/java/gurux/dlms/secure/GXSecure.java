@@ -69,14 +69,26 @@ public final class GXSecure {
 
         try {
 
-            byte[] tmp;
+            byte[] d, s;
             if (settings.getAuthentication() == Authentication.HIGH) {
-                tmp = new byte[data.length + (16 - (data.length % 16))];
-                System.arraycopy(data, 0, tmp, 0, data.length);
-                for (int pos = 0; pos < tmp.length / 16; ++pos) {
-                    GXDLMSChipperingStream.aes1Encrypt(tmp, pos * 16, secret);
+                int len = data.length;
+                if (len % 16 != 0) {
+                    len += (16 - (data.length % 16));
                 }
-                return tmp;
+                if (secret.length > data.length) {
+                    len = secret.length;
+                    if (len % 16 != 0) {
+                        len += (16 - (secret.length % 16));
+                    }
+                }
+                s = new byte[len];
+                d = new byte[len];
+                System.arraycopy(data, 0, d, 0, data.length);
+                System.arraycopy(secret, 0, s, 0, secret.length);
+                for (int pos = 0; pos < d.length / 16; ++pos) {
+                    GXDLMSChipperingStream.aes1Encrypt(d, pos * 16, s);
+                }
+                return d;
             }
             // Get server Challenge.
             GXByteBuffer challenge = new GXByteBuffer();
@@ -87,14 +99,14 @@ public final class GXSecure {
                 challenge.set(data);
                 challenge.set(secret);
             }
-            tmp = challenge.array();
+            d = challenge.array();
             if (settings.getAuthentication() == Authentication.HIGH_MD5) {
                 MessageDigest md = MessageDigest.getInstance("MD5");
-                return md.digest(tmp);
+                return md.digest(d);
             } else if (settings
                     .getAuthentication() == Authentication.HIGH_SHA1) {
                 MessageDigest md = MessageDigest.getInstance("SHA-1");
-                return md.digest(tmp);
+                return md.digest(d);
             } else if (settings
                     .getAuthentication() == Authentication.HIGH_GMAC) {
                 // SC is always Security.Authentication.
@@ -106,9 +118,9 @@ public final class GXSecure {
                 challenge.clear();
                 challenge.setUInt8((byte) Security.AUTHENTICATION.getValue());
                 challenge.setUInt32(p.getFrameCounter());
-                challenge.set(GXDLMSChippering.encryptAesGcm(p, tmp));
-                tmp = challenge.array();
-                return tmp;
+                challenge.set(GXDLMSChippering.encryptAesGcm(p, d));
+                d = challenge.array();
+                return d;
             }
             return data;
         } catch (NoSuchAlgorithmException ex) {
@@ -133,10 +145,7 @@ public final class GXSecure {
         // int len = r.nextInt(57) + 8;
         byte[] result = new byte[len];
         for (int pos = 0; pos != len; ++pos) {
-            // Allow printable characters only.
-            do {
-                result[pos] = (byte) r.nextInt(0x7A);
-            } while (result[pos] < 0x21);
+            result[pos] = (byte) r.nextInt(0x7A);
         }
         return result;
     }

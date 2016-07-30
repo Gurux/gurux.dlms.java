@@ -318,7 +318,7 @@ public abstract class GXDLMSServer {
      * @return Maximum size of received PDU.
      */
     public final int getMaxReceivePDUSize() {
-        return settings.getMaxReceivePDUSize();
+        return settings.getMaxServerPDUSize();
     }
 
     /**
@@ -326,7 +326,7 @@ public abstract class GXDLMSServer {
      *            Maximum size of received PDU.
      */
     public final void setMaxReceivePDUSize(final int value) {
-        settings.setMaxReceivePDUSize(value);
+        settings.setMaxServerPDUSize(value);
     }
 
     /**

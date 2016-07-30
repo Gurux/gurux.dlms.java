@@ -432,9 +432,10 @@ public class GXDLMSNotify {
     /**
      * Returns collection of push objects.
      * 
+     * @param objects
+     *            Array of objects and called indexes.
      * @param data
      *            Received data.
-     * @return Array of objects and called indexes.
      */
     public final void parsePush(
             final List<Entry<GXDLMSObject, Integer>> objects,

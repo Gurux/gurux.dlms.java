@@ -379,9 +379,12 @@ public class GXDLMSProfileGeneric extends GXDLMSObject implements IGXDLMSBase {
     /**
      * @param table
      *            Table where rows are get.
+     * @param columns
+     *            Columns to get. Null if not used.
      * @return Buffer rows as byte array.
      */
-    private byte[] getData(final Object[] table) {
+    private byte[] getData(final Object[] table,
+            final List<Entry<GXDLMSObject, GXDLMSCaptureObject>> columns) {
         GXByteBuffer data = new GXByteBuffer();
         data.setUInt8((byte) DataType.ARRAY.getValue());
         GXCommon.setObjectCount(table.length, data);
@@ -397,33 +400,78 @@ public class GXDLMSProfileGeneric extends GXDLMSObject implements IGXDLMSBase {
         for (Object row : table) {
             Object[] items = (Object[]) row;
             data.setUInt8(DataType.STRUCTURE.getValue());
-            GXCommon.setObjectCount(items.length, data);
+            if (columns == null || columns.size() == 0) {
+                GXCommon.setObjectCount(items.length, data);
+            } else {
+                GXCommon.setObjectCount(columns.size(), data);
+            }
             pos = -1;
             for (Object value : items) {
                 tp = DataType.NONE;
                 if (types.length == items.length) {
                     tp = types[++pos];
+                } else {
+                    ++pos;
                 }
-                if (tp == DataType.NONE) {
-                    tp = GXCommon.getValueType(value);
-                    if (types.length == items.length) {
-                        types[pos] = tp;
+                if (columns == null
+                        || columns.contains(captureObjects.get(pos))) {
+                    if (tp == DataType.NONE) {
+                        tp = GXCommon.getValueType(value);
+                        if (types.length == items.length) {
+                            types[pos] = tp;
+                        }
                     }
+                    GXCommon.setData(data, tp, value);
                 }
-                GXCommon.setData(data, tp, value);
             }
         }
         return data.array();
 
     }
 
+    /**
+     * Get selected columns.
+     * 
+     * @param cols
+     *            selected columns.
+     * @return Selected columns.
+     */
+    private List<Entry<GXDLMSObject, GXDLMSCaptureObject>>
+            getColumns(final Object[] cols) {
+        List<Entry<GXDLMSObject, GXDLMSCaptureObject>> columns = null;
+        if (cols != null && cols.length != 0) {
+            columns = new ArrayList<Entry<GXDLMSObject, GXDLMSCaptureObject>>();
+            for (Object it : cols) {
+                Object[] tmp = (Object[]) it;
+                ObjectType ot = ObjectType.forValue((Integer) tmp[0]);
+                String ln = GXDLMSObject.toLogicalName((byte[]) tmp[1]);
+                byte attributeIndex = (Byte) tmp[2];
+                int dataIndex = (Short) tmp[3];
+                // Find columns and update only them.
+                for (Entry<GXDLMSObject, GXDLMSCaptureObject> c
+
+                : captureObjects) {
+                    if (c.getKey().getObjectType() == ot
+                            && c.getValue()
+                                    .getAttributeIndex() == attributeIndex
+                            && c.getValue().getDataIndex() == dataIndex
+                            && c.getKey().getLogicalName().compareTo(ln) == 0) {
+                        columns.add(c);
+                        break;
+                    }
+                }
+            }
+        }
+        return columns;
+    }
+
     final byte[] getProfileGenericData(final int selector,
             final Object parameters) {
+        List<Entry<GXDLMSObject, GXDLMSCaptureObject>> columns = null;
         // If all data is read.
         if (selector == 0 || parameters == null) {
-            return getData(getBuffer());
+            return getData(getBuffer(), columns);
         }
-
         Object[] arr = (Object[]) parameters;
         ArrayList<Object[]> table = new ArrayList<Object[]>();
         // Read by range
@@ -438,6 +486,10 @@ public class GXDLMSProfileGeneric extends GXDLMSObject implements IGXDLMSBase {
             java.util.Date end = ((GXDateTime) GXCommon
                     .getData(new GXByteBuffer((byte[]) arr[2]), info))
                             .getValue();
+
+            if (arr.length > 3) {
+                columns = getColumns((Object[]) ((Object[]) arr)[3]);
+            }
             for (Object row : getBuffer()) {
                 java.util.Date tm;
                 Object tmp = ((Object[]) row)[0];
@@ -454,6 +506,20 @@ public class GXDLMSProfileGeneric extends GXDLMSObject implements IGXDLMSBase {
             // Read by entry.
             int start = ((Number) arr[0]).intValue();
             int count = ((Number) arr[1]).intValue();
+            int colStart = 1;
+            int colCount = 0;
+            if (arr.length > 2) {
+                colStart = ((Number) arr[2]).intValue();
+            }
+            if (arr.length > 3) {
+                colCount = ((Number) arr[3]).intValue();
+            } else if (colStart != 1) {
+                colCount = captureObjects.size();
+            }
+            if (colStart != 1 || colCount != 0) {
+                columns = captureObjects.subList(colStart - 1,
+                        colStart + colCount - 1);
+            }
             for (int pos = 0; pos < count; ++pos) {
                 if (pos + start == getBuffer().length) {
                     break;
@@ -463,7 +529,7 @@ public class GXDLMSProfileGeneric extends GXDLMSObject implements IGXDLMSBase {
         } else {
             throw new IllegalArgumentException("Invalid selector.");
         }
-        return getData(table.toArray());
+        return getData(table.toArray(), columns);
     }
 
     @Override
@@ -563,7 +629,7 @@ public class GXDLMSProfileGeneric extends GXDLMSObject implements IGXDLMSBase {
         if (e.getIndex() == 1) {
             super.setValue(settings, e);
         } else if (e.getIndex() == 2) {
-            setBuffer(e.getValue());
+            setBuffer(e);
         } else if (e.getIndex() == 3) {
             captureObjects.clear();
             buffer.clear();
@@ -649,25 +715,35 @@ public class GXDLMSProfileGeneric extends GXDLMSObject implements IGXDLMSBase {
      * @param value
      *            Received data.
      */
-    private void setBuffer(final Object value) {
-        if (captureObjects == null || captureObjects.size() == 0) {
+    @SuppressWarnings("unchecked")
+    private void setBuffer(final ValueEventArgs e) {
+
+        List<Entry<GXDLMSObject, GXDLMSCaptureObject>> cols = null;
+        if (e.getParameters() instanceof List) {
+            cols = (List<Entry<GXDLMSObject, GXDLMSCaptureObject>>) e
+                    .getParameters();
+        }
+
+        if (cols == null) {
+            cols = captureObjects;
+        }
+        if (cols == null || cols.size() == 0) {
             throw new RuntimeException("Read capture objects first.");
         }
         buffer.clear();
-        if (value != null) {
+        if (e.getValue() != null) {
             java.util.Calendar lastDate = java.util.Calendar.getInstance();
-            // java.util.Date lastDate = null;
-            DataType[] types = new DataType[captureObjects.size()];
+            DataType[] types = new DataType[cols.size()];
             int colIndex = -1;
             // CHECKSTYLE:OFF
-            for (Entry<GXDLMSObject, GXDLMSCaptureObject> it : captureObjects) {
+            for (Entry<GXDLMSObject, GXDLMSCaptureObject> it : cols) {
                 // CHECKSTYLE:ON
                 types[++colIndex] = it.getKey()
                         .getUIDataType(it.getValue().getAttributeIndex());
             }
-            for (Object it : (Object[]) value) {
+            for (Object it : (Object[]) e.getValue()) {
                 Object[] row = (Object[]) it;
-                if (row.length != captureObjects.size()) {
+                if (row.length != cols.size()) {
                     throw new RuntimeException(
                             "Number of columns do not match.");
                 }
@@ -697,7 +773,7 @@ public class GXDLMSProfileGeneric extends GXDLMSObject implements IGXDLMSBase {
                         }
                     }
                     Entry<GXDLMSObject, GXDLMSCaptureObject> item =
-                            captureObjects.get(colIndex);
+                            cols.get(colIndex);
                     if (item.getKey() instanceof GXDLMSRegister
                             && item.getValue().getAttributeIndex() == 2) {
                         double scaler =

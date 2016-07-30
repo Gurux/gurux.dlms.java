@@ -169,6 +169,11 @@ public class GXDLMSSettings {
     private int maxReceivePDUSize = MAX_RECEIVE_PDU_SIZE;
 
     /**
+     * Server maximum PDU size.
+     */
+    public int maxServerPDUSize = MAX_RECEIVE_PDU_SIZE;
+
+    /**
      * HDLC sender frame sequence number.
      */
     private short senderFrame;
@@ -609,6 +614,21 @@ public class GXDLMSSettings {
     }
 
     /**
+     * @return Server maximum PDU size.
+     */
+    public final int getMaxServerPDUSize() {
+        return maxServerPDUSize;
+    }
+
+    /**
+     * @param value
+     *            Server maximum PDU size.
+     */
+    public final void setMaxServerPDUSize(final int value) {
+        maxServerPDUSize = value;
+    }
+
+    /**
      * @return Is Logical Name Referencing used.
      */
     public final boolean getUseLogicalNameReferencing() {
@@ -752,8 +772,8 @@ public class GXDLMSSettings {
     }
 
     /**
-     * @param count
-     *            Long data count.
+     * @param value
+     *            Data count.
      */
     public final void setCount(final int value) {
         count = value;
@@ -767,7 +787,7 @@ public class GXDLMSSettings {
     }
 
     /**
-     * @param index
+     * @param value
      *            Long data index
      */
     public final void setIndex(final int value) {

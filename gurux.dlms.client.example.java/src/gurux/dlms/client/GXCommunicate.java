@@ -62,6 +62,7 @@ import gurux.dlms.enums.ErrorCode;
 import gurux.dlms.enums.InterfaceType;
 import gurux.dlms.enums.ObjectType;
 import gurux.dlms.enums.RequestTypes;
+import gurux.dlms.enums.Security;
 import gurux.dlms.manufacturersettings.GXManufacturer;
 import gurux.dlms.manufacturersettings.GXObisCode;
 import gurux.dlms.manufacturersettings.GXServerAddress;
@@ -73,6 +74,7 @@ import gurux.dlms.objects.GXDLMSObjectCollection;
 import gurux.dlms.objects.GXDLMSProfileGeneric;
 import gurux.dlms.objects.GXDLMSRegister;
 import gurux.dlms.objects.IGXDLMSBase;
+import gurux.dlms.secure.GXDLMSSecureClient;
 import gurux.io.Parity;
 import gurux.io.StopBits;
 import gurux.net.GXNet;
@@ -83,7 +85,7 @@ public class GXCommunicate {
     public boolean Trace = false;
     long ConnectionStartTime;
     GXManufacturer manufacturer;
-    public GXDLMSClient dlms;
+    public GXDLMSSecureClient dlms;
     boolean iec;
     java.nio.ByteBuffer replyBuff;
     int WaitTime = 10000;
@@ -98,7 +100,7 @@ public class GXCommunicate {
         System.out.print(text + "\r\n");
     }
 
-    public GXCommunicate(int waitTime, gurux.dlms.GXDLMSClient dlms,
+    public GXCommunicate(int waitTime, GXDLMSSecureClient dlms,
             GXManufacturer manufacturer, boolean iec, Authentication auth,
             String pw, IGXMedia media) throws Exception {
         Files.deleteIfExists(Paths.get("trace.txt"));
@@ -116,6 +118,7 @@ public class GXCommunicate {
         GXServerAddress serv = manufacturer.getServer(HDLCAddressType.DEFAULT);
         if (useIec47) {
             dlms.setInterfaceType(InterfaceType.WRAPPER);
+            value = serv.getPhysicalAddress();
         } else {
             dlms.setInterfaceType(InterfaceType.HDLC);
             value = GXDLMSClient.getServerAddress(serv.getLogicalAddress(),
@@ -398,6 +401,9 @@ public class GXCommunicate {
         ConnectionStartTime =
                 java.util.Calendar.getInstance().getTimeInMillis();
         GXReplyData reply = new GXReplyData();
+        dlms.setAuthentication(Authentication.HIGH);
+        dlms.setPassword("Gurux");
+        dlms.getCiphering().setSecurity(Security.AUTHENTICATION_ENCRYPTION);
         byte[] data = dlms.snrmRequest();
         if (data.length != 0) {
             readDLMSPacket(data, reply);
@@ -770,7 +776,6 @@ public class GXCommunicate {
         readDataBlock(dlms.getObjectsRequest(), reply);
         GXDLMSObjectCollection objects =
                 dlms.parseObjects(reply.getData(), true);
-
         // Get description of the objects.
         GXDLMSConverter converter = new GXDLMSConverter();
         converter.updateOBISCodeInformation(objects);

@@ -366,7 +366,13 @@ final class GXAPDU {
             }
         }
         if (settings.isServer()) {
-            data.getUInt16();
+            // Proposed max PDU size.
+            settings.setMaxReceivePDUSize(data.getUInt16());
+            // If client asks too high PDU.
+            if (settings.getMaxReceivePDUSize() > settings
+                    .getMaxServerPDUSize()) {
+                settings.setMaxReceivePDUSize(settings.getMaxServerPDUSize());
+            }
         } else {
             settings.setMaxReceivePDUSize(data.getUInt16());
         }
@@ -556,7 +562,8 @@ final class GXAPDU {
                 if (buff.getUInt8() != BerType.OBJECT_DESCRIPTOR.getValue()) {
                     throw new RuntimeException("Invalid tag.");
                 }
-                //Get only value because client app is sending system title with LOW authentication.
+                // Get only value because client application is
+                // sending system title with LOW authentication.
                 buff.getUInt8();
                 break;
             // BerType.CONTEXT | PduType.MECHANISMNAME or

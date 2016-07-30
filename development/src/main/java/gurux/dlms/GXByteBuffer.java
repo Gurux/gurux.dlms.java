@@ -152,6 +152,9 @@ public class GXByteBuffer {
      *            Buffer position.
      */
     public final void position(final int value) {
+        if (value < 0 || value > size()) {
+            throw new IllegalArgumentException("position");
+        }
         position = value;
     }
 
@@ -174,6 +177,9 @@ public class GXByteBuffer {
      *            Buffer size.
      */
     public final void size(final int value) {
+        if (value < 0 || value > capacity()) {
+            throw new IllegalArgumentException("size");
+        }
         size = value;
         if (position > size) {
             position = size;
@@ -188,9 +194,13 @@ public class GXByteBuffer {
     }
 
     /**
-     * Returns data as byte array.
+     * Returns sub array from byte buffer.
      * 
-     * @return Byte buffer as a byte array.
+     * @param index
+     *            Start index.
+     * @param count
+     *            Byte count.
+     * @return Sub array.
      */
     public final byte[] subArray(final int index, final int count) {
         byte[] tmp = new byte[count];

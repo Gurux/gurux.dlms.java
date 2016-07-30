@@ -163,6 +163,7 @@ public class GXDLMSAssociationShortName extends GXDLMSObject
                 return null;
             }
         } else {
+            settings.setConnected(false);
             e.setError(ErrorCode.READ_WRITE_DENIED);
             return null;
         }

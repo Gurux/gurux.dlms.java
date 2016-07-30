@@ -1124,11 +1124,11 @@ class GXDLMSChipperingStream {
             key[1] = (byte) (S_BOX[key[14] & 0xFF] ^ key[1]);
             key[2] = (byte) (S_BOX[key[15] & 0xFF] ^ key[2]);
             key[3] = (byte) (S_BOX[key[12] & 0xFF] ^ key[3]);
+
             for (i = 4; i < 16; i++) {
                 key[i] = (byte) (key[i] ^ key[i - 4]);
             }
         }
-
         for (i = 0; i < 16; i++) {
             data[i + offset] = (byte) (data[i + offset] ^ key[i]);
         }

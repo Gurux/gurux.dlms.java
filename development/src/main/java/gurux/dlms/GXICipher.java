@@ -58,6 +58,7 @@ public interface GXICipher {
      *            System Title.
      * @param data
      *            Decrypted data.
+     * @return Used security.
      */
     Security decrypt(final byte[] systemTitle, GXByteBuffer data);
 

@@ -38,10 +38,10 @@ import java.io.FileWriter;
 import java.io.PrintWriter;
 
 import gurux.common.IGXMedia;
-import gurux.dlms.GXDLMSClient;
 import gurux.dlms.enums.Authentication;
 import gurux.dlms.manufacturersettings.GXManufacturer;
 import gurux.dlms.manufacturersettings.GXManufacturerCollection;
+import gurux.dlms.secure.GXDLMSSecureClient;
 import gurux.io.Parity;
 import gurux.io.StopBits;
 import gurux.net.GXNet;
@@ -234,7 +234,7 @@ public class sampleclient {
         } else {
             throw new Exception("Unknown media type.");
         }
-        GXDLMSClient dlms = new GXDLMSClient();
+        GXDLMSSecureClient dlms = new GXDLMSSecureClient();
         GXManufacturerCollection items = new GXManufacturerCollection();
         GXManufacturerCollection.readManufacturerSettings(items, path);
         GXManufacturer man = items.findByIdentification(id);
@@ -244,6 +244,9 @@ public class sampleclient {
         dlms.setObisCodes(man.getObisCodes());
         com = new GXCommunicate(5000, dlms, man, iec, auth, pw, media);
         com.Trace = trace;
+        // Mikko
+        dlms.setClientAddress(1);
+        dlms.setServerAddress(1);
         return com;
     }
 }

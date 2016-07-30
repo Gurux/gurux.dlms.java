@@ -53,11 +53,17 @@ public class AesGcmParameter {
      * Constructor.
      * 
      * @param forTag
+     *            Tag.
      * @param forSecurity
+     *            Security level.
      * @param forFrameCounter
+     *            Frame counter.
      * @param forSystemTitle
+     *            System title.
      * @param forBlockCipherKey
+     *            Block cipher key.
      * @param forAuthenticationKey
+     *            Authentication key.
      */
     public AesGcmParameter(final int forTag, final Security forSecurity,
             final long forFrameCounter, final byte[] forSystemTitle,
@@ -76,8 +82,11 @@ public class AesGcmParameter {
      * Constructor.
      * 
      * @param forsystemTitle
+     *            System title.
      * @param forblockCipherKey
+     *            Block cipher key.
      * @param forauthenticationKey
+     *            Authentication key.
      */
     public AesGcmParameter(final byte[] forsystemTitle,
             final byte[] forblockCipherKey, final byte[] forauthenticationKey) {

@@ -58,9 +58,12 @@ public class GXDLMSLongTransaction {
     /**
      * Constructor.
      * 
-     * @param forTarget
+     * @param forTargets
+     *            Targets.
      * @param forCommand
+     *            Command.
      * @param forData
+     *            Data.
      */
     public GXDLMSLongTransaction(final ValueEventArgs[] forTargets,
             final Command forCommand, final GXByteBuffer forData) {

@@ -167,6 +167,8 @@ public class ValueEventArgs {
     /**
      * Constructor.
      * 
+     * @param s
+     *            DLMS settings.
      * @param eventTarget
      *            Event target.
      * @param eventIndex
@@ -216,7 +218,7 @@ public class ValueEventArgs {
     }
 
     /**
-     * @param error
+     * @param value
      *            Occurred error.
      */
     public final void setError(final ErrorCode value) {
