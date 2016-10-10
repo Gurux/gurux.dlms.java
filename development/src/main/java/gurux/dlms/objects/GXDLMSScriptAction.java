@@ -144,7 +144,7 @@ public class GXDLMSScriptAction {
     public final String toString() {
         String tmp;
         if (parameter instanceof byte[]) {
-            tmp = GXCommon.toHex((byte[]) parameter);
+            tmp = GXCommon.toHex((byte[]) parameter, true);
         } else {
             tmp = String.valueOf(parameter);
         }

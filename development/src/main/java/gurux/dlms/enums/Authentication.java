@@ -87,4 +87,54 @@ public enum Authentication {
     public static Authentication forValue(final int value) {
         return values()[value];
     }
+
+    @Override
+    public String toString() {
+        String str;
+        Authentication value = Authentication.forValue(getValue());
+        switch (value) {
+        case HIGH:
+            str = "High";
+            break;
+        case HIGH_GMAC:
+            str = "HighGMac";
+            break;
+        case HIGH_MD5:
+            str = "HighMd5";
+            break;
+        case HIGH_SHA1:
+            str = "HighSha1";
+            break;
+        case LOW:
+            str = "Low";
+            break;
+        case NONE:
+            str = "None";
+            break;
+        default:
+            str = "";
+            break;
+        }
+        return str;
+    }
+
+    public static Authentication valueOfString(final String value) {
+        Authentication v = Authentication.NONE;
+        if ("None".equalsIgnoreCase(value)) {
+            v = Authentication.NONE;
+        } else if ("Low".equalsIgnoreCase(value)) {
+            v = Authentication.LOW;
+        } else if ("High".equalsIgnoreCase(value)) {
+            v = Authentication.HIGH;
+        } else if ("HighMd5".equalsIgnoreCase(value)) {
+            v = Authentication.HIGH_MD5;
+        } else if ("HighSha1".equalsIgnoreCase(value)) {
+            v = Authentication.HIGH_SHA1;
+        } else if ("HighGMac".equalsIgnoreCase(value)) {
+            v = Authentication.HIGH_GMAC;
+        } else {
+            throw new IllegalArgumentException(value);
+        }
+        return v;
+    }
 }

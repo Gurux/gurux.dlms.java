@@ -2,7 +2,7 @@
   <modelVersion>4.0.0</modelVersion>
   <groupId>org.gurux</groupId>
   <artifactId>gurux.dlms</artifactId>
-  <version>1.2.30</version>
+  <version>1.4.2</version>
   <packaging>jar</packaging>  
  <name>gurux.dlms.java</name>
  <url>http://www.gurux.org</url>

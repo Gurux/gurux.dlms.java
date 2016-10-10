@@ -99,6 +99,6 @@ public class GXxDLMSContextType {
                 + String.valueOf(maxSendPpuSize) + " "
                 + String.valueOf(dlmsVersionNumber) + " "
                 + String.valueOf(qualityOfService) + " "
-                + GXCommon.toHex(cypheringInfo);
+                + GXCommon.toHex(cypheringInfo, true);
     }
 }

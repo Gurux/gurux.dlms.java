@@ -47,8 +47,7 @@
 // Copyright (c) Gurux Ltd
 package gurux.dlms.secure;
 
-import java.io.ByteArrayOutputStream;
-
+import gurux.dlms.GXByteBuffer;
 import gurux.dlms.GXDLMSException;
 import gurux.dlms.enums.Security;
 import gurux.dlms.internal.GXCommon;
@@ -58,7 +57,7 @@ import gurux.dlms.internal.GXCommon;
  * http://csrc.nist.gov/publications/nistpubs/800-38D/SP-800-38D.pdf
  */
 class GXDLMSChipperingStream {
-    private ByteArrayOutputStream output = new ByteArrayOutputStream();
+    private GXByteBuffer output = new GXByteBuffer();
     // Consts.
     private static final int BLOCK_SIZE = 16;
     private static final int TAG_SIZE = 0x10;
@@ -95,6 +94,32 @@ class GXDLMSChipperingStream {
     GXDLMSChipperingStream(final boolean forEncrypt, final byte[] kek) {
         encrypt = forEncrypt;
         workingKey = generateKey(encrypt, kek);
+    }
+
+    /**
+     * Clone byte array.
+     * 
+     * @param value
+     *            Source array.
+     * @return cloned array.
+     */
+    private byte[] clone(final byte[] value) {
+        byte[] tmp = new byte[value.length];
+        System.arraycopy(value, 0, tmp, 0, value.length);
+        return tmp;
+    }
+
+    /**
+     * Clone int array.
+     * 
+     * @param value
+     *            Source array.
+     * @return cloned array.
+     */
+    private int[] clone(final int[] value) {
+        int[] tmp = new int[value.length];
+        System.arraycopy(value, 0, tmp, 0, value.length);
+        return tmp;
     }
 
     /**
@@ -136,7 +161,7 @@ class GXDLMSChipperingStream {
         System.arraycopy(iv, 0, j0, 0, iv.length);
         this.j0[15] = 0x01;
         this.s = getGHash(aad);
-        this.counter = (byte[]) j0.clone();
+        this.counter = clone(j0);
         this.bytesRemaining = 0;
         this.totalLength = 0;
     }
@@ -827,16 +852,16 @@ class GXDLMSChipperingStream {
         mArray[1][8] = getUint128(value);
         int[] tmp;
         for (int pos = 4; pos >= 1; pos >>= 1) {
-            tmp = (int[]) mArray[1][pos + pos].clone();
+            tmp = clone(mArray[1][pos + pos]);
             multiplyP(tmp);
             mArray[1][pos] = tmp;
         }
-        tmp = (int[]) mArray[1][1].clone();
+        tmp = clone(mArray[1][1]);
         multiplyP(tmp);
         mArray[0][8] = tmp;
 
         for (int pos = 4; pos >= 1; pos >>= 1) {
-            tmp = (int[]) mArray[0][pos + pos].clone();
+            tmp = clone(mArray[0][pos + pos]);
             multiplyP(tmp);
             mArray[0][pos] = tmp;
         }
@@ -844,7 +869,7 @@ class GXDLMSChipperingStream {
         for (int pos1 = 0;;) {
             for (int pos2 = 2; pos2 < 16; pos2 += pos2) {
                 for (int k = 1; k < pos2; ++k) {
-                    tmp = (int[]) mArray[pos1][pos2].clone();
+                    tmp = clone(mArray[pos1][pos2]);
                     xor128(tmp, mArray[pos1][k]);
                     mArray[pos1][pos2 + k] = tmp;
                 }
@@ -858,7 +883,7 @@ class GXDLMSChipperingStream {
                 mArray[pos1] = new int[16][];
                 mArray[pos1][0] = new int[4];
                 for (int pos = 8; pos > 0; pos >>= 1) {
-                    tmp = (int[]) mArray[pos1 - 2][pos].clone();
+                    tmp = clone(mArray[pos1 - 2][pos]);
                     multiplyP8(tmp);
                     mArray[pos1][pos] = tmp;
                 }
@@ -885,7 +910,7 @@ class GXDLMSChipperingStream {
         }
         for (int pos = 0; pos != bufCount; ++pos) {
             tmp[pos] ^= buf[pos];
-            output.write(tmp[pos]);
+            output.setUInt8(tmp[pos]);
         }
         xor(s, hashBytes);
         multiplyH(s);
@@ -910,7 +935,7 @@ class GXDLMSChipperingStream {
      */
     private void reset() {
         s = getGHash(aad);
-        counter = (byte[]) j0.clone();
+        counter = clone(j0);
         bytesRemaining = 0;
         totalLength = 0;
     }
@@ -967,7 +992,7 @@ class GXDLMSChipperingStream {
         // If tag is not needed.
         if (security == Security.ENCRYPTION) {
             reset();
-            return this.output.toByteArray();
+            return output.array();
         }
         // Count HASH.
         byte[] x = new byte[16];
@@ -980,8 +1005,8 @@ class GXDLMSChipperingStream {
         xor(generatedTag, s);
         if (!encrypt) {
             if (!tagsEquals(this.tag, generatedTag)) {
-                System.out.println(GXCommon.toHex(tag) + "-"
-                        + GXCommon.toHex(generatedTag));
+                System.out.println(GXCommon.toHex(tag, false) + "-"
+                        + GXCommon.toHex(generatedTag, false));
                 throw new GXDLMSException("Decrypt failed. Invalid tag.");
             }
         } else {
@@ -989,7 +1014,7 @@ class GXDLMSChipperingStream {
             System.arraycopy(generatedTag, 0, tag, 0, 12);
         }
         reset();
-        return this.output.toByteArray();
+        return output.array();
     }
 
     /**

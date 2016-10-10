@@ -225,9 +225,8 @@ public class GXDLMSDemandRegister extends GXDLMSObject implements IGXDLMSBase {
 
     @Override
     public final Object[] getValues() {
-        String str = String.format("Scaler: %1$,.2f Unit: ",
-                new Double(getScaler()));
-        str += getUnit().toString();
+        String str = "Scaler: " + String.valueOf(getScaler()) + " Unit: "
+                + getUnit().toString();
         return new Object[] { getLogicalName(), getCurrentAvarageValue(),
                 getLastAvarageValue(), str, getStatus(), getCaptureTime(),
                 getStartTimeCurrent(), getPeriod(),
@@ -323,10 +322,10 @@ public class GXDLMSDemandRegister extends GXDLMSObject implements IGXDLMSBase {
             return super.getDataType(index);
         }
         if (index == 6) {
-            return DataType.DATETIME;
+            return DataType.OCTET_STRING;
         }
         if (index == 7) {
-            return DataType.DATETIME;
+            return DataType.OCTET_STRING;
         }
         if (index == 8) {
             return DataType.UINT32;

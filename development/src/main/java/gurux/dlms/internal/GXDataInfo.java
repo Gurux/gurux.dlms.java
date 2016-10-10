@@ -34,6 +34,7 @@
 
 package gurux.dlms.internal;
 
+import gurux.dlms.GXDLMSTranslatorStructure;
 import gurux.dlms.enums.DataType;
 
 /**
@@ -58,6 +59,8 @@ public class GXDataInfo {
      * Is data parsed to the end.
      */
     private boolean compleate = true;
+
+    private GXDLMSTranslatorStructure xml;
 
     /**
      * @return Last array index.
@@ -107,7 +110,7 @@ public class GXDataInfo {
     /**
      * @return Is data parsed to the end.
      */
-    public final boolean isCompleate() {
+    public final boolean isComplete() {
         return compleate;
     }
 
@@ -117,6 +120,14 @@ public class GXDataInfo {
      */
     public final void setCompleate(final boolean value) {
         compleate = value;
+    }
+
+    public final void setXml(final GXDLMSTranslatorStructure value) {
+        xml = value;
+    }
+
+    public final GXDLMSTranslatorStructure getXml() {
+        return xml;
     }
 
     public final void clear() {

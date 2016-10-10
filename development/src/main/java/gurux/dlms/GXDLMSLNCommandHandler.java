@@ -1,0 +1,784 @@
+package gurux.dlms;
+
+import java.util.ArrayList;
+import java.util.List;
+import java.util.logging.Logger;
+
+import gurux.dlms.enums.AccessMode;
+import gurux.dlms.enums.AccessServiceCommandType;
+import gurux.dlms.enums.Command;
+import gurux.dlms.enums.DataType;
+import gurux.dlms.enums.ErrorCode;
+import gurux.dlms.enums.MethodAccessMode;
+import gurux.dlms.enums.ObjectType;
+import gurux.dlms.internal.GXCommon;
+import gurux.dlms.internal.GXDataInfo;
+import gurux.dlms.objects.GXDLMSAssociationLogicalName;
+import gurux.dlms.objects.GXDLMSObject;
+
+final class GXDLMSLNCommandHandler {
+    private static final Logger LOGGER =
+            Logger.getLogger(GXDLMSServer.class.getName());
+
+    /**
+     * Constructor.
+     */
+    private GXDLMSLNCommandHandler() {
+
+    }
+
+    static void handleGetRequest(final GXDLMSSettings settings,
+            final GXDLMSServer server, final GXByteBuffer data,
+            final GXByteBuffer replyData, final GXDLMSTranslatorStructure xml) {
+        // Return error if connection is not established.
+        if (xml == null && !settings.isConnected()) {
+            replyData.set(GXDLMSServer.generateConfirmedServiceError(
+                    ConfirmedServiceError.INITIATE_ERROR, ServiceError.SERVICE,
+                    Service.UNSUPPORTED.getValue()));
+            return;
+        }
+        // Get type.
+        byte type = (byte) data.getUInt8();
+        // Get invoke ID and priority.
+        short invokeID = data.getUInt8();
+        if (xml != null) {
+            xml.appendStartTag(Command.GET_REQUEST);
+            xml.appendStartTag(Command.GET_REQUEST, type);
+            xml.appendLine(TranslatorTags.INVOKE_ID, "Value",
+                    xml.integerToHex(invokeID, 2));
+        }
+
+        // GetRequest normal
+        if (type == GetCommandType.NORMAL) {
+            getRequestNormal(settings, server, data, replyData, xml);
+        } else if (type == GetCommandType.NEXT_DATA_BLOCK) {
+            // Get request for next data block
+            getRequestNextDataBlock(settings, server, data, replyData, xml);
+        } else if (type == GetCommandType.WITH_LIST) {
+            // Get request with a list.
+            getRequestWithList(settings, server, data, replyData, xml);
+        } else {
+            LOGGER.info("HandleGetRequest failed. Invalid command type.");
+            GXByteBuffer bb = new GXByteBuffer();
+            settings.resetBlockIndex();
+            // Access Error : Device reports a hardware fault.
+            bb.setUInt8(ErrorCode.HARDWARE_FAULT.getValue());
+            GXDLMS.getLNPdu(
+                    new GXDLMSLNParameters(settings, Command.GET_RESPONSE, type,
+                            null, bb, ErrorCode.OK.getValue()),
+                    replyData);
+        }
+        if (xml != null) {
+            xml.appendEndTag(Command.GET_REQUEST, type);
+            xml.appendEndTag(Command.GET_REQUEST);
+        }
+    }
+
+    /**
+     * Handle set request.
+     * 
+     * @return Reply to the client.
+     */
+    public static void handleSetRequest(final GXDLMSSettings settings,
+            final GXDLMSServer server, final GXByteBuffer data,
+            final GXByteBuffer replyData, final GXDLMSTranslatorStructure xml) {
+        // Return error if connection is not established.
+        if (xml == null && !settings.isConnected()) {
+            replyData.set(GXDLMSServer.generateConfirmedServiceError(
+                    ConfirmedServiceError.INITIATE_ERROR, ServiceError.SERVICE,
+                    Service.UNSUPPORTED.getValue()));
+            return;
+        }
+        // Get type.
+        byte type = (byte) data.getUInt8();
+        // Get invoke ID and priority.
+        short invoke = data.getUInt8();
+        // SetRequest normal or Set Request With First Data Block
+        GXDLMSLNParameters p = new GXDLMSLNParameters(settings,
+                Command.SET_RESPONSE, type, null, null, 0);
+        if (xml != null) {
+            xml.appendStartTag(Command.SET_REQUEST);
+            xml.appendStartTag(Command.SET_REQUEST, type);
+            // InvokeIdAndPriority
+            xml.appendLine(TranslatorTags.INVOKE_ID, "Value",
+                    xml.integerToHex(invoke, 2));
+        }
+        switch (type) {
+        case SetRequestType.NORMAL:
+        case SetRequestType.FIRST_DATA_BLOCK:
+            handleSetRequestNormal(settings, server, data, type, p, replyData,
+                    xml);
+            break;
+        case SetRequestType.WITH_DATA_BLOCK:
+            hanleSetRequestWithDataBlock(settings, server, data, p, replyData,
+                    xml);
+            break;
+        default:
+            LOGGER.info("HandleSetRequest failed. Unknown command.");
+            settings.resetBlockIndex();
+            p.setStatus(ErrorCode.HARDWARE_FAULT.getValue());
+            break;
+        }
+        if (xml != null) {
+            xml.appendEndTag(Command.SET_REQUEST, type);
+            xml.appendEndTag(Command.SET_REQUEST);
+            return;
+        }
+        GXDLMS.getLNPdu(p, replyData);
+    }
+
+    private static void appendAttributeDescriptor(
+            final GXDLMSTranslatorStructure xml, final int ci, final byte[] ln,
+            final short attributeIndex) {
+        xml.appendStartTag(TranslatorTags.ATTRIBUTE_DESCRIPTOR);
+        xml.appendLine(TranslatorTags.CLASS_ID, "Value",
+                xml.integerToHex(ci, 4));
+        xml.appendLine(TranslatorTags.INSTANCE_ID, "Value",
+                GXCommon.toHex(ln, false));
+        xml.appendLine(TranslatorTags.ATTRIBUTE_ID, "Value",
+                xml.integerToHex(attributeIndex, 2));
+        xml.appendEndTag(TranslatorTags.ATTRIBUTE_DESCRIPTOR);
+    }
+
+    private static void appendMethodDescriptor(
+            final GXDLMSTranslatorStructure xml, final int ci, final byte[] ln,
+            final short attributeIndex) {
+        xml.appendStartTag(TranslatorTags.METHOD_DESCRIPTOR);
+        xml.appendLine(TranslatorTags.CLASS_ID, "Value",
+                xml.integerToHex(ci, 4));
+        xml.appendLine(TranslatorTags.INSTANCE_ID, "Value",
+                GXCommon.toHex(ln, false));
+        xml.appendLine(TranslatorTags.METHOD_ID, "Value",
+                xml.integerToHex(attributeIndex, 2));
+        xml.appendEndTag(TranslatorTags.METHOD_DESCRIPTOR);
+    }
+
+    /**
+     * Handle get request normal command.
+     * 
+     * @param data
+     *            Received data.
+     */
+    private static void getRequestNormal(final GXDLMSSettings settings,
+            final GXDLMSServer server, final GXByteBuffer data,
+            final GXByteBuffer replyData, final GXDLMSTranslatorStructure xml) {
+        GXByteBuffer bb = new GXByteBuffer();
+        ValueEventArgs e = null;
+        ErrorCode status = ErrorCode.OK;
+        settings.setCount(0);
+        settings.setIndex(0);
+        settings.resetBlockIndex();
+        // CI
+        ObjectType ci = ObjectType.forValue(data.getUInt16());
+        byte[] ln = new byte[6];
+        data.get(ln);
+        // Attribute Id
+        short attributeIndex = data.getUInt8();
+
+        // AccessSelection
+        short selection = data.getUInt8();
+        short selector = 0;
+        Object parameters = null;
+        GXDataInfo info = new GXDataInfo();
+        if (selection != 0) {
+            selector = data.getUInt8();
+        }
+        if (xml != null) {
+            appendAttributeDescriptor(xml, ci.getValue(), ln, attributeIndex);
+            if (selection != 0) {
+                info.setXml(xml);
+                xml.appendStartTag(TranslatorTags.ACCESS_SELECTION);
+                xml.appendLine(TranslatorTags.ACCESS_SELECTOR, "Value",
+                        xml.integerToHex(selector, 2));
+                xml.appendStartTag(TranslatorTags.ACCESS_PARAMETERS);
+                GXCommon.getData(data, info);
+                xml.appendEndTag(TranslatorTags.ACCESS_PARAMETERS);
+                xml.appendEndTag(TranslatorTags.ACCESS_SELECTION);
+            }
+            return;
+        }
+        if (selection != 0) {
+            parameters = GXCommon.getData(data, info);
+        }
+        GXDLMSObject obj = settings.getObjects().findByLN(ci,
+                GXDLMSObject.toLogicalName(ln));
+        if (obj == null) {
+            obj = server.notifyFindObject(ci, 0,
+                    GXDLMSObject.toLogicalName(ln));
+        }
+        if (obj == null) {
+            // "Access Error : Device reports a undefined object."
+            status = ErrorCode.UNDEFINED_OBJECT;
+        } else {
+            if (obj.getAccess(attributeIndex) == AccessMode.NO_ACCESS) {
+                // Read Write denied.
+                status = ErrorCode.READ_WRITE_DENIED;
+            } else {
+                e = new ValueEventArgs(settings, obj, attributeIndex, selector,
+                        parameters);
+                server.notifyRead(new ValueEventArgs[] { e });
+                Object value;
+                if (e.getHandled()) {
+                    value = e.getValue();
+                } else {
+                    value = obj.getValue(settings, e);
+                }
+                GXDLMS.appendData(obj, attributeIndex, bb, value);
+                status = e.getError();
+            }
+        }
+        GXDLMS.getLNPdu(new GXDLMSLNParameters(settings, Command.GET_RESPONSE,
+                1, null, bb, status.getValue()), replyData);
+        if (settings.getCount() != settings.getIndex()
+                || bb.size() != bb.position()) {
+            server.setTransaction(new GXDLMSLongTransaction(
+                    new ValueEventArgs[] { e }, Command.GET_REQUEST, bb));
+        }
+    }
+
+    /**
+     * Handle get request next data block command.
+     * 
+     * @param data
+     *            Received data.
+     */
+    private static void getRequestNextDataBlock(final GXDLMSSettings settings,
+            final GXDLMSServer server, final GXByteBuffer data,
+            final GXByteBuffer replyData, final GXDLMSTranslatorStructure xml) {
+        GXByteBuffer bb = new GXByteBuffer();
+        int index = (int) data.getUInt32();
+        // Get block index.
+        if (xml != null) {
+            xml.appendLine(TranslatorTags.BLOCK_NUMBER, null,
+                    xml.integerToHex(index, 8));
+            return;
+        }
+        if (index != settings.getBlockIndex()) {
+            LOGGER.info("getRequestNextDataBlock failed. Invalid block number. "
+                    + settings.getBlockIndex() + "/" + index);
+            GXDLMS.getLNPdu(
+                    new GXDLMSLNParameters(settings, Command.GET_RESPONSE, 2,
+                            null, bb,
+                            ErrorCode.DATA_BLOCK_NUMBER_INVALID.getValue()),
+                    replyData);
+        } else {
+            settings.increaseBlockIndex();
+            GXDLMSLNParameters p = new GXDLMSLNParameters(settings,
+                    Command.GET_RESPONSE, 2, null, bb, ErrorCode.OK.getValue());
+            // If transaction is not in progress.
+            if (server.getTransaction() == null) {
+                p.setStatus(
+                        ErrorCode.NO_LONG_GET_OR_READ_IN_PROGRESS.getValue());
+            } else {
+                bb.set(server.getTransaction().getData());
+                boolean moreData = settings.getIndex() != settings.getCount();
+                if (moreData) {
+                    // If there is multiple blocks on the buffer.
+                    // This might happen when Max PDU size is very small.
+                    if (bb.size() < settings.getMaxPduSize()) {
+                        Object value;
+                        for (ValueEventArgs arg : server.getTransaction()
+                                .getTargets()) {
+                            if (arg.getHandled()) {
+                                value = arg.getValue();
+                            } else {
+                                value = arg.getTarget().getValue(settings, arg);
+                            }
+                            // Add data.
+                            GXDLMS.appendData(arg.getTarget(), arg.getIndex(),
+                                    bb, value);
+                        }
+                    }
+                }
+                p.setMultipleBlocks(true);
+                GXDLMS.getLNPdu(p, replyData);
+                if (moreData || bb.size() - bb.position() != 0) {
+                    server.getTransaction().setData(bb);
+                } else {
+                    server.setTransaction(null);
+                }
+            }
+        }
+    }
+
+    /**
+     * Handle get request with list command.
+     * 
+     * @param data
+     *            Received data.
+     */
+    private static void getRequestWithList(final GXDLMSSettings settings,
+            final GXDLMSServer server, final GXByteBuffer data,
+            final GXByteBuffer replyData, final GXDLMSTranslatorStructure xml) {
+        ValueEventArgs e = null;
+        GXByteBuffer bb = new GXByteBuffer();
+        int pos;
+        int cnt = GXCommon.getObjectCount(data);
+        GXCommon.setObjectCount(cnt, bb);
+        List<ValueEventArgs> list = new ArrayList<ValueEventArgs>();
+        if (xml != null) {
+            xml.appendStartTag(TranslatorTags.ATTRIBUTE_DESCRIPTOR_LIST, "Qty",
+                    xml.integerToHex(cnt, 2));
+        }
+        for (pos = 0; pos != cnt; ++pos) {
+            ObjectType ci = ObjectType.forValue(data.getUInt16());
+            byte[] ln = new byte[6];
+            data.get(ln);
+            short attributeIndex = data.getUInt8();
+
+            // AccessSelection
+            int selection = data.getUInt8();
+            int selector = 0;
+            Object parameters = null;
+            if (selection != 0) {
+                selector = data.getUInt8();
+                GXDataInfo i = new GXDataInfo();
+                parameters = GXCommon.getData(data, i);
+            }
+            if (xml != null) {
+                xml.appendStartTag(
+                        TranslatorTags.ATTRIBUTE_DESCRIPTOR_WITH_SELECTION);
+                xml.appendStartTag(TranslatorTags.ATTRIBUTE_DESCRIPTOR);
+                xml.appendLine(TranslatorTags.CLASS_ID, "Value",
+                        xml.integerToHex(ci.getValue(), 4));
+                xml.appendLine(TranslatorTags.INSTANCE_ID, "Value",
+                        GXCommon.toHex(ln, false));
+                xml.appendLine(TranslatorTags.ATTRIBUTE_ID, "Value",
+                        xml.integerToHex(attributeIndex, 2));
+                xml.appendEndTag(TranslatorTags.ATTRIBUTE_DESCRIPTOR);
+                xml.appendEndTag(
+                        TranslatorTags.ATTRIBUTE_DESCRIPTOR_WITH_SELECTION);
+            } else {
+                GXDLMSObject obj = settings.getObjects().findByLN(ci,
+                        GXDLMSObject.toLogicalName(ln));
+                if (obj == null) {
+                    obj = server.notifyFindObject(ci, 0,
+                            GXDLMSObject.toLogicalName(ln));
+                }
+                if (obj == null) {
+                    // "Access Error : Device reports a undefined object."
+                    e = new ValueEventArgs(settings, obj, attributeIndex, 0, 0);
+                    e.setError(ErrorCode.UNDEFINED_OBJECT);
+                    list.add(e);
+                } else {
+                    if (obj.getAccess(attributeIndex) == AccessMode.NO_ACCESS) {
+                        // Read Write denied.
+                        ValueEventArgs arg = new ValueEventArgs(settings, obj,
+                                attributeIndex, 0, null);
+                        arg.setError(ErrorCode.READ_WRITE_DENIED);
+                        list.add(arg);
+                    } else {
+                        ValueEventArgs arg = new ValueEventArgs(settings, obj,
+                                attributeIndex, selector, parameters);
+                        list.add(arg);
+                    }
+                }
+            }
+        }
+        if (xml != null) {
+            xml.appendEndTag(TranslatorTags.ATTRIBUTE_DESCRIPTOR_LIST);
+            return;
+        }
+        server.notifyRead(list.toArray(new ValueEventArgs[list.size()]));
+        Object value;
+        pos = 0;
+        for (ValueEventArgs it : list) {
+            try {
+                if (it.getHandled()) {
+                    value = it.getValue();
+                } else {
+                    value = it.getTarget().getValue(settings, it);
+                }
+                bb.setUInt8(it.getError().getValue());
+                GXDLMS.appendData(it.getTarget(), it.getIndex(), bb, value);
+            } catch (Exception ex) {
+                bb.setUInt8(ErrorCode.HARDWARE_FAULT.getValue());
+            }
+            if (settings.getIndex() != settings.getCount()) {
+                server.setTransaction(new GXDLMSLongTransaction(
+                        list.toArray(new ValueEventArgs[list.size()]),
+                        Command.GET_REQUEST, null));
+            }
+            ++pos;
+        }
+        GXDLMS.getLNPdu(new GXDLMSLNParameters(settings, Command.GET_RESPONSE,
+                3, null, bb, 0xFF), replyData);
+    }
+
+    private static void handleSetRequestNormal(final GXDLMSSettings settings,
+            final GXDLMSServer server, final GXByteBuffer data, final int type,
+            final GXDLMSLNParameters p, final GXByteBuffer replyData,
+            final GXDLMSTranslatorStructure xml) {
+        Object value = null;
+        GXDataInfo reply = new GXDataInfo();
+        // CI
+        short ci = data.getInt16();
+        ObjectType ot = ObjectType.forValue(ci & 0xFFFF);
+        byte[] ln = new byte[6];
+        data.get(ln);
+        // Attribute index.
+        short index = data.getUInt8();
+        // Get Access Selection.
+        data.getUInt8();
+        if (xml != null) {
+            appendAttributeDescriptor(xml, ci, ln, index);
+            xml.appendStartTag(TranslatorTags.VALUE);
+            GXDataInfo di = new GXDataInfo();
+            di.setXml(xml);
+            value = GXCommon.getData(data, di);
+            if (!di.isComplete()) {
+                value = GXCommon.toHex(data.getData(), false, data.position(),
+                        data.size() - data.position());
+            } else if (value instanceof byte[]) {
+                value = GXCommon.toHex((byte[]) value, false);
+            }
+            xml.appendEndTag(TranslatorTags.VALUE);
+            return;
+        }
+        if (type == 2) {
+            p.setMultipleBlocks(data.getUInt8() == 0);
+            long blockNumber = data.getUInt32();
+            if (blockNumber != settings.getBlockIndex()) {
+                LOGGER.info("handleSetRequest failed. Invalid block number. "
+                        + settings.getBlockIndex() + "/" + blockNumber);
+                p.setStatus(ErrorCode.DATA_BLOCK_NUMBER_INVALID.getValue());
+                return;
+            }
+            settings.increaseBlockIndex();
+            int size = GXCommon.getObjectCount(data);
+            int realSize = data.size() - data.position();
+            if (size != realSize) {
+                LOGGER.info("handleSetRequest failed. Invalid block size.");
+                p.setStatus(ErrorCode.DATA_BLOCK_UNAVAILABLE.getValue());
+                return;
+            }
+        }
+        if (!p.isMultipleBlocks()) {
+            settings.resetBlockIndex();
+            value = GXCommon.getData(data, reply);
+        }
+
+        GXDLMSObject obj = settings.getObjects().findByLN(ot,
+                GXDLMSObject.toLogicalName(ln));
+        if (obj == null) {
+            obj = server.notifyFindObject(ot, 0,
+                    GXDLMSObject.toLogicalName(ln));
+        }
+        // If target is unknown.
+        if (obj == null) {
+            // Device reports a undefined object.
+            p.setStatus(ErrorCode.UNDEFINED_OBJECT.getValue());
+        } else {
+            AccessMode am = obj.getAccess(index);
+            // If write is denied.
+            if (am != AccessMode.WRITE && am != AccessMode.READ_WRITE) {
+                // Read Write denied.
+                p.setStatus(ErrorCode.READ_WRITE_DENIED.getValue());
+            } else {
+                try {
+                    if (value instanceof byte[]) {
+                        DataType dt = obj.getDataType(index);
+                        if (dt != DataType.NONE
+                                && dt != DataType.OCTET_STRING) {
+                            value = GXDLMSClient.changeType((byte[]) value, dt);
+                        }
+                    }
+                    ValueEventArgs e =
+                            new ValueEventArgs(settings, obj, index, 0, null);
+                    e.setValue(value);
+                    ValueEventArgs[] list = new ValueEventArgs[] { e };
+                    if (p.isMultipleBlocks()) {
+                        server.setTransaction(new GXDLMSLongTransaction(list,
+                                Command.GET_REQUEST, data));
+                    }
+                    server.notifyWrite(list);
+                    if (!e.getHandled() && !p.isMultipleBlocks()) {
+                        obj.setValue(settings, e);
+                    }
+                } catch (Exception e) {
+                    p.setStatus(ErrorCode.HARDWARE_FAULT.getValue());
+                }
+            }
+        }
+    }
+
+    private static void hanleSetRequestWithDataBlock(
+            final GXDLMSSettings settings, final GXDLMSServer server,
+            final GXByteBuffer data, final GXDLMSLNParameters p,
+            final GXByteBuffer replyData, final GXDLMSTranslatorStructure xml) {
+        GXDataInfo reply = new GXDataInfo();
+        p.setMultipleBlocks(data.getUInt8() == 0);
+        long blockNumber = data.getUInt32();
+        if (blockNumber != settings.getBlockIndex()) {
+            LOGGER.info("handleSetRequest failed. Invalid block number. "
+                    + settings.getBlockIndex() + "/" + blockNumber);
+            p.setStatus(ErrorCode.DATA_BLOCK_NUMBER_INVALID.getValue());
+        } else {
+            int size = GXCommon.getObjectCount(data);
+            int realSize = data.size() - data.position();
+            if (size != realSize) {
+                LOGGER.info("handleSetRequest failed. Invalid block size.");
+                p.setStatus(ErrorCode.DATA_BLOCK_UNAVAILABLE.getValue());
+            }
+            server.getTransaction().getData().set(data);
+            // If all data is received.
+            if (!p.isMultipleBlocks()) {
+                try {
+                    Object value = GXCommon
+                            .getData(server.getTransaction().getData(), reply);
+                    if (value instanceof byte[]) {
+                        DataType dt = server.getTransaction().getTargets()[0]
+                                .getTarget().getDataType(
+                                        server.getTransaction().getTargets()[0]
+                                                .getIndex());
+                        if (dt != DataType.NONE
+                                && dt != DataType.OCTET_STRING) {
+                            value = GXDLMSClient.changeType((byte[]) value, dt);
+                        }
+                    }
+                    server.getTransaction().getTargets()[0].setValue(value);
+                    server.notifyWrite(server.getTransaction().getTargets());
+                    if (!server.getTransaction().getTargets()[0].getHandled()
+                            && !p.isMultipleBlocks()) {
+                        server.getTransaction().getTargets()[0].getTarget()
+                                .setValue(settings, server.getTransaction()
+                                        .getTargets()[0]);
+                    }
+                } catch (RuntimeException e) {
+                    p.setStatus(ErrorCode.HARDWARE_FAULT.getValue());
+                } finally {
+                    server.setTransaction(null);
+                }
+                settings.resetBlockIndex();
+            }
+        }
+        p.setMultipleBlocks(true);
+    }
+
+    /**
+     * Handle action request.
+     * 
+     * @param reply
+     *            Received data from the client.
+     * @return Reply.
+     */
+    static void handleMethodRequest(final GXDLMSSettings settings,
+            final GXDLMSServer server, final GXByteBuffer data,
+            final GXDLMSConnectionEventArgs connectionInfo,
+            final GXByteBuffer replyData, final GXDLMSTranslatorStructure xml) {
+        ErrorCode error = ErrorCode.OK;
+        GXByteBuffer bb = new GXByteBuffer();
+        // Get type.
+        short type = data.getUInt8();
+        // Get invoke ID and priority.
+        short invokeId = data.getUInt8();
+        // CI
+        int ci = data.getUInt16();
+        ObjectType ot = ObjectType.forValue(ci);
+        byte[] ln = new byte[6];
+        data.get(ln);
+        // Attribute Id
+        short id = data.getUInt8();
+        // Get parameters.
+        Object parameters = null;
+        byte selection = (byte) data.getUInt8();
+        if (xml != null) {
+            xml.appendStartTag(Command.METHOD_REQUEST);
+            if (type == ActionRequestType.NORMAL) {
+                xml.appendStartTag(Command.METHOD_REQUEST,
+                        ActionRequestType.NORMAL);
+                xml.appendLine(TranslatorTags.INVOKE_ID, "Value",
+                        xml.integerToHex(invokeId, 2));
+                appendMethodDescriptor(xml, ci, ln, id);
+                if (selection != 0) {
+                    // MethodInvocationParameters
+                    xml.appendStartTag(
+                            TranslatorTags.METHOD_INVOCATION_PARAMETERS);
+                    GXDataInfo di = new GXDataInfo();
+                    di.setXml(xml);
+                    GXCommon.getData(data, di);
+                    xml.appendEndTag(
+                            TranslatorTags.METHOD_INVOCATION_PARAMETERS);
+                }
+                xml.appendEndTag(Command.METHOD_REQUEST,
+                        ActionRequestType.NORMAL);
+            }
+            xml.appendEndTag(Command.METHOD_REQUEST);
+            return;
+        }
+        if (selection != 0) {
+            GXDataInfo info = new GXDataInfo();
+            parameters = GXCommon.getData(data, info);
+        }
+        GXDLMSObject obj = settings.getObjects().findByLN(ot,
+                GXDLMSObject.toLogicalName(ln));
+        if (!settings.isConnected()
+                && (ci != ObjectType.ASSOCIATION_LOGICAL_NAME.getValue()
+                        || id != 1)) {
+            replyData.set(GXDLMSServer.generateConfirmedServiceError(
+                    ConfirmedServiceError.INITIATE_ERROR, ServiceError.SERVICE,
+                    Service.UNSUPPORTED.getValue()));
+            return;
+        }
+        if (obj == null) {
+            obj = server.notifyFindObject(ot, 0,
+                    GXDLMSObject.toLogicalName(ln));
+        }
+        if (obj == null) {
+            // Device reports a undefined object.
+            error = ErrorCode.UNDEFINED_OBJECT;
+        } else {
+            if (obj.getMethodAccess(id) == MethodAccessMode.NO_ACCESS) {
+                error = ErrorCode.READ_WRITE_DENIED;
+            } else {
+                ValueEventArgs e =
+                        new ValueEventArgs(settings, obj, id, 0, parameters);
+                server.notifyAction(new ValueEventArgs[] { e });
+                byte[] actionReply;
+                if (e.getHandled()) {
+                    actionReply = (byte[]) e.getValue();
+                } else {
+                    actionReply = obj.invoke(settings, e);
+                }
+                // Set default action reply if not given.
+                if (actionReply != null && e.getError() == ErrorCode.OK) {
+                    // Add return parameters
+                    bb.setUInt8(1);
+                    // Add parameters error code.
+                    bb.setUInt8(0);
+                    GXCommon.setData(bb, GXCommon.getValueType(actionReply),
+                            actionReply);
+                } else {
+                    // Add parameters error code.
+                    error = e.getError();
+                    // Add return parameters
+                    bb.setUInt8(0);
+                }
+            }
+        }
+        GXDLMSLNParameters p = new GXDLMSLNParameters(settings,
+                Command.METHOD_RESPONSE, 1, null, bb, error.getValue());
+        GXDLMS.getLNPdu(p, replyData);
+        // If High level authentication fails.
+        if (!settings.isConnected()
+                && obj instanceof GXDLMSAssociationLogicalName && id == 1) {
+            server.notifyInvalidConnection(connectionInfo);
+        }
+    }
+
+    /// <summary>
+    /// Handle Access request.
+    /// </summary>
+    /// <param name="Reply">
+    /// Received data from the client.
+    /// </param>
+    /// <returns>
+    /// Reply.
+    /// </returns>
+    /*
+     * 
+     */
+    public static void handleAccessRequest(final GXDLMSSettings settings,
+            final GXDLMSServer server, final GXByteBuffer data,
+            final GXReplyData reply, final GXDLMSTranslatorStructure xml) {
+        // Return error if connection is not established.
+        if (xml == null && !settings.isConnected()) {
+            reply.getData().set(GXDLMSServer.generateConfirmedServiceError(
+                    ConfirmedServiceError.INITIATE_ERROR, ServiceError.SERVICE,
+                    Service.UNSUPPORTED.getValue()));
+            return;
+        }
+        // Get long invoke id and priority.
+        long invokeId = data.getUInt32();
+        int len = GXCommon.getObjectCount(data);
+        byte[] tmp = null;
+        // If date time is given.
+        if (len != 0) {
+            tmp = new byte[len];
+            data.get(tmp);
+            if (xml == null) {
+
+                DataType dt = DataType.DATETIME;
+                if (len == 4) {
+                    dt = DataType.TIME;
+                } else if (len == 5) {
+                    dt = DataType.DATE;
+                }
+                GXDataInfo info = new GXDataInfo();
+                info.setType(dt);
+                Object ret = GXCommon.getData(new GXByteBuffer(tmp), info);
+                reply.setTime(((GXDateTime) ret).getValue());
+            }
+        }
+        // Get object count.
+        int cnt = GXCommon.getObjectCount(data);
+        if (xml != null) {
+            xml.appendStartTag(Command.ACCESS_REQUEST);
+            xml.appendLine(TranslatorTags.LONG_INVOKE_ID, "Value",
+                    xml.integerToHex(invokeId, 8));
+            xml.appendLine(TranslatorTags.DATE_TIME, "Value",
+                    GXCommon.toHex(tmp, false));
+            xml.appendStartTag(TranslatorTags.ACCESS_REQUEST_BODY);
+            xml.appendStartTag(
+                    TranslatorTags.LIST_OF_ACCESS_REQUEST_SPECIFICATION, "Qty",
+                    xml.integerToHex(cnt, 2));
+        }
+        byte type;
+        for (int pos = 0; pos != cnt; ++pos) {
+            type = (byte) data.getUInt8();
+            if (!(type == AccessServiceCommandType.GET
+                    || type == AccessServiceCommandType.SET
+                    || type == AccessServiceCommandType.ACTION)) {
+                throw new IllegalArgumentException(
+                        "Invalid access service command type.");
+            }
+            // CI
+            ObjectType ci = ObjectType.forValue(data.getUInt16());
+            byte[] ln = new byte[6];
+            data.get(ln);
+            // Attribute Id
+            short attributeIndex = data.getUInt8();
+            if (xml != null) {
+                xml.appendStartTag(TranslatorTags.ACCESS_REQUEST_SPECIFICATION);
+                xml.appendStartTag(Command.ACCESS_REQUEST, type);
+                appendAttributeDescriptor(xml, ci.getValue(), ln,
+                        attributeIndex);
+
+                xml.appendEndTag(Command.ACCESS_REQUEST, type);
+                xml.appendEndTag(TranslatorTags.ACCESS_REQUEST_SPECIFICATION);
+            }
+        }
+        if (xml != null) {
+            xml.appendEndTag(
+                    TranslatorTags.LIST_OF_ACCESS_REQUEST_SPECIFICATION);
+            xml.appendStartTag(TranslatorTags.ACCESS_REQUEST_LIST_OF_DATA,
+                    "Qty", xml.integerToHex(cnt, 2));
+        }
+        // Get data count.
+        cnt = GXCommon.getObjectCount(data);
+        for (int pos = 0; pos != cnt; ++pos) {
+            GXDataInfo di = new GXDataInfo();
+            di.setXml(xml);
+            if (xml != null && xml
+                    .getOutputType() == TranslatorOutputType.STANDARD_XML) {
+                xml.appendStartTag("x:Data", null, null);
+            }
+            Object value = GXCommon.getData(data, di);
+            if (!di.isComplete()) {
+                value = GXCommon.toHex(data.getData(), false, data.position(),
+                        data.size() - data.position());
+            } else if (value instanceof byte[]) {
+                value = GXCommon.toHex((byte[]) value, false);
+            }
+            if (xml != null && xml
+                    .getOutputType() == TranslatorOutputType.STANDARD_XML) {
+                xml.appendEndTag("x:Data");
+            }
+        }
+        if (xml != null) {
+            xml.appendEndTag(TranslatorTags.ACCESS_REQUEST_LIST_OF_DATA);
+            xml.appendEndTag(TranslatorTags.ACCESS_REQUEST_BODY);
+            xml.appendEndTag(Command.ACCESS_REQUEST);
+        }
+    }
+}

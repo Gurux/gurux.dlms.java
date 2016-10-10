@@ -34,10 +34,18 @@
 
 package gurux.dlms;
 
+import gurux.dlms.enums.Access;
+import gurux.dlms.enums.ApplicationReference;
 import gurux.dlms.enums.AssociationResult;
-import gurux.dlms.enums.ServiceError;
+import gurux.dlms.enums.Definition;
+import gurux.dlms.enums.ExceptionServiceError;
+import gurux.dlms.enums.HardwareResource;
+import gurux.dlms.enums.Initiate;
+import gurux.dlms.enums.LoadDataSet;
 import gurux.dlms.enums.SourceDiagnostic;
 import gurux.dlms.enums.StateError;
+import gurux.dlms.enums.Task;
+import gurux.dlms.enums.VdeStateError;
 
 /**
  * DLMS specific exception class that has error description available from
@@ -48,11 +56,15 @@ public class GXDLMSException extends RuntimeException {
      * Serial version UID.
      */
     private static final long serialVersionUID = 1L;
+    private ConfirmedServiceError confirmedServiceError;
+    private ServiceError serviceError;
+    private byte serviceErrorValue;
+
     private AssociationResult result = AssociationResult.ACCEPTED;
     private SourceDiagnostic diagnostic = SourceDiagnostic.NONE;
     private int errorCode;
     private StateError stateError;
-    private ServiceError serviceError;
+    private ExceptionServiceError exceptionServiceError;
 
     public GXDLMSException(final int errCode) {
         super(GXDLMS.getDescription(errCode));
@@ -73,16 +85,34 @@ public class GXDLMSException extends RuntimeException {
     }
 
     /**
+     * Constructor for Confirmed ServiceError.
+     * 
+     * @param service
+     * @param type
+     * @param value
+     */
+    GXDLMSException(final ConfirmedServiceError service,
+            final ServiceError type, final int value) {
+        super("ServiceError " + getConfirmedServiceError(service)
+                + " exception. " + getServiceError(type) + " "
+                + getServiceErrorValue(type, (byte) value));
+        confirmedServiceError = service;
+        serviceError = type;
+        serviceErrorValue = (byte) value;
+    }
+
+    /**
      * @param stateErr
      *            State error.
      * @param serviceErr
      *            Service error.
      */
-    GXDLMSException(final StateError stateErr, final ServiceError serviceErr) {
+    GXDLMSException(final StateError stateErr,
+            final ExceptionServiceError serviceErr) {
         super("Meter returns " + getStateError(stateErr) + " exception. "
                 + getServiceError(serviceErr));
         stateError = stateErr;
-        serviceError = serviceErr;
+        exceptionServiceError = serviceErr;
     }
 
     /**
@@ -103,6 +133,78 @@ public class GXDLMSException extends RuntimeException {
         return "";
     }
 
+    private static String
+            getConfirmedServiceError(final ConfirmedServiceError stateError) {
+        switch (stateError) {
+        case INITIATE_ERROR:
+            return "Initiate Error";
+        case READ:
+            return "Read";
+        case WRITE:
+            return "Write";
+        default:
+            break;
+        }
+        return "";
+    }
+
+    private static String getServiceError(final ServiceError error) {
+        switch (error) {
+        case APPLICATION_REFERENCE:
+            return "Application reference";
+        case HARDWARE_RESOURCE:
+            return "Hardware resource";
+        case VDE_STATE_ERROR:
+            return "Vde state error";
+        case SERVICE:
+            return "Service";
+        case DEFINITION:
+            return "Definition";
+        case ACCESS:
+            return "Access";
+        case INITIATE:
+            return "Initiate";
+        case LOAD_DATASET:
+            return "Load dataset";
+        case TASK:
+            return "Task";
+        case OTHER_ERROR:
+            return "Other Error";
+        default:
+            break;
+        }
+        return "";
+    }
+
+    private static String getServiceErrorValue(final ServiceError error,
+            final byte value) {
+        switch (error) {
+        case APPLICATION_REFERENCE:
+            return ApplicationReference.forValue(value).toString();
+        case HARDWARE_RESOURCE:
+            return HardwareResource.forValue(value).toString();
+        case VDE_STATE_ERROR:
+            return VdeStateError.forValue(value).toString();
+        case SERVICE:
+            return Service.forValue(value).toString();
+        case DEFINITION:
+            return Definition.forValue(value).toString();
+        case ACCESS:
+            return Access.forValue(value).toString();
+        case INITIATE:
+            return Initiate.forValue(value).toString();
+        case LOAD_DATASET:
+            return LoadDataSet.forValue(value).toString();
+        case TASK:
+            return Task.forValue(value).toString();
+        case OTHER_ERROR:
+            return String.valueOf(value);
+        default:
+            break;
+        }
+        return "";
+    }
+
     /**
      * Gets service error description.
      * 
@@ -110,7 +212,8 @@ public class GXDLMSException extends RuntimeException {
      *            Service error enumerator value.
      * @return Service error as an string.
      */
-    private static String getServiceError(final ServiceError serviceError) {
+    private static String
+            getServiceError(final ExceptionServiceError serviceError) {
         switch (serviceError) {
         case OPERATION_NOT_POSSIBLE:
             return "Operation not possible";
@@ -187,7 +290,7 @@ public class GXDLMSException extends RuntimeException {
     /**
      * @return Association Result in AARE message.
      */
-    final AssociationResult getResult() {
+    public final AssociationResult getResult() {
         return result;
     }
 
@@ -202,7 +305,7 @@ public class GXDLMSException extends RuntimeException {
     /**
      * @return Diagnostic code in AARE message.
      */
-    final SourceDiagnostic getDiagnostic() {
+    public final SourceDiagnostic getDiagnostic() {
         return diagnostic;
     }
 
@@ -217,14 +320,36 @@ public class GXDLMSException extends RuntimeException {
     /**
      * @return State error.
      */
-    final StateError getStateError() {
+    public final StateError getStateError() {
         return stateError;
     }
 
     /**
      * @return Service error.
      */
-    final ServiceError getServiceError() {
+    public final ExceptionServiceError getExceptionServiceError() {
+        return exceptionServiceError;
+    }
+
+    /**
+     * @return the Confirmed service error.
+     */
+    public final ConfirmedServiceError getConfirmedServiceError() {
+        return confirmedServiceError;
+    }
+
+    /**
+     * @return the serviceErrorValue
+     */
+    public final byte getServiceErrorValue() {
+        return serviceErrorValue;
+    }
+
+    /**
+     * @return the serviceError
+     */
+    public final ServiceError getServiceError() {
         return serviceError;
     }
+
 }

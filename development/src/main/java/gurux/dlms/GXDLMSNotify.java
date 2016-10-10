@@ -147,7 +147,7 @@ public class GXDLMSNotify {
      * @return Maximum size of received PDU.
      */
     public final int getMaxReceivePDUSize() {
-        return settings.getMaxReceivePDUSize();
+        return settings.getMaxPduSize();
     }
 
     /**
@@ -155,7 +155,7 @@ public class GXDLMSNotify {
      *            Maximum size of received PDU.
      */
     public final void setMaxReceivePDUSize(final int value) {
-        settings.setMaxReceivePDUSize(value);
+        settings.setMaxPduSize(value);
     }
 
     /**
@@ -284,43 +284,55 @@ public class GXDLMSNotify {
     /**
      * Generates data notification message.
      * 
-     * @param date
+     * @param time
      *            Date time. Set to null or Date(0) if not used
      * @param data
      *            Notification body.
      * @return Generated data notification message(s).
      */
-    public final byte[][] generateDataNotificationMessages(final Date date,
+    public final byte[][] generateDataNotificationMessages(final Date time,
             final byte[] data) {
-        return GXDLMS.getMessages(settings, Command.DATA_NOTIFICATION, 0,
-                new GXByteBuffer(data), date);
+        return generateDataNotificationMessages(time, new GXByteBuffer(data));
     }
 
     /**
      * Generates data notification message.
      * 
-     * @param date
+     * @param time
      *            Date time. Set Date(0) if not added.
      * @param data
      *            Notification body.
      * @return Generated data notification message(s).
      */
-    public final byte[][] generateDataNotificationMessages(final Date date,
+    public final byte[][] generateDataNotificationMessages(final Date time,
             final GXByteBuffer data) {
-        byte[][] reply = GXDLMS.getMessages(settings, Command.DATA_NOTIFICATION,
-                0, data, date);
-        if (!getGeneralBlockTransfer() && reply.length != 1) {
+        List<byte[]> reply;
+        if (getUseLogicalNameReferencing()) {
+            GXDLMSLNParameters p = new GXDLMSLNParameters(settings,
+                    Command.DATA_NOTIFICATION, 0, null, data, 0xff);
+            if (time == null) {
+                p.setTime(null);
+            } else {
+                p.setTime(new GXDateTime(time));
+            }
+            reply = GXDLMS.getLnMessages(p);
+        } else {
+            GXDLMSSNParameters p = new GXDLMSSNParameters(settings,
+                    Command.DATA_NOTIFICATION, 1, 0, data, null);
+            reply = GXDLMS.getSnMessages(p);
+        }
+        if (!getGeneralBlockTransfer() && reply.size() != 1) {
             throw new IllegalArgumentException(
                     "Data is not fit to one PDU. Use general block transfer.");
         }
-        return reply;
+        return reply.toArray(new byte[0][0]);
     }
 
     /**
      * Generates data notification message.
      * 
      * @param date
-     *            Date time. Set To Min or Max if not added.
+     *            Date time. Set To null if not added.
      * @param objects
      *            List of objects and attribute indexes to notify.
      * @return Generated data notification message(s).
@@ -398,9 +410,9 @@ public class GXDLMSNotify {
                         items.add(new GXSimpleEntry<GXDLMSObject, Integer>(comp,
                                 ((Number) tmp[2]).intValue()));
                     } else {
-                        System.out.println(String.format(
-                                "Unknown object : %d %s", classID,
-                                GXDLMSObject.toLogicalName((byte[]) tmp[1])));
+                        System.out.println("Unknown object: "
+                                + String.valueOf(classID) + " "
+                                + GXDLMSObject.toLogicalName((byte[]) tmp[1]));
                     }
                 }
             }

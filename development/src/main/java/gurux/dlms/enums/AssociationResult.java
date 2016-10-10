@@ -70,7 +70,7 @@ public enum AssociationResult {
     }
 
     /*
-     * Get integer value for enum.
+     * Get integer value for enumerator.
      */
     public int getValue() {
         return intValue;

@@ -35,7 +35,6 @@
 package gurux.dlms.internal;
 
 import java.io.UnsupportedEncodingException;
-import java.security.InvalidParameterException;
 import java.text.DateFormat;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
@@ -46,7 +45,9 @@ import java.util.HashSet;
 import java.util.List;
 
 import gurux.dlms.GXByteBuffer;
+import gurux.dlms.GXDate;
 import gurux.dlms.GXDateTime;
+import gurux.dlms.GXTime;
 import gurux.dlms.enums.ClockStatus;
 import gurux.dlms.enums.DataType;
 import gurux.dlms.enums.DateTimeSkips;
@@ -56,6 +57,9 @@ import gurux.dlms.enums.DateTimeSkips;
  * in future versions of the API. Don't use it. </b>
  */
 public final class GXCommon {
+    private static String zeroes = "00000000000000000000000000000000";
+    private static char[] hexArray = { '0', '1', '2', '3', '4', '5', '6', '7',
+            '8', '9', 'A', 'B', 'C', 'D', 'E', 'F' };
 
     /*
      * Constructor.
@@ -68,12 +72,6 @@ public final class GXCommon {
      * HDLC frame start and end character.
      */
     public static final byte HDLC_FRAME_START_END = 0x7E;
-    public static final byte AARQ_TAG = 0x60;
-    public static final byte AARE_TAG = 0x61;
-    public static final byte INITIAL_REQUEST = 0x1;
-    public static final byte INITIAL_RESPONSE = 0x8;
-    public static final byte INITIAL_REQUEST_GLO = 0x21;
-    public static final byte INITIAL_RESPONSE_GLO = 0x28;
     public static final byte[] LOGICAL_NAME_OBJECT_ID =
             { 0x60, (byte) 0x85, 0x74, 0x05, 0x08, 0x01, 0x01 };
     public static final byte[] SHORT_NAME_OBJECT_ID =
@@ -104,11 +102,10 @@ public final class GXCommon {
         return tmp;
     }
 
-    /**
+    /*
      * Convert array to list.
-     * 
-     * @param value
-     * @return
+     * @param value Converted array.
+     * @return Converted list.
      */
     public static List<Object> asList(final Object[] value) {
         List<Object> list = new ArrayList<Object>(value.length);
@@ -118,9 +115,8 @@ public final class GXCommon {
         return list;
     }
 
-    /**
-     * Add all items to the list.s
-     * 
+    /*
+     * Add all items to the list.
      * @param target
      * @param list
      */
@@ -152,17 +148,22 @@ public final class GXCommon {
      * @return Byte value of hex char value.
      */
     private static byte getValue(final byte c) {
-        byte value;
-        if (c > '9') {
-            if (c > 'Z') {
-                value = (byte) (c - 'a' + 10);
-            } else {
-                value = (byte) (c - 'A' + 10);
-            }
-        } else {
+        byte value = -1;
+        // If number
+        if (c > 0x2F && c < 0x3A) {
             value = (byte) (c - '0');
+        } else if (c > 0x40 && c < 'G') {
+            // If upper case.
+            value = (byte) (c - 'A' + 10);
+        } else if (c > 0x60 && c < 'g') {
+            // If lower case.
+            value = (byte) (c - 'a' + 10);
         }
         return value;
+    }
+
+    private static boolean isHex(final byte c) {
+        return getValue(c) != -1;
     }
 
     /**
@@ -173,27 +174,32 @@ public final class GXCommon {
      * @return byte array.
      */
     public static byte[] hexToBytes(final String value) {
-        byte[] buffer = new byte[value.length() / 2];
+        if (value == null || value.length() == 0) {
+            return new byte[0];
+        }
+        byte[] buffer = new byte[(value.length() / 2) + 1];
         int lastValue = -1;
         int index = 0;
-        try {
-            for (byte ch : value.getBytes("ASCII")) {
-                if (ch >= '0' && ch < 'g') {
-                    if (lastValue == -1) {
-                        lastValue = getValue(ch);
-                    } else if (lastValue != -1) {
-                        buffer[index] = (byte) (lastValue << 4 | getValue(ch));
-                        lastValue = -1;
-                        ++index;
-                    }
+        for (byte ch : value.getBytes()) {
+            if (isHex(ch)) {
+                if (lastValue == -1) {
+                    lastValue = getValue(ch);
                 } else if (lastValue != -1) {
-                    buffer[index] = getValue(ch);
+                    buffer[index] = (byte) (lastValue << 4 | getValue(ch));
                     lastValue = -1;
                     ++index;
                 }
+            } else if (lastValue != -1 && ch == ' ') {
+                buffer[index] = getValue(ch);
+                lastValue = -1;
+                ++index;
+            } else {
+                lastValue = -1;
             }
-        } catch (UnsupportedEncodingException e) {
-            throw new RuntimeException(e.getMessage());
+        }
+        if (lastValue != -1) {
+            buffer[index] = (byte) lastValue;
+            ++index;
         }
         byte[] tmp = new byte[index];
         System.arraycopy(buffer, 0, tmp, 0, index);
@@ -204,31 +210,45 @@ public final class GXCommon {
      * Convert byte array to hex string.
      */
     public static String toHex(final byte[] bytes) {
-        return toHex(bytes, 0, bytes.length);
+        return toHex(bytes, true);
     }
 
     /*
      * Convert byte array to hex string.
      */
-    public static String toHex(final byte[] bytes, final int index,
-            final int count) {
-        final char[] hexArray = { '0', '1', '2', '3', '4', '5', '6', '7', '8',
-                '9', 'A', 'B', 'C', 'D', 'E', 'F' };
-        if (index + count > bytes.length) {
-            throw new IllegalArgumentException("Not enought data.");
-        }
-        if (count == 0) {
+    public static String toHex(final byte[] bytes, final boolean addSpace) {
+        if (bytes == null) {
             return "";
         }
-        char[] hexChars = new char[count * 3];
+        return toHex(bytes, addSpace, 0, bytes.length);
+    }
+
+    /*
+     * Convert byte array to hex string.
+     */
+    public static String toHex(final byte[] bytes, final boolean addSpace,
+            final int index, final int count) {
+        if (bytes == null || bytes.length == 0 || count == 0) {
+            return "";
+        }
+        char[] str = new char[count * 3];
         int tmp;
+        int len = 0;
         for (int pos = 0; pos != count; ++pos) {
             tmp = bytes[index + pos] & 0xFF;
-            hexChars[pos * 3] = hexArray[tmp >>> 4];
-            hexChars[pos * 3 + 1] = hexArray[tmp & 0x0F];
-            hexChars[pos * 3 + 2] = ' ';
+            str[len] = hexArray[tmp >>> 4];
+            ++len;
+            str[len] = hexArray[tmp & 0x0F];
+            ++len;
+            if (addSpace) {
+                str[len] = ' ';
+                ++len;
+            }
         }
-        return new String(hexChars, 0, count * 3 - 1);
+        if (addSpace) {
+            --len;
+        }
+        return new String(str, 0, len);
     }
 
     /*
@@ -370,7 +390,7 @@ public final class GXCommon {
     /*
      * Reserved for internal use.
      */
-    static void toBitString(final StringBuilder sb, final byte value,
+    public static void toBitString(final StringBuilder sb, final byte value,
             final int count2) {
         int count = count2;
         if (count > 8) {
@@ -411,6 +431,10 @@ public final class GXCommon {
             info.setType(DataType.forValue(data.getUInt8()));
         }
         if (info.getType() == DataType.NONE) {
+            if (info.getXml() != null) {
+                info.getXml().appendLine("<"
+                        + info.getXml().getDataType(info.getType()) + " />");
+            }
             return value;
         }
         if (data.position() == data.size()) {
@@ -490,6 +514,21 @@ public final class GXCommon {
         return value;
     }
 
+    /*
+     * Convert value to hex string.
+     * @param value value to convert.
+     * @param desimals Amount of decimals.
+     * @return
+     */
+    public static String integerToHex(final Object value, final int desimals) {
+        String str =
+                Long.toString(((Number) value).longValue(), 16).toUpperCase();
+        if (desimals == 0 || str.length() == zeroes.length()) {
+            return str;
+        }
+        return zeroes.substring(0, desimals - str.length()) + str;
+    }
+
     /**
      * Get array from DLMS data.
      * 
@@ -507,6 +546,11 @@ public final class GXCommon {
         if (info.getCount() == 0) {
             info.setCount(GXCommon.getObjectCount(buff));
         }
+        if (info.getXml() != null) {
+            info.getXml().appendStartTag(
+                    info.getXml().getDataType(info.getType()), "Qty",
+                    info.getXml().integerToHex(info.getCount(), 2));
+        }
         int size = buff.size() - buff.position();
         if (info.getCount() != 0 && size < 1) {
             info.setCompleate(false);
@@ -519,8 +563,9 @@ public final class GXCommon {
         int pos = info.getIndex();
         for (; pos != info.getCount(); ++pos) {
             GXDataInfo info2 = new GXDataInfo();
+            info2.setXml(info.getXml());
             Object tmp = getData(buff, info2);
-            if (!info2.isCompleate()) {
+            if (!info2.isComplete()) {
                 buff.position(startIndex);
                 info.setCompleate(false);
                 break;
@@ -530,6 +575,10 @@ public final class GXCommon {
                     arr.add(tmp);
                 }
             }
+        }
+        if (info.getXml() != null) {
+            info.getXml()
+                    .appendEndTag(info.getXml().getDataType(info.getType()));
         }
         info.setIndex(pos);
         value = arr.toArray();
@@ -553,12 +602,20 @@ public final class GXCommon {
             info.setCompleate(false);
             return null;
         }
+        if (info.getXml() != null) {
+            info.getXml().appendLine(info.getXml().getDataType(info.getType()),
+                    null,
+                    GXCommon.toHex(buff.getData(), false, buff.position(), 4));
+        }
         // Get time.
         int hour = buff.getUInt8();
         int minute = buff.getUInt8();
         int second = buff.getUInt8();
         int ms = buff.getUInt8();
-        GXDateTime dt = new GXDateTime(-1, -1, -1, hour, minute, second, ms);
+        if (ms != 0xFF) {
+            ms *= 10;
+        }
+        GXTime dt = new GXTime(hour, minute, second, ms);
         value = dt;
         return value;
     }
@@ -580,16 +637,23 @@ public final class GXCommon {
             info.setCompleate(false);
             return null;
         }
+        if (info.getXml() != null) {
+            info.getXml().appendLine(info.getXml().getDataType(info.getType()),
+                    null,
+                    GXCommon.toHex(buff.getData(), false, buff.position(), 5));
+        }
         // Get year.
         int year = buff.getUInt16();
         // Get month
         int month = buff.getUInt8();
         // Get day
         int day = buff.getUInt8();
-        // Skip week day
-        buff.getUInt8();
-        GXDateTime dt = new GXDateTime(year, month, day, -1, -1, -1, -1);
+        GXDate dt = new GXDate(year, month, day);
         value = dt;
+        // Skip week day
+        if (buff.getUInt8() == 0xFF) {
+            dt.getSkip().add(DateTimeSkips.DAY_OF_WEEK);
+        }
         return value;
     }
 
@@ -605,10 +669,17 @@ public final class GXCommon {
     private static Object getDateTime(final GXByteBuffer buff,
             final GXDataInfo info) {
         Object value;
+        java.util.Set<DateTimeSkips> skip = new HashSet<DateTimeSkips>();
+
         // If there is not enough data available.
         if (buff.size() - buff.position() < 12) {
             info.setCompleate(false);
             return null;
+        }
+        if (info.getXml() != null) {
+            info.getXml().appendLine(info.getXml().getDataType(info.getType()),
+                    null,
+                    GXCommon.toHex(buff.getData(), false, buff.position(), 12));
         }
         // Get year.
         int year = buff.getUInt16();
@@ -617,7 +688,9 @@ public final class GXCommon {
         // Get day
         int day = buff.getUInt8();
         // Skip week day
-        buff.getUInt8();
+        if (buff.getUInt8() == 0xFF) {
+            skip.add(DateTimeSkips.DAY_OF_WEEK);
+        }
         // Get time.
         int hour = buff.getUInt8();
         int minute = buff.getUInt8();
@@ -626,13 +699,12 @@ public final class GXCommon {
         if (ms != 0xFF) {
             ms *= 10;
         } else {
-            ms = 0;
+            ms = -1;
         }
         int deviation = buff.getInt16();
         int status = buff.getUInt8();
         GXDateTime dt = new GXDateTime();
         dt.setStatus(ClockStatus.forValue(status));
-        java.util.Set<DateTimeSkips> skip = new HashSet<DateTimeSkips>();
         if (year < 1 || year == 0xFFFF) {
             skip.add(DateTimeSkips.YEAR);
             java.util.Calendar tm = java.util.Calendar.getInstance();
@@ -666,7 +738,7 @@ public final class GXCommon {
             second = 0;
         }
         // If ms is Zero it's skipped.
-        if (ms < 1 || ms > 1000) {
+        if (ms < 0 || ms > 1000) {
             skip.add(DateTimeSkips.MILLISECOND);
             ms = 0;
         }
@@ -704,6 +776,13 @@ public final class GXCommon {
             return null;
         }
         value = new Double(buff.getDouble());
+        if (info.getXml() != null) {
+            GXByteBuffer tmp = new GXByteBuffer();
+            setData(tmp, DataType.FLOAT64, value);
+            info.getXml().appendLine(info.getXml().getDataType(info.getType()),
+                    null,
+                    GXCommon.toHex(tmp.getData(), false, 1, tmp.size() - 1));
+        }
         return value;
     }
 
@@ -725,6 +804,13 @@ public final class GXCommon {
             return null;
         }
         value = new Float(buff.getFloat());
+        if (info.getXml() != null) {
+            GXByteBuffer tmp = new GXByteBuffer();
+            setData(tmp, DataType.FLOAT32, value);
+            info.getXml().appendLine(info.getXml().getDataType(info.getType()),
+                    null,
+                    GXCommon.toHex(tmp.getData(), false, 1, tmp.size() - 1));
+        }
         return value;
     }
 
@@ -746,6 +832,10 @@ public final class GXCommon {
             return null;
         }
         value = new Short(buff.getUInt8());
+        if (info.getXml() != null) {
+            info.getXml().appendLine(info.getXml().getDataType(info.getType()),
+                    null, info.getXml().integerToHex(value, 2));
+        }
         return value;
     }
 
@@ -767,6 +857,10 @@ public final class GXCommon {
             return null;
         }
         value = buff.getUInt64();
+        if (info.getXml() != null) {
+            info.getXml().appendLine(info.getXml().getDataType(info.getType()),
+                    null, info.getXml().integerToHex(value, 16));
+        }
         return value;
     }
 
@@ -788,6 +882,10 @@ public final class GXCommon {
             return null;
         }
         value = new Long(buff.getInt64());
+        if (info.getXml() != null) {
+            info.getXml().appendLine(info.getXml().getDataType(info.getType()),
+                    null, info.getXml().integerToHex(value, 16));
+        }
         return value;
     }
 
@@ -809,6 +907,11 @@ public final class GXCommon {
             return null;
         }
         value = new Integer(buff.getUInt16());
+        if (info.getXml() != null) {
+            info.getXml().appendLine(info.getXml().getDataType(info.getType()),
+                    null, info.getXml().integerToHex(value, 4));
+
+        }
         return value;
     }
 
@@ -830,6 +933,11 @@ public final class GXCommon {
             return null;
         }
         value = new Integer(buff.getUInt8() & 0xFF);
+        if (info.getXml() != null) {
+            info.getXml().appendLine(info.getXml().getDataType(info.getType()),
+                    null, info.getXml().integerToHex(value, 2));
+
+        }
         return value;
     }
 
@@ -851,6 +959,10 @@ public final class GXCommon {
             return null;
         }
         value = new Short(buff.getInt16());
+        if (info.getXml() != null) {
+            info.getXml().appendLine(info.getXml().getDataType(info.getType()),
+                    null, info.getXml().integerToHex(value, 4));
+        }
         return value;
     }
 
@@ -872,6 +984,10 @@ public final class GXCommon {
             return null;
         }
         value = new Byte(buff.getInt8());
+        if (info.getXml() != null) {
+            info.getXml().appendLine(info.getXml().getDataType(info.getType()),
+                    null, info.getXml().integerToHex(value, 2));
+        }
         return value;
     }
 
@@ -886,26 +1002,16 @@ public final class GXCommon {
      */
     private static Object getBcd(final GXByteBuffer buff, final GXDataInfo info,
             final boolean knownType) {
-        Object value;
-        int len;
-        if (knownType) {
-            len = buff.size();
-        } else {
-            len = GXCommon.getObjectCount(buff);
-            // If there is not enough data available.
-            if (buff.size() - buff.position() < len) {
-                info.setCompleate(false);
-                return null;
-            }
+        // If there is not enough data available.
+        if (buff.size() - buff.position() < 1) {
+            info.setCompleate(false);
+            return null;
         }
-        StringBuilder bcd = new StringBuilder(len * 2);
-        for (int a = 0; a != len; ++a) {
-            byte ch = buff.getInt8();
-            int idHigh = ch >>> 4;
-            int idLow = ch & 0x0F;
-            bcd.append(String.valueOf(idHigh) + String.valueOf(idLow));
+        short value = buff.getUInt8();
+        if (info.getXml() != null) {
+            info.getXml().appendLine(info.getXml().getDataType(info.getType()),
+                    null, info.getXml().integerToHex(value, 2));
         }
-        value = bcd.toString();
         return value;
     }
 
@@ -937,6 +1043,18 @@ public final class GXCommon {
         } else {
             value = "";
         }
+        if (info.getXml() != null) {
+            if (info.getXml().getShowStringAsHex()) {
+                info.getXml().appendLine(
+                        info.getXml().getDataType(info.getType()), null,
+                        GXCommon.toHex(buff.getData(), false,
+                                buff.position() - len, len));
+            } else {
+                info.getXml().appendLine(
+                        info.getXml().getDataType(info.getType()), null,
+                        value.toString());
+            }
+        }
         return value;
     }
 
@@ -966,6 +1084,10 @@ public final class GXCommon {
         byte[] tmp = new byte[len];
         buff.get(tmp);
         value = tmp;
+        if (info.getXml() != null) {
+            info.getXml().appendLine(info.getXml().getDataType(info.getType()),
+                    null, GXCommon.toHex(tmp, false));
+        }
         return value;
     }
 
@@ -997,6 +1119,18 @@ public final class GXCommon {
         } else {
             value = "";
         }
+        if (info.getXml() != null) {
+            if (info.getXml().getShowStringAsHex()) {
+                info.getXml().appendLine(
+                        info.getXml().getDataType(info.getType()), null,
+                        GXCommon.toHex(buff.getData(), false,
+                                buff.position() - len, len));
+            } else {
+                info.getXml().appendLine(
+                        info.getXml().getDataType(info.getType()), null,
+                        value.toString());
+            }
+        }
         return value;
     }
 
@@ -1016,7 +1150,12 @@ public final class GXCommon {
             info.setCompleate(false);
             return null;
         }
-        return new Long(buff.getUInt32());
+        Long value = new Long(buff.getUInt32());
+        if (info.getXml() != null) {
+            info.getXml().appendLine(info.getXml().getDataType(info.getType()),
+                    null, info.getXml().integerToHex(value, 8));
+        }
+        return value;
     }
 
     /**
@@ -1035,7 +1174,12 @@ public final class GXCommon {
             info.setCompleate(false);
             return null;
         }
-        return new Integer(buff.getInt32());
+        Integer value = new Integer(buff.getInt32());
+        if (info.getXml() != null) {
+            info.getXml().appendLine(info.getXml().getDataType(info.getType()),
+                    null, info.getXml().integerToHex(value, 8));
+        }
+        return value;
     }
 
     /**
@@ -1066,6 +1210,10 @@ public final class GXCommon {
             toBitString(sb, buff.getInt8(), cnt);
             cnt -= 8;
         }
+        if (info.getXml() != null) {
+            info.getXml().appendLine(info.getXml().getDataType(info.getType()),
+                    null, sb.toString());
+        }
         return sb.toString();
     }
 
@@ -1085,7 +1233,12 @@ public final class GXCommon {
             info.setCompleate(false);
             return null;
         }
-        return new Boolean(buff.getUInt8() != 0);
+        Boolean value = new Boolean(buff.getUInt8() != 0);
+        if (info.getXml() != null) {
+            info.getXml().appendLine(info.getXml().getDataType(info.getType()),
+                    null, value.toString());
+        }
+        return value;
     }
 
     /**
@@ -1115,7 +1268,7 @@ public final class GXCommon {
                     | ((tmp & 0xFE0000) >> 3) | ((tmp & 0xFE000000) >> 4);
             return (int) tmp;
         }
-        throw new InvalidParameterException("Wrong size.");
+        throw new IllegalArgumentException("Wrong size.");
     }
 
     /**
@@ -1136,14 +1289,7 @@ public final class GXCommon {
             throw new RuntimeException(
                     "Value can't be enum. Give integer value.");
         }
-        if (type == DataType.OCTET_STRING
-                && (value instanceof GXDateTime || value instanceof Date)) {
-            type = DataType.DATETIME;
-        }
-        if (type == DataType.DATETIME || type == DataType.DATE
-                || type == DataType.TIME) {
-            buff.setUInt8(DataType.OCTET_STRING.getValue());
-        } else if ((type == DataType.ARRAY || type == DataType.STRUCTURE)
+        if ((type == DataType.ARRAY || type == DataType.STRUCTURE)
                 && value instanceof byte[]) {
             // If byte array is added do not add type.
             buff.set((byte[]) value);
@@ -1151,79 +1297,86 @@ public final class GXCommon {
         } else {
             buff.setUInt8(type.getValue());
         }
-        if (type == DataType.NONE) {
-            return;
-        }
-        if (type == DataType.BOOLEAN) {
+        switch (type) {
+        case NONE:
+            break;
+        case BOOLEAN:
             if (Boolean.parseBoolean(value.toString())) {
                 buff.setUInt8(1);
             } else {
                 buff.setUInt8(0);
             }
-        } else if (type == DataType.INT8 || type == DataType.UINT8
-                || type == DataType.ENUM) {
+            break;
+        case INT8:
+        case UINT8:
+        case ENUM:
             buff.setUInt8(((Number) value).byteValue());
-        } else if (type == DataType.INT16 || type == DataType.UINT16) {
+            break;
+        case INT16:
+        case UINT16:
             buff.setUInt16(((Number) value).shortValue());
-        } else if (type == DataType.INT32 || type == DataType.UINT32) {
+            break;
+        case INT32:
+        case UINT32:
             buff.setUInt32(((Number) value).intValue());
-        } else if (type == DataType.INT64 || type == DataType.UINT64) {
+            break;
+        case INT64:
+        case UINT64:
             buff.setUInt64(((Number) value).longValue());
-        } else if (type == DataType.FLOAT32) {
+            break;
+        case FLOAT32:
             buff.setFloat(((Number) value).floatValue());
-        } else if (type == DataType.FLOAT64) {
+            break;
+        case FLOAT64:
             buff.setDouble(((Number) value).doubleValue());
-        } else if (type == DataType.BITSTRING) {
+            break;
+        case BITSTRING:
             setBitString(buff, value);
-        } else if (type == DataType.STRING) {
+            break;
+        case STRING:
             setString(buff, value);
-        } else if (type == DataType.STRING_UTF8) {
+            break;
+        case STRING_UTF8:
             setUtfString(buff, value);
-        } else if (type == DataType.OCTET_STRING) {
-            if (value instanceof GXDateTime) {
-                GXDateTime tmp = (GXDateTime) value;
-                java.util.Set<DateTimeSkips> date =
-                        new HashSet<DateTimeSkips>();
-                date.add(DateTimeSkips.HOUR);
-                date.add(DateTimeSkips.MINUTE);
-                date.add(DateTimeSkips.SECOND);
-                date.add(DateTimeSkips.MILLISECOND);
-                java.util.Set<DateTimeSkips> time =
-                        new HashSet<DateTimeSkips>();
-                time.add(DateTimeSkips.YEAR);
-                time.add(DateTimeSkips.MONTH);
-                time.add(DateTimeSkips.DAY);
-                time.add(DateTimeSkips.DAY_OF_WEEK);
-                if (tmp.getSkip().containsAll(date)) {
-                    // If only date part is written.
-                    setDate(buff, value);
-                } else if (tmp.getSkip().containsAll(time)) {
-                    // If only time part is written.
-                    setTime(buff, value);
-                } else {
-                    // Write date and time.
-                    setDateTime(buff, value);
-                }
-            } else if (value instanceof java.util.Date
+            break;
+        case OCTET_STRING:
+            if (value instanceof GXDate) {
+                // Add size
+                buff.setUInt8(5);
+                setDate(buff, value);
+            } else if (value instanceof GXTime) {
+                // Add size
+                buff.setUInt8(4);
+                setTime(buff, value);
+            } else if (value instanceof GXDateTime
+                    || value instanceof java.util.Date
                     || value instanceof java.util.Calendar) {
                 // Date an calendar are always written as date time.
+                buff.setUInt8(12);
                 setDateTime(buff, value);
             } else {
                 setOctetString(buff, value);
             }
-        } else if (type == DataType.ARRAY || type == DataType.STRUCTURE) {
+            break;
+        case ARRAY:
+        case STRUCTURE:
             setArray(buff, value);
-        } else if (type == DataType.BCD) {
+            break;
+        case BCD:
             setBcd(buff, value);
-        } else if (type == DataType.COMPACT_ARRAY) {
+            break;
+        case COMPACT_ARRAY:
             throw new RuntimeException("Invalid data type.");
-        } else if (type == DataType.DATETIME) {
+        case DATETIME:
             setDateTime(buff, value);
-        } else if (type == DataType.DATE) {
+            break;
+        case DATE:
             setDate(buff, value);
-        } else if (type == DataType.TIME) {
+            break;
+        case TIME:
             setTime(buff, value);
-        } else {
+            break;
+        default:
             throw new RuntimeException("Invalid data type.");
         }
     }
@@ -1258,8 +1411,6 @@ public final class GXCommon {
         } else {
             throw new RuntimeException("Invalid date format.");
         }
-        // Add size
-        buff.setUInt8(4);
         // Add time.
         if (skip.contains(DateTimeSkips.HOUR)) {
             buff.setUInt8(0xFF);
@@ -1276,7 +1427,12 @@ public final class GXCommon {
         } else {
             buff.setUInt8(tm.get(java.util.Calendar.SECOND));
         }
-        buff.setUInt8(0xFF); // Hundredths of second is not used.
+        if (skip.contains(DateTimeSkips.MILLISECOND)) {
+            // Hundredths of second is not used.
+            buff.setUInt8(0xFF);
+        } else {
+            buff.setUInt8(tm.get(java.util.Calendar.MILLISECOND) / 10);
+        }
     }
 
     /**
@@ -1307,8 +1463,6 @@ public final class GXCommon {
         }
         java.util.Calendar tm = java.util.Calendar.getInstance();
         tm.setTime(dt.getValue());
-        // Add size
-        buff.setUInt8(5);
         // Add year.
         if (dt.getSkip().contains(DateTimeSkips.YEAR)) {
             buff.setUInt16(0xFFFF);
@@ -1331,8 +1485,43 @@ public final class GXCommon {
         } else {
             buff.setUInt8(tm.get(java.util.Calendar.DATE));
         }
-        // Week day is not spesified.
-        buff.setUInt8(0xFF);
+        if (dt.getSkip().contains(DateTimeSkips.DAY_OF_WEEK)) {
+            // Week day is not specified.
+            buff.setUInt8(0xFF);
+        } else {
+            int val = tm.get(java.util.Calendar.DAY_OF_WEEK);
+            if (val == java.util.Calendar.SUNDAY) {
+                val = 8;
+            }
+            buff.setUInt8(val - 1);
+        }
+    }
+
+    public static GXDateTime getDateTime(final Object value) {
+        GXDateTime dt;
+        if (value instanceof GXDateTime) {
+            dt = (GXDateTime) value;
+        } else if (value instanceof java.util.Date) {
+            dt = new GXDateTime((java.util.Date) value);
+            dt.getSkip().add(DateTimeSkips.MILLISECOND);
+        } else if (value instanceof java.util.Calendar) {
+            java.util.Calendar tm = (java.util.Calendar) value;
+            dt = new GXDateTime(tm.getTime());
+            dt.setDeviation(tm.getTimeZone().getRawOffset() / 60000);
+            dt.getSkip().add(DateTimeSkips.MILLISECOND);
+        } else if (value instanceof String) {
+            DateFormat f = new SimpleDateFormat();
+            try {
+                dt = new GXDateTime(f.parse(value.toString()));
+                dt.getSkip().add(DateTimeSkips.MILLISECOND);
+            } catch (ParseException e) {
+                throw new RuntimeException(
+                        "Invalid date time value." + e.getMessage());
+            }
+        } else {
+            throw new RuntimeException("Invalid date format.");
+        }
+        return dt;
     }
 
     /**
@@ -1374,8 +1563,6 @@ public final class GXCommon {
         }
         Date date = dt.toMeterTime();
         boolean summertime = tm.getTimeZone().inDaylightTime(date);
-        // Add size
-        buff.setUInt8(12);
         tm.setTime(dt.getValue());
         // If summer time.
         if (summertime
@@ -1405,8 +1592,17 @@ public final class GXCommon {
         } else {
             buff.setUInt8(tm.get(java.util.Calendar.DATE));
         }
-        // Week day is not specified.
-        buff.setUInt8(0xFF);
+        // Week day.
+        if (dt.getSkip().contains(DateTimeSkips.DAY_OF_WEEK)) {
+            buff.setUInt8(0xFF);
+        } else {
+            int val = tm.get(java.util.Calendar.DAY_OF_WEEK);
+            if (val == java.util.Calendar.SUNDAY) {
+                val = 8;
+            }
+            buff.setUInt8(val - 1);
+        }
+
         // Add time.
         if (dt.getSkip().contains(DateTimeSkips.HOUR)) {
             buff.setUInt8(0xFF);
@@ -1458,23 +1654,8 @@ public final class GXCommon {
      *            Added value.
      */
     private static void setBcd(final GXByteBuffer buff, final Object value) {
-        if (!(value instanceof String)) {
-            throw new RuntimeException("BCD value must give as string.");
-        }
-        String str = value.toString().trim();
-        int len = str.length();
-        if (len % 2 != 0) {
-            str = "0" + str;
-            ++len;
-        }
-        len /= 2;
-        buff.setUInt8(len);
-        for (int pos = 0; pos != len; ++pos) {
-            int ch1 = Integer.parseInt(str.substring(2 * pos, 2 * pos + 1));
-            int ch2 = Integer
-                    .parseInt(str.substring(2 * pos + 1, 2 * pos + 1 + 1));
-            buff.setUInt8((byte) (ch1 << 4 | ch2));
-        }
+        // Standard supports only size of byte.
+        buff.setUInt8(((Number) value).byteValue());
     }
 
     /**
@@ -1593,10 +1774,10 @@ public final class GXCommon {
     private static void setUtfString(final GXByteBuffer buff,
             final Object value) {
         if (value != null) {
-            String str = value.toString();
-            setObjectCount(str.length(), buff);
             try {
-                buff.set(str.getBytes("UTF-8"));
+                byte[] tmp = String.valueOf(value).getBytes("UTF-8");
+                setObjectCount(tmp.length, buff);
+                buff.set(tmp);
             } catch (UnsupportedEncodingException e) {
                 throw new RuntimeException(e.getMessage());
             }
@@ -1692,6 +1873,13 @@ public final class GXCommon {
         if (value instanceof Long) {
             return DataType.INT64;
         }
+        if (value instanceof GXTime) {
+            return DataType.TIME;
+        }
+        if (value instanceof GXDate) {
+            return DataType.DATE;
+        }
+
         if (value instanceof java.util.Date || value instanceof GXDateTime) {
             return DataType.DATETIME;
         }

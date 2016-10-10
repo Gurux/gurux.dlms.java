@@ -39,7 +39,9 @@ import java.util.Calendar;
 import gurux.dlms.GXByteBuffer;
 import gurux.dlms.GXDLMSClient;
 import gurux.dlms.GXDLMSSettings;
+import gurux.dlms.GXDate;
 import gurux.dlms.GXDateTime;
+import gurux.dlms.GXTime;
 import gurux.dlms.ValueEventArgs;
 import gurux.dlms.enums.DataType;
 import gurux.dlms.enums.DateTimeSkips;
@@ -215,8 +217,10 @@ public class GXDLMSActionSchedule extends GXDLMSObject implements IGXDLMSBase {
                 for (GXDateTime it : getExecutionTime()) {
                     bb.setUInt8(DataType.STRUCTURE.getValue());
                     bb.setUInt8(2); // Count
-                    GXCommon.setData(bb, DataType.TIME, it.getValue()); // Time
-                    GXCommon.setData(bb, DataType.DATE, it.getValue()); // Date
+                    GXCommon.setData(bb, DataType.OCTET_STRING,
+                            new GXTime(it.getValue())); // Time
+                    GXCommon.setData(bb, DataType.OCTET_STRING,
+                            new GXDate(it.getValue())); // Date
                 }
             }
             return bb.array();

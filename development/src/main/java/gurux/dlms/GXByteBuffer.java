@@ -129,7 +129,7 @@ public class GXByteBuffer {
                     System.arraycopy(tmp, 0, getData(), 0, size);
                 } else {
                     System.arraycopy(tmp, 0, getData(), 0, capacity);
-                    size = capacity;
+                    size(capacity);
                 }
             }
         }
@@ -204,7 +204,9 @@ public class GXByteBuffer {
      */
     public final byte[] subArray(final int index, final int count) {
         byte[] tmp = new byte[count];
-        System.arraycopy(data, index, tmp, 0, count);
+        if (count != 0) {
+            System.arraycopy(data, index, tmp, 0, count);
+        }
         return tmp;
     }
 
@@ -225,9 +227,9 @@ public class GXByteBuffer {
         }
         if (count != 0) {
             System.arraycopy(data, srcPos, data, destPos, count);
-            size = (short) (destPos + count);
+            size((destPos + count));
             if (position > size) {
-                position = size;
+                position(size);
             }
         }
     }
@@ -238,11 +240,11 @@ public class GXByteBuffer {
      */
     public final void trim() {
         if (size == position) {
-            size = 0;
+            size(0);
         } else {
             move(position, 0, size - position);
         }
-        position = 0;
+        position(0);
     }
 
     /**
@@ -319,8 +321,7 @@ public class GXByteBuffer {
     }
 
     public final void setFloat(final float value) {
-        int tmp = Float.floatToIntBits(value);
-        setUInt32(size, tmp);
+        setFloat(size, value);
         size += 4;
     }
 
@@ -330,8 +331,7 @@ public class GXByteBuffer {
     }
 
     public final void setDouble(final double value) {
-        long tmp = Double.doubleToLongBits(value);
-        setUInt64(size, tmp);
+        setDouble(size, value);
         size += 8;
     }
 
@@ -352,7 +352,7 @@ public class GXByteBuffer {
 
     public final short getUInt8(final int index) {
         if (index >= size) {
-            throw new OutOfMemoryError();
+            throw new IllegalArgumentException("getUInt8");
         }
         return (short) (data[index] & 0xFF);
     }
@@ -369,7 +369,7 @@ public class GXByteBuffer {
 
     public final int getUInt16(final int index) {
         if (index + 2 > size) {
-            throw new OutOfMemoryError();
+            throw new IllegalArgumentException("getUInt16");
         }
         return ((data[index] & 0xFF) << 8) | (data[index + 1] & 0xFF);
     }
@@ -381,32 +381,48 @@ public class GXByteBuffer {
     }
 
     public final int getInt32() {
-        return (int) getUInt32();
+        int value = getInt32(position());
+        position += 4;
+        return value;
     }
 
-    public final long getUInt32(final int index) {
-
+    public final int getInt32(final int index) {
         if (index + 4 > size) {
-            throw new OutOfMemoryError();
+            throw new IllegalArgumentException("getUInt32");
         }
         return (data[index] & 0xFF) << 24 | (data[index + 1] & 0xFF) << 16
                 | (data[index + 2] & 0xFF) << 8 | (data[index + 3] & 0xFF);
     }
 
-    public final float getFloat() {
-        float value = java.nio.ByteBuffer.wrap(getData()).getFloat(position);
-        position += 4;
+    public final long getUInt32(final int index) {
+        if (index + 4 > size) {
+            throw new IllegalArgumentException("getUInt32");
+        }
+        long value = data[index] & 0xFF;
+        value = value << 24;
+        value |= (data[index + 1] & 0xFF) << 16;
+        value |= (data[index + 2] & 0xFF) << 8;
+        value |= (data[index + 3] & 0xFF);
         return value;
+    }
+
+    public final float getFloat() {
+        return Float.intBitsToFloat(getInt32());
     }
 
     public final double getDouble() {
-        double value = java.nio.ByteBuffer.wrap(getData()).getDouble(position);
-        position += 8;
-        return value;
+        return Double.longBitsToDouble(getInt64());
     }
 
     public final long getInt64() {
-        long value = java.nio.ByteBuffer.wrap(getData()).getLong(position);
+        long value = (long) (data[position] & 0xFF) << 56
+                | (long) (data[position + 1] & 0xFF) << 48
+                | (long) (data[position + 2] & 0xFF) << 40
+                | (long) (data[position + 3] & 0xFF) << 32
+                | (data[position + 4] & 0xFF) << 24
+                | (data[position + 5] & 0xFF) << 16
+                | (data[position + 6] & 0xFF) << 8
+                | (data[position + 7] & 0xFF);
         position += 8;
         return value;
     }
@@ -427,8 +443,7 @@ public class GXByteBuffer {
     }
 
     public final BigInteger getUInt64() {
-        long value = java.nio.ByteBuffer.wrap(getData()).getLong(position);
-        position += 8;
+        long value = getInt64();
         BigInteger b = BigInteger.valueOf(value);
         if (b.compareTo(BigInteger.ZERO) < 0) {
             b = b.add(BigInteger.ONE.shiftLeft(64));
@@ -449,7 +464,7 @@ public class GXByteBuffer {
     public final String getString(final int index, final int count,
             final String charsetName) {
         if (index + count > size) {
-            throw new OutOfMemoryError();
+            throw new IllegalArgumentException("getString");
         }
         try {
             return new String(getData(), index, count, charsetName);
@@ -502,7 +517,9 @@ public class GXByteBuffer {
     }
 
     public final void set(final GXByteBuffer value) {
-        set(value, value.size() - value.position());
+        if (value != null) {
+            set(value, value.size() - value.position());
+        }
     }
 
     /**
@@ -557,9 +574,8 @@ public class GXByteBuffer {
     }
 
     public final void get(final byte[] target) {
-
         if (size - position < target.length) {
-            throw new OutOfMemoryError();
+            throw new IllegalArgumentException("get");
         }
         System.arraycopy(getData(), position, target, 0, target.length);
         position += target.length;
@@ -586,8 +602,67 @@ public class GXByteBuffer {
         return ret;
     }
 
+    /**
+     * Reverses the order of the given array.
+     */
+    public final void reverse() {
+        if (size() == 0) {
+            return;
+        }
+        int first = position;
+        int last = size - 1;
+        byte tmp;
+        while (last > first) {
+            tmp = data[last];
+            data[last] = data[first];
+            data[first] = tmp;
+            --last;
+            ++first;
+        }
+    }
+
+    /**
+     * Push the given hex string as byte array into this buffer at the current
+     * position, and then increments the position.
+     * 
+     * @param value
+     *            The hex string to be added.
+     */
+    public final void setHexString(final String value) {
+        set(GXCommon.hexToBytes(value));
+    }
+
+    /**
+     * Push the given hex string as byte array into this buffer at the current
+     * position, and then increments the position.
+     * 
+     * @param index
+     *            Byte index.
+     * @param value
+     *            The hex string to be added.
+     */
+    public final void setHexString(final int index, final String value) {
+        set(index, GXCommon.hexToBytes(value));
+    }
+
+    /**
+     * Push the given hex string as byte array into this buffer at the current
+     * position, and then increments the position.
+     * 
+     * @param value
+     *            Byte array to add.
+     * @param index
+     *            Byte index.
+     * @param count
+     *            Byte count.
+     */
+    public final void setHexString(final String value, final int index,
+            final int count) {
+        set(GXCommon.hexToBytes(value), index, count);
+    }
+
     @Override
     public final String toString() {
-        return GXCommon.toHex(data, 0, size);
+        return GXCommon.toHex(data, true, 0, size);
     }
 }

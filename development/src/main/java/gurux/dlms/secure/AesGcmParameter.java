@@ -164,11 +164,11 @@ public class AesGcmParameter {
         sb.append(" FrameCounter: ");
         sb.append(getFrameCounter());
         sb.append(" SystemTitle: ");
-        sb.append(GXCommon.toHex(systemTitle));
+        sb.append(GXCommon.toHex(systemTitle, true));
         sb.append(" AuthenticationKey: ");
-        sb.append(GXCommon.toHex(authenticationKey));
+        sb.append(GXCommon.toHex(authenticationKey, true));
         sb.append(" BlockCipherKey: ");
-        sb.append(GXCommon.toHex(blockCipherKey));
+        sb.append(GXCommon.toHex(blockCipherKey, true));
         return sb.toString();
     }
 }

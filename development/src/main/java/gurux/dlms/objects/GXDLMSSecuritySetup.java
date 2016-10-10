@@ -313,7 +313,7 @@ public class GXDLMSSecuritySetup extends GXDLMSObject implements IGXDLMSBase {
      * 
      * @param client
      *            DLMS client that is used to generate action.
-     * @param security
+     * @param type
      *            New certificate type.
      * @return Generated action.
      */

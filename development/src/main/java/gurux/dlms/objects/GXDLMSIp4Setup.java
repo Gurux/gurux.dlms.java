@@ -34,6 +34,9 @@
 
 package gurux.dlms.objects;
 
+import java.net.InetAddress;
+import java.net.UnknownHostException;
+
 import gurux.dlms.GXByteBuffer;
 import gurux.dlms.GXDLMSClient;
 import gurux.dlms.GXDLMSSettings;
@@ -46,7 +49,7 @@ import gurux.dlms.objects.enums.GXDLMSIp4SetupIpOptionType;
 
 public class GXDLMSIp4Setup extends GXDLMSObject implements IGXDLMSBase {
     private String dataLinkLayerReference;
-    private long ipAddress;
+    private String ipAddress;
     private long[] multicastIPAddress;
     private GXDLMSIp4SetupIpOption[] ipOptions;
     private long subnetMask;
@@ -59,7 +62,7 @@ public class GXDLMSIp4Setup extends GXDLMSObject implements IGXDLMSBase {
      * Constructor.
      */
     public GXDLMSIp4Setup() {
-        super(ObjectType.IP4_SETUP);
+        this("0.0.25.1.0.255");
     }
 
     /**
@@ -69,7 +72,7 @@ public class GXDLMSIp4Setup extends GXDLMSObject implements IGXDLMSBase {
      *            Logical Name of the object.
      */
     public GXDLMSIp4Setup(final String ln) {
-        super(ObjectType.IP4_SETUP, ln, 0);
+        this(ln, 0);
     }
 
     /**
@@ -92,11 +95,11 @@ public class GXDLMSIp4Setup extends GXDLMSObject implements IGXDLMSBase {
         dataLinkLayerReference = value;
     }
 
-    public final long getIPAddress() {
+    public final String getIPAddress() {
         return ipAddress;
     }
 
-    public final void setIPAddress(final long value) {
+    public final void setIPAddress(final String value) {
         ipAddress = value;
     }
 
@@ -159,10 +162,9 @@ public class GXDLMSIp4Setup extends GXDLMSObject implements IGXDLMSBase {
     @Override
     public final Object[] getValues() {
         return new Object[] { getLogicalName(), getDataLinkLayerReference(),
-                new Long(getIPAddress()), getMulticastIPAddress(),
-                getIPOptions(), new Long(getSubnetMask()),
-                new Long(getGatewayIPAddress()), new Boolean(getUseDHCP()),
-                new Long(getPrimaryDNSAddress()),
+                getIPAddress(), getMulticastIPAddress(), getIPOptions(),
+                new Long(getSubnetMask()), new Long(getGatewayIPAddress()),
+                new Boolean(getUseDHCP()), new Long(getPrimaryDNSAddress()),
                 new Long(getSecondaryDNSAddress()) };
     }
 
@@ -282,7 +284,17 @@ public class GXDLMSIp4Setup extends GXDLMSObject implements IGXDLMSBase {
             return this.getDataLinkLayerReference();
         }
         if (e.getIndex() == 3) {
-            return new Long(this.getIPAddress());
+            if (getIPAddress() == null || getIPAddress().isEmpty()) {
+                return 0;
+            }
+            GXByteBuffer bb = new GXByteBuffer();
+            try {
+                bb.set(InetAddress.getByName(getIPAddress()).getAddress());
+                bb.reverse();
+                return new Long(bb.getUInt32());
+            } catch (UnknownHostException e1) {
+                throw new RuntimeException("Invalid IP address.");
+            }
         }
         if (e.getIndex() == 4) {
             return this.getMulticastIPAddress();
@@ -291,7 +303,7 @@ public class GXDLMSIp4Setup extends GXDLMSObject implements IGXDLMSBase {
             GXByteBuffer data = new GXByteBuffer();
             data.setUInt8(DataType.ARRAY.getValue());
             if (ipOptions == null) {
-                data.setUInt8(1);
+                data.setUInt8(0);
             } else {
                 GXCommon.setObjectCount(ipOptions.length, data);
                 for (GXDLMSIp4SetupIpOption it : ipOptions) {
@@ -341,7 +353,14 @@ public class GXDLMSIp4Setup extends GXDLMSObject implements IGXDLMSBase {
                                 DataType.OCTET_STRING).toString());
             }
         } else if (e.getIndex() == 3) {
-            setIPAddress(((Number) e.getValue()).intValue());
+            GXByteBuffer bb = new GXByteBuffer();
+            bb.setUInt32(((Number) e.getValue()).intValue());
+            bb.reverse();
+            try {
+                setIPAddress(InetAddress.getByAddress(bb.array()).toString());
+            } catch (UnknownHostException e1) {
+                throw new RuntimeException("Invalid IP address.");
+            }
         } else if (e.getIndex() == 4) {
             java.util.ArrayList<Long> data = new java.util.ArrayList<Long>();
             if (e.getValue() != null) {

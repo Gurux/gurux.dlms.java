@@ -423,7 +423,7 @@ public class GXDLMSLimiter extends GXDLMSObject implements IGXDLMSBase {
             data.setUInt8(3);
             GXCommon.setData(data, DataType.UINT16,
                     new Integer(emergencyProfile.getID()));
-            GXCommon.setData(data, DataType.DATETIME,
+            GXCommon.setData(data, DataType.OCTET_STRING,
                     emergencyProfile.getActivationTime());
             GXCommon.setData(data, DataType.UINT32,
                     new Long(emergencyProfile.getDuration()));

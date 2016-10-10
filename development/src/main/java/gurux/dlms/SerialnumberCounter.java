@@ -34,7 +34,6 @@
 
 package gurux.dlms;
 
-import java.security.InvalidParameterException;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -91,7 +90,7 @@ final class SerialNumberCounter {
     public static int count(final int sn, final String formula) {
         List<String> values = getValues(formatString(formula));
         if (values.size() % 2 == 0) {
-            throw new InvalidParameterException(
+            throw new IllegalArgumentException(
                     "Invalid serial number formula.");
         }
         String str;
@@ -109,7 +108,7 @@ final class SerialNumberCounter {
             } else if ("/".equals(str)) {
                 value = value / getValue(values.get(index + 1), sn);
             } else {
-                throw new InvalidParameterException(
+                throw new IllegalArgumentException(
                         "Invalid serial number formula.");
             }
         }

@@ -46,21 +46,18 @@ final class GXDLMSChippering {
     private static final Logger LOGGER =
             Logger.getLogger(GXDLMSChippering.class.getName());
 
-    /**
+    /*
      * Constructor.
      */
     private GXDLMSChippering() {
 
     }
 
-    /**
+    /*
      * Get nonse from frame counter and system title.
-     * 
-     * @param frameCounter
-     *            Frame counter.
-     * @param systemTitle
-     *            System title.
-     * @return
+     * @param frameCounter Frame counter.
+     * @param systemTitle System title.
+     * @return Generated nonse.
      */
     private static byte[] getNonse(final long frameCounter,
             final byte[] systemTitle) {
@@ -133,7 +130,7 @@ final class GXDLMSChippering {
             data = tmp2;
         }
         byte[] crypted = data.array();
-        LOGGER.info("Crypted: " + GXCommon.toHex(crypted));
+        LOGGER.info("Crypted: " + GXCommon.toHex(crypted, false));
         return crypted;
     }
 
@@ -168,31 +165,40 @@ final class GXDLMSChippering {
         if (data == null || data.size() - data.position() < 2) {
             throw new IllegalArgumentException("cryptedData");
         }
-        int ch = data.getUInt8();
-        if (!(ch == 0x21 || ch == 0x28)) {
-            Command cmd = Command.forValue(ch);
-            if (cmd == Command.GLO_GENERAL_CIPHERING) {
-                int len = GXCommon.getObjectCount(data);
-                byte[] title = new byte[len];
-                data.get(title);
-                p.setSystemTitle(title);
-            } else if (!(cmd == Command.GLO_GET_REQUEST
-                    || cmd == Command.GLO_GET_RESPONSE
-                    || cmd == Command.GLO_SET_REQUEST
-                    || cmd == Command.GLO_SET_RESPONSE
-                    || cmd == Command.GLO_METHOD_REQUEST
-                    || cmd == Command.GLO_METHOD_RESPONSE
-                    || cmd == Command.GLO_EVENT_NOTIFICATION_REQUEST)) {
-                throw new IllegalArgumentException("cryptedData");
-            }
+        int cmd = data.getUInt8();
+        switch (cmd) {
+        case Command.GLO_GENERAL_CIPHERING:
+            int len = GXCommon.getObjectCount(data);
+            byte[] title = new byte[len];
+            data.get(title);
+            p.setSystemTitle(title);
+            break;
+        case Command.GLO_INITIATE_REQUEST:
+        case Command.GLO_INITIATE_RESPONSE:
+        case Command.GLO_READ_REQUEST:
+        case Command.GLO_READ_RESPONSE:
+        case Command.GLO_WRITE_REQUEST:
+        case Command.GLO_WRITE_RESPONSE:
+        case Command.GLO_GET_REQUEST:
+        case Command.GLO_GET_RESPONSE:
+        case Command.GLO_SET_REQUEST:
+        case Command.GLO_SET_RESPONSE:
+        case Command.GLO_METHOD_REQUEST:
+        case Command.GLO_METHOD_RESPONSE:
+        case Command.GLO_EVENT_NOTIFICATION_REQUEST:
+            break;
+        default:
+            throw new IllegalArgumentException("cryptedData");
         }
+
         GXCommon.getObjectCount(data);
         Security security = Security.forValue(data.getUInt8());
         p.setSecurity(security);
         long frameCounter = data.getUInt32();
         p.setFrameCounter(frameCounter);
         LOGGER.info("Decrypt settings: " + p.toString());
-        LOGGER.info("Encrypted: " + GXCommon.toHex(data.array()));
+        LOGGER.info("Encrypted: "
+                + GXCommon.toHex(data.getData(), false, 0, data.size()));
         byte[] tag = new byte[12];
         byte[] encryptedData;
         int length;

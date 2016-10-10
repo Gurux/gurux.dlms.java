@@ -342,9 +342,9 @@ public class GXDLMSClock extends GXDLMSObject implements IGXDLMSBase {
         GXByteBuffer buff = new GXByteBuffer(44);
         buff.setUInt8(DataType.STRUCTURE.getValue());
         buff.setUInt8(3);
-        GXCommon.setData(buff, DataType.DATETIME, presetTime);
-        GXCommon.setData(buff, DataType.DATETIME, validityIntervalStart);
-        GXCommon.setData(buff, DataType.DATETIME, validityIntervalEnd);
+        GXCommon.setData(buff, DataType.OCTET_STRING, presetTime);
+        GXCommon.setData(buff, DataType.OCTET_STRING, validityIntervalStart);
+        GXCommon.setData(buff, DataType.OCTET_STRING, validityIntervalEnd);
         return client.method(this, 5, buff.array(), DataType.OCTET_STRING);
     }
 
@@ -428,7 +428,7 @@ public class GXDLMSClock extends GXDLMSObject implements IGXDLMSBase {
             return DataType.OCTET_STRING;
         }
         if (index == 2) {
-            return DataType.DATETIME;
+            return DataType.OCTET_STRING;
         }
         if (index == 3) {
             return DataType.INT16;
@@ -437,10 +437,10 @@ public class GXDLMSClock extends GXDLMSObject implements IGXDLMSBase {
             return DataType.UINT8;
         }
         if (index == 5) {
-            return DataType.DATETIME;
+            return DataType.OCTET_STRING;
         }
         if (index == 6) {
-            return DataType.DATETIME;
+            return DataType.OCTET_STRING;
         }
         if (index == 7) {
             return DataType.INT8;

@@ -46,7 +46,11 @@ public enum InterfaceType {
      * The interface type is Net, can be used with devices that support IEC
      * 62056-47.
      */
-    WRAPPER;
+    WRAPPER,
+    /**
+     * Plain PDU is returned.
+     */
+    PDU;
 
     /**
      * @return Get integer value for enumeration.

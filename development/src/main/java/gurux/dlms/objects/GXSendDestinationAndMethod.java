@@ -38,9 +38,9 @@ import gurux.dlms.objects.enums.MessageType;
 import gurux.dlms.objects.enums.ServiceType;
 
 public class GXSendDestinationAndMethod {
-    private ServiceType service;
+    private ServiceType service = ServiceType.TCP;
     private String destination;
-    private MessageType message;
+    private MessageType message = MessageType.COSEM_APDU;
 
     public final ServiceType getService() {
         return service;

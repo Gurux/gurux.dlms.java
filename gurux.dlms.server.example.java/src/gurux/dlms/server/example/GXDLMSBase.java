@@ -543,7 +543,7 @@ public class GXDLMSBase extends GXDLMSSecureServer
     public void onClientDisconnected(Object sender,
             gurux.net.ConnectionEventArgs e) {
         // Reset server settings when connection closed.
-        this.reset();
+        // this.reset();
         System.out.println("Client Disconnected.");
     }
 

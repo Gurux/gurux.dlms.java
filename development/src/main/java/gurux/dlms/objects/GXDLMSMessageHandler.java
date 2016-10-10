@@ -217,8 +217,8 @@ public class GXDLMSMessageHandler extends GXDLMSObject implements IGXDLMSBase {
             for (Entry<GXDateTime, GXDateTime> it : listeningWindow) {
                 buff.setUInt8(DataType.STRUCTURE.getValue());
                 buff.setUInt8(2);
-                GXCommon.setData(buff, DataType.DATETIME, it.getKey());
-                GXCommon.setData(buff, DataType.DATETIME, it.getValue());
+                GXCommon.setData(buff, DataType.OCTET_STRING, it.getKey());
+                GXCommon.setData(buff, DataType.OCTET_STRING, it.getValue());
             }
             return buff.array();
         }

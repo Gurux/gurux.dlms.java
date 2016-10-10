@@ -34,8 +34,6 @@
 
 package gurux.dlms;
 
-import gurux.dlms.enums.Command;
-
 /**
  * Long get or set information is saved here.
  */
@@ -43,7 +41,7 @@ public class GXDLMSLongTransaction {
     /**
      * Executed command.
      */
-    private Command command;
+    private int command;
 
     /**
      * Targets.
@@ -66,16 +64,17 @@ public class GXDLMSLongTransaction {
      *            Data.
      */
     public GXDLMSLongTransaction(final ValueEventArgs[] forTargets,
-            final Command forCommand, final GXByteBuffer forData) {
+            final int forCommand, final GXByteBuffer forData) {
         targets = forTargets;
         command = forCommand;
-        data = forData;
+        data = new GXByteBuffer();
+        data.set(forData);
     }
 
     /**
      * @return Executed command.
      */
-    public final Command getCommand() {
+    public final int getCommand() {
         return command;
     }
 
@@ -98,6 +97,7 @@ public class GXDLMSLongTransaction {
      *            New data.
      */
     public final void setData(final GXByteBuffer value) {
-        data = value;
+        data.clear();
+        data.set(value);
     }
 }

@@ -137,14 +137,10 @@ public class GXDLMSObjectCollection extends ArrayList<GXDLMSObject>
         return sb.toString();
     }
 
-    /**
+    /*
      * Load COSEM objects from the file.
-     * 
-     * @param path
-     *            File path.
+     * @param path File path.
      * @return Collection of serialized COSEM objects.
-     * @throws XMLStreamException
-     * @throws IOException
      */
     public static GXDLMSObjectCollection load(final String path)
             throws XMLStreamException, IOException {
@@ -191,13 +187,9 @@ public class GXDLMSObjectCollection extends ArrayList<GXDLMSObject>
         return objects;
     }
 
-    /**
+    /*
      * Save COSEM objects to the file.
-     * 
-     * @param path
-     *            File path.
-     * @throws IOException
-     * @throws XMLStreamException
+     * @param path File path.
      */
     public final void save(final String path)
             throws IOException, XMLStreamException {

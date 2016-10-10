@@ -188,8 +188,92 @@ public enum DataType {
     public static DataType forValue(final int value) {
         DataType type = getMappings().get(new Integer(value));
         if (type == null) {
-            throw new IllegalArgumentException("Invalid data type.");
+            throw new IllegalArgumentException(
+                    "Invalid data type: " + String.valueOf(value));
         }
         return type;
+    }
+
+    @Override
+    public String toString() {
+        String str;
+        DataType dt = DataType.forValue(intValue);
+        switch (dt) {
+        case ARRAY:
+            str = "Array";
+            break;
+        case BCD:
+            str = "Bcd";
+            break;
+        case BITSTRING:
+            str = "BitString";
+            break;
+        case BOOLEAN:
+            str = "Boolean";
+            break;
+        case COMPACT_ARRAY:
+            str = "CompactArray";
+            break;
+        case DATE:
+            str = "Date";
+            break;
+        case DATETIME:
+            str = "DateTime";
+            break;
+        case ENUM:
+            str = "Enum";
+            break;
+        case FLOAT32:
+            str = "Float32";
+            break;
+        case FLOAT64:
+            str = "Float64";
+            break;
+        case INT16:
+            str = "Int16";
+            break;
+        case INT32:
+            str = "Int32";
+            break;
+        case INT64:
+            str = "Int64";
+            break;
+        case INT8:
+            str = "Int8";
+            break;
+        case NONE:
+            str = "None";
+            break;
+        case OCTET_STRING:
+            str = "OctetString";
+            break;
+        case STRING:
+            str = "String";
+            break;
+        case STRING_UTF8:
+            str = "StringUTF8";
+            break;
+        case STRUCTURE:
+            str = "Structure";
+            break;
+        case TIME:
+            str = "Time";
+            break;
+        case UINT16:
+            str = "UInt16";
+            break;
+        case UINT32:
+            str = "UInt32";
+            break;
+        case UINT64:
+            str = "UInt64";
+            break;
+        case UINT8:
+            str = "UInt8";
+            break;
+        default:
+            throw new IllegalArgumentException("DataType");
+        }
+        return str;
     }
 }

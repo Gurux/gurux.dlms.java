@@ -74,12 +74,7 @@ public class GXDLMSPushSetup extends GXDLMSObject implements IGXDLMSBase {
      *            Logical Name of the object.
      */
     public GXDLMSPushSetup(final String ln) {
-        super(ObjectType.PUSH_SETUP, ln, 0);
-        pushObjectList =
-                new ArrayList<Entry<GXDLMSObject, GXDLMSCaptureObject>>();
-        sendDestinationAndMethod = new GXSendDestinationAndMethod();
-        communicationWindow =
-                new ArrayList<Map.Entry<GXDateTime, GXDateTime>>();
+        this(ln, 0);
     }
 
     /**
@@ -174,6 +169,25 @@ public class GXDLMSPushSetup extends GXDLMSObject implements IGXDLMSBase {
                 sendDestinationAndMethod, communicationWindow,
                 new Integer(randomisationStartInterval),
                 new Integer(numberOfRetries), new Integer(repetitionDelay) };
+    }
+
+    @Override
+    public final byte[] invoke(final GXDLMSSettings settings,
+            final ValueEventArgs e) {
+        if (e.getIndex() == 1) {
+            e.setError(ErrorCode.READ_WRITE_DENIED);
+        } else {
+            e.setError(ErrorCode.READ_WRITE_DENIED);
+        }
+        return null;
+    }
+
+    /*
+     * Activates the push process.
+     */
+    public final byte[][] activate(final GXDLMSClient client) {
+        return client.method(getName(), getObjectType(), 1, new Integer(0),
+                DataType.INT8);
     }
 
     @Override
@@ -293,7 +307,7 @@ public class GXDLMSPushSetup extends GXDLMSObject implements IGXDLMSBase {
                 GXCommon.setData(buff, DataType.OCTET_STRING, null);
             }
             GXCommon.setData(buff, DataType.UINT8,
-                    sendDestinationAndMethod.getMessage());
+                    sendDestinationAndMethod.getMessage().getValue());
             return buff.array();
         }
         if (e.getIndex() == 4) {
@@ -302,8 +316,8 @@ public class GXDLMSPushSetup extends GXDLMSObject implements IGXDLMSBase {
             for (Entry<GXDateTime, GXDateTime> it : communicationWindow) {
                 buff.setUInt8(DataType.STRUCTURE.getValue());
                 buff.setUInt8(2);
-                GXCommon.setData(buff, DataType.DATETIME, it.getKey());
-                GXCommon.setData(buff, DataType.DATETIME, it.getValue());
+                GXCommon.setData(buff, DataType.OCTET_STRING, it.getKey());
+                GXCommon.setData(buff, DataType.OCTET_STRING, it.getValue());
             }
             return buff.array();
         }

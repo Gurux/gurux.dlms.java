@@ -34,6 +34,7 @@
 
 package gurux.dlms;
 
+import java.text.DecimalFormat;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Calendar;
@@ -374,8 +375,9 @@ public class GXDateTime {
     }
 
     private static String getTimeZone(final int forDeviation) {
-        String tmp = String.format("%02d:%02d", new Integer(forDeviation / 60),
-                new Integer(forDeviation % 60));
+        DecimalFormat df = new DecimalFormat("00");
+        String tmp = df.format(forDeviation / 60) + ":"
+                + df.format(forDeviation % 60);
         if (forDeviation == 0) {
             return "GMT";
         } else if (forDeviation > 0) {

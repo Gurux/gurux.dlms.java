@@ -143,7 +143,7 @@ public class GXDLMSRegister extends GXDLMSObject implements IGXDLMSBase {
      */
     public final byte[][] reset(final GXDLMSClient client) {
         return client.method(getName(), getObjectType(), 1, new Integer(0),
-                DataType.UINT8);
+                DataType.INT8);
     }
 
     // CHECKSTYLE:OFF
@@ -166,7 +166,6 @@ public class GXDLMSRegister extends GXDLMSObject implements IGXDLMSBase {
             setValue(null);
         } else {
             e.setError(ErrorCode.READ_WRITE_DENIED);
-            return null;
         }
         return null;
     }

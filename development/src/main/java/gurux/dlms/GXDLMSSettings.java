@@ -100,7 +100,7 @@ public class GXDLMSSettings {
     /**
      * Long Invoke ID.
      */
-    private int longInvokeID = 0x1;
+    private long longInvokeID = 0x1;
 
     /**
      * Priority.
@@ -166,12 +166,12 @@ public class GXDLMSSettings {
     /**
      * Maximum receivers PDU size.
      */
-    private int maxReceivePDUSize = MAX_RECEIVE_PDU_SIZE;
+    private int maxPduSize = MAX_RECEIVE_PDU_SIZE;
 
     /**
      * Server maximum PDU size.
      */
-    public int maxServerPDUSize = MAX_RECEIVE_PDU_SIZE;
+    private int maxServerPDUSize = MAX_RECEIVE_PDU_SIZE;
 
     /**
      * HDLC sender frame sequence number.
@@ -186,7 +186,7 @@ public class GXDLMSSettings {
     /**
      * Is this server or client.
      */
-    private final boolean server;
+    private boolean server;
 
     /**
      * Information from the connection size that server can handle.
@@ -211,6 +211,16 @@ public class GXDLMSSettings {
      * List of server or client objects.
      */
     private final GXDLMSObjectCollection objects;
+
+    /**
+     * Proposed conformance block.
+     */
+    private byte[] conformanceBlock = new byte[3];
+
+    /**
+     * Is authentication Required.
+     */
+    private boolean isAuthenticationRequired;
 
     /**
      * Cipher interface that is used to cipher PDU.
@@ -330,7 +340,7 @@ public class GXDLMSSettings {
     /**
      * @return Is connected to the meter.
      */
-    public final boolean getConnected() {
+    public final boolean isConnected() {
         return connected;
     }
 
@@ -371,8 +381,8 @@ public class GXDLMSSettings {
             return true;
         }
         // Handle I-frame.
-        if (frame == increaseReceiverSequence(
-                increaseSendSequence(receiverFrame))) {
+        if (frame == (increaseReceiverSequence(
+                increaseSendSequence(receiverFrame)) & 0xFF)) {
             receiverFrame = frame;
             return true;
         }
@@ -381,7 +391,7 @@ public class GXDLMSSettings {
             receiverFrame = frame;
             return true;
         }
-        System.out.println("Frame ID do not match.");
+        System.out.println("Invalid HDLC Frame ID.");
         return true;
         // TODO: unit test must fix first. return false;
     }
@@ -502,8 +512,19 @@ public class GXDLMSSettings {
         blockIndex += 1;
     }
 
+    /**
+     * @return Is server or client.
+     */
     public final boolean isServer() {
         return server;
+    }
+
+    /**
+     * @param value
+     *            Is server or client.
+     */
+    public final void setServer(final boolean value) {
+        server = value;
     }
 
     /**
@@ -601,16 +622,16 @@ public class GXDLMSSettings {
     /**
      * @return Maximum PDU size.
      */
-    public final int getMaxReceivePDUSize() {
-        return maxReceivePDUSize;
+    public final int getMaxPduSize() {
+        return maxPduSize;
     }
 
     /**
      * @param value
      *            Maximum PDU size.
      */
-    public final void setMaxReceivePDUSize(final int value) {
-        maxReceivePDUSize = value;
+    public final void setMaxPduSize(final int value) {
+        maxPduSize = value;
     }
 
     /**
@@ -694,7 +715,7 @@ public class GXDLMSSettings {
     /**
      * @return Invoke ID.
      */
-    public final int getLongInvokeID() {
+    public final long getLongInvokeID() {
         return longInvokeID;
     }
 
@@ -702,7 +723,7 @@ public class GXDLMSSettings {
      * @param value
      *            Invoke ID.
      */
-    public final void setLongInvokeID(final int value) {
+    public final void setLongInvokeID(final long value) {
         if (value > 0xFFFFFF) {
             throw new IllegalArgumentException("Invalid InvokeID");
         }
@@ -792,5 +813,12 @@ public class GXDLMSSettings {
      */
     public final void setIndex(final int value) {
         index = value;
+    }
+
+    /**
+     * @return Conformance block.
+     */
+    final byte[] getConformanceBlock() {
+        return conformanceBlock;
     }
 }

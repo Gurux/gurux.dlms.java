@@ -63,9 +63,14 @@ public class GXDLMSAssociationLogicalName extends GXDLMSObject
     private GXxDLMSContextType xDLMSContextInfo;
     private GXAuthenticationMechanismName authenticationMechanismMame;
     /**
-     * Secret used in Authentication.
+     * Secret used in Low Level Authentication.
      */
-    private byte[] secret;
+    private byte[] llsSecret;
+
+    /**
+     * Secret used in High Level Authentication.
+     */
+    private byte[] hlsSecret;
     private AssociationStatus associationStatus =
             AssociationStatus.NonAssociated;
     private String securitySetupReference;
@@ -90,7 +95,8 @@ public class GXDLMSAssociationLogicalName extends GXDLMSObject
         applicationContextName = new GXApplicationContextName();
         xDLMSContextInfo = new GXxDLMSContextType();
         authenticationMechanismMame = new GXAuthenticationMechanismName();
-        secret = "Gurux".getBytes();
+        llsSecret = "Gurux".getBytes();
+        hlsSecret = "Gurux".getBytes();
         setVersion(1);
     }
 
@@ -142,18 +148,33 @@ public class GXDLMSAssociationLogicalName extends GXDLMSObject
     }
 
     /**
-     * @return Secret used in Authentication.
+     * @return Secret used in Low Level Authentication.
      */
     public final byte[] getSecret() {
-        return secret;
+        return llsSecret;
     }
 
     /**
      * @param value
-     *            Secret used in Authentication.
+     *            Secret used in Low Level Authentication.
      */
     public final void setSecret(final byte[] value) {
-        secret = value;
+        llsSecret = value;
+    }
+
+    /**
+     * @return Secret used in HLS Authentication.
+     */
+    public final byte[] getHlsSecret() {
+        return hlsSecret;
+    }
+
+    /**
+     * @param value
+     *            Secret used in HLS Authentication.
+     */
+    public final void setHlsSecret(final byte[] value) {
+        hlsSecret = value;
     }
 
     public final AssociationStatus getAssociationStatus() {
@@ -194,7 +215,7 @@ public class GXDLMSAssociationLogicalName extends GXDLMSObject
                 bb.getUInt8();
                 ic = bb.getUInt32();
             } else {
-                readSecret = getSecret();
+                readSecret = hlsSecret;
             }
             byte[] serverChallenge =
                     GXSecure.secure(settings, settings.getCipher(), ic,
@@ -205,15 +226,16 @@ public class GXDLMSAssociationLogicalName extends GXDLMSObject
                     readSecret = settings.getCipher().getSystemTitle();
                     ic = settings.getCipher().getFrameCounter();
                 } else {
-                    readSecret = getSecret();
+                    readSecret = hlsSecret;
                 }
                 byte[] tmp = GXSecure.secure(settings, settings.getCipher(), ic,
                         settings.getCtoSChallenge(), readSecret);
                 settings.setConnected(true);
                 return tmp;
             } else {
-                LOGGER.info("Invalid CtoS:" + GXCommon.toHex(serverChallenge)
-                        + "-" + GXCommon.toHex(clientChallenge));
+                LOGGER.info(
+                        "Invalid CtoS:" + GXCommon.toHex(serverChallenge, false)
+                                + "-" + GXCommon.toHex(clientChallenge, false));
                 settings.setConnected(false);
                 return null;
             }
@@ -290,45 +312,40 @@ public class GXDLMSAssociationLogicalName extends GXDLMSObject
     /**
      * Returns Association View.
      */
-    private byte[] getObjects() {
+    private byte[] getObjects(final GXDLMSSettings settings,
+            final ValueEventArgs e) {
         GXByteBuffer data = new GXByteBuffer();
-        data.setUInt8(DataType.ARRAY.getValue());
-        boolean lnExists =
-                objectList.findByLN(ObjectType.ASSOCIATION_LOGICAL_NAME,
-                        this.getLogicalName()) != null;
-        // Add count
-        int cnt = objectList.size();
-        if (!lnExists) {
-            ++cnt;
+
+        // Add count only for first time.
+        if (settings.getIndex() == 0) {
+            settings.setCount(objectList.size());
+            data.setUInt8(DataType.ARRAY.getValue());
+            GXCommon.setObjectCount(objectList.size(), data);
         }
-        GXCommon.setObjectCount(cnt, data);
+        int pos = 0;
         for (GXDLMSObject it : objectList) {
-            data.setUInt8(DataType.STRUCTURE.getValue());
-            // Count
-            data.setUInt8(4);
-            // ClassID
-            GXCommon.setData(data, DataType.UINT16,
-                    it.getObjectType().getValue());
-            // Version
-            GXCommon.setData(data, DataType.UINT8, it.getVersion());
-            // LN
-            GXCommon.setData(data, DataType.OCTET_STRING, it.getLogicalName());
-            getAccessRights(it, data); // Access rights.
-        }
-        if (!lnExists) {
-            data.setUInt8(DataType.STRUCTURE.getValue());
-            // Count
-            data.setUInt8(4);
-            // ClassID
-            GXCommon.setData(data, DataType.UINT16,
-                    this.getObjectType().getValue());
-            // Version
-            GXCommon.setData(data, DataType.UINT8, this.getVersion());
-            // LN
-            GXCommon.setData(data, DataType.OCTET_STRING,
-                    this.getLogicalName());
-            // Access rights.
-            getAccessRights(this, data);
+            ++pos;
+            if (!(pos <= settings.getIndex())) {
+                data.setUInt8(DataType.STRUCTURE.getValue());
+                // Count
+                data.setUInt8(4);
+                // ClassID
+                GXCommon.setData(data, DataType.UINT16,
+                        it.getObjectType().getValue());
+                // Version
+                GXCommon.setData(data, DataType.UINT8, it.getVersion());
+                // LN
+                GXCommon.setData(data, DataType.OCTET_STRING,
+                        it.getLogicalName());
+                getAccessRights(it, data); // Access rights.
+                settings.setIndex(settings.getIndex() + 1);
+                // If PDU is full.
+                if (!e.isSkipMaxPduSize()
+                        && data.size() >= settings.getMaxPduSize()) {
+                    break;
+                }
+            }
+
         }
         return data.array();
     }
@@ -462,7 +479,7 @@ public class GXDLMSAssociationLogicalName extends GXDLMSObject
             return getLogicalName();
         }
         if (e.getIndex() == 2) {
-            return getObjects();
+            return getObjects(settings, e);
         }
         if (e.getIndex() == 3) {
             GXByteBuffer data = new GXByteBuffer();
@@ -536,7 +553,7 @@ public class GXDLMSAssociationLogicalName extends GXDLMSObject
             return data.array();
         }
         if (e.getIndex() == 7) {
-            return secret;
+            return llsSecret;
         }
         if (e.getIndex() == 8) {
             return getAssociationStatus().ordinal();
@@ -775,7 +792,7 @@ public class GXDLMSAssociationLogicalName extends GXDLMSObject
             updateAuthenticationMechanismMame(e.getValue());
             break;
         case 7:
-            secret = (byte[]) e.getValue();
+            llsSecret = (byte[]) e.getValue();
             break;
         case 8:
             if (e.getValue() == null) {

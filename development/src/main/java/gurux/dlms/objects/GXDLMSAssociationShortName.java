@@ -59,9 +59,14 @@ public class GXDLMSAssociationShortName extends GXDLMSObject
     private String securitySetupReference;
 
     /**
-     * Secret used in Authentication.
+     * Secret used in LLS Authentication.
      */
-    private byte[] secret;
+    private byte[] llsSecret;
+
+    /**
+     * Secret used in HLS Authentication.
+     */
+    private byte[] hlsSecret;
 
     /**
      * Constructor.
@@ -81,22 +86,38 @@ public class GXDLMSAssociationShortName extends GXDLMSObject
     public GXDLMSAssociationShortName(final String ln, final int sn) {
         super(ObjectType.ASSOCIATION_SHORT_NAME, ln, sn);
         objectList = new GXDLMSObjectCollection(this);
-        secret = "Gurux".getBytes();
+        llsSecret = "Gurux".getBytes();
+        hlsSecret = "Gurux".getBytes();
     }
 
     /**
-     * @return Secret used in Authentication.
+     * @return Secret used in LLS Authentication.
      */
     public final byte[] getSecret() {
-        return secret;
+        return llsSecret;
     }
 
     /**
      * @param value
-     *            Secret used in Authentication.
+     *            Secret used in LLS Authentication.
      */
     public final void setSecret(final byte[] value) {
-        secret = value;
+        llsSecret = value;
+    }
+
+    /**
+     * @return Secret used in HLS Authentication.
+     */
+    public final byte[] getHlsSecret() {
+        return hlsSecret;
+    }
+
+    /**
+     * @param value
+     *            Secret used in HLS Authentication.
+     */
+    public final void setHlsSecret(final byte[] value) {
+        hlsSecret = value;
     }
 
     public final GXDLMSObjectCollection getObjectList() {
@@ -142,7 +163,7 @@ public class GXDLMSAssociationShortName extends GXDLMSObject
                 bb.getUInt8();
                 ic = bb.getUInt32();
             } else {
-                readSecret = getSecret();
+                readSecret = hlsSecret;
             }
             byte[] serverChallenge =
                     GXSecure.secure(settings, settings.getCipher(), ic,
@@ -153,13 +174,15 @@ public class GXDLMSAssociationShortName extends GXDLMSObject
                     readSecret = settings.getCipher().getSystemTitle();
                     ic = settings.getCipher().getFrameCounter();
                 } else {
-                    readSecret = getSecret();
+                    readSecret = hlsSecret;
                 }
+                settings.setConnected(true);
                 return GXSecure.secure(settings, settings.getCipher(), ic,
                         settings.getCtoSChallenge(), readSecret);
             } else {
-                LOGGER.info("Invalid CtoS:" + GXCommon.toHex(serverChallenge)
-                        + "-" + GXCommon.toHex(clientChallenge));
+                LOGGER.info(
+                        "Invalid CtoS:" + GXCommon.toHex(serverChallenge, false)
+                                + "-" + GXCommon.toHex(clientChallenge, false));
                 return null;
             }
         } else {
@@ -251,22 +274,26 @@ public class GXDLMSAssociationShortName extends GXDLMSObject
                 "getDataType failed. Invalid attribute index.");
     }
 
-    /*
-     * Returns value of given attribute.
+    /**
+     * Returns Association View.
      */
-    @Override
-    public final Object getValue(final GXDLMSSettings settings,
+    private byte[] getObjects(final GXDLMSSettings settings,
             final ValueEventArgs e) {
         GXByteBuffer bb = new GXByteBuffer();
-        if (e.getIndex() == 1) {
-            return getLogicalName();
-        } else if (e.getIndex() == 2) {
-            int cnt = objectList.size();
+        int cnt = objectList.size();
+
+        // Add count only for first time.
+        if (settings.getIndex() == 0) {
+            settings.setCount(cnt);
             bb.setUInt8((byte) DataType.ARRAY.getValue());
             // Add count
             GXCommon.setObjectCount(cnt, bb);
-            if (cnt != 0) {
-                for (GXDLMSObject it : objectList) {
+        }
+        int pos = 0;
+        if (cnt != 0) {
+            for (GXDLMSObject it : objectList) {
+                ++pos;
+                if (!(pos <= settings.getIndex())) {
                     bb.setUInt8((byte) DataType.STRUCTURE.getValue());
                     // Count
                     bb.setUInt8((byte) 4);
@@ -280,24 +307,29 @@ public class GXDLMSAssociationShortName extends GXDLMSObject
                     // LN
                     GXCommon.setData(bb, DataType.OCTET_STRING,
                             it.getLogicalName());
-                }
-                if (objectList.findBySN(this.getShortName()) == null) {
-                    bb.setUInt8((byte) DataType.STRUCTURE.getValue());
-                    // Count
-                    bb.setUInt8((byte) 4);
-                    // base address.
-                    GXCommon.setData(bb, DataType.INT16, this.getShortName());
-                    // ClassID
-                    GXCommon.setData(bb, DataType.UINT16,
-                            this.getObjectType().getValue());
-                    // Version
-                    GXCommon.setData(bb, DataType.UINT8, 0);
-                    // LN
-                    GXCommon.setData(bb, DataType.OCTET_STRING,
-                            this.getLogicalName());
+                    settings.setIndex(settings.getIndex() + 1);
+                    // If PDU is full.
+                    if (!e.isSkipMaxPduSize()
+                            && bb.size() >= settings.getMaxPduSize()) {
+                        break;
+                    }
                 }
             }
-            return bb.array();
+        }
+        return bb.array();
+    }
+
+    /*
+     * Returns value of given attribute.
+     */
+    @Override
+    public final Object getValue(final GXDLMSSettings settings,
+            final ValueEventArgs e) {
+        GXByteBuffer bb = new GXByteBuffer();
+        if (e.getIndex() == 1) {
+            return getLogicalName();
+        } else if (e.getIndex() == 2) {
+            return getObjects(settings, e);
         } else if (e.getIndex() == 3) {
             boolean lnExists = objectList.findBySN(this.getShortName()) != null;
             // Add count

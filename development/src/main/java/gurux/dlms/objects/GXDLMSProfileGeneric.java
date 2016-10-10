@@ -443,14 +443,15 @@ public class GXDLMSProfileGeneric extends GXDLMSObject implements IGXDLMSBase {
             columns = new ArrayList<Entry<GXDLMSObject, GXDLMSCaptureObject>>();
             for (Object it : cols) {
                 Object[] tmp = (Object[]) it;
-                ObjectType ot = ObjectType.forValue((Integer) tmp[0]);
+                ObjectType ot =
+                        ObjectType.forValue(((Number) tmp[0]).intValue());
                 String ln = GXDLMSObject.toLogicalName((byte[]) tmp[1]);
-                byte attributeIndex = (Byte) tmp[2];
-                int dataIndex = (Short) tmp[3];
+                byte attributeIndex = ((Number) tmp[2]).byteValue();
+                int dataIndex = ((Number) tmp[3]).intValue();
                 // Find columns and update only them.
-                for (Entry<GXDLMSObject, GXDLMSCaptureObject> c
-
-                : captureObjects) {
+                // CHECKSTYLE:OFF
+                for (Entry<GXDLMSObject, GXDLMSCaptureObject> c : captureObjects) {
+                    // CHECKSTYLE:ON
                     if (c.getKey().getObjectType() == ot
                             && c.getValue()
                                     .getAttributeIndex() == attributeIndex
@@ -461,8 +462,60 @@ public class GXDLMSProfileGeneric extends GXDLMSObject implements IGXDLMSBase {
                     }
                 }
             }
+        } else {
+            // Return all rows.
+            List<Entry<GXDLMSObject, GXDLMSCaptureObject>> colums =
+                    new ArrayList<Entry<GXDLMSObject, GXDLMSCaptureObject>>();
+            colums.addAll(captureObjects);
+            return colums;
         }
         return columns;
+    }
+
+    /**
+     * Get selected columns from parameters.
+     * 
+     * @param selector
+     *            Is read by entry or range.
+     * @param parameters
+     *            Received parameters where columns information is found.
+     * @return Selected columns.
+     */
+    public final List<Entry<GXDLMSObject, GXDLMSCaptureObject>>
+
+            getSelectedColumns(final int selector, final Object parameters) {
+        if (selector == 0) {
+            // Return all rows.
+            List<Entry<GXDLMSObject, GXDLMSCaptureObject>> colums =
+                    new ArrayList<Entry<GXDLMSObject, GXDLMSCaptureObject>>();
+            colums.addAll(captureObjects);
+            return colums;
+        } else if (selector == 1) {
+            return getColumns((Object[]) ((Object[]) parameters)[3]);
+        } else if (selector == 2) {
+            Object[] arr = (Object[]) parameters;
+            int colStart = 1;
+            int colCount = 0;
+            if (arr.length > 2) {
+                colStart = ((Number) arr[2]).intValue();
+            }
+            if (arr.length > 3) {
+                colCount = ((Number) arr[3]).intValue();
+            } else if (colStart != 1) {
+                colCount = captureObjects.size();
+            }
+            if (colStart != 1 || colCount != 0) {
+                return captureObjects.subList(colStart - 1,
+                        colStart + colCount - 1);
+            }
+            // Return all rows.
+            List<Entry<GXDLMSObject, GXDLMSCaptureObject>> colums =
+                    new ArrayList<Entry<GXDLMSObject, GXDLMSCaptureObject>>();
+            colums.addAll(captureObjects);
+            return colums;
+        } else {
+            throw new IllegalArgumentException("Invalid selector.");
+        }
     }
 
     final byte[] getProfileGenericData(final int selector,
@@ -473,6 +526,7 @@ public class GXDLMSProfileGeneric extends GXDLMSObject implements IGXDLMSBase {
             return getData(getBuffer(), columns);
         }
         Object[] arr = (Object[]) parameters;
+        columns = getSelectedColumns(selector, arr);
         ArrayList<Object[]> table = new ArrayList<Object[]>();
         // Read by range
         if (selector == 1) {
@@ -486,10 +540,6 @@ public class GXDLMSProfileGeneric extends GXDLMSObject implements IGXDLMSBase {
             java.util.Date end = ((GXDateTime) GXCommon
                     .getData(new GXByteBuffer((byte[]) arr[2]), info))
                             .getValue();
-
-            if (arr.length > 3) {
-                columns = getColumns((Object[]) ((Object[]) arr)[3]);
-            }
             for (Object row : getBuffer()) {
                 java.util.Date tm;
                 Object tmp = ((Object[]) row)[0];
@@ -505,26 +555,22 @@ public class GXDLMSProfileGeneric extends GXDLMSObject implements IGXDLMSBase {
         } else if (selector == 2) {
             // Read by entry.
             int start = ((Number) arr[0]).intValue();
+            if (start == 0) {
+                start = 1;
+            }
             int count = ((Number) arr[1]).intValue();
-            int colStart = 1;
-            int colCount = 0;
-            if (arr.length > 2) {
-                colStart = ((Number) arr[2]).intValue();
+            if (count == 0) {
+                count = getBuffer().length;
             }
-            if (arr.length > 3) {
-                colCount = ((Number) arr[3]).intValue();
-            } else if (colStart != 1) {
-                colCount = captureObjects.size();
+            if (start + count > getBuffer().length + 1) {
+                count = getBuffer().length;
             }
-            if (colStart != 1 || colCount != 0) {
-                columns = captureObjects.subList(colStart - 1,
-                        colStart + colCount - 1);
-            }
+            // Starting index is 1.
             for (int pos = 0; pos < count; ++pos) {
-                if (pos + start == getBuffer().length) {
+                if (pos + start - 1 == getBuffer().length) {
                     break;
                 }
-                table.add((Object[]) getBuffer()[start + pos]);
+                table.add((Object[]) getBuffer()[start + pos - 1]);
             }
         } else {
             throw new IllegalArgumentException("Invalid selector.");

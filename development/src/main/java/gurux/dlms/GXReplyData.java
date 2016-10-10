@@ -51,22 +51,36 @@ public class GXReplyData {
      * Is more data available.
      */
     private RequestTypes moreData;
+
     /**
      * Received command.
      */
-    private Command command;
+    private int command;
+
+    /**
+     * Received command type.
+     */
+    private int commandType;
+
     /**
      * Received data.
      */
     private GXByteBuffer data = new GXByteBuffer();
+
     /**
      * Is frame complete.
      */
     private boolean complete;
+
+    /**
+     * HDLC frame ID.
+     */
+    private short frameId;
+
     /**
      * Received error.
      */
-    private short error;
+    private int error;
 
     /**
      * Read value.
@@ -114,6 +128,11 @@ public class GXReplyData {
     private Date time = null;
 
     /**
+     * XML settings.
+     */
+    private GXDLMSTranslatorStructure xml;
+
+    /**
      * Constructor.
      * 
      * @param more
@@ -127,7 +146,7 @@ public class GXReplyData {
      * @param err
      *            Received error ID.
      */
-    GXReplyData(final RequestTypes more, final Command cmd,
+    GXReplyData(final RequestTypes more, final short cmd,
             final GXByteBuffer buff, final boolean forComplete,
             final byte err) {
         clear();
@@ -184,7 +203,7 @@ public class GXReplyData {
         packetLength = value;
     }
 
-    public final void setCommand(final Command value) {
+    public final void setCommand(final int value) {
         command = value;
     }
 
@@ -196,7 +215,7 @@ public class GXReplyData {
         complete = value;
     }
 
-    public final void setError(final short value) {
+    public final void setError(final int value) {
         error = value;
     }
 
@@ -225,6 +244,7 @@ public class GXReplyData {
     public final void clear() {
         moreData = RequestTypes.NONE;
         command = Command.NONE;
+        commandType = 0;
         data.capacity(0);
         complete = false;
         error = 0;
@@ -263,7 +283,7 @@ public class GXReplyData {
      * 
      * @return Received command.
      */
-    public final Command getCommand() {
+    public final int getCommand() {
         return command;
     }
 
@@ -290,7 +310,7 @@ public class GXReplyData {
      * 
      * @return Received error.
      */
-    public final short getError() {
+    public final int getError() {
         return error;
     }
 
@@ -388,6 +408,51 @@ public class GXReplyData {
      */
     public final void setTime(final Date value) {
         time = value;
+    }
+
+    /**
+     * @return Received command type.
+     */
+    public final int getCommandType() {
+        return commandType;
+    }
+
+    /**
+     * @param value
+     *            Received command type.
+     */
+    public final void setCommandType(final int value) {
+        commandType = value;
+    }
+
+    /**
+     * @return XML settings.
+     */
+    public final GXDLMSTranslatorStructure getXml() {
+        return xml;
+    }
+
+    /**
+     * @param value
+     *            XML settings.
+     */
+    public final void setXml(final GXDLMSTranslatorStructure value) {
+        xml = value;
+    }
+
+    /**
+     * @return HDLC frame ID.
+     */
+    public final short getFrameId() {
+        return frameId;
+    }
+
+    /**
+     * @param value
+     *            HDLC frame ID.
+     */
+    public final void setFrameId(final short value) {
+        frameId = value;
     }
 
 }

@@ -34,13 +34,13 @@
 
 package gurux.dlms.objects;
 
-import gurux.dlms.GXDateTime;
+import gurux.dlms.GXTime;
 
 /**
  * Activity Calendar's Day Profile Action is defined on the standard.
  */
 public class GXDLMSDayProfileAction {
-    private GXDateTime time;
+    private GXTime time;
     private String logicalName;
     private int selector;
 
@@ -61,7 +61,7 @@ public class GXDLMSDayProfileAction {
      * @param scriptSelector
      *            Script selector.
      */
-    public GXDLMSDayProfileAction(final GXDateTime startTime,
+    public GXDLMSDayProfileAction(final GXTime startTime,
             final String scriptLogicalName, final int scriptSelector) {
         setStartTime(startTime);
         setScriptLogicalName(scriptLogicalName);
@@ -71,7 +71,7 @@ public class GXDLMSDayProfileAction {
     /**
      * @return Defines the time when the script is to be executed.
      */
-    public final GXDateTime getStartTime() {
+    public final GXTime getStartTime() {
         return time;
     }
 
@@ -79,7 +79,7 @@ public class GXDLMSDayProfileAction {
      * @param value
      *            Defines the time when the script is to be executed.
      */
-    public final void setStartTime(final GXDateTime value) {
+    public final void setStartTime(final GXTime value) {
         time = value;
     }
 

@@ -34,10 +34,9 @@
 
 package gurux.dlms.objects;
 
-import java.util.Dictionary;
-import java.util.Enumeration;
-import java.util.Hashtable;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 import gurux.dlms.GXDLMSException;
 import gurux.dlms.GXDLMSSettings;
@@ -55,8 +54,8 @@ import gurux.dlms.manufacturersettings.GXDLMSAttributeSettings;
  * GXDLMSObject provides an interface to DLMS registers.
  */
 public class GXDLMSObject {
-    private Dictionary<Integer, java.util.Date> readTimes =
-            new Hashtable<Integer, java.util.Date>();
+    private HashMap<Integer, java.util.Date> readTimes =
+            new HashMap<Integer, java.util.Date>();
     private int version;
     private ObjectType objectType = ObjectType.NONE;
     private GXAttributeCollection attributes = null;
@@ -72,14 +71,14 @@ public class GXDLMSObject {
         this(ObjectType.NONE, null, 0);
     }
 
-    /**
+    /*
      * Constructor,
      */
     protected GXDLMSObject(final ObjectType type) {
         this(type, null, 0);
     }
 
-    /**
+    /*
      * Constructor,
      */
     protected GXDLMSObject(final ObjectType type, final String ln,
@@ -131,19 +130,18 @@ public class GXDLMSObject {
      * @return Is attribute read only.
      */
     protected final java.util.Date getLastReadTime(final int attributeIndex) {
-        Enumeration<Integer> key = readTimes.keys();
-        int value;
-        while (key.hasMoreElements()) {
-            value = key.nextElement();
-            if (value == attributeIndex) {
-                return readTimes.get(value);
+        for (Map.Entry<Integer, java.util.Date> it : readTimes.entrySet()) {
+            if (it.getKey() == attributeIndex) {
+                return it.getValue();
             }
         }
         return new java.util.Date(0);
     }
 
-    /**
+    /*
      * Set time when attribute was last time read.
+     * @param attributeIndex Attribute index.
+     * @param tm Read time.
      */
     protected final void setLastReadTime(final int attributeIndex,
             final java.util.Date tm) {
@@ -409,17 +407,12 @@ public class GXDLMSObject {
     }
     // CHECKSTYLE:ON
 
-    /**
+    /*
      * Get value.
-     * 
-     * @param settings
-     *            DLMS settings.
-     * @param index
-     *            Attribute index.
-     * @param selector
-     *            Optional selector.
-     * @param parameters
-     *            Optional parameters.
+     * @param settings DLMS settings.
+     * @param index Attribute index.
+     * @param selector Optional selector.
+     * @param parameters Optional parameters.
      * @return Value of given attribute.
      */
     // CHECKSTYLE:OFF
@@ -433,10 +426,8 @@ public class GXDLMSObject {
      * 
      * @param settings
      *            DLMS settings.
-     * @param index
-     *            Attribute index.
-     * @param value
-     *            Attribute value.
+     * @param e
+     *            Value event parameters.
      */
     // CHECKSTYLE:OFF
     public void setValue(final GXDLMSSettings settings, ValueEventArgs e) {
@@ -453,16 +444,10 @@ public class GXDLMSObject {
     }
     // CHECKSTYLE:ON
 
-    /**
+    /*
      * Server calls this invokes method.
-     * 
-     * @param settings
-     *            DLMS settings.
-     * @param index
-     *            Method index.
-     * @param parameters
-     *            Optional parameters.
-     * @return Invoke reply.
+     * @param settings DLMS settings.
+     * @param e Value event parameters.
      */
     // CHECKSTYLE:OFF
     public byte[] invoke(final GXDLMSSettings settings,

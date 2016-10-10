@@ -41,6 +41,7 @@ import gurux.dlms.GXByteBuffer;
 import gurux.dlms.GXDLMSClient;
 import gurux.dlms.GXDLMSSettings;
 import gurux.dlms.GXDateTime;
+import gurux.dlms.GXTime;
 import gurux.dlms.ValueEventArgs;
 import gurux.dlms.enums.DataType;
 import gurux.dlms.enums.ErrorCode;
@@ -272,7 +273,7 @@ public class GXDLMSActivityCalendar extends GXDLMSObject
             return DataType.ARRAY;
         }
         if (index == 10) {
-            return DataType.DATETIME;
+            return DataType.OCTET_STRING;
         }
         throw new IllegalArgumentException(
                 "getDataType failed. Invalid attribute index.");
@@ -355,7 +356,7 @@ public class GXDLMSActivityCalendar extends GXDLMSObject
                         .getDaySchedules()) {
                     data.setUInt8(DataType.STRUCTURE.getValue());
                     data.setUInt8(3);
-                    GXCommon.setData(data, DataType.TIME,
+                    GXCommon.setData(data, DataType.OCTET_STRING,
                             action.getStartTime());
                     GXCommon.setData(data, DataType.OCTET_STRING,
                             action.getScriptLogicalName());
@@ -458,7 +459,7 @@ public class GXDLMSActivityCalendar extends GXDLMSObject
                 for (final Object it2 : (Object[]) ((Object[]) item)[1]) {
                     final GXDLMSDayProfileAction ac =
                             new GXDLMSDayProfileAction();
-                    ac.setStartTime((GXDateTime) GXDLMSClient.changeType(
+                    ac.setStartTime((GXTime) GXDLMSClient.changeType(
                             (byte[]) ((Object[]) it2)[0], DataType.TIME));
                     ac.setScriptLogicalName(GXDLMSClient
                             .changeType((byte[]) ((Object[]) it2)[1],

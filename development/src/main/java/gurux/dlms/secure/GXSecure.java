@@ -55,8 +55,12 @@ public final class GXSecure {
     /**
      * Chipher text.
      * 
-     * @param auth
-     *            Authentication level.
+     * @param settings
+     *            DLMS settings.
+     * @param cipher
+     *            Chipher settings.
+     * @param ic
+     *            IC
      * @param data
      *            Text to chipher.
      * @param secret

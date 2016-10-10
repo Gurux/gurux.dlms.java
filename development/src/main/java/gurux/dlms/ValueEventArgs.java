@@ -84,6 +84,11 @@ public class ValueEventArgs {
     private GXDLMSSettings settings;
 
     /**
+     * Is value max PDU size skipped when converting data to bytes.
+     */
+    private boolean skipMaxPduSize;
+
+    /**
      * @return Target DLMS object.
      */
     public final GXDLMSObject getTarget() {
@@ -158,10 +163,26 @@ public class ValueEventArgs {
     }
 
     /**
+     * @param value
+     *            Selector.
+     */
+    public final void setSelector(final int value) {
+        selector = value;
+    }
+
+    /**
      * @return Optional parameters.
      */
     public final Object getParameters() {
         return parameters;
+    }
+
+    /**
+     * @param value
+     *            Optional parameters.
+     */
+    public final void setParameters(final Object value) {
+        parameters = value;
     }
 
     /**
@@ -245,5 +266,20 @@ public class ValueEventArgs {
      */
     public final GXDLMSSettings getSettings() {
         return settings;
+    }
+
+    /**
+     * @return Is value max PDU size skipped when converting data to bytes.
+     */
+    public final boolean isSkipMaxPduSize() {
+        return skipMaxPduSize;
+    }
+
+    /**
+     * @param value
+     *            Is value max PDU size skipped when converting data to bytes.
+     */
+    public final void setSkipMaxPduSize(final boolean value) {
+        skipMaxPduSize = value;
     }
 }

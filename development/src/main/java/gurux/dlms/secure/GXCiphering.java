@@ -55,12 +55,10 @@ public class GXCiphering implements GXICipher {
     /**
      * Constructor. Default values are from the Green Book.
      * 
-     * @param server
-     *            Used Is server or client.
      * @param title
      *            Used system title.
      */
-    GXCiphering(final byte[] title) {
+    public GXCiphering(final byte[] title) {
         setSecurity(Security.NONE);
         setSystemTitle(title);
         setBlockCipherKey(new byte[] { 0x00, 0x01, 0x02, 0x03, 0x04, 0x05, 0x06,
