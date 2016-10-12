@@ -177,7 +177,12 @@ public final class GXCommon {
         if (value == null || value.length() == 0) {
             return new byte[0];
         }
-        byte[] buffer = new byte[(value.length() / 2) + 1];
+        int len = value.length() / 2;
+        if (value.length() % 2 != 0) {
+            ++len;
+        }
+
+        byte[] buffer = new byte[len];
         int lastValue = -1;
         int index = 0;
         for (byte ch : value.getBytes()) {
@@ -200,6 +205,10 @@ public final class GXCommon {
         if (lastValue != -1) {
             buffer[index] = (byte) lastValue;
             ++index;
+        }
+        // If there are no spaces in the hex string.
+        if (buffer.length == index) {
+            return buffer;
         }
         byte[] tmp = new byte[index];
         System.arraycopy(buffer, 0, tmp, 0, index);

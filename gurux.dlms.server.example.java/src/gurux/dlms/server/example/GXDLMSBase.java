@@ -35,6 +35,8 @@
 package gurux.dlms.server.example;
 
 import java.math.BigInteger;
+import java.net.InetAddress;
+import java.net.UnknownHostException;
 import java.util.AbstractMap;
 
 import gurux.common.IGXMediaListener;
@@ -44,7 +46,10 @@ import gurux.common.ReceiveEventArgs;
 import gurux.common.TraceEventArgs;
 import gurux.common.enums.TraceLevel;
 import gurux.dlms.GXDLMSConnectionEventArgs;
+import gurux.dlms.GXDate;
 import gurux.dlms.GXDateTime;
+import gurux.dlms.GXSimpleEntry;
+import gurux.dlms.GXTime;
 import gurux.dlms.ValueEventArgs;
 import gurux.dlms.enums.AccessMode;
 import gurux.dlms.enums.Authentication;
@@ -58,6 +63,7 @@ import gurux.dlms.objects.GXDLMSAssociationLogicalName;
 import gurux.dlms.objects.GXDLMSAssociationShortName;
 import gurux.dlms.objects.GXDLMSAutoAnswer;
 import gurux.dlms.objects.GXDLMSAutoConnect;
+import gurux.dlms.objects.GXDLMSCaptureObject;
 import gurux.dlms.objects.GXDLMSClock;
 import gurux.dlms.objects.GXDLMSData;
 import gurux.dlms.objects.GXDLMSDayProfile;
@@ -65,11 +71,13 @@ import gurux.dlms.objects.GXDLMSDayProfileAction;
 import gurux.dlms.objects.GXDLMSDemandRegister;
 import gurux.dlms.objects.GXDLMSIECOpticalPortSetup;
 import gurux.dlms.objects.GXDLMSImageTransfer;
+import gurux.dlms.objects.GXDLMSIp4Setup;
 import gurux.dlms.objects.GXDLMSMacAddressSetup;
 import gurux.dlms.objects.GXDLMSModemConfiguration;
 import gurux.dlms.objects.GXDLMSModemInitialisation;
 import gurux.dlms.objects.GXDLMSObject;
 import gurux.dlms.objects.GXDLMSProfileGeneric;
+import gurux.dlms.objects.GXDLMSPushSetup;
 import gurux.dlms.objects.GXDLMSRegister;
 import gurux.dlms.objects.GXDLMSRegisterMonitor;
 import gurux.dlms.objects.GXDLMSSapAssignment;
@@ -108,9 +116,18 @@ public class GXDLMSBase extends GXDLMSSecureServer
         GXDLMSData d = new GXDLMSData("0.0.42.0.0.255");
         d.setValue("Gurux123456");
         // Set access right. Client can't change Device name.
-        d.setAccess(2, AccessMode.READ_WRITE);
+        d.setAccess(2, AccessMode.READ);
         d.setDataType(2, DataType.OCTET_STRING);
         d.setUIDataType(2, DataType.STRING);
+        getItems().add(d);
+    }
+
+    /*
+     * Add firmware version.
+     */
+    void addFirmwareVersion() {
+        GXDLMSData d = new GXDLMSData("1.0.0.2.0.255");
+        d.setValue("Gurux FW 0.0.1");
         getItems().add(d);
     }
 
@@ -174,8 +191,7 @@ public class GXDLMSBase extends GXDLMSSecureServer
         // Calling is allowed between 1am to 6am.
         ac.getCallingWindow()
                 .add(new AbstractMap.SimpleEntry<GXDateTime, GXDateTime>(
-                        new GXDateTime(-1, -1, -1, 1, 0, 0, -1),
-                        new GXDateTime(-1, -1, -1, 6, 0, 0, -1)));
+                        new GXTime(1, 0, 0, -1), new GXTime(6, 0, 0, -1)));
         ac.setDestinations(new String[] { "www.gurux.org" });
         getItems().add(ac);
     }
@@ -189,9 +205,9 @@ public class GXDLMSBase extends GXDLMSSecureServer
 
         GXDLMSActivityCalendar activity = new GXDLMSActivityCalendar();
         activity.setCalendarNameActive("Active");
-        activity.setSeasonProfileActive(new GXDLMSSeasonProfile[] {
-                new GXDLMSSeasonProfile("Summer time",
-                        new GXDateTime(-1, 3, 31, -1, -1, -1, -1), "") });
+        activity.setSeasonProfileActive(
+                new GXDLMSSeasonProfile[] { new GXDLMSSeasonProfile(
+                        "Summer time", new GXDate(-1, 3, 31), "") });
         GXDLMSWeekProfile wp = new GXDLMSWeekProfile();
         wp.setName("Monday");
         wp.setMonday(1);
@@ -205,12 +221,12 @@ public class GXDLMSBase extends GXDLMSSecureServer
         activity.setDayProfileTableActive(
                 new GXDLMSDayProfile[] { new GXDLMSDayProfile(1,
                         new GXDLMSDayProfileAction[] {
-                                new GXDLMSDayProfileAction(new GXDateTime(now),
+                                new GXDLMSDayProfileAction(new GXTime(now),
                                         "test", 1) }) });
         activity.setCalendarNamePassive("Passive");
-        activity.setSeasonProfilePassive(new GXDLMSSeasonProfile[] {
-                new GXDLMSSeasonProfile("Winter time",
-                        new GXDateTime(-1, 10, 30, -1, -1, -1, -1), "") });
+        activity.setSeasonProfilePassive(
+                new GXDLMSSeasonProfile[] { new GXDLMSSeasonProfile(
+                        "Winter time", new GXDate(-1, 10, 30), "") });
         wp = new GXDLMSWeekProfile();
         wp.setName("Tuesday");
         wp.setMonday(1);
@@ -224,7 +240,7 @@ public class GXDLMSBase extends GXDLMSSecureServer
         activity.setDayProfileTablePassive(
                 new GXDLMSDayProfile[] { new GXDLMSDayProfile(1,
                         new GXDLMSDayProfileAction[] {
-                                new GXDLMSDayProfileAction(new GXDateTime(now),
+                                new GXDLMSDayProfileAction(new GXTime(now),
                                         "0.0.1.0.0.255", 1) }) });
         activity.setTime(new GXDateTime(now));
         getItems().add(activity);
@@ -308,7 +324,7 @@ public class GXDLMSBase extends GXDLMSSecureServer
     /**
      * Add Auto Answer object.
      */
-    void AddAutoAnswer() {
+    void addAutoAnswer() {
         GXDLMSAutoAnswer aa = new GXDLMSAutoAnswer();
         aa.setMode(AutoConnectMode.EMAIL_SENDING);
         aa.getListeningWindow()
@@ -354,6 +370,46 @@ public class GXDLMSBase extends GXDLMSSecureServer
     }
 
     /**
+     * Add IP4 setup object.
+     */
+    void addIp4Setup() {
+        GXDLMSIp4Setup ip4 = new GXDLMSIp4Setup();
+        // Get FIRST local IP address.
+        try {
+            ip4.setIPAddress(
+                    InetAddress.getLocalHost().getHostAddress().toString());
+        } catch (UnknownHostException e) {
+            throw new RuntimeException(e.getMessage());
+        }
+        getItems().add(ip4);
+    }
+
+    /**
+     * Add Push Setup. (On Connectivity object).
+     */
+    void addPushSetup() {
+        GXDLMSPushSetup push = new GXDLMSPushSetup("0.0.25.9.0.255");
+        getItems().add(push);
+        // Add push object itself. This is needed to tell structure of data to
+        // the Push listener.
+        push.getPushObjectList()
+                .add(new GXSimpleEntry<GXDLMSObject, GXDLMSCaptureObject>(push,
+                        new GXDLMSCaptureObject(2, 0)));
+        // Add logical device name.
+        GXDLMSObject ldn =
+                getItems().findByLN(ObjectType.DATA, "0.0.42.0.0.255");
+        push.getPushObjectList()
+                .add(new GXSimpleEntry<GXDLMSObject, GXDLMSCaptureObject>(ldn,
+                        new GXDLMSCaptureObject(2, 0)));
+        // Add .0.0.25.1.0.255 Ch. 0 IPv4 setup IP address.
+        GXDLMSObject ip4 =
+                getItems().findByLN(ObjectType.IP4_SETUP, "0.0.25.1.0.255");
+        push.getPushObjectList()
+                .add(new GXSimpleEntry<GXDLMSObject, GXDLMSCaptureObject>(ip4,
+                        new GXDLMSCaptureObject(3, 0)));
+    }
+
+    /**
      * Add available objects.
      * 
      * @param server
@@ -366,6 +422,8 @@ public class GXDLMSBase extends GXDLMSSecureServer
         ///////////////////////////////////////////////////////////////////////
         // Add objects of the meter.
         addLogicalDeviceName();
+        // Add firmware version.
+        addFirmwareVersion();
         // Add example register object.
         GXDLMSRegister register = addRegister();
         // Add default clock object.
@@ -394,7 +452,7 @@ public class GXDLMSBase extends GXDLMSSecureServer
         // Add SAP Assignment object.
         addSapAssignment();
         // Add Auto Answer object.
-        AddAutoAnswer();
+        addAutoAnswer();
 
         // Add Modem Configuration object.
         addModemConfiguration();
@@ -402,6 +460,12 @@ public class GXDLMSBase extends GXDLMSSecureServer
         addMacAddressSetup();
         // Add Image transfer object.
         addImageTransfer();
+
+        // Add IP4 Setup object.
+        addIp4Setup();
+
+        // Add Push Setup. (On Connectivity object)
+        addPushSetup();
         ///////////////////////////////////////////////////////////////////////
         // Server must initialize after all objects are added.
         initialize();
@@ -581,16 +645,16 @@ public class GXDLMSBase extends GXDLMSSecureServer
     public final SourceDiagnostic validateAuthentication(
             final Authentication authentication, final byte[] password) {
         // Accept all passwords.
-        return SourceDiagnostic.NONE;
+        // return SourceDiagnostic.NONE;
         // Uncomment checkPassword if you want to check password.
-        // Default password is Gurux.
-        // checkPassword(authentication, password);
+        return checkPassword(authentication, password);
     }
 
     SourceDiagnostic checkPassword(final Authentication authentication,
             final byte[] password) {
+        // Default password is Gurux.
         byte[] expectedPassword = "Gurux".getBytes();
-        if (authentication == Authentication.LOW && expectedPassword != null) {
+        if (authentication == Authentication.LOW) {
             if (!java.util.Arrays.equals(password, expectedPassword)) {
                 String actual = "";
                 if (getSettings().getPassword() != null) {
@@ -602,6 +666,7 @@ public class GXDLMSBase extends GXDLMSSecureServer
                 return SourceDiagnostic.AUTHENTICATION_FAILURE;
             }
         }
+        // Other authentication levels are check on phase two.
         return SourceDiagnostic.NONE;
     }
 

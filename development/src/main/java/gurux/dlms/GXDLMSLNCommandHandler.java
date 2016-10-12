@@ -666,24 +666,26 @@ final class GXDLMSLNCommandHandler {
         }
     }
 
-    /// <summary>
-    /// Handle Access request.
-    /// </summary>
-    /// <param name="Reply">
-    /// Received data from the client.
-    /// </param>
-    /// <returns>
-    /// Reply.
-    /// </returns>
-    /*
+    /**
+     * Handle Access request.
      * 
+     * @param settings
+     *            DLMS settings.
+     * @param server
+     *            server.
+     * @param data
+     *            Received data from the client.
+     * @param reply
+     *            reply data-
+     * @param xml
+     *            XML settings.
      */
     public static void handleAccessRequest(final GXDLMSSettings settings,
             final GXDLMSServer server, final GXByteBuffer data,
-            final GXReplyData reply, final GXDLMSTranslatorStructure xml) {
+            final GXByteBuffer reply, final GXDLMSTranslatorStructure xml) {
         // Return error if connection is not established.
         if (xml == null && !settings.isConnected()) {
-            reply.getData().set(GXDLMSServer.generateConfirmedServiceError(
+            reply.set(GXDLMSServer.generateConfirmedServiceError(
                     ConfirmedServiceError.INITIATE_ERROR, ServiceError.SERVICE,
                     Service.UNSUPPORTED.getValue()));
             return;
@@ -706,8 +708,7 @@ final class GXDLMSLNCommandHandler {
                 }
                 GXDataInfo info = new GXDataInfo();
                 info.setType(dt);
-                Object ret = GXCommon.getData(new GXByteBuffer(tmp), info);
-                reply.setTime(((GXDateTime) ret).getValue());
+                GXCommon.getData(new GXByteBuffer(tmp), info);
             }
         }
         // Get object count.
@@ -761,7 +762,8 @@ final class GXDLMSLNCommandHandler {
             di.setXml(xml);
             if (xml != null && xml
                     .getOutputType() == TranslatorOutputType.STANDARD_XML) {
-                xml.appendStartTag("x:Data", null, null);
+                xml.appendStartTag(Command.WRITE_REQUEST,
+                        SingleReadResponse.DATA);
             }
             Object value = GXCommon.getData(data, di);
             if (!di.isComplete()) {
@@ -772,7 +774,8 @@ final class GXDLMSLNCommandHandler {
             }
             if (xml != null && xml
                     .getOutputType() == TranslatorOutputType.STANDARD_XML) {
-                xml.appendEndTag("x:Data");
+                xml.appendEndTag(Command.WRITE_REQUEST,
+                        SingleReadResponse.DATA);
             }
         }
         if (xml != null) {

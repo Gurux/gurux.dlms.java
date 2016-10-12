@@ -292,9 +292,6 @@ abstract class GXDLMS {
         case REJECTED:
             str = "Rejected";
             break;
-        case INVALID_HDLC_REPLY:
-            str = "Not a reply";
-            break;
         case OK:
             str = "";
             break;
@@ -1642,17 +1639,35 @@ abstract class GXDLMS {
      */
     static void handleMethodResponse(final GXDLMSSettings settings,
             final GXReplyData data) {
-        short type;
 
         // Get type.
-        type = data.getData().getUInt8();
+        byte type = (byte) data.getData().getUInt8();
         // Get invoke ID and priority.
-        data.getData().getUInt8();
+        short invoke = data.getData().getUInt8();
+        if (data.getXml() != null) {
+            data.getXml().appendStartTag(Command.METHOD_RESPONSE);
+            data.getXml().appendStartTag(Command.METHOD_RESPONSE, type);
+            // InvokeIdAndPriority
+            data.getXml().appendLine(TranslatorTags.INVOKE_ID, "Value",
+                    data.getXml().integerToHex(invoke, 2));
+        }
+
         if (type == 1) {
             // Get Action-Result
             short ret = data.getData().getUInt8();
             if (ret != 0) {
                 data.setError(ret);
+            }
+            if (data.getXml() != null) {
+                if (data.getXml()
+                        .getOutputType() == TranslatorOutputType.STANDARD_XML) {
+                    data.getXml()
+                            .appendStartTag(TranslatorTags.SINGLE_RESPONSE);
+                }
+                data.getXml().appendLine(TranslatorTags.RESULT, null,
+                        GXDLMSTranslator.errorCodeToString(
+                                data.getXml().getOutputType(),
+                                ErrorCode.forValue(data.getError())));
             }
             // Action-Response-Normal. Get data if exists. All meters do not
             // return data here.
@@ -1674,6 +1689,43 @@ abstract class GXDLMS {
                             "parseApplicationAssociationResponse failed. "
                                     + "Invalid tag.");
                 }
+                if (data.getXml() != null) {
+                    data.getXml()
+                            .appendStartTag(TranslatorTags.RETURN_PARAMETERS);
+                    if (ret != 0) {
+                        data.getXml().appendLine(
+                                TranslatorTags.DATA_ACCESS_ERROR, null,
+                                GXDLMSTranslator.errorCodeToString(
+                                        data.getXml().getOutputType(), ErrorCode
+                                                .forValue(data.getError())));
+
+                    } else {
+                        if (data.getError() != 0) {
+                            data.getXml().appendLine(TranslatorTags.RESULT,
+                                    null,
+                                    GXDLMSTranslator.errorCodeToString(
+                                            data.getXml().getOutputType(),
+                                            ErrorCode.forValue(
+                                                    data.getError())));
+                        } else {
+                            data.getXml().appendStartTag(Command.READ_RESPONSE,
+                                    SingleReadResponse.DATA);
+                            GXDataInfo di = new GXDataInfo();
+                            di.setXml(data.getXml());
+                            GXCommon.getData(data.getData(), di);
+
+                            data.getXml().appendEndTag(Command.READ_RESPONSE,
+                                    SingleReadResponse.DATA);
+                        }
+                    }
+                    data.getXml()
+                            .appendEndTag(TranslatorTags.RETURN_PARAMETERS);
+                    if (data.getXml()
+                            .getOutputType() == TranslatorOutputType.STANDARD_XML) {
+                        data.getXml()
+                                .appendEndTag(TranslatorTags.SINGLE_RESPONSE);
+                    }
+                }
             }
         } else if (type == 2) {
             // Action-Response-With-Pblock
@@ -1686,6 +1738,11 @@ abstract class GXDLMS {
             throw new IllegalArgumentException("Invalid Command.");
         } else {
             throw new IllegalArgumentException("Invalid Command.");
+        }
+
+        if (data.getXml() != null) {
+            data.getXml().appendEndTag(Command.METHOD_RESPONSE, type);
+            data.getXml().appendEndTag(Command.METHOD_RESPONSE);
         }
     }
 
@@ -1835,12 +1892,6 @@ abstract class GXDLMS {
         int start = reply.getData().position() - 1;
         // Get invoke id.
         long invokeId = reply.getData().getUInt32();
-        if (reply.getXml() != null) {
-            reply.getXml().appendStartTag(Command.DATA_NOTIFICATION);
-            reply.getXml().appendLine(TranslatorTags.LONG_INVOKE_ID, null,
-                    reply.getXml().integerToHex(invokeId, 8));
-        }
-
         // Get date time.
         reply.setTime(null);
         int len = reply.getData().getUInt8();
@@ -1863,10 +1914,11 @@ abstract class GXDLMS {
             }
         }
         if (reply.getXml() != null) {
-            if (reply.getXml() != null) {
-                reply.getXml().appendLine(TranslatorTags.DATE_TIME, null,
-                        GXCommon.toHex(tmp, false));
-            }
+            reply.getXml().appendStartTag(Command.DATA_NOTIFICATION);
+            reply.getXml().appendLine(TranslatorTags.LONG_INVOKE_ID, null,
+                    reply.getXml().integerToHex(invokeId, 8));
+            reply.getXml().appendLine(TranslatorTags.DATE_TIME, null,
+                    GXCommon.toHex(tmp, false));
             reply.getXml().appendStartTag(TranslatorTags.NOTIFICATION_BODY);
             reply.getXml().appendStartTag(TranslatorTags.DATA_VALUE);
             GXDataInfo di = new GXDataInfo();

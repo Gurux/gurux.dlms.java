@@ -49,11 +49,6 @@ public enum ErrorCode {
     REJECTED(-2),
 
     /**
-     * Not a reply.
-     */
-    INVALID_HDLC_REPLY(-1),
-
-    /**
      * No error has occurred.
      */
     OK(0),

@@ -660,6 +660,7 @@ public class GXDLMSTranslator {
         case Command.SET_REQUEST:
         case Command.DISCONNECT_REQUEST:
         case Command.METHOD_REQUEST:
+        case Command.ACCESS_REQUEST:
             s.getSettings().setServer(false);
             break;
         case Command.UA:
@@ -671,7 +672,6 @@ public class GXDLMSTranslator {
         case Command.METHOD_RESPONSE:
         case Command.DISCONNECT_RESPONSE:
         case Command.DATA_NOTIFICATION:
-        case Command.ACCESS_REQUEST:
         case Command.ACCESS_RESPONSE:
             break;
         default:
@@ -1129,15 +1129,12 @@ public class GXDLMSTranslator {
                 s.setCount(s.getCount() + 1);
                 break;
             case Command.METHOD_REQUEST << 8 | ActionRequestType.NORMAL:
-                // ActionRequestNormal
                 s.setRequestType((byte) (tag & 0xFF));
                 break;
             case Command.METHOD_REQUEST << 8 | ActionRequestType.NEXT_BLOCK:
-                // ActionRequestForNextDataBlock
                 s.setRequestType((byte) (tag & 0xFF));
                 break;
             case Command.METHOD_REQUEST << 8 | ActionRequestType.WITH_LIST:
-                // ActionRequestWithList
                 s.setRequestType((byte) (tag & 0xFF));
                 break;
             case Command.METHOD_RESPONSE << 8 | ActionResponseType.NORMAL:
@@ -1151,10 +1148,10 @@ public class GXDLMSTranslator {
                         || s.getCommand() == Command.GET_REQUEST) {
                     s.setCount(s.getCount() + 1);
                     s.setRequestType(0);
-                } else if (s.getCommand() == Command.GET_RESPONSE) {
+                } else if (s.getCommand() == Command.GET_RESPONSE
+                        || s.getCommand() == Command.METHOD_RESPONSE) {
                     s.getData().setUInt8(0); // Add status.
                 }
-
                 break;
             case TranslatorTags.SUCCESS:
                 s.setCount(s.getCount() + 1);
@@ -1188,7 +1185,6 @@ public class GXDLMSTranslator {
             case (int) Command.ACCESS_RESPONSE << 8
                     | (byte) AccessServiceCommandType.ACTION:
                 s.getData().setUInt8((0xFF & tag));
-                str = getValue(node, s);
                 break;
             case TranslatorTags.DATE_TIME:
                 preData = updateDateTime(node, s, preData);
@@ -1286,6 +1282,7 @@ public class GXDLMSTranslator {
                 s.getAttributeDescriptor().setUInt8(0);
                 break;
             case TranslatorTags.RESULT:
+            case TranslatorGeneralTags.ASSOCIATION_RESULT:
                 // Result.
                 if (s.getCommand() == Command.GET_REQUEST
                         || s.getRequestType() == 3) {
@@ -1306,23 +1303,13 @@ public class GXDLMSTranslator {
                                 valueOfErrorCode(s.getOutputType(), str)
                                         .getValue());
                     }
-                } else if (s.getCommand() == Command.GET_RESPONSE) {
-                    str = getValue(node, s);
-                    if (!str.isEmpty()) {
-                        ErrorCode err =
-                                valueOfErrorCode(s.getOutputType(), str);
-                        if (s.getOutputType() != TranslatorOutputType.SIMPLE_XML
-                                && err != ErrorCode.OK) {
-                            s.getAttributeDescriptor().setUInt8(err.getValue());
-                        }
-                    }
                 }
                 break;
             case TranslatorTags.REASON:
                 s.setReason(ReleaseRequestReason.valueOf(getValue(node, s)));
                 break;
             case TranslatorTags.RETURN_PARAMETERS:
-                s.getData().setUInt8(1);
+                s.getAttributeDescriptor().setUInt8(1);
                 break;
             case TranslatorTags.ACCESS_SELECTION:
                 s.getAttributeDescriptor()
@@ -1415,6 +1402,8 @@ public class GXDLMSTranslator {
                 // Add access-response-list-of-data. Optional
                 s.getData().setUInt8(0);
                 s.getData().setUInt8(getNodeCount(node));
+                break;
+            case TranslatorTags.SINGLE_RESPONSE:
                 break;
             default:
                 throw new IllegalArgumentException(

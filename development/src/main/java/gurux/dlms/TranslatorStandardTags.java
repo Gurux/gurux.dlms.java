@@ -188,6 +188,8 @@ final class TranslatorStandardTags {
                 "x:action-response-with-first-block");
         list.put(Command.METHOD_RESPONSE << 8 | ActionResponseType.WITH_LIST,
                 "x:action-response-with-list");
+        list.put(TranslatorTags.SINGLE_RESPONSE, "x:single-response");
+
         list.put((int) Command.DATA_NOTIFICATION, "x:data-notification");
         GXDLMSTranslator.addTag(list, Command.GET_RESPONSE, "x:get-response");
         list.put(Command.GET_RESPONSE << 8 | GetCommandType.NORMAL,
@@ -322,7 +324,7 @@ final class TranslatorStandardTags {
         GXDLMSTranslator.addTag(list, TranslatorTags.METHOD_ID, "x:method-id");
         GXDLMSTranslator.addTag(list, TranslatorTags.RESULT, "x:result");
         GXDLMSTranslator.addTag(list, TranslatorTags.RETURN_PARAMETERS,
-                "ReturnParameters");
+                "x:return-parameters");
         GXDLMSTranslator.addTag(list, TranslatorTags.ACCESS_SELECTION,
                 "x:access-selection");
         GXDLMSTranslator.addTag(list, TranslatorTags.VALUE, "x:value");
@@ -421,9 +423,6 @@ final class TranslatorStandardTags {
         case INCONSISTENT_CLASS:
             str = "object-class-inconsistent";
             break;
-        case INVALID_HDLC_REPLY:
-            str = "InvalidHdlcReply";
-            break;
         case LONG_GET_OR_READ_ABORTED:
             str = "long-get-aborted";
             break;
@@ -459,7 +458,7 @@ final class TranslatorStandardTags {
             break;
         default:
             throw new IllegalArgumentException(
-                    "Error code:" + String.valueOf(value));
+                    "Error code: " + String.valueOf(value));
         }
         return str;
     }
@@ -476,8 +475,6 @@ final class TranslatorStandardTags {
             v = ErrorCode.HARDWARE_FAULT;
         } else if ("object-class-inconsistent".equalsIgnoreCase(value)) {
             v = ErrorCode.INCONSISTENT_CLASS;
-        } else if ("InvalidHdlcReply".equalsIgnoreCase(value)) {
-            v = ErrorCode.INVALID_HDLC_REPLY;
         } else if ("long-get-aborted".equalsIgnoreCase(value)) {
             v = ErrorCode.LONG_GET_OR_READ_ABORTED;
         } else if ("long-set-aborted".equalsIgnoreCase(value)) {
@@ -501,7 +498,7 @@ final class TranslatorStandardTags {
         } else if ("type-unmatched".equalsIgnoreCase(value)) {
             v = ErrorCode.UNMATCHED_TYPE;
         } else {
-            throw new IllegalArgumentException("Error code:" + value);
+            throw new IllegalArgumentException("Error code: " + value);
         }
         return v;
     }

@@ -747,6 +747,10 @@ public abstract class GXDLMSServer {
             final GXDLMSConnectionEventArgs connectionInfo) {
         byte frame = 0;
         switch (cmd) {
+        case Command.ACCESS_REQUEST:
+            GXDLMSLNCommandHandler.handleAccessRequest(settings, this, data,
+                    replyData, null);
+            break;
         case Command.SET_REQUEST:
             GXDLMSLNCommandHandler.handleSetRequest(settings, this, data,
                     replyData, null);

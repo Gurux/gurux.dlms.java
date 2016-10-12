@@ -62,5 +62,5 @@ final class TranslatorTags {
     static final int LIST_OF_ACCESS_RESPONSE_SPECIFICATION = 0xFF36;
     static final int ACCESS_RESPONSE_SPECIFICATION = 0xFF37;
     static final int ACCESS_RESPONSE_LIST_OF_DATA = 0xFF38;
-
+    static final int SINGLE_RESPONSE = 0xFF39;
 }

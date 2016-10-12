@@ -361,7 +361,6 @@ final class TranslatorSimpleTags {
         list.put(GXDLMS.DATA_TYPE_OFFSET + DataType.INT32.getValue(), "Int32");
         list.put(GXDLMS.DATA_TYPE_OFFSET + DataType.INT64.getValue(), "Int64");
         list.put(GXDLMS.DATA_TYPE_OFFSET + DataType.INT8.getValue(), "Int8");
-        list.put(GXDLMS.DATA_TYPE_OFFSET + DataType.NONE.getValue(), "None");
         list.put(GXDLMS.DATA_TYPE_OFFSET + DataType.OCTET_STRING.getValue(),
                 "OctetString");
         list.put(GXDLMS.DATA_TYPE_OFFSET + DataType.STRING.getValue(),
@@ -398,9 +397,6 @@ final class TranslatorSimpleTags {
         case INCONSISTENT_CLASS:
             str = "InconsistentClass";
             break;
-        case INVALID_HDLC_REPLY:
-            str = "InvalidHdlcReply";
-            break;
         case LONG_GET_OR_READ_ABORTED:
             str = "LongGetOrReadAborted";
             break;
@@ -436,7 +432,7 @@ final class TranslatorSimpleTags {
             break;
         default:
             throw new IllegalArgumentException(
-                    "Error code:" + String.valueOf(value));
+                    "Error code: " + String.valueOf(value));
         }
         return str;
     }
@@ -453,8 +449,6 @@ final class TranslatorSimpleTags {
             v = ErrorCode.HARDWARE_FAULT;
         } else if ("InconsistentClass".equalsIgnoreCase(value)) {
             v = ErrorCode.INCONSISTENT_CLASS;
-        } else if ("InvalidHdlcReply".equalsIgnoreCase(value)) {
-            v = ErrorCode.INVALID_HDLC_REPLY;
         } else if ("LongGetOrReadAborted".equalsIgnoreCase(value)) {
             v = ErrorCode.LONG_GET_OR_READ_ABORTED;
         } else if ("LongSetOrWriteAborted".equalsIgnoreCase(value)) {
@@ -478,7 +472,7 @@ final class TranslatorSimpleTags {
         } else if ("UnmatchedType".equalsIgnoreCase(value)) {
             v = ErrorCode.UNMATCHED_TYPE;
         } else {
-            throw new IllegalArgumentException("Error code:" + value);
+            throw new IllegalArgumentException("Error code: " + value);
         }
         return v;
     }
