@@ -542,7 +542,7 @@ public class GXDLMSProfileGeneric extends GXDLMSObject implements IGXDLMSBase {
                             .getValue();
             for (Object row : getBuffer()) {
                 java.util.Date tm;
-                Object tmp = ((Object[]) row)[0];
+                Object tmp = ((Object[]) row)[this.getSortObjectDataIndex()];
                 if (tmp instanceof GXDateTime) {
                     tm = ((GXDateTime) tmp).getValue();
                 } else {
