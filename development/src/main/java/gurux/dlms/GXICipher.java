@@ -34,6 +34,8 @@
 
 package gurux.dlms;
 
+import java.security.PrivateKey;
+
 import gurux.dlms.enums.Security;
 
 public interface GXICipher {
@@ -108,4 +110,9 @@ public interface GXICipher {
      * @return Frame counter. Invocation counter.
      */
     long getFrameCounter();
+
+    /**
+     * @return Private key.
+     */
+    PrivateKey getPrivateKey();
 }

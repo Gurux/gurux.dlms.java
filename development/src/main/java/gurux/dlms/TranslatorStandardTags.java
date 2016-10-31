@@ -31,9 +31,9 @@ final class TranslatorStandardTags {
                 TranslatorGeneralTags.APPLICATION_CONTEXT_NAME,
                 "x:application-context-name");
         GXDLMSTranslator.addTag(list, Command.INITIATE_RESPONSE,
-                "InitiateResponse");
+                "x:initiateResponse");
         GXDLMSTranslator.addTag(list, Command.INITIATE_REQUEST,
-                "x:user-information");
+                "x:initiateRequest");
         GXDLMSTranslator.addTag(list,
                 TranslatorGeneralTags.NEGOTIATED_QUALITY_OF_SERVICE,
                 "x:negotiated-quality-of-service");
@@ -50,16 +50,16 @@ final class TranslatorStandardTags {
                 TranslatorGeneralTags.PROPOSED_CONFORMANCE,
                 "x:proposed-conformance");
         GXDLMSTranslator.addTag(list, TranslatorGeneralTags.VAA_NAME,
-                "VaaName");
+                "x:vaa-name");
         GXDLMSTranslator.addTag(list,
                 TranslatorGeneralTags.NEGOTIATED_CONFORMANCE,
-                "NegotiatedConformance");
+                "x:negotiated-conformance");
         GXDLMSTranslator.addTag(list,
                 TranslatorGeneralTags.NEGOTIATED_DLMS_VERSION_NUMBER,
-                "NegotiatedDlmsVersionNumber");
+                "x:negotiated-dlms-version-number");
         GXDLMSTranslator.addTag(list,
                 TranslatorGeneralTags.NEGOTIATED_MAX_PDU_SIZE,
-                "NegotiatedMaxPduSize");
+                "x:server-max-receive-pdu-size");
         GXDLMSTranslator.addTag(list, TranslatorGeneralTags.CONFORMANCE_BIT,
                 "ConformanceBit");
         GXDLMSTranslator.addTag(list,
@@ -98,7 +98,12 @@ final class TranslatorStandardTags {
                 "RespondingAPTitle");
         GXDLMSTranslator.addTag(list, TranslatorGeneralTags.CHAR_STRING,
                 "x:charstring");
-
+        GXDLMSTranslator.addTag(list, TranslatorGeneralTags.DEDICATED_KEY,
+                "x:dedicated-key");
+        GXDLMSTranslator.addTag(list, TranslatorGeneralTags.RESPONSE_ALLOWED,
+                "x:response-allowed");
+        GXDLMSTranslator.addTag(list, TranslatorGeneralTags.USER_INFORMATION,
+                "x:user-information");
     }
 
     /**

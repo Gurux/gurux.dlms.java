@@ -35,8 +35,10 @@
 package gurux.dlms.objects;
 
 import java.lang.reflect.Array;
+import java.security.Signature;
 import java.util.logging.Logger;
 
+import gurux.dlms.GXASN1Converter;
 import gurux.dlms.GXByteBuffer;
 import gurux.dlms.GXDLMSSettings;
 import gurux.dlms.ValueEventArgs;
@@ -207,21 +209,46 @@ public class GXDLMSAssociationLogicalName extends GXDLMSObject
             final ValueEventArgs e) {
         // Check reply_to_HLS_authentication
         if (e.getIndex() == 1) {
+            byte[] serverChallenge = null, clientChallenge = null;
             long ic = 0;
             byte[] readSecret;
-            if (settings.getAuthentication() == Authentication.HIGH_GMAC) {
-                readSecret = settings.getSourceSystemTitle();
-                GXByteBuffer bb = new GXByteBuffer((byte[]) e.getParameters());
-                bb.getUInt8();
-                ic = bb.getUInt32();
+            boolean accept;
+            if (settings.getAuthentication() == Authentication.HIGH_ECDSA) {
+                try {
+                    GXByteBuffer signature =
+                            new GXByteBuffer((byte[]) e.getParameters());
+                    Signature ver = Signature.getInstance("SHA256withECDSA");
+                    ver.initVerify(
+                            settings.getCertificates().get(0).getPublicKey());
+                    GXByteBuffer bb = new GXByteBuffer();
+                    bb.set(settings.getSourceSystemTitle());
+                    bb.set(settings.getCipher().getSystemTitle());
+                    bb.set(settings.getStoCChallenge());
+                    bb.set(settings.getCtoSChallenge());
+                    ver.update(bb.array());
+                    accept = ver
+                            .verify(GXASN1Converter.encode(signature.array()));
+
+                } catch (Exception ex) {
+                    throw new RuntimeException(ex.getMessage());
+                }
             } else {
-                readSecret = hlsSecret;
+                if (settings.getAuthentication() == Authentication.HIGH_GMAC) {
+                    readSecret = settings.getSourceSystemTitle();
+                    GXByteBuffer bb =
+                            new GXByteBuffer((byte[]) e.getParameters());
+                    bb.getUInt8();
+                    ic = bb.getUInt32();
+                } else {
+                    readSecret = hlsSecret;
+                }
+                serverChallenge =
+                        GXSecure.secure(settings, settings.getCipher(), ic,
+                                settings.getStoCChallenge(), readSecret);
+                clientChallenge = (byte[]) e.getParameters();
+                accept = GXCommon.compare(serverChallenge, clientChallenge);
             }
-            byte[] serverChallenge =
-                    GXSecure.secure(settings, settings.getCipher(), ic,
-                            settings.getStoCChallenge(), readSecret);
-            byte[] clientChallenge = (byte[]) e.getParameters();
-            if (GXCommon.compare(serverChallenge, clientChallenge)) {
+            if (accept) {
                 if (settings.getAuthentication() == Authentication.HIGH_GMAC) {
                     readSecret = settings.getCipher().getSystemTitle();
                     ic = settings.getCipher().getFrameCounter();

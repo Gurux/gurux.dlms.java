@@ -34,6 +34,8 @@
 
 package gurux.dlms.secure;
 
+import java.security.PrivateKey;
+
 import gurux.dlms.GXByteBuffer;
 import gurux.dlms.GXICipher;
 import gurux.dlms.enums.Security;
@@ -51,6 +53,11 @@ public class GXCiphering implements GXICipher {
 
     private byte[] blockCipherKey;
     private long frameCounter = 0;
+
+    /**
+     * Private key.
+     */
+    private PrivateKey privateKey;
 
     /**
      * Constructor. Default values are from the Green Book.
@@ -190,5 +197,20 @@ public class GXCiphering implements GXICipher {
             throw new IllegalArgumentException("Invalid Authentication Key.");
         }
         authenticationKey = value;
+    }
+
+    /**
+     * @return Private key.
+     */
+    public final PrivateKey getPrivateKey() {
+        return privateKey;
+    }
+
+    /**
+     * @param value
+     *            Private key.
+     */
+    public final void setPrivateKey(final PrivateKey value) {
+        this.privateKey = value;
     }
 }

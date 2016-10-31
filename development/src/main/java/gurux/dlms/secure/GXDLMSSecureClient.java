@@ -34,6 +34,9 @@
 
 package gurux.dlms.secure;
 
+import java.security.cert.X509Certificate;
+import java.util.List;
+
 import gurux.dlms.GXDLMSClient;
 import gurux.dlms.enums.Authentication;
 import gurux.dlms.enums.InterfaceType;
@@ -45,6 +48,15 @@ import gurux.dlms.enums.InterfaceType;
  * @author Gurux Ltd.
  */
 public class GXDLMSSecureClient extends GXDLMSClient {
+
+    /**
+     * Client certificate.
+     */
+    private X509Certificate clientCertificate;
+    /**
+     * Server certificate.
+     */
+    private X509Certificate serverCertificate;
 
     /**
      * Ciphering settings.
@@ -145,5 +157,42 @@ public class GXDLMSSecureClient extends GXDLMSClient {
         }
         GXDLMSChipperingStream gcm = new GXDLMSChipperingStream(false, kek);
         return gcm.decryptAes(data);
+    }
+
+    /**
+     * @return Client certificate.
+     */
+    public final X509Certificate getClientCertificate() {
+        return clientCertificate;
+    }
+
+    /**
+     * @param value
+     *            Client certificate.
+     */
+    public final void setClientCertificate(final X509Certificate value) {
+        clientCertificate = value;
+    }
+
+    /**
+     * @return Server certificate.
+     */
+    public final X509Certificate getServerCertificate() {
+        return serverCertificate;
+    }
+
+    /**
+     * @param value
+     *            Server certificate.
+     */
+    public final void setServerCertificate(final X509Certificate value) {
+        serverCertificate = value;
+    }
+
+    /**
+     * @return Available certificates.
+     */
+    public final List<X509Certificate> getCertificates() {
+        return getSettings().getCertificates();
     }
 }

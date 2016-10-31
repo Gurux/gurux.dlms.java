@@ -34,6 +34,7 @@
 
 package gurux.dlms;
 
+import java.security.Signature;
 import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.List;
@@ -623,8 +624,9 @@ public class GXDLMSClient {
      * @return Get challenge request if HLS authentication is used.
      */
     public final byte[][] getApplicationAssociationRequest() {
-        if (settings.getPassword() == null
-                || settings.getPassword().length == 0) {
+        if (settings.getAuthentication() != Authentication.HIGH_ECDSA
+                && (settings.getPassword() == null
+                        || settings.getPassword().length == 0)) {
             throw new IllegalArgumentException("Password is invalid.");
         }
         settings.resetBlockIndex();
@@ -666,21 +668,39 @@ public class GXDLMSClient {
         long ic = 0;
         byte[] value = (byte[]) GXCommon.getData(reply, info);
         if (value != null) {
-            if (settings.getAuthentication() == Authentication.HIGH_GMAC) {
-                secret = settings.getSourceSystemTitle();
-                GXByteBuffer bb = new GXByteBuffer(value);
-                bb.getUInt8();
-                ic = bb.getUInt32();
+            if (settings.getAuthentication() == Authentication.HIGH_ECDSA) {
+                try {
+                    Signature ver = Signature.getInstance("SHA256withECDSA");
+                    ver.initVerify(
+                            settings.getCertificates().get(0).getPublicKey());
+                    GXByteBuffer bb = new GXByteBuffer();
+                    bb.set(settings.getSourceSystemTitle());
+                    bb.set(settings.getCipher().getSystemTitle());
+                    bb.set(settings.getCtoSChallenge());
+                    bb.set(settings.getStoCChallenge());
+                    ver.update(bb.array());
+                    equals = ver.verify(GXASN1Converter.encode(value));
+
+                } catch (Exception ex) {
+                    throw new RuntimeException(ex.getMessage());
+                }
             } else {
-                secret = settings.getPassword();
-            }
-            byte[] tmp = GXSecure.secure(settings, settings.getCipher(), ic,
-                    settings.getCtoSChallenge(), secret);
-            GXByteBuffer challenge = new GXByteBuffer(tmp);
-            equals = challenge.compare(value);
-            if (!equals) {
-                LOGGER.info("Invalid StoC:" + GXCommon.toHex(value, true) + "-"
-                        + GXCommon.toHex(tmp, true));
+                if (settings.getAuthentication() == Authentication.HIGH_GMAC) {
+                    secret = settings.getSourceSystemTitle();
+                    GXByteBuffer bb = new GXByteBuffer(value);
+                    bb.getUInt8();
+                    ic = bb.getUInt32();
+                } else {
+                    secret = settings.getPassword();
+                }
+                byte[] tmp = GXSecure.secure(settings, settings.getCipher(), ic,
+                        settings.getCtoSChallenge(), secret);
+                GXByteBuffer challenge = new GXByteBuffer(tmp);
+                equals = challenge.compare(value);
+                if (!equals) {
+                    LOGGER.info("Invalid StoC:" + GXCommon.toHex(value, true)
+                            + "-" + GXCommon.toHex(tmp, true));
+                }
             }
         } else {
             LOGGER.info("Server did not accept CtoS.");

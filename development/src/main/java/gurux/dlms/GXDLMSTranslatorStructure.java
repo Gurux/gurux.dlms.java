@@ -181,6 +181,7 @@ public class GXDLMSTranslatorStructure {
 
     public final void append(final int tag, final boolean start) {
         if (start) {
+            appendSpaces(sb, 2 * offset);
             sb.append('<');
         } else {
             sb.append("</");

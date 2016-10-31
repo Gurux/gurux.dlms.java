@@ -523,6 +523,18 @@ public class GXDLMSTranslator {
             settings = new GXDLMSSettings(true);
             GXAPDU.parsePDU(settings, settings.getCipher(), value, xml);
             break;
+        case Command.INITIATE_REQUEST:
+            value.position(0);
+            settings = new GXDLMSSettings(true);
+            GXAPDU.parseInitiate(true, settings, settings.getCipher(), value,
+                    xml);
+            break;
+        case Command.INITIATE_RESPONSE:
+            value.position(0);
+            settings = new GXDLMSSettings(false);
+            GXAPDU.parseInitiate(true, settings, settings.getCipher(), value,
+                    xml);
+            break;
         case 0x81: // Ua
             value.position(0);
             getUa(value, xml);
@@ -617,6 +629,7 @@ public class GXDLMSTranslator {
                 sb.append("<?xml version=\"1.0\" encoding=\"utf-8\"?>\r\n");
             }
             if (!omitNameSpace) {
+                // CHECKSTYLE:OFF
                 if (cmd != Command.AARE && cmd != Command.AARQ) {
                     sb.append(
                             "<x:xDLMS-APDU xmlns:x=\"http://www.dlms.com/COSEMpdu\">\r\n");
@@ -624,6 +637,7 @@ public class GXDLMSTranslator {
                     sb.append(
                             "<x:aCSE-APDU xmlns:x=\"http://www.dlms.com/COSEMpdu\">\r\n");
                 }
+                // CHECKSTYLE:ON
             }
             sb.append(xml.toString());
             if (!omitNameSpace) {
@@ -661,6 +675,7 @@ public class GXDLMSTranslator {
         case Command.DISCONNECT_REQUEST:
         case Command.METHOD_REQUEST:
         case Command.ACCESS_REQUEST:
+        case Command.INITIATE_REQUEST:
             s.getSettings().setServer(false);
             break;
         case Command.UA:
@@ -673,6 +688,7 @@ public class GXDLMSTranslator {
         case Command.DISCONNECT_RESPONSE:
         case Command.DATA_NOTIFICATION:
         case Command.ACCESS_RESPONSE:
+        case Command.INITIATE_RESPONSE:
             break;
         default:
             throw new IllegalArgumentException(
@@ -809,7 +825,8 @@ public class GXDLMSTranslator {
                     s.getSettings().setUseLogicalNameReferencing(false);
                     break;
                 default:
-                    throw new RuntimeException("Invalid dedicated key.");
+                    throw new RuntimeException(
+                            "Invalid application context name.");
                 }
             } else {
                 if (node.getAttributes().item(0).getNodeValue()
@@ -853,12 +870,13 @@ public class GXDLMSTranslator {
             break;
         case Command.INITIATE_REQUEST:
         case Command.INITIATE_RESPONSE:
+            break;
+        case TranslatorGeneralTags.USER_INFORMATION:
             if (s.getOutputType() == TranslatorOutputType.STANDARD_XML) {
                 GXByteBuffer bb = new GXByteBuffer();
                 tmp = GXCommon.hexToBytes(getValue(node, s));
-                GXCommon.setObjectCount(tmp.length, bb);
                 bb.set(tmp);
-                GXAPDU.parseUserInformation(s.getSettings(),
+                GXAPDU.parseInitiate(false, s.getSettings(),
                         s.getSettings().getCipher(), bb, null);
                 if (s.getCommand() == Command.AARQ) {
                     if (s.getSettings().getUseLogicalNameReferencing()) {
@@ -874,8 +892,15 @@ public class GXDLMSTranslator {
         case 0xBE00:
         case 0xBE06:
         case 0xBE01:
-        case 0xBE04:
         case 0x8A:
+            break;
+        case 0xBE04:
+            String str = getValue(node, s);
+            if (Integer.parseInt(str, 16) == 07) {
+                s.getSettings().setUseLogicalNameReferencing(true);
+            } else {
+                s.getSettings().setUseLogicalNameReferencing(false);
+            }
             break;
         case 0x8B:
         case 0x89:
@@ -898,8 +923,11 @@ public class GXDLMSTranslator {
                         GXCommon.hexToBytes(getValue(node, s)));
             }
             break;
-        case 0xA6:
-            // CallingAPTitle.
+        case TranslatorGeneralTags.DEDICATED_KEY:
+            tmp = GXCommon.hexToBytes(getValue(node, s));
+            s.getSettings().setDedicatedKey(tmp);
+            break;
+        case TranslatorGeneralTags.CALLING_AP_TITLE:
             s.getSettings()
                     .setCtoSChallenge(GXCommon.hexToBytes(getValue(node, s)));
             break;
@@ -1081,7 +1109,9 @@ public class GXDLMSTranslator {
                 getCommand(node, s, tag);
             }
         } else if (s.getCommand() == Command.AARQ
-                || s.getCommand() == Command.AARE) {
+                || s.getCommand() == Command.AARE
+                || s.getCommand() == Command.INITIATE_REQUEST
+                || s.getCommand() == Command.INITIATE_RESPONSE) {
             handleAarqAare(node, s, tag);
         } else if (tag >= GXDLMS.DATA_TYPE_OFFSET) {
             if (tag == DataType.DATETIME.getValue() + GXDLMS.DATA_TYPE_OFFSET) {
@@ -1622,7 +1652,12 @@ public class GXDLMSTranslator {
         GXDLMSSNParameters sn;
         switch (s.getCommand()) {
         case Command.INITIATE_REQUEST:
+            GXAPDU.getInitiateRequest(s.getSettings(),
+                    s.getSettings().getCipher(), bb);
+            break;
         case Command.INITIATE_RESPONSE:
+            bb.set(GXAPDU.getUserInformation(s.getSettings(),
+                    s.getSettings().getCipher()));
             break;
         case Command.READ_REQUEST:
         case Command.WRITE_REQUEST:

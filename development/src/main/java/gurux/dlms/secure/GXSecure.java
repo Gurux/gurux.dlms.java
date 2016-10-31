@@ -36,8 +36,10 @@ package gurux.dlms.secure;
 
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
+import java.security.Signature;
 import java.util.Random;
 
+import gurux.dlms.GXASN1Converter;
 import gurux.dlms.GXByteBuffer;
 import gurux.dlms.GXDLMSSettings;
 import gurux.dlms.GXICipher;
@@ -104,15 +106,17 @@ public final class GXSecure {
                 challenge.set(secret);
             }
             d = challenge.array();
-            if (settings.getAuthentication() == Authentication.HIGH_MD5) {
-                MessageDigest md = MessageDigest.getInstance("MD5");
-                return md.digest(d);
-            } else if (settings
-                    .getAuthentication() == Authentication.HIGH_SHA1) {
-                MessageDigest md = MessageDigest.getInstance("SHA-1");
-                return md.digest(d);
-            } else if (settings
-                    .getAuthentication() == Authentication.HIGH_GMAC) {
+            MessageDigest md;
+            switch (settings.getAuthentication()) {
+            case HIGH_MD5:
+                md = MessageDigest.getInstance("MD5");
+                d = md.digest(d);
+                break;
+            case HIGH_SHA1:
+                md = MessageDigest.getInstance("SHA-1");
+                d = md.digest(d);
+                break;
+            case HIGH_GMAC:
                 // SC is always Security.Authentication.
                 AesGcmParameter p =
                         new AesGcmParameter(0, Security.AUTHENTICATION, ic,
@@ -124,9 +128,33 @@ public final class GXSecure {
                 challenge.setUInt32(p.getFrameCounter());
                 challenge.set(GXDLMSChippering.encryptAesGcm(p, d));
                 d = challenge.array();
-                return d;
+                break;
+            case HIGH_HLS_SHA256:
+                break;
+            case HIGH_ECDSA:
+                Signature sig = Signature.getInstance("SHA256withECDSA");
+                try {
+                    sig.initSign(settings.getCipher().getPrivateKey());
+                    GXByteBuffer bb = new GXByteBuffer();
+                    bb.set(settings.getCipher().getSystemTitle());
+                    bb.set(settings.getSourceSystemTitle());
+                    if (settings.isServer()) {
+                        bb.set(settings.getCtoSChallenge());
+                        bb.set(settings.getStoCChallenge());
+                    } else {
+                        bb.set(settings.getStoCChallenge());
+                        bb.set(settings.getCtoSChallenge());
+                    }
+                    sig.update(bb.array());
+                    d = sig.sign();
+                    d = GXASN1Converter.getBytes(d);
+                } catch (Exception e) {
+                    throw new RuntimeException(e.getMessage());
+                }
+                break;
+            default:
             }
-            return data;
+            return d;
         } catch (NoSuchAlgorithmException ex) {
             throw new RuntimeException(ex.getMessage());
         }

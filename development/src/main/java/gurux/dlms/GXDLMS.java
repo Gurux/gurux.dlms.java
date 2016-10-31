@@ -1527,12 +1527,13 @@ abstract class GXDLMS {
             // Get status code.
             type = reply.getData().getUInt8();
             reply.setCommandType(type);
+            boolean standardXml = reply.getXml() != null && reply.getXml()
+                    .getOutputType() == TranslatorOutputType.STANDARD_XML;
             switch (type) {
             case SingleReadResponse.DATA:
                 reply.setError(0);
                 if (reply.getXml() != null) {
-                    if (reply.getXml()
-                            .getOutputType() == TranslatorOutputType.STANDARD_XML) {
+                    if (standardXml) {
                         reply.getXml().appendStartTag(TranslatorTags.CHOICE);
                     }
                     reply.getXml().appendStartTag(Command.READ_RESPONSE,
@@ -1542,8 +1543,7 @@ abstract class GXDLMS {
                     GXCommon.getData(reply.getData(), di);
                     reply.getXml().appendEndTag(Command.READ_RESPONSE,
                             SingleReadResponse.DATA);
-                    if (reply.getXml()
-                            .getOutputType() == TranslatorOutputType.STANDARD_XML) {
+                    if (standardXml) {
                         reply.getXml().appendEndTag(TranslatorTags.CHOICE);
                     }
                 } else if (cnt == 1) {
@@ -1575,8 +1575,7 @@ abstract class GXDLMS {
                 // Get error code.
                 reply.setError(reply.getData().getUInt8());
                 if (reply.getXml() != null) {
-                    if (reply.getXml()
-                            .getOutputType() == TranslatorOutputType.STANDARD_XML) {
+                    if (standardXml) {
                         reply.getXml().appendStartTag(TranslatorTags.CHOICE);
                     }
                     reply.getXml().appendLine(
@@ -1586,8 +1585,7 @@ abstract class GXDLMS {
                             GXDLMSTranslator.errorCodeToString(
                                     reply.getXml().getOutputType(),
                                     ErrorCode.forValue(reply.getError())));
-                    if (reply.getXml()
-                            .getOutputType() == TranslatorOutputType.STANDARD_XML) {
+                    if (standardXml) {
                         reply.getXml().appendEndTag(TranslatorTags.CHOICE);
                     }
                 }
@@ -1651,7 +1649,8 @@ abstract class GXDLMS {
             data.getXml().appendLine(TranslatorTags.INVOKE_ID, "Value",
                     data.getXml().integerToHex(invoke, 2));
         }
-
+        boolean standardXml = data.getXml() != null && data.getXml()
+                .getOutputType() == TranslatorOutputType.STANDARD_XML;
         if (type == 1) {
             // Get Action-Result
             short ret = data.getData().getUInt8();
@@ -1659,8 +1658,7 @@ abstract class GXDLMS {
                 data.setError(ret);
             }
             if (data.getXml() != null) {
-                if (data.getXml()
-                        .getOutputType() == TranslatorOutputType.STANDARD_XML) {
+                if (standardXml) {
                     data.getXml()
                             .appendStartTag(TranslatorTags.SINGLE_RESPONSE);
                 }
@@ -1720,8 +1718,7 @@ abstract class GXDLMS {
                     }
                     data.getXml()
                             .appendEndTag(TranslatorTags.RETURN_PARAMETERS);
-                    if (data.getXml()
-                            .getOutputType() == TranslatorOutputType.STANDARD_XML) {
+                    if (standardXml) {
                         data.getXml()
                                 .appendEndTag(TranslatorTags.SINGLE_RESPONSE);
                     }
@@ -2343,7 +2340,6 @@ abstract class GXDLMS {
                 break;
             case Command.DATA_NOTIFICATION:
                 handleDataNotification(settings, data);
-                // Client handles this.
                 break;
             default:
                 throw new IllegalArgumentException("Invalid Command.");
@@ -2409,7 +2405,8 @@ abstract class GXDLMS {
         // Get data if all data is read or we want to peek data.
         if (data.getXml() == null && !data.getGbt()
                 && data.getData().position() != data.getData().size()
-                && (cmd == Command.READ_RESPONSE || cmd == Command.GET_RESPONSE)
+                && (cmd == Command.READ_RESPONSE || cmd == Command.GET_RESPONSE
+                        || cmd == Command.METHOD_RESPONSE)
                 && (data.getMoreData() == RequestTypes.NONE
                         || data.getPeek())) {
             getValueFromData(settings, data);
@@ -2716,6 +2713,10 @@ abstract class GXDLMS {
         case SPECIAL_DAYS_TABLE:
             value[0] = 0x10;
             count[0] = 2;
+            break;
+        case SECURITY_SETUP:
+            value[0] = 0x30;
+            count[0] = 8;
             break;
         default:
             count[0] = 0;

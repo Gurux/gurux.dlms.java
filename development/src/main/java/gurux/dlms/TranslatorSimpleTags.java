@@ -96,6 +96,8 @@ final class TranslatorSimpleTags {
                 "CallingAPTitle");
         GXDLMSTranslator.addTag(list, TranslatorGeneralTags.RESPONDING_AP_TITLE,
                 "RespondingAPTitle");
+        GXDLMSTranslator.addTag(list, TranslatorGeneralTags.DEDICATED_KEY,
+                "DedicatedKey");
     }
 
     /**

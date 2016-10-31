@@ -69,6 +69,11 @@ final class BerType {
     public static final short ENUMERATED = 10;
 
     /**
+     * Sequence.
+     */
+    public static final short SEQUENCE = 0x10;
+
+    /**
      * Utf8 String.
      */
     public static final short UTF8STRING = 12;

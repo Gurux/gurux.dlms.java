@@ -63,8 +63,10 @@ final class TranslatorGeneralTags {
     static final int ASSOCIATION_RESULT = 0xA2;
     static final int RESULT_SOURCE_DIAGNOSTIC = 0xA3;
     static final int ACSE_SERVICE_USER = 0xA301;
-    static final int CALLING_AP_TITLE = 0xA6;
     static final int RESPONDING_AP_TITLE = 0xA4;
     static final int RESPONSE_ALLOWED = 0xA4;
     static final int CHAR_STRING = 0xA5;
- }
+    static final int DEDICATED_KEY = 0xA8;
+    static final int USER_INFORMATION = 0xA7;
+    static final int CALLING_AP_TITLE = 0xA6;
+}

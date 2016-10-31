@@ -34,6 +34,10 @@
 
 package gurux.dlms;
 
+import java.security.cert.X509Certificate;
+import java.util.ArrayList;
+import java.util.List;
+
 import gurux.dlms.enums.Authentication;
 import gurux.dlms.enums.InterfaceType;
 import gurux.dlms.enums.Priority;
@@ -67,6 +71,11 @@ public class GXDLMSSettings {
     static final short CLIENT_START_RCEIVER_FRAME_SEQUENCE = 0xE;
 
     /**
+     * Certificates.
+     */
+    private List<X509Certificate> certificates;
+
+    /**
      * DLMS version number.
      */
     static final byte DLMS_VERSION = 6;
@@ -87,6 +96,11 @@ public class GXDLMSSettings {
      * Server to Client challenge.
      */
     private byte[] stoCChallenge;
+
+    /**
+     * Dedicated key.
+     */
+    private byte[] dedicatedKey;
 
     /**
      * Source system title.
@@ -233,6 +247,7 @@ public class GXDLMSSettings {
     GXDLMSSettings(final boolean isServer) {
         server = isServer;
         objects = new GXDLMSObjectCollection();
+        certificates = new ArrayList<X509Certificate>();
         limits = new GXDLMSLimits();
         if (isServer) {
             lnSettings = new GXDLMSLNSettings(new byte[] { 0x00, 0x7C, 0x1F });
@@ -820,5 +835,27 @@ public class GXDLMSSettings {
      */
     final byte[] getConformanceBlock() {
         return conformanceBlock;
+    }
+
+    /**
+     * @return Dedicated key.
+     */
+    public final byte[] getDedicatedKey() {
+        return dedicatedKey;
+    }
+
+    /**
+     * @param value
+     *            Dedicated key.
+     */
+    public final void setDedicatedKey(final byte[] value) {
+        dedicatedKey = value;
+    }
+
+    /**
+     * @return Available certificates.
+     */
+    public final List<X509Certificate> getCertificates() {
+        return certificates;
     }
 }

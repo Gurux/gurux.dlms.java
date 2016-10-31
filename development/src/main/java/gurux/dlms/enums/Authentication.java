@@ -68,7 +68,17 @@ public enum Authentication {
     /**
      * High authentication is used. Password is hashed with GMAC.
      */
-    HIGH_GMAC;
+    HIGH_GMAC,
+
+    /**
+     * High authentication is used. Password is hashed with SHA-256.
+     */
+    HIGH_HLS_SHA256,
+
+    /**
+     * High authentication is used. Password is hashed with ECDSA.
+     */
+    HIGH_ECDSA;
 
     /**
      * @return Get integer value for enumeration.

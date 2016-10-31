@@ -143,7 +143,8 @@ final class GXAPDU {
         }
         // Add system title.
         if (!settings.isServer() && (ciphered
-                || settings.getAuthentication() == Authentication.HIGH_GMAC)) {
+                || settings.getAuthentication() == Authentication.HIGH_GMAC)
+                || settings.getAuthentication() == Authentication.HIGH_ECDSA) {
             if (cipher.getSystemTitle() == null
                     || cipher.getSystemTitle().length == 0) {
                 throw new IllegalArgumentException("SystemTitle");
@@ -167,14 +168,21 @@ final class GXAPDU {
      * @param cipher
      * @param data
      */
-    private static void getInitiateRequest(final GXDLMSSettings settings,
+    static void getInitiateRequest(final GXDLMSSettings settings,
             final GXICipher cipher, final GXByteBuffer data) {
         // Tag for xDLMS-Initiate request
         data.setUInt8(Command.INITIATE_REQUEST);
         // Usage field for the response allowed component.
 
-        // Usage field for dedicated-key component. Not used
-        data.setUInt8(0x00);
+        // Usage field for dedicated-key component.
+        if (settings.getDedicatedKey() == null) {
+            // Not used
+            data.setUInt8(0x00);
+        } else {
+            data.setUInt8(1);
+            data.setUInt8(settings.getDedicatedKey().length);
+            data.set(settings.getDedicatedKey());
+        }
 
         // encoding of the response-allowed component (BOOLEAN DEFAULT TRUE)
         // usage flag (FALSE, default value TRUE conveyed)
@@ -372,27 +380,38 @@ final class GXAPDU {
     static void parseUserInformation(final GXDLMSSettings settings,
             final GXICipher cipher, final GXByteBuffer data,
             final GXDLMSTranslatorStructure xml) {
-        int len = data.getUInt8();
+        short len = data.getUInt8();
+        if (data.size() - data.position() < len) {
+            throw new RuntimeException("Not enough data.");
+        }
+        // Encoding the choice for user information
+        short tag = data.getUInt8();
+        if (tag != 0x4) {
+            throw new RuntimeException("Invalid tag.");
+        }
+        len = data.getUInt8();
         if (data.size() - data.position() < len) {
             throw new RuntimeException("Not enough data.");
         }
         if (xml != null
                 && xml.getOutputType() == TranslatorOutputType.STANDARD_XML) {
-            xml.appendLine(Command.INITIATE_REQUEST, null, GXCommon
-                    .toHex(data.getData(), false, data.position(), len));
+            xml.appendLine(TranslatorGeneralTags.USER_INFORMATION, null,
+                    GXCommon.toHex(data.getData(), false, data.position(),
+                            len));
             data.position(data.position() + len);
             return;
         }
+        parseInitiate(false, settings, cipher, data, xml);
+    }
+
+    static void parseInitiate(final boolean initiateRequest,
+            final GXDLMSSettings settings, final GXICipher cipher,
+            final GXByteBuffer data, final GXDLMSTranslatorStructure xml) {
+        int len;
         GXByteBuffer tmp2 = new GXByteBuffer();
         tmp2.setUInt8(0);
-        // Encoding the choice for user information
-        int tag = data.getUInt8();
-        if (tag != 0x4) {
-            throw new RuntimeException("Invalid tag.");
-        }
-        len = data.getUInt8();
         // Tag for xDLMS-Initate.response
-        tag = data.getUInt8();
+        int tag = data.getUInt8();
         if (tag == Command.GLO_INITIATE_RESPONSE) {
             if (xml != null
                     && xml.getOutputType() == TranslatorOutputType.SIMPLE_XML) {
@@ -447,31 +466,43 @@ final class GXAPDU {
             }
         } else if (tag == Command.INITIATE_REQUEST) {
             if (xml != null) {
-                if (xml.getOutputType() == TranslatorOutputType.SIMPLE_XML) {
-                    // <InitiateRequest>
-                    xml.appendStartTag(Command.INITIATE_REQUEST);
+                xml.appendStartTag(Command.INITIATE_REQUEST);
+            }
+            // Optional usage field of the negotiated quality of service
+            // component
+            tag = data.getUInt8();
+
+            if (tag != 0) {
+                len = data.getUInt8();
+                byte[] tmp = new byte[len];
+                data.get(tmp);
+                if (initiateRequest) {
+                    settings.setDedicatedKey(tmp);
+                    if (xml != null) {
+                        xml.appendLine(TranslatorGeneralTags.DEDICATED_KEY,
+                                null, GXCommon.toHex(tmp, false));
+                    }
+                } else {
+                    // CtoS.
+                    settings.setCtoSChallenge(tmp);
                 }
             }
             // Optional usage field of the negotiated quality of service
             // component
             tag = data.getUInt8();
-            // CtoS.
             if (tag != 0) {
                 len = data.getUInt8();
-                byte[] tmp = new byte[len];
-                data.get(tmp);
-                settings.setCtoSChallenge(tmp);
-            }
-            // Optional usage field of the negotiated quality of service
-            // component
-            tag = data.getUInt8();
-            if (tag != 0) {
-                len = data.getUInt8();
-                if (xml != null && xml
-                        .getOutputType() == TranslatorOutputType.SIMPLE_XML) {
+                if (xml != null && (initiateRequest || xml
+                        .getOutputType() == TranslatorOutputType.SIMPLE_XML)) {
                     xml.appendLine(
                             TranslatorGeneralTags.PROPOSED_QUALITY_OF_SERVICE,
                             null, String.valueOf(len));
+                }
+            } else {
+                if (xml != null && xml
+                        .getOutputType() == TranslatorOutputType.STANDARD_XML) {
+                    xml.appendLine(TranslatorGeneralTags.RESPONSE_ALLOWED, null,
+                            "true");
                 }
             }
             // Optional usage field of the proposed quality of service component
@@ -491,8 +522,8 @@ final class GXAPDU {
                         "Invalid DLMS version number.");
             }
             // ProposedDlmsVersionNumber
-            if (xml != null
-                    && xml.getOutputType() == TranslatorOutputType.SIMPLE_XML) {
+            if (xml != null && (initiateRequest || xml
+                    .getOutputType() == TranslatorOutputType.SIMPLE_XML)) {
                 xml.appendLine(
                         TranslatorGeneralTags.PROPOSED_DLMS_VERSION_NUMBER,
                         "Value",
@@ -503,8 +534,8 @@ final class GXAPDU {
                 throw new IllegalArgumentException(
                         "Invalid DLMS version number.");
             }
-            if (xml != null
-                    && xml.getOutputType() == TranslatorOutputType.SIMPLE_XML) {
+            if (xml != null && (initiateRequest || xml
+                    .getOutputType() == TranslatorOutputType.SIMPLE_XML)) {
                 xml.appendLine(
                         TranslatorGeneralTags.NEGOTIATED_DLMS_VERSION_NUMBER,
                         "Value",
@@ -526,18 +557,28 @@ final class GXAPDU {
         tag = data.getUInt8();
         if (!response) {
             // ProposedConformance
-            if (xml != null
-                    && xml.getOutputType() == TranslatorOutputType.SIMPLE_XML) {
-                xml.appendStartTag(TranslatorGeneralTags.PROPOSED_CONFORMANCE);
+            if (xml != null) {
+                if ((xml.getOutputType() == TranslatorOutputType.SIMPLE_XML)) {
+                    xml.appendStartTag(
+                            TranslatorGeneralTags.PROPOSED_CONFORMANCE);
+                } else if (initiateRequest) {
+                    xml.append(TranslatorGeneralTags.PROPOSED_CONFORMANCE,
+                            true);
+
+                }
             }
             data.get(settings.getConformanceBlock());
             tmp2.set(settings.getConformanceBlock());
         } else {
             // NegotiatedConformance
-            if (xml != null
-                    && xml.getOutputType() == TranslatorOutputType.SIMPLE_XML) {
-                xml.appendStartTag(
-                        TranslatorGeneralTags.NEGOTIATED_CONFORMANCE);
+            if (xml != null) {
+                if (xml.getOutputType() == TranslatorOutputType.SIMPLE_XML) {
+                    xml.appendStartTag(
+                            TranslatorGeneralTags.NEGOTIATED_CONFORMANCE);
+                } else if (initiateRequest) {
+                    xml.append(TranslatorGeneralTags.NEGOTIATED_CONFORMANCE,
+                            true);
+                }
             }
             if (settings.getUseLogicalNameReferencing()) {
                 data.get(settings.getLnSettings().getConformanceBlock());
@@ -547,18 +588,23 @@ final class GXAPDU {
                 tmp2.set(settings.getSnSettings().getConformanceBlock());
             }
         }
-        if (xml != null
-                && xml.getOutputType() == TranslatorOutputType.SIMPLE_XML) {
+        if (xml != null && (initiateRequest
+                || xml.getOutputType() == TranslatorOutputType.SIMPLE_XML)) {
             getConformance(tmp2.getUInt32(), xml);
         }
 
         if (!response) {
             // Proposed max PDU size.
             settings.setMaxPduSize(data.getUInt16());
-            if (xml != null
-                    && xml.getOutputType() == TranslatorOutputType.SIMPLE_XML) {
+            if (xml != null) {
                 // ProposedConformance closing
-                xml.appendEndTag(TranslatorGeneralTags.PROPOSED_CONFORMANCE);
+                if (xml.getOutputType() == TranslatorOutputType.SIMPLE_XML) {
+                    xml.appendEndTag(
+                            TranslatorGeneralTags.PROPOSED_CONFORMANCE);
+                } else if (initiateRequest) {
+                    xml.append(TranslatorGeneralTags.PROPOSED_CONFORMANCE,
+                            false);
+                }
                 // ProposedMaxPduSize
                 xml.appendLine(TranslatorGeneralTags.PROPOSED_MAX_PDU_SIZE,
                         "Value", xml.integerToHex(settings.getMaxPduSize(), 4));
@@ -570,10 +616,15 @@ final class GXAPDU {
         } else {
             // Max PDU size.
             settings.setMaxPduSize(data.getUInt16());
-            if (xml != null
-                    && xml.getOutputType() == TranslatorOutputType.SIMPLE_XML) {
+            if (xml != null) {
                 // NegotiatedConformance closing
-                xml.appendEndTag(TranslatorGeneralTags.NEGOTIATED_CONFORMANCE);
+                if (xml.getOutputType() == TranslatorOutputType.SIMPLE_XML) {
+                    xml.appendEndTag(
+                            TranslatorGeneralTags.NEGOTIATED_CONFORMANCE);
+                } else if (initiateRequest) {
+                    xml.append(TranslatorGeneralTags.NEGOTIATED_CONFORMANCE,
+                            false);
+                }
                 // NegotiatedMaxPduSize
                 xml.appendLine(TranslatorGeneralTags.NEGOTIATED_MAX_PDU_SIZE,
                         "Value", xml.integerToHex(settings.getMaxPduSize(), 4));
@@ -582,20 +633,30 @@ final class GXAPDU {
         if (response) {
             // VAA Name
             tag = data.getUInt16();
-            if (xml != null
-                    && xml.getOutputType() == TranslatorOutputType.SIMPLE_XML) {
-                xml.appendLine(TranslatorGeneralTags.VAA_NAME, "Value",
-                        xml.integerToHex(tag, 4));
+            if (xml != null) {
+                if (initiateRequest || xml
+                        .getOutputType() == TranslatorOutputType.SIMPLE_XML) {
+                    xml.appendLine(TranslatorGeneralTags.VAA_NAME, "Value",
+                            xml.integerToHex(tag, 4));
+                }
             }
             if (tag == 0x0007) {
-                // If LN
-                if (!settings.getUseLogicalNameReferencing()) {
-                    throw new IllegalArgumentException("Invalid VAA.");
+                if (initiateRequest) {
+                    settings.setUseLogicalNameReferencing(true);
+                } else {
+                    // If LN
+                    if (!settings.getUseLogicalNameReferencing()) {
+                        throw new IllegalArgumentException("Invalid VAA.");
+                    }
                 }
             } else if (tag == 0xFA00) {
                 // If SN
-                if (settings.getUseLogicalNameReferencing()) {
-                    throw new IllegalArgumentException("Invalid VAA.");
+                if (initiateRequest) {
+                    settings.setUseLogicalNameReferencing(false);
+                } else {
+                    if (settings.getUseLogicalNameReferencing()) {
+                        throw new IllegalArgumentException("Invalid VAA.");
+                    }
                 }
             } else {
                 // Unknown VAA.
@@ -605,9 +666,7 @@ final class GXAPDU {
                 // <InitiateResponse>
                 xml.appendEndTag(Command.INITIATE_RESPONSE);
             }
-        } else if (xml != null
-                && xml.getOutputType() == TranslatorOutputType.SIMPLE_XML) {
-            // </InitiateRequest>
+        } else if (xml != null) {
             xml.appendEndTag(Command.INITIATE_REQUEST);
         }
     }
@@ -829,7 +888,9 @@ final class GXAPDU {
             case BerType.CONTEXT | PduType.CALLING_AE_INVOCATION_ID: // 0x89
                 updateAuthentication(settings, buff);
                 if (xml != null) {
+                    // CHECKSTYLE:OFF
                     if (xml.getOutputType() == TranslatorOutputType.SIMPLE_XML) {
+                        // CHECKSTYLE:ON
                         xml.appendLine(tag, "Value",
                                 settings.getAuthentication().toString());
                     } else {
@@ -1022,19 +1083,18 @@ final class GXAPDU {
             throw new RuntimeException("Invalid tag.");
         }
         ch = buff.getUInt8();
-        if (ch < 0 || ch > 5) {
+        if (ch < 0 || ch > 7) {
             throw new RuntimeException("Invalid tag.");
         }
         settings.setAuthentication(Authentication.forValue(ch));
     }
 
-    private static byte[] getUserInformation(final GXDLMSSettings settings,
+    static byte[] getUserInformation(final GXDLMSSettings settings,
             final GXICipher cipher) {
         GXByteBuffer data = new GXByteBuffer();
         // Tag for xDLMS-Initiate response
         data.setUInt8(Command.INITIATE_RESPONSE);
         // Usage field for the response allowed component (not used)
-        data.setUInt8(0x01);
         data.setUInt8(0x00);
         // DLMS Version Number
         data.setUInt8(06);
