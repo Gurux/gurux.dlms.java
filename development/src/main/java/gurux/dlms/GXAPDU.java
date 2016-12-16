@@ -36,6 +36,7 @@ package gurux.dlms;
 
 import gurux.dlms.enums.AssociationResult;
 import gurux.dlms.enums.Authentication;
+import gurux.dlms.enums.BerType;
 import gurux.dlms.enums.Command;
 import gurux.dlms.enums.Security;
 import gurux.dlms.enums.SourceDiagnostic;
@@ -1130,7 +1131,7 @@ final class GXAPDU {
             final GXByteBuffer data, final AssociationResult result,
             final SourceDiagnostic diagnostic, final GXICipher cipher,
             final GXByteBuffer encryptedData) {
-        int offset = data.position();
+        int offset = data.size();
         // Set AARE tag and length 0x61
         data.setUInt8(BerType.APPLICATION | BerType.CONSTRUCTED
                 | PduType.APPLICATION_CONTEXT_NAME);

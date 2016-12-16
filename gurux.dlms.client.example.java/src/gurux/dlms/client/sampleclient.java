@@ -244,9 +244,6 @@ public class sampleclient {
         dlms.setObisCodes(man.getObisCodes());
         com = new GXCommunicate(5000, dlms, man, iec, auth, pw, media);
         com.Trace = trace;
-        // Mikko
-        dlms.setClientAddress(1);
-        dlms.setServerAddress(1);
         return com;
     }
 }

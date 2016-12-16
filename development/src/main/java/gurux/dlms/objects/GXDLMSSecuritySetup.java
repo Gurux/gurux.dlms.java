@@ -34,27 +34,27 @@
 
 package gurux.dlms.objects;
 
-import java.io.ByteArrayInputStream;
-import java.io.InputStream;
 import java.security.KeyPair;
 import java.security.KeyPairGenerator;
+import java.security.NoSuchAlgorithmException;
 import java.security.cert.CertificateEncodingException;
-import java.security.cert.CertificateException;
-import java.security.cert.CertificateFactory;
-import java.security.cert.CertificateParsingException;
 import java.security.cert.X509Certificate;
 import java.util.ArrayList;
 import java.util.Hashtable;
 import java.util.List;
 import java.util.Set;
 
-// import javax.security.auth.x500.X500Principal;
+// TODO: This is removed for now because all JVMs are not supporting this.
+//import javax.security.auth.x500.X500Principal;
 
 import gurux.dlms.GXByteBuffer;
 import gurux.dlms.GXDLMSClient;
 import gurux.dlms.GXDLMSSettings;
 import gurux.dlms.GXSimpleEntry;
 import gurux.dlms.ValueEventArgs;
+import gurux.dlms.asn.GXPkcs10;
+import gurux.dlms.asn.GXx509Certificate;
+import gurux.dlms.asn.enums.HashAlgorithm;
 import gurux.dlms.enums.DataType;
 import gurux.dlms.enums.ErrorCode;
 import gurux.dlms.enums.ObjectType;
@@ -67,15 +67,8 @@ import gurux.dlms.objects.enums.SecurityPolicy;
 import gurux.dlms.objects.enums.SecurityPolicy1;
 import gurux.dlms.objects.enums.SecuritySuite;
 import gurux.dlms.secure.GXDLMSSecureClient;
-//CHECKSTYLE:OFF
-//import sun.security.pkcs10.PKCS10;
-//import sun.security.x509.X500Name;
-//CHECKSTYLE:ON
 
-@SuppressWarnings("restriction")
 public class GXDLMSSecuritySetup extends GXDLMSObject implements IGXDLMSBase {
-    public static final String DN_NAME = "CN=Test O=Gurux, L=Tampere, C=FI";
-    private static final String SHA1WITHECDSA = "SHA1withECDSA";
     /**
      * Asymmetric key pair as required by the security suite.
      */
@@ -582,8 +575,7 @@ public class GXDLMSSecuritySetup extends GXDLMSObject implements IGXDLMSBase {
             CertificateType key = CertificateType
                     .forValue(((Number) e.getParameters()).intValue());
             try {
-                KeyPairGenerator kpg =
-                        KeyPairGenerator.getInstance("EC", "SunEC");
+                KeyPairGenerator kpg = KeyPairGenerator.getInstance("RSA");
                 KeyPair value = kpg.genKeyPair();
                 keys.put(key, value);
             } catch (Exception e1) {
@@ -591,28 +583,26 @@ public class GXDLMSSecuritySetup extends GXDLMSObject implements IGXDLMSBase {
             }
         } else if (e.getIndex() == 5) {
             // generate_certificate_request
+            CertificateType key = CertificateType
+                    .forValue(((Number) e.getParameters()).intValue());
             try {
-                // CertificateType key = CertificateType
-                // .forValue(((Number) e.getParameters()).intValue());
-                // return generatePKCS10(keys.get(key), "Test", "dev-Gurux",
-                // "Gurux", "Tampere", "", "FI");
-            } catch (Exception e1) {
-                e.setError(ErrorCode.READ_WRITE_DENIED);
+
+                KeyPairGenerator kpg = KeyPairGenerator.getInstance("RSA");
+                KeyPair kp = kpg.genKeyPair();
+                GXPkcs10 pkc10 = new GXPkcs10();
+                pkc10.setPublicKey(keys.get(key).getPublic());
+                pkc10.setSubject(
+                        "CN=gurux.fi, O=Gurux Ltd, L=Tampere, C=FI, E=gurux@gurux.fi");
+                pkc10.sign(kp, HashAlgorithm.SHA256withECDSA);
+                return pkc10.getEncoded();
+            } catch (NoSuchAlgorithmException e1) {
+                e.setError(ErrorCode.HARDWARE_FAULT);
             }
         } else if (e.getIndex() == 6) {
             // import_certificate
-            try {
-                CertificateFactory certFactory =
-                        CertificateFactory.getInstance("X.509");
-                InputStream in =
-                        new ByteArrayInputStream((byte[]) e.getParameters());
-                X509Certificate cert =
-                        (X509Certificate) certFactory.generateCertificate(in);
-                settings.getCertificates().add(cert);
-            } catch (CertificateException e1) {
-                // Invalid type
-                e.setError(ErrorCode.READ_WRITE_DENIED);
-            }
+            GXx509Certificate cert =
+                    new GXx509Certificate((byte[]) e.getParameters());
+            settings.getCertificates().add(cert);
         } else if (e.getIndex() == 7) {
             // TODO: export_certificate
         } else if (e.getIndex() == 8) {
@@ -624,34 +614,6 @@ public class GXDLMSSecuritySetup extends GXDLMSObject implements IGXDLMSBase {
         // Return standard reply.
         return null;
     }
-
-    /*
-     * @param cn Common Name, is X.509 speak for the name that distinguishes the
-     * Certificate best, and ties it to your Organization
-     * @param ou Organizational unit
-     * @param o Organization NAME
-     * @param l Location
-     * @param S State
-     * @param C Country
-     * @return
-     * @throws Exception
-     */
-    // private static byte[] generatePKCS10(final KeyPair kp, final String cn,
-    // final String ou, final String o, final String l, final String s,
-    // final String c) throws Exception {
-    // // generate PKCS10 certificate request
-    // PKCS10 pkcs10 = new PKCS10(kp.getPublic());
-    // Signature signature = Signature.getInstance(SHA1WITHECDSA);
-    // signature.initSign(kp.getPrivate());
-    // // common, orgUnit, org, locality, state, country
-    // X500Principal principal = new X500Principal("CN=" + cn + ", OU=" + ou
-    // + ", O=" + o + ", L=" + l + ", C=" + c);
-    // X500Name x500name = null;
-    // x500name = new X500Name(principal.getEncoded());
-    // pkcs10.encodeAndSign(x500name, signature);
-    // byte[] ret = pkcs10.getEncoded();
-    // return ret;
-    // }
 
     @Override
     public final int[] getAttributeIndexToRead() {
@@ -744,7 +706,7 @@ public class GXDLMSSecuritySetup extends GXDLMSObject implements IGXDLMSBase {
         GXByteBuffer bb = new GXByteBuffer();
         bb.setUInt8((byte) DataType.ARRAY.getValue());
         GXCommon.setObjectCount(settings.getCertificates().size(), bb);
-        for (X509Certificate it : settings.getCertificates()) {
+        for (GXx509Certificate it : settings.getCertificates()) {
             bb.setUInt8((byte) DataType.STRUCTURE.getValue());
             GXCommon.setObjectCount(6, bb);
             bb.setUInt8((byte) DataType.ENUM.getValue());
@@ -754,19 +716,9 @@ public class GXDLMSSecuritySetup extends GXDLMSObject implements IGXDLMSBase {
             // TODO: digital signature
             bb.setUInt8((byte) CertificateType.DIGITAL_SIGNATURE.getValue());
             GXCommon.addString(it.getSerialNumber().toString(), bb);
-            GXCommon.addString(it.getIssuerDN().getName(), bb);
-            GXCommon.addString(it.getSubjectDN().getName(), bb);
-            try {
-                if (it.getSubjectAlternativeNames() != null
-                        && !it.getSubjectAlternativeNames().isEmpty()) {
-                    GXCommon.addString(it.getSubjectAlternativeNames()
-                            .toArray(null).toString(), bb);
-                } else {
-                    GXCommon.addString("", bb);
-                }
-            } catch (CertificateParsingException e) {
-                GXCommon.addString("", bb);
-            }
+            GXCommon.addString(it.getIssuer(), bb);
+            GXCommon.addString(it.getSubject(), bb);
+            GXCommon.addString("", bb);
         }
         return bb.array();
     }

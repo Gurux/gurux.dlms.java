@@ -590,10 +590,10 @@ public class GXDLMSProfileGeneric extends GXDLMSObject implements IGXDLMSBase {
             return DataType.ARRAY;
         }
         if (index == 4) {
-            return DataType.INT8;
+            return DataType.UINT32;
         }
         if (index == 5) {
-            return DataType.INT8;
+            return DataType.ENUM;
         }
         if (index == 6) {
             return DataType.ARRAY;

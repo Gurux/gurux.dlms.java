@@ -415,14 +415,14 @@ public class GXByteBuffer {
     }
 
     public final long getInt64() {
-        long value = (long) (data[position] & 0xFF) << 56
-                | (long) (data[position + 1] & 0xFF) << 48
-                | (long) (data[position + 2] & 0xFF) << 40
-                | (long) (data[position + 3] & 0xFF) << 32
-                | (data[position + 4] & 0xFF) << 24
-                | (data[position + 5] & 0xFF) << 16
-                | (data[position + 6] & 0xFF) << 8
-                | (data[position + 7] & 0xFF);
+        long value = (long) (data[position] & 0xFF) << 56;
+        value |= (long) (data[position + 1] & 0xFF) << 48;
+        value |= (long) (data[position + 2] & 0xFF) << 40;
+        value |= (long) (data[position + 3] & 0xFF) << 32;
+        value |= (long) (data[position + 4] & 0xFF) << 24;
+        value |= (data[position + 5] & 0xFF) << 16;
+        value |= (data[position + 6] & 0xFF) << 8;
+        value |= (data[position + 7] & 0xFF);
         position += 8;
         return value;
     }
@@ -558,15 +558,15 @@ public class GXByteBuffer {
             } else if (value instanceof Integer) {
                 setUInt32(((Integer) value).intValue());
             } else if (value instanceof Long) {
-                if (value instanceof Integer) {
-                    setUInt64(((Integer) value).longValue());
-                }
+                setUInt64(((Long) value).longValue());
             } else if (value instanceof String) {
                 try {
                     set(((String) value).getBytes("ASCII"));
                 } catch (UnsupportedEncodingException e) {
                     throw new RuntimeException(e.getMessage());
                 }
+            } else if (value instanceof BigInteger) {
+                set(((BigInteger) value).toByteArray());
             } else {
                 throw new RuntimeException("Invalid object type.");
             }

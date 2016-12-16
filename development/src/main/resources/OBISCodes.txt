@@ -1,13 +1,19 @@
 0.0-64.0.1.0.0-99,255;1,3,4;6,17,18;Ch. $B;Billing period counter (1);;;#$F
 0.0-64.0.1.1.255;1,3,4;6,17,18;Ch. $B;No. of available billing periods (1);;;
-0.0-64.0.1.2.0-99;1,3,4;9;Ch. $B;Time stamp of the billing period (1);;;#$F
-0.0-64.0.1.2.255;1,3,4;9;Ch. $B;Time stamp of the most recent billing period (1) closed;;;
+0.0-64.0.1.2.0-99;1,3,4;9,25;Ch. $B;Time stamp of the billing period (1);;;#$F
+0.0-64.0.1.2.255;1,3,4;9,25;Ch. $B;Time stamp of the most recent billing period (1) closed;;;
 0.0-64.0.1.3.0-99,255;1,3,4;6,17,18;Ch. $B;Billing period counter (2), VZ;;;#$F
 0.0-64.0.1.4.255;1,3,4;6,17,18;Ch. $B;No. of available billing periods (2);;;
-0.0-64.0.1.5.0-99;1,3,4;9;Ch. $B;Time stamp of the billing period (2);;;#$F
-0.0-64.0.1.5.255;1,3,4;9;Ch. $B;Time stamp of the most recent billing period (2) closed;;;
+0.0-64.0.1.5.0-99;1,3,4;9,25;Ch. $B;Time stamp of the billing period (2);;;#$F
+0.0-64.0.1.5.255;1,3,4;9,25;Ch. $B;Time stamp of the most recent billing period (2) closed;;;
+0.0-64.0.2.0.255;1,3,4;9,10,17,18;Ch. $B;Active firmware identifier;;;
+0.0-64.0.2.1.255;1,3,4;9,10,17,18;Ch. $B;Active firmware version;;;
+0.0-64.0.2.8.255;1,3,4;9,10,17,18;Ch. $B;Active firmware signature;;;
+0.0-64.0.9.1.255;1,3,4;9;Ch. $B;Local time;;;
+0.0-64.0.9.2.255;1,3,4;9;Ch. $B;Local date;;;
 0.0-64.1.0.0.255;8;;Ch. $B;Clock object;;#$(E+1);
 0.0-64.1.0.1-127.255;8;;Ch. $B;Clock object, nth instance;;#$(E+1);
+0.0-64.1.1.0-127.255;1,3,4;6;Ch. $B;UNIX clock;;#$(E+1);
 0.0-64.2.0.0.255;27;;Ch. $B;Modem configuration;;;
 0.0-64.2.1.0.255;29;;Ch. $B;Auto connect;;;
 0.0-64.2.2.0.255;28;;Ch. $B;Auto answer;;;
@@ -30,24 +36,35 @@
 0.0-64.10.0.106.255;9;;Ch. $B;Disconnect control;;;
 0.0-64.10.1-127.106.255;9;;Ch. $B;Disconnect control;#$(D+1);;
 0.0-64.10.0.107.255;9;;Ch. $B;Image activation;;;
-0.0-64.10.1-127.107.255;9;;Ch. $B;Image activation;#$(D+1);;
+0.0-64.10.1-127.107.255;9;;Ch. $B;Image activation, implementation specific;#$(D+1);;
+0.0-64.10.0.108.255;9;;Ch. $B;Push script table;;;
+0.0-64.10.1-127.108.255;9;;Ch. $B;Push script table, implementation specific;#$(D+1);;
 0.0-64.10.0.125.255;9;;Ch. $B;Broadcast script table;;;
 0.0-64.10.1-127.125.255;9;;Ch. $B;Broadcast script table, implementation specific;#$(D+1);;
-0.0-64.11.0.0.255;11;;Ch. $B;Special days table;;;
+0.0-64.11.0.0-127.255;11;;Ch. $B;Special days table;;#$(E+1);
 0.0-64.12.0.0.255;10;;Ch. $B;Schedule;;#$(E+1);
 0.0-64.12.0.1-127.255;10;;Ch. $B;Schedule;;#$(E+1);
-0.0-64.13.0.0.255;20;;Ch. $B;Activity calendar;;;
+0.0-64.13.0.0-127.255;20;;Ch. $B;Activity calendar;;#$(E+1);
 0.0-64.14.0.0.255;6;;Ch. $B;Register activation;;#$(E+1);
 0.0-64.14.0.1-127.255;6;;Ch. $B;Register activation;;#$(E+1);
 0.0-64.15.0.0.255;22;;Ch. $B;End of billing period;;;
-0.0-64.15.1-127.0.255;22;;Ch. $B;End of billing period, implementation specific;#$(D+1);;
-0.0-64.15.0.1.255;22;;Ch. $B;Disconnect control scheduler;;;
+0.0-64.15.1-127.0-127.255;22;;Ch. $B;End of billing period, implementation specific;#$(D+1);#$(E+1);
+0.0-64.15.0.1.255;22;;Ch. $B;Disconnect control;;;
 0.0-64.15.0.2.255;22;;Ch. $B;Image activation;;;
-0.0-64.15.0.3.255;22;;Ch. $B;Output control scheduler;;;
+0.0-64.15.0.3.255;22;;Ch. $B;Output control;;;
+0.0-64.15.0.4.255;22;;Ch. $B;Push;;;
 0.0-64.16.0.0.255;21;;Ch. $B;Register monitor;;#$(E+1);
 0.0-64.16.0.1-127.255;21;;Ch. $B;Register monitor;;#$(E+1);
+0.0-64.16.1.0-9.255;21;;Ch. $B;Alarm monitor;;#$(E+1);
+0.0-64.16.2.0-127.255;65;;Ch. $B;Parameter monitor;;#$(E+1);
 0.0-64.17.0.0.255;71;;Ch. $B;Limiter;;#$(E+1);
 0.0-64.17.0.1-127.255;71;;Ch. $B;Limiter;;#$(E+1);
+0.0-64.19.0-9.0.255;111;;Ch. $B;Account;;;
+0.0-64.19.10-19.0-127.255;112;;Ch. $B;Credit;#$(D-10);#$(E);
+0.0-64.19.20-29.0-127.255;113;;Ch. $B;Charge;#$(D-20);#$(E);
+0.0-64.19.40-49.0-127.255;115;;Ch. $B;Token gateway;#$(D-40);#$(E);
+0.0-64.19.50-59.1.255;1,3,4;5,6,17,18,20,21;Ch. $B;Max credit limit;#$(D-50);;
+0.0-64.19.50-59.2.255;1,3.4;5,6,17,18,20,21;Ch. $B;Max vend limit;#$(D-50);;
 0.0-64.20.0.0.255;19;;Ch. $B;IEC optical port setup;;;
 0.0-64.20.0.1.255;19;;Ch. $B;IEC electrical port setup;;;
 0.0-64.21.0.0.255;7;;Ch. $B;General local port readout;;;
@@ -56,24 +73,34 @@
 0.0-64.21.0.3.255;7;;Ch. $B;Service display readout;;;
 0.0-64.21.0.4.255;7;;Ch. $B;List of configurable meter data;;;
 0.0-64.21.0.5.255;7;;Ch. $B;Additional readout profile;;#$(E-4);
-0.0-64.21.0.6-127.255;7;;Ch. $B;Additional readout profiles 2 to 123;;#$(E-4);
+0.0-64.21.0.6-127.255;7;;Ch. $B;Additional readout profiles;;#$(E-4);
 0.0-64.21.0.0.255;1;1;Ch. $B;Standard readout parametrization;;#$(E+1);
 0.0-64.21.0.1-127.255;1;1;Ch. $B;Standard readout parametrization;;#$(E+1);
 0.0-64.22.0.0.255;23;;Ch. $B;IEC HDLC setup;;;
 0.0-64.23.0.0.255;24;;Ch. $B;IEC twisted pair (1) setup;;;
+0.0-64.23.0.1.255;43;;Ch. $B;IEC twisted pair MAC address setup;;;
+0.0-64.23.0.2.255;1,3,4;4,6,9,17,18;Ch. $B;IEC twisted pair fatal error register;;;
+0.0-64.23.3.0.255;7;;Ch. $B;IEC 62056-3-1 Short  readout;;;
+0.0-64.23.3.1.255;7;;Ch. $B;IEC 62056-3-1 Long readout;;;
+0.0-64.23.3.2-9.255;7;;Ch. $B;IEC 62056-3-1 Alternate readout profile;;#$(E-2);
 0.0-64.24.0.0.255;25;;Ch. $B;M-Bus slave port setup;;;
 0.0-64.24.1.0-127.255;72;;Ch. $B;M-Bus client;;#$(E+1);
-0.0-64.24.2.0-127.255;4;5,6,9,10,13,15,16,17,18,20,21,23,24;Ch. $B;M-Bus value object;;#$(E+1);
-0.0-64.24.3.0-127.255;7;;Ch. $B;M-Bus profile generic object;;#$(E+1);
-0.0-64.24.4.0.255;70;;Ch. $B;M-Bus Disconnect control;;#$(E+1);
+0.0-64.24.2.0-127.255;4;5,6,9,10,13,15,16,17,18,20,21,23,24;Ch. $B;M-Bus value;;#$(E+1);
+0.0-64.24.3.0-127.255;7;;Ch. $B;M-Bus profile generic;;#$(E+1);
+0.0-64.24.4.0.255;70;;Ch. $B;M-Bus disconnect control;;#$(E+1);
 0.0-64.24.5.0.255;7;;Ch. $B;M-Bus control log;;#$(E+1);
 0.0-64.24.6.0.255;74;;Ch. $B;M-Bus master port setup;;#$(E+1);
+0.0-64.24.8.0-127.255;76;;Ch. $B;DLMS/COSEM server M-Bus port setup;;;
+0.0-64.24.9.0-127.255;77;;Ch. $B;M-Bus diagnostic;;;
 0.0-64.25.0.0.255;41;;Ch. $B;TCP-UDP setup;;;
 0.0-64.25.1.0.255;42;;Ch. $B;IPv4 setup;;;
 0.0-64.25.2.0.255;43;;Ch. $B;MAC address setup;;;
 0.0-64.25.3.0.255;44;;Ch. $B;PPP setup;;;
-0.0-64.25.4.0.255;45;;Ch. $B;GPRS setup;;;
+0.0-64.25.4.0.255;45;;Ch. $B;GPRS modem setup;;;
 0.0-64.25.5.0.255;46;;Ch. $B;SMTP setup;;;
+0.0-64.25.6.0.255;47;;Ch. $B;GSM diagnostic;;;
+0.0-64.25.7.0.255;48;;Ch. $B;IPv6 setup;;;
+0.0-64.25.9.0.255;40;;Ch. $B;Push setup;;;
 0.0-64.26.0.0.255;50;;Ch. $B;S-FSK Phy&MAC setup;;;
 0.0-64.26.1.0.255;51;;Ch. $B;S-FSK Active initiator;;;
 0.0-64.26.2.0.255;52;;Ch. $B;S-FSK MAC synchronization timeouts;;;
@@ -83,82 +110,106 @@
 0.0-64.27.0.0.255;57;;Ch. $B;ISO/IEC 8802-2 LLC Type 1 setup;;;
 0.0-64.27.1.0.255;58;;Ch. $B;ISO/IEC 8802-2 LLC Type 2 setup;;;
 0.0-64.27.2.0.255;59;;Ch. $B;ISO/IEC 8802-2 LLC Type 3 setup;;;
+0.0-64.28.0.0.255;80;;Ch. $B;61334-4-32 LLC SSCS setup;;;
+0.0-64.28.1.0.255;81;;Ch. $B;PRIME NB OFDM PLC Physical layer counters;;;
+0.0-64.28.2.0.255;82;;Ch. $B;PRIME NB OFDM PLC MAC setup;;;
+0.0-64.28.3.0.255;83;;Ch. $B;PRIME NB OFDM PLC MAC functional parameters;;;
+0.0-64.28.4.0.255;84;;Ch. $B;PRIME NB OFDM PLC MAC counters;;;
+0.0-64.28.5.0.255;85;;Ch. $B;PRIME NB OFDM PLC MAC network administration data;;;
+0.0-64.28.6.0.255;43;;Ch. $B;PRIME NB OFDM PLC MAC address setup;;;
+0.0-64.28.7.0.255;86;;Ch. $B;PRIME NB OFDM PLC Application identification;;;
+0.0-64.29.0.0.255;90;;Ch. $B;G3-PLC MAC layer counters;;;
+0.0-64.29.1.0.255;91;;Ch. $B;G3-PLC MAC setup;;;
+0.0-64.29.2.0.255;92;;Ch. $B;G3-PLC 6LoWPAN adaptation layer setup;;;
+0.0-64.30.0.0-127.255;101;;Ch. $B;ZigBee® SAS startup;;#$(E+1);
+0.0-64.30.1.0-127.255;102;;Ch. $B;ZigBee® SAS join;;#$(E+1);
+0.0-64.30.2.0-127.255;103;;Ch. $B;ZigBee® SAS APS fragmentation;;#$(E+1);
+0.0-64.30.3.0-127.255;104;;Ch. $B;ZigBee® network control;;#$(E+1);
+0.0-64.30.4.0-127.255;105;;Ch. $B;ZigBee® tunnel setup;;#$(E+1);
 0.0-64.31.0.0.255;73;;Ch. $B;Wireless Mode Q channel;;;
 0.0.40.0.0.255;12,15;;Ch. $B;Current association;;;
 0.0.40.0.1.255;12,15;;Ch. $B;Association;;#$E;
 0.0.40.0.2-127.255;12,15;;Ch. $B;Association;;#$E;
 0.0.41.0.0.255;17;;Ch. $B;SAP Assignment;;;
 0.0.42.0.0.255;1,3;9,10;Ch. $B;COSEM Logical device name;;;
-0.0.43.0.0-127.255;64;;Ch. $B;Security setup object;;#$E;
-0.0-64.43.1.0-127.255;1,3,4;6,17,18,21;Ch. $B;Frame counter;;#$E;
-0.0.44.0.0-127.255;18;;Ch. $B;Image transfer object;;0;
-0.0-64.65.0.0-127.255;26;;Ch. $B;Standard tables (D*128+E);$D;$E;
-0.0-64.65.1-15.0-127.255;26;;Ch. $B;Standard tables (D*128+E);$D;$E;
-0.0-64.65.16.0-127.255;26;;Ch. $B;Manufacturer tables ((D-16)*128+E);$D;$E;
-0.0-64.65.17-31.0-127.255;26;;Ch. $B;Manufacturer tables ((D-16)*128+E);$D;$E;
-0.0-64.65.32.0-127.255;26;;Ch. $B;Std pending tables ((D-32)*128+E);$D;$E;
-0.0-64.65.33-47.0-127.255;26;;Ch. $B;Std pending tables ((D-32)*128+E);$D;$E;
-0.0-64.65.48.0-127.255;26;;Ch. $B;Mfg pending tables ((D-48)*128+E);$D;$E;
-0.0-64.65.49-63.0-127.255;26;;Ch. $B;Mfg pending tables ((D-48)*128+E);$D;$E;
-&.0-64.94.0.0-255.0-255;*;*;Ch. $B;Identifiers for Finland;;;
-&.0-64.94.1.0-255.0-255;*;*;Ch. $B;Identifiers for the USA;;;
-&.0-64.94.2.0-255.0-255;*;*;Ch. $B;Identifiers for Canada;;;
-&.0-64.94.3.0-255.0-255;*;*;Ch. $B;Identifiers for Serbia;;;
-&.0-64.94.7.0-255.0-255;*;*;Ch. $B;Identifiers for Russia;;;
-&.0-64.94.10.0-255.0-255;*;*;Ch. $B;Identifiers for Czech;;;
-&.0-64.94.11.0-255.0-255;*;*;Ch. $B;Identifiers for Bulgaria;;;
-&.0-64.94.12.0-255.0-255;*;*;Ch. $B;Identifiers for Croatia;;;
-&.0-64.94.13.0-255.0-255;*;*;Ch. $B;Identifiers for Ireland;;;
-&.0-64.94.14.0-255.0-255;*;*;Ch. $B;Identifiers for Israel;;;
-&.0-64.94.15.0-255.0-255;*;*;Ch. $B;Identifiers for Ukraine;;;
-&.0-64.94.16.0-255.0-255;*;*;Ch. $B;Identifiers for Yugoslavia;;;
-&.0-64.94.20.0-255.0-255;*;*;Ch. $B;Identifiers for Egyipt;;;
-&.0-64.94.27.0-255.0-255;*;*;Ch. $B;Identifiers for South Africa;;;
-&.0-64.94.30.0-255.0-255;*;*;Ch. $B;Identifiers for Greece;;;
-&.0-64.94.31.0-255.0-255;*;*;Ch. $B;Identifiers for the Netherlands;;;
-&.0-64.94.32.0-255.0-255;*;*;Ch. $B;Identifiers for Belgium;;;
-&.0-64.94.33.0-255.0-255;*;*;Ch. $B;Identifiers for France;;;
-&.0-64.94.34.0-255.0-255;*;*;Ch. $B;Identifiers for Spain;;;
-&.0-64.94.35.0-255.0-255;*;*;Ch. $B;Identifiers for Portugal;;;
-&.0-64.94.36.0-255.0-255;*;*;Ch. $B;Identifiers for Hungary;;;
-&.0-64.94.37.0-255.0-255;*;*;Ch. $B;Identifiers for Lithuania;;;
-&.0-64.94.38.0-255.0-255;*;*;Ch. $B;Identifiers for Slovenia;;;
-&.0-64.94.39.0-255.0-255;*;*;Ch. $B;Identifiers for Italy;;;
-&.0-64.94.40.0-255.0-255;*;*;Ch. $B;Identifiers for Romania;;;
-&.0-64.94.41.0-255.0-255;*;*;Ch. $B;Identifiers for Switzerland;;;
-&.0-64.94.42.0-255.0-255;*;*;Ch. $B;Identifiers for Slovakia;;;
-&.0-64.94.43.0-255.0-255;*;*;Ch. $B;Identifiers for Austria;;;
-&.0-64.94.44.0-255.0-255;*;*;Ch. $B;Identifiers for the UK;;;
-&.0-64.94.45.0-255.0-255;*;*;Ch. $B;Identifiers for Denmark;;;
-&.0-64.94.46.0-255.0-255;*;*;Ch. $B;Identifiers for Sweden;;;
-&.0-64.94.47.0-255.0-255;*;*;Ch. $B;Identifiers for Norway;;;
-&.0-64.94.48.0-255.0-255;*;*;Ch. $B;Identifiers for Poland;;;
-&.0-64.94.49.0-255.0-255;*;*;Ch. $B;Identifiers for Germany;;;
-&.0-64.94.52.0-255.0-255;*;*;Ch. $B;Identifiers for South Korea;;;
-&.0-64.94.54.0-255.0-255;*;*;Ch. $B;Identifiers for Argentina;;;
-&.0-64.94.55.0-255.0-255;*;*;Ch. $B;Identifiers for Brazil;;;
-&.0-64.94.57.0-255.0-255;*;*;Ch. $B;Identifiers for Colombia;;;
-&.0-64.94.61.0-255.0-255;*;*;Ch. $B;Identifiers for Australia;;;
-&.0-64.94.62.0-255.0-255;*;*;Ch. $B;Identifiers for Indonesia;;;
-&.0-64.94.63.0-255.0-255;*;*;Ch. $B;Identifiers for the Philippines;;;
-&.0-64.94.64.0-255.0-255;*;*;Ch. $B;Identifiers for New Zealand;;;
-&.0-64.94.65.0-255.0-255;*;*;Ch. $B;Identifiers for Singapore;;;
-&.0-64.94.73.0-255.0-255;*;*;Ch. $B;Identifiers for Moldova;;;
-&.0-64.94.75.0-255.0-255;*;*;Ch. $B;Identifiers for Belarus;;;
-&.0-64.94.81.0-255.0-255;*;*;Ch. $B;Identifiers for Japan;;;
-&.0-64.94.85.0-255.0-255;*;*;Ch. $B;Identifiers for Hong Kong;;;
-&.0-64.94.86.0-255.0-255;*;*;Ch. $B;Identifiers for China;;;
-&.0-64.94.87.0-255.0-255;*;*;Ch. $B;Identifiers for Bosnia and Herzegovina;;;
-&.0-64.94.90.0-255.0-255;*;*;Ch. $B;Identifiers for Turkey;;;
-&.0-64.94.91.0-255.0-255;*;*;Ch. $B;Identifiers for India;;;
-&.0-64.94.92.0-255.0-255;*;*;Ch. $B;Identifiers for Pakistan;;;
-&.0-64.94.96.0-255.0-255;*;*;Ch. $B;Identifiers for Saudi Arabia;;;
-&.0-64.94.97.0-255.0-255;*;*;Ch. $B;Identifiers for the United Arab Emirates;;;
-&.0-64.94.98.0-255.0-255;*;*;Ch. $B;Identifiers for Iran;;;
-0.0-64.96.1.0.255;1,3,4;6,9,10,17,18;Ch. $B;Device ID 1, manufacturing number;;;
-0.0-64.96.1.1-9.255;1,3,4;6,9,10,17,18;Ch. $B;Device ID;;#$(E+1);
+0.0.43.0.0-127.255;64;;Ch. $B;Security setup;;#$E;
+0.0-64.43.1.0-127.255;1,3,4;6,17,18,21;Ch. $B;Invocation counter;;#$E;
+0.0-64.43.2.0-127.255;30;;Ch. $B;Data protection;;#$E;
+0.0.44.0.0-127.255;18;;Ch. $B;Image transfer;;#$E;
+0.0-64.65.0.0-127.255;26;;Ch. $B;Standard tables (D*128+E);$D;#$E;
+0.0-64.65.1-15.0-127.255;26;;Ch. $B;Standard tables (D*128+E);$D;#$E;
+0.0-64.65.16.0-127.255;26;;Ch. $B;Manufacturer tables ((D-16)*128+E);$D;#$E;
+0.0-64.65.17-31.0-127.255;26;;Ch. $B;Manufacturer tables ((D-16)*128+E);$D;#$E;
+0.0-64.65.32.0-127.255;26;;Ch. $B;Std pending tables ((D-32)*128+E);$D;#$E;
+0.0-64.65.33-47.0-127.255;26;;Ch. $B;Std pending tables ((D-32)*128+E);$D;#$E;
+0.0-64.65.48.0-127.255;26;;Ch. $B;Mfg pending tables ((D-48)*128+E);$D;#$E;
+0.0-64.65.49-63.0-127.255;26;;Ch. $B;Mfg pending tables ((D-48)*128+E);$D;#$E;
+0.0-64.66.0.0-127.255;62;;Ch. $B;Compact data;;#$E;
+0,1,7.0-64.94.0.0-255.0-255;*;*;Ch. $B;Identifiers for Finland;;;
+0,1,7.0-64.94.1.0-255.0-255;*;*;Ch. $B;Identifiers for the USA;;;
+0,1,7.0-64.94.2.0-255.0-255;*;*;Ch. $B;Identifiers for Canada;;;
+0,1,7.0-64.94.3.0-255.0-255;*;*;Ch. $B;Identifiers for Serbia;;;
+0,1,7.0-64.94.7.0-255.0-255;*;*;Ch. $B;Identifiers for Russia;;;
+0,1,7.0-64.94.10.0-255.0-255;*;*;Ch. $B;Identifiers for Czech;;;
+0,1,7.0-64.94.11.0-255.0-255;*;*;Ch. $B;Identifiers for Bulgaria;;;
+0,1,7.0-64.94.12.0-255.0-255;*;*;Ch. $B;Identifiers for Croatia;;;
+0,1,7.0-64.94.13.0-255.0-255;*;*;Ch. $B;Identifiers for Ireland;;;
+0,1,7.0-64.94.14.0-255.0-255;*;*;Ch. $B;Identifiers for Israel;;;
+0,1,7.0-64.94.15.0-255.0-255;*;*;Ch. $B;Identifiers for Ukraine;;;
+0,1,7.0-64.94.16.0-255.0-255;*;*;Ch. $B;Identifiers for Yugoslavia;;;
+0,1,7.0-64.94.20.0-255.0-255;*;*;Ch. $B;Identifiers for Egyipt;;;
+0,1,7.0-64.94.27.0-255.0-255;*;*;Ch. $B;Identifiers for South Africa;;;
+0,1,7.0-64.94.30.0-255.0-255;*;*;Ch. $B;Identifiers for Greece;;;
+0,1,7.0-64.94.31.0-255.0-255;*;*;Ch. $B;Identifiers for the Netherlands;;;
+0,1,7.0-64.94.32.0-255.0-255;*;*;Ch. $B;Identifiers for Belgium;;;
+0,1,7.0-64.94.33.0-255.0-255;*;*;Ch. $B;Identifiers for France;;;
+0,1,7.0-64.94.34.0-255.0-255;*;*;Ch. $B;Identifiers for Spain;;;
+0,1,7.0-64.94.35.0-255.0-255;*;*;Ch. $B;Identifiers for Portugal;;;
+0,1,7.0-64.94.36.0-255.0-255;*;*;Ch. $B;Identifiers for Hungary;;;
+0,1,7.0-64.94.37.0-255.0-255;*;*;Ch. $B;Identifiers for Lithuania;;;
+0,1,7.0-64.94.38.0-255.0-255;*;*;Ch. $B;Identifiers for Slovenia;;;
+0,1,7.0-64.94.39.0-255.0-255;*;*;Ch. $B;Identifiers for Italy;;;
+0,1,7.0-64.94.40.0-255.0-255;*;*;Ch. $B;Identifiers for Romania;;;
+0,1,7.0-64.94.41.0-255.0-255;*;*;Ch. $B;Identifiers for Switzerland;;;
+0,1,7.0-64.94.42.0-255.0-255;*;*;Ch. $B;Identifiers for Slovakia;;;
+0,1,7.0-64.94.43.0-255.0-255;*;*;Ch. $B;Identifiers for Austria;;;
+0,1,7.0-64.94.44.0-255.0-255;*;*;Ch. $B;Identifiers for the UK;;;
+0,1,7.0-64.94.45.0-255.0-255;*;*;Ch. $B;Identifiers for Denmark;;;
+0,1,7.0-64.94.46.0-255.0-255;*;*;Ch. $B;Identifiers for Sweden;;;
+0,1,7.0-64.94.47.0-255.0-255;*;*;Ch. $B;Identifiers for Norway;;;
+0,1,7.0-64.94.48.0-255.0-255;*;*;Ch. $B;Identifiers for Poland;;;
+0,1,7.0-64.94.49.0-255.0-255;*;*;Ch. $B;Identifiers for Germany;;;
+0,1,7.0-64.94.51.0-255.0-255;*;*;Ch. $B;Identifiers for Peru;;;
+0,1,7.0-64.94.52.0-255.0-255;*;*;Ch. $B;Identifiers for South Korea;;;
+0,1,7.0-64.94.53.0-255.0-255;*;*;Ch. $B;Identifiers for Cuba;;;
+0,1,7.0-64.94.54.0-255.0-255;*;*;Ch. $B;Identifiers for Argentina;;;
+0,1,7.0-64.94.55.0-255.0-255;*;*;Ch. $B;Identifiers for Brazil;;;
+0,1,7.0-64.94.56.0-255.0-255;*;*;Ch. $B;Identifiers for Chile;;;
+0,1,7.0-64.94.57.0-255.0-255;*;*;Ch. $B;Identifiers for Colombia;;;
+0,1,7.0-64.94.58.0-255.0-255;*;*;Ch. $B;Identifiers for Venezuela;;;
+0,1,7.0-64.94.60.0-255.0-255;*;*;Ch. $B;Identifiers for Malaysia;;;
+0,1,7.0-64.94.61.0-255.0-255;*;*;Ch. $B;Identifiers for Australia;;;
+0,1,7.0-64.94.62.0-255.0-255;*;*;Ch. $B;Identifiers for Indonesia;;;
+0,1,7.0-64.94.63.0-255.0-255;*;*;Ch. $B;Identifiers for the Philippines;;;
+0,1,7.0-64.94.64.0-255.0-255;*;*;Ch. $B;Identifiers for New Zealand;;;
+0,1,7.0-64.94.65.0-255.0-255;*;*;Ch. $B;Identifiers for Singapore;;;
+0,1,7.0-64.94.66.0-255.0-255;*;*;Ch. $B;Identifiers for Thailand;;;
+0,1,7.0-64.94.73.0-255.0-255;*;*;Ch. $B;Identifiers for Moldova;;;
+0,1,7.0-64.94.75.0-255.0-255;*;*;Ch. $B;Identifiers for Belarus;;;
+0,1,7.0-64.94.81.0-255.0-255;*;*;Ch. $B;Identifiers for Japan;;;
+0,1,7.0-64.94.85.0-255.0-255;*;*;Ch. $B;Identifiers for Hong Kong;;;
+0,1,7.0-64.94.86.0-255.0-255;*;*;Ch. $B;Identifiers for China;;;
+0,1,7.0-64.94.87.0-255.0-255;*;*;Ch. $B;Identifiers for Bosnia and Herzegovina;;;
+0,1,7.0-64.94.90.0-255.0-255;*;*;Ch. $B;Identifiers for Turkey;;;
+0,1,7.0-64.94.91.0-255.0-255;*;*;Ch. $B;Identifiers for India;;;
+0,1,7.0-64.94.92.0-255.0-255;*;*;Ch. $B;Identifiers for Pakistan;;;
+0,1,7.0-64.94.96.0-255.0-255;*;*;Ch. $B;Identifiers for Saudi Arabia;;;
+0,1,7.0-64.94.97.0-255.0-255;*;*;Ch. $B;Identifiers for the United Arab Emirates;;;
+0,1,7.0-64.94.98.0-255.0-255;*;*;Ch. $B;Identifiers for Iran;;;
+0.0-64.96.1.0.255;1,3,4;6,9,10,12,17,18;Ch. $B;Device ID 1, manufacturing number;;;
+0.0-64.96.1.1-9.255;1,3,4;6,9,10,12,17,18;Ch. $B;Device ID;;#$(E+1);
 0.0-64.96.1.255.255;7,61;;Ch. $B;Complete device ID;;;
-0.0-64.96.1.10.255;1,3,4;9,10;Ch. $B;Metering point ID;;;
+0.0-64.96.1.10.255;1,3,4;6,9,10,12,17,18;Ch. $B;Metering point ID;;;
 0.0-64.96.2.0.255;1,3,4;6,17,18,21;Ch. $B;No. of configuration program changes;;;
 0.0-64.96.2.1.255;1,3,4;9,25,26;Ch. $B;Date of last configuration program change;;;
 0.0-64.96.2.2.255;1,3,4;9,25,26;Ch. $B;Date of last time switch program change;;;
@@ -176,7 +227,8 @@
 0.0-64.96.3.2.255;1,3,4,63;4,6,9,17,18,21;Ch. $B;State of the output control signals;;(status word #$E);
 0.0-64.96.3.3.255;1,3,4,63;4,6,9,17,18,21;Ch. $B;State of input/output control signals;;(status word #$E);
 0.0-64.96.3.4.255;1,3,4,63;4,6,9,17,18,21;Ch. $B;State of input/output control signals;;(status word #$E);
-0.0-64.96.3.10.255;70;;Ch. $B;Disconnect control object;;;
+0.0-64.96.3.10.255;70;;Ch. $B;Disconnect control;;;
+0.0-64.96.3.20-29.255;68;;Ch. $B;Arbitrator;;#$(E-20);
 0.0-64.96.4.0.255;1,3,4,63,7,61;4,6,9,17,18,21;Ch. $B;State of the internal control signals, global;;;
 0.0-64.96.4.1.255;1,3,4,63;4,6,9,17,18,21;Ch. $B;State of the internal control signals;;(status word #$E);
 0.0-64.96.4.2.255;1,3,4,63;4,6,9,17,18,21;Ch. $B;State of the internal control signals;;(status word #$E);
@@ -207,11 +259,11 @@
 0.0-64.96.7.7.255;1,3,4;6,17,18,21;Ch. $B;No. of long power failures;in phase L2;;
 0.0-64.96.7.8.255;1,3,4;6,17,18,21;Ch. $B;No. of long power failures;in phase L3;;
 0.0-64.96.7.9.255;1,3,4;6,17,18,21;Ch. $B;No. of long power failures;in any phase;;
-0.0-64.96.7.10.255;1,3,4;9;Ch. $B;Time of power failure;in all three phases;;
-0.0-64.96.7.11.255;1,3,4;9;Ch. $B;Time of power failure;in phase L1;;
-0.0-64.96.7.12.255;1,3,4;9;Ch. $B;Time of power failure;in phase L2;;
-0.0-64.96.7.13.255;1,3,4;9;Ch. $B;Time of power failure;in phase L3;;
-0.0-64.96.7.14.255;1,3,4;9;Ch. $B;Time of power failure;in any phase;;
+0.0-64.96.7.10.255;1,3,4;9,25;Ch. $B;Time of power failure;in all three phases;;
+0.0-64.96.7.11.255;1,3,4;9,25;Ch. $B;Time of power failure;in phase L1;;
+0.0-64.96.7.12.255;1,3,4;9,25;Ch. $B;Time of power failure;in phase L2;;
+0.0-64.96.7.13.255;1,3,4;9,25;Ch. $B;Time of power failure;in phase L3;;
+0.0-64.96.7.14.255;1,3,4;9,25;Ch. $B;Time of power failure;in any phase;;
 0.0-64.96.7.15.255;1,3,4;6,17,18,21;Ch. $B;Duration of long power failure;in all three phases;;
 0.0-64.96.7.16.255;1,3,4;6,17,18,21;Ch. $B;Duration of long power failure;in phase L1;;
 0.0-64.96.7.17.255;1,3,4;6,17,18,21;Ch. $B;Duration of long power failure;in phase L2;;
@@ -219,7 +271,7 @@
 0.0-64.96.7.19.255;1,3,4;6,17,18,21;Ch. $B;Duration of long power failure;in any phase;;
 0.0-64.96.7.20.255;1,3,4;6,17,18,21;Ch. $B;Time threshold for long of power failure;;;
 0.0-64.96.8.0.255;3,4,1;6,17,18,21;Ch. $B;Time of operation, total;;;
-0.0-64.96.8.1-63.255;3,4,1;6,17,18,21;Ch. $B;Time of registration;;Rate $E;
+0.0-64.96.8.1-63.255;3,4,1;6,17,18,21;Ch. $B;Time of operation;;Rate $E;
 0.0-64.96.9.0.255;3,4;5,6,15,16,17,18,20,21,23,24;Ch. $B;Ambient temperature;;;
 0.0-64.96.9.1.255;3,4;5,6,15,16,17,18,20,21,23,24;Ch. $B;Ambient pressure;;;
 0.0-64.96.9.2.255;3,4;5,6,15,16,17,18,20,21,23,24;Ch. $B;Relative humidity;;;
@@ -233,30 +285,61 @@
 0.0-64.96.10.8.255;1,3,4,63;4,6,9,17,18,21;Ch. $B;Status register;;#$E;
 0.0-64.96.10.9.255;1,3,4,63;4,6,9,17,18,21;Ch. $B;Status register;;#$E;
 0.0-64.96.10.10.255;1,3,4,63;4,6,9,17,18,21;Ch. $B;Status register;;#$E;
-0.0-64.96.11.0-9.255;1,3,4;5,6,15,16,17,18,22;Ch. $B;Event code;;#$(E+1);
+0.0-64.96.11.0-99.255;1,3,4;5,6,15,16,17,18,22;Ch. $B;Event code;;#$(E+1);
 0.0-64.96.12.1.255;1,3,4;6,17,18,21;Ch. $B;Comm. port parameters;No. of connections;;
 0.0-64.96.12.4.255;1,3,4;9,10;Ch. $B;Comm. port parameters;Parameter 1;;
 0.0-64.96.12.5.255;1,3,4;5,6,9,10,13,15,16,17,18,20,21,23,24;Ch. $B;Comm. port parameters;GSM field strength;;
 0.0-64.96.12.6.255;1,3,4;9;Ch. $B;Comm. port parameters;Telephone number / Communication address of the physical device;;
-0.0-64.96.13.0.255;1,3,4;9,1;Ch. $B;Consumer message via local consumer information port;;;
-0.0-64.96.13.1.255;1,3,4;9,1;Ch. $B;Consumer message via the meter display and/or via local consumer information port;;;
+0.0-64.96.13.0.255;1,3,4;9,10;Ch. $B;Consumer message via local consumer information port;;;
+0.0-64.96.13.1.255;1,3,4;9,10;Ch. $B;Consumer message via the meter display and/or via local consumer information port;;;
 0.0-64.96.14.0-15.255;1,3,4;6,9,15,17,18,21;Ch. $B;Currently active tariff;;#$(E+1);
-0.0-64.96.15.0-9.255;1,3,4;6,17,18,21;Ch. $B;Event counter;;#$(E+1);
+0.0-64.96.15.0-99.255;1,3,4;6,17,18,21;Ch. $B;Event counter;;#$(E+1);
+0.0-64.96.16.0-9.255;1,3,4;9;Ch. $B;Profile entry digital signature;;#$(E+1);
+0.0-64.96.20.0.255;1,3,4;6,17,18;Ch. $B;Meter open event counter;;;
+0.0-64.96.20.1.255;1,3,4;6,9,25;Ch. $B;Meter open event, time stamp of current event occurrence;;;
+0.0-64.96.20.2.255;1,3,4;6,17,18;Ch. $B;Meter open event, duration of current event;;;
+0.0-64.96.20.3.255;1,3,4;6,17,18;Ch. $B;Meter open event, cumulative duration;;;
+0.0-64.96.20.5.255;1,3,4;6,17,18;Ch. $B;Terminal cover open event counter;;;
+0.0-64.96.20.6.255;1,3,4;6,9,25;Ch. $B;Terminal cover open event, time stamp of current event occurrence;;;
+0.0-64.96.20.7.255;1,3,4;6,17,18;Ch. $B;Terminal cover open event, duration of current event;;;
+0.0-64.96.20.8.255;1,3,4;6,17,18;Ch. $B;Terminal cover open event, cumulative duration;;;
+0.0-64.96.20.10.255;1,3,4;6,17,18;Ch. $B;Tilt event counter;;;
+0.0-64.96.20.11.255;1,3,4;6,9,25;Ch. $B;Tilt event, time stamp of current event occurrence;;;
+0.0-64.96.20.12.255;1,3,4;6,17,18;Ch. $B;Tilt event, duration of current event;;;
+0.0-64.96.20.13.255;1,3,4;6,17,18;Ch. $B;Tilt event, cumulative duration;;;
+0.0-64.96.20.15.255;1,3,4;6,17,18;Ch. $B;Strong DC magnetic field event counter;;;
+0.0-64.96.20.16.255;1,3,4;6,9,25;Ch. $B;Strong DC magnetic field event, time stamp of current event occurrence;;;
+0.0-64.96.20.17.255;1,3,4;6,17,18;Ch. $B;Strong DC magnetic field event, duration of current event;;;
+0.0-64.96.20.18.255;1,3,4;6,17,18;Ch. $B;Strong DC magnetic field event, cumulative duration;;;
+0.0-64.96.20.20.255;1,3,4;6,17,18;Ch. $B;Supply control switch / valve tamper event counter;;;
+0.0-64.96.20.21.255;1,3,4;6,9,25;Ch. $B;Supply control switch / valve tamper event, time stamp of current event occurrence;;;
+0.0-64.96.20.22.255;1,3,4;6,17,18;Ch. $B;Supply control switch / valve tamper event, duration of current event;;;
+0.0-64.96.20.23.255;1,3,4;6,17,18;Ch. $B;Supply control switch / valve tamper event, cumulative duration;;;
+0.0-64.96.20.25.255;1,3,4;6,17,18;Ch. $B;Metrology tamper event counter;;;
+0.0-64.96.20.26.255;1,3,4;6,9,25;Ch. $B;Metrology tamper event, time stamp of current event occurrence;;;
+0.0-64.96.20.27.255;1,3,4;6,17,18;Ch. $B;Metrology tamper event, duration of current event;;;
+0.0-64.96.20.28.255;1,3,4;6,17,18;Ch. $B;Metrology tamper event, cumulative duration;;;
+0.0-64.96.20.29.255;1,3,4;;Ch. $B;Reserved;;;
+0.0-64.96.20.30.255;1,3,4;6,17,18;Ch. $B;Communication tamper event counter;;;
+0.0-64.96.20.31.255;1,3,4;6,9,25;Ch. $B;Communication tamper event, time stamp of current event occurrence;;;
+0.0-64.96.20.32.255;1,3,4;6,17,18;Ch. $B;Communication tamper event, duration of current event;;;
+0.0-64.96.20.33.255;1,3,4;6,17,18;Ch. $B;Communication tamper event, cumulative duration;;;
 0.0-64.96.50-99.0-255.0-255;1,3,4,7,61,63;*;Ch. $B;Man. spec. abstract object;;;
-&.0-64.97.97.0.255;1,3,4;4,6,9,17,18;Ch. $B;Error object;;#$(E+1);
-&.0-64.97.97.1.255;1,3,4;4,6,9,17,18;Ch. $B;Error object;;#$(E+1);
-&.0-64.97.97.2.255;1,3,4;4,6,9,17,18;Ch. $B;Error object;;#$(E+1);
-&.0-64.97.97.3.255;1,3,4;4,6,9,17,18;Ch. $B;Error object;;#$(E+1);
-&.0-64.97.97.4.255;1,3,4;4,6,9,17,18;Ch. $B;Error object;;#$(E+1);
-&.0-64.97.97.5.255;1,3,4;4,6,9,17,18;Ch. $B;Error object;;#$(E+1);
-&.0-64.97.97.6.255;1,3,4;4,6,9,17,18;Ch. $B;Error object;;#$(E+1);
-&.0-64.97.97.7.255;1,3,4;4,6,9,17,18;Ch. $B;Error object;;#$(E+1);
-&.0-64.97.97.8.255;1,3,4;4,6,9,17,18;Ch. $B;Error object;;#$(E+1);
-&.0-64.97.97.9.255;1,3,4;4,6,9,17,18;Ch. $B;Error object;;#$(E+1);
-&.0-64.97.97.255.255;7,61;;Ch. $B;Error profile object;;;
+0,1,7.0-64.97.97.0.255;1,3,4;4,6,9,17,18;Ch. $B;Error object;;#$(E+1);
+0,1,7.0-64.97.97.1.255;1,3,4;4,6,9,17,18;Ch. $B;Error object;;#$(E+1);
+0,1,7.0-64.97.97.2.255;1,3,4;4,6,9,17,18;Ch. $B;Error object;;#$(E+1);
+0,1,7.0-64.97.97.3.255;1,3,4;4,6,9,17,18;Ch. $B;Error object;;#$(E+1);
+0,1,7.0-64.97.97.4.255;1,3,4;4,6,9,17,18;Ch. $B;Error object;;#$(E+1);
+0,1,7.0-64.97.97.5.255;1,3,4;4,6,9,17,18;Ch. $B;Error object;;#$(E+1);
+0,1,7.0-64.97.97.6.255;1,3,4;4,6,9,17,18;Ch. $B;Error object;;#$(E+1);
+0,1,7.0-64.97.97.7.255;1,3,4;4,6,9,17,18;Ch. $B;Error object;;#$(E+1);
+0,1,7.0-64.97.97.8.255;1,3,4;4,6,9,17,18;Ch. $B;Error object;;#$(E+1);
+0,1,7.0-64.97.97.9.255;1,3,4;4,6,9,17,18;Ch. $B;Error object;;#$(E+1);
+0,1,7.0-64.97.97.255.255;7,61;;Ch. $B;Error profile object;;;
 0.0-64.97.98.0-9.255;1,3,4;4,6,9,17,18;Ch. $B;Alarm register object;;#$(E+1);
 0.0-64.97.98.255.255;7,61;;Ch. $B;Alarm register profile object;;;
 0.0-64.97.98.10-19.255;1,3,4;4,6,9,17,18;Ch. $B;Alarm filter object;;#$(E-9);
+0.0-64.97.98.20-29.255;1,3,4;4,6,9,17,18;Ch. $B;Alarm descriptor object;;#$(E-9);
 0.0-64.98.1.0-127,255.0-99;7;;Ch. $B;Data of billing period;Scheme 1;#$(E+1);Billing period $F
 0.0-64.98.1.0-127,255.101-125;7;;Ch. $B;Data of billing period;Scheme 1;#$(E+1);$(F-100) last billing periods
 0.0-64.98.1.0-127,255.126,255;7;;Ch. $B;Data of billing period;Scheme 1;#$(E+1);Unspecified number of most recent billing periods
@@ -264,30 +347,35 @@
 0.0-64.98.2.0-127,255.101-125;7;;Ch. $B;Data of billing period;Scheme 2;#$(E+1);$(F-100) last billing periods
 0.0-64.98.2.0-127,255.126,255;7;;Ch. $B;Data of billing period;Scheme 2;#$(E+1);Unspecified number of most recent billing periods
 0.0-64.98.10.0-127.0-99;61;;Ch. $B;Register table objects, general use;;#$(E+1);
-0.0-64.98.10.0-127.101-125;62;;Ch. $B;Register table objects, general use;;#$(E+1);
-0.0-64.98.10.0-127.126,255;63;;Ch. $B;Register table objects, general use;;#$(E+1);
+0.0-64.98.10.0-127.101-125;61;;Ch. $B;Register table objects, general use;;#$(E+1);
+0.0-64.98.10.0-127.126,255;61;;Ch. $B;Register table objects, general use;;#$(E+1);
 0.0-64.99.1.0-127.255;7;;Ch. $B;Load profile with recording period 1;;#$(E+1);
 0.0-64.99.2.0-127.255;7;;Ch. $B;Load profile with recording period 2;;#$(E+1);
 0.0-64.99.3.0.255;7;;Ch. $B;Load profile during test;;;
 0.0-64.99.12.0-127.255;7;;Ch. $B;Connection profile;;#$(E+1);
-&.0-64.99.98.0-127.255;7;;Ch. $B;Event log;;#$(E+1);
-&.0-64.127.0-255.0-255.0-255;*;*;Ch. $B;Inactive object;;;
-&.65-127.0-255.0-255.0-255.0-255;*;*;Ch. $B;Utility specific objects;;;
+0.0-64.99.13.0-127.255;7;;Ch. $B;GSM diagnostic profile;;#$(E+1);
+0.0-64.99.14.0-127.255;7;;Ch. $B;Charge collection history (Payment metering);;#$(E+1);
+0.0-64.99.15.0-127.255;7;;Ch. $B;Token credit history (Payment metering);;#$(E+1);
+0.0-64.99.16.0-127.255;7;;Ch. $B;Parameter monitor log;;#$(E+1);
+0.0-64.99.17.0-127.255;7;;Ch. $B;Token transfer log (Payment metering);;#$(E+1);
+0,1,7.0-64.99.98.0-127.255;7;;Ch. $B;Event log;;#$(E+1);
+0,1,7.0-64.127.0-255.0-255.0-255;*;*;Ch. $B;Inactive object;;;
+0,1,7.65-127.0-255.0-255.0-255.0-255;*;*;Ch. $B;Utility specific objects;;;
 0.128-199.0-199,255.0-255.0-255.0-255;*;*;Manufacturer specific;;;;
 0.0-199,255.128-199,240.0-255.0-255.0-255;*;*;Manufacturer specific;;;;
 0.0-199,255.0-199,255.128-254.0-255.0-255;*;*;Manufacturer specific;;;;
 0.0-199,255.0-199,255.0-255.128-254.0-255;*;*;Manufacturer specific;;;;
-0.0-199,255.0-199,255.0-255.0-255.128-254;*;*;Manufacturer specific;;;;
+0.0-199,255.0-199,255.0-255.0-255.128-254;*;*;Manufactur-er specific;;;;
 1.0-64.0.0.0-9.255;1,3,4;6,9,10,17,18;Ch. $B;Electricity ID;;#$(E+1);
 1.0-64.0.0.255.255;7,61;;Ch. $B;Complete combined electricity ID;;;
 1.0-64.0.1.0.0-99,255;1,3,4;6,17,18;Ch. $B;Billing period counter (1);;;#$F
 1.0-64.0.1.1.255;1,3,4;6,17,18;Ch. $B;No. of available billing periods (1);;;
-1.0-64.0.1.2.0-99;1,3,4;9;Ch. $B;Time stamp of the billing period (1);;;#$F
-1.0-64.0.1.2.255;1,3,4;9;Ch. $B;Time stamp of the most recent billing period closed (1);;;
+1.0-64.0.1.2.0-99;1,3,4;9,25;Ch. $B;Time stamp of the billing period (1);;;#$F
+1.0-64.0.1.2.255;1,3,4;9,25;Ch. $B;Time stamp of the most recent billing period closed (1);;;
 1.0-64.0.1.3.0-99,255;1,3,4;6,17,18;Ch. $B;Billing period counter (2);;;$F
 1.0-64.0.1.4.255;1,3,4;6,17,18;Ch. $B;No. of available billing periods (2);;;
-1.0-64.0.1.5.0-99;1,3,4;9;Ch. $B;Time stamp of the billing period (2);;;#$F
-1.0-64.0.1.5.255;1,3,4;9;Ch. $B;Time stamp of the most recent billing period closed (2);;;
+1.0-64.0.1.5.0-99;1,3,4;9,25;Ch. $B;Time stamp of the billing period (2);;;#$F
+1.0-64.0.1.5.255;1,3,4;9,25;Ch. $B;Time stamp of the most recent billing period closed (2);;;
 1.0-64.0.2.0.255;1,3,4;9,10,17,18;Ch. $B;Active firmware identifier;;;
 1.0-64.0.2.1.255;1,3,4;9,10,17,18;Ch. $B;Parameter record number;;;
 1.0-64.0.2.1.1;1,3,4;9,10,17,18;Ch. $B;Parameter number line 1;;;
@@ -302,7 +390,7 @@
 1.0-64.0.3.3.255;1,3,4;5,6,9,10,13,15,16,17,18,20,21,23,24;Ch. $B;Meter constant;Active energy, output pulse;;
 1.0-64.0.3.4.255;1,3,4;5,6,9,10,13,15,16,17,18,20,21,23,24;Ch. $B;Meter constant;Reactive energy, output pulse;;
 1.0-64.0.3.5.255;1,3,4;5,6,9,10,13,15,16,17,18,20,21,23,24;Ch. $B;Meter constant;Apparent energy, output pulse;;
-1.0-64.0.3.6.255;1,3,4;5,6,9,10,13,15,16,17,18,20,21,23,24;Ch. $B;Meter constant;Volt-squared hours, metrological LED ;;
+1.0-64.0.3.6.255;1,3,4;5,6,9,10,13,15,16,17,18,20,21,23,24;Ch. $B;Meter constant;Volt-squared hours, metrological LED;;
 1.0-64.0.3.7.255;1,3,4;5,6,9,10,13,15,16,17,18,20,21,23,24;Ch. $B;Meter constant;Ampere-squared hours, metrological LED;;
 1.0-64.0.3.8.255;1,3,4;5,6,9,10,13,15,16,17,18,20,21,23,24;Ch. $B;Meter constant;Volt-squared hours, output pulse;;
 1.0-64.0.3.9.255;1,3,4;5,6,9,10,13,15,16,17,18,20,21,23,24;Ch. $B;Meter constant;Ampere-squared hours, output pulse;;
@@ -334,12 +422,13 @@
 1.0-64.0.8.0.255;3,1,4;5,6,9,10,13,15,16,17,18,20,21,23,24;Ch. $B;Measurement period 1,  for averaging scheme 1;;;
 1.0-64.0.8.1.255;3,1,4;5,6,9,10,13,15,16,17,18,20,21,23,24;Ch. $B;Measurement period 2,  for averaging scheme 2;;;
 1.0-64.0.8.2.255;3,1,4;5,6,9,10,13,15,16,17,18,20,21,23,24;Ch. $B;Measurement period 3,  for instantaneous value;;;
-1.0-64.0.8.3.255;3,1,4;5,6,9,10,13,15,16,17,18,20,21,23,24;Ch. $B;Measurement period 4 for test value ;;;
+1.0-64.0.8.3.255;3,1,4;5,6,9,10,13,15,16,17,18,20,21,23,24;Ch. $B;Measurement period 4 for test value;;;
 1.0-64.0.8.4.255;3,1,4;5,6,9,10,13,15,16,17,18,20,21,23,24;Ch. $B;Recording interval 1, for load profile;;;
 1.0-64.0.8.5.255;3,1,4;5,6,9,10,13,15,16,17,18,20,21,23,24;Ch. $B;Recording interval 2, for load profile;;;
 1.0-64.0.8.6.255;3,1,4;5,6,9,10,13,15,16,17,18,20,21,23,24;Ch. $B;Billing period (Billing period 1 if there are two billing periods);;;
 1.0-64.0.8.7.255;3,1,4;5,6,9,10,13,15,16,17,18,20,21,23,24;Ch. $B;Billing period 2;;;
-1.0-64.0.9.0.255;3,1,4;9;Ch. $B;Time expired since last end of billing period;;;
+1.0-64.0.8.8.255;3,1,4;5,6,9,10,13,15,16,17,18,20,21,23,24;Ch. $B;Measurement period 4,  for harmonics;;;
+1.0-64.0.9.0.255;3,1,4;6,17,18;Ch. $B;Time expired since last end of billing period;;;
 1.0-64.0.9.1.255;1,3,4;9;Ch. $B;Local time;;;
 1.0-64.0.9.2.255;1,3,4;9;Ch. $B;Local date;;;
 1.0-64.0.9.3.255;1,3,4;;Ch. $B;Reserved for Germany;;;
@@ -352,21 +441,21 @@
 1.0-64.0.9.10.255;3,4,1;22;Ch. $B;Clock synchronisation method;;;
 1.0-64.0.9.11.255;3,4,1;6,15,17,18;Ch. $B;Clock time shift limit;;;
 1.0-64.0.9.12.255;3,1,4;6,15,17,18;Ch. $B;Billing period reset lockout time (First billing period scheme if there are more than one);;;
-1.0-64.0.9.13.255;3,1,4;9;Ch. $B;Time expired since last end of billing period (Second billing period scheme);;;
+1.0-64.0.9.13.255;3,1,4;6,17,18;Ch. $B;Time expired since last end of billing period (Second billing period scheme);;;
 1.0-64.0.9.14.255;1,3,4;9;Ch. $B;Time of last reset (Second billing period scheme);;;
 1.0-64.0.9.15.255;1,3,4;9;Ch. $B;Date of last reset (Second billing period scheme);;;
-1.0-64.0.9.16.255;3,1,4;6,15,17,18;Ch. $B;Billing period reset lockout time (Second billing period scheme) ;;;
+1.0-64.0.9.16.255;3,1,4;6,15,17,18;Ch. $B;Billing period reset lockout time (Second billing period scheme);;;
 1.0-64.0.10.0.255;3,4;5,6,9,10,13,15,16,17,18,20,21,23,24;Ch. $B;Transformer magnetic losses Xm;;;
 1.0-64.0.10.1.255;3,4;5,6,9,10,13,15,16,17,18,20,21,23,24;Ch. $B;Transformer iron losses RFe;;;
 1.0-64.0.10.2.255;3,4;5,6,9,10,13,15,16,17,18,20,21,23,24;Ch. $B;Line resistance losses RCu;;;
 1.0-64.0.10.3.255;3,4;5,6,9,10,13,15,16,17,18,20,21,23,24;Ch. $B;Line reactance losses Xs;;;
-1.0-64.0.11.1.255;1,3;22;Ch. $B;Measurement algorithm; Active power;;
-1.0-64.0.11.2.255;1,3;22;Ch. $B;Measurement algorithm; Active energy;;
-1.0-64.0.11.3.255;1,3;22;Ch. $B;Measurement algorithm; Reactive power;;
-1.0-64.0.11.4.255;1,3;22;Ch. $B;Measurement algorithm; Reactive energy;;
-1.0-64.0.11.5.255;1,3;22;Ch. $B;Measurement algorithm; Apparent power;;
-1.0-64.0.11.6.255;1,3;22;Ch. $B;Measurement algorithm; Apparent energy;;
-1.0-64.0.11.7.255;1,3;22;Ch. $B;Measurement algorithm; Power factor;;
+1.0-64.0.11.1.255;1,3;22;Ch. $B;Measurement algorithm;Active power;;
+1.0-64.0.11.2.255;1,3;22;Ch. $B;Measurement algorithm;Active energy;;
+1.0-64.0.11.3.255;1,3;22;Ch. $B;Measurement algorithm;Reactive power;;
+1.0-64.0.11.4.255;1,3;22;Ch. $B;Measurement algorithm;Reactive energy;;
+1.0-64.0.11.5.255;1,3;22;Ch. $B;Measurement algorithm;Apparent power;;
+1.0-64.0.11.6.255;1,3;22;Ch. $B;Measurement algorithm;Apparent energy;;
+1.0-64.0.11.7.255;1,3;22;Ch. $B;Measurement algorithm;Power factor calculation;;
 1.0-64.1-20,21-40,41-60,61-80,82,84-92.0.0.255;3,4,5;5,6,9,10,13,15,16,17,18,20,21,23,24;Ch. $B;$1;Billing period avg. (since last reset);Rate $E (0 is total);
 1.0-64.1-20,21-40,41-60,61-80,82,84-92.0.1-63.255;3,4,5;5,6,9,10,13,15,16,17,18,20,21,23,24;Ch. $B;$1;Billing period avg. (since last reset);Rate $E (0 is total);
 1.0-64.1-20,21-40,41-60,61-80,82,84-92.0.0-63.0-99;3,4,5,7;5,6,9,10,13,15,16,17,18,20,21,23,24;Ch. $B;$1;Billing period avg. (since last reset);Rate $E (0 is total);Billing period $F
@@ -375,7 +464,7 @@
 1.0-64.1-20,21-40,41-60,61-80,82,84-92.1.0.255;3,4;5,6,9,10,13,15,16,17,18,20,21,23,24;Ch. $B;$1;Cum. min. 1;Rate $E (0 is total);
 1.0-64.1-20,21-40,41-60,61-80,82,84-92.1.1-63.255;3,4;5,6,9,10,13,15,16,17,18,20,21,23,24;Ch. $B;$1;Cum. min. 1;Rate $E (0 is total);
 1.0-64.1-20,21-40,41-60,61-80,82,84-92.1.0-63.0-99;3,4,7;5,6,9,10,13,15,16,17,18,20,21,23,24;Ch. $B;$1;Cum. min. 1;Rate $E (0 is total);Billing period $F
-1.0-64.1-20,21-40,41-60,61-80,82,84-92.1.0-63.101-125;3,4,7;5,6,9,10,13,15,16,17,18,20,21,23,24;Ch. $B;$1;Cum. min. 1;Rate $E (0 is total); $(F-100). last / $(F-100) last billing period(s)
+1.0-64.1-20,21-40,41-60,61-80,82,84-92.1.0-63.101-125;3,4,7;5,6,9,10,13,15,16,17,18,20,21,23,24;Ch. $B;$1;Cum. min. 1;Rate $E (0 is total);$(F-100). last / $(F-100) last billing period(s)
 1.0-64.1-20,21-40,41-60,61-80,82,84-92.1.0-63.126,255;,7;;Ch. $B;$1;Cum. min. 1;Rate $E (0 is total);Unspecified number of most recent billing periods
 1.0-64.1-20,21-40,41-60,61-80,82,84-92.2.0.255;3,4;5,6,9,10,13,15,16,17,18,20,21,23,24;Ch. $B;$1;Cum. max. 1;Rate $E (0 is total);
 1.0-64.1-20,21-40,41-60,61-80,82,84-92.2.1-63.255;3,4;5,6,9,10,13,15,16,17,18,20,21,23,24;Ch. $B;$1;Cum. max. 1;Rate $E (0 is total);
@@ -404,12 +493,12 @@
 1.0-64.1-20,21-40,41-60,61-80,82,84-92.9.0.255;3,4;5,6,9,10,13,15,16,17,18,20,21,23,24;Ch. $B;$1;Time integral 2;Rate $E (0 is total);
 1.0-64.1-20,21-40,41-60,61-80,82,84-92.9.1-63.255;3,4;5,6,9,10,13,15,16,17,18,20,21,23,24;Ch. $B;$1;Time integral 2;Rate $E (0 is total);
 1.0-64.1-20,21-40,41-60,61-80,82,84-92.9.0-63.0-99;3,4,7;5,6,9,10,13,15,16,17,18,20,21,23,24;Ch. $B;$1;Time integral 2;Rate $E (0 is total);Billing period $F
-1.0-64.1-20,21-40,41-60,61-80,82,84-92.9.0-63.101-125;3,4,7;5,6,9,10,13,15,16,17,18,20,21,23,24;Ch. $B;$1;Time integral 2;Rate $E (0 is total); $(F-100). last / $(F-100) last billing period(s)
+1.0-64.1-20,21-40,41-60,61-80,82,84-92.9.0-63.101-125;3,4,7;5,6,9,10,13,15,16,17,18,20,21,23,24;Ch. $B;$1;Time integral 2;Rate $E (0 is total);$(F-100). last / $(F-100) last billing period(s)
 1.0-64.1-20,21-40,41-60,61-80,82,84-92.9.0-63.126,255;,7;;Ch. $B;$1;Time integral 2;Rate $E (0 is total);Unspecified number of most recent billing periods
 1.0-64.1-20,21-40,41-60,61-80,82,84-92.10.0.255;3,4;5,6,9,10,13,15,16,17,18,20,21,23,24;Ch. $B;$1;Time integral 3;Rate $E (0 is total);
 1.0-64.1-20,21-40,41-60,61-80,82,84-92.10.1-63.255;3,4;5,6,9,10,13,15,16,17,18,20,21,23,24;Ch. $B;$1;Time integral 3;Rate $E (0 is total);
 1.0-64.1-20,21-40,41-60,61-80,82,84-92.10.0-63.0-99;3,4,7;5,6,9,10,13,15,16,17,18,20,21,23,24;Ch. $B;$1;Time integral 3;Rate $E (0 is total);Billing period $F
-1.0-64.1-20,21-40,41-60,61-80,82,84-92.10.0-63.101-125;3,4,7;5,6,9,10,13,15,16,17,18,20,21,23,24;Ch. $B;$1;Time integral 3;Rate $E (0 is total); $(F-100). last / $(F-100) last billing period(s)
+1.0-64.1-20,21-40,41-60,61-80,82,84-92.10.0-63.101-125;3,4,7;5,6,9,10,13,15,16,17,18,20,21,23,24;Ch. $B;$1;Time integral 3;Rate $E (0 is total);$(F-100). last / $(F-100) last billing period(s)
 1.0-64.1-20,21-40,41-60,61-80,82,84-92.10.0-63.126,255;,7;;Ch. $B;$1;Time integral 3;Rate $E (0 is total);Unspecified number of most recent billing periods
 1.0-64.1-20,21-40,41-60,61-80,82,84-92.11.0.255;3,4;5,6,9,10,13,15,16,17,18,20,21,23,24;Ch. $B;$1;Cum. min. 2;Rate $E (0 is total);
 1.0-64.1-20,21-40,41-60,61-80,82,84-92.11.1-63.255;3,4;5,6,9,10,13,15,16,17,18,20,21,23,24;Ch. $B;$1;Cum. min. 2;Rate $E (0 is total);
@@ -454,7 +543,7 @@
 1.0-64.1-20,21-40,41-60,61-80,82,84-92.23.0-63.126;,7;;Ch. $B;$1;Min. 3;Rate $E (0 is total);Unspecified number of most recent billing periods
 1.0-64.1-13,15-20,21-33,35-40,41-53,55-60,61-73,75-80,84-92.24.0.255;5,3,4;5,6,9,10,13,15,16,17,18,20,21,23,24;Ch. $B;$1;Current avg. 3;;
 1.0-64.14,34,54,74.24.0,255.255;5,3,4;5,6,9,10,13,15,16,17,18,20,21,23,24;Ch. $B;$1;Current avg. 3;;
-1.0-64.1-20,21-40,41-60,61-80,82,84-92.25.0,63.255;3,4;5,6,9,10,13,15,16,17,18,20,21,23,24;Ch. $B;$1;Last avg. 3;;
+1.0-64.1-20,21-40,41-60,61-80,82,84-92.25.0-63.255;3,4;5,6,9,10,13,15,16,17,18,20,21,23,24;Ch. $B;$1;Last avg. 3;;
 1.0-64.1-20,21-40,41-60,61-80,82,84-92.26.0.255;3,4,7;5,6,9,10,13,15,16,17,18,20,21,23,24;Ch. $B;$1;Max. 3;;
 1.0-64.1-20,21-40,41-60,61-80,82,84-92.26.1-63.255;3,4,7;5,6,9,10,13,15,16,17,18,20,21,23,24;Ch. $B;$1;Max. 3;;
 1.0-64.1-20,21-40,41-60,61-80,82,84-92.26.0-63.0-99;3,4,7;5,6,9,10,13,15,16,17,18,20,21,23,24;Ch. $B;$1;Max. 3;;Billing period $F
@@ -500,24 +589,24 @@
 1.0-64.11,12,15,31,32,35,51,52,55,71,72,75,90-92.43.0-120,124-127.0-99,255;1,3,4;6,15,17,18;Ch. $B;$1;Time threshold for under limit;Harmonic / Distortion factor $E;Billing period  $F (255 is current)
 1.0-64.11,12,15,31,32,35,51,52,55,71,72,75,90-92.44.0-120,124-127.0-99,255;1,3,4;6,15,17,18;Ch. $B;$1;Time threshold for over limut;Harmonic / Distortion factor $E;Billing period  $F (255 is current)
 1.0-64.11,12,15,31,32,35,51,52,55,71,72,75,90-92.45.0-120,124-127.0-99,255;1,3,4;6,15,17,18;Ch. $B;$1;Time threshold of missing magnitude;Harmonic / Distortion factor $E;Billing period  $F (255 is current)
-1.0-64.1-10,13,14,16-20,21-30,33,34,36-40,41-50,53,54,56-60,61-70,73,74,76-80,82,84-89.31.0-63.255;21;;Ch. $B;$1;Inst. value, under limit threshold;Rate $E (0 is total);
-1.0-64.1-10,13,14,16-20,21-30,33,34,36-40,41-50,53,54,56-60,61-70,73,74,76-80,82,84-89.35.0-63.255;21;;Ch. $B;$1;Inst. value, over limit threshold;Rate $E (0 is total);
-1.0-64.1-10,13,14,16-20,21-30,33,34,36-40,41-50,53,54,56-60,61-70,73,74,76-80,82,84-89.39.0-63.255;21;;Ch. $B;$1;Inst. value, missing threshold;Rate $E (0 is total);
-1.0-64.11,12,15,31,32,35,51,52,55,71,72,75,90-92.31.0-120,124-127.255;21;;Ch. $B;$1;Inst. value, under limit threshold;Harmonic / Distortion factor $E;
-1.0-64.11,12,15,31,32,35,51,52,55,71,72,75,90-92.35.0-120,124-127.255;21;;Ch. $B;$1;Inst. value, over limit threshold;Harmonic / Distortion factor $E;
-1.0-64.11,12,15,31,32,35,51,52,55,71,72,75,90-92.39.0-120,124-127.255;21;;Ch. $B;$1;Inst. value, missing threshold;Harmonic / Distortion factor $E;
-1.0-64.1-10,13,14,16-20,21-30,33,34,36-40,41-50,53,54,56-60,61-70,73,74,76-80,82,84-89.4.0-63.255;21;;Ch. $B;$1;Current avg. 1;Rate $E (0 is total);
-1.0-64.1-10,13,14,16-20,21-30,33,34,36-40,41-50,53,54,56-60,61-70,73,74,76-80,82,84-89.5.0-63.255;21;;;$1;Last avg. 1;Rate $E (0 is total);
-1.0-64.1-10,13,14,16-20,21-30,33,34,36-40,41-50,53,54,56-60,61-70,73,74,76-80,82,84-89.14.0-63.255;21;;;$1;Current avg. 2;Rate $E (0 is total);
-1.0-64.1-10,13,14,16-20,21-30,33,34,36-40,41-50,53,54,56-60,61-70,73,74,76-80,82,84-89.15.0-63.255;21;;;$1;Last avg. 2;Rate $E (0 is total);
-1.0-64.1-10,13,14,16-20,21-30,33,34,36-40,41-50,53,54,56-60,61-70,73,74,76-80,82,84-89.24.0-63.255;21;;;$1;Current avg. 3;Rate $E (0 is total);
-1.0-64.1-10,13,14,16-20,21-30,33,34,36-40,41-50,53,54,56-60,61-70,73,74,76-80,82,84-89.25.0-63.255;21;;Ch. $B;$1;Last avg. 3;Rate $E (0 is total);
-1.0-64.11,12,15,31,32,35,51,52,55,71,72,75,90-92.4.0-120,124-127.255;21;;Ch. $B;$1;Current avg. 1;Harmonic / Distortion factor $E;
-1.0-64.11,12,15,31,32,35,51,52,55,71,72,75,90-92.5.0-120,124-127.255;21;;;$1;Last avg. 1;Harmonic / Distortion factor $E;
-1.0-64.11,12,15,31,32,35,51,52,55,71,72,75,90-92.14.0-120,124-127.255;21;;;$1;Current avg. 2;Harmonic / Distortion factor $E;
-1.0-64.11,12,15,31,32,35,51,52,55,71,72,75,90-92.15.0-120,124-127.255;21;;;$1;Last avg. 2;Harmonic / Distortion factor $E;
-1.0-64.11,12,15,31,32,35,51,52,55,71,72,75,90-92.24.0-120,124-127.255;21;;;$1;Current avg. 3;Harmonic / Distortion factor $E;
-1.0-64.11,12,15,31,32,35,51,52,55,71,72,75,90-92.25.0-120,124-127.255;21;;Ch. $B;$1;Last avg. 3;Harmonic / Distortion factor $E;
+1.0-64.1-10,13,14,16-20,21-30,33,34,36-40,41-50,53,54,56-60,61-70,73,74,76-80,82,84-89.31.0-63.0-99,255;21;;Ch. $B;$1;Inst. value, under limit threshold;Rate $E (0 is total);
+1.0-64.1-10,13,14,16-20,21-30,33,34,36-40,41-50,53,54,56-60,61-70,73,74,76-80,82,84-89.35.0-63.0-99,255;21;;Ch. $B;$1;Inst. value, over limit threshold;Rate $E (0 is total);
+1.0-64.1-10,13,14,16-20,21-30,33,34,36-40,41-50,53,54,56-60,61-70,73,74,76-80,82,84-89.39.0-63.0-99,255;21;;Ch. $B;$1;Inst. value, missing threshold;Rate $E (0 is total);
+1.0-64.11,12,15,31,32,35,51,52,55,71,72,75,90-92.31.0-120,124-127.0-99,255;21;;Ch. $B;$1;Inst. value, under limit threshold;Harmonic / Distortion factor $E;
+1.0-64.11,12,15,31,32,35,51,52,55,71,72,75,90-92.35.0-120,124-127.0-99,255;21;;Ch. $B;$1;Inst. value, over limit threshold;Harmonic / Distortion factor $E;
+1.0-64.11,12,15,31,32,35,51,52,55,71,72,75,90-92.39.0-120,124-127.0-99,255;21;;Ch. $B;$1;Inst. value, missing threshold;Harmonic / Distortion factor $E;
+1.0-64.1-10,13,14,16-20,21-30,33,34,36-40,41-50,53,54,56-60,61-70,73,74,76-80,82,84-89.4.0-63.0-99,255;21;;Ch. $B;$1;Current avg. 1;Rate $E (0 is total);
+1.0-64.1-10,13,14,16-20,21-30,33,34,36-40,41-50,53,54,56-60,61-70,73,74,76-80,82,84-89.5.0-63.0-99,255;21;;;$1;Last avg. 1;Rate $E (0 is total);
+1.0-64.1-10,13,14,16-20,21-30,33,34,36-40,41-50,53,54,56-60,61-70,73,74,76-80,82,84-89.14.0-63.0-99,255;21;;;$1;Current avg. 2;Rate $E (0 is total);
+1.0-64.1-10,13,14,16-20,21-30,33,34,36-40,41-50,53,54,56-60,61-70,73,74,76-80,82,84-89.15.0-63.0-99,255;21;;;$1;Last avg. 2;Rate $E (0 is total);
+1.0-64.1-10,13,14,16-20,21-30,33,34,36-40,41-50,53,54,56-60,61-70,73,74,76-80,82,84-89.24.0-63.0-99,255;21;;;$1;Current avg. 3;Rate $E (0 is total);
+1.0-64.1-10,13,14,16-20,21-30,33,34,36-40,41-50,53,54,56-60,61-70,73,74,76-80,82,84-89.25.0-63.0-99,255;21;;Ch. $B;$1;Last avg. 3;Rate $E (0 is total);
+1.0-64.11,12,15,31,32,35,51,52,55,71,72,75,90-92.4.0-120,124-127.0-99,255;21;;Ch. $B;$1;Current avg. 1;Harmonic / Distortion factor $E;
+1.0-64.11,12,15,31,32,35,51,52,55,71,72,75,90-92.5.0-120,124-127.0-99,255;21;;;$1;Last avg. 1;Harmonic / Distortion factor $E;
+1.0-64.11,12,15,31,32,35,51,52,55,71,72,75,90-92.14.0-120,124-127.0-99,255;21;;;$1;Current avg. 2;Harmonic / Distortion factor $E;
+1.0-64.11,12,15,31,32,35,51,52,55,71,72,75,90-92.15.0-120,124-127.0-99,255;21;;;$1;Last avg. 2;Harmonic / Distortion factor $E;
+1.0-64.11,12,15,31,32,35,51,52,55,71,72,75,90-92.24.0-120,124-127.0-99,255;21;;;$1;Current avg. 3;Harmonic / Distortion factor $E;
+1.0-64.11,12,15,31,32,35,51,52,55,71,72,75,90-92.25.0-120,124-127.0-99,255;21;;Ch. $B;$1;Last avg. 3;Harmonic / Distortion factor $E;
 1.0-64.11,12,15,31,32,35,51,52,55,71,72,75,90-92.7.1-120.255;3,4;5,6,9,10,13,15,16,17,18,20,21,23,24;Ch. $B;$1;Inst. value;Harmonic $E;
 1.0-64.11,12,15,31,32,35,51,52,55,71,72,75,90-92.7.124.255;3,4;5,6,9,10,13,15,16,17,18,20,21,23,24;Ch. $B;$1;Inst. value;Total Harmonic Distortion (THD);
 1.0-64.11,12,15,31,32,35,51,52,55,71,72,75,90-92.7.125.255;3,4;5,6,9,10,13,15,16,17,18,20,21,23,24;Ch. $B;$1;Inst. value;Total Demand Distortion (TDD);
@@ -527,7 +616,13 @@
 1.0-64.11,12,15,31,32,35,51,52,55,71,72,75,90-92.24.124.255;3,4;5,6,9,10,13,15,16,17,18,20,21,23,24;Ch. $B;$1;Current avg. 3;Total Harmonic Distortion (THD);
 1.0-64.11,12,15,31,32,35,51,52,55,71,72,75,90-92.24.125.255;3,4;5,6,9,10,13,15,16,17,18,20,21,23,24;Ch. $B;$1;Current avg. 3;Total Demand Distortion (TDD);
 1.0-64.11,12,15,31,32,35,51,52,55,71,72,75,90-92.24.126.255;3,4;5,6,9,10,13,15,16,17,18,20,21,23,24;Ch. $B;$1;Current avg. 3;All harmonics;
-1.0-64.11,12,15,31,32,35,51,52,55,71,72,75,90-92.24.127.255;3,4;5,6,9,10,13,15,16,17,18,20,21,23,24;Ch. $B;$1;Current avg. 3;All harmonics to nominal value ratio;
+1.0-64.11,12,15,31,32,35,51,52,55,71,72,75,90-92.24.127.255;3,4;5,6,9,10,13,15,16,17,18,20,21,23,24;Ch. $B;$1;Current avg. 4;All harmonics to nominal value ratio;
+1.0-64.11,12,15,31,32,35,51,52,55,71,72,75,90-92.56.0.255;3,4,5;5,6,9,10,13,15,16,17,18,20,21,23,24;Ch. $B;$1;Current avg. 4;Fundamental + all harmonics;
+1.0-64.11,12,15,31,32,35,51,52,55,71,72,75,90-92.56.1-120.255;3,4,5;5,6,9,10,13,15,16,17,18,20,21,23,24;Ch. $B;$1;Current avg. 4;Harmonic $E;
+1.0-64.11,12,15,31,32,35,51,52,55,71,72,75,90-92.56.124.255;3,4,5;5,6,9,10,13,15,16,17,18,20,21,23,24;Ch. $B;$1;Current avg. 4;Total Harmonic Distortion (THD);
+1.0-64.11,12,15,31,32,35,51,52,55,71,72,75,90-92.56.125.255;3,4,5;5,6,9,10,13,15,16,17,18,20,21,23,24;Ch. $B;$1;Current avg. 4;Total Demand Distortion (TDD);
+1.0-64.11,12,15,31,32,35,51,52,55,71,72,75,90-92.56.126.255;3,4,5;5,6,9,10,13,15,16,17,18,20,21,23,24;Ch. $B;$1;Current avg. 4;All harmonics;
+1.0-64.11,12,15,31,32,35,51,52,55,71,72,75,90-92.56.127.255;3,4,5;5,6,9,10,13,15,16,17,18,20,21,23,24;Ch. $B;$1;Current avg. 4;All harmonics to nominal value ratio;
 1.0-64.81.7.0.255;3;5,6,9,10,13,15,16,17,18,20,21,23,24;Ch. $B;Angle of U(L1) - U(L1);;;
 1.0-64.81.7.1.255;3;5,6,9,10,13,15,16,17,18,20,21,23,24;Ch. $B;Angle of U(L2) - U(L1);;;
 1.0-64.81.7.2.255;3;5,6,9,10,13,15,16,17,18,20,21,23,24;Ch. $B;Angle of U(L3) - U(L1);;;
@@ -611,19 +706,19 @@
 1.0-64.12,32,52,72.32.255.255;61;;Ch. $B;$1;Unipede voltage dip;Summary;
 1.0-64.83.0-10,11-16,17-20,21-26,27-30,55,58.1.255;3,4;5,6,9,10,13,15,16,17,18,20,21,23,24;Ch. $B;Sum Li Active line losses +;$2;;
 1.0-64.83.0-10,11-16,17-20,21-26,27-30,55,58.2.255;3,4;5,6,9,10,13,15,16,17,18,20,21,23,24;Ch. $B;Sum Li Active line losses -;$2;;
-1.0-64.83.0-10,11-16,17-20,21-26,27-30,55,58.3.255;3,4;5,6,9,10,13,15,16,17,18,20,21,23,24;Ch. $B;Sum Li Active line losses ;$2;;
+1.0-64.83.0-10,11-16,17-20,21-26,27-30,55,58.3.255;3,4;5,6,9,10,13,15,16,17,18,20,21,23,24;Ch. $B;Sum Li Active line losses;$2;;
 1.0-64.83.0-10,11-16,17-20,21-26,27-30,55,58.4.255;3,4;5,6,9,10,13,15,16,17,18,20,21,23,24;Ch. $B;Sum Li Active transformer losses +;$2;;
 1.0-64.83.0-10,11-16,17-20,21-26,27-30,55,58.5.255;3,4;5,6,9,10,13,15,16,17,18,20,21,23,24;Ch. $B;Sum Li Active transformer losses -;$2;;
-1.0-64.83.0-10,11-16,17-20,21-26,27-30,55,58.6.255;3,4;5,6,9,10,13,15,16,17,18,20,21,23,24;Ch. $B;Sum Li Active transformer losses ;$2;;
+1.0-64.83.0-10,11-16,17-20,21-26,27-30,55,58.6.255;3,4;5,6,9,10,13,15,16,17,18,20,21,23,24;Ch. $B;Sum Li Active transformer losses;$2;;
 1.0-64.83.0-10,11-16,17-20,21-26,27-30,55,58.7.255;3,4;5,6,9,10,13,15,16,17,18,20,21,23,24;Ch. $B;Sum Li Active losses +;$2;;
 1.0-64.83.0-10,11-16,17-20,21-26,27-30,55,58.8.255;3,4;5,6,9,10,13,15,16,17,18,20,21,23,24;Ch. $B;Sum Li Active losses -;$2;;
 1.0-64.83.0-10,11-16,17-20,21-26,27-30,55,58.9.255;3,4;5,6,9,10,13,15,16,17,18,20,21,23,24;Ch. $B;Sum Li Active losses;$2;;
 1.0-64.83.0-10,11-16,17-20,21-26,27-30,55,58.10.255;3,4;5,6,9,10,13,15,16,17,18,20,21,23,24;Ch. $B;Sum Li Reactive line losses +;$2;;
 1.0-64.83.0-10,11-16,17-20,21-26,27-30,55,58.11.255;3,4;5,6,9,10,13,15,16,17,18,20,21,23,24;Ch. $B;Sum Li Reactive line losses -;$2;;
-1.0-64.83.0-10,11-16,17-20,21-26,27-30,55,58.12.255;3,4;5,6,9,10,13,15,16,17,18,20,21,23,24;Ch. $B;Sum Li Reactive line losses ;$2;;
+1.0-64.83.0-10,11-16,17-20,21-26,27-30,55,58.12.255;3,4;5,6,9,10,13,15,16,17,18,20,21,23,24;Ch. $B;Sum Li Reactive line losses;$2;;
 1.0-64.83.0-10,11-16,17-20,21-26,27-30,55,58.13.255;3,4;5,6,9,10,13,15,16,17,18,20,21,23,24;Ch. $B;Sum Li Reactive transformer losses +;$2;;
 1.0-64.83.0-10,11-16,17-20,21-26,27-30,55,58.14.255;3,4;5,6,9,10,13,15,16,17,18,20,21,23,24;Ch. $B;Sum Li Reactive transformer losses -;$2;;
-1.0-64.83.0-10,11-16,17-20,21-26,27-30,55,58.15.255;3,4;5,6,9,10,13,15,16,17,18,20,21,23,24;Ch. $B;Sum Li Reactive transformer losses ;$2;;
+1.0-64.83.0-10,11-16,17-20,21-26,27-30,55,58.15.255;3,4;5,6,9,10,13,15,16,17,18,20,21,23,24;Ch. $B;Sum Li Reactive transformer losses;$2;;
 1.0-64.83.0-10,11-16,17-20,21-26,27-30,55,58.16.255;3,4;5,6,9,10,13,15,16,17,18,20,21,23,24;Ch. $B;Sum Li Reactive losses +;$2;;
 1.0-64.83.0-10,11-16,17-20,21-26,27-30,55,58.17.255;3,4;5,6,9,10,13,15,16,17,18,20,21,23,24;Ch. $B;Sum Li Reactive losses -;$2;;
 1.0-64.83.0-10,11-16,17-20,21-26,27-30,55,58.18.255;3,4;5,6,9,10,13,15,16,17,18,20,21,23,24;Ch. $B;Sum Li Reactive losses;$2;;
@@ -632,26 +727,26 @@
 1.0-64.83.0-10,11-16,17-20,21-26,27-30,55,58.21.255;3,4;5,6,9,10,13,15,16,17,18,20,21,23,24;Ch. $B;Compensated active gross +;$2;;
 1.0-64.83.0-10,11-16,17-20,21-26,27-30,55,58.22.255;3,4;5,6,9,10,13,15,16,17,18,20,21,23,24;Ch. $B;Compensated active net +;$2;;
 1.0-64.83.0-10,11-16,17-20,21-26,27-30,55,58.23.255;3,4;5,6,9,10,13,15,16,17,18,20,21,23,24;Ch. $B;Compensated active gross -;$2;;
-1.0-64.83.0-10,11-16,17-20,21-26,27-30,55,58.24.255;3,4;5,6,9,10,13,15,16,17,18,20,21,23,24;Ch. $B;Compensated active net - ;$2;;
+1.0-64.83.0-10,11-16,17-20,21-26,27-30,55,58.24.255;3,4;5,6,9,10,13,15,16,17,18,20,21,23,24;Ch. $B;Compensated active net -;$2;;
 1.0-64.83.0-10,11-16,17-20,21-26,27-30,55,58.25.255;3,4;5,6,9,10,13,15,16,17,18,20,21,23,24;Ch. $B;Compensated reactive gross +;$2;;
 1.0-64.83.0-10,11-16,17-20,21-26,27-30,55,58.26.255;3,4;5,6,9,10,13,15,16,17,18,20,21,23,24;Ch. $B;Compensated reactive net +;$2;;
 1.0-64.83.0-10,11-16,17-20,21-26,27-30,55,58.27.255;3,4;5,6,9,10,13,15,16,17,18,20,21,23,24;Ch. $B;Compensated reactive gross -;$2;;
-1.0-64.83.0-10,11-16,17-20,21-26,27-30,55,58.28.255;3,4;5,6,9,10,13,15,16,17,18,20,21,23,24;Ch. $B;Compensated reactive net - ;$2;;
+1.0-64.83.0-10,11-16,17-20,21-26,27-30,55,58.28.255;3,4;5,6,9,10,13,15,16,17,18,20,21,23,24;Ch. $B;Compensated reactive net -;$2;;
 1.0-64.83.0-10,11-16,17-20,21-26,27-30,55,58.31.255;3,4;5,6,9,10,13,15,16,17,18,20,21,23,24;Ch. $B;L1 Active line losses +;$2;;
 1.0-64.83.0-10,11-16,17-20,21-26,27-30,55,58.32.255;3,4;5,6,9,10,13,15,16,17,18,20,21,23,24;Ch. $B;L1 Active line losses -;$2;;
-1.0-64.83.0-10,11-16,17-20,21-26,27-30,55,58.33.255;3,4;5,6,9,10,13,15,16,17,18,20,21,23,24;Ch. $B;L1 Active line losses ;$2;;
+1.0-64.83.0-10,11-16,17-20,21-26,27-30,55,58.33.255;3,4;5,6,9,10,13,15,16,17,18,20,21,23,24;Ch. $B;L1 Active line losses;$2;;
 1.0-64.83.0-10,11-16,17-20,21-26,27-30,55,58.34.255;3,4;5,6,9,10,13,15,16,17,18,20,21,23,24;Ch. $B;L1 Active transformer losses +;$2;;
 1.0-64.83.0-10,11-16,17-20,21-26,27-30,55,58.35.255;3,4;5,6,9,10,13,15,16,17,18,20,21,23,24;Ch. $B;L1 Active transformer losses -;$2;;
-1.0-64.83.0-10,11-16,17-20,21-26,27-30,55,58.36.255;3,4;5,6,9,10,13,15,16,17,18,20,21,23,24;Ch. $B;L1 Active transformer losses ;$2;;
+1.0-64.83.0-10,11-16,17-20,21-26,27-30,55,58.36.255;3,4;5,6,9,10,13,15,16,17,18,20,21,23,24;Ch. $B;L1 Active transformer losses;$2;;
 1.0-64.83.0-10,11-16,17-20,21-26,27-30,55,58.37.255;3,4;5,6,9,10,13,15,16,17,18,20,21,23,24;Ch. $B;L1 Active losses +;$2;;
 1.0-64.83.0-10,11-16,17-20,21-26,27-30,55,58.38.255;3,4;5,6,9,10,13,15,16,17,18,20,21,23,24;Ch. $B;L1 Active losses -;$2;;
 1.0-64.83.0-10,11-16,17-20,21-26,27-30,55,58.39.255;3,4;5,6,9,10,13,15,16,17,18,20,21,23,24;Ch. $B;L1 Active losses;$2;;
 1.0-64.83.0-10,11-16,17-20,21-26,27-30,55,58.40.255;3,4;5,6,9,10,13,15,16,17,18,20,21,23,24;Ch. $B;L1 Reactive line losses +;$2;;
 1.0-64.83.0-10,11-16,17-20,21-26,27-30,55,58.41.255;3,4;5,6,9,10,13,15,16,17,18,20,21,23,24;Ch. $B;L1 Reactive line losses -;$2;;
-1.0-64.83.0-10,11-16,17-20,21-26,27-30,55,58.42.255;3,4;5,6,9,10,13,15,16,17,18,20,21,23,24;Ch. $B;L1 Reactive line losses ;$2;;
+1.0-64.83.0-10,11-16,17-20,21-26,27-30,55,58.42.255;3,4;5,6,9,10,13,15,16,17,18,20,21,23,24;Ch. $B;L1 Reactive line losses;$2;;
 1.0-64.83.0-10,11-16,17-20,21-26,27-30,55,58.43.255;3,4;5,6,9,10,13,15,16,17,18,20,21,23,24;Ch. $B;L1 Reactive transformer losses +;$2;;
 1.0-64.83.0-10,11-16,17-20,21-26,27-30,55,58.44.255;3,4;5,6,9,10,13,15,16,17,18,20,21,23,24;Ch. $B;L1 Reactive transformer losses -;$2;;
-1.0-64.83.0-10,11-16,17-20,21-26,27-30,55,58.45.255;3,4;5,6,9,10,13,15,16,17,18,20,21,23,24;Ch. $B;L1 Reactive transformer losses ;$2;;
+1.0-64.83.0-10,11-16,17-20,21-26,27-30,55,58.45.255;3,4;5,6,9,10,13,15,16,17,18,20,21,23,24;Ch. $B;L1 Reactive transformer losses;$2;;
 1.0-64.83.0-10,11-16,17-20,21-26,27-30,55,58.46.255;3,4;5,6,9,10,13,15,16,17,18,20,21,23,24;Ch. $B;L1 Reactive losses +;$2;;
 1.0-64.83.0-10,11-16,17-20,21-26,27-30,55,58.47.255;3,4;5,6,9,10,13,15,16,17,18,20,21,23,24;Ch. $B;L1 Reactive losses -;$2;;
 1.0-64.83.0-10,11-16,17-20,21-26,27-30,55,58.48.255;3,4;5,6,9,10,13,15,16,17,18,20,21,23,24;Ch. $B;L1 Reactive losses;$2;;
@@ -659,19 +754,19 @@
 1.0-64.83.0-10,11-16,17-20,21-26,27-30,55,58.50.255;3,4;5,6,9,10,13,15,16,17,18,20,21,23,24;Ch. $B;L1 V2h;$2;;
 1.0-64.83.0-10,11-16,17-20,21-26,27-30,55,58.51.255;3,4;5,6,9,10,13,15,16,17,18,20,21,23,24;Ch. $B;L2 Active line losses +;$2;;
 1.0-64.83.0-10,11-16,17-20,21-26,27-30,55,58.52.255;3,4;5,6,9,10,13,15,16,17,18,20,21,23,24;Ch. $B;L2 Active line losses -;$2;;
-1.0-64.83.0-10,11-16,17-20,21-26,27-30,55,58.53.255;3,4;5,6,9,10,13,15,16,17,18,20,21,23,24;Ch. $B;L2 Active line losses ;$2;;
+1.0-64.83.0-10,11-16,17-20,21-26,27-30,55,58.53.255;3,4;5,6,9,10,13,15,16,17,18,20,21,23,24;Ch. $B;L2 Active line losses;$2;;
 1.0-64.83.0-10,11-16,17-20,21-26,27-30,55,58.54.255;3,4;5,6,9,10,13,15,16,17,18,20,21,23,24;Ch. $B;L2 Active transformer losses +;$2;;
 1.0-64.83.0-10,11-16,17-20,21-26,27-30,55,58.55.255;3,4;5,6,9,10,13,15,16,17,18,20,21,23,24;Ch. $B;L2 Active transformer losses -;$2;;
-1.0-64.83.0-10,11-16,17-20,21-26,27-30,55,58.56.255;3,4;5,6,9,10,13,15,16,17,18,20,21,23,24;Ch. $B;L2 Active transformer losses ;$2;;
+1.0-64.83.0-10,11-16,17-20,21-26,27-30,55,58.56.255;3,4;5,6,9,10,13,15,16,17,18,20,21,23,24;Ch. $B;L2 Active transformer losses;$2;;
 1.0-64.83.0-10,11-16,17-20,21-26,27-30,55,58.57.255;3,4;5,6,9,10,13,15,16,17,18,20,21,23,24;Ch. $B;L2 Active losses +;$2;;
 1.0-64.83.0-10,11-16,17-20,21-26,27-30,55,58.58.255;3,4;5,6,9,10,13,15,16,17,18,20,21,23,24;Ch. $B;L2 Active losses -;$2;;
 1.0-64.83.0-10,11-16,17-20,21-26,27-30,55,58.59.255;3,4;5,6,9,10,13,15,16,17,18,20,21,23,24;Ch. $B;L2 Active losses;$2;;
 1.0-64.83.0-10,11-16,17-20,21-26,27-30,55,58.60.255;3,4;5,6,9,10,13,15,16,17,18,20,21,23,24;Ch. $B;L2 Reactive line losses +;$2;;
 1.0-64.83.0-10,11-16,17-20,21-26,27-30,55,58.61.255;3,4;5,6,9,10,13,15,16,17,18,20,21,23,24;Ch. $B;L2 Reactive line losses -;$2;;
-1.0-64.83.0-10,11-16,17-20,21-26,27-30,55,58.62.255;3,4;5,6,9,10,13,15,16,17,18,20,21,23,24;Ch. $B;L2 Reactive line losses ;$2;;
+1.0-64.83.0-10,11-16,17-20,21-26,27-30,55,58.62.255;3,4;5,6,9,10,13,15,16,17,18,20,21,23,24;Ch. $B;L2 Reactive line losses;$2;;
 1.0-64.83.0-10,11-16,17-20,21-26,27-30,55,58.63.255;3,4;5,6,9,10,13,15,16,17,18,20,21,23,24;Ch. $B;L2 Reactive transformer losses +;$2;;
 1.0-64.83.0-10,11-16,17-20,21-26,27-30,55,58.64.255;3,4;5,6,9,10,13,15,16,17,18,20,21,23,24;Ch. $B;L2 Reactive transformer losses -;$2;;
-1.0-64.83.0-10,11-16,17-20,21-26,27-30,55,58.65.255;3,4;5,6,9,10,13,15,16,17,18,20,21,23,24;Ch. $B;L2 Reactive transformer losses ;$2;;
+1.0-64.83.0-10,11-16,17-20,21-26,27-30,55,58.65.255;3,4;5,6,9,10,13,15,16,17,18,20,21,23,24;Ch. $B;L2 Reactive transformer losses;$2;;
 1.0-64.83.0-10,11-16,17-20,21-26,27-30,55,58.66.255;3,4;5,6,9,10,13,15,16,17,18,20,21,23,24;Ch. $B;L2 Reactive losses +;$2;;
 1.0-64.83.0-10,11-16,17-20,21-26,27-30,55,58.67.255;3,4;5,6,9,10,13,15,16,17,18,20,21,23,24;Ch. $B;L2 Reactive losses -;$2;;
 1.0-64.83.0-10,11-16,17-20,21-26,27-30,55,58.68.255;3,4;5,6,9,10,13,15,16,17,18,20,21,23,24;Ch. $B;L2 Reactive losses;$2;;
@@ -679,19 +774,19 @@
 1.0-64.83.0-10,11-16,17-20,21-26,27-30,55,58.70.255;3,4;5,6,9,10,13,15,16,17,18,20,21,23,24;Ch. $B;L2 V2h;$2;;
 1.0-64.83.0-10,11-16,17-20,21-26,27-30,55,58.71.255;3,4;5,6,9,10,13,15,16,17,18,20,21,23,24;Ch. $B;L3 Active line losses +;$2;;
 1.0-64.83.0-10,11-16,17-20,21-26,27-30,55,58.72.255;3,4;5,6,9,10,13,15,16,17,18,20,21,23,24;Ch. $B;L3 Active line losses -;$2;;
-1.0-64.83.0-10,11-16,17-20,21-26,27-30,55,58.73.255;3,4;5,6,9,10,13,15,16,17,18,20,21,23,24;Ch. $B;L3 Active line losses ;$2;;
+1.0-64.83.0-10,11-16,17-20,21-26,27-30,55,58.73.255;3,4;5,6,9,10,13,15,16,17,18,20,21,23,24;Ch. $B;L3 Active line losses;$2;;
 1.0-64.83.0-10,11-16,17-20,21-26,27-30,55,58.74.255;3,4;5,6,9,10,13,15,16,17,18,20,21,23,24;Ch. $B;L3 Active transformer losses +;$2;;
 1.0-64.83.0-10,11-16,17-20,21-26,27-30,55,58.75.255;3,4;5,6,9,10,13,15,16,17,18,20,21,23,24;Ch. $B;L3 Active transformer losses -;$2;;
-1.0-64.83.0-10,11-16,17-20,21-26,27-30,55,58.76.255;3,4;5,6,9,10,13,15,16,17,18,20,21,23,24;Ch. $B;L3 Active transformer losses ;$2;;
+1.0-64.83.0-10,11-16,17-20,21-26,27-30,55,58.76.255;3,4;5,6,9,10,13,15,16,17,18,20,21,23,24;Ch. $B;L3 Active transformer losses;$2;;
 1.0-64.83.0-10,11-16,17-20,21-26,27-30,55,58.77.255;3,4;5,6,9,10,13,15,16,17,18,20,21,23,24;Ch. $B;L3 Active losses +;$2;;
 1.0-64.83.0-10,11-16,17-20,21-26,27-30,55,58.78.255;3,4;5,6,9,10,13,15,16,17,18,20,21,23,24;Ch. $B;L3 Active losses -;$2;;
 1.0-64.83.0-10,11-16,17-20,21-26,27-30,55,58.79.255;3,4;5,6,9,10,13,15,16,17,18,20,21,23,24;Ch. $B;L3 Active losses;$2;;
 1.0-64.83.0-10,11-16,17-20,21-26,27-30,55,58.80.255;3,4;5,6,9,10,13,15,16,17,18,20,21,23,24;Ch. $B;L3 Reactive line losses +;$2;;
 1.0-64.83.0-10,11-16,17-20,21-26,27-30,55,58.81.255;3,4;5,6,9,10,13,15,16,17,18,20,21,23,24;Ch. $B;L3 Reactive line losses -;$2;;
-1.0-64.83.0-10,11-16,17-20,21-26,27-30,55,58.82.255;3,4;5,6,9,10,13,15,16,17,18,20,21,23,24;Ch. $B;L3 Reactive line losses ;$2;;
+1.0-64.83.0-10,11-16,17-20,21-26,27-30,55,58.82.255;3,4;5,6,9,10,13,15,16,17,18,20,21,23,24;Ch. $B;L3 Reactive line losses;$2;;
 1.0-64.83.0-10,11-16,17-20,21-26,27-30,55,58.83.255;3,4;5,6,9,10,13,15,16,17,18,20,21,23,24;Ch. $B;L3 Reactive transformer losses +;$2;;
 1.0-64.83.0-10,11-16,17-20,21-26,27-30,55,58.84.255;3,4;5,6,9,10,13,15,16,17,18,20,21,23,24;Ch. $B;L3 Reactive transformer losses -;$2;;
-1.0-64.83.0-10,11-16,17-20,21-26,27-30,55,58.85.255;3,4;5,6,9,10,13,15,16,17,18,20,21,23,24;Ch. $B;L3 Reactive transformer losses ;$2;;
+1.0-64.83.0-10,11-16,17-20,21-26,27-30,55,58.85.255;3,4;5,6,9,10,13,15,16,17,18,20,21,23,24;Ch. $B;L3 Reactive transformer losses;$2;;
 1.0-64.83.0-10,11-16,17-20,21-26,27-30,55,58.86.255;3,4;5,6,9,10,13,15,16,17,18,20,21,23,24;Ch. $B;L3 Reactive losses +;$2;;
 1.0-64.83.0-10,11-16,17-20,21-26,27-30,55,58.87.255;3,4;5,6,9,10,13,15,16,17,18,20,21,23,24;Ch. $B;L3 Reactive losses -;$2;;
 1.0-64.83.0-10,11-16,17-20,21-26,27-30,55,58.88.255;3,4;5,6,9,10,13,15,16,17,18,20,21,23,24;Ch. $B;L3 Reactive losses;$2;;
@@ -740,20 +835,20 @@
 7.0-64.0.0.255.255;7,61;;Ch. $B;Gas ID;;;
 7.0-64.0.1.0.0-99,255;1,3,4;6,17,18;Ch. $B;Billing period counter (1);;;#$F
 7.0-64.0.1.1.255;1,3;6,17,18;Ch. $B;No. of available billing periods (1);;;
-7.0-64.0.1.2.255;1,3,4;9;Ch. $B;Time stamp of the most recent billing period (1);;;
-7.0-64.0.1.2.0-99;1,3,4;9;Ch. $B;Time stamp of the billing period (1);;;#$F
+7.0-64.0.1.2.255;1,3,4;9,25;Ch. $B;Time stamp of the most recent billing period (1);;;
+7.0-64.0.1.2.0-99;1,3,4;9,25;Ch. $B;Time stamp of the billing period (1);;;#$F
 7.0-64.0.1.3.0-99,255;1,3,4;6,17,18;Ch. $B;Billing period counter (2);;;#$F
 7.0-64.0.1.4.255;1,3;6,17,18;Ch. $B;No. of available billing periods (2);;;
-7.0-64.0.1.5.255;1,3,4;9;Ch. $B;Time stamp of the most recent billing period (2);;;
-7.0-64.0.1.5.0-99;1,3,4;9;Ch. $B;Time stamp of the billing period (2) VZ (last reset);;;#$F
+7.0-64.0.1.5.255;1,3,4;9,25;Ch. $B;Time stamp of the most recent billing period (2);;;
+7.0-64.0.1.5.0-99;1,3,4;9.25;Ch. $B;Time stamp of the billing period (2) VZ (last reset);;;#$F
 7.0-64.0.1.6.0-99,255;1,3,4;6,17,18;Ch. $B;Billing period counter (3);;;#$F
 7.0-64.0.1.7.255;1,3;6,17,18;Ch. $B;No. of available billing periods (3);;;
-7.0-64.0.1.8.255;1,3,4;9;Ch. $B;Time stamp of the most recent billing period (3);;;
-7.0-64.0.1.8.0-99;1,3,4;9;Ch. $B;Time stamp of the billing period (3) VZ (last reset);;;#$F
+7.0-64.0.1.8.255;1,3,4;9,25;Ch. $B;Time stamp of the most recent billing period (3);;;
+7.0-64.0.1.8.0-99;1,3,4;9,25;Ch. $B;Time stamp of the billing period (3) VZ (last reset);;;#$F
 7.0-64.0.1.9.0-99,255;1,3,4;6,17,18;Ch. $B;Billing period counter (4);;;#$F
 7.0-64.0.1.10.255;1,3;6,17,18;Ch. $B;No. of available billing periods (4);;;
-7.0-64.0.1.11.255;1,3,4;9;Ch. $B;Time stamp of the most recent billing period (4);;;
-7.0-64.0.1.11.0-99;1,3,4;9;Ch. $B;Time stamp of the billing period (4) VZ (last reset);;;#$F
+7.0-64.0.1.11.255;1,3,4;9,25;Ch. $B;Time stamp of the most recent billing period (4);;;
+7.0-64.0.1.11.0-99;1,3,4;9,25;Ch. $B;Time stamp of the billing period (4) VZ (last reset);;;#$F
 7.0-64.0.2.0.255;1,3,4;6,9,10,17,18;Ch. $B;Program version;;;
 7.0-64.0.2.1.255;1,3,4;6,9,10,17,18;Ch. $B;Firmware version;;;
 7.0-64.0.2.2.255;1,3,4;6,9,10,17,18;Ch. $B;Software version;;;
@@ -774,22 +869,22 @@
 7.0-64.0.3.3.255;3,4;5,6,9,10,13,15,16,17,18,20,21,23,24;Ch. $B;Output pulse constant;Volume forward at base conditions;;
 7.0-64.0.3.4.255;3,4;5,6,9,10,13,15,16,17,18,20,21,23,24;Ch. $B;Output pulse constant;Volume reverse at base conditions;;
 7.0-64.0.3.5.255;3,4;5,6,9,10,13,15,16,17,18,20,21,23,24;Ch. $B;Output pulse constant;Volume absolute at base conditions;;
-7.0-64.0.4.0.255;1,3,4;5,6,9,10,13,15,16,17,18,20,21,23,24;Ch. $B;Conversion factor;;$(E+1);
-7.0-64.0.4.1.255;1,3,4;5,6,9,10,13,15,16,17,18,20,21,23,24;Ch. $B;Conversion factor;;$(E+1);
-7.0-64.0.4.2.255;1,3,4;5,6,9,10,13,15,16,17,18,20,21,23,24;Ch. $B;Conversion factor;;$(E+1);
+7.0-64.0.4.0.255;1,3,4;5,6,9,10,13,15,16,17,18,20,21,23,24;Ch. $B;Conversion factor;;#$(E+1);
+7.0-64.0.4.1.255;1,3,4;5,6,9,10,13,15,16,17,18,20,21,23,24;Ch. $B;Conversion factor;;$#(E+1);
+7.0-64.0.4.2.255;1,3,4;5,6,9,10,13,15,16,17,18,20,21,23,24;Ch. $B;Conversion factor;;$#(E+1);
 7.0-64.0.4.3.255;1,3,4;5,6,9,10,13,15,16,17,18,20,21,23,24;Ch. $B;Conversion factor;;$(E+1);
-7.0-64.0.4.4.255;1,3,4;5,6,9,10,13,15,16,17,18,20,21,23,24;Ch. $B;Conversion factor;;$(E+1);
-7.0-64.0.5.1.1-4;3,4;5,6,9,10,13,15,16,17,18,20,21,23,24;Ch. $B;Threshold power for over-consumption relative to measurement period 2 for indexes and index differences;;Limit $E;
-7.0-64.0.5.1.11-14;3,4;5,6,9,10,13,15,16,17,18,20,21,23,24;Ch. $B;Threshold power for over-consumption relative to measurement period 3 for indexes and index differences;;Limit ($E-10);
-7.0-64.0.5.2.1-9;3,4;5,6,9,10,13,15,16,17,18,20,21,23,24;Ch. $B;Threshold limit for over-consumption relative to measurement period 2 for indexes and index differences;;Rate ($E-10);
-7.0-64.0.5.2.11-19;3,4;5,6,9,10,13,15,16,17,18,20,21,23,24;Ch. $B;Threshold limit for over-consumption relative to measurement period 3 for indexes and index differences;;Rate ($E-10);
+7.0-64.0.4.4.255;1,3,4;5,6,9,10,13,15,16,17,18,20,21,23,24;Ch. $B;Conversion factor;;#$(E+1);
+7.0-64.0.5.1.1-4;3,4;5,6,9,10,13,15,16,17,18,20,21,23,24;Ch. $B;Threshold power for over-consumption relative to measurement period 2 for indexes and index differences;;Limit $#E;
+7.0-64.0.5.1.11-14;3,4;5,6,9,10,13,15,16,17,18,20,21,23,24;Ch. $B;Threshold power for over-consumption relative to measurement period 3 for indexes and index differences;;Limit #($E-10);
+7.0-64.0.5.2.1-9;3,4;5,6,9,10,13,15,16,17,18,20,21,23,24;Ch. $B;Threshold limit for over-consumption relative to measurement period 2 for indexes and index differences;;Rate #($E-10);
+7.0-64.0.5.2.11-19;3,4;5,6,9,10,13,15,16,17,18,20,21,23,24;Ch. $B;Threshold limit for over-consumption relative to measurement period 3 for indexes and index differences;;Rate #($E-10);
 7.0-64.0.5.3.255;3,4;5,6,9,10,13,15,16,17,18,20,21,23,24;Ch. $B;Max. contracted consumption for recording interval 1;;;
 7.0-64.0.5.4.255;3,4;5,6,9,10,13,15,16,17,18,20,21,23,24;Ch. $B;Max. contracted consumption for recording interval 2;;;
 7.0-64.0.5.11.255;3,4;5,6,9,10,13,15,16,17,18,20,21,23,24;Ch. $B;Absolute temperature, min. limit setting, Tmin;;;
 7.0-64.0.5.12.255;3,4;5,6,9,10,13,15,16,17,18,20,21,23,24;Ch. $B;Absolute temperature, max. limit setting, Tmax;;;
 7.0-64.0.5.13.255;3,4;5,6,9,10,13,15,16,17,18,20,21,23,24;Ch. $B;Absolute pressure, min. limit setting, Pmin;;;
 7.0-64.0.5.14.255;3,4;5,6,9,10,13,15,16,17,18,20,21,23,24;Ch. $B;Absolute pressure, max. limit setting, Pmax;;;
-7.0-64.0.6.1.255;3,4;5,6,9,10,13,15,16,17,18,20,21,23,24;Ch. $B;Nominal values volume sensor; Pressure;;
+7.0-64.0.6.1.255;3,4;5,6,9,10,13,15,16,17,18,20,21,23,24;Ch. $B;Nominal values volume sensor;Pressure;;
 7.0-64.0.6.2.255;3,4;5,6,9,10,13,15,16,17,18,20,21,23,24;Ch. $B;Nominal values volume sensor;Temperature;;
 7.0-64.0.6.3.255;3,4;5,6,9,10,13,15,16,17,18,20,21,23,24;Ch. $B;Nominal values volume sensor;Qmin;;
 7.0-64.0.6.4.255;3,4;5,6,9,10,13,15,16,17,18,20,21,23,24;Ch. $B;Nominal values volume sensor;Qmax;;
@@ -804,7 +899,7 @@
 7.0-64.0.8.3.255;1,3;6,17,18;Ch. $B;Measurement period 1, for average value 1;;;
 7.0-64.0.8.4.255;1,3;6,17,18;Ch. $B;Measurement period 2, for average value 2;;;
 7.0-64.0.8.5.255;1,3;6,17,18;Ch. $B;Measurement period 3, for instantaneous value;;;
-7.0-64.0.8.6.255;1,3;6,17,18;Ch. $B;Measurement period 4, for test value ;;;
+7.0-64.0.8.6.255;1,3;6,17,18;Ch. $B;Measurement period 4, for test value;;;
 7.0-64.0.8.10.255;1,3;6,17,18;Ch. $B;Billing period;;;
 7.0-64.0.8.11.255;1,3;6,17,18;Ch. $B;Process interval 1, default value 15 minutes;;;
 7.0-64.0.8.12.255;1,3;6,17,18;Ch. $B;Process interval 2, default value 1 hour;;;
@@ -831,25 +926,25 @@
 7.0-64.0.8.34.255;1,3;6,17,18;Ch. $B;Averaging period 10, between two last events;;;
 7.0-64.0.8.35.255;1,3;6,17,18;Ch. $B;Number of sub-periods for averaging period 2;;;
 7.0-64.0.9.0.255;1,3;6,17,18;Ch. $B;No. of days since last reset;;;
-7.0-64.0.9.1.255;1,3,4;9;Ch. $B;Local time;;;
-7.0-64.0.9.2.255;1,3,4;9;Ch. $B;Local date;;;
-7.0-64.0.9.3.255;1,3,4;9;Ch. $B;Start of conventional gas day;;;
+7.0-64.0.9.1.255;1,3,4;9,25;Ch. $B;Local time;;;
+7.0-64.0.9.2.255;1,3,4;9,25;Ch. $B;Local date;;;
+7.0-64.0.9.3.255;1,3,4;9,25;Ch. $B;Start of conventional gas day;;;
 7.0-64.0.9.4.255;1,3,4;5,6,15,16,17,18;Ch. $B;Residual time shift;;;
-7.0-64.0.9.6.255;1,3,4;9;Ch. $B;Time of last reset (First billing period scheme if there are more than one);;;
-7.0-64.0.9.7.255;1,3,4;9;Ch. $B;Date of last reset (First billing period scheme if there are more than one);;;
+7.0-64.0.9.6.255;1,3,4;9,25;Ch. $B;Time of last reset (First billing period scheme if there are more than one);;;
+7.0-64.0.9.7.255;1,3,4;9,25;Ch. $B;Date of last reset (First billing period scheme if there are more than one);;;
 7.0-64.0.9.11.255;1,3,4;6,17,18;Ch. $B;Clock time shift limit;;;
 7.0-64.0.9.12.255;1,3,4;6,17,18;Ch. $B;Billing period reset lockout time (First billing period scheme if there are more than one);;;
 7.0-64.0.9.13.255;1,3,4;6,17,18;Ch. $B;Time expired since last end of billing period (Second billing period scheme);;;
-7.0-64.0.9.14.255;1,3,4;9;Ch. $B;Time of last reset (Second billing period scheme);;;
-7.0-64.0.9.15.255;1,3,4;9;Ch. $B;Date of last reset (Second billing period scheme);;;
+7.0-64.0.9.14.255;1,3,4;9,25;Ch. $B;Time of last reset (Second billing period scheme);;;
+7.0-64.0.9.15.255;1,3,4;9,25;Ch. $B;Date of last reset (Second billing period scheme);;;
 7.0-64.0.9.16.255;1,3,4;6,17,18;Ch. $B;Billing period reset lockout time (Second billing period scheme);;;
 7.0-64.0.9.17.255;1,3,4;6,17,18;Ch. $B;Time expired since last end of billing period (Third billing period scheme);;;
-7.0-64.0.9.18.255;1,3,4;9;Ch. $B;Time of last reset (Third billing period scheme);;;
-7.0-64.0.9.19.255;1,3,4;9;Ch. $B;Date of last reset (Third billing period scheme);;;
+7.0-64.0.9.18.255;1,3,4;9,25;Ch. $B;Time of last reset (Third billing period scheme);;;
+7.0-64.0.9.19.255;1,3,4;9,25;Ch. $B;Date of last reset (Third billing period scheme);;;
 7.0-64.0.9.20.255;1,3,4;6,17,18;Ch. $B;Billing period reset lockout time (Third billing period scheme);;;
 7.0-64.0.9.21.255;1,3,4;6,17,18;Ch. $B;Time expired since last end of billing period (Fourth billing period scheme);;;
-7.0-64.0.9.22.255;1,3,4;9;Ch. $B;Time of last reset (Fourth billing period scheme);;;
-7.0-64.0.9.23.255;1,3,4;9;Ch. $B;Date of last reset (Fourth billing period scheme);;;
+7.0-64.0.9.22.255;1,3,4;9,25;Ch. $B;Time of last reset (Fourth billing period scheme);;;
+7.0-64.0.9.23.255;1,3,4;9,25;Ch. $B;Date of last reset (Fourth billing period scheme);;;
 7.0-64.0.9.24.255;1,3,4;6,17,18;Ch. $B;Billing period reset lockout time (Fourth billing period scheme);;;
 7.0-64.0.10.0.255;1,3,4;5,6,15,16,17,18,23,24;Ch. $B;Heating temperature f, current value;;;
 7.0-64.0.10.1.255;1,3,4;5,6,15,16,17,18,23,24;Ch. $B;Heating temperature, average 15 minutes;;;
@@ -916,11 +1011,11 @@
 7.0-64.0.14.2.255;1,3,4;5,6,15,16,17,18;Ch. $B;K2 Densimeter Coefficient;;;
 7.0-64.0.14.10.255;1,3,4;5,6,15,16,17,18,23,25;Ch. $B;Densimeter period for instanteneous measurement;;;
 7.0-64.0.14.11.255;1,3,4;5,6,15,16,17,19;Ch. $B;Densimeter period for measurement period 15 minutes;;;
-7.0-64.0.15.0-127.255;67;;Ch. $B;Sensor manager objects;;$(E+1);
-7.0-64.1-8,11-16,21-26,31-36,61-66.0.0-63.0-99,101-126,255;3,4,7;5,6,9,10,13,15,16,17,18,20,21,23,24;Ch. $B;$0;Index, Value at metering conditions, Current;Rate $E (0 is total);Billing period $F (255 is current)
-7.0-64.1-8,11-16,21-26,31-36,61-66.1.0-63.0-99,101-126,255;3,4,7;5,6,9,10,13,15,16,17,18,20,21,23,24;Ch. $B;$0;Index, Corrected value, Current;Rate $E (0 is total);Billing period $F (255 is current)
-7.0-64.1-8,11-16,21-26,31-36,61-66.2.0-63.0-99,101-126,255;3,4,7;5,6,9,10,13,15,16,17,18,20,21,23,24;Ch. $B;$0;Index, Value at base conditions / “Converted value”, Current;Rate $E (0 is total);Billing period $F (255 is current)
-7.0-64.1-8,11-16,21-26,31-36,61-66.3.0-63.0-99,101-126,255;3,4,7;5,6,9,10,13,15,16,17,18,20,21,23,24;Ch. $B;$0;Index, Current redundant value at metering conditions, Current;Rate $E (0 is total);Billing period $F (255 is current)
+7.0-64.0.15.0-127.255;67;;Ch. $B;Sensor manager objects;;#$(E+1);
+7.0-64.1-8,11-16,21-26,31-36,61-66.0.0-63.255;3,4,7;5,6,9,10,13,15,16,17,18,20,21,23,24;Ch. $B;$0;Index, Value at metering conditions, Current;Rate $E (0 is total);Billing period $F (255 is current)
+7.0-64.1-8,11-16,21-26,31-36,61-66.1.0-63.255;3,4,7;5,6,9,10,13,15,16,17,18,20,21,23,24;Ch. $B;$0;Index, Corrected value, Current;Rate $E (0 is total);Billing period $F (255 is current)
+7.0-64.1-8,11-16,21-26,31-36,61-66.2.0-63.255;3,4,7;5,6,9,10,13,15,16,17,18,20,21,23,24;Ch. $B;$0;Index, Value at base conditions / “Converted value”, Current;Rate $E (0 is total);Billing period $F (255 is current)
+7.0-64.1-8,11-16,21-26,31-36,61-66.3.0-63.255;3,4,7;5,6,9,10,13,15,16,17,18,20,21,23,24;Ch. $B;$0;Index, Current redundant value at metering conditions, Current;Rate $E (0 is total);Billing period $F (255 is current)
 7.0-64.1-8,11-16,21-26,31-36,61-66.6.0-63.0-99,101-126,255;3,4,7;5,6,9,10,13,15,16,17,18,20,21,23,24;Ch. $B;$0;Value relative to measurement period 1, Index difference, Value at metering conditions, Current period;Rate $E (0 is total);Billing period $F (255 is current)
 7.0-64.1-8,11-16,21-26,31-36,61-66.7.0-63.0-99,101-126,255;3,4,7;5,6,9,10,13,15,16,17,18,20,21,23,24;Ch. $B;$0;Value relative to measurement period 1, Index difference, Corrected value, Current period;Rate $E (0 is total);Billing period $F (255 is current)
 7.0-64.1-8,11-16,21-26,31-36,61-66.8.0-63.0-99,101-126,255;3,4,7;5,6,9,10,13,15,16,17,18,20,21,23,24;Ch. $B;$0;Value relative to measurement period 1, Index difference, Value at base conditions, Current, period;Rate $E (0 is total);Billing period $F (255 is current)
@@ -939,9 +1034,9 @@
 7.0-64.1-8,11-16,21-26,31-36,61-66.21.0-63.0-99,101-126,255;3,4,7;5,6,9,10,13,15,16,17,18,20,21,23,24;Ch. $B;$0;Value relative to measurement period 3, Index difference, Value at metering conditions, Last period;Rate $E (0 is total);Billing period $F (255 is current)
 7.0-64.1-8,11-16,21-26,31-36,61-66.22.0-63.0-99,101-126,255;3,4,7;5,6,9,10,13,15,16,17,18,20,21,23,24;Ch. $B;$0;Value relative to measurement period 3, Index difference, Corrected value, Last period;Rate $E (0 is total);Billing period $F (255 is current)
 7.0-64.1-8,11-16,21-26,31-36,61-66.23.0-63.0-99,101-126,255;3,4,7;5,6,9,10,13,15,16,17,18,20,21,23,24;Ch. $B;$0;Value relative to measurement period 3, Index difference, Value at base conditions, Last period;Rate $E (0 is total);Billing period $F (255 is current)
-7.0-64.1-8,11-16,21-26,31-36,61-66.24.0-63.0-99,101-126,255;3,4,7;5,6,9,10,13,15,16,17,18,20,21,23,24;Ch. $B;$0;Values relative to billing period 1, Index, Value at metering conditions, Historical ;Rate $E (0 is total);Billing period $F (255 is current)
-7.0-64.1-8,11-16,21-26,31-36,61-66.25.0-63.0-99,101-126,255;3,4,7;5,6,9,10,13,15,16,17,18,20,21,23,24;Ch. $B;$0;Values relative to billing period 1, Index, Corrected value, Historical;Rate $E (0 is total);Billing period $F (255 is current)
-7.0-64.1-8,11-16,21-26,31-36,61-66.26.0-63.0-99,101-126,255;3,4,7;5,6,9,10,13,15,16,17,18,20,21,23,24;Ch. $B;$0;Values relative to billing period 1, Index, Value at base conditions, Historical;Rate $E (0 is total);Billing period $F (255 is current)
+7.0-64.1-8,11-16,21-26,31-36,61-66.24.0-63.0-99,101-126;3,4,7;5,6,9,10,13,15,16,17,18,20,21,23,24;Ch. $B;$0;Values relative to billing period 1, Index, Value at metering conditions, Historical;Rate $E (0 is total);Billing period $F (255 is current)
+7.0-64.1-8,11-16,21-26,31-36,61-66.25.0-63.0-99,101-126;3,4,7;5,6,9,10,13,15,16,17,18,20,21,23,24;Ch. $B;$0;Values relative to billing period 1, Index, Corrected value, Historical;Rate $E (0 is total);Billing period $F (255 is current)
+7.0-64.1-8,11-16,21-26,31-36,61-66.26.0-63.0-99,101-126;3,4,7;5,6,9,10,13,15,16,17,18,20,21,23,24;Ch. $B;$0;Values relative to billing period 1, Index, Value at base conditions, Historical;Rate $E (0 is total);Billing period $F (255 is current)
 7.0-64.1-8,11-16,21-26,31-36,61-66.27.0-63.0-99,101-126,255;3,4,7;5,6,9,10,13,15,16,17,18,20,21,23,24;Ch. $B;$0;Value relative to billing period 1, Index difference, Value at metering conditions, Current period;Rate $E (0 is total);Billing period $F (255 is current)
 7.0-64.1-8,11-16,21-26,31-36,61-66.28.0-63.0-99,101-126,255;3,4,7;5,6,9,10,13,15,16,17,18,20,21,23,24;Ch. $B;$0;Value relative to billing period 1, Index difference, Corrected value, Current period;Rate $E (0 is total);Billing period $F (255 is current)
 7.0-64.1-8,11-16,21-26,31-36,61-66.29.0-63.0-99,101-126,255;3,4,7;5,6,9,10,13,15,16,17,18,20,21,23,24;Ch. $B;$0;Value relative to billing period 1, Index difference, Value at base conditions, Current period;Rate $E (0 is total);Billing period $F (255 is current)
@@ -957,9 +1052,9 @@
 7.0-64.1-8,11-16,21-26,31-36,61-66.39.0-63.0-99,101-126,255;3,4,7;5,6,9,10,13,15,16,17,18,20,21,23,24;Ch. $B;$0;Values relative to billing period 1, Maximum of Index differences over measurement period 3, Value at metering conditions;Rate $E (0 is total);Billing period $F (255 is current)
 7.0-64.1-8,11-16,21-26,31-36,61-66.40.0-63.0-99,101-126,255;3,4,7;5,6,9,10,13,15,16,17,18,20,21,23,24;Ch. $B;$0;Values relative to billing period 1, Maximum of Index differences over measurement period 3, Corrected value;Rate $E (0 is total);Billing period $F (255 is current)
 7.0-64.1-8,11-16,21-26,31-36,61-66.41.0-63.0-99,101-126,255;3,4,7;5,6,9,10,13,15,16,17,18,20,21,23,24;Ch. $B;$0;Values relative to billing period 1, Maximum of Index differences over measurement period 3, Value at base conditions;Rate $E (0 is total);Billing period $F (255 is current)
-7.0-64.1-8,11-16,21-26,31-36,61-66.42.0-63.0-99,101-126,255;3,4,7;5,6,9,10,13,15,16,17,18,20,21,23,24;Ch. $B;$0;Values relative to billing period 2, Index, Value at metering conditions, Historical ;Rate $E (0 is total);Billing period $F (255 is current)
-7.0-64.1-8,11-16,21-26,31-36,61-66.43.0-63.0-99,101-126,255;3,4,7;5,6,9,10,13,15,16,17,18,20,21,23,24;Ch. $B;$0;Values relative to billing period 2, Index, Corrected value, Historical;Rate $E (0 is total);Billing period $F (255 is current)
-7.0-64.1-8,11-16,21-26,31-36,61-66.44.0-63.0-99,101-126,255;3,4,7;5,6,9,10,13,15,16,17,18,20,21,23,24;Ch. $B;$0;Values relative to billing period 2, Index, Value at base conditions, Historical;Rate $E (0 is total);Billing period $F (255 is current)
+7.0-64.1-8,11-16,21-26,31-36,61-66.42.0-63.0-99,101-126;3,4,7;5,6,9,10,13,15,16,17,18,20,21,23,24;Ch. $B;$0;Values relative to billing period 2, Index, Value at metering conditions, Historical;Rate $E (0 is total);Billing period $F (255 is current)
+7.0-64.1-8,11-16,21-26,31-36,61-66.43.0-63.0-99,101-126;3,4,7;5,6,9,10,13,15,16,17,18,20,21,23,24;Ch. $B;$0;Values relative to billing period 2, Index, Corrected value, Historical;Rate $E (0 is total);Billing period $F (255 is current)
+7.0-64.1-8,11-16,21-26,31-36,61-66.44.0-63.0-99,101-126;3,4,7;5,6,9,10,13,15,16,17,18,20,21,23,24;Ch. $B;$0;Values relative to billing period 2, Index, Value at base conditions, Historical;Rate $E (0 is total);Billing period $F (255 is current)
 7.0-64.1-8,11-16,21-26,31-36,61-66.45.0-63.0-99,101-126,255;3,4,7;5,6,9,10,13,15,16,17,18,20,21,23,24;Ch. $B;$0;Value relative to billing period 2, Index difference, Value at metering conditions, Current period;Rate $E (0 is total);Billing period $F (255 is current)
 7.0-64.1-8,11-16,21-26,31-36,61-66.46.0-63.0-99,101-126,255;3,4,7;5,6,9,10,13,15,16,17,18,20,21,23,24;Ch. $B;$0;Value relative to billing period 2, Index difference, Corrected value, Current period;Rate $E (0 is total);Billing period $F (255 is current)
 7.0-64.1-8,11-16,21-26,31-36,61-66.47.0-63.0-99,101-126,255;3,4,7;5,6,9,10,13,15,16,17,18,20,21,23,24;Ch. $B;$0;Value relative to billing period 2, Index difference, Value at base conditions, Current period;Rate $E (0 is total);Billing period $F (255 is current)
@@ -978,9 +1073,9 @@
 7.0-64.1-8,11-16,21-26,31-36,61-66.60.0-63.0-99,101-126,255;3,4,7;5,6,9,10,13,15,16,17,18,20,21,23,24;Ch. $B;$0;Values relative to billing period 2, Maximum of Index differences over billing period 1, Value at metering conditions;Rate $E (0 is total);Billing period $F (255 is current)
 7.0-64.1-8,11-16,21-26,31-36,61-66.61.0-63.0-99,101-126,255;3,4,7;5,6,9,10,13,15,16,17,18,20,21,23,24;Ch. $B;$0;Values relative to billing period 2, Maximum of Index differences over billing period 1, Corrected value;Rate $E (0 is total);Billing period $F (255 is current)
 7.0-64.1-8,11-16,21-26,31-36,61-66.62.0-63.0-99,101-126,255;3,4,7;5,6,9,10,13,15,16,17,18,20,21,23,24;Ch. $B;$0;Values relative to billing period 2, Maximum of Index differences over billing period 1, Value at base conditions;Rate $E (0 is total);Billing period $F (255 is current)
-7.0-64.1-8,11-16,21-26,31-36,61-66.63.0-63.0-99,101-126,255;3,4,7;5,6,9,10,13,15,16,17,18,20,21,23,24;Ch. $B;$0;Values relative to billing period 3, Index, Value at metering conditions, Historical ;Rate $E (0 is total);Billing period $F (255 is current)
-7.0-64.1-8,11-16,21-26,31-36,61-66.64.0-63.0-99,101-126,255;3,4,7;5,6,9,10,13,15,16,17,18,20,21,23,24;Ch. $B;$0;Values relative to billing period 3, Index, Corrected value, Historical;Rate $E (0 is total);Billing period $F (255 is current)
-7.0-64.1-8,11-16,21-26,31-36,61-66.65.0-63.0-99,101-126,255;3,4,7;5,6,9,10,13,15,16,17,18,20,21,23,24;Ch. $B;$0;Values relative to billing period 3, Index, Value at base conditions, Historical;Rate $E (0 is total);Billing period $F (255 is current)
+7.0-64.1-8,11-16,21-26,31-36,61-66.63.0-63.0-99,101-126;3,4,7;5,6,9,10,13,15,16,17,18,20,21,23,24;Ch. $B;$0;Values relative to billing period 3, Index, Value at metering conditions, Historical;Rate $E (0 is total);Billing period $F (255 is current)
+7.0-64.1-8,11-16,21-26,31-36,61-66.64.0-63.0-99,101-126;3,4,7;5,6,9,10,13,15,16,17,18,20,21,23,24;Ch. $B;$0;Values relative to billing period 3, Index, Corrected value, Historical;Rate $E (0 is total);Billing period $F (255 is current)
+7.0-64.1-8,11-16,21-26,31-36,61-66.65.0-63.0-99,101-126;3,4,7;5,6,9,10,13,15,16,17,18,20,21,23,24;Ch. $B;$0;Values relative to billing period 3, Index, Value at base conditions, Historical;Rate $E (0 is total);Billing period $F (255 is current)
 7.0-64.1-8,11-16,21-26,31-36,61-66.66.0-63.0-99,101-126,255;3,4,7;5,6,9,10,13,15,16,17,18,20,21,23,24;Ch. $B;$0;Value relative to billing period 3, Index difference, Value at metering conditions, Current period;Rate $E (0 is total);Billing period $F (255 is current)
 7.0-64.1-8,11-16,21-26,31-36,61-66.67.0-63.0-99,101-126,255;3,4,7;5,6,9,10,13,15,16,17,18,20,21,23,24;Ch. $B;$0;Value relative to billing period 3, Index difference, Corrected value, Current period;Rate $E (0 is total);Billing period $F (255 is current)
 7.0-64.1-8,11-16,21-26,31-36,61-66.68.0-63.0-99,101-126,255;3,4,7;5,6,9,10,13,15,16,17,18,20,21,23,24;Ch. $B;$0;Value relative to billing period 3, Index difference, Value at base conditions, Current period;Rate $E (0 is total);Billing period $F (255 is current)
@@ -996,9 +1091,9 @@
 7.0-64.1-8,11-16,21-26,31-36,61-66.78.0-63.0-99,101-126,255;3,4,7;5,6,9,10,13,15,16,17,18,20,21,23,24;Ch. $B;$0;Values relative to billing period 3, Maximum of Index differences over measurement period 3, Value at metering conditions;Rate $E (0 is total);Billing period $F (255 is current)
 7.0-64.1-8,11-16,21-26,31-36,61-66.79.0-63.0-99,101-126,255;3,4,7;5,6,9,10,13,15,16,17,18,20,21,23,24;Ch. $B;$0;Values relative to billing period 3, Maximum of Index differences over measurement period 3, Corrected value;Rate $E (0 is total);Billing period $F (255 is current)
 7.0-64.1-8,11-16,21-26,31-36,61-66.80.0-63.0-99,101-126,255;3,4,7;5,6,9,10,13,15,16,17,18,20,21,23,24;Ch. $B;$0;Values relative to billing period 3, Maximum of Index differences over measurement period 3, Value at base conditions;Rate $E (0 is total) (0 is total);Billing period $F (255 is current)
-7.0-64.1-8,11-16,21-26,31-36,61-66.81.0-63.0-99,101-126,255;3,4,7;5,6,9,10,13,15,16,17,18,20,21,23,24;Ch. $B;$0;Values relative to billing period 4, Index, Value at metering conditions, Historical ;Rate $E (0 is total) (0 is total);Billing period $F (255 is current)
-7.0-64.1-8,11-16,21-26,31-36,61-66.82.0-63.0-99,101-126,255;3,4,7;5,6,9,10,13,15,16,17,18,20,21,23,24;Ch. $B;$0;Values relative to billing period 4, Index, Corrected value, Historical;Rate $E (0 is total) (0 is total);Billing period $F (255 is current)
-7.0-64.1-8,11-16,21-26,31-36,61-66.83.0-63.0-99,101-126,255;3,4,7;5,6,9,10,13,15,16,17,18,20,21,23,24;Ch. $B;$0;Values relative to billing period 4, Index, Value at base conditions, Historical;Rate $E (0 is total) (0 is total);Billing period $F (255 is current)
+7.0-64.1-8,11-16,21-26,31-36,61-66.81.0-63.0-99,101-126;3,4,7;5,6,9,10,13,15,16,17,18,20,21,23,24;Ch. $B;$0;Values relative to billing period 4, Index, Value at metering conditions, Historical;Rate $E (0 is total) (0 is total);Billing period $F (255 is current)
+7.0-64.1-8,11-16,21-26,31-36,61-66.82.0-63.0-99,101-126;3,4,7;5,6,9,10,13,15,16,17,18,20,21,23,24;Ch. $B;$0;Values relative to billing period 4, Index, Corrected value, Historical;Rate $E (0 is total) (0 is total);Billing period $F (255 is current)
+7.0-64.1-8,11-16,21-26,31-36,61-66.83.0-63.0-99,101-126;3,4,7;5,6,9,10,13,15,16,17,18,20,21,23,24;Ch. $B;$0;Values relative to billing period 4, Index, Value at base conditions, Historical;Rate $E (0 is total) (0 is total);Billing period $F (255 is current)
 7.0-64.1-8,11-16,21-26,31-36,61-66.84.0-63.0-99,101-126,255;3,4,7;5,6,9,10,13,15,16,17,18,20,21,23,24;Ch. $B;$0;Value relative to billing period 4, Index difference, Value at metering conditions, Current period;Rate $E (0 is total) (0 is total);Billing period $F (255 is current)
 7.0-64.1-8,11-16,21-26,31-36,61-66.85.0-63.0-99,101-126,255;3,4,7;5,6,9,10,13,15,16,17,18,20,21,23,24;Ch. $B;$0;Value relative to billing period 4, Index difference, Corrected value, Current period;Rate $E (0 is total) (0 is total);Billing period $F (255 is current)
 7.0-64.1-8,11-16,21-26,31-36,61-66.86.0-63.0-99,101-126,255;3,4,7;5,6,9,10,13,15,16,17,18,20,21,23,24;Ch. $B;$0;Value relative to billing period 4, Index difference, Value at base conditions, Current period;Rate $E (0 is total) (0 is total);Billing period $F (255 is current)
@@ -1014,174 +1109,176 @@
 7.0-64.1-8,11-16,21-26,31-36,61-66.96.0-63.0-99,101-126,255;3,4,7;5,6,9,10,13,15,16,17,18,20,21,23,24;Ch. $B;$0;Values relative to billing period 4, Maximum of Index differences over measurement period 3, Value at metering conditions;Rate $E (0 is total) (0 is total);Billing period $F (255 is current)
 7.0-64.1-8,11-16,21-26,31-36,61-66.97.0-63.0-99,101-126,255;3,4,7;5,6,9,10,13,15,16,17,18,20,21,23,24;Ch. $B;$0;Values relative to billing period 4, Maximum of Index differences over measurement period 3, Corrected value;Rate $E (0 is total) (0 is total);Billing period $F (255 is current)
 7.0-64.1-8,11-16,21-26,31-36,61-66.98.0-63.0-99,101-126,255;3,4,7;5,6,9,10,13,15,16,17,18,20,21,23,24;Ch. $B;$0;Values relative to billing period 4, Maximum of Index differences over measurement period 3, Value at base conditions;Rate $E (0 is total) (0 is total);Billing period $F (255 is current)
-7.0-64.43.0.0.0-99,101-126,255;3,4,7;5,6,9,10,13,15,16,17,18,20,21,23,24;Ch. $B;Flow rate;Instantaneous, Current value at metering conditions;;Billing period $F (255 is current)
-7.0-64.43.1.0.0-99,101-126,255;3,4,7;5,6,9,10,13,15,16,17,18,20,21,23,24;Ch. $B;Flow rate;Instantaneous, Corrected value;;Billing period $F (255 is current)
-7.0-64.43.2.0.0-99,101-126,255;3,4,7;5,6,9,10,13,15,16,17,18,20,21,23,24;Ch. $B;Flow rate;Instantaneous, Value at base conditions / “Converted value”;;Billing period $F (255 is current)
-7.0-64.43.13.0.0-99,101-126,255;3,4,7;5,6,9,10,13,15,16,17,18,20,21,23,24;Ch. $B;Flow rate;Instantaneous, Value at standard conditions;;Billing period $F (255 is current)
+7.0-64.43.0.0.255;3,4,7;5,6,9,10,13,15,16,17,18,20,21,23,24;Ch. $B;Flow rate;Instantaneous, Current value at metering conditions;;Billing period $F (255 is current)
+7.0-64.43.1.0.255;3,4,7;5,6,9,10,13,15,16,17,18,20,21,23,24;Ch. $B;Flow rate;Instantaneous, Corrected value;;Billing period $F (255 is current)
+7.0-64.43.2.0.255;3,4,7;5,6,9,10,13,15,16,17,18,20,21,23,24;Ch. $B;Flow rate;Instantaneous, Value at base conditions / “Converted value”;;Billing period $F (255 is current)
+7.0-64.43.13.0.255;3,4,7;5,6,9,10,13,15,16,17,18,20,21,23,24;Ch. $B;Flow rate;Instantaneous, Value at standard conditions;;Billing period $F (255 is current)
 7.0-64.43.15.0.0-99,101-126,255;3,4,5,7;5,6,9,10,13,15,16,17,18,20,21,23,24;Ch. $B;Flow rate;Current average for averaging period 1, Value at metering conditions;;Billing period $F (255 is current)
 7.0-64.43.16.0.0-99,101-126,255;3,4,5,7;5,6,9,10,13,15,16,17,18,20,21,23,24;Ch. $B;Flow rate;Current average for averaging period 1, Corrected value;;Billing period $F (255 is current)
-7.0-64.43.17.0.0-99,101-126,255;3,4,5,7;5,6,9,10,13,15,16,17,18,20,21,23,24;Ch. $B;Flow rate;Current average for averaging period 1, Value at base conditions ;;Billing period $F (255 is current)
+7.0-64.43.17.0.0-99,101-126,255;3,4,5,7;5,6,9,10,13,15,16,17,18,20,21,23,24;Ch. $B;Flow rate;Current average for averaging period 1, Value at base conditions;;Billing period $F (255 is current)
 7.0-64.43.18.0.0-99,101-126,255;3,4,5,7;5,6,9,10,13,15,16,17,18,20,21,23,24;Ch. $B;Flow rate;Current average for averaging period 1, Value at standard conditions;;Billing period $F (255 is current)
 7.0-64.43.19.0.0-99,101-126,255;3,4,5,7;5,6,9,10,13,15,16,17,18,20,21,23,24;Ch. $B;Flow rate;Last average for averaging period 1, Value at metering conditions;;Billing period $F (255 is current)
 7.0-64.43.20.0.0-99,101-126,255;3,4,5,7;5,6,9,10,13,15,16,17,18,20,21,23,24;Ch. $B;Flow rate;Last average for averaging period 1, Corrected value;;Billing period $F (255 is current)
-7.0-64.43.21.0.0-99,101-126,255;3,4,5,7;5,6,9,10,13,15,16,17,18,20,21,23,24;Ch. $B;Flow rate;Last average for averaging period 1, Value at base conditions ;;Billing period $F (255 is current)
+7.0-64.43.21.0.0-99,101-126,255;3,4,5,7;5,6,9,10,13,15,16,17,18,20,21,23,24;Ch. $B;Flow rate;Last average for averaging period 1, Value at base conditions;;Billing period $F (255 is current)
 7.0-64.43.22.0.0-99,101-126,255;3,4,5,7;5,6,9,10,13,15,16,17,18,20,21,23,24;Ch. $B;Flow rate;Last average for averaging period 1, Value at standard conditions;;Billing period $F (255 is current)
 7.0-64.43.23.0.0-99,101-126,255;3,4,7;5,6,9,10,13,15,16,17,18,20,21,23,24;Ch. $B;Flow rate;Maximum of last averages for averaging period 1 relative to measurement period 2, Value at metering conditions;;Billing period $F (255 is current)
 7.0-64.43.24.0.0-99,101-126,255;3,4,7;5,6,9,10,13,15,16,17,18,20,21,23,24;Ch. $B;Flow rate;Maximum of last averages for averaging period 1 relative to measurement period 2, Corrected value;;Billing period $F (255 is current)
-7.0-64.43.25.0.0-99,101-126,255;3,4,7;5,6,9,10,13,15,16,17,18,20,21,23,24;Ch. $B;Flow rate;Maximum of last averages for averaging period 1 relative to measurement period 2, Value at base conditions ;;Billing period $F (255 is current)
+7.0-64.43.25.0.0-99,101-126,255;3,4,7;5,6,9,10,13,15,16,17,18,20,21,23,24;Ch. $B;Flow rate;Maximum of last averages for averaging period 1 relative to measurement period 2, Value at base conditions;;Billing period $F (255 is current)
 7.0-64.43.26.0.0-99,101-126,255;3,4,7;5,6,9,10,13,15,16,17,18,20,21,23,24;Ch. $B;Flow rate;Maximum of last averages for averaging period 1 relative to measurement period 2, Value at standard conditions;;Billing period $F (255 is current)
 7.0-64.43.27.0.0-99,101-126,255;3,4,7;5,6,9,10,13,15,16,17,18,20,21,23,24;Ch. $B;Flow rate;Maximum of last averages for averaging period 1 relative to measurement period 3, Value at metering conditions;;Billing period $F (255 is current)
 7.0-64.43.28.0.0-99,101-126,255;3,4,7;5,6,9,10,13,15,16,17,18,20,21,23,24;Ch. $B;Flow rate;Maximum of last averages for averaging period 1 relative to measurement period 3, Corrected value;;Billing period $F (255 is current)
-7.0-64.43.29.0.0-99,101-126,255;3,4,7;5,6,9,10,13,15,16,17,18,20,21,23,24;Ch. $B;Flow rate;Maximum of last averages for averaging period 1 relative to measurement period 3, Value at base conditions ;;Billing period $F (255 is current)
+7.0-64.43.29.0.0-99,101-126,255;3,4,7;5,6,9,10,13,15,16,17,18,20,21,23,24;Ch. $B;Flow rate;Maximum of last averages for averaging period 1 relative to measurement period 3, Value at base conditions;;Billing period $F (255 is current)
 7.0-64.43.30.0.0-99,101-126,255;3,4,7;5,6,9,10,13,15,16,17,18,20,21,23,24;Ch. $B;Flow rate;Maximum of last averages for averaging period 1 relative to measurement period 3, Value at standard conditions;;Billing period $F (255 is current)
 7.0-64.43.31.0.0-99,101-126,255;3,4,7;5,6,9,10,13,15,16,17,18,20,21,23,24;Ch. $B;Flow rate;Maximum of last averages for averaging period 1 relative to billing period 1, Value at metering conditions;;Billing period $F (255 is current)
 7.0-64.43.32.0.0-99,101-126,255;3,4,7;5,6,9,10,13,15,16,17,18,20,21,23,24;Ch. $B;Flow rate;Maximum of last averages for averaging period 1 relative to billing period 1, Corrected value;;Billing period $F (255 is current)
-7.0-64.43.33.0.0-99,101-126,255;3,4,7;5,6,9,10,13,15,16,17,18,20,21,23,24;Ch. $B;Flow rate;Maximum of last averages for averaging period 1 relative to billing period 1, Value at base conditions ;;Billing period $F (255 is current)
+7.0-64.43.33.0.0-99,101-126,255;3,4,7;5,6,9,10,13,15,16,17,18,20,21,23,24;Ch. $B;Flow rate;Maximum of last averages for averaging period 1 relative to billing period 1, Value at base conditions;;Billing period $F (255 is current)
 7.0-64.43.34.0.0-99,101-126,255;3,4,7;5,6,9,10,13,15,16,17,18,20,21,23,24;Ch. $B;Flow rate;Maximum of last averages for averaging period 1 relative to billing period 1, Value at standard conditions;;Billing period $F (255 is current)
 7.0-64.43.35.0.0-99,101-126,255;3,4,5,7;5,6,9,10,13,15,16,17,18,20,21,23,24;Ch. $B;Flow rate;Current average for averaging period 2, Value at metering conditions;;Billing period $F (255 is current)
 7.0-64.43.36.0.0-99,101-126,255;3,4,5,7;5,6,9,10,13,15,16,17,18,20,21,23,24;Ch. $B;Flow rate;Current average for averaging period 2, Corrected value;;Billing period $F (255 is current)
-7.0-64.43.37.0.0-99,101-126,255;3,4,5,7;5,6,9,10,13,15,16,17,18,20,21,23,24;Ch. $B;Flow rate;Current average for averaging period 2, Value at base conditions ;;Billing period $F (255 is current)
+7.0-64.43.37.0.0-99,101-126,255;3,4,5,7;5,6,9,10,13,15,16,17,18,20,21,23,24;Ch. $B;Flow rate;Current average for averaging period 2, Value at base conditions;;Billing period $F (255 is current)
 7.0-64.43.38.0.0-99,101-126,255;3,4,5,7;5,6,9,10,13,15,16,17,18,20,21,23,24;Ch. $B;Flow rate;Current average for averaging period 2, Value at standard conditions;;Billing period $F (255 is current)
 7.0-64.43.39.0.0-99,101-126,255;3,4,5,7;5,6,9,10,13,15,16,17,18,20,21,23,24;Ch. $B;Flow rate;Last average for averaging period 2, Value at metering conditions;;Billing period $F (255 is current)
 7.0-64.43.40.0.0-99,101-126,255;3,4,5,7;5,6,9,10,13,15,16,17,18,20,21,23,24;Ch. $B;Flow rate;Last average for averaging period 2, Corrected value;;Billing period $F (255 is current)
-7.0-64.43.41.0.0-99,101-126,255;3,4,5,7;5,6,9,10,13,15,16,17,18,20,21,23,24;Ch. $B;Flow rate;Last average for averaging period 2, Value at base conditions ;;Billing period $F (255 is current)
+7.0-64.43.41.0.0-99,101-126,255;3,4,5,7;5,6,9,10,13,15,16,17,18,20,21,23,24;Ch. $B;Flow rate;Last average for averaging period 2, Value at base conditions;;Billing period $F (255 is current)
 7.0-64.43.42.0.0-99,101-126,255;3,4,5,7;5,6,9,10,13,15,16,17,18,20,21,23,24;Ch. $B;Flow rate;Last average for averaging period 2, Value at standard conditions;;Billing period $F (255 is current)
 7.0-64.43.43.0.0-99,101-126,255;3,4,7;5,6,9,10,13,15,16,17,18,20,21,23,24;Ch. $B;Flow rate;Maximum of last averages for averaging period 2 relative to measurement period 2, Value at metering conditions;;Billing period $F (255 is current)
 7.0-64.43.44.0.0-99,101-126,255;3,4,7;5,6,9,10,13,15,16,17,18,20,21,23,24;Ch. $B;Flow rate;Maximum of last averages for averaging period 2 relative to measurement period 2, Corrected value;;Billing period $F (255 is current)
-7.0-64.43.45.0.0-99,101-126,255;3,4,7;5,6,9,10,13,15,16,17,18,20,21,23,24;Ch. $B;Flow rate;Maximum of last averages for averaging period 2 relative to measurement period 2, Value at base conditions ;;Billing period $F (255 is current)
+7.0-64.43.45.0.0-99,101-126,255;3,4,7;5,6,9,10,13,15,16,17,18,20,21,23,24;Ch. $B;Flow rate;Maximum of last averages for averaging period 2 relative to measurement period 2, Value at base conditions;;Billing period $F (255 is current)
 7.0-64.43.46.0.0-99,101-126,255;3,4,7;5,6,9,10,13,15,16,17,18,20,21,23,24;Ch. $B;Flow rate;Maximum of last averages for averaging period 2 relative to measurement period 2, Value at standard conditions;;Billing period $F (255 is current)
 7.0-64.43.47.0.0-99,101-126,255;3,4,7;5,6,9,10,13,15,16,17,18,20,21,23,24;Ch. $B;Flow rate;Maximum of last averages for averaging period 2 relative to measurement period 3, Value at metering conditions;;Billing period $F (255 is current)
 7.0-64.43.48.0.0-99,101-126,255;3,4,7;5,6,9,10,13,15,16,17,18,20,21,23,24;Ch. $B;Flow rate;Maximum of last averages for averaging period 2 relative to measurement period 3, Corrected value;;Billing period $F (255 is current)
-7.0-64.43.49.0.0-99,101-126,255;3,4,7;5,6,9,10,13,15,16,17,18,20,21,23,24;Ch. $B;Flow rate;Maximum of last averages for averaging period 2 relative to measurement period 3, Value at base conditions ;;Billing period $F (255 is current)
+7.0-64.43.49.0.0-99,101-126,255;3,4,7;5,6,9,10,13,15,16,17,18,20,21,23,24;Ch. $B;Flow rate;Maximum of last averages for averaging period 2 relative to measurement period 3, Value at base conditions;;Billing period $F (255 is current)
 7.0-64.43.50.0.0-99,101-126,255;3,4,7;5,6,9,10,13,15,16,17,18,20,21,23,24;Ch. $B;Flow rate;Maximum of last averages for averaging period 2 relative to measurement period 3, Value at standard conditions;;Billing period $F (255 is current)
 7.0-64.43.51.0.0-99,101-126,255;3,4,7;5,6,9,10,13,15,16,17,18,20,21,23,24;Ch. $B;Flow rate;Maximum of last averages for averaging period 2 relative to billing period 1, Value at metering conditions;;Billing period $F (255 is current)
 7.0-64.43.52.0.0-99,101-126,255;3,4,7;5,6,9,10,13,15,16,17,18,20,21,23,24;Ch. $B;Flow rate;Maximum of last averages for averaging period 2 relative to billing period 1, Corrected value;;Billing period $F (255 is current)
-7.0-64.43.53.0.0-99,101-126,255;3,4,7;5,6,9,10,13,15,16,17,18,20,21,23,24;Ch. $B;Flow rate;Maximum of last averages for averaging period 2 relative to billing period 1, Value at base conditions ;;Billing period $F (255 is current)
+7.0-64.43.53.0.0-99,101-126,255;3,4,7;5,6,9,10,13,15,16,17,18,20,21,23,24;Ch. $B;Flow rate;Maximum of last averages for averaging period 2 relative to billing period 1, Value at base conditions;;Billing period $F (255 is current)
 7.0-64.43.54.0.0-99,101-126,255;3,4,7;5,6,9,10,13,15,16,17,18,20,21,23,24;Ch. $B;Flow rate;Maximum of last averages for averaging period 2 relative to billing period 1, Value at standard conditions;;Billing period $F (255 is current)
 7.0-64.43.55.0.0-99,101-126,255;3,4,5,7;5,6,9,10,13,15,16,17,18,20,21,23,24;Ch. $B;Flow rate;Current average for averaging period 3, Value at metering conditions;;Billing period $F (255 is current)
 7.0-64.43.56.0.0-99,101-126,255;3,4,5,7;5,6,9,10,13,15,16,17,18,20,21,23,24;Ch. $B;Flow rate;Current average for averaging period 3, Corrected value;;Billing period $F (255 is current)
-7.0-64.43.57.0.0-99,101-126,255;3,4,5,7;5,6,9,10,13,15,16,17,18,20,21,23,24;Ch. $B;Flow rate;Current average for averaging period 3, Value at base conditions ;;Billing period $F (255 is current)
+7.0-64.43.57.0.0-99,101-126,255;3,4,5,7;5,6,9,10,13,15,16,17,18,20,21,23,24;Ch. $B;Flow rate;Current average for averaging period 3, Value at base conditions;;Billing period $F (255 is current)
 7.0-64.43.58.0.0-99,101-126,255;3,4,5,7;5,6,9,10,13,15,16,17,18,20,21,23,24;Ch. $B;Flow rate;Current average for averaging period 3, Value at standard conditions;;Billing period $F (255 is current)
 7.0-64.43.59.0.0-99,101-126,255;3,4,5,7;5,6,9,10,13,15,16,17,18,20,21,23,24;Ch. $B;Flow rate;Last average for averaging period 3, Value at metering conditions;;Billing period $F (255 is current)
 7.0-64.43.60.0.0-99,101-126,255;3,4,5,7;5,6,9,10,13,15,16,17,18,20,21,23,24;Ch. $B;Flow rate;Last average for averaging period 3, Corrected value;;Billing period $F (255 is current)
-7.0-64.43.61.0.0-99,101-126,255;3,4,5,7;5,6,9,10,13,15,16,17,18,20,21,23,24;Ch. $B;Flow rate;Last average for averaging period 3, Value at base conditions ;;Billing period $F (255 is current)
+7.0-64.43.61.0.0-99,101-126,255;3,4,5,7;5,6,9,10,13,15,16,17,18,20,21,23,24;Ch. $B;Flow rate;Last average for averaging period 3, Value at base conditions;;Billing period $F (255 is current)
 7.0-64.43.62.0.0-99,101-126,255;3,4,5,7;5,6,9,10,13,15,16,17,18,20,21,23,24;Ch. $B;Flow rate;Last average for averaging period 3, Value at standard conditions;;Billing period $F (255 is current)
 7.0-64.43.63.0.0-99,101-126,255;3,4,5,7;5,6,9,10,13,15,16,17,18,20,21,23,24;Ch. $B;Flow rate;Current average for averaging period 4, Value at metering conditions;;Billing period $F (255 is current)
 7.0-64.43.64.0.0-99,101-126,255;3,4,5,7;5,6,9,10,13,15,16,17,18,20,21,23,24;Ch. $B;Flow rate;Current average for averaging period 4, Corrected value;;Billing period $F (255 is current)
-7.0-64.43.65.0.0-99,101-126,255;3,4,5,7;5,6,9,10,13,15,16,17,18,20,21,23,24;Ch. $B;Flow rate;Current average for averaging period 4, Value at base conditions ;;Billing period $F (255 is current)
+7.0-64.43.65.0.0-99,101-126,255;3,4,5,7;5,6,9,10,13,15,16,17,18,20,21,23,24;Ch. $B;Flow rate;Current average for averaging period 4, Value at base conditions;;Billing period $F (255 is current)
 7.0-64.43.66.0.0-99,101-126,255;3,4,5,7;5,6,9,10,13,15,16,17,18,20,21,23,24;Ch. $B;Flow rate;Current average for averaging period 4, Value at standard conditions;;Billing period $F (255 is current)
 7.0-64.43.67.0.0-99,101-126,255;3,4,5,7;5,6,9,10,13,15,16,17,18,20,21,23,24;Ch. $B;Flow rate;Last average for averaging period 4, Value at metering conditions;;Billing period $F (255 is current)
 7.0-64.43.68.0.0-99,101-126,255;3,4,5,7;5,6,9,10,13,15,16,17,18,20,21,23,24;Ch. $B;Flow rate;Last average for averaging period 4, Corrected value;;Billing period $F (255 is current)
-7.0-64.43.69.0.0-99,101-126,255;3,4,5,7;5,6,9,10,13,15,16,17,18,20,21,23,24;Ch. $B;Flow rate;Last average for averaging period 4, Value at base conditions ;;Billing period $F (255 is current)
+7.0-64.43.69.0.0-99,101-126,255;3,4,5,7;5,6,9,10,13,15,16,17,18,20,21,23,24;Ch. $B;Flow rate;Last average for averaging period 4, Value at base conditions;;Billing period $F (255 is current)
 7.0-64.43.70.0.0-99,101-126,255;3,4,5,7;5,6,9,10,13,15,16,17,18,20,21,23,24;Ch. $B;Flow rate;Last average for averaging period 4, Value at standard conditions;;Billing period $F (255 is current)
 7.0-64.41,42,44-49.0.0.255;3,4,7;5,6,9,10,13,15,16,17,18,20,21,23,24;Ch. $B;$1;Instantaneous, Current value at metering conditions;;Billing period $F (255 is current)
-7.0-64.41,42,44-49.2.0.255;3,4,7;5,6,9,10,13,15,16,17,18,20,21,23,24;Ch. $B;$1;Instantaneous Value at base conditions / “Converted value” ;;Billing period $F (255 is current)
+7.0-64.41,42,44-49.2.0.255;3,4,7;5,6,9,10,13,15,16,17,18,20,21,23,24;Ch. $B;$1;Instantaneous Value at base conditions / “Converted value”;;Billing period $F (255 is current)
 7.0-64.41,42,44-49.3.0.255;3,4,7;5,6,9,10,13,15,16,17,18,20,21,23,24;Ch. $B;$1;Instantaneous, Backup value;;Billing period $F (255 is current)
 7.0-64.41,42,44-49.10.0.255;3,4,7;5,6,9,10,13,15,16,17,18,20,21,23,24;Ch. $B;$1;Instantaneous, Actual value;;Billing period $F (255 is current)
 7.0-64.41,42,44-49.11.0.255;3,4,7;5,6,9,10,13,15,16,17,18,20,21,23,24;Ch. $B;$1;Instantaneous, Preset value;;Billing period $F (255 is current)
 7.0-64.41,42,44-49.13.0.255;3,4,7;5,6,9,10,13,15,16,17,18,20,21,23,24;Ch. $B;$1;Instantaneous, Value at standard conditions;;Billing period $F (255 is current)
 7.0-64.41,42,44-49.15.0.255;3,4,7;5,6,9,10,13,15,16,17,18,20,21,23,24;Ch. $B;$1;Average, current interval, process interval 1, Value at metering conditions;;Billing period $F (255 is current)
-7.0-64.41,42,44-49.16.0.255;3,4,7;5,6,9,10,13,15,16,17,18,20,21,23,24;Ch. $B;$1;Average, current interval, process interval 1, Value at base conditions ;;Billing period $F (255 is current)
+7.0-64.41,42,44-49.16.0.255;3,4,7;5,6,9,10,13,15,16,17,18,20,21,23,24;Ch. $B;$1;Average, current interval, process interval 1, Value at base conditions;;Billing period $F (255 is current)
 7.0-64.41,42,44-49.17.0.255;3,4,7;5,6,9,10,13,15,16,17,18,20,21,23,24;Ch. $B;$1;Average, current interval, process interval 1, Value at standard conditions;;Billing period $F (255 is current)
 7.0-64.41,42,44-49.18.0.255;3,4,7;5,6,9,10,13,15,16,17,18,20,21,23,24;Ch. $B;$1;Minimum, current interval, process interval 1, Value at metering conditions;;Billing period $F (255 is current)
-7.0-64.41,42,44-49.19.0.255;3,4,7;5,6,9,10,13,15,16,17,18,20,21,23,24;Ch. $B;$1;Minimum, current interval, process interval 1, Value at base conditions ;;Billing period $F (255 is current)
+7.0-64.41,42,44-49.19.0.255;3,4,7;5,6,9,10,13,15,16,17,18,20,21,23,24;Ch. $B;$1;Minimum, current interval, process interval 1, Value at base conditions;;Billing period $F (255 is current)
 7.0-64.41,42,44-49.20.0.255;3,4,7;5,6,9,10,13,15,16,17,18,20,21,23,24;Ch. $B;$1;Minimum, current interval, process interval 1, Value at standard conditions;;Billing period $F (255 is current)
 7.0-64.41,42,44-49.21.0.255;3,4,7;5,6,9,10,13,15,16,17,18,20,21,23,24;Ch. $B;$1;Maximum, current interval, process interval 1, Value at metering conditions;;Billing period $F (255 is current)
-7.0-64.41,42,44-49.22.0.255;3,4,7;5,6,9,10,13,15,16,17,18,20,21,23,24;Ch. $B;$1;Maximum, current interval, process interval 1, Value at base conditions ;;Billing period $F (255 is current)
+7.0-64.41,42,44-49.22.0.255;3,4,7;5,6,9,10,13,15,16,17,18,20,21,23,24;Ch. $B;$1;Maximum, current interval, process interval 1, Value at base conditions;;Billing period $F (255 is current)
 7.0-64.41,42,44-49.23.0.255;3,4,7;5,6,9,10,13,15,16,17,18,20,21,23,24;Ch. $B;$1;Maximum, current interval, process interval 1, Value at standard conditions;;Billing period $F (255 is current)
 7.0-64.41,42,44-49.24.0.255;3,4,7;5,6,9,10,13,15,16,17,18,20,21,23,24;Ch. $B;$1;Average, last interval, process interval 1, Value at metering conditions;;Billing period $F (255 is current)
-7.0-64.41,42,44-49.25.0.255;3,4,7;5,6,9,10,13,15,16,17,18,20,21,23,24;Ch. $B;$1;Average, last interval, process interval 1, Value at base conditions ;;Billing period $F (255 is current)
+7.0-64.41,42,44-49.25.0.255;3,4,7;5,6,9,10,13,15,16,17,18,20,21,23,24;Ch. $B;$1;Average, last interval, process interval 1, Value at base conditions;;Billing period $F (255 is current)
 7.0-64.41,42,44-49.26.0.255;3,4,7;5,6,9,10,13,15,16,17,18,20,21,23,24;Ch. $B;$1;Average, last interval, process interval 1, Value at standard conditions;;Billing period $F (255 is current)
 7.0-64.41,42,44-49.27.0.255;3,4,7;5,6,9,10,13,15,16,17,18,20,21,23,24;Ch. $B;$1;Minimum, last interval, process interval 1, Value at metering conditions;;Billing period $F (255 is current)
-7.0-64.41,42,44-49.28.0.255;3,4,7;5,6,9,10,13,15,16,17,18,20,21,23,24;Ch. $B;$1;Minimum, last interval, process interval 1, Value at base conditions ;;Billing period $F (255 is current)
+7.0-64.41,42,44-49.28.0.255;3,4,7;5,6,9,10,13,15,16,17,18,20,21,23,24;Ch. $B;$1;Minimum, last interval, process interval 1, Value at base conditions;;Billing period $F (255 is current)
 7.0-64.41,42,44-49.29.0.255;3,4,7;5,6,9,10,13,15,16,17,18,20,21,23,24;Ch. $B;$1;Minimum, last interval, process interval 1, Value at standard conditions;;Billing period $F (255 is current)
 7.0-64.41,42,44-49.30.0.255;3,4,7;5,6,9,10,13,15,16,17,18,20,21,23,24;Ch. $B;$1;Maximum, last interval, process interval 1, Value at metering conditions;;Billing period $F (255 is current)
-7.0-64.41,42,44-49.31.0.255;3,4,7;5,6,9,10,13,15,16,17,18,20,21,23,24;Ch. $B;$1;Maximum, last interval, process interval 1, Value at base conditions ;;Billing period $F (255 is current)
+7.0-64.41,42,44-49.31.0.255;3,4,7;5,6,9,10,13,15,16,17,18,20,21,23,24;Ch. $B;$1;Maximum, last interval, process interval 1, Value at base conditions;;Billing period $F (255 is current)
 7.0-64.41,42,44-49.32.0.255;3,4,7;5,6,9,10,13,15,16,17,18,20,21,23,24;Ch. $B;$1;Maximum, last interval, process interval 1, Value at standard conditions;;Billing period $F (255 is current)
 7.0-64.41,42,44-49.33.0.255;3,4,7;5,6,9,10,13,15,16,17,18,20,21,23,24;Ch. $B;$1;Average, current interval, process interval 2, Value at metering conditions;;Billing period $F (255 is current)
-7.0-64.41,42,44-49.34.0.255;3,4,7;5,6,9,10,13,15,16,17,18,20,21,23,24;Ch. $B;$1;Average, current interval, process interval 2, Value at base conditions ;;Billing period $F (255 is current)
+7.0-64.41,42,44-49.34.0.255;3,4,7;5,6,9,10,13,15,16,17,18,20,21,23,24;Ch. $B;$1;Average, current interval, process interval 2, Value at base conditions;;Billing period $F (255 is current)
 7.0-64.41,42,44-49.35.0.255;3,4,7;5,6,9,10,13,15,16,17,18,20,21,23,24;Ch. $B;$1;Average, current interval, process interval 2, Value at standard conditions;;Billing period $F (255 is current)
 7.0-64.41,42,44-49.36.0.255;3,4,7;5,6,9,10,13,15,16,17,18,20,21,23,24;Ch. $B;$1;Minimum, current interval, process interval 2, Value at metering conditions;;Billing period $F (255 is current)
-7.0-64.41,42,44-49.37.0.255;3,4,7;5,6,9,10,13,15,16,17,18,20,21,23,24;Ch. $B;$1;Minimum, current interval, process interval 2, Value at base conditions ;;Billing period $F (255 is current)
+7.0-64.41,42,44-49.37.0.255;3,4,7;5,6,9,10,13,15,16,17,18,20,21,23,24;Ch. $B;$1;Minimum, current interval, process interval 2, Value at base conditions;;Billing period $F (255 is current)
 7.0-64.41,42,44-49.38.0.255;3,4,7;5,6,9,10,13,15,16,17,18,20,21,23,24;Ch. $B;$1;Minimum, current interval, process interval 2, Value at standard conditions;;Billing period $F (255 is current)
 7.0-64.41,42,44-49.39.0.255;3,4,7;5,6,9,10,13,15,16,17,18,20,21,23,24;Ch. $B;$1;Maximum, current interval, process interval 2, Value at metering conditions;;Billing period $F (255 is current)
-7.0-64.41,42,44-49.40.0.255;3,4,7;5,6,9,10,13,15,16,17,18,20,21,23,24;Ch. $B;$1;Maximum, current interval, process interval 2, Value at base conditions ;;Billing period $F (255 is current)
+7.0-64.41,42,44-49.40.0.255;3,4,7;5,6,9,10,13,15,16,17,18,20,21,23,24;Ch. $B;$1;Maximum, current interval, process interval 2, Value at base conditions;;Billing period $F (255 is current)
 7.0-64.41,42,44-49.41.0.255;3,4,7;5,6,9,10,13,15,16,17,18,20,21,23,24;Ch. $B;$1;Maximum, current interval, process interval 2, Value at standard conditions;;Billing period $F (255 is current)
 7.0-64.41,42,44-49.42.0.255;3,4,7;5,6,9,10,13,15,16,17,18,20,21,23,24;Ch. $B;$1;Average, last interval, process interval 2, Value at metering conditions;;Billing period $F (255 is current)
-7.0-64.41,42,44-49.43.0.255;3,4,7;5,6,9,10,13,15,16,17,18,20,21,23,24;Ch. $B;$1;Average, last interval, process interval 2, Value at base conditions ;;Billing period $F (255 is current)
+7.0-64.41,42,44-49.43.0.255;3,4,7;5,6,9,10,13,15,16,17,18,20,21,23,24;Ch. $B;$1;Average, last interval, process interval 2, Value at base conditions;;Billing period $F (255 is current)
 7.0-64.41,42,44-49.44.0.255;3,4,7;5,6,9,10,13,15,16,17,18,20,21,23,24;Ch. $B;$1;Average, last interval, process interval 2, Value at standard conditions;;Billing period $F (255 is current)
 7.0-64.41,42,44-49.45.0.255;3,4,7;5,6,9,10,13,15,16,17,18,20,21,23,24;Ch. $B;$1;Minimum, last interval, process interval 2, Value at metering conditions;;Billing period $F (255 is current)
-7.0-64.41,42,44-49.46.0.255;3,4,7;5,6,9,10,13,15,16,17,18,20,21,23,24;Ch. $B;$1;Minimum, last interval, process interval 2, Value at base conditions ;;Billing period $F (255 is current)
+7.0-64.41,42,44-49.46.0.255;3,4,7;5,6,9,10,13,15,16,17,18,20,21,23,24;Ch. $B;$1;Minimum, last interval, process interval 2, Value at base conditions;;Billing period $F (255 is current)
 7.0-64.41,42,44-49.47.0.255;3,4,7;5,6,9,10,13,15,16,17,18,20,21,23,24;Ch. $B;$1;Minimum, last interval, process interval 2, Value at standard conditions;;Billing period $F (255 is current)
 7.0-64.41,42,44-49.48.0.255;3,4,7;5,6,9,10,13,15,16,17,18,20,21,23,24;Ch. $B;$1;Maximum, last interval, process interval 2, Value at metering conditions;;Billing period $F (255 is current)
-7.0-64.41,42,44-49.49.0.255;3,4,7;5,6,9,10,13,15,16,17,18,20,21,23,24;Ch. $B;$1;Maximum, last interval, process interval 2, Value at base conditions ;;Billing period $F (255 is current)
+7.0-64.41,42,44-49.49.0.255;3,4,7;5,6,9,10,13,15,16,17,18,20,21,23,24;Ch. $B;$1;Maximum, last interval, process interval 2, Value at base conditions;;Billing period $F (255 is current)
 7.0-64.41,42,44-49.50.0.255;3,4,7;5,6,9,10,13,15,16,17,18,20,21,23,24;Ch. $B;$1;Maximum, last interval, process interval 2, Value at standard conditions;;Billing period $F (255 is current)
 7.0-64.41,42,44-49.51.0.255;3,4,7;5,6,9,10,13,15,16,17,18,20,21,23,24;Ch. $B;$1;Average, current interval, process interval 3, Value at metering conditions;;Billing period $F (255 is current)
-7.0-64.41,42,44-49.52.0.255;3,4,7;5,6,9,10,13,15,16,17,18,20,21,23,24;Ch. $B;$1;Average, current interval, process interval 3, Value at base conditions ;;Billing period $F (255 is current)
+7.0-64.41,42,44-49.52.0.255;3,4,7;5,6,9,10,13,15,16,17,18,20,21,23,24;Ch. $B;$1;Average, current interval, process interval 3, Value at base conditions;;Billing period $F (255 is current)
 7.0-64.41,42,44-49.53.0.255;3,4,7;5,6,9,10,13,15,16,17,18,20,21,23,24;Ch. $B;$1;Average, current interval, process interval 3, Value at standard conditions;;Billing period $F (255 is current)
 7.0-64.41,42,44-49.54.0.255;3,4,7;5,6,9,10,13,15,16,17,18,20,21,23,24;Ch. $B;$1;Minimum, current interval, process interval 3, Value at metering conditions;;Billing period $F (255 is current)
-7.0-64.41,42,44-49.55.0.255;3,4,7;5,6,9,10,13,15,16,17,18,20,21,23,24;Ch. $B;$1;Minimum, current interval, process interval 3, Value at base conditions ;;Billing period $F (255 is current)
+7.0-64.41,42,44-49.55.0.255;3,4,7;5,6,9,10,13,15,16,17,18,20,21,23,24;Ch. $B;$1;Minimum, current interval, process interval 3, Value at base conditions;;Billing period $F (255 is current)
 7.0-64.41,42,44-49.56.0.255;3,4,7;5,6,9,10,13,15,16,17,18,20,21,23,24;Ch. $B;$1;Minimum, current interval, process interval 3, Value at standard conditions;;Billing period $F (255 is current)
 7.0-64.41,42,44-49.57.0.255;3,4,7;5,6,9,10,13,15,16,17,18,20,21,23,24;Ch. $B;$1;Maximum, current interval, process interval 3, Value at metering conditions;;Billing period $F (255 is current)
-7.0-64.41,42,44-49.58.0.255;3,4,7;5,6,9,10,13,15,16,17,18,20,21,23,24;Ch. $B;$1;Maximum, current interval, process interval 3, Value at base conditions ;;Billing period $F (255 is current)
+7.0-64.41,42,44-49.58.0.255;3,4,7;5,6,9,10,13,15,16,17,18,20,21,23,24;Ch. $B;$1;Maximum, current interval, process interval 3, Value at base conditions;;Billing period $F (255 is current)
 7.0-64.41,42,44-49.59.0.255;3,4,7;5,6,9,10,13,15,16,17,18,20,21,23,24;Ch. $B;$1;Maximum, current interval, process interval 3, Value at standard conditions;;Billing period $F (255 is current)
 7.0-64.41,42,44-49.60.0.255;3,4,7;5,6,9,10,13,15,16,17,18,20,21,23,24;Ch. $B;$1;Average, last interval, process interval 3, Value at metering conditions;;Billing period $F (255 is current)
-7.0-64.41,42,44-49.61.0.255;3,4,7;5,6,9,10,13,15,16,17,18,20,21,23,24;Ch. $B;$1;Average, last interval, process interval 3, Value at base conditions ;;Billing period $F (255 is current)
+7.0-64.41,42,44-49.61.0.255;3,4,7;5,6,9,10,13,15,16,17,18,20,21,23,24;Ch. $B;$1;Average, last interval, process interval 3, Value at base conditions;;Billing period $F (255 is current)
 7.0-64.41,42,44-49.62.0.255;3,4,7;5,6,9,10,13,15,16,17,18,20,21,23,24;Ch. $B;$1;Average, last interval, process interval 3, Value at standard conditions;;Billing period $F (255 is current)
 7.0-64.41,42,44-49.63.0.255;3,4,7;5,6,9,10,13,15,16,17,18,20,21,23,24;Ch. $B;$1;Minimum, last interval, process interval 3, Value at metering conditions;;Billing period $F (255 is current)
-7.0-64.41,42,44-49.64.0.255;3,4,7;5,6,9,10,13,15,16,17,18,20,21,23,24;Ch. $B;$1;Minimum, last interval, process interval 3, Value at base conditions ;;Billing period $F (255 is current)
+7.0-64.41,42,44-49.64.0.255;3,4,7;5,6,9,10,13,15,16,17,18,20,21,23,24;Ch. $B;$1;Minimum, last interval, process interval 3, Value at base conditions;;Billing period $F (255 is current)
 7.0-64.41,42,44-49.65.0.255;3,4,7;5,6,9,10,13,15,16,17,18,20,21,23,24;Ch. $B;$1;Minimum, last interval, process interval 3, Value at standard conditions;;Billing period $F (255 is current)
 7.0-64.41,42,44-49.66.0.255;3,4,7;5,6,9,10,13,15,16,17,18,20,21,23,24;Ch. $B;$1;Maximum, last interval, process interval 3, Value at metering conditions;;Billing period $F (255 is current)
-7.0-64.41,42,44-49.67.0.255;3,4,7;5,6,9,10,13,15,16,17,18,20,21,23,24;Ch. $B;$1;Maximum, last interval, process interval 3, Value at base conditions ;;Billing period $F (255 is current)
+7.0-64.41,42,44-49.67.0.255;3,4,7;5,6,9,10,13,15,16,17,18,20,21,23,24;Ch. $B;$1;Maximum, last interval, process interval 3, Value at base conditions;;Billing period $F (255 is current)
 7.0-64.41,42,44-49.68.0.255;3,4,7;5,6,9,10,13,15,16,17,18,20,21,23,24;Ch. $B;$1;Maximum, last interval, process interval 3, Value at standard conditions;;Billing period $F (255 is current)
 7.0-64.41,42,44-49.69.0.255;3,4,7;5,6,9,10,13,15,16,17,18,20,21,23,24;Ch. $B;$1;Average, current interval, process interval 4, Value at metering conditions;;Billing period $F (255 is current)
-7.0-64.41,42,44-49.70.0.255;3,4,7;5,6,9,10,13,15,16,17,18,20,21,23,24;Ch. $B;$1;Average, current interval, process interval 4, Value at base conditions ;;Billing period $F (255 is current)
+7.0-64.41,42,44-49.70.0.255;3,4,7;5,6,9,10,13,15,16,17,18,20,21,23,24;Ch. $B;$1;Average, current interval, process interval 4, Value at base conditions;;Billing period $F (255 is current)
 7.0-64.41,42,44-49.71.0.255;3,4,7;5,6,9,10,13,15,16,17,18,20,21,23,24;Ch. $B;$1;Average, current interval, process interval 4, Value at standard conditions;;Billing period $F (255 is current)
 7.0-64.41,42,44-49.72.0.255;3,4,7;5,6,9,10,13,15,16,17,18,20,21,23,24;Ch. $B;$1;Minimum, current interval, process interval 4, Value at metering conditions;;Billing period $F (255 is current)
-7.0-64.41,42,44-49.73.0.255;3,4,7;5,6,9,10,13,15,16,17,18,20,21,23,24;Ch. $B;$1;Minimum, current interval, process interval 4, Value at base conditions ;;Billing period $F (255 is current)
+7.0-64.41,42,44-49.73.0.255;3,4,7;5,6,9,10,13,15,16,17,18,20,21,23,24;Ch. $B;$1;Minimum, current interval, process interval 4, Value at base conditions;;Billing period $F (255 is current)
 7.0-64.41,42,44-49.74.0.255;3,4,7;5,6,9,10,13,15,16,17,18,20,21,23,24;Ch. $B;$1;Minimum, current interval, process interval 4, Value at standard conditions;;Billing period $F (255 is current)
 7.0-64.41,42,44-49.75.0.255;3,4,7;5,6,9,10,13,15,16,17,18,20,21,23,24;Ch. $B;$1;Maximum, current interval, process interval 4, Value at metering conditions;;Billing period $F (255 is current)
-7.0-64.41,42,44-49.76.0.255;3,4,7;5,6,9,10,13,15,16,17,18,20,21,23,24;Ch. $B;$1;Maximum, current interval, process interval 4, Value at base conditions ;;Billing period $F (255 is current)
+7.0-64.41,42,44-49.76.0.255;3,4,7;5,6,9,10,13,15,16,17,18,20,21,23,24;Ch. $B;$1;Maximum, current interval, process interval 4, Value at base conditions;;Billing period $F (255 is current)
 7.0-64.41,42,44-49.77.0.255;3,4,7;5,6,9,10,13,15,16,17,18,20,21,23,24;Ch. $B;$1;Maximum, current interval, process interval 4, Value at standard conditions;;Billing period $F (255 is current)
 7.0-64.41,42,44-49.78.0.255;3,4,7;5,6,9,10,13,15,16,17,18,20,21,23,24;Ch. $B;$1;Average, last interval, process interval 4, Value at metering conditions;;Billing period $F (255 is current)
-7.0-64.41,42,44-49.79.0.255;3,4,7;5,6,9,10,13,15,16,17,18,20,21,23,24;Ch. $B;$1;Average, last interval, process interval 4, Value at base conditions ;;Billing period $F (255 is current)
+7.0-64.41,42,44-49.79.0.255;3,4,7;5,6,9,10,13,15,16,17,18,20,21,23,24;Ch. $B;$1;Average, last interval, process interval 4, Value at base conditions;;Billing period $F (255 is current)
 7.0-64.41,42,44-49.80.0.255;3,4,7;5,6,9,10,13,15,16,17,18,20,21,23,24;Ch. $B;$1;Average, last interval, process interval 4, Value at standard conditions;;Billing period $F (255 is current)
 7.0-64.41,42,44-49.81.0.255;3,4,7;5,6,9,10,13,15,16,17,18,20,21,23,24;Ch. $B;$1;Minimum, last interval, process interval 4, Value at metering conditions;;Billing period $F (255 is current)
-7.0-64.41,42,44-49.82.0.255;3,4,7;5,6,9,10,13,15,16,17,18,20,21,23,24;Ch. $B;$1;Minimum, last interval, process interval 4, Value at base conditions ;;Billing period $F (255 is current)
+7.0-64.41,42,44-49.82.0.255;3,4,7;5,6,9,10,13,15,16,17,18,20,21,23,24;Ch. $B;$1;Minimum, last interval, process interval 4, Value at base conditions;;Billing period $F (255 is current)
 7.0-64.41,42,44-49.83.0.255;3,4,7;5,6,9,10,13,15,16,17,18,20,21,23,24;Ch. $B;$1;Minimum, last interval, process interval 4, Value at standard conditions;;Billing period $F (255 is current)
 7.0-64.41,42,44-49.84.0.255;3,4,7;5,6,9,10,13,15,16,17,18,20,21,23,24;Ch. $B;$1;Maximum, last interval, process interval 4, Value at metering conditions;;Billing period $F (255 is current)
-7.0-64.41,42,44-49.85.0.255;3,4,7;5,6,9,10,13,15,16,17,18,20,21,23,24;Ch. $B;$1;Maximum, last interval, process interval 4, Value at base conditions ;;Billing period $F (255 is current)
+7.0-64.41,42,44-49.85.0.255;3,4,7;5,6,9,10,13,15,16,17,18,20,21,23,24;Ch. $B;$1;Maximum, last interval, process interval 4, Value at base conditions;;Billing period $F (255 is current)
 7.0-64.41,42,44-49.86.0.255;3,4,7;5,6,9,10,13,15,16,17,18,20,21,23,24;Ch. $B;$1;Maximum, last interval, process interval 4, Value at standard conditions;;Billing period $F (255 is current)
 7.0-64.41,42,44-49.87.0.255;3,4,7;5,6,9,10,13,15,16,17,18,20,21,23,24;Ch. $B;$1;Average, process interval 5, interval since last event, Value at metering conditions;;Billing period $F (255 is current)
-7.0-64.41,42,44-49.88.0.255;3,4,7;5,6,9,10,13,15,16,17,18,20,21,23,24;Ch. $B;$1;Average, process interval 5, interval since last event, Value at base conditions ;;Billing period $F (255 is current)
+7.0-64.41,42,44-49.88.0.255;3,4,7;5,6,9,10,13,15,16,17,18,20,21,23,24;Ch. $B;$1;Average, process interval 5, interval since last event, Value at base conditions;;Billing period $F (255 is current)
 7.0-64.41,42,44-49.89.0.255;3,4,7;5,6,9,10,13,15,16,17,18,20,21,23,24;Ch. $B;$1;Average, process interval 5, interval since last event, Value at standard conditions;;Billing period $F (255 is current)
 7.0-64.41,42,44-49.90.0.255;3,4,7;5,6,9,10,13,15,16,17,18,20,21,23,24;Ch. $B;$1;Average, process interval 6, interval between last two events, Value at metering conditions;;Billing period $F (255 is current)
-7.0-64.41,42,44-49.91.0.255;3,4,7;5,6,9,10,13,15,16,17,18,20,21,23,24;Ch. $B;$1;Average, process interval 6, interval between last two events, Value at base conditions ;;Billing period $F (255 is current)
+7.0-64.41,42,44-49.91.0.255;3,4,7;5,6,9,10,13,15,16,17,18,20,21,23,24;Ch. $B;$1;Average, process interval 6, interval between last two events, Value at base conditions;;Billing period $F (255 is current)
 7.0-64.41,42,44-49.92.0.255;3,4,7;5,6,9,10,13,15,16,17,18,20,21,23,24;Ch. $B;$1;Average, process interval 6, interval between last two events, Value at standard conditions;;Billing period $F (255 is current)
-7.0-64.51-55.0,2,3,10,11,12.0.255;3,4,7;5,6,9,10,13,15,16,17,18,20,21,23,24;Ch. $B;$2;$3;Process independent current value;Billing period $F (255 is current)
-7.0-64.51-55.0,2,3,10,11,12.1.255;3,4,7;5,6,9,10,13,15,16,17,18,20,21,23,24;Ch. $B;$2;$3;Weighted value (e.g. Superior calorific value);Billing period $F (255 is current)
-7.0-64.51-55.0,2,3,10,11,12.11.255;3,4,7;5,6,9,10,13,15,16,17,18,20,21,23,24;Ch. $B;$2;$3;Average, current interval, averaging period 1 ;Billing period $F (255 is current)
-7.0-64.51-55.0,2,3,10,11,12.12.255;3,4,7;5,6,9,10,13,15,16,17,18,20,21,23,24;Ch. $B;$2;$3;Average, last interval, averaging period 1 ;Billing period $F (255 is current)
-7.0-64.51-55.0,2,3,10,11,12.13.255;3,4,7;5,6,9,10,13,15,16,17,18,20,21,23,24;Ch. $B;$2;$3;Average, current interval, averaging period 2;Billing period $F (255 is current)
-7.0-64.51-55.0,2,3,10,11,12.14.255;3,4,7;5,6,9,10,13,15,16,17,18,20,21,23,24;Ch. $B;$2;$3;Average, last interval, averaging period 2;Billing period $F (255 is current)
-7.0-64.51-55.0,2,3,10,11,12.15.255;3,4,7;5,6,9,10,13,15,16,17,18,20,21,23,24;Ch. $B;$2;$3;Average, current interval, averaging period 3;Billing period $F (255 is current)
-7.0-64.51-55.0,2,3,10,11,12.16.255;3,4,7;5,6,9,10,13,15,16,17,18,20,21,23,24;Ch. $B;$2;$3;Average, last interval, averaging period 3;Billing period $F (255 is current)
-7.0-64.51-55.0,2,3,10,11,12.17.255;3,4,7;5,6,9,10,13,15,16,17,18,20,21,23,24;Ch. $B;$2;$3;Average, current interval, averaging period 4;Billing period $F (255 is current)
-7.0-64.51-55.0,2,3,10,11,12.18.255;3,4,7;5,6,9,10,13,15,16,17,18,20,21,23,24;Ch. $B;$2;$3;Average, last interval, averaging period 4;Billing period $F (255 is current)
-7.0-64.51-55.0,2,3,10,11,12.19.255;3,4,7;5,6,9,10,13,15,16,17,18,20,21,23,24;Ch. $B;$2;$3;Average, current interval, averaging period 5;Billing period $F (255 is current)
-7.0-64.51-55.0,2,3,10,11,12.20.255;3,4,7;5,6,9,10,13,15,16,17,18,20,21,23,24;Ch. $B;$2;$3;Average, last interval, averaging period 5;Billing period $F (255 is current)
-7.0-64.51-55.0,2,3,10,11,12.21.255;3,4,7;5,6,9,10,13,15,16,17,18,20,21,23,24;Ch. $B;$2;$3;Average, current interval, averaging period 6;Billing period $F (255 is current)
-7.0-64.51-55.0,2,3,10,11,12.22.255;3,4,7;5,6,9,10,13,15,16,17,18,20,21,23,24;Ch. $B;$2;$3;Average, last interval, averaging period 6;Billing period $F (255 is current)
-7.0-64.51-55.0,2,3,10,11,12.23.255;3,4,7;5,6,9,10,13,15,16,17,18,20,21,23,24;Ch. $B;$2;$3;Average, current interval, averaging period 7;Billing period $F (255 is current)
-7.0-64.51-55.0,2,3,10,11,12.24.255;3,4,7;5,6,9,10,13,15,16,17,18,20,21,23,24;Ch. $B;$2;$3;Average, last interval, averaging period 7;Billing period $F (255 is current)
-7.0-64.51-55.0,2,3,10,11,12.25.255;3,4,7;5,6,9,10,13,15,16,17,18,20,21,23,24;Ch. $B;$2;$3;Average, current interval, averaging period 8;Billing period $F (255 is current)
-7.0-64.51-55.0,2,3,10,11,12.26.255;3,4,7;5,6,9,10,13,15,16,17,18,20,21,23,24;Ch. $B;$2;$3;Average, last interval, averaging period 8;Billing period $F (255 is current)
-7.0-64.51-55.0,2,3,10,11,12.27.255;3,4,7;5,6,9,10,13,15,16,17,18,20,21,23,24;Ch. $B;$2;$3;Average, averaging period 9, interval since last event;Billing period $F (255 is current)
-7.0-64.51-55.0,2,3,10,11,12.28.255;3,4,7;5,6,9,10,13,15,16,17,18,20,21,23,24;Ch. $B;$2;$3;Average, averaging period 10, interval between last two events;Billing period $F (255 is current)
+7.0-64.51-55.0,2,3,10,11.0.255;3,4,7;5,6,9,10,13,15,16,17,18,20,21,23,24;Ch. $B;$2;$3;Process independent current value;Billing period $F (255 is current)
+7.0-64.51-55.0,2,3,10,11.1.255;3,4,7;5,6,9,10,13,15,16,17,18,20,21,23,24;Ch. $B;$2;$3;Weighted value (e.g. Superior calorific value);Billing period $F (255 is current)
+7.0-64.51-55.0,2,3,10,11.11.255;3,4,7;5,6,9,10,13,15,16,17,18,20,21,23,24;Ch. $B;$2;$3;Average, current interval, averaging period 1;Billing period $F (255 is current)
+7.0-64.51-55.0,2,3,10,11.12.255;3,4,7;5,6,9,10,13,15,16,17,18,20,21,23,24;Ch. $B;$2;$3;Average, last interval, averaging period 1;Billing period $F (255 is current)
+7.0-64.51-55.0,2,3,10,11.13.255;3,4,7;5,6,9,10,13,15,16,17,18,20,21,23,24;Ch. $B;$2;$3;Average, current interval, averaging period 2;Billing period $F (255 is current)
+7.0-64.51-55.0,2,3,10,11.14.255;3,4,7;5,6,9,10,13,15,16,17,18,20,21,23,24;Ch. $B;$2;$3;Average, last interval, averaging period 2;Billing period $F (255 is current)
+7.0-64.51-55.0,2,3,10,11.15.255;3,4,7;5,6,9,10,13,15,16,17,18,20,21,23,24;Ch. $B;$2;$3;Average, current interval, averaging period 3;Billing period $F (255 is current)
+7.0-64.51-55.0,2,3,10,11.16.255;3,4,7;5,6,9,10,13,15,16,17,18,20,21,23,24;Ch. $B;$2;$3;Average, last interval, averaging period 3;Billing period $F (255 is current)
+7.0-64.51-55.0,2,3,10,11.17.255;3,4,7;5,6,9,10,13,15,16,17,18,20,21,23,24;Ch. $B;$2;$3;Average, current interval, averaging period 4;Billing period $F (255 is current)
+7.0-64.51-55.0,2,3,10,11.18.255;3,4,7;5,6,9,10,13,15,16,17,18,20,21,23,24;Ch. $B;$2;$3;Average, last interval, averaging period 4;Billing period $F (255 is current)
+7.0-64.51-55.0,2,3,10,11.19.255;3,4,7;5,6,9,10,13,15,16,17,18,20,21,23,24;Ch. $B;$2;$3;Average, current interval, averaging period 5;Billing period $F (255 is current)
+7.0-64.51-55.0,2,3,10,11.20.255;3,4,7;5,6,9,10,13,15,16,17,18,20,21,23,24;Ch. $B;$2;$3;Average, last interval, averaging period 5;Billing period $F (255 is current)
+7.0-64.51-55.0,2,3,10,11.21.255;3,4,7;5,6,9,10,13,15,16,17,18,20,21,23,24;Ch. $B;$2;$3;Average, current interval, averaging period 6;Billing period $F (255 is current)
+7.0-64.51-55.0,2,3,10,11.22.255;3,4,7;5,6,9,10,13,15,16,17,18,20,21,23,24;Ch. $B;$2;$3;Average, last interval, averaging period 6;Billing period $F (255 is current)
+7.0-64.51-55.0,2,3,10,11.23.255;3,4,7;5,6,9,10,13,15,16,17,18,20,21,23,24;Ch. $B;$2;$3;Average, current interval, averaging period 7;Billing period $F (255 is current)
+7.0-64.51-55.0,2,3,10,11.24.255;3,4,7;5,6,9,10,13,15,16,17,18,20,21,23,24;Ch. $B;$2;$3;Average, last interval, averaging period 7;Billing period $F (255 is current)
+7.0-64.51-55.0,2,3,10,11.25.255;3,4,7;5,6,9,10,13,15,16,17,18,20,21,23,24;Ch. $B;$2;$3;Average, current interval, averaging period 8;Billing period $F (255 is current)
+7.0-64.51-55.0,2,3,10,11.26.255;3,4,7;5,6,9,10,13,15,16,17,18,20,21,23,24;Ch. $B;$2;$3;Average, last interval, averaging period 8;Billing period $F (255 is current)
+7.0-64.51-55.0,2,3,10,11.27.255;3,4,7;5,6,9,10,13,15,16,17,18,20,21,23,24;Ch. $B;$2;$3;Average, averaging period 9, interval since last event;Billing period $F (255 is current)
+7.0-64.51-55.0,2,3,10,11.28.255;3,4,7;5,6,9,10,13,15,16,17,18,20,21,23,24;Ch. $B;$2;$3;Average, averaging period 10, interval between last two events;Billing period $F (255 is current)
+7.0-64.51-55.12.0.255;3;;;Calculation method in use;;;
+7.0-64.51-55.12.1-20.255;3;;;Calculation method supported;;$E;
 7.0-64.70.8-20,60-84.0.255;3,4,7;5,6,9,10,13,15,16,17,18,20,21,23,24;Ch. $B;Natural gas analysis;$4;Process independent current value;Billing period $F (255 is current)
 7.0-64.70.8-20,60-84.1.255;3,4,7;5,6,9,10,13,15,16,17,18,20,21,23,24;Ch. $B;Natural gas analysis;$4;Weighted value (e.g. CO2 in [GJ / t]);Billing period $F (255 is current)
-7.0-64.70.8-20,60-84.11.255;3,4,7;5,6,9,10,13,15,16,17,18,20,21,23,24;Ch. $B;Natural gas analysis;$4;Average, current interval, averaging period 1 ;Billing period $F (255 is current)
-7.0-64.70.8-20,60-84.12.255;3,4,7;5,6,9,10,13,15,16,17,18,20,21,23,24;Ch. $B;Natural gas analysis;$4;Average, last interval, averaging period 1 ;Billing period $F (255 is current)
+7.0-64.70.8-20,60-84.11.255;3,4,7;5,6,9,10,13,15,16,17,18,20,21,23,24;Ch. $B;Natural gas analysis;$4;Average, current interval, averaging period 1;Billing period $F (255 is current)
+7.0-64.70.8-20,60-84.12.255;3,4,7;5,6,9,10,13,15,16,17,18,20,21,23,24;Ch. $B;Natural gas analysis;$4;Average, last interval, averaging period 1;Billing period $F (255 is current)
 7.0-64.70.8-20,60-84.13.255;3,4,7;5,6,9,10,13,15,16,17,18,20,21,23,24;Ch. $B;Natural gas analysis;$4;Average, current interval, averaging period 2;Billing period $F (255 is current)
 7.0-64.70.8-20,60-84.14.255;3,4,7;5,6,9,10,13,15,16,17,18,20,21,23,24;Ch. $B;Natural gas analysis;$4;Average, last interval, averaging period 2;Billing period $F (255 is current)
 7.0-64.70.8-20,60-84.15.255;3,4,7;5,6,9,10,13,15,16,17,18,20,21,23,24;Ch. $B;Natural gas analysis;$4;Average, current interval, averaging period 3;Billing period $F (255 is current)
@@ -1213,12 +1310,12 @@
 7.0-64.98.2.0-127.255;7;;Ch. $B;Gas related data of billing period (with billing period scheme 2);;;
 7.0-64.98.3.0-127.255;7;;Ch. $B;Gas related data of billing period (with billing period scheme 3);;;
 7.0-64.98.4.0-127.255;7;;Ch. $B;Gas related data of billing period (with billing period scheme 4);;;
-7.0-64.98.11.0-127.255;7;;Ch. $B;Gas related data of event triggered billing profile ;;;
+7.0-64.98.11.0-127.255;7;;Ch. $B;Gas related data of event triggered billing profile;;;
 7.0-64.99.1.4.255;7;;Ch. $B;Load profile with recording interval 1;;#$(E+1);
 7.0-64.99.2.4.255;7;;Ch. $B;Load profile with recording interval 2;;#$(E+1);
 7.0-64.99.3.4.255;7;;Ch. $B;Profile of maxima with recording interval 1;;;
 7.0-64.99.4.4.255;7;;Ch. $B;Profile of maxima with recording interval 2;;;
-7.0-64.99.1-8,11-16,21-26,31-36,61-66.0-3,6-98.0-99,101-126,255;7;;;Load profile for indexes and index differences of volume, mass and energy ;$5;$6;Billing period $F (255 is current)
+7.0-64.99.1-8,11-16,21-26,31-36,61-66.0-3,6-98.0-99,101-126,255;7;;;Load profile for indexes and index differences of volume, mass and energy;$5;$6;Billing period $F (255 is current)
 7.0-64.99.41.255.255;;;;;Absolute temperature;;
 7.0-64.99.42.255.255;;;;;Absolute pressure;;
 7.0-64.99.44.255.255;;;;;Velocity of sound;;

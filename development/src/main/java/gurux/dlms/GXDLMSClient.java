@@ -39,8 +39,10 @@ import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.List;
 import java.util.Map.Entry;
+import java.util.logging.Level;
 import java.util.logging.Logger;
 
+import gurux.dlms.asn.GXAsn1Converter;
 import gurux.dlms.enums.AccessMode;
 import gurux.dlms.enums.Authentication;
 import gurux.dlms.enums.Command;
@@ -679,7 +681,7 @@ public class GXDLMSClient {
                     bb.set(settings.getCtoSChallenge());
                     bb.set(settings.getStoCChallenge());
                     ver.update(bb.array());
-                    equals = ver.verify(GXASN1Converter.encode(value));
+                    equals = ver.verify(value);
 
                 } catch (Exception ex) {
                     throw new RuntimeException(ex.getMessage());
@@ -698,12 +700,13 @@ public class GXDLMSClient {
                 GXByteBuffer challenge = new GXByteBuffer(tmp);
                 equals = challenge.compare(value);
                 if (!equals) {
-                    LOGGER.info("Invalid StoC:" + GXCommon.toHex(value, true)
-                            + "-" + GXCommon.toHex(tmp, true));
+                    LOGGER.log(Level.INFO,
+                            "Invalid StoC:" + GXCommon.toHex(value, true) + "-"
+                                    + GXCommon.toHex(tmp, true));
                 }
             }
         } else {
-            LOGGER.info("Server did not accept CtoS.");
+            LOGGER.log(Level.INFO, "Server did not accept CtoS.");
         }
 
         if (!equals) {
@@ -726,10 +729,11 @@ public class GXDLMSClient {
             return new byte[0];
         }
         if (this.getInterfaceType() == InterfaceType.HDLC) {
-            return GXDLMS.getHdlcFrame(settings, Command.DISC, null);
+            return GXDLMS.getHdlcFrame(settings, Command.DISCONNECT_REQUEST,
+                    null);
         }
         GXByteBuffer bb = new GXByteBuffer(2);
-        bb.setUInt8(Command.DISCONNECT_REQUEST);
+        bb.setUInt8(Command.RELEASE_REQUEST);
         bb.setUInt8(0x0);
         return GXDLMS.getWrapperFrame(settings, bb);
     }

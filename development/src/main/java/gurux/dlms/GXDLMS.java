@@ -1679,6 +1679,15 @@ abstract class GXDLMS {
                     ret = (byte) data.getData().getUInt8();
                     if (ret != 0) {
                         data.setError(data.getData().getUInt8());
+                        // Handle Texas Instrument missing byte here.
+                        if (ret == 9 && data.getError() == 16) {
+                            data.getData()
+                                    .position(data.getData().position() - 2);
+                            getDataFromBlock(data.getData(), 0);
+                            data.setError(0);
+                            ret = 0;
+                        }
+
                     } else {
                         getDataFromBlock(data.getData(), 0);
                     }
@@ -2303,7 +2312,7 @@ abstract class GXDLMS {
                 // This is parsed later.
                 data.getData().position(data.getData().position() - 1);
                 break;
-            case Command.DISCONNECT_RESPONSE:
+            case Command.RELEASE_RESPONSE:
                 break;
             case Command.CONFIRMED_SERVICE_ERROR:
                 handleConfirmedServiceError(data);
@@ -2314,7 +2323,7 @@ abstract class GXDLMS {
             case Command.WRITE_REQUEST:
             case Command.SET_REQUEST:
             case Command.METHOD_REQUEST:
-            case Command.DISCONNECT_REQUEST:
+            case Command.RELEASE_REQUEST:
                 // Server handles this.
                 if ((data.getMoreData().getValue()
                         & RequestTypes.FRAME.getValue()) != 0) {

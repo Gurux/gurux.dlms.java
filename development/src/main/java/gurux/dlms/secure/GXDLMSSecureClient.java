@@ -34,10 +34,10 @@
 
 package gurux.dlms.secure;
 
-import java.security.cert.X509Certificate;
 import java.util.List;
 
 import gurux.dlms.GXDLMSClient;
+import gurux.dlms.asn.GXx509Certificate;
 import gurux.dlms.enums.Authentication;
 import gurux.dlms.enums.InterfaceType;
 
@@ -52,11 +52,11 @@ public class GXDLMSSecureClient extends GXDLMSClient {
     /**
      * Client certificate.
      */
-    private X509Certificate clientCertificate;
+    private GXx509Certificate clientCertificate;
     /**
      * Server certificate.
      */
-    private X509Certificate serverCertificate;
+    private GXx509Certificate serverCertificate;
 
     /**
      * Ciphering settings.
@@ -162,7 +162,7 @@ public class GXDLMSSecureClient extends GXDLMSClient {
     /**
      * @return Client certificate.
      */
-    public final X509Certificate getClientCertificate() {
+    public final GXx509Certificate getClientCertificate() {
         return clientCertificate;
     }
 
@@ -170,14 +170,14 @@ public class GXDLMSSecureClient extends GXDLMSClient {
      * @param value
      *            Client certificate.
      */
-    public final void setClientCertificate(final X509Certificate value) {
+    public final void setClientCertificate(final GXx509Certificate value) {
         clientCertificate = value;
     }
 
     /**
      * @return Server certificate.
      */
-    public final X509Certificate getServerCertificate() {
+    public final GXx509Certificate getServerCertificate() {
         return serverCertificate;
     }
 
@@ -185,14 +185,14 @@ public class GXDLMSSecureClient extends GXDLMSClient {
      * @param value
      *            Server certificate.
      */
-    public final void setServerCertificate(final X509Certificate value) {
+    public final void setServerCertificate(final GXx509Certificate value) {
         serverCertificate = value;
     }
 
     /**
      * @return Available certificates.
      */
-    public final List<X509Certificate> getCertificates() {
+    public final List<GXx509Certificate> getCertificates() {
         return getSettings().getCertificates();
     }
 }

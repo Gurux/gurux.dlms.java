@@ -51,7 +51,7 @@ public interface GXICipher {
      *            Data to encrypt.
      * @return Encrypted data.
      */
-    byte[] encrypt(int tag, final byte[] systemTitle, byte[] data);
+    byte[] encrypt(int tag, byte[] systemTitle, byte[] data);
 
     /**
      * Decrypt data.
@@ -62,7 +62,7 @@ public interface GXICipher {
      *            Decrypted data.
      * @return Used security.
      */
-    Security decrypt(final byte[] systemTitle, GXByteBuffer data);
+    Security decrypt(byte[] systemTitle, GXByteBuffer data);
 
     /**
      * Reset encrypt settings.

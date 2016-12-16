@@ -34,10 +34,10 @@
 
 package gurux.dlms;
 
-import java.security.cert.X509Certificate;
 import java.util.ArrayList;
 import java.util.List;
 
+import gurux.dlms.asn.GXx509Certificate;
 import gurux.dlms.enums.Authentication;
 import gurux.dlms.enums.InterfaceType;
 import gurux.dlms.enums.Priority;
@@ -73,7 +73,7 @@ public class GXDLMSSettings {
     /**
      * Certificates.
      */
-    private List<X509Certificate> certificates;
+    private List<GXx509Certificate> certificates;
 
     /**
      * DLMS version number.
@@ -247,7 +247,7 @@ public class GXDLMSSettings {
     GXDLMSSettings(final boolean isServer) {
         server = isServer;
         objects = new GXDLMSObjectCollection();
-        certificates = new ArrayList<X509Certificate>();
+        certificates = new ArrayList<GXx509Certificate>();
         limits = new GXDLMSLimits();
         if (isServer) {
             lnSettings = new GXDLMSLNSettings(new byte[] { 0x00, 0x7C, 0x1F });
@@ -855,7 +855,7 @@ public class GXDLMSSettings {
     /**
      * @return Available certificates.
      */
-    public final List<X509Certificate> getCertificates() {
+    public final List<GXx509Certificate> getCertificates() {
         return certificates;
     }
 }

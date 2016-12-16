@@ -34,6 +34,7 @@
 
 package gurux.dlms;
 
+import java.util.logging.Level;
 import java.util.logging.Logger;
 
 import gurux.dlms.enums.AssociationResult;
@@ -214,8 +215,7 @@ public abstract class GXDLMSServer {
      *            Client address.
      * @return True, if data is sent to this server.
      */
-    protected abstract boolean isTarget(final int serverAddress,
-            final int clientAddress);
+    protected abstract boolean isTarget(int serverAddress, int clientAddress);
 
     /**
      * Check whether the authentication and password are correct.
@@ -227,7 +227,7 @@ public abstract class GXDLMSServer {
      * @return Source diagnostic.
      */
     protected abstract SourceDiagnostic validateAuthentication(
-            final Authentication authentication, final byte[] password);
+            Authentication authentication, byte[] password);
 
     /**
      * Find object.
@@ -432,7 +432,7 @@ public abstract class GXDLMSServer {
                 associationObject = it;
             } else if (!(it instanceof IGXDLMSBase)) {
                 // Remove unsupported items.
-                LOGGER.info(it.getLogicalName() + " not supported.");
+                LOGGER.log(Level.INFO, it.getLogicalName() + " not supported.");
                 settings.getObjects().remove(pos);
                 --pos;
             }
@@ -508,6 +508,9 @@ public abstract class GXDLMSServer {
             } else {
                 settings.setConnected(true);
             }
+        }
+        if (settings.getInterfaceType() == InterfaceType.HDLC) {
+            replyData.set(GXCommon.LLC_REPLY_BYTES);
         }
         // Generate AARE packet.
         GXAPDU.generateAARE(settings, replyData, result, diagnostic,
@@ -677,7 +680,7 @@ public abstract class GXDLMSServer {
         } catch (
 
         Exception e) {
-            LOGGER.severe(e.toString());
+            LOGGER.log(Level.SEVERE, e.toString());
             if (info.getCommand() != Command.NONE) {
                 return reportError(info.getCommand(), ErrorCode.HARDWARE_FAULT);
             } else {
@@ -781,8 +784,8 @@ public abstract class GXDLMSServer {
             handleAarqRequest(data, connectionInfo);
             connected(connectionInfo);
             break;
+        case Command.RELEASE_REQUEST:
         case Command.DISCONNECT_REQUEST:
-        case Command.DISC:
             generateDisconnectRequest();
             settings.setConnected(false);
             disconnected(connectionInfo);
@@ -792,7 +795,7 @@ public abstract class GXDLMSServer {
             // Client wants to get next block.
             break;
         default:
-            LOGGER.severe("Invalid command: " + cmd);
+            LOGGER.log(Level.SEVERE, "Invalid command: " + cmd);
         }
         byte[] reply;
         if (settings.getInterfaceType() == InterfaceType.WRAPPER) {

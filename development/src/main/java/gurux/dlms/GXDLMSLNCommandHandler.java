@@ -2,6 +2,7 @@ package gurux.dlms;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.logging.Level;
 import java.util.logging.Logger;
 
 import gurux.dlms.enums.AccessMode;
@@ -58,7 +59,8 @@ final class GXDLMSLNCommandHandler {
             // Get request with a list.
             getRequestWithList(settings, server, data, replyData, xml);
         } else {
-            LOGGER.info("HandleGetRequest failed. Invalid command type.");
+            LOGGER.log(Level.INFO,
+                    "HandleGetRequest failed. Invalid command type.");
             GXByteBuffer bb = new GXByteBuffer();
             settings.resetBlockIndex();
             // Access Error : Device reports a hardware fault.
@@ -114,7 +116,7 @@ final class GXDLMSLNCommandHandler {
                     xml);
             break;
         default:
-            LOGGER.info("HandleSetRequest failed. Unknown command.");
+            LOGGER.log(Level.INFO, "HandleSetRequest failed. Unknown command.");
             settings.resetBlockIndex();
             p.setStatus(ErrorCode.HARDWARE_FAULT.getValue());
             break;
@@ -254,8 +256,9 @@ final class GXDLMSLNCommandHandler {
             return;
         }
         if (index != settings.getBlockIndex()) {
-            LOGGER.info("getRequestNextDataBlock failed. Invalid block number. "
-                    + settings.getBlockIndex() + "/" + index);
+            LOGGER.log(Level.INFO,
+                    "getRequestNextDataBlock failed. Invalid block number. "
+                            + settings.getBlockIndex() + "/" + index);
             GXDLMS.getLNPdu(
                     new GXDLMSLNParameters(settings, Command.GET_RESPONSE, 2,
                             null, bb,
@@ -439,8 +442,9 @@ final class GXDLMSLNCommandHandler {
             p.setMultipleBlocks(data.getUInt8() == 0);
             long blockNumber = data.getUInt32();
             if (blockNumber != settings.getBlockIndex()) {
-                LOGGER.info("handleSetRequest failed. Invalid block number. "
-                        + settings.getBlockIndex() + "/" + blockNumber);
+                LOGGER.log(Level.INFO,
+                        "handleSetRequest failed. Invalid block number. "
+                                + settings.getBlockIndex() + "/" + blockNumber);
                 p.setStatus(ErrorCode.DATA_BLOCK_NUMBER_INVALID.getValue());
                 return;
             }
@@ -448,7 +452,8 @@ final class GXDLMSLNCommandHandler {
             int size = GXCommon.getObjectCount(data);
             int realSize = data.size() - data.position();
             if (size != realSize) {
-                LOGGER.info("handleSetRequest failed. Invalid block size.");
+                LOGGER.log(Level.INFO,
+                        "handleSetRequest failed. Invalid block size.");
                 p.setStatus(ErrorCode.DATA_BLOCK_UNAVAILABLE.getValue());
                 return;
             }
@@ -492,7 +497,9 @@ final class GXDLMSLNCommandHandler {
                                 Command.GET_REQUEST, data));
                     }
                     server.notifyWrite(list);
-                    if (!e.getHandled() && !p.isMultipleBlocks()) {
+                    if (e.getError() != ErrorCode.OK) {
+                        p.setStatus(e.getError().getValue());
+                    } else if (!e.getHandled() && !p.isMultipleBlocks()) {
                         obj.setValue(settings, e);
                     }
                 } catch (Exception e) {
@@ -510,14 +517,16 @@ final class GXDLMSLNCommandHandler {
         p.setMultipleBlocks(data.getUInt8() == 0);
         long blockNumber = data.getUInt32();
         if (blockNumber != settings.getBlockIndex()) {
-            LOGGER.info("handleSetRequest failed. Invalid block number. "
-                    + settings.getBlockIndex() + "/" + blockNumber);
+            LOGGER.log(Level.INFO,
+                    "handleSetRequest failed. Invalid block number. "
+                            + settings.getBlockIndex() + "/" + blockNumber);
             p.setStatus(ErrorCode.DATA_BLOCK_NUMBER_INVALID.getValue());
         } else {
             int size = GXCommon.getObjectCount(data);
             int realSize = data.size() - data.position();
             if (size != realSize) {
-                LOGGER.info("handleSetRequest failed. Invalid block size.");
+                LOGGER.log(Level.INFO,
+                        "handleSetRequest failed. Invalid block size.");
                 p.setStatus(ErrorCode.DATA_BLOCK_UNAVAILABLE.getValue());
             }
             server.getTransaction().getData().set(data);

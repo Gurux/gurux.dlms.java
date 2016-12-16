@@ -43,6 +43,7 @@ import java.nio.file.Paths;
 import java.text.NumberFormat;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Date;
 import java.util.List;
 import java.util.Map.Entry;
@@ -50,7 +51,6 @@ import java.util.Map.Entry;
 import gurux.common.GXCommon;
 import gurux.common.IGXMedia;
 import gurux.common.ReceiveParameters;
-import gurux.dlms.GXByteBuffer;
 import gurux.dlms.GXDLMSClient;
 import gurux.dlms.GXDLMSConverter;
 import gurux.dlms.GXDLMSException;
@@ -62,9 +62,7 @@ import gurux.dlms.enums.ErrorCode;
 import gurux.dlms.enums.InterfaceType;
 import gurux.dlms.enums.ObjectType;
 import gurux.dlms.enums.RequestTypes;
-import gurux.dlms.enums.Security;
 import gurux.dlms.manufacturersettings.GXManufacturer;
-import gurux.dlms.manufacturersettings.GXObisCode;
 import gurux.dlms.manufacturersettings.GXServerAddress;
 import gurux.dlms.manufacturersettings.HDLCAddressType;
 import gurux.dlms.objects.GXDLMSCaptureObject;
@@ -83,7 +81,6 @@ import gurux.serial.GXSerial;
 public class GXCommunicate {
     IGXMedia Media;
     public boolean Trace = false;
-    long ConnectionStartTime;
     GXManufacturer manufacturer;
     public GXDLMSSecureClient dlms;
     boolean iec;
@@ -398,12 +395,7 @@ public class GXCommunicate {
                 }
             }
         }
-        ConnectionStartTime =
-                java.util.Calendar.getInstance().getTimeInMillis();
         GXReplyData reply = new GXReplyData();
-        dlms.setAuthentication(Authentication.HIGH);
-        dlms.setPassword("Gurux");
-        dlms.getCiphering().setSecurity(Security.AUTHENTICATION_ENCRYPTION);
         byte[] data = dlms.snrmRequest();
         if (data.length != 0) {
             readDLMSPacket(data, reply);
@@ -463,17 +455,10 @@ public class GXCommunicate {
      */
     public void readList(List<Entry<GXDLMSObject, Integer>> list)
             throws Exception {
-        GXByteBuffer bb = new GXByteBuffer();
         byte[][] data = dlms.readList(list);
         GXReplyData reply = new GXReplyData();
-        for (byte[] it : data) {
-            reply.clear();
-            readDataBlock(it, reply);
-            if (reply.isComplete()) {
-                bb.set(reply.getData());
-            }
-        }
-        dlms.updateValues(list, bb);
+        readDataBlock(data, reply);
+        dlms.updateValues(list, Arrays.asList(reply.getValue()));
     }
 
     /**
@@ -495,16 +480,8 @@ public class GXCommunicate {
     public List<Entry<GXDLMSObject, GXDLMSCaptureObject>>
             GetColumns(GXDLMSProfileGeneric pg) throws Exception {
         Object entries = readObject(pg, 7);
-        GXObisCode code = manufacturer.getObisCodes()
-                .findByLN(pg.getObjectType(), pg.getLogicalName(), null);
-        if (code != null) {
-            System.out.println("Reading Profile Generic: " + pg.getLogicalName()
-                    + " " + code.getDescription() + " entries:"
-                    + entries.toString());
-        } else {
-            System.out.println("Reading Profile Generic: " + pg.getLogicalName()
-                    + " entries:" + entries.toString());
-        }
+        System.out.println("Reading Profile Generic: " + pg.getLogicalName()
+                + " " + pg.getDescription() + " entries:" + entries.toString());
         GXReplyData reply = new GXReplyData();
         byte[] data = dlms.read(pg.getName(), pg.getObjectType(), 3)[0];
         readDataBlock(data, reply);

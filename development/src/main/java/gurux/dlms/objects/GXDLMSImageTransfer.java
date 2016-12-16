@@ -36,7 +36,6 @@ package gurux.dlms.objects;
 
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.Dictionary;
 import java.util.Enumeration;
 import java.util.Hashtable;
 import java.util.List;
@@ -53,7 +52,7 @@ import gurux.dlms.objects.enums.ImageTransferStatus;
 
 public class GXDLMSImageTransfer extends GXDLMSObject implements IGXDLMSBase {
     private long imageSize;
-    private Dictionary<Long, Object> imageData = new Hashtable<Long, Object>();
+    private Hashtable<Long, Object> imageData = new Hashtable<Long, Object>();
     private long imageBlockSize;
     private String imageTransferredBlocksStatus;
     private long imageFirstNotTransferredBlockNumber;

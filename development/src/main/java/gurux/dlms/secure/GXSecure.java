@@ -39,7 +39,6 @@ import java.security.NoSuchAlgorithmException;
 import java.security.Signature;
 import java.util.Random;
 
-import gurux.dlms.GXASN1Converter;
 import gurux.dlms.GXByteBuffer;
 import gurux.dlms.GXDLMSSettings;
 import gurux.dlms.GXICipher;
@@ -147,7 +146,6 @@ public final class GXSecure {
                     }
                     sig.update(bb.array());
                     d = sig.sign();
-                    d = GXASN1Converter.getBytes(d);
                 } catch (Exception e) {
                     throw new RuntimeException(e.getMessage());
                 }

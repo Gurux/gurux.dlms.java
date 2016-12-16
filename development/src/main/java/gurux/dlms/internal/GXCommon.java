@@ -61,6 +61,13 @@ public final class GXCommon {
     private static char[] hexArray = { '0', '1', '2', '3', '4', '5', '6', '7',
             '8', '9', 'A', 'B', 'C', 'D', 'E', 'F' };
 
+    private static final char[] base64Array = { 'A', 'B', 'C', 'D', 'E', 'F',
+            'G', 'H', 'I', 'J', 'K', 'L', 'M', 'N', 'O', 'P', 'Q', 'R', 'S',
+            'T', 'U', 'V', 'W', 'X', 'Y', 'Z', 'a', 'b', 'c', 'd', 'e', 'f',
+            'g', 'h', 'i', 'j', 'k', 'l', 'm', 'n', 'o', 'p', 'q', 'r', 's',
+            't', 'u', 'v', 'w', 'x', 'y', 'z', '0', '1', '2', '3', '4', '5',
+            '6', '7', '8', '9', '+', '/', '=' };
+
     /*
      * Constructor.
      */
@@ -260,6 +267,130 @@ public final class GXCommon {
         return new String(str, 0, len);
     }
 
+    /**
+     * Is string hex string.
+     * 
+     * @param value
+     *            String value.
+     * @return Return true, if string is hex string.
+     */
+    public static boolean isHexString(final String value) {
+        if (value == null || value.length() == 0) {
+            return false;
+        }
+        char ch;
+        for (int pos = 0; pos != value.length(); ++pos) {
+            ch = value.charAt(pos);
+            if (ch != ' ') {
+                if (!((ch > 0x40 && ch < 'G') || (ch > 0x60 && ch < 'g')
+                        || (ch > '/' && ch < ':'))) {
+                    return false;
+                }
+            }
+        }
+        return true;
+    }
+
+    /**
+     * Convert byte array to Base64 string.
+     * 
+     * @param value
+     *            Byte array to convert.
+     * @return Base64 string.
+     */
+    public static String toBase64(final byte[] value) {
+        StringBuilder str = new StringBuilder((value.length * 4) / 3);
+        int b;
+        for (int pos = 0; pos < value.length; pos += 3) {
+            b = (value[pos] & 0xFC) >> 2;
+            str.append(base64Array[b]);
+            b = (value[pos] & 0x03) << 4;
+            if (pos + 1 < value.length) {
+                b |= (value[pos + 1] & 0xF0) >> 4;
+                str.append(base64Array[b]);
+                b = (value[pos + 1] & 0x0F) << 2;
+                if (pos + 2 < value.length) {
+                    b |= (value[pos + 2] & 0xC0) >> 6;
+                    str.append(base64Array[b]);
+                    b = value[pos + 2] & 0x3F;
+                    str.append(base64Array[b]);
+                } else {
+                    str.append(base64Array[b]);
+                    str.append('=');
+                }
+            } else {
+                str.append(base64Array[b]);
+                str.append("==");
+            }
+        }
+
+        return str.toString();
+    }
+
+    /**
+     * Get index of given char.
+     * 
+     * @param ch
+     * @return
+     */
+    private static int getIndex(final char ch) {
+        if (ch == '+') {
+            return 62;
+        }
+        if (ch == '/') {
+            return 63;
+        }
+        if (ch == '=') {
+            return 64;
+        }
+        if (ch < ':') {
+            return (52 + (ch - '0'));
+        }
+        if (ch < '[') {
+            return (ch - 'A');
+        }
+        if (ch < '{') {
+            return (26 + (ch - 'a'));
+        }
+        throw new IllegalArgumentException("fromBase64");
+    }
+
+    /**
+     * Convert Base64 string to byte array.
+     * 
+     * @param input
+     * @return
+     */
+    public static byte[] fromBase64(final String input) {
+        if (input.length() % 4 != 0) {
+            throw new IllegalArgumentException("Invalid base64 input");
+        }
+        int len = (input.length() * 3) / 4;
+        int pos = input.indexOf('=');
+        if (pos > 0) {
+            len -= input.length() - pos;
+        }
+        byte[] decoded = new byte[len];
+        char[] inChars = new char[4];
+        int j = 0;
+        int[] b = new int[4];
+        for (pos = 0; pos != input.length(); pos += 4) {
+            input.getChars(pos, pos + 4, inChars, 0);
+            b[0] = getIndex(inChars[0]);
+            b[1] = getIndex(inChars[1]);
+            b[2] = getIndex(inChars[2]);
+            b[3] = getIndex(inChars[3]);
+            decoded[j++] = (byte) ((b[0] << 2) | (b[1] >> 4));
+            if (b[2] < 64) {
+                decoded[j++] = (byte) ((b[1] << 4) | (b[2] >> 2));
+                if (b[3] < 64) {
+                    decoded[j++] = (byte) ((b[2] << 6) | b[3]);
+                }
+            }
+        }
+        return decoded;
+    }
+
     /*
      * Reserved for internal use.
      * @param value Byte value.
@@ -360,19 +491,23 @@ public final class GXCommon {
      * @param count
      * @param buff
      */
-    public static void setObjectCount(final int count,
+    public static byte setObjectCount(final int count,
             final GXByteBuffer buff) {
         if (count < 0x80) {
             buff.setUInt8(count);
+            return 1;
         } else if (count < 0x100) {
             buff.setUInt8(0x81);
             buff.setUInt8(count);
+            return 2;
         } else if (count < 0x10000) {
             buff.setUInt8(0x82);
             buff.setUInt16(count);
+            return 3;
         } else {
             buff.setUInt8(0x84);
             buff.setUInt32(count);
+            return 5;
         }
     }
 
@@ -532,6 +667,20 @@ public final class GXCommon {
     public static String integerToHex(final Object value, final int desimals) {
         String str =
                 Long.toString(((Number) value).longValue(), 16).toUpperCase();
+        if (desimals == 0 || str.length() == zeroes.length()) {
+            return str;
+        }
+        return zeroes.substring(0, desimals - str.length()) + str;
+    }
+
+    /*
+     * Convert value to hex string.
+     * @param value value to convert.
+     * @param desimals Amount of decimals.
+     * @return
+     */
+    public static String integerString(final Object value, final int desimals) {
+        String str = Long.toString(((Number) value).longValue());
         if (desimals == 0 || str.length() == zeroes.length()) {
             return str;
         }

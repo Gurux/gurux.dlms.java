@@ -1,12 +1,12 @@
 //
 // --------------------------------------------------------------------------
 //  Gurux Ltd
-package gurux.dlms;
+package gurux.dlms.enums;
 
 /**
  * BER encoding enumeration values.
  */
-final class BerType {
+public final class BerType {
     /**
      * Constructor.
      */
@@ -73,6 +73,7 @@ final class BerType {
      */
     public static final short SEQUENCE = 0x10;
 
+    public static final short SET = 0x11;
     /**
      * Utf8 String.
      */

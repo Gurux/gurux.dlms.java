@@ -48,6 +48,7 @@ import org.xml.sax.InputSource;
 import gurux.dlms.enums.AccessServiceCommandType;
 import gurux.dlms.enums.AssociationResult;
 import gurux.dlms.enums.Authentication;
+import gurux.dlms.enums.BerType;
 import gurux.dlms.enums.Command;
 import gurux.dlms.enums.DataType;
 import gurux.dlms.enums.ErrorCode;
@@ -210,6 +211,49 @@ public class GXDLMSTranslator {
         return data.position() != data.size();
     }
 
+    /**
+     * Find next frame from the string. Position of data is set to the begin of
+     * new frame. If PDU is null it is not updated.
+     * 
+     * @param data
+     *            Data where frame is search.
+     * @param pdu
+     *            PDU of received frame is set here.
+     * @param type
+     *            Interface type.
+     * @return Is new frame found.
+     */
+    public final boolean findNextFrame(final GXByteBuffer data,
+            final GXByteBuffer pdu, final InterfaceType type) {
+        GXDLMSSettings settings = new GXDLMSSettings(true);
+        settings.setInterfaceType(type);
+        GXReplyData reply = new GXReplyData();
+        reply.setXml(new GXDLMSTranslatorStructure(outputType, hex,
+                getShowStringAsHex(), null));
+        int pos;
+        while (data.position() != data.size()) {
+            if (type == InterfaceType.HDLC
+                    && data.getUInt8(data.position()) == 0x7e) {
+                pos = data.position();
+                GXDLMS.getData(settings, data, reply);
+                data.position(pos);
+                break;
+            } else if (type == InterfaceType.WRAPPER
+                    && data.getUInt16(data.position()) == 0x1) {
+                pos = data.position();
+                GXDLMS.getData(settings, data, reply);
+                data.position(pos);
+                break;
+            }
+            data.position(data.position() + 1);
+        }
+        if (pdu != null) {
+            pdu.clear();
+            pdu.set(reply.getData().getData(), 0, reply.getData().size());
+        }
+        return data.position() != data.size();
+    }
+
     static void addTag(final HashMap<Integer, String> list, final int value,
             final String text) {
         list.put(value, text);
@@ -263,25 +307,39 @@ public class GXDLMSTranslator {
         return getPdu(new GXByteBuffer(value));
     }
 
+    /**
+     * Identify used DLMS framing type.
+     * 
+     * @param value
+     *            Input data.
+     * @return Interface type.
+     */
+    public static InterfaceType getDlmsFraming(final GXByteBuffer value) {
+        for (int pos = value.position(); pos != value.size(); ++pos) {
+            if (value.getUInt8(pos) == 0x7e) {
+                return InterfaceType.HDLC;
+            }
+            if (value.getUInt16(pos) == 1) {
+                return InterfaceType.WRAPPER;
+            }
+        }
+        throw new IllegalArgumentException("Invalid DLMS framing.");
+    }
+
     public final byte[] getPdu(final GXByteBuffer value) {
+        InterfaceType framing = getDlmsFraming(value);
+
         GXReplyData data = new GXReplyData();
         data.setXml(new GXDLMSTranslatorStructure(outputType, hex,
                 getShowStringAsHex(), tags));
         GXDLMSSettings settings = new GXDLMSSettings(true);
-        if (value.getUInt8(0) == 0x7e) {
-            settings.setInterfaceType(InterfaceType.HDLC);
-        } else if (value.getUInt16(0) == 1) {
-            // If wrapper.
-            settings.setInterfaceType(InterfaceType.WRAPPER);
-        } else {
-            throw new IllegalArgumentException("Invalid DLMS framing.");
-        }
+        settings.setInterfaceType(framing);
         GXDLMS.getData(settings, value, data);
         return data.getData().array();
     }
 
     /**
-     * Convert message to xml.
+     * Convert message to XML.
      * 
      * @param value
      *            Bytes to convert.
@@ -292,7 +350,7 @@ public class GXDLMSTranslator {
     }
 
     /**
-     * Convert message to xml.
+     * Convert message to XML.
      * 
      * @param value
      *            Bytes to convert.
@@ -424,7 +482,7 @@ public class GXDLMSTranslator {
     }
 
     /**
-     * Convert hex string to XML.
+     * Convert PDU in hex string to XML.
      * 
      * @param pdu
      *            Converted hex string.
@@ -436,7 +494,7 @@ public class GXDLMSTranslator {
     }
 
     /**
-     * Convert bytes to XML.
+     * Convert PDU bytes to XML.
      * 
      * @param value
      *            Bytes to convert.
@@ -585,8 +643,8 @@ public class GXDLMSTranslator {
             value.position(0);
             GXDLMS.getPdu(settings, data);
             break;
-        case Command.DISCONNECT_REQUEST:
-        case Command.DISCONNECT_RESPONSE:
+        case Command.RELEASE_REQUEST:
+        case Command.RELEASE_RESPONSE:
             xml.appendStartTag(cmd);
             // Len.
             if (value.getUInt8() != 0) {
@@ -672,7 +730,7 @@ public class GXDLMSTranslator {
         case Command.WRITE_REQUEST:
         case Command.GET_REQUEST:
         case Command.SET_REQUEST:
-        case Command.DISCONNECT_REQUEST:
+        case Command.RELEASE_REQUEST:
         case Command.METHOD_REQUEST:
         case Command.ACCESS_REQUEST:
         case Command.INITIATE_REQUEST:
@@ -685,7 +743,7 @@ public class GXDLMSTranslator {
         case Command.READ_RESPONSE:
         case Command.WRITE_RESPONSE:
         case Command.METHOD_RESPONSE:
-        case Command.DISCONNECT_RESPONSE:
+        case Command.RELEASE_RESPONSE:
         case Command.DATA_NOTIFICATION:
         case Command.ACCESS_RESPONSE:
         case Command.INITIATE_RESPONSE:
@@ -1458,10 +1516,11 @@ public class GXDLMSTranslator {
     }
 
     private static GXByteBuffer updateDateTime(final Node node,
-            final GXDLMSXmlSettings s, GXByteBuffer preData) {
+            final GXDLMSXmlSettings s, final GXByteBuffer preData) {
         byte[] tmp;
+        GXByteBuffer bb = preData;
         if (s.getRequestType() != 0xFF) {
-            preData = updateDataType(node, s,
+            bb = updateDataType(node, s,
                     DataType.DATETIME.getValue() + GXDLMS.DATA_TYPE_OFFSET);
         } else {
             DataType dt = DataType.DATETIME;
@@ -1475,7 +1534,7 @@ public class GXDLMSTranslator {
                 s.setTime((GXDateTime) GXDLMSClient.changeType(tmp, dt));
             }
         }
-        return preData;
+        return bb;
     }
 
     private static GXByteBuffer updateDataType(final Node node,
@@ -1713,13 +1772,13 @@ public class GXDLMSTranslator {
                     s.getDiagnostic(), s.getSettings().getCipher(),
                     s.getData());
             break;
-        case Command.DISC:
-            break;
         case Command.DISCONNECT_REQUEST:
+            break;
+        case Command.RELEASE_REQUEST:
             bb.setUInt8(s.getCommand());
             bb.setUInt8(0);
             break;
-        case Command.DISCONNECT_RESPONSE:
+        case Command.RELEASE_RESPONSE:
             bb.setUInt8(s.getCommand());
             // Len
             bb.setUInt8(3);

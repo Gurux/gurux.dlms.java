@@ -3,9 +3,11 @@ package gurux.dlms;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
+import java.util.ArrayList;
 import java.util.List;
 
 import gurux.dlms.enums.DataType;
+import gurux.dlms.enums.ObjectType;
 import gurux.dlms.internal.GXCommon;
 import gurux.dlms.objects.GXDLMSObject;
 import gurux.dlms.objects.GXDLMSObjectCollection;
@@ -16,6 +18,81 @@ public class GXDLMSConverter {
      */
     private GXStandardObisCodeCollection codes =
             new GXStandardObisCodeCollection();
+
+    /**
+     * Get OBIS code description.
+     * 
+     * @param logicalName
+     *            Logical name (OBIS code).
+     * @return Array of descriptions that match given OBIS code.
+     */
+    public final String[] getDescription(final String logicalName) {
+        return getDescription(logicalName, ObjectType.NONE);
+    }
+
+    /**
+     * Get OBIS code description.
+     * 
+     * @param logicalName
+     *            Logical name (OBIS code).
+     * @param description
+     *            Description filter.
+     * @return Array of descriptions that match given OBIS code.
+     */
+    public final String[] getDescription(final String logicalName,
+            final String description) {
+        return getDescription(logicalName, ObjectType.NONE, description);
+    }
+
+    /**
+     * Get OBIS code description.
+     * 
+     * @param logicalName
+     *            Logical name (OBIS code).
+     * @param type
+     *            Object type.
+     * @return Array of descriptions that match given OBIS code.
+     */
+    public final String[] getDescription(final String logicalName,
+            final ObjectType type) {
+        return getDescription(logicalName, type, null);
+    }
+
+    /**
+     * Get OBIS code description.
+     * 
+     * @param logicalName
+     *            Logical name (OBIS code).
+     * @param type
+     *            Object type.
+     * @param description
+     *            Description filter.
+     * @return Array of descriptions that match given OBIS code.
+     */
+    public final String[] getDescription(final String logicalName,
+            final ObjectType type, final String description) {
+        if (codes.size() == 0) {
+            readStandardObisInfo(codes);
+        }
+        List<String> list = new ArrayList<String>();
+        boolean all = logicalName == null || logicalName.isEmpty();
+        for (GXStandardObisCode it : codes.find(logicalName, type)) {
+            if (description != null && !description.isEmpty()
+                    && !it.getDescription().toLowerCase()
+                            .contains(description.toLowerCase())) {
+                continue;
+            }
+            if (all) {
+                list.add("A=" + it.getOBIS()[0] + ", B=" + it.getOBIS()[1]
+                        + ", C=" + it.getOBIS()[2] + ", D=" + it.getOBIS()[3]
+                        + ", E=" + it.getOBIS()[4] + ", F=" + it.getOBIS()[5]
+                        + "\r\n" + it.getDescription());
+            } else {
+                list.add(it.getDescription());
+            }
+        }
+        return list.toArray(new String[list.size()]);
+    }
 
     /**
      * Update OBIS code information.
@@ -29,7 +106,7 @@ public class GXDLMSConverter {
             return;
         }
         String ln = it.getLogicalName();
-        GXStandardObisCode code = codes.find(ln, it.getObjectType());
+        GXStandardObisCode code = codes.find(ln, it.getObjectType())[0];
         if (code != null) {
             it.setDescription(code.getDescription());
             // If string is used
@@ -105,15 +182,12 @@ public class GXDLMSConverter {
                     && !code.getDataType().contains(",")) {
                 DataType type =
                         DataType.forValue(Integer.parseInt(code.getDataType()));
-                switch (it.getObjectType()) {
-                case DATA:
-                case REGISTER:
-                case REGISTER_ACTIVATION:
-                case EXTENDED_REGISTER:
+                ObjectType objectType = it.getObjectType();
+                if (objectType == ObjectType.DATA
+                        || objectType == ObjectType.REGISTER
+                        || objectType == ObjectType.REGISTER_ACTIVATION
+                        || objectType == ObjectType.EXTENDED_REGISTER) {
                     it.setUIDataType(2, type);
-                    break;
-                default:
-                    break;
                 }
             }
         } else {
@@ -183,14 +257,16 @@ public class GXDLMSConverter {
         String str = buffer.toString();
         List<String> rows = GXCommon.split(str, "\r\n");
         for (String it : rows) {
-            List<String> items = GXCommon.split(it, ';');
-            List<String> obis = GXCommon.split(items.get(0), '.');
-            GXStandardObisCode code = new GXStandardObisCode(
-                    obis.toArray(new String[0]),
-                    items.get(3) + "; " + items.get(4) + "; " + items.get(5)
-                            + "; " + items.get(6) + "; " + items.get(7),
-                    items.get(1), items.get(2));
-            codes.add(code);
+            if (!it.isEmpty()) {
+                List<String> items = GXCommon.split(it, ';');
+                List<String> obis = GXCommon.split(items.get(0), '.');
+                GXStandardObisCode code = new GXStandardObisCode(
+                        obis.toArray(new String[0]),
+                        items.get(3) + "; " + items.get(4) + "; " + items.get(5)
+                                + "; " + items.get(6) + "; " + items.get(7),
+                        items.get(1), items.get(2));
+                codes.add(code);
+            }
         }
     }
 

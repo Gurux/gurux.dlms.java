@@ -138,17 +138,17 @@ public final class Command {
     /**
      * Disconnect request for HDLC framing.
      */
-    public static final int DISC = 0x53;
+    public static final int DISCONNECT_REQUEST = 0x53;
 
     /**
-     * Disconnect request.
+     * Release request.
      */
-    public static final int DISCONNECT_REQUEST = 0x62;
+    public static final int RELEASE_REQUEST = 0x62;
 
     /**
      * Disconnect response.
      */
-    public static final int DISCONNECT_RESPONSE = 0x63;
+    public static final int RELEASE_RESPONSE = 0x63;
 
     /**
      * Confirmed Service Error.
@@ -303,13 +303,13 @@ public final class Command {
         case Command.AARE:
             str = "Aare";
             break;
-        case Command.DISC:
+        case Command.DISCONNECT_REQUEST:
             str = "Disc";
             break;
-        case Command.DISCONNECT_REQUEST:
+        case Command.RELEASE_REQUEST:
             str = "DisconnectRequest";
             break;
-        case Command.DISCONNECT_RESPONSE:
+        case Command.RELEASE_RESPONSE:
             str = "DisconnectResponse";
             break;
         case Command.CONFIRMED_SERVICE_ERROR:
@@ -419,11 +419,11 @@ public final class Command {
         } else if ("Aare".equalsIgnoreCase(value)) {
             ret = Command.AARE;
         } else if ("Disc".equalsIgnoreCase(value)) {
-            ret = Command.DISC;
-        } else if ("DisconnectRequest".equalsIgnoreCase(value)) {
             ret = Command.DISCONNECT_REQUEST;
+        } else if ("DisconnectRequest".equalsIgnoreCase(value)) {
+            ret = Command.RELEASE_REQUEST;
         } else if ("DisconnectResponse".equalsIgnoreCase(value)) {
-            ret = Command.DISCONNECT_RESPONSE;
+            ret = Command.RELEASE_RESPONSE;
         } else if ("ConfirmedServiceError".equalsIgnoreCase(value)) {
             ret = Command.CONFIRMED_SERVICE_ERROR;
         } else if ("ExceptionResponse".equalsIgnoreCase(value)) {

@@ -2,6 +2,7 @@ package gurux.dlms;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.logging.Level;
 import java.util.logging.Logger;
 
 import gurux.dlms.enums.AccessMode;
@@ -127,7 +128,7 @@ final class GXDLMSSNCommandHandler {
 
         GXByteBuffer bb = new GXByteBuffer();
         if (blockNumber != settings.getBlockIndex()) {
-            LOGGER.info(
+            LOGGER.log(Level.INFO,
                     "handleReadBlockNumberAccess failed. Invalid block number. "
                             + settings.getBlockIndex() + "/" + blockNumber);
             bb.setUInt8(ErrorCode.DATA_BLOCK_NUMBER_INVALID.getValue());
@@ -249,7 +250,7 @@ final class GXDLMSSNCommandHandler {
             return;
         }
         if (blockNumber != settings.getBlockIndex()) {
-            LOGGER.info(
+            LOGGER.log(Level.INFO,
                     "handleReadDataBlockAccess failed. Invalid block number. "
                             + settings.getBlockIndex() + "/" + blockNumber);
             bb.setUInt8(ErrorCode.DATA_BLOCK_NUMBER_INVALID.getValue());
@@ -269,7 +270,8 @@ final class GXDLMSSNCommandHandler {
         int realSize = data.size() - data.position();
         if (count != 1 || type != DataType.OCTET_STRING.getValue()
                 || size != realSize) {
-            LOGGER.info("handleGetRequest failed. Invalid block size.");
+            LOGGER.log(Level.INFO,
+                    "handleGetRequest failed. Invalid block size.");
             bb.setUInt8(ErrorCode.DATA_BLOCK_UNAVAILABLE.getValue());
             GXDLMS.getSNPdu(
                     new GXDLMSSNParameters(settings, command, cnt,
@@ -571,7 +573,9 @@ final class GXDLMSSNCommandHandler {
                             target.getItem(), target.getIndex(), 0, null);
                     e.setValue(value);
                     server.notifyWrite(new ValueEventArgs[] { e });
-                    if (!e.getHandled()) {
+                    if (e.getError() != ErrorCode.OK) {
+                        results.setUInt8(pos, e.getError().getValue());
+                    } else if (!e.getHandled()) {
                         target.getItem().setValue(settings, e);
                     }
                 }

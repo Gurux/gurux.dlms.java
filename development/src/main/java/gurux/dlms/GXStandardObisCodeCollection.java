@@ -33,6 +33,7 @@
 //---------------------------------------------------------------------------
 package gurux.dlms;
 
+import java.util.ArrayList;
 import java.util.List;
 
 import gurux.dlms.enums.ObjectType;
@@ -52,9 +53,21 @@ class GXStandardObisCodeCollection
      * Convert Logical name string to bytes.
      */
     static int[] getBytes(final String ln) {
+        if (ln == null || ln.isEmpty()) {
+            return null;
+        }
         List<String> tmp = GXCommon.split(ln, '.');
         if (tmp.size() != 6) {
-            throw new IllegalArgumentException("Invalid OBIS Code.");
+            // If value is give as hex.
+            byte[] tmp2 = GXCommon.hexToBytes(ln);
+            if (tmp2.length == 6) {
+                return new int[] { tmp2[0] & 0xFF, tmp2[1] & 0xFF,
+                        tmp2[2] & 0xFF, tmp2[3] & 0xFF, tmp2[4] & 0xFF,
+                        tmp2[5] & 0xFF };
+            }
+            if (tmp.size() != 6) {
+                throw new IllegalArgumentException("Invalid OBIS Code.");
+            }
         }
         int[] code = new int[6];
         code[0] = Integer.parseInt(tmp.get(0));
@@ -66,7 +79,7 @@ class GXStandardObisCodeCollection
         return code;
     }
 
-    public final GXStandardObisCode find(final String ln,
+    public final GXStandardObisCode[] find(final String ln,
             final ObjectType objectType) {
         if (objectType == null) {
             return null;
@@ -79,7 +92,7 @@ class GXStandardObisCodeCollection
      */
     private boolean equalsInterface(final GXStandardObisCode it, final int ic) {
         // If all interfaces are allowed.
-        if (it.getInterfaces().equals("*")) {
+        if (ic == 0 || it.getInterfaces().equals("*")) {
             return true;
         }
         return GXCommon.split(it.getInterfaces(), ',')
@@ -129,6 +142,9 @@ class GXStandardObisCodeCollection
      */
     private static boolean equalsObisCode(final String[] obisMask,
             final int[] ic) {
+        if (ic == null) {
+            return true;
+        }
         if (!equalsMask(obisMask[0], ic[0])) {
             return false;
         }
@@ -349,17 +365,23 @@ class GXStandardObisCodeCollection
     /**
      * Find Standard OBIS Code description.
      */
-    public final GXStandardObisCode find(final int[] obisCode, final int ic) {
+    public final GXStandardObisCode[] find(final int[] obisCode, final int ic) {
         GXStandardObisCode tmp;
+        List<GXStandardObisCode> list = new ArrayList<GXStandardObisCode>();
+
         for (GXStandardObisCode it : this) {
             // Interface is tested first because it's faster.
             if (equalsInterface(it, ic)
                     && equalsObisCode(it.getOBIS(), obisCode)) {
                 tmp = new GXStandardObisCode(it.getOBIS(), it.getDescription(),
                         it.getInterfaces(), it.getDataType());
+                list.add(tmp);
                 List<String> tmp2 = GXCommon.split(it.getDescription(), ';');
                 if (tmp2.size() > 1) {
-                    String desc = getDescription(tmp2.get(1).trim());
+                    String desc = "";
+                    if (obisCode != null && "$1".equals(tmp2.get(1).trim())) {
+                        desc = getDescription("$" + obisCode[2]);
+                    }
                     if (!desc.equals("")) {
                         tmp2.set(1, desc);
                         StringBuilder builder = new StringBuilder();
@@ -372,63 +394,69 @@ class GXStandardObisCodeCollection
                         tmp.setDescription(builder.toString());
                     }
                 }
-                String[] obis = tmp.getOBIS();
-                obis[0] = Integer.toString(obisCode[0]);
-                obis[1] = Integer.toString(obisCode[1]);
-                obis[2] = Integer.toString(obisCode[2]);
-                obis[3] = Integer.toString(obisCode[3]);
-                obis[4] = Integer.toString(obisCode[4]);
-                obis[5] = Integer.toString(obisCode[5]);
-                tmp.setOBIS(obis);
-                String desc = tmp.getDescription();
-                desc = desc.replace("$A", Integer.toString(obisCode[0]));
-                desc = desc.replace("$B", Integer.toString(obisCode[1]));
-                desc = desc.replace("$C", Integer.toString(obisCode[2]));
-                desc = desc.replace("$D", Integer.toString(obisCode[3]));
-                desc = desc.replace("$E", Integer.toString(obisCode[4]));
-                desc = desc.replace("$F", Integer.toString(obisCode[5]));
-                // Increase value
-                int begin = desc.indexOf("#$");
-                if (begin != -1) {
-                    int start = desc.indexOf('(');
-                    int end = desc.indexOf(')');
-                    char channel = desc.charAt(start + 1);
-                    int ch = 0;
-                    if (channel == 'A') {
-                        ch = obisCode[0];
-                    } else if (channel == 'B') {
-                        ch = obisCode[1];
-                    } else if (channel == 'C') {
-                        ch = obisCode[2];
-                    } else if (channel == 'D') {
-                        ch = obisCode[3];
-                    } else if (channel == 'E') {
-                        ch = obisCode[4];
-                    } else if (channel == 'F') {
-                        ch = obisCode[5];
+
+                if (obisCode != null) {
+                    String[] obis = tmp.getOBIS();
+                    obis[0] = Integer.toString(obisCode[0]);
+                    obis[1] = Integer.toString(obisCode[1]);
+                    obis[2] = Integer.toString(obisCode[2]);
+                    obis[3] = Integer.toString(obisCode[3]);
+                    obis[4] = Integer.toString(obisCode[4]);
+                    obis[5] = Integer.toString(obisCode[5]);
+
+                    tmp.setOBIS(obis);
+                    String desc = tmp.getDescription();
+                    desc = desc.replace("$A", Integer.toString(obisCode[0]));
+                    desc = desc.replace("$B", Integer.toString(obisCode[1]));
+                    desc = desc.replace("$C", Integer.toString(obisCode[2]));
+                    desc = desc.replace("$D", Integer.toString(obisCode[3]));
+                    desc = desc.replace("$E", Integer.toString(obisCode[4]));
+                    desc = desc.replace("$F", Integer.toString(obisCode[5]));
+                    // Increase value
+                    int begin = desc.indexOf("#$");
+                    if (begin != -1) {
+                        int start = desc.indexOf('(');
+                        int end = desc.indexOf(')');
+                        char channel = desc.charAt(start + 1);
+                        int ch = 0;
+                        if (channel == 'A') {
+                            ch = obisCode[0];
+                        } else if (channel == 'B') {
+                            ch = obisCode[1];
+                        } else if (channel == 'C') {
+                            ch = obisCode[2];
+                        } else if (channel == 'D') {
+                            ch = obisCode[3];
+                        } else if (channel == 'E') {
+                            ch = obisCode[4];
+                        } else if (channel == 'F') {
+                            ch = obisCode[5];
+                        }
+                        int plus = desc.indexOf('+');
+                        if (plus != -1) {
+                            ch += Integer.parseInt(desc.substring(plus + 1,
+                                    plus + 1 + end - plus - 1));
+                        }
+                        desc = desc.substring(0, begin) + Integer.toString(ch);
                     }
-                    int plus = desc.indexOf('+');
-                    if (plus != -1) {
-                        ch += Integer.parseInt(desc.substring(plus + 1,
-                                plus + 1 + end - plus - 1));
-                    }
-                    desc = desc.substring(0, begin) + Integer.toString(ch);
+                    desc = desc.replace(';', ' ').replace("  ", " ").trim();
+                    tmp.setDescription(desc);
                 }
-                desc = desc.replace(';', ' ').replace("  ", " ").trim();
-                tmp.setDescription(desc);
-                return tmp;
             }
         }
-        tmp = new GXStandardObisCode(null, "Manufacturer specific",
-                (new Integer(ic)).toString(), "");
-        String[] obis = tmp.getOBIS();
-        obis[0] = Integer.toString(obisCode[0]);
-        obis[1] = Integer.toString(obisCode[1]);
-        obis[2] = Integer.toString(obisCode[2]);
-        obis[3] = Integer.toString(obisCode[3]);
-        obis[4] = Integer.toString(obisCode[4]);
-        obis[5] = Integer.toString(obisCode[5]);
-        tmp.setOBIS(obis);
-        return tmp;
+        // If invalid OBIS code.
+        if (list.size() == 0) {
+            tmp = new GXStandardObisCode(null, "Invalid",
+                    (new Integer(ic)).toString(), "");
+            String[] obis = tmp.getOBIS();
+            obis[0] = Integer.toString(obisCode[0]);
+            obis[1] = Integer.toString(obisCode[1]);
+            obis[2] = Integer.toString(obisCode[2]);
+            obis[3] = Integer.toString(obisCode[3]);
+            obis[4] = Integer.toString(obisCode[4]);
+            obis[5] = Integer.toString(obisCode[5]);
+            tmp.setOBIS(obis);
+        }
+        return list.toArray(new GXStandardObisCode[list.size()]);
     }
 }

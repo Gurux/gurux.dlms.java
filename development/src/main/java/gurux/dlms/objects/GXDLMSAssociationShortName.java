@@ -36,12 +36,13 @@ package gurux.dlms.objects;
 
 import java.lang.reflect.Array;
 import java.security.Signature;
+import java.util.logging.Level;
 import java.util.logging.Logger;
 
-import gurux.dlms.GXASN1Converter;
 import gurux.dlms.GXByteBuffer;
 import gurux.dlms.GXDLMSSettings;
 import gurux.dlms.ValueEventArgs;
+import gurux.dlms.asn.GXAsn1Converter;
 import gurux.dlms.enums.AccessMode;
 import gurux.dlms.enums.Authentication;
 import gurux.dlms.enums.DataType;
@@ -174,8 +175,7 @@ public class GXDLMSAssociationShortName extends GXDLMSObject
                     bb.set(settings.getStoCChallenge());
                     bb.set(settings.getCtoSChallenge());
                     ver.update(bb.array());
-                    accept = ver
-                            .verify(GXASN1Converter.encode(signature.array()));
+                    accept = ver.verify(signature.array());
 
                 } catch (Exception ex) {
                     throw new RuntimeException(ex.getMessage());
@@ -207,7 +207,7 @@ public class GXDLMSAssociationShortName extends GXDLMSObject
                 return GXSecure.secure(settings, settings.getCipher(), ic,
                         settings.getCtoSChallenge(), readSecret);
             } else {
-                LOGGER.info(
+                LOGGER.log(Level.INFO,
                         "Invalid CtoS:" + GXCommon.toHex(serverChallenge, false)
                                 + "-" + GXCommon.toHex(clientChallenge, false));
                 return null;

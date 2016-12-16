@@ -80,11 +80,11 @@ final class TranslatorSimpleTags {
         GXDLMSTranslator.addTag(list,
                 TranslatorGeneralTags.RESPONDING_AUTHENTICATION,
                 "RespondingAuthentication");
-        GXDLMSTranslator.addTag(list, Command.DISCONNECT_REQUEST,
+        GXDLMSTranslator.addTag(list, Command.RELEASE_REQUEST,
                 "ReleaseRequest");
-        GXDLMSTranslator.addTag(list, Command.DISCONNECT_RESPONSE,
+        GXDLMSTranslator.addTag(list, Command.RELEASE_RESPONSE,
                 "ReleaseResponse");
-        GXDLMSTranslator.addTag(list, Command.DISC, "Disc");
+        GXDLMSTranslator.addTag(list, Command.DISCONNECT_REQUEST, "Disc");
         GXDLMSTranslator.addTag(list, TranslatorGeneralTags.ASSOCIATION_RESULT,
                 "AssociationResult");
         GXDLMSTranslator.addTag(list,
