@@ -226,3 +226,24 @@ gurux.dlms.client.example.java/ManufacturerSettings/files.xml
 ManufacturerSettings/files.xml
 gurux.dlms.client.example.java/logFile.txt
 gurux.dlms.client.example.java/trace.txt
+
+#############
+## Maven
+#############
+target/
+pom.xml.tag
+pom.xml.releaseBackup
+pom.xml.versionsBackup
+pom.xml.next
+release.properties
+dependency-reduced-pom.xml
+buildNumber.properties
+.mvn/timing.properties
+
+# Exclude maven wrapper
+!/.mvn/wrapper/maven-wrapper.jar
+
+#############
+## Jetbrains: Intellij
+#############
+.idea
