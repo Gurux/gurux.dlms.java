@@ -106,7 +106,13 @@ public class GXDLMSConverter {
             return;
         }
         String ln = it.getLogicalName();
-        GXStandardObisCode code = codes.find(ln, it.getObjectType())[0];
+
+        GXStandardObisCode code = null;
+        GXStandardObisCode[] codesArray = codes.find(ln, it.getObjectType());
+        if (codesArray.length > 0) {
+            code = codes.find(ln, it.getObjectType())[0];
+        }
+
         if (code != null) {
             it.setDescription(code.getDescription());
             // If string is used
