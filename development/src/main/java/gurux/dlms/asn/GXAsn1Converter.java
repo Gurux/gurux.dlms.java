@@ -184,13 +184,19 @@ public final class GXAsn1Converter {
             throw new IllegalArgumentException("Not enought memory.");
         }
         int start = bb.position();
+        String tagString = null;
         if (s != null) {
             s.appendSpaces();
             if (type == BerType.INTEGER) {
-                s.append("<" + s.getTag((short) -len) + ">");
+                if (len == 1 || len == 2 || len == 4 || len == 8) {
+                    tagString = s.getTag((short) -len);
+                } else {
+                    tagString = s.getTag(BerType.INTEGER);
+                }
             } else {
-                s.append("<" + s.getTag(type) + ">");
+                tagString = s.getTag(type);
             }
+            s.append("<" + tagString + ">");
         }
 
         switch (type) {
@@ -327,12 +333,7 @@ public final class GXAsn1Converter {
             throw new RuntimeException("Invalid type: " + type);
         }
         if (s != null) {
-            if (type == BerType.INTEGER) {
-                s.append("</" + s.getTag((short) -len) + ">\r\n");
-            } else {
-                s.append("</" + s.getTag(type) + ">\r\n");
-            }
-
+            s.append("</" + tagString + ">\r\n");
         }
     }
 
@@ -699,6 +700,8 @@ public final class GXAsn1Converter {
                     node.getChildNodes().item(0).getNodeValue()));
             break;
         case BerType.INTEGER:
+            list.add(new GXAsn1Integer(
+                    node.getChildNodes().item(0).getNodeValue()));
             break;
         case BerType.NULL:
             list.add(null);

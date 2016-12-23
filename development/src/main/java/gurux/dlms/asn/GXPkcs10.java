@@ -18,7 +18,7 @@ import gurux.dlms.asn.enums.X9ObjectIdentifier;
 import gurux.dlms.internal.GXCommon;
 
 /**
- * Pkcs10 certification request. ¨ https://tools.ietf.org/html/rfc2986
+ * Pkcs10 certification request. https://tools.ietf.org/html/rfc2986
  */
 public class GXPkcs10 {
 

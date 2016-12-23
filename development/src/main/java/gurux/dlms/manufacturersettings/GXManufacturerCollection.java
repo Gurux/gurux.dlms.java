@@ -415,6 +415,10 @@ public class GXManufacturerCollection
                 } else if (target.equalsIgnoreCase("StartProtocol")) {
                     man.setStartProtocol(
                             StartProtocolType.valueOf(data.toUpperCase()));
+                } else if (target.equalsIgnoreCase("WebAddress")) {
+                    man.setWebAddress(data);
+                } else if (target.equalsIgnoreCase("Info")) {
+                    man.setInfo(data);
                 } else {
                     target = "";
                 }

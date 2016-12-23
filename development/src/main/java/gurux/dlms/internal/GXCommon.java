@@ -362,20 +362,21 @@ public final class GXCommon {
      * @return
      */
     public static byte[] fromBase64(final String input) {
-        if (input.length() % 4 != 0) {
+        String tmp = input.replace("\r\n", "");
+        if (tmp.length() % 4 != 0) {
             throw new IllegalArgumentException("Invalid base64 input");
         }
-        int len = (input.length() * 3) / 4;
-        int pos = input.indexOf('=');
+        int len = (tmp.length() * 3) / 4;
+        int pos = tmp.indexOf('=');
         if (pos > 0) {
-            len -= input.length() - pos;
+            len -= tmp.length() - pos;
         }
         byte[] decoded = new byte[len];
         char[] inChars = new char[4];
         int j = 0;
         int[] b = new int[4];
-        for (pos = 0; pos != input.length(); pos += 4) {
-            input.getChars(pos, pos + 4, inChars, 0);
+        for (pos = 0; pos != tmp.length(); pos += 4) {
+            tmp.getChars(pos, pos + 4, inChars, 0);
             b[0] = getIndex(inChars[0]);
             b[1] = getIndex(inChars[1]);
             b[2] = getIndex(inChars[2]);

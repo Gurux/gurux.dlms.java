@@ -49,6 +49,9 @@ public class GXManufacturer {
     private int keepAliveInterval;
     private StartProtocolType startProtocol = StartProtocolType.IEC;
 
+    private String webAddress;
+    private String info;
+
     /**
      * Constructor.
      */
@@ -238,5 +241,35 @@ public class GXManufacturer {
             }
         }
         return null;
+    }
+
+    /**
+     * @return Web address where is more information.
+     */
+    public String getWebAddress() {
+        return webAddress;
+    }
+
+    /**
+     * @param webAddress
+     *            Web address where is more information.
+     */
+    public void setWebAddress(final String webAddress) {
+        this.webAddress = webAddress;
+    }
+
+    /**
+     * @return Additional info.
+     */
+    public String getInfo() {
+        return info;
+    }
+
+    /**
+     * @param info
+     *            Additional info.
+     */
+    public void setInfo(final String info) {
+        this.info = info;
     }
 }

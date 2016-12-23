@@ -3,11 +3,18 @@
 //  Gurux Ltd
 package gurux.dlms.asn;
 
+import java.security.KeyFactory;
+import java.security.NoSuchAlgorithmException;
 import java.security.PrivateKey;
-import java.util.Base64;
+import java.security.PublicKey;
+import java.security.spec.InvalidKeySpecException;
+import java.security.spec.PKCS8EncodedKeySpec;
+import java.security.spec.X509EncodedKeySpec;
 
 import gurux.dlms.asn.enums.GXOid;
+import gurux.dlms.asn.enums.PkcsObjectIdentifier;
 import gurux.dlms.asn.enums.X9ObjectIdentifier;
+import gurux.dlms.internal.GXCommon;
 
 /**
  * Pkcs8 certification request. Private key is saved using this format.
@@ -26,9 +33,19 @@ public class GXPkcs8 {
     private GXOid algorithm;
 
     /**
+     * Parameters.
+     */
+    private Object parameters;
+
+    /**
      * Private key.
      */
     private PrivateKey privateKey;
+
+    /**
+     * Public key.
+     */
+    private PublicKey publicKey;
 
     /**
      * Constructor.
@@ -44,7 +61,15 @@ public class GXPkcs8 {
      *            Base64 string.
      */
     public GXPkcs8(final String data) {
-        init(Base64.getDecoder().decode(data));
+        String tmp = data.replace("-----BEGIN PUBLIC KEY-----", "");
+        tmp = tmp.replace("-----END PUBLIC KEY-----", "");
+        tmp = tmp.replace("-----BEGIN RSA PRIVATE KEY-----", "");
+        tmp = tmp.replace("-----END RSA PRIVATE KEY-----", "");
+        tmp = tmp.replace("-----BEGIN EC PRIVATE KEY-----", "");
+        tmp = tmp.replace("-----END EC PRIVATE KEY-----", "");
+        tmp = tmp.replace("-----BEGIN PRIVATE KEY-----", "");
+        tmp = tmp.replace("-----END PRIVATE KEY-----", "");
+        init(GXCommon.fromBase64(tmp));
     }
 
     /**
@@ -64,14 +89,90 @@ public class GXPkcs8 {
     private void init(final byte[] data) {
         GXAsn1Sequence seq =
                 (GXAsn1Sequence) GXAsn1Converter.fromByteArray(data);
-        if (seq.size() != 3) {
-            throw new IllegalArgumentException(
-                    "Wrong number of elements in sequence.");
-        }
-        version = CertificateVersion.forValue(((Number) seq.get(0)).intValue());
-        GXAsn1Sequence tmp = (GXAsn1Sequence) seq.get(1);
-        algorithm = X9ObjectIdentifier.forValue(tmp.get(0).toString());
+        // If public key.
+        if (seq.size() == 2) {
+            GXAsn1Sequence tmp = (GXAsn1Sequence) seq.get(0);
+            algorithm = PkcsObjectIdentifier.forValue(tmp.get(0).toString());
+            if (algorithm == null) {
+                algorithm = X9ObjectIdentifier.forValue(tmp.get(0).toString());
+            }
 
+            parameters = tmp.get(1);
+            // Make public key.
+            KeyFactory eckf;
+            try {
+                String name = algorithm.toString().toLowerCase();
+                if (name.contains("rsa")) {
+                    eckf = KeyFactory.getInstance("RSA");
+                } else if (name.endsWith("ecdsa")) {
+                    eckf = KeyFactory.getInstance("EC");
+                } else if (name.contains("ec")) {
+                    eckf = KeyFactory.getInstance("EC");
+                } else {
+                    throw new IllegalStateException(
+                            "Unknown algorithm:" + algorithm.toString());
+                }
+            } catch (NoSuchAlgorithmException e) {
+                throw new IllegalStateException(
+                        algorithm.toString().substring(0, 2)
+                                + "key factory not present in runtime");
+            }
+            try {
+                byte[] encodedKey = GXAsn1Converter.toByteArray(seq);
+                X509EncodedKeySpec ecpks = new X509EncodedKeySpec(encodedKey);
+                setPublicKey(eckf.generatePublic(ecpks));
+            } catch (InvalidKeySpecException e) {
+                throw new RuntimeException(e.getMessage());
+            }
+
+            // PublicKeyInfo ::= SEQUENCE {
+            // algorithm AlgorithmIdentifier,
+            // PublicKey BIT STRING
+            // }
+            // AlgorithmIdentifier ::= SEQUENCE {
+            // algorithm OBJECT IDENTIFIER,
+            // parameters ANY DEFINED BY algorithm OPTIONAL
+            // }
+
+        } else {
+            if (seq.size() < 3) {
+                throw new IllegalArgumentException(
+                        "Wrong number of elements in sequence.");
+            }
+            version = CertificateVersion
+                    .forValue(((Number) seq.get(0)).intValue());
+            GXAsn1Sequence tmp = (GXAsn1Sequence) seq.get(1);
+            algorithm = X9ObjectIdentifier.forValue(tmp.get(0).toString());
+            if (algorithm == null) {
+                algorithm =
+                        PkcsObjectIdentifier.forValue(tmp.get(0).toString());
+            }
+            // Make public key.
+            KeyFactory eckf;
+            try {
+                String name = algorithm.toString().toLowerCase();
+                if (name.contains("rsa")) {
+                    eckf = KeyFactory.getInstance("RSA");
+                } else if (name.endsWith("ecdsa")) {
+                    eckf = KeyFactory.getInstance("EC");
+                } else if (name.contains("ec")) {
+                    eckf = KeyFactory.getInstance("EC");
+                } else {
+                    throw new IllegalStateException(
+                            "Unknown algorithm:" + algorithm.toString());
+                }
+            } catch (NoSuchAlgorithmException e) {
+                throw new IllegalStateException(
+                        algorithm.toString().substring(0, 2)
+                                + "key factory not present in runtime");
+            }
+            try {
+                PKCS8EncodedKeySpec ecpks = new PKCS8EncodedKeySpec(data);
+                privateKey = (eckf.generatePrivate(ecpks));
+            } catch (InvalidKeySpecException e) {
+                throw new RuntimeException(e.getMessage());
+            }
+        }
     }
 
     /**
@@ -133,5 +234,20 @@ public class GXPkcs8 {
      */
     public void setPrivateKey(final PrivateKey value) {
         privateKey = value;
+    }
+
+    /**
+     * @return Public key.
+     */
+    public PublicKey getPublicKey() {
+        return publicKey;
+    }
+
+    /**
+     * @param value
+     *            Public key.
+     */
+    public void setPublicKey(final PublicKey value) {
+        publicKey = value;
     }
 }

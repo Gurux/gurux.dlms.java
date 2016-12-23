@@ -34,8 +34,9 @@
 
 package gurux.dlms.asn;
 
+import java.math.BigInteger;
+
 import gurux.dlms.GXByteBuffer;
-import gurux.dlms.internal.GXCommon;
 
 /**
  * ASN1 bit string
@@ -64,6 +65,19 @@ public class GXAsn1Integer {
             throw new IllegalArgumentException("data");
         }
         value = data;
+    }
+
+    /**
+     * Constructor
+     * 
+     * @param data
+     *            Integer.
+     */
+    public GXAsn1Integer(final String data) {
+        if (data == null) {
+            throw new IllegalArgumentException("data");
+        }
+        value = new BigInteger(data).toByteArray();
     }
 
     /**
@@ -122,7 +136,7 @@ public class GXAsn1Integer {
             str = String.valueOf(toLong());
             break;
         default:
-            str = GXCommon.toHex(value);
+            str = new BigInteger(value).toString();
         }
         return str;
     }

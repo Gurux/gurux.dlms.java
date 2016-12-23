@@ -81,10 +81,11 @@ class GXStandardObisCodeCollection
 
     public final GXStandardObisCode[] find(final String ln,
             final ObjectType objectType) {
-        if (objectType == null) {
-            return null;
+        int ic = 0;
+        if (objectType != null) {
+            ic = objectType.getValue();
         }
-        return find(getBytes(ln), objectType.getValue());
+        return find(getBytes(ln), ic);
     }
 
     /**
