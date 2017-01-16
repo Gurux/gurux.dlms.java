@@ -55,7 +55,6 @@ import gurux.dlms.enums.ErrorCode;
 import gurux.dlms.enums.InterfaceType;
 import gurux.dlms.enums.Priority;
 import gurux.dlms.enums.RequestTypes;
-import gurux.dlms.enums.Security;
 import gurux.dlms.enums.ServiceClass;
 import gurux.dlms.enums.SourceDiagnostic;
 import gurux.dlms.internal.GXCommon;
@@ -669,11 +668,16 @@ public class GXDLMSTranslator {
         case Command.GLO_METHOD_REQUEST:
         case Command.GLO_METHOD_RESPONSE:
             int cnt = GXCommon.getObjectCount(value);
-            if (cnt != value.size()) {
+            if (cnt != value.size() - value.position()) {
                 throw new IllegalArgumentException();
             }
             xml.appendLine(cmd, "Value", GXCommon.toHex(value.getData(), false,
                     value.position(), value.size() - value.position()));
+            break;
+        case Command.CONFIRMED_SERVICE_ERROR:
+            data.setXml(xml);
+            data.setData(value);
+            GXDLMS.handleConfirmedServiceError(data);
             break;
         default:
             xml.appendLine("<Data=\"" + GXCommon.toHex(value.getData(), false,
@@ -723,6 +727,7 @@ public class GXDLMSTranslator {
     private static void getCommand(final Node node, final GXDLMSXmlSettings s,
             final int tag) {
         s.setCommand(tag);
+        byte[] tmp;
         switch (tag) {
         case Command.SNRM:
         case Command.AARQ:
@@ -734,7 +739,21 @@ public class GXDLMSTranslator {
         case Command.METHOD_REQUEST:
         case Command.ACCESS_REQUEST:
         case Command.INITIATE_REQUEST:
+        case Command.CONFIRMED_SERVICE_ERROR:
             s.getSettings().setServer(false);
+            break;
+        case Command.GLO_INITIATE_REQUEST:
+        case Command.GLO_GET_REQUEST:
+        case Command.GLO_SET_REQUEST:
+        case Command.GLO_METHOD_REQUEST:
+        case Command.GLO_READ_REQUEST:
+        case Command.GLO_WRITE_REQUEST:
+            s.getSettings().setServer(false);
+            s.setCommand(tag);
+            tmp = GXCommon.hexToBytes(getValue(node, s));
+            s.getSettings().getCipher()
+                    .setSecurity(gurux.dlms.enums.Security.forValue(tmp[0]));
+            s.getData().set(tmp);
             break;
         case Command.UA:
         case Command.AARE:
@@ -747,6 +766,20 @@ public class GXDLMSTranslator {
         case Command.DATA_NOTIFICATION:
         case Command.ACCESS_RESPONSE:
         case Command.INITIATE_RESPONSE:
+            break;
+        case Command.GLO_INITIATE_RESPONSE:
+        case Command.GLO_GET_RESPONSE:
+        case Command.GLO_SET_RESPONSE:
+        case Command.GLO_METHOD_RESPONSE:
+        case Command.GLO_READ_RESPONSE:
+        case Command.GLO_WRITE_RESPONSE:
+        case Command.GLO_EVENT_NOTIFICATION_REQUEST:
+        case Command.GLO_GENERAL_CIPHERING:
+            s.setCommand(tag);
+            tmp = GXCommon.hexToBytes(getValue(node, s));
+            s.getSettings().getCipher()
+                    .setSecurity(gurux.dlms.enums.Security.forValue(tmp[0]));
+            s.getData().set(tmp);
             break;
         default:
             throw new IllegalArgumentException(
@@ -904,26 +937,18 @@ public class GXDLMSTranslator {
             }
             break;
         case Command.GLO_INITIATE_REQUEST:
-        case Command.GLO_GET_REQUEST:
-        case Command.GLO_SET_REQUEST:
-        case Command.GLO_METHOD_REQUEST:
-        case Command.GLO_READ_REQUEST:
-        case Command.GLO_WRITE_REQUEST:
             s.getSettings().setServer(false);
             s.setCommand(tag);
             tmp = GXCommon.hexToBytes(getValue(node, s));
-            s.getSettings().getCipher().setSecurity(Security.forValue(tmp[0]));
+            s.getSettings().getCipher()
+                    .setSecurity(gurux.dlms.enums.Security.forValue(tmp[0]));
             s.getData().set(tmp);
             break;
         case Command.GLO_INITIATE_RESPONSE:
-        case Command.GLO_GET_RESPONSE:
-        case Command.GLO_SET_RESPONSE:
-        case Command.GLO_METHOD_RESPONSE:
-        case Command.GLO_READ_RESPONSE:
-        case Command.GLO_WRITE_RESPONSE:
             s.setCommand(tag);
             tmp = GXCommon.hexToBytes(getValue(node, s));
-            s.getSettings().getCipher().setSecurity(Security.forValue(tmp[0]));
+            s.getSettings().getCipher()
+                    .setSecurity(gurux.dlms.enums.Security.forValue(tmp[0]));
             s.getData().set(tmp);
             break;
         case Command.INITIATE_REQUEST:
@@ -1157,7 +1182,11 @@ public class GXDLMSTranslator {
         } else {
             str = node.getNodeName();
         }
-        int tag = s.getTags().get(str);
+        int tag = 0;
+        if (s.getCommand() != Command.CONFIRMED_SERVICE_ERROR
+                || s.getTags().containsKey(str)) {
+            tag = s.getTags().get(str);
+        }
         if (s.getCommand() == Command.NONE) {
             if (!((s.getSettings().getClientAddress() == 0
                     || s.getSettings().getServerAddress() == 0)
@@ -1176,6 +1205,32 @@ public class GXDLMSTranslator {
                 preData = updateDateTime(node, s, preData);
             } else {
                 preData = updateDataType(node, s, tag);
+            }
+        } else if (s.getCommand() == Command.CONFIRMED_SERVICE_ERROR) {
+            if (s.getOutputType() == TranslatorOutputType.STANDARD_XML) {
+                if (tag == TranslatorTags.INITIATE_ERROR) {
+                    s.getAttributeDescriptor().setUInt8(1);
+                } else {
+                    ServiceError se = TranslatorStandardTags
+                            .getServiceError(str.substring(2));
+                    s.getAttributeDescriptor().setUInt8(se.getValue());
+                    s.getAttributeDescriptor().setUInt8(TranslatorStandardTags
+                            .getError(se, getValue(node, s)));
+                }
+            } else {
+                if (tag == TranslatorTags.SERVICE_ERROR) {
+                } else {
+                    if (s.getAttributeDescriptor().size() == 0) {
+                        s.getAttributeDescriptor()
+                                .setUInt8(s.parseShort(getValue(node, s)));
+                    } else {
+                        ServiceError se =
+                                TranslatorSimpleTags.getServiceError(str);
+                        s.getAttributeDescriptor().setUInt8(se.getValue());
+                        s.getAttributeDescriptor().setUInt8(TranslatorSimpleTags
+                                .getError(se, getValue(node, s)));
+                    }
+                }
             }
         } else {
             switch (tag) {
@@ -1405,6 +1460,18 @@ public class GXDLMSTranslator {
                 break;
             case TranslatorTags.VALUE:
                 break;
+            case TranslatorTags.SERVICE:
+                // Mikko
+                if (s.getAttributeDescriptor().size() == 0) {
+                    s.getAttributeDescriptor()
+                            .setUInt8(s.parseShort(getValue(node, s)));
+                } else {
+                    s.getAttributeDescriptor()
+                            .setUInt8(ServiceError.SERVICE.getValue());
+                    s.getAttributeDescriptor().setUInt8(
+                            Service.valueOf(getValue(node, s)).getValue());
+                }
+                break;
             case TranslatorTags.ACCESS_SELECTOR:
                 s.getData().setUInt8(s.parseShort(getValue(node, s)));
                 break;
@@ -1478,7 +1545,6 @@ public class GXDLMSTranslator {
             case TranslatorTags.ACCESS_REQUEST_LIST_OF_DATA:
                 s.getAttributeDescriptor().setUInt8(getNodeCount(node));
                 break;
-
             case TranslatorTags.ACCESS_RESPONSE_BODY:
                 break;
             case TranslatorTags.LIST_OF_ACCESS_RESPONSE_SPECIFICATION:
@@ -1686,6 +1752,17 @@ public class GXDLMSTranslator {
     }
 
     /**
+     * Convert XML to hex string.
+     * 
+     * @param xml
+     *            Converted XML.
+     * @return Converted PDU in hex string.
+     */
+    public final String xmlToHexPdu(final String xml, final boolean addSpace) {
+        return GXCommon.toHex(xmlToPdu(xml), addSpace);
+    }
+
+    /**
      * Convert XML to byte array.
      * 
      * @param xml
@@ -1789,6 +1866,8 @@ public class GXDLMSTranslator {
             bb.setUInt8(s.getReason().getValue());
             break;
         case Command.CONFIRMED_SERVICE_ERROR:
+            bb.setUInt8(s.getCommand());
+            bb.set(s.getAttributeDescriptor());
             break;
         case Command.EXCEPTION_RESPONSE:
             break;

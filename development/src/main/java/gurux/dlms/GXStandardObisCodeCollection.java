@@ -457,6 +457,7 @@ class GXStandardObisCodeCollection
             obis[4] = Integer.toString(obisCode[4]);
             obis[5] = Integer.toString(obisCode[5]);
             tmp.setOBIS(obis);
+            list.add(tmp);
         }
         return list.toArray(new GXStandardObisCode[list.size()]);
     }

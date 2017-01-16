@@ -63,4 +63,8 @@ final class TranslatorTags {
     static final int ACCESS_RESPONSE_SPECIFICATION = 0xFF37;
     static final int ACCESS_RESPONSE_LIST_OF_DATA = 0xFF38;
     static final int SINGLE_RESPONSE = 0xFF39;
+    static final int SERVICE = 0xFF40;
+    static final int SERVICE_ERROR = 0xFF41;
+    static final int INITIATE_ERROR = 0xFF42;
+
 }

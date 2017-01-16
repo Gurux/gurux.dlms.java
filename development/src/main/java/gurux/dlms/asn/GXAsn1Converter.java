@@ -14,7 +14,6 @@ import java.text.DateFormat;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
-import java.util.Base64;
 import java.util.Calendar;
 import java.util.Date;
 import java.util.List;
@@ -52,7 +51,7 @@ public final class GXAsn1Converter {
     }
 
     private static byte[] p256Head =
-            Base64.getDecoder().decode("MFkwEwYHKoZIzj0CAQYIKoZIzj0DAQcDQgAE");
+            GXCommon.fromBase64("MFkwEwYHKoZIzj0CAQYIKoZIzj0DAQcDQgAE");
 
     public static PublicKey getPublicKey4(final GXOid algorithm,
             final GXAsn1BitString key) {

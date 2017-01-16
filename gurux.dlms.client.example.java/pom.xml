@@ -33,22 +33,22 @@
     <dependency>
       <groupId>org.gurux</groupId>
       <artifactId>gurux.serial</artifactId>
-      <version>1.0.3</version>
+      <version>1.0.8</version>
     </dependency>
     <dependency>
       <groupId>org.gurux</groupId>
       <artifactId>gurux.net</artifactId>
-      <version>1.0.4</version>
+      <version>1.0.10</version>
     </dependency>
      <dependency>
       <groupId>org.gurux</groupId>
       <artifactId>gurux.terminal</artifactId>
-      <version>1.0.3</version>
+      <version>1.0.7</version>
     </dependency>
   <dependency>
     <groupId>org.gurux</groupId>
       <artifactId>gurux.dlms</artifactId>
-      <version>1.4.8</version>
+      <version>1.4.9</version>
   </dependency>
   </dependencies>
   <licenses>

@@ -9,7 +9,6 @@ import java.security.PrivateKey;
 import java.security.PublicKey;
 import java.security.spec.InvalidKeySpecException;
 import java.security.spec.X509EncodedKeySpec;
-import java.util.Base64;
 import java.util.Date;
 
 import gurux.dlms.asn.enums.GXOid;
@@ -45,7 +44,7 @@ public class GXx509Certificate {
      *            Base64 string.
      */
     public GXx509Certificate(final String data) {
-        init(Base64.getDecoder().decode(data));
+        init(GXCommon.fromBase64(data));
     }
 
     /*

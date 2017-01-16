@@ -1150,7 +1150,7 @@ abstract class GXDLMS {
         }
         // Get frame type.
         frame = reply.getUInt8();
-        if (!settings.checkFrame(frame)) {
+        if (data.getXml() == null && !settings.checkFrame(frame)) {
             reply.position(eopPos + 1);
             return getHdlcData(server, settings, reply, data);
         }
@@ -2428,11 +2428,41 @@ abstract class GXDLMS {
                 ExceptionServiceError.values()[data.getData().getUInt8() - 1]);
     }
 
-    private static void handleConfirmedServiceError(final GXReplyData data) {
-        ConfirmedServiceError service =
-                ConfirmedServiceError.forValue(data.getData().getUInt8());
-        ServiceError type = ServiceError.forValue(data.getData().getUInt8());
-        throw new GXDLMSException(service, type, data.getData().getUInt8());
+    static void handleConfirmedServiceError(final GXReplyData data) {
+        if (data.getXml() != null) {
+            data.getXml().appendStartTag(Command.CONFIRMED_SERVICE_ERROR);
+            if (data.getXml()
+                    .getOutputType() == TranslatorOutputType.STANDARD_XML) {
+                data.getData().getUInt8();
+                data.getXml().appendStartTag(TranslatorTags.INITIATE_ERROR);
+                ServiceError type =
+                        ServiceError.forValue(data.getData().getUInt8());
+
+                String tag = TranslatorStandardTags.serviceErrorToString(type);
+                String value = TranslatorStandardTags.getServiceErrorValue(type,
+                        (byte) data.getData().getUInt8());
+                data.getXml().appendLine("x:" + tag, null, value);
+                data.getXml().appendEndTag(TranslatorTags.INITIATE_ERROR);
+            } else {
+                data.getXml().appendLine(TranslatorTags.SERVICE, "Value", data
+                        .getXml().integerToHex(data.getData().getUInt8(), 2));
+                ServiceError type =
+                        ServiceError.forValue(data.getData().getUInt8());
+                data.getXml().appendStartTag(TranslatorTags.SERVICE_ERROR);
+                data.getXml().appendLine(
+                        TranslatorSimpleTags.serviceErrorToString(type),
+                        "Value", TranslatorSimpleTags.getServiceErrorValue(type,
+                                (byte) data.getData().getUInt8()));
+                data.getXml().appendEndTag(TranslatorTags.SERVICE_ERROR);
+            }
+            data.getXml().appendEndTag(Command.CONFIRMED_SERVICE_ERROR);
+        } else {
+            ConfirmedServiceError service =
+                    ConfirmedServiceError.forValue(data.getData().getUInt8());
+            ServiceError type =
+                    ServiceError.forValue(data.getData().getUInt8());
+            throw new GXDLMSException(service, type, data.getData().getUInt8());
+        }
     }
 
     private static int handleGloRequest(final GXDLMSSettings settings,

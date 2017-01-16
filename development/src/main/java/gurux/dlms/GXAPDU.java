@@ -916,8 +916,10 @@ final class GXAPDU {
             default:
                 // Unknown tags.
                 System.out.println("Unknown tag: " + tag + ".");
-                len = buff.getUInt8();
-                buff.position(buff.position() + len);
+                if (buff.position() < buff.size()) {
+                    len = buff.getUInt8();
+                    buff.position(buff.position() + len);
+                }
                 break;
             }
         }

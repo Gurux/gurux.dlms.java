@@ -1,11 +1,21 @@
 package gurux.dlms;
 
 import java.util.HashMap;
+import java.util.Map;
+import java.util.Map.Entry;
 
+import gurux.dlms.enums.Access;
 import gurux.dlms.enums.AccessServiceCommandType;
+import gurux.dlms.enums.ApplicationReference;
 import gurux.dlms.enums.Command;
 import gurux.dlms.enums.DataType;
+import gurux.dlms.enums.Definition;
 import gurux.dlms.enums.ErrorCode;
+import gurux.dlms.enums.HardwareResource;
+import gurux.dlms.enums.Initiate;
+import gurux.dlms.enums.LoadDataSet;
+import gurux.dlms.enums.Task;
+import gurux.dlms.enums.VdeStateError;
 
 final class TranslatorSimpleTags {
     /**
@@ -98,6 +108,8 @@ final class TranslatorSimpleTags {
                 "RespondingAPTitle");
         GXDLMSTranslator.addTag(list, TranslatorGeneralTags.DEDICATED_KEY,
                 "DedicatedKey");
+        GXDLMSTranslator.addTag(list, Command.CONFIRMED_SERVICE_ERROR,
+                "ConfirmedServiceError");
     }
 
     /**
@@ -233,6 +245,8 @@ final class TranslatorSimpleTags {
                 "_AccessResponseSpecification");
         list.put(TranslatorTags.ACCESS_RESPONSE_LIST_OF_DATA,
                 "AccessResponseListOfData");
+        list.put(TranslatorTags.SERVICE, "Service");
+        list.put(TranslatorTags.SERVICE_ERROR, "ServiceError");
     }
 
     /**
@@ -479,4 +493,346 @@ final class TranslatorSimpleTags {
         return v;
     }
 
+    private static Map<ServiceError, String> getServiceErrors() {
+        Map<ServiceError, String> list = new HashMap<ServiceError, String>();
+        list.put(ServiceError.APPLICATION_REFERENCE, "ApplicationReference");
+        list.put(ServiceError.HARDWARE_RESOURCE, "HardwareResource");
+        list.put(ServiceError.VDE_STATE_ERROR, "VdeStateError");
+        list.put(ServiceError.SERVICE, "Service");
+        list.put(ServiceError.DEFINITION, "Definition");
+        list.put(ServiceError.ACCESS, "Access");
+        list.put(ServiceError.INITIATE, "Initiate");
+        list.put(ServiceError.LOAD_DATASET, "LoadDataSet");
+        list.put(ServiceError.TASK, "Task");
+        return list;
+    }
+
+    static Map<ApplicationReference, String> getApplicationReference() {
+        Map<ApplicationReference, String> list =
+                new HashMap<ApplicationReference, String>();
+        list.put(ApplicationReference.APPLICATION_CONTEXT_UNSUPPORTED,
+                "ApplicationContextUnsupported");
+        list.put(ApplicationReference.APPLICATION_REFERENCE_INVALID,
+                "ApplicationReferenceInvalid");
+        list.put(ApplicationReference.APPLICATION_UNREACHABLE,
+                "ApplicationUnreachable");
+        list.put(ApplicationReference.DECIPHERING_ERROR, "DecipheringError");
+        list.put(ApplicationReference.OTHER, "Other");
+        list.put(ApplicationReference.PROVIDER_COMMUNICATION_ERROR,
+                "ProviderCommunicationError");
+        list.put(ApplicationReference.TIME_ELAPSED, "TimeElapsed");
+        return list;
+    }
+
+    static Map<HardwareResource, String> getHardwareResource() {
+        Map<HardwareResource, String> list =
+                new HashMap<HardwareResource, String>();
+        list.put(HardwareResource.MASS_STORAGE_UNAVAILABLE,
+                "MassStorageUnavailable");
+        list.put(HardwareResource.MEMORY_UNAVAILABLE, "MemoryUnavailable");
+        list.put(HardwareResource.OTHER, "Other");
+        list.put(HardwareResource.OTHER_RESOURCE_UNAVAILABLE,
+                "OtherResourceUnavailable");
+        list.put(HardwareResource.PROCESSOR_RESOURCE_UNAVAILABLE,
+                "ProcessorResourceUnavailable");
+        return list;
+    }
+
+    static Map<VdeStateError, String> getVdeStateError() {
+        Map<VdeStateError, String> list = new HashMap<VdeStateError, String>();
+        list.put(VdeStateError.LOADING_DATASET, "LoadingDataSet");
+        list.put(VdeStateError.NO_DLMS_CONTEXT, "NoDlmsContext");
+        list.put(VdeStateError.OTHER, "Other");
+        list.put(VdeStateError.STATUS_INOPERABLE, "StatusInoperable");
+        list.put(VdeStateError.STATUS_NO_CHANGE, "StatusNochange");
+        return list;
+    }
+
+    static Map<Service, String> getService() {
+        Map<Service, String> list = new HashMap<Service, String>();
+        list.put(Service.OTHER, "Other");
+        list.put(Service.PDU_SIZE, "PduSize");
+        list.put(Service.UNSUPPORTED, "ServiceUnsupported");
+        return list;
+    }
+
+    static Map<Definition, String> getDefinition() {
+        Map<Definition, String> list = new HashMap<Definition, String>();
+        list.put(Definition.OBJECT_ATTRIBUTE_INCONSISTENT,
+                "ObjectAttributeInconsistent");
+        list.put(Definition.OBJECT_CLASS_INCONSISTENT,
+                "ObjectClassInconsistent");
+        list.put(Definition.OBJECT_UNDEFINED, "ObjectUndefined");
+        list.put(Definition.OTHER, "Other");
+        return list;
+    }
+
+    static Map<Access, String> getAccess() {
+        Map<Access, String> list = new HashMap<Access, String>();
+        list.put(Access.HARDWARE_FAULT, "HardwareFault");
+        list.put(Access.OBJECT_ACCESS_INVALID, "ObjectAccessInvalid");
+        list.put(Access.OBJECT_UNAVAILABLE, "ObjectUnavailable");
+        list.put(Access.OTHER, "Other");
+        list.put(Access.SCOPE_OF_ACCESS_VIOLATED, "ScopeOfAccessViolated");
+        return list;
+    }
+
+    static Map<Initiate, String> getInitiate() {
+        Map<Initiate, String> list = new HashMap<Initiate, String>();
+        list.put(Initiate.DLMS_VERSION_TOO_LOW, "DlmsVersionTooLow");
+        list.put(Initiate.INCOMPATIBLE_CONFORMANCE, "IncompatibleConformance");
+        list.put(Initiate.OTHER, "Other");
+        list.put(Initiate.PDU_SIZE_TOOSHORT, "PduSizeTooShort");
+        list.put(Initiate.REFUSED_BY_THE_VDE_HANDLER, "RefusedByTheVDEHandler");
+        return list;
+    }
+
+    static Map<LoadDataSet, String> getLoadDataSet() {
+        Map<LoadDataSet, String> list = new HashMap<LoadDataSet, String>();
+        list.put(LoadDataSet.DATASET_NOT_READY, "DataSetNotReady");
+        list.put(LoadDataSet.DATASET_SIZE_TOO_LARGE, "DatasetSizeTooLarge");
+        list.put(LoadDataSet.INTERPRETATION_FAILURE, "InterpretationFailure");
+        list.put(LoadDataSet.NOT_AWAITED_SEGMENT, "NotAwaitedSegment");
+        list.put(LoadDataSet.NOT_LOADABLE, "NotLoadable");
+        list.put(LoadDataSet.OTHER, "Other");
+        list.put(LoadDataSet.PRIMITIVE_OUT_OF_SEQUENCE,
+                "PrimitiveOutOfSequence");
+        list.put(LoadDataSet.STORAGE_FAILURE, "StorageFailure");
+        return list;
+    }
+
+    static Map<Task, String> getTask() {
+        Map<Task, String> list = new HashMap<Task, String>();
+        list.put(Task.NO_REMOTE_CONTROL, "NoRemoteControl");
+        list.put(Task.OTHER, "Other");
+        list.put(Task.TI_RUNNING, "tiRunning");
+        list.put(Task.TI_STOPPED, "tiStopped");
+        list.put(Task.TI_UNUSABLE, "tiUnusable");
+        return list;
+    }
+
+    static String getServiceErrorValue(final ServiceError error,
+            final byte value) {
+        switch (error) {
+        case APPLICATION_REFERENCE:
+            return getApplicationReference()
+                    .get(ApplicationReference.forValue(value));
+        case HARDWARE_RESOURCE:
+            return getHardwareResource().get(HardwareResource.forValue(value));
+        case VDE_STATE_ERROR:
+            return getVdeStateError().get(VdeStateError.forValue(value));
+        case SERVICE:
+            return getService().get(Service.forValue(value));
+        case DEFINITION:
+            return getDefinition().get(Definition.forValue(value));
+        case ACCESS:
+            return getAccess().get(Access.forValue(value));
+        case INITIATE:
+            return getInitiate().get(Initiate.forValue(value));
+        case LOAD_DATASET:
+            return getLoadDataSet().get(LoadDataSet.forValue(value));
+        case TASK:
+            return getTask().get(Task.forValue(value));
+        case OTHER_ERROR:
+            return String.valueOf(value);
+        default:
+            break;
+        }
+        return "";
+    }
+
+    /**
+     * @param error
+     *            Service error enumeration value.
+     * @return Service error simple XML tag.
+     */
+    static String serviceErrorToString(final ServiceError error) {
+        return getServiceErrors().get(error);
+    }
+
+    /**
+     * @param value
+     *            Service error simple XML tag.
+     * @return Service error enumeration value.
+     */
+    static ServiceError getServiceError(final String value) {
+        ServiceError error = null;
+        for (Entry<ServiceError, String> it : getServiceErrors().entrySet()) {
+            if (value.compareTo(it.getValue().toLowerCase()) == 0) {
+                error = it.getKey();
+                break;
+            }
+        }
+        if (error == null) {
+            throw new IllegalArgumentException();
+        }
+        return error;
+    }
+
+    private static int getApplicationReference(final String value) {
+        int ret = -1;
+        for (Entry<ApplicationReference, String> it : getApplicationReference()
+                .entrySet()) {
+            if (value.compareTo(it.getValue()) == 0) {
+                ret = it.getKey().getValue();
+                break;
+            }
+        }
+        if (ret == -1) {
+            throw new IllegalArgumentException();
+        }
+        return ret;
+    }
+
+    private static int getHardwareResource(final String value) {
+        int ret = -1;
+        for (Entry<HardwareResource, String> it : getHardwareResource()
+                .entrySet()) {
+            if (value.compareTo(it.getValue()) == 0) {
+                ret = it.getKey().getValue();
+                break;
+            }
+        }
+        if (ret == -1) {
+            throw new IllegalArgumentException();
+        }
+        return ret;
+    }
+
+    private static int getVdeStateError(final String value) {
+        int ret = -1;
+        for (Entry<VdeStateError, String> it : getVdeStateError().entrySet()) {
+            if (value.compareTo(it.getValue()) == 0) {
+                ret = it.getKey().getValue();
+                break;
+            }
+        }
+        if (ret == -1) {
+            throw new IllegalArgumentException();
+        }
+        return ret;
+    }
+
+    private static int getService(final String value) {
+        int ret = -1;
+        for (Entry<Service, String> it : getService().entrySet()) {
+            if (value.compareTo(it.getValue()) == 0) {
+                ret = it.getKey().getValue();
+                break;
+            }
+        }
+        if (ret == -1) {
+            throw new IllegalArgumentException();
+        }
+        return ret;
+    }
+
+    private static int getDefinition(final String value) {
+        int ret = -1;
+        for (Entry<Definition, String> it : getDefinition().entrySet()) {
+            if (value.compareTo(it.getValue()) == 0) {
+                ret = it.getKey().getValue();
+                break;
+            }
+        }
+        if (ret == -1) {
+            throw new IllegalArgumentException();
+        }
+        return ret;
+    }
+
+    private static int getAccess(final String value) {
+        int ret = -1;
+        for (Entry<Access, String> it : getAccess().entrySet()) {
+            if (value.compareTo(it.getValue()) == 0) {
+                ret = it.getKey().getValue();
+                break;
+            }
+        }
+        if (ret == -1) {
+            throw new IllegalArgumentException();
+        }
+        return ret;
+    }
+
+    private static int getInitiate(final String value) {
+        int ret = -1;
+        for (Entry<Initiate, String> it : getInitiate().entrySet()) {
+            if (value.compareTo(it.getValue()) == 0) {
+                ret = it.getKey().getValue();
+                break;
+            }
+        }
+        if (ret == -1) {
+            throw new IllegalArgumentException();
+        }
+        return ret;
+    }
+
+    private static int getLoadDataSet(final String value) {
+        int ret = -1;
+        for (Entry<LoadDataSet, String> it : getLoadDataSet().entrySet()) {
+            if (value.compareTo(it.getValue()) == 0) {
+                ret = it.getKey().getValue();
+                break;
+            }
+        }
+        if (ret == -1) {
+            throw new IllegalArgumentException();
+        }
+        return ret;
+    }
+
+    private static int getTask(final String value) {
+        int ret = -1;
+        for (Entry<Task, String> it : getTask().entrySet()) {
+            if (value.compareTo(it.getValue()) == 0) {
+                ret = it.getKey().getValue();
+                break;
+            }
+        }
+        if (ret == -1) {
+            throw new IllegalArgumentException();
+        }
+        return ret;
+    }
+
+    static byte getError(final ServiceError serviceError, final String value) {
+        int ret = 0;
+        switch (serviceError) {
+        case APPLICATION_REFERENCE:
+            ret = getApplicationReference(value);
+            break;
+        case HARDWARE_RESOURCE:
+            ret = getHardwareResource(value);
+            break;
+        case VDE_STATE_ERROR:
+            ret = getVdeStateError(value);
+            break;
+        case SERVICE:
+            ret = getService(value);
+            break;
+        case DEFINITION:
+            ret = getDefinition(value);
+            break;
+        case ACCESS:
+            ret = getAccess(value);
+            break;
+        case INITIATE:
+            ret = getInitiate(value);
+            break;
+        case LOAD_DATASET:
+            ret = getLoadDataSet(value);
+            break;
+        case TASK:
+            ret = getTask(value);
+            break;
+        case OTHER_ERROR:
+            ret = Integer.parseInt(value);
+            break;
+        default:
+            break;
+        }
+        return (byte) ret;
+    }
 }

@@ -42,7 +42,6 @@ import java.util.Map.Entry;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
-import gurux.dlms.asn.GXAsn1Converter;
 import gurux.dlms.enums.AccessMode;
 import gurux.dlms.enums.Authentication;
 import gurux.dlms.enums.Command;
@@ -486,7 +485,7 @@ public class GXDLMSClient {
         }
         // If default HDLC parameters are not used.
         if (data.size() != 3) {
-            data.setUInt8(2, data.position() - 3); // Length.
+            data.setUInt8(2, data.size() - 3); // Length.
         } else {
             data = null;
         }
