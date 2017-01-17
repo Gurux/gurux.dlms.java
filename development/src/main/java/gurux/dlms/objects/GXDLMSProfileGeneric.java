@@ -763,12 +763,9 @@ public class GXDLMSProfileGeneric extends GXDLMSObject implements IGXDLMSBase {
      */
     @SuppressWarnings("unchecked")
     private void setBuffer(final ValueEventArgs e) {
-
-        List<Entry<GXDLMSObject, GXDLMSCaptureObject>> cols = null;
-        if (e.getParameters() instanceof List) {
-            cols = (List<Entry<GXDLMSObject, GXDLMSCaptureObject>>) e
-                    .getParameters();
-        }
+        List<Entry<GXDLMSObject, GXDLMSCaptureObject>> cols =
+                (List<Entry<GXDLMSObject, GXDLMSCaptureObject>>) e
+                        .getParameters();
 
         if (cols == null) {
             cols = captureObjects;
@@ -776,7 +773,6 @@ public class GXDLMSProfileGeneric extends GXDLMSObject implements IGXDLMSBase {
         if (cols == null || cols.size() == 0) {
             throw new RuntimeException("Read capture objects first.");
         }
-        buffer.clear();
         if (e.getValue() != null) {
             java.util.Calendar lastDate = java.util.Calendar.getInstance();
             DataType[] types = new DataType[cols.size()];
@@ -824,6 +820,21 @@ public class GXDLMSProfileGeneric extends GXDLMSObject implements IGXDLMSBase {
                             && item.getValue().getAttributeIndex() == 2) {
                         double scaler =
                                 ((GXDLMSRegister) item.getKey()).getScaler();
+                        if (scaler != 1 && data != null) {
+                            try {
+                                data = ((Number) data).doubleValue() * scaler;
+                                row[colIndex] = data;
+                            } catch (Exception ex) {
+                                System.out.println("Scalar failed for: "
+                                        + item.getKey().getLogicalName());
+                                // Skip error
+                            }
+                        }
+                    } else if (item.getKey() instanceof GXDLMSDemandRegister
+                            && (item.getValue().getAttributeIndex() == 2 || item
+                                    .getValue().getAttributeIndex() == 3)) {
+                        double scaler = ((GXDLMSDemandRegister) item.getKey())
+                                .getScaler();
                         if (scaler != 1 && data != null) {
                             try {
                                 data = ((Number) data).doubleValue() * scaler;
