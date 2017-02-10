@@ -489,7 +489,7 @@ public class GXDLMSClient {
         } else {
             data = null;
         }
-        return GXDLMS.getHdlcFrame(settings, (byte) Command.SNRM, null);
+        return GXDLMS.getHdlcFrame(settings, (byte) Command.SNRM, data);
     }
 
     /**
