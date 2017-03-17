@@ -43,6 +43,7 @@ import gurux.dlms.GXByteBuffer;
 import gurux.dlms.GXDLMSClient;
 import gurux.dlms.GXDLMSException;
 import gurux.dlms.GXDLMSServer;
+import gurux.dlms.GXDLMSServer2;
 import gurux.dlms.GXDLMSSettings;
 import gurux.dlms.GXDateTime;
 import gurux.dlms.GXSimpleEntry;
@@ -50,6 +51,7 @@ import gurux.dlms.ValueEventArgs;
 import gurux.dlms.enums.DataType;
 import gurux.dlms.enums.ErrorCode;
 import gurux.dlms.enums.ObjectType;
+import gurux.dlms.enums.UpdateType;
 import gurux.dlms.internal.GXCommon;
 import gurux.dlms.internal.GXDataInfo;
 import gurux.dlms.objects.enums.SortMethod;
@@ -534,17 +536,17 @@ public class GXDLMSProfileGeneric extends GXDLMSObject implements IGXDLMSBase {
             info.setType(DataType.DATETIME);
             java.util.Date start = ((GXDateTime) GXCommon
                     .getData(new GXByteBuffer((byte[]) arr[1]), info))
-                            .getValue();
+                            .getCalendar().getTime();
             info.clear();
             info.setType(DataType.DATETIME);
             java.util.Date end = ((GXDateTime) GXCommon
                     .getData(new GXByteBuffer((byte[]) arr[2]), info))
-                            .getValue();
+                            .getCalendar().getTime();
             for (Object row : getBuffer()) {
                 java.util.Date tm;
                 Object tmp = ((Object[]) row)[0];
                 if (tmp instanceof GXDateTime) {
-                    tm = ((GXDateTime) tmp).getValue();
+                    tm = ((GXDateTime) tmp).getCalendar().getTime();
                 } else {
                     tm = (java.util.Date) tmp;
                 }
@@ -797,7 +799,7 @@ public class GXDLMSProfileGeneric extends GXDLMSObject implements IGXDLMSBase {
                         data = GXDLMSClient.changeType((byte[]) data, type);
                         if (data instanceof GXDateTime) {
                             GXDateTime dt = (GXDateTime) data;
-                            lastDate.setTime(dt.getValue());
+                            lastDate.setTime(dt.getCalendar().getTime());
                         }
                         row[colIndex] = data;
                     } else if (type == DataType.DATETIME && data == null
@@ -806,7 +808,7 @@ public class GXDLMSProfileGeneric extends GXDLMSObject implements IGXDLMSBase {
                                 && !buffer.isEmpty()) {
                             lastDate.setTime(((GXDateTime) buffer
                                     .get(buffer.size() - 1)[colIndex])
-                                            .getValue());
+                                            .getCalendar().getTime());
                         }
                         if (lastDate.getTimeInMillis() != 0) {
                             lastDate.add(java.util.Calendar.SECOND,
@@ -867,21 +869,35 @@ public class GXDLMSProfileGeneric extends GXDLMSObject implements IGXDLMSBase {
      * Copies the values of the objects to capture into the buffer by reading
      * capture objects.
      */
-    public final void capture(final GXDLMSServer server) {
+    public final void capture(final Object server) {
         synchronized (this) {
             Object[] values = new Object[captureObjects.size()];
             int pos = -1;
+            ValueEventArgs e;
             // CHECKSTYLE:OFF
             for (Entry<GXDLMSObject, GXDLMSCaptureObject> obj : captureObjects) {
                 // CHECKSTYLE:ON
-                ValueEventArgs e =
-                        new ValueEventArgs(server.getSettings(), obj.getKey(),
-                                obj.getValue().getAttributeIndex(), 0, null);
-                server.read(new ValueEventArgs[] { e });
+                if (server instanceof GXDLMSServer) {
+                    e = new ValueEventArgs(
+                            ((GXDLMSServer) server).getSettings(), obj.getKey(),
+                            obj.getValue().getAttributeIndex(), 0, null);
+                    ((GXDLMSServer) server).read(new ValueEventArgs[] { e });
+                } else {
+                    e = new ValueEventArgs(
+                            ((GXDLMSServer2) server).getSettings(),
+                            obj.getKey(), obj.getValue().getAttributeIndex(), 0,
+                            null);
+                    ((GXDLMSServer2) server).onGet(UpdateType.PROFILE_GENERIC,
+                            new ValueEventArgs[] { e });
+                }
                 if (e.getHandled()) {
                     values[++pos] = e.getValue();
                 } else {
                     values[++pos] = obj.getKey().getValue(null, e);
+                }
+                if (server instanceof GXDLMSServer) {
+                    ((GXDLMSServer2) server)
+                            .onPostRead(new ValueEventArgs[] { e });
                 }
             }
             synchronized (this) {

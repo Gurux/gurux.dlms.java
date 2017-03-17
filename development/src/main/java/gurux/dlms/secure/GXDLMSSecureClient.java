@@ -34,12 +34,19 @@
 
 package gurux.dlms.secure;
 
-import java.util.List;
+import java.security.PublicKey;
 
+import javax.crypto.KeyAgreement;
+
+import gurux.dlms.GXByteBuffer;
 import gurux.dlms.GXDLMSClient;
-import gurux.dlms.asn.GXx509Certificate;
+import gurux.dlms.asn.GXAsn1Converter;
 import gurux.dlms.enums.Authentication;
 import gurux.dlms.enums.InterfaceType;
+import gurux.dlms.objects.GXDLMSSecuritySetup;
+import gurux.dlms.objects.enums.CertificateEntity;
+import gurux.dlms.objects.enums.CertificateType;
+import gurux.dlms.objects.enums.SecuritySuite;
 
 /**
  * GXDLMSSecureClient implements secure client where all messages are secured
@@ -48,16 +55,6 @@ import gurux.dlms.enums.InterfaceType;
  * @author Gurux Ltd.
  */
 public class GXDLMSSecureClient extends GXDLMSClient {
-
-    /**
-     * Client certificate.
-     */
-    private GXx509Certificate clientCertificate;
-    /**
-     * Server certificate.
-     */
-    private GXx509Certificate serverCertificate;
-
     /**
      * Ciphering settings.
      */
@@ -160,39 +157,91 @@ public class GXDLMSSecureClient extends GXDLMSClient {
     }
 
     /**
-     * @return Client certificate.
+     * @return Used security suite.
      */
-    public final GXx509Certificate getClientCertificate() {
-        return clientCertificate;
+    public SecuritySuite getSecuritySuite() {
+        return ciphering.getSecuritySuite();
     }
 
     /**
      * @param value
-     *            Client certificate.
+     *            Used security suite.
      */
-    public final void setClientCertificate(final GXx509Certificate value) {
-        clientCertificate = value;
+    public void setSecuritySuite(final SecuritySuite value) {
+        ciphering.setSecuritySuite(value);
     }
 
     /**
-     * @return Server certificate.
+     * Exports an X.509 v3 certificate from the server using entity information.
+     * 
+     * @param ss
+     *            Security Setup.
+     * @param type
+     *            Certificate type.
+     * @return Generated action.
      */
-    public final GXx509Certificate getServerCertificate() {
-        return serverCertificate;
+    public final byte[][] getServerCertificate(final GXDLMSSecuritySetup ss,
+            final CertificateType type) {
+        return ss.exportCertificateByEntity(this, CertificateEntity.SERVER,
+                type, getSettings().getSourceSystemTitle());
+    }
+
+    public final void parseServerCertificate(final byte[] data,
+            final PublicKey pk) {
+        // ephemeral public key
+        GXByteBuffer data2 = new GXByteBuffer(65);
+        data2.setUInt8(0);
+        data2.set(data, 0, 64);
+        GXByteBuffer sign = new GXByteBuffer();
+        sign.set(data, 64, 64);
+        // PublicKey pk = GXAsn1Converter.getPublicKey(data2.subArray(1, 64));
+        getSettings().setTargetEphemeralKey(pk);
+        try {
+            if (!GXASymmetric.validateEphemeralPublicKeySignature(data2.array(),
+                    sign.array(), pk)) {
+                throw new IllegalArgumentException("Key agreement failed.");
+            }
+        } catch (Exception e) {
+            throw new RuntimeException(e.getMessage());
+        }
     }
 
     /**
-     * @param value
-     *            Server certificate.
+     * Get Ephemeral Keys what server has sent.
+     * 
+     * @param data
+     *            received data from the server.
+     * @param sPk
+     *            Server's public key.
      */
-    public final void setServerCertificate(final GXx509Certificate value) {
-        serverCertificate = value;
+    public final void getSharedSecret(final byte[] data, final PublicKey sPk) {
+        // ephemeral public key
+        GXByteBuffer data2 = new GXByteBuffer(65);
+        data2.setUInt8(0);
+        data2.set(data, 0, 64);
+        GXByteBuffer sign = new GXByteBuffer();
+        sign.set(data, 64, 64);
+        getSettings().setTargetEphemeralKey(null);
+        try {
+            if (!GXASymmetric.validateEphemeralPublicKeySignature(data2.array(),
+                    sign.array(), sPk)) {
+                throw new IllegalArgumentException("Key agreement failed.");
+            }
+        } catch (Exception e) {
+            throw new RuntimeException(e.getMessage());
+        }
+        PublicKey ePubKs = GXAsn1Converter.getPublicKey(data2.subArray(1, 64));
+        // Get shared secret
+        KeyAgreement ka;
+        try {
+            ka = KeyAgreement.getInstance("ECDH");
+            ka.init(getCiphering().getEphemeralKeyPair().getPrivate());
+            ka.doPhase(ePubKs, true);
+            getSettings().getCipher().setSharedSecret(ka.generateSecret());
+            getSettings().setTargetEphemeralKey(ePubKs);
+        } catch (Exception e) {
+            throw new RuntimeException(e.getMessage());
+        }
     }
 
-    /**
-     * @return Available certificates.
-     */
-    public final List<GXx509Certificate> getCertificates() {
-        return getSettings().getCertificates();
-    }
 }

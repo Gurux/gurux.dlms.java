@@ -17,7 +17,7 @@ import gurux.dlms.objects.GXDLMSObject;
 
 final class GXDLMSSNCommandHandler {
     private static final Logger LOGGER =
-            Logger.getLogger(GXDLMSServer.class.getName());
+            Logger.getLogger(GXDLMSServerBase.class.getName());
 
     /**
      * Constructor.
@@ -28,8 +28,9 @@ final class GXDLMSSNCommandHandler {
 
     // CHECKSTYLE:OFF
     private static void handleRead(final GXDLMSSettings settings,
-            final GXDLMSServer server, final byte type, final GXByteBuffer data,
-            final List<ValueEventArgs> list, final List<ValueEventArgs> reads,
+            final GXDLMSServerBase server, final byte type,
+            final GXByteBuffer data, final List<ValueEventArgs> list,
+            final List<ValueEventArgs> reads,
             final List<ValueEventArgs> actions, final GXByteBuffer replyData,
             final GXDLMSTranslatorStructure xml) {
         // CHECKSTYLE:ON
@@ -83,7 +84,7 @@ final class GXDLMSSNCommandHandler {
         if (!settings.isConnected()
                 && (!e.isAction() || e.getTarget().getShortName() != 0xFA00
                         || e.getIndex() != 8)) {
-            replyData.set(GXDLMSServer.generateConfirmedServiceError(
+            replyData.set(GXDLMSServerBase.generateConfirmedServiceError(
                     ConfirmedServiceError.INITIATE_ERROR, ServiceError.SERVICE,
                     Service.UNSUPPORTED.getValue()));
             return;
@@ -112,7 +113,7 @@ final class GXDLMSSNCommandHandler {
      *            Received data.
      */
     private static void handleReadBlockNumberAccess(
-            final GXDLMSSettings settings, final GXDLMSServer server,
+            final GXDLMSSettings settings, final GXDLMSServerBase server,
             final GXByteBuffer data, final GXByteBuffer replyData,
             final GXDLMSTranslatorStructure xml) {
         int blockNumber = data.getUInt16();
@@ -161,6 +162,14 @@ final class GXDLMSSNCommandHandler {
             }
             getReadData(settings, server.getTransaction().getTargets(),
                     server.getTransaction().getData());
+            if (reads.size() != 0) {
+                server.notifyPostRead(
+                        reads.toArray(new ValueEventArgs[reads.size()]));
+            }
+            if (actions.size() != 0) {
+                server.notifyPostAction(
+                        actions.toArray(new ValueEventArgs[actions.size()]));
+            }
         }
         settings.increaseBlockIndex();
         GXDLMSSNParameters p = new GXDLMSSNParameters(settings,
@@ -226,7 +235,7 @@ final class GXDLMSSNCommandHandler {
     }
 
     private static void handleReadDataBlockAccess(final GXDLMSSettings settings,
-            final GXDLMSServer server, final int command,
+            final GXDLMSServerBase server, final int command,
             final GXByteBuffer data, final int cnt,
             final GXByteBuffer replyData, final GXDLMSTranslatorStructure xml) {
         GXByteBuffer bb = new GXByteBuffer();
@@ -319,7 +328,7 @@ final class GXDLMSSNCommandHandler {
      *            Received data.
      */
     static void handleReadRequest(final GXDLMSSettings settings,
-            final GXDLMSServer server, final GXByteBuffer data,
+            final GXDLMSServerBase server, final GXByteBuffer data,
             final GXByteBuffer replyData, final GXDLMSTranslatorStructure xml) {
         GXByteBuffer bb = new GXByteBuffer();
         int cnt = 0xFF;
@@ -395,6 +404,10 @@ final class GXDLMSSNCommandHandler {
             for (ValueEventArgs it : list) {
                 reads.add(it);
             }
+            if (reads.size() != 0) {
+                server.notifyPostRead(
+                        reads.toArray(new ValueEventArgs[reads.size()]));
+            }
             server.setTransaction(new GXDLMSLongTransaction(
                     reads.toArray(new ValueEventArgs[reads.size()]),
                     Command.READ_REQUEST, bb));
@@ -421,7 +434,7 @@ final class GXDLMSSNCommandHandler {
      * 
      * @param sn
      */
-    private static GXSNInfo findSNObject(final GXDLMSServer server,
+    private static GXSNInfo findSNObject(final GXDLMSServerBase server,
             final int sn) {
         GXSNInfo i = new GXSNInfo();
         int[] offset = new int[1], count = new int[1];
@@ -460,11 +473,11 @@ final class GXDLMSSNCommandHandler {
      * @return Reply.
      */
     static void handleWriteRequest(final GXDLMSSettings settings,
-            final GXDLMSServer server, final GXByteBuffer data,
+            final GXDLMSServerBase server, final GXByteBuffer data,
             final GXByteBuffer replyData, final GXDLMSTranslatorStructure xml) {
         // Return error if connection is not established.
         if (xml == null && !settings.isConnected()) {
-            replyData.set(GXDLMSServer.generateConfirmedServiceError(
+            replyData.set(GXDLMSServerBase.generateConfirmedServiceError(
                     ConfirmedServiceError.INITIATE_ERROR, ServiceError.SERVICE,
                     Service.UNSUPPORTED.getValue()));
             return;
@@ -578,6 +591,7 @@ final class GXDLMSSNCommandHandler {
                     } else if (!e.getHandled()) {
                         target.getItem().setValue(settings, e);
                     }
+                    server.notifyPostWrite(new ValueEventArgs[] { e });
                 }
             }
         }

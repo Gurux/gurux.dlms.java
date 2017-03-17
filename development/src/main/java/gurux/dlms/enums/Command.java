@@ -111,9 +111,9 @@ public final class Command {
     public static final int METHOD_RESPONSE = 0xC7;
 
     /**
-     * Command rejected.
+     * Unacceptable frame.
      */
-    public static final int REJECTED = 0x97;
+    public static final int UNACCEPTABLE_FRAME = 0x97;
 
     /**
      * SNRM request.
@@ -201,11 +201,6 @@ public final class Command {
     public static final int GLO_SET_RESPONSE = 0xCD;
 
     /**
-     * Glo general ciphering.
-     */
-    public static final int GLO_GENERAL_CIPHERING = 0xDB;
-
-    /**
      * Glo event notification request.
      */
     public static final int GLO_EVENT_NOTIFICATION_REQUEST = 0xCA;
@@ -245,6 +240,21 @@ public final class Command {
      * Glo write response.
      */
     public static final int GLO_WRITE_RESPONSE = 45;
+
+    /**
+     * General GLO ciphering.
+     */
+    public static final int GENERAL_GLO_CIPHERING = 0xDB;
+
+    /**
+     * General DED ciphering.
+     */
+    public static final int GENERAL_DED_CIPHERING = 0xDC;
+
+    /**
+     * General ciphering.
+     */
+    public static final int GENERAL_CIPHERING = 0xDD;
 
     public static String toString(final int value) {
         String str;
@@ -288,8 +298,8 @@ public final class Command {
         case Command.METHOD_RESPONSE:
             str = "MethodResponse";
             break;
-        case Command.REJECTED:
-            str = "Rejected";
+        case Command.UNACCEPTABLE_FRAME:
+            str = "UnacceptableFrame";
             break;
         case Command.SNRM:
             str = "Snrm";
@@ -342,9 +352,6 @@ public final class Command {
         case Command.GLO_SET_RESPONSE:
             str = "GloSetResponse";
             break;
-        case Command.GLO_GENERAL_CIPHERING:
-            str = "GloGeneralCiphering";
-            break;
         case Command.GLO_EVENT_NOTIFICATION_REQUEST:
             str = "GloEventNotificationRequest";
             break;
@@ -371,6 +378,15 @@ public final class Command {
             break;
         case Command.GLO_WRITE_RESPONSE:
             str = "GloWriteResponse";
+            break;
+        case Command.GENERAL_GLO_CIPHERING:
+            str = "GeneralGloCiphering";
+            break;
+        case Command.GENERAL_DED_CIPHERING:
+            str = "GeneralDedCiphering";
+            break;
+        case Command.GENERAL_CIPHERING:
+            str = "GeneralCiphering";
             break;
         default:
             throw new IllegalArgumentException(String.valueOf(value));
@@ -408,8 +424,8 @@ public final class Command {
             ret = Command.METHOD_REQUEST;
         } else if ("MethodResponse".equalsIgnoreCase(value)) {
             ret = Command.METHOD_RESPONSE;
-        } else if ("Rejected".equalsIgnoreCase(value)) {
-            ret = Command.REJECTED;
+        } else if ("UnacceptableFrame".equalsIgnoreCase(value)) {
+            ret = Command.UNACCEPTABLE_FRAME;
         } else if ("Snrm".equalsIgnoreCase(value)) {
             ret = Command.SNRM;
         } else if ("Ua".equalsIgnoreCase(value)) {
@@ -444,8 +460,6 @@ public final class Command {
             ret = Command.GLO_SET_REQUEST;
         } else if ("GloSetResponse".equalsIgnoreCase(value)) {
             ret = Command.GLO_SET_RESPONSE;
-        } else if ("GloGeneralCiphering".equalsIgnoreCase(value)) {
-            ret = Command.GLO_GENERAL_CIPHERING;
         } else if ("GloEventNotificationRequest".equalsIgnoreCase(value)) {
             ret = Command.GLO_EVENT_NOTIFICATION_REQUEST;
         } else if ("GloMethodRequest".equalsIgnoreCase(value)) {
@@ -464,6 +478,12 @@ public final class Command {
             ret = Command.GLO_READ_RESPONSE;
         } else if ("GloWriteResponse".equalsIgnoreCase(value)) {
             ret = Command.GLO_WRITE_RESPONSE;
+        } else if ("GeneralGloCiphering".equalsIgnoreCase(value)) {
+            ret = Command.GENERAL_GLO_CIPHERING;
+        } else if ("GeneralDedCiphering".equalsIgnoreCase(value)) {
+            ret = Command.GENERAL_DED_CIPHERING;
+        } else if ("GeneralCiphering".equalsIgnoreCase(value)) {
+            ret = Command.GENERAL_CIPHERING;
         } else {
             throw new IllegalArgumentException(value);
         }

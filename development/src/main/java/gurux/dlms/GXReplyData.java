@@ -34,8 +34,6 @@
 
 package gurux.dlms;
 
-import java.util.Date;
-
 import gurux.dlms.enums.Command;
 import gurux.dlms.enums.DataType;
 import gurux.dlms.enums.RequestTypes;
@@ -125,7 +123,7 @@ public class GXReplyData {
     /**
      * Data notification date time.
      */
-    private Date time = null;
+    private GXDateTime time = null;
 
     /**
      * XML settings.
@@ -398,7 +396,7 @@ public class GXReplyData {
     /**
      * @return Data notification date time.
      */
-    public final Date getTime() {
+    public final GXDateTime getTime() {
         return time;
     }
 
@@ -406,7 +404,7 @@ public class GXReplyData {
      * @param value
      *            Data notification date time.
      */
-    public final void setTime(final Date value) {
+    public final void setTime(final GXDateTime value) {
         time = value;
     }
 

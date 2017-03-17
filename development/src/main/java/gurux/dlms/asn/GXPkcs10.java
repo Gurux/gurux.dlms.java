@@ -32,20 +32,11 @@ public class GXPkcs10 {
      */
     private String subject;
 
+    private Object attributes;
     /**
      * Algorithm.
      */
-    private GXOid algorithm;
-
-    /**
-     * Parameters.
-     */
-    private Object parameters;
-
-    /**
-     * public key info.
-     */
-    private GXAsn1BitString publicKeyInfo;
+    private GXOid algorithm = X9ObjectIdentifier.IdECPublicKey;
 
     /**
      * Subject public key.
@@ -115,13 +106,14 @@ public class GXPkcs10 {
         subject = GXAsn1Converter.getSubject((GXAsn1Sequence) reqInfo.get(1));
         // subject Public key info.
         GXAsn1Sequence subjectPKInfo = (GXAsn1Sequence) reqInfo.get(2);
+        if (reqInfo.size() > 3) {
+            attributes = reqInfo.get(3);
+        }
         GXAsn1Sequence tmp = (GXAsn1Sequence) subjectPKInfo.get(0);
         algorithm = PkcsObjectIdentifier.forValue(tmp.get(0).toString());
         if (algorithm == null) {
             algorithm = X9ObjectIdentifier.forValue(tmp.get(0).toString());
         }
-        parameters = tmp.get(1);
-        publicKeyInfo = (GXAsn1BitString) subjectPKInfo.get(1);
         // Make public key.
         KeyFactory eckf;
         try {
@@ -152,12 +144,6 @@ public class GXPkcs10 {
         // signatureAlgorithm
         GXAsn1Sequence sign = (GXAsn1Sequence) seq.get(1);
         signatureAlgorithm = HashAlgorithm.forValue(sign.get(0).toString());
-        // signatureAlgorithm =
-        // PkcsObjectIdentifier.forValue(sign.get(0).toString());
-        // if (signatureAlgorithm == null) {
-        // signatureAlgorithm =
-        // X9ObjectIdentifier.forValue(tmp.get(0).toString());
-        // }
         if (sign.size() != 1) {
             signatureParameters = (String) sign.get(1);
         }
@@ -230,42 +216,6 @@ public class GXPkcs10 {
     }
 
     /**
-     * @return Parameters.
-     */
-    public final Object getParameters() {
-        return parameters;
-    }
-
-    /**
-     * @param value
-     *            Parameters.
-     */
-    public final void setParameters(final Object value) {
-        parameters = value;
-    }
-
-    public final byte[] getEncoded() {
-        if (signature == null) {
-            throw new RuntimeException("Sign first.");
-        }
-        // Certification request info.
-        // subject Public key info.
-        GXAsn1ObjectIdentifier sa =
-                new GXAsn1ObjectIdentifier(signatureAlgorithm.getValue());
-        GXAsn1ObjectIdentifier a =
-                new GXAsn1ObjectIdentifier(algorithm.getValue());
-        Object[] list = new Object[] {
-                new Object[] { version.getValue(),
-                        GXAsn1Converter.encodeSubject(subject),
-                        new Object[] { new Object[] { a, parameters, },
-                                publicKeyInfo },
-                        new GXAsn1Context() },
-                new Object[] { sa, signatureParameters },
-                new GXAsn1BitString(signature, 0) };
-        return GXAsn1Converter.toByteArray(list);
-    }
-
-    /**
      * @return Signature algorithm.
      */
     public final GXOid getSignatureAlgorithm() {
@@ -328,38 +278,28 @@ public class GXPkcs10 {
             bb.append(algorithm.toString());
         }
         bb.append("\r\n");
-
-        bb.append("Parameters: ");
-        if (parameters != null) {
-            bb.append(parameters.toString());
-        }
-        bb.append("\r\n");
-
         bb.append("Public Key: ");
         if (publicKey != null) {
             bb.append(publicKey.toString());
         }
         bb.append("\r\n");
-
         bb.append("Signature algorithm: ");
         if (signatureAlgorithm != null) {
             bb.append(signatureAlgorithm.toString());
         }
         bb.append("\r\n");
-
         bb.append("Signature parameters: ");
         if (signatureParameters != null) {
             bb.append(signatureParameters.toString());
         }
         bb.append("\r\n");
-
         bb.append("Signature: ");
         bb.append(GXCommon.toHex(signature));
         bb.append("\r\n");
         return bb.toString();
     }
 
-    private boolean verify(final byte[] data, final byte[] signature) {
+    private boolean verify(final byte[] data, final byte[] sign) {
         try {
             Signature instance;
             if (signatureAlgorithm == HashAlgorithm.SHA256withECDSA) {
@@ -373,10 +313,39 @@ public class GXPkcs10 {
             // instance = Signature.getInstance(signatureAlgorithm.toString());
             instance.initVerify(publicKey);
             instance.update(data);
-            return instance.verify(signature);
+            return instance.verify(sign);
         } catch (Exception e) {
             throw new RuntimeException(e.getMessage());
         }
+    }
+
+    private Object[] getdata() {
+        Object subjectPKInfo =
+                GXAsn1Converter.fromByteArray(publicKey.getEncoded());
+        Object[] list;
+        if (attributes != null) {
+            list = new Object[] { version.getValue(),
+                    GXAsn1Converter.encodeSubject(subject), subjectPKInfo,
+                    attributes };
+        } else {
+            list = new Object[] { version.getValue(),
+                    GXAsn1Converter.encodeSubject(subject), subjectPKInfo,
+                    new GXAsn1Context() };
+        }
+        return list;
+    }
+
+    public final byte[] getEncoded() {
+        if (signature == null) {
+            throw new RuntimeException("Sign first.");
+        }
+        // Certification request info.
+        // subject Public key info.
+        GXAsn1ObjectIdentifier sa =
+                new GXAsn1ObjectIdentifier(signatureAlgorithm.getValue());
+        Object[] list = new Object[] { getdata(), new Object[] { sa },
+                new GXAsn1BitString(signature, 0) };
+        return GXAsn1Converter.toByteArray(list);
     }
 
     /**
@@ -388,45 +357,35 @@ public class GXPkcs10 {
      *            Used algorithm for signing.
      */
     public void sign(final KeyPair kp, final HashAlgorithm hashAlgorithm) {
-        GXAsn1Sequence seq = (GXAsn1Sequence) GXAsn1Converter
-                .fromByteArray(kp.getPrivate().getEncoded());
-        if (seq.size() != 3) {
-            throw new IllegalArgumentException(
-                    "Wrong number of elements in sequence.");
-        }
-        algorithm = hashAlgorithm;
-        signatureAlgorithm = X9ObjectIdentifier
-                .forValue(((GXAsn1Sequence) seq.get(1)).get(0).toString());
-        if (signatureAlgorithm == null) {
-            signatureAlgorithm = PkcsObjectIdentifier
-                    .forValue(((GXAsn1Sequence) seq.get(1)).get(0).toString());
-        }
-
-        // Certification request info.
-        // subject Public key info.
-        publicKey = kp.getPublic();
-
-        GXAsn1ObjectIdentifier sa =
-                new GXAsn1ObjectIdentifier(signatureAlgorithm.getValue());
-        GXAsn1ObjectIdentifier a =
-                new GXAsn1ObjectIdentifier(algorithm.getValue());
-        Object[] list = new Object[] { version.getValue(),
-                GXAsn1Converter.encodeSubject(subject),
-                new Object[] { new Object[] { a, parameters, }, publicKeyInfo },
-                new GXAsn1Context() };
-        byte[] data = GXAsn1Converter.toByteArray(list);
-
-        // privateKey.getAlgorithm();
-        // this.signatureAlgorithm =
-        // Compute signature
+        byte[] data = GXAsn1Converter.toByteArray(getdata());
         try {
-            Signature instance = Signature.getInstance("SHA1withRSA");
+            Signature instance =
+                    Signature.getInstance(hashAlgorithm.toString());
             instance.initSign(kp.getPrivate());
             instance.update(data);
+            signatureAlgorithm = hashAlgorithm;
             signature = instance.sign();
         } catch (Exception e) {
             throw new RuntimeException(e.getMessage());
         }
+    }
 
+    /**
+     * Create Certificate Signing Request.
+     * 
+     * @param kp
+     *            KeyPair
+     * @param subject
+     *            Subject.
+     * @return Created GXPkcs10.
+     */
+    public static GXPkcs10 createCertificateSigningRequest(final KeyPair kp,
+            final String subject) {
+        GXPkcs10 pkc10 = new GXPkcs10();
+        pkc10.setAlgorithm(X9ObjectIdentifier.IdECPublicKey);
+        pkc10.setPublicKey(kp.getPublic());
+        pkc10.setSubject(subject);
+        pkc10.sign(kp, HashAlgorithm.SHA256withECDSA);
+        return pkc10;
     }
 }

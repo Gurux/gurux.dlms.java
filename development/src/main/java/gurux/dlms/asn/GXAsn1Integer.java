@@ -71,6 +71,24 @@ public class GXAsn1Integer {
      * Constructor
      * 
      * @param data
+     *            Data.
+     * @param index
+     *            Index.
+     * @param count
+     *            Count.
+     */
+    public GXAsn1Integer(final byte[] data, final int index, final int count) {
+        if (data == null || data.length < index + count) {
+            throw new IllegalArgumentException("data");
+        }
+        value = new byte[count];
+        System.arraycopy(data, index, value, 0, count);
+    }
+
+    /**
+     * Constructor
+     * 
+     * @param data
      *            Integer.
      */
     public GXAsn1Integer(final String data) {

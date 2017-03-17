@@ -49,6 +49,11 @@ public enum ErrorCode {
     REJECTED(-2),
 
     /**
+     * Unacceptable frame.
+     */
+    UNACCEPTABLE_FRAME(-1),
+
+    /**
      * No error has occurred.
      */
     OK(0),

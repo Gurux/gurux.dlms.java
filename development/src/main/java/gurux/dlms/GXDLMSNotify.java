@@ -40,6 +40,7 @@ import java.util.List;
 import java.util.Map.Entry;
 
 import gurux.dlms.enums.Command;
+import gurux.dlms.enums.Conformance;
 import gurux.dlms.enums.DataType;
 import gurux.dlms.enums.InterfaceType;
 import gurux.dlms.enums.ObjectType;
@@ -85,32 +86,20 @@ public class GXDLMSNotify {
     }
 
     /**
-     * @return Is General block transfer supported.
+     * What kind of services are used.
+     * 
+     * @return Functionality.
      */
-    public final boolean getGeneralBlockTransfer() {
-        if (settings.getUseLogicalNameReferencing()) {
-            return settings.getLnSettings().getGeneralBlockTransfer();
-        }
-        return settings.getSnSettings().getGeneralBlockTransfer();
+    public final java.util.Set<Conformance> getConformance() {
+        return settings.getNegotiatedConformance();
     }
 
     /**
      * @param value
-     *            Is General block transfer supported.
+     *            What kind of services are used.
      */
-    public final void setGeneralBlockTransfer(final boolean value) {
-        if (settings.getUseLogicalNameReferencing()) {
-            settings.getLnSettings().setGeneralBlockTransfer(value);
-        } else {
-            settings.getSnSettings().setGeneralBlockTransfer(value);
-        }
-    }
-
-    /**
-     * @return Get settings.
-     */
-    protected final GXDLMSSettings getSettings() {
-        return settings;
+    public final void setConformance(final java.util.Set<Conformance> value) {
+        settings.setNegotiatedConformance(value);
     }
 
     /**
@@ -321,7 +310,9 @@ public class GXDLMSNotify {
                     Command.DATA_NOTIFICATION, 1, 0, data, null);
             reply = GXDLMS.getSnMessages(p);
         }
-        if (!getGeneralBlockTransfer() && reply.size() != 1) {
+        if (!settings.getNegotiatedConformance()
+                .contains(Conformance.GENERAL_BLOCK_TRANSFER)
+                && reply.size() != 1) {
             throw new IllegalArgumentException(
                     "Data is not fit to one PDU. Use general block transfer.");
         }

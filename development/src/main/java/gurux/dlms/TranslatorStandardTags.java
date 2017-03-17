@@ -8,6 +8,7 @@ import gurux.dlms.enums.Access;
 import gurux.dlms.enums.AccessServiceCommandType;
 import gurux.dlms.enums.ApplicationReference;
 import gurux.dlms.enums.Command;
+import gurux.dlms.enums.Conformance;
 import gurux.dlms.enums.DataType;
 import gurux.dlms.enums.Definition;
 import gurux.dlms.enums.ErrorCode;
@@ -34,6 +35,8 @@ final class TranslatorStandardTags {
     static void getGeneralTags(final TranslatorOutputType type,
             final HashMap<Integer, String> list) {
         GXDLMSTranslator.addTag(list, Command.SNRM, "Snrm");
+        GXDLMSTranslator.addTag(list, Command.UNACCEPTABLE_FRAME,
+                "UnacceptableFrame");
         GXDLMSTranslator.addTag(list, Command.UA, "Ua");
         GXDLMSTranslator.addTag(list, Command.AARQ, "x:aarq");
         GXDLMSTranslator.addTag(list, Command.AARE, "x:aare");
@@ -296,6 +299,8 @@ final class TranslatorStandardTags {
                 "x:glo-write-request");
         GXDLMSTranslator.addTag(list, Command.GLO_WRITE_RESPONSE,
                 "x:glo-write-response");
+        GXDLMSTranslator.addTag(list, Command.GENERAL_GLO_CIPHERING,
+                "x:general-glo-ciphering");
     }
 
     /**
@@ -377,6 +382,11 @@ final class TranslatorStandardTags {
                 "x:data-value");
         GXDLMSTranslator.addTag(list, TranslatorTags.INITIATE_ERROR,
                 "x:initiateError");
+        GXDLMSTranslator.addTag(list, TranslatorTags.CIPHERED_SERVICE,
+                "x:ciphered-content");
+        GXDLMSTranslator.addTag(list, TranslatorTags.SYSTEM_TITLE,
+                "x:system-title");
+
     }
 
     static void getDataTypeTags(final HashMap<Integer, String> list) {
@@ -865,5 +875,142 @@ final class TranslatorStandardTags {
             break;
         }
         return (byte) ret;
+    }
+
+    static String conformancetoString(final Conformance value) {
+        String str;
+        switch (value) {
+        case ACCESS:
+            str = "access";
+            break;
+        case ACTION:
+            str = "action";
+            break;
+        case ATTRIBUTE_0_SUPPORTED_WITH_GET:
+            str = "attribute0-supported-with-get";
+            break;
+        case ATTRIBUTE_0_SUPPORTED_WITH_SET:
+            str = "attribute0-supported-with-set";
+            break;
+        case BLOCK_TRANSFER_WITH_ACTION:
+            str = "block-transfer-with-action";
+            break;
+        case BLOCK_TRANSFER_WITH_GET_OR_READ:
+            str = "block-transfer-with-get-or-read";
+            break;
+        case BLOCK_TRANSFER_WITH_SET_OR_WRITE:
+            str = "block-transfer-with-set-or-write";
+            break;
+        case DATA_NOTIFICATION:
+            str = "data-notification";
+            break;
+        case EVENT_NOTIFICATION:
+            str = "event-notification";
+            break;
+        case GENERAL_BLOCK_TRANSFER:
+            str = "general-block-transfer";
+            break;
+        case GENERAL_PROTECTION:
+            str = "general-protection";
+            break;
+        case GET:
+            str = "get";
+            break;
+        case INFORMATION_REPORT:
+            str = "information-report";
+            break;
+        case MULTIPLE_REFERENCES:
+            str = "multiple-references";
+            break;
+        case PARAMETERIZED_ACCESS:
+            str = "parameterized-access";
+            break;
+        case PRIORITY_MGMT_SUPPORTED:
+            str = "priority-mgmt-supported";
+            break;
+        case READ:
+            str = "read";
+            break;
+        case RESERVED_SEVEN:
+            str = "reserved-seven";
+            break;
+        case RESERVED_SIX:
+            str = "reserved-six";
+            break;
+        case RESERVED_ZERO:
+            str = "reserved-zero";
+            break;
+        case SELECTIVE_ACCESS:
+            str = "selective-access";
+            break;
+        case SET:
+            str = "set";
+            break;
+        case UN_CONFIRMED_WRITE:
+            str = "unconfirmed-write";
+            break;
+        case WRITE:
+            str = "write";
+            break;
+        default:
+            throw new IllegalArgumentException(String.valueOf(value));
+        }
+        return str;
+    }
+
+    static Conformance valueOfConformance(final String value) {
+        Conformance ret;
+        if ("access".equalsIgnoreCase(value)) {
+            ret = Conformance.ACCESS;
+        } else if ("action".equalsIgnoreCase(value)) {
+            ret = Conformance.ACTION;
+        } else if ("attribute0-supported-with-get".equalsIgnoreCase(value)) {
+            ret = Conformance.ATTRIBUTE_0_SUPPORTED_WITH_GET;
+        } else if ("attribute0-supported-with-set".equalsIgnoreCase(value)) {
+            ret = Conformance.ATTRIBUTE_0_SUPPORTED_WITH_SET;
+        } else if ("block-transfer-with-action".equalsIgnoreCase(value)) {
+            ret = Conformance.BLOCK_TRANSFER_WITH_ACTION;
+        } else if ("block-transfer-with-get-or-read".equalsIgnoreCase(value)) {
+            ret = Conformance.BLOCK_TRANSFER_WITH_GET_OR_READ;
+        } else if ("block-transfer-with-set-or-write".equalsIgnoreCase(value)) {
+            ret = Conformance.BLOCK_TRANSFER_WITH_SET_OR_WRITE;
+        } else if ("data-notification".equalsIgnoreCase(value)) {
+            ret = Conformance.DATA_NOTIFICATION;
+        } else if ("event-notification".equalsIgnoreCase(value)) {
+            ret = Conformance.EVENT_NOTIFICATION;
+        } else if ("general-block-transfer".equalsIgnoreCase(value)) {
+            ret = Conformance.GENERAL_BLOCK_TRANSFER;
+        } else if ("general-protection".equalsIgnoreCase(value)) {
+            ret = Conformance.GENERAL_PROTECTION;
+        } else if ("get".equalsIgnoreCase(value)) {
+            ret = Conformance.GET;
+        } else if ("information-report".equalsIgnoreCase(value)) {
+            ret = Conformance.INFORMATION_REPORT;
+        } else if ("multiple-references".equalsIgnoreCase(value)) {
+            ret = Conformance.MULTIPLE_REFERENCES;
+        } else if ("parameterized-access".equalsIgnoreCase(value)) {
+            ret = Conformance.PARAMETERIZED_ACCESS;
+        } else if ("priority-mgmt-supported".equalsIgnoreCase(value)) {
+            ret = Conformance.PRIORITY_MGMT_SUPPORTED;
+        } else if ("read".equalsIgnoreCase(value)) {
+            ret = Conformance.READ;
+        } else if ("reserved-seven".equalsIgnoreCase(value)) {
+            ret = Conformance.RESERVED_SEVEN;
+        } else if ("reserved-six".equalsIgnoreCase(value)) {
+            ret = Conformance.RESERVED_SIX;
+        } else if ("reserved-zero".equalsIgnoreCase(value)) {
+            ret = Conformance.RESERVED_ZERO;
+        } else if ("selective-access".equalsIgnoreCase(value)) {
+            ret = Conformance.SELECTIVE_ACCESS;
+        } else if ("set".equalsIgnoreCase(value)) {
+            ret = Conformance.SET;
+        } else if ("unconfirmed-write".equalsIgnoreCase(value)) {
+            ret = Conformance.UN_CONFIRMED_WRITE;
+        } else if ("write".equalsIgnoreCase(value)) {
+            ret = Conformance.WRITE;
+        } else {
+            throw new IllegalArgumentException(value);
+        }
+        return ret;
     }
 }

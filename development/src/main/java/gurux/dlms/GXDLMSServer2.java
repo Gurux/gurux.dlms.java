@@ -41,25 +41,18 @@ import gurux.dlms.enums.ObjectType;
 import gurux.dlms.enums.Priority;
 import gurux.dlms.enums.ServiceClass;
 import gurux.dlms.enums.SourceDiagnostic;
+import gurux.dlms.enums.UpdateType;
 import gurux.dlms.objects.GXDLMSObject;
 import gurux.dlms.objects.GXDLMSObjectCollection;
 
 /**
  * GXDLMSServer implements methods to implement DLMS/COSEM meter/proxy.
  */
-public abstract class GXDLMSServer {
+public abstract class GXDLMSServer2 {
 
     private final GXDLMSServerBase base;
 
-    /**
-     * Constructor.
-     * 
-     * @param logicalNameReferencing
-     *            Is logical name referencing used.
-     * @param type
-     *            Interface type.
-     */
-    public GXDLMSServer(final boolean logicalNameReferencing,
+    public GXDLMSServer2(final boolean logicalNameReferencing,
             final InterfaceType type) {
         base = new GXDLMSServerBase(this, logicalNameReferencing, type);
     }
@@ -300,8 +293,19 @@ public abstract class GXDLMSServer {
      *            Password.
      * @return Source diagnostic.
      */
-    protected abstract SourceDiagnostic validateAuthentication(
+    protected abstract SourceDiagnostic onValidateAuthentication(
             Authentication authentication, byte[] password);
+
+    /**
+     * Get selected value(s). This is called when example profile generic
+     * request current value.
+     * 
+     * @param type
+     *            Update type.
+     * @param e
+     *            Value event arguments.
+     */
+    public abstract void onGet(UpdateType type, ValueEventArgs[] e);
 
     /**
      * Find object.
@@ -318,20 +322,36 @@ public abstract class GXDLMSServer {
             String ln);
 
     /**
-     * Read selected item(s).
+     * Called before read is executed.
      * 
      * @param args
      *            Handled read requests.
      */
-    public abstract void read(ValueEventArgs[] args);
+    public abstract void onPreRead(ValueEventArgs[] args);
 
     /**
-     * Write selected item(s).
+     * Called after read is executed.
+     * 
+     * @param args
+     *            Handled read requests.
+     */
+    public abstract void onPostRead(ValueEventArgs[] args);
+
+    /**
+     * Called before write is executed..
      * 
      * @param args
      *            Handled write requests.
      */
-    protected abstract void write(ValueEventArgs[] args);
+    protected abstract void onPreWrite(ValueEventArgs[] args);
+
+    /**
+     * Called after write is executed.
+     * 
+     * @param args
+     *            Handled write requests.
+     */
+    protected abstract void onPostWrite(ValueEventArgs[] args);
 
     /**
      * Accepted connection is made for the server. All initialization is done
@@ -340,7 +360,8 @@ public abstract class GXDLMSServer {
      * @param connectionInfo
      *            Connection info.
      */
-    protected abstract void connected(GXDLMSConnectionEventArgs connectionInfo);
+    protected abstract void
+            onConnected(GXDLMSConnectionEventArgs connectionInfo);
 
     /**
      * Client has try to made invalid connection. Password is incorrect.
@@ -349,7 +370,7 @@ public abstract class GXDLMSServer {
      *            Connection info.
      */
     protected abstract void
-            invalidConnection(GXDLMSConnectionEventArgs connectionInfo);
+            onInvalidConnection(GXDLMSConnectionEventArgs connectionInfo);
 
     /**
      * Server has close the connection. All clean up is made here.
@@ -358,14 +379,21 @@ public abstract class GXDLMSServer {
      *            Connection info.
      */
     protected abstract void
-            disconnected(GXDLMSConnectionEventArgs connectionInfo);
+            onDisconnected(GXDLMSConnectionEventArgs connectionInfo);
 
     /**
-     * Action is occurred.
+     * Called before action is executed.
      * 
      * @param args
      *            Handled action requests.
      */
-    protected abstract void action(ValueEventArgs[] args);
+    protected abstract void onPreAction(ValueEventArgs[] args);
 
+    /**
+     * Called after action is executed.
+     * 
+     * @param args
+     *            Handled action requests.
+     */
+    protected abstract void onPostAction(ValueEventArgs[] args);
 }

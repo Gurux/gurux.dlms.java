@@ -34,9 +34,16 @@
 
 package gurux.dlms;
 
-import java.security.PrivateKey;
+import java.security.KeyPair;
+import java.security.PublicKey;
+import java.util.List;
+import java.util.Map;
 
+import gurux.dlms.asn.GXx509Certificate;
 import gurux.dlms.enums.Security;
+import gurux.dlms.objects.enums.CertificateType;
+import gurux.dlms.objects.enums.SecuritySuite;
+import gurux.dlms.secure.AesGcmParameter;
 
 public interface GXICipher {
 
@@ -62,7 +69,7 @@ public interface GXICipher {
      *            Decrypted data.
      * @return Used security.
      */
-    Security decrypt(byte[] systemTitle, GXByteBuffer data);
+    AesGcmParameter decrypt(byte[] systemTitle, GXByteBuffer data);
 
     /**
      * Reset encrypt settings.
@@ -86,9 +93,14 @@ public interface GXICipher {
     void setSecurity(Security value);
 
     /**
-     * @return system title.
+     * @return System title.
      */
     byte[] getSystemTitle();
+
+    /**
+     * @return Recipient system Title.
+     */
+    byte[] getRecipientSystemTitle();
 
     /**
      * @return Block cipher key.
@@ -107,12 +119,66 @@ public interface GXICipher {
     void setAuthenticationKey(byte[] value);
 
     /**
-     * @return Frame counter. Invocation counter.
+     * @return Invocation counter.
      */
-    long getFrameCounter();
+    long getInvocationCounter();
 
     /**
-     * @return Private key.
+     * @return Used security suite.
      */
-    PrivateKey getPrivateKey();
+    SecuritySuite getSecuritySuite();
+
+    /**
+     * @return Ephemeral key pair.
+     */
+    KeyPair getEphemeralKeyPair();
+
+    /**
+     * @param value
+     *            Ephemeral key pair.
+     */
+    void setEphemeralKeyPair(KeyPair value);
+
+    /**
+     * @return Client's key agreement key pair.
+     */
+    KeyPair getKeyAgreementKeyPair();
+
+    /**
+     * @param value
+     *            Client's key agreement key pair.
+     */
+    void setKeyAgreementKeyPair(KeyPair value);
+
+    /**
+     * @return Target (Server or client) Public key.
+     */
+    List<Map.Entry<CertificateType, PublicKey>> getPublicKeys();
+
+    /**
+     * @return Available certificates.
+     */
+    List<GXx509Certificate> getCertificates();
+
+    /**
+     * @return Signing key pair.
+     */
+    KeyPair getSigningKeyPair();
+
+    /**
+     * @param value
+     *            Signing key pair.
+     */
+    void setSigningKeyPair(KeyPair value);
+
+    /**
+     * @return Shared secret is generated when connection is made.
+     */
+    byte[] getSharedSecret();
+
+    /**
+     * @param value
+     *            Shared secret is generated when connection is made.
+     */
+    void setSharedSecret(byte[] value);
 }

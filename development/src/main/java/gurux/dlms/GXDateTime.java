@@ -52,10 +52,7 @@ public class GXDateTime {
      * Clock status.
      */
     private java.util.Set<ClockStatus> status;
-    /**
-     * Clock time.
-     */
-    private java.util.Date time = new java.util.Date(0);
+    Calendar calendar;
     /**
      * Skipped fields.
      */
@@ -68,17 +65,13 @@ public class GXDateTime {
      * Daylight savings end.
      */
     private boolean daylightSavingsEnd;
-    /**
-     * Deviation.
-     */
-    private int deviation;
 
     /**
      * Constructor.
      */
     public GXDateTime() {
         skip = new HashSet<DateTimeSkips>();
-        deviation = 0x8000;
+        calendar = Calendar.getInstance();
         status = new HashSet<ClockStatus>();
         status.add(ClockStatus.OK);
     }
@@ -86,12 +79,26 @@ public class GXDateTime {
     /**
      * Constructor.
      * 
-     * @param forvalue
+     * @param value
      *            Date value.
      */
-    public GXDateTime(final Date forvalue) {
+    public GXDateTime(final Date value) {
         skip = new HashSet<DateTimeSkips>();
-        setValue(forvalue);
+        calendar = Calendar.getInstance();
+        calendar.setTime(value);
+        status = new HashSet<ClockStatus>();
+        status.add(ClockStatus.OK);
+    }
+
+    /**
+     * Constructor.
+     * 
+     * @param value
+     *            Date value.
+     */
+    public GXDateTime(final Calendar value) {
+        skip = new HashSet<DateTimeSkips>();
+        calendar = value;
         status = new HashSet<ClockStatus>();
         status.add(ClockStatus.OK);
     }
@@ -117,6 +124,40 @@ public class GXDateTime {
     public GXDateTime(final int year, final int month, final int day,
             final int hour, final int minute, final int second,
             final int millisecond) {
+        calendar = Calendar.getInstance();
+        init(year, month, day, hour, minute, second, millisecond);
+    }
+
+    /**
+     * Constructor.
+     * 
+     * @param year
+     *            Used year.
+     * @param month
+     *            Used month.
+     * @param day
+     *            Used day.
+     * @param hour
+     *            Used hour.
+     * @param minute
+     *            Used minute.
+     * @param second
+     *            Used second.
+     * @param millisecond
+     *            Used millisecond.
+     * @param deviation
+     *            Used deviation.
+     */
+    public GXDateTime(final int year, final int month, final int day,
+            final int hour, final int minute, final int second,
+            final int millisecond, final int deviation) {
+        calendar = Calendar.getInstance(getTimeZone(deviation));
+        init(year, month, day, hour, minute, second, millisecond);
+    }
+
+    private void init(final int year, final int month, final int day,
+            final int hour, final int minute, final int second,
+            final int millisecond) {
         int y = year;
         int m = month;
         int d = day;
@@ -129,7 +170,7 @@ public class GXDateTime {
         status.add(ClockStatus.OK);
         if (y < 1 || y == 0xFFFF) {
             skip.add(DateTimeSkips.YEAR);
-            java.util.Calendar tm = java.util.Calendar.getInstance();
+            Calendar tm = Calendar.getInstance();
             y = tm.get(Calendar.YEAR);
         }
         daylightSavingsBegin = m == 0xFE;
@@ -165,19 +206,36 @@ public class GXDateTime {
             skip.add(DateTimeSkips.MILLISECOND);
             ms = 0;
         }
-        java.util.Calendar tm = java.util.Calendar.getInstance();
-        tm.set(y, m, d, h, min, s);
+        calendar.set(y, m, d, h, min, s);
         if (ms != 0) {
-            tm.set(Calendar.MILLISECOND, ms);
+            calendar.set(Calendar.MILLISECOND, ms);
         }
-        setValue(tm.getTime());
+    }
+
+    /**
+     * @return Used calendar.
+     */
+    public final Calendar getCalendar() {
+        return calendar;
+    }
+
+    /**
+     * Set date time value.
+     * 
+     * @param value
+     *            Used date time value.
+     */
+    public final void setCalendar(final Calendar value) {
+        calendar = value;
     }
 
     /**
      * @return Used date time value.
+     * @deprecated use {@link #getCalendar} instead.
      */
+    @Deprecated
     public final java.util.Date getValue() {
-        return time;
+        return calendar.getTime();
     }
 
     /**
@@ -185,10 +243,11 @@ public class GXDateTime {
      * 
      * @param forvalue
      *            Used date time value.
+     * @deprecated use {@link #setCalendar} instead.
      */
+    @Deprecated
     public final void setValue(final java.util.Date forvalue) {
-        setValue(forvalue, java.util.Calendar.getInstance().getTimeZone()
-                .getOffset(time.getTime()) / 60000);
+        calendar.setTime(forvalue);
     }
 
     /**
@@ -198,11 +257,13 @@ public class GXDateTime {
      *            Used date time value.
      * @param forDeviation
      *            Used deviation.
+     * @deprecated use {@link #setCalendar} instead.
      */
+    @Deprecated
     public final void setValue(final java.util.Date forvalue,
             final int forDeviation) {
-        time = forvalue;
-        deviation = forDeviation;
+        calendar = Calendar.getInstance(getTimeZone(forDeviation));
+        calendar.setTime(forvalue);
     }
 
     /**
@@ -260,18 +321,20 @@ public class GXDateTime {
     }
 
     /**
-     * @return Deviation.
+     * @return Deviation is time from current time zone to UTC time.
      */
     public final int getDeviation() {
-        return deviation;
+        return -calendar.getTimeZone().getRawOffset() / 60000;
     }
 
     /**
      * @param forValue
-     *            Deviation.
+     *            Deviation is time from current time zone to UTC time.
+     * @deprecated use {@link #setCalendar} instead.
      */
+    @Deprecated
     public final void setDeviation(final int forValue) {
-        deviation = forValue;
+        calendar = Calendar.getInstance(getTimeZone(forValue));
     }
 
     /*
@@ -358,63 +421,57 @@ public class GXDateTime {
                     format += sb.toString();
                 }
                 sd = new SimpleDateFormat(format);
-                return sd.format(meterTimeToLocalTime(getMeterCalendar()));
+                return sd.format(calendar.getTime());
             }
         }
-        return sd.format(meterTimeToLocalTime(getMeterCalendar()));
-    }
-
-    public static Date meterTimeToLocalTime(final Calendar calendar) {
-        Calendar tm = Calendar.getInstance();
-        int offset = tm.getTimeZone().getRawOffset();
-        offset -= calendar.getTimeZone().getRawOffset();
-        offset /= 60000;
-        tm.setTime(calendar.getTime());
-        tm.add(Calendar.MINUTE, offset);
-        return tm.getTime();
-    }
-
-    private static String getTimeZone(final int forDeviation) {
-        DecimalFormat df = new DecimalFormat("00");
-        String tmp = df.format(forDeviation / 60) + ":"
-                + df.format(forDeviation % 60);
-        if (forDeviation == 0) {
-            return "GMT";
-        } else if (forDeviation > 0) {
-            return "GMT+" + tmp;
-        }
-        return "GMT" + tmp;
+        return sd.format(calendar.getTime());
     }
 
     /**
-     * Gets a calendar using the meter's time zone.
+     * Convert deviation to time zone.
      * 
-     * @return Meter's calendar.
+     * @param deviation
+     *            Used deviation.
+     * @return Time zone.
      */
-    public final Calendar getMeterCalendar() {
-        // Add deviation.
-        TimeZone tz;
-        tz = TimeZone.getTimeZone(getTimeZone(deviation));
-        java.util.Calendar tm = java.util.Calendar.getInstance(tz);
-        tm.setTime(time);
-        // Convert to GMT if time zone not found.
-        if (tz.getRawOffset() / 60000 != deviation) {
-            tm.add(Calendar.MINUTE, -deviation);
+    public static TimeZone getTimeZone(final int deviation) {
+        // Return current time zone if time zone is not used or time zone is
+        // same.
+        TimeZone tz = Calendar.getInstance().getTimeZone();
+        if (deviation == 0x8000 || tz.getRawOffset() / 60000 == -deviation) {
+            return tz;
         }
-        return tm;
+        int value = -deviation;
+        String str;
+        DecimalFormat df = new DecimalFormat("00");
+        String tmp = df.format(value / 60) + ":" + df.format(value % 60);
+        if (value == 0) {
+            str = "GMT";
+        } else if (value > 0) {
+            str = "GMT+" + tmp;
+        } else {
+            str = "GMT" + tmp;
+        }
+        String[] ids = TimeZone.getAvailableIDs(-deviation * 10000);
+        return TimeZone.getTimeZone(str);
+
+        // TimeZone tz = Calendar.getInstance().getTimeZone();
+        // if (deviation == 0x8000 || tz.getRawOffset() / 60000 == -deviation) {
+        // return tz;
+        // }
+        // int value = -deviation;
+        // String str;
+        // DecimalFormat df = new DecimalFormat("00");
+        // String tmp = df.format(value / 60) + ":" + df.format(value % 60);
+        // if (value == 0) {
+        // str = "GMT";
+        // } else if (value > 0) {
+        // str = "GMT+" + tmp;
+        // } else {
+        // str = "GMT" + tmp;
+        // }
+        // TimeZone.getAvailableIDs(rawOffset)
+        // return TimeZone.getTimeZone(str);
     }
 
-    /**
-     * @return Date time as local time.
-     */
-    public final Date toLocalTime() {
-        return meterTimeToLocalTime(getMeterCalendar());
-    }
-
-    /**
-     * @return Date time as local time.
-     */
-    public final Date toMeterTime() {
-        return getMeterCalendar().getTime();
-    }
 }

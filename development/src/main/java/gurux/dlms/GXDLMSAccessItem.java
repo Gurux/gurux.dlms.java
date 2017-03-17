@@ -17,12 +17,12 @@ public class GXDLMSAccessItem {
     /**
      * Executed command type.
      */
-    private AccessServiceCommandType command;
+    private int command;
 
     /**
      * Attribute index.
      */
-    private byte index;
+    private int index;
 
     /**
      * @return COSEM target object.
@@ -42,22 +42,14 @@ public class GXDLMSAccessItem {
     /**
      * @return Executed command type.
      */
-    public final AccessServiceCommandType getCommand() {
+    public final int getCommand() {
         return command;
-    }
-
-    /**
-     * @param value
-     *            Executed command type.
-     */
-    public final void setCommand(final AccessServiceCommandType value) {
-        command = value;
     }
 
     /**
      * @return Attribute index.
      */
-    public final byte getIndex() {
+    public final int getIndex() {
         return index;
     }
 
@@ -65,7 +57,7 @@ public class GXDLMSAccessItem {
      * @param value
      *            Attribute index.
      */
-    public final void setIndex(final byte value) {
+    public final void setIndex(final int value) {
         index = value;
     }
 
@@ -85,9 +77,15 @@ public class GXDLMSAccessItem {
      * @param attributeIndex
      *            Attribute index.
      */
-    public GXDLMSAccessItem(final AccessServiceCommandType commandType,
-            final GXDLMSObject targetObject, final byte attributeIndex) {
-        setCommand(commandType);
+    public GXDLMSAccessItem(final int commandType,
+            final GXDLMSObject targetObject, final int attributeIndex) {
+        if (commandType == AccessServiceCommandType.GET) {
+            command = 1;
+        } else if (commandType == AccessServiceCommandType.SET) {
+            command = 2;
+        } else if (commandType == AccessServiceCommandType.ACTION) {
+            command = 3;
+        }
         setTarget(targetObject);
         setIndex(attributeIndex);
     }

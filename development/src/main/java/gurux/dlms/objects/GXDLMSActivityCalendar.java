@@ -312,7 +312,7 @@ public class GXDLMSActivityCalendar extends GXDLMSObject
             // Add count
             GXCommon.setObjectCount(target.length, data);
             for (final GXDLMSWeekProfile it : target) {
-                data.setUInt8(DataType.ARRAY.getValue());
+                data.setUInt8(DataType.STRUCTURE.getValue());
                 data.setUInt8(8);
                 GXCommon.setData(data, DataType.OCTET_STRING,
                         GXCommon.getBytes(it.getName()));
@@ -415,10 +415,17 @@ public class GXDLMSActivityCalendar extends GXDLMSObject
                         GXDLMSClient.changeType((byte[]) ((Object[]) item)[0],
                                 DataType.STRING).toString());
                 it.setStart((GXDateTime) GXDLMSClient.changeType(
-                        (byte[]) ((Object[]) item)[1], DataType.DATE));
-                it.setWeekName(
-                        GXDLMSClient.changeType((byte[]) ((Object[]) item)[2],
-                                DataType.STRING).toString());
+                        (byte[]) ((Object[]) item)[1], DataType.DATETIME));
+                byte[] weekName = (byte[]) ((Object[]) item)[2];
+                // If week name is ignored.
+                if (weekName != null && weekName.length == 1
+                        && weekName[0] == 0xFF) {
+                    it.setWeekName("");
+                } else {
+                    it.setWeekName(GXDLMSClient
+                            .changeType(weekName, DataType.STRING).toString());
+                }
+
                 items.add(it);
             }
         }

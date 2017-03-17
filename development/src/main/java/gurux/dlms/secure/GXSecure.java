@@ -71,7 +71,6 @@ public final class GXSecure {
     public static byte[] secure(final GXDLMSSettings settings,
             final GXICipher cipher, final long ic, final byte[] data,
             final byte[] secret) {
-
         try {
 
             byte[] d, s;
@@ -124,16 +123,18 @@ public final class GXSecure {
                 p.setType(CountType.TAG);
                 challenge.clear();
                 challenge.setUInt8((byte) Security.AUTHENTICATION.getValue());
-                challenge.setUInt32(p.getFrameCounter());
+                challenge.setUInt32(p.getInvocationCounter());
                 challenge.set(GXDLMSChippering.encryptAesGcm(p, d));
                 d = challenge.array();
                 break;
             case HIGH_HLS_SHA256:
+                md = MessageDigest.getInstance("SHA-256");
+                d = md.digest(d);
                 break;
             case HIGH_ECDSA:
                 Signature sig = Signature.getInstance("SHA256withECDSA");
                 try {
-                    sig.initSign(settings.getCipher().getPrivateKey());
+                    sig.initSign(cipher.getKeyAgreementKeyPair().getPrivate());
                     GXByteBuffer bb = new GXByteBuffer();
                     bb.set(settings.getCipher().getSystemTitle());
                     bb.set(settings.getSourceSystemTitle());

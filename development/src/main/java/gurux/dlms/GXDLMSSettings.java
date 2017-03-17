@@ -34,11 +34,12 @@
 
 package gurux.dlms;
 
-import java.util.ArrayList;
-import java.util.List;
+import java.security.PublicKey;
+import java.util.HashSet;
+import java.util.Set;
 
-import gurux.dlms.asn.GXx509Certificate;
 import gurux.dlms.enums.Authentication;
+import gurux.dlms.enums.Conformance;
 import gurux.dlms.enums.InterfaceType;
 import gurux.dlms.enums.Priority;
 import gurux.dlms.enums.ServiceClass;
@@ -69,11 +70,6 @@ public class GXDLMSSettings {
      * Client receiver frame sequence starting number.
      */
     static final short CLIENT_START_RCEIVER_FRAME_SEQUENCE = 0xE;
-
-    /**
-     * Certificates.
-     */
-    private List<GXx509Certificate> certificates;
 
     /**
      * DLMS version number.
@@ -123,7 +119,7 @@ public class GXDLMSSettings {
     /**
      * Service class.
      */
-    private ServiceClass serviceClass = ServiceClass.UN_CONFIRMED;
+    private ServiceClass serviceClass = ServiceClass.CONFIRMED;
     /**
      * Client address.
      */
@@ -171,6 +167,11 @@ public class GXDLMSSettings {
     private int index;
 
     /**
+     * Target ephemeral public key.
+     */
+    private PublicKey targetEphemeralKey;
+
+    /**
      * DLMS version number.
      */
     private byte dlmsVersionNumber = DLMS_VERSION;
@@ -186,6 +187,17 @@ public class GXDLMSSettings {
      * Server maximum PDU size.
      */
     private int maxServerPDUSize = MAX_RECEIVE_PDU_SIZE;
+
+    /**
+     * When connection is made client tells what kind of services it want's to
+     * use.
+     */
+    private Set<Conformance> proposedConformance = new HashSet<Conformance>();
+
+    /**
+     * Server tells what functionality is available and client will know it.
+     */
+    private Set<Conformance> negotiatedConformance = new HashSet<Conformance>();
 
     /**
      * HDLC sender frame sequence number.
@@ -206,14 +218,6 @@ public class GXDLMSSettings {
      * Information from the connection size that server can handle.
      */
     private GXDLMSLimits limits;
-    /**
-     * Logical name settings.
-     */
-    private GXDLMSLNSettings lnSettings;
-    /**
-     * Short name settings.
-     */
-    private GXDLMSSNSettings snSettings;
 
     private int startingPacketIndex = 1;
 
@@ -225,11 +229,6 @@ public class GXDLMSSettings {
      * List of server or client objects.
      */
     private final GXDLMSObjectCollection objects;
-
-    /**
-     * Proposed conformance block.
-     */
-    private byte[] conformanceBlock = new byte[3];
 
     /**
      * Is authentication Required.
@@ -247,14 +246,8 @@ public class GXDLMSSettings {
     GXDLMSSettings(final boolean isServer) {
         server = isServer;
         objects = new GXDLMSObjectCollection();
-        certificates = new ArrayList<GXx509Certificate>();
         limits = new GXDLMSLimits();
-        if (isServer) {
-            lnSettings = new GXDLMSLNSettings(new byte[] { 0x00, 0x7C, 0x1F });
-        } else {
-            lnSettings = new GXDLMSLNSettings(new byte[] { 0x00, 0x7E, 0x1F });
-        }
-        snSettings = new GXDLMSSNSettings(new byte[] { 0x1C, 0x03, 0x20 });
+        proposedConformance.addAll(GXDLMSClient.getInitialConformance(false));
         resetFrameSequence();
     }
 
@@ -360,6 +353,13 @@ public class GXDLMSSettings {
     }
 
     /**
+     * @return Is connection accepted.
+     */
+    public final boolean acceptConnection() {
+        return connected || cipher.getSharedSecret() != null;
+    }
+
+    /**
      * @param value
      *            Is connected to the meter.
      */
@@ -456,20 +456,6 @@ public class GXDLMSSettings {
     final byte getKeepAlive() {
         senderFrame = (byte) (senderFrame | 1);
         return (byte) (senderFrame & 0xF1);
-    }
-
-    /**
-     * @return Gets Logical Name settings.
-     */
-    public final GXDLMSLNSettings getLnSettings() {
-        return lnSettings;
-    }
-
-    /**
-     * @return Short name settings.
-     */
-    public final GXDLMSSNSettings getSnSettings() {
-        return snSettings;
     }
 
     /**
@@ -676,7 +662,12 @@ public class GXDLMSSettings {
      *            Is Logical Name Referencing used.
      */
     public final void setUseLogicalNameReferencing(final boolean value) {
-        useLogicalNameReferencing = value;
+        if (useLogicalNameReferencing != value) {
+            useLogicalNameReferencing = value;
+            proposedConformance.clear();
+            proposedConformance.addAll(GXDLMSClient
+                    .getInitialConformance(getUseLogicalNameReferencing()));
+        }
     }
 
     /**
@@ -779,7 +770,7 @@ public class GXDLMSSettings {
      *            Source system title.
      */
     final void setSourceSystemTitle(final byte[] value) {
-        if (value != null && value.length != 8) {
+        if (value != null && value.length != 0 && value.length != 8) {
             throw new IllegalArgumentException("Invalid client system title.");
         }
         sourceSystemTitle = value;
@@ -831,13 +822,6 @@ public class GXDLMSSettings {
     }
 
     /**
-     * @return Conformance block.
-     */
-    final byte[] getConformanceBlock() {
-        return conformanceBlock;
-    }
-
-    /**
      * @return Dedicated key.
      */
     public final byte[] getDedicatedKey() {
@@ -853,9 +837,49 @@ public class GXDLMSSettings {
     }
 
     /**
-     * @return Available certificates.
+     * @return Target ephemeral public key.
      */
-    public final List<GXx509Certificate> getCertificates() {
-        return certificates;
+    public PublicKey getTargetEphemeralKey() {
+        return targetEphemeralKey;
+    }
+
+    /**
+     * @param value
+     *            Target ephemeral public key .
+     */
+    public void setTargetEphemeralKey(final PublicKey value) {
+        targetEphemeralKey = value;
+    }
+
+    /**
+     * @return Proposed conformance block.
+     */
+    public Set<Conformance> getProposedConformance() {
+        return proposedConformance;
+    }
+
+    /**
+     * @param value
+     *            Proposed conformance block.
+     */
+    public void setProposedConformance(final Set<Conformance> value) {
+        proposedConformance = value;
+    }
+
+    /**
+     * @return Server tells what functionality is available and client will know
+     *         it.
+     */
+    public Set<Conformance> getNegotiatedConformance() {
+        return negotiatedConformance;
+    }
+
+    /**
+     * @param value
+     *            Server tells what functionality is available and client will
+     *            know it.
+     */
+    public void setNegotiatedConformance(final Set<Conformance> value) {
+        negotiatedConformance = value;
     }
 }

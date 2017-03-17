@@ -89,6 +89,11 @@ public class ValueEventArgs {
     private boolean skipMaxPduSize;
 
     /**
+     * Is reply handled as byte array or octect string.
+     */
+    private boolean byteArray = false;
+
+    /**
      * @return Target DLMS object.
      */
     public final GXDLMSObject getTarget() {
@@ -281,5 +286,20 @@ public class ValueEventArgs {
      */
     public final void setSkipMaxPduSize(final boolean value) {
         skipMaxPduSize = value;
+    }
+
+    /**
+     * @return Is reply handled as byte array or octect string.
+     */
+    public boolean isByteArray() {
+        return byteArray;
+    }
+
+    /**
+     * @param value
+     *            Is reply handled as byte array or octect string.
+     */
+    public void setByteArray(final boolean value) {
+        byteArray = value;
     }
 }

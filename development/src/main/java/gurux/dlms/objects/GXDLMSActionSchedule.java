@@ -218,9 +218,9 @@ public class GXDLMSActionSchedule extends GXDLMSObject implements IGXDLMSBase {
                     bb.setUInt8(DataType.STRUCTURE.getValue());
                     bb.setUInt8(2); // Count
                     GXCommon.setData(bb, DataType.OCTET_STRING,
-                            new GXTime(it.getValue())); // Time
+                            new GXTime(it.getCalendar().getTime())); // Time
                     GXCommon.setData(bb, DataType.OCTET_STRING,
-                            new GXDate(it.getValue())); // Date
+                            new GXDate(it.getCalendar().getTime())); // Date
                 }
             }
             return bb.array();
@@ -258,9 +258,9 @@ public class GXDLMSActionSchedule extends GXDLMSObject implements IGXDLMSBase {
                     GXDateTime dt2 = (GXDateTime) GXDLMSClient.changeType(
                             (byte[]) ((Object[]) it)[1], DataType.DATE);
                     java.util.Calendar tm = Calendar.getInstance();
-                    tm.setTime(dt.getValue());
+                    tm.setTime(dt.getCalendar().getTime());
                     java.util.Calendar date = Calendar.getInstance();
-                    date.setTime(dt2.getValue());
+                    date.setTime(dt2.getCalendar().getTime());
                     tm.set(java.util.Calendar.YEAR,
                             date.get(java.util.Calendar.YEAR) - 1);
                     tm.set(java.util.Calendar.MONTH,
@@ -270,7 +270,7 @@ public class GXDLMSActionSchedule extends GXDLMSObject implements IGXDLMSBase {
                     java.util.Set<DateTimeSkips> skip = dt.getSkip();
                     skip.addAll(dt2.getSkip());
                     dt.setSkip(skip);
-                    dt.setValue(tm.getTime());
+                    dt.setCalendar(tm);
                     items.add(dt);
                 }
                 setExecutionTime(items.toArray(new GXDateTime[items.size()]));

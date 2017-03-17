@@ -36,17 +36,25 @@ package gurux.dlms;
 
 import java.security.Signature;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Calendar;
+import java.util.Date;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Map;
 import java.util.Map.Entry;
+import java.util.Set;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
 import gurux.dlms.enums.AccessMode;
+import gurux.dlms.enums.AccessServiceCommandType;
 import gurux.dlms.enums.Authentication;
 import gurux.dlms.enums.Command;
+import gurux.dlms.enums.Conformance;
 import gurux.dlms.enums.DataType;
 import gurux.dlms.enums.DateTimeSkips;
+import gurux.dlms.enums.ErrorCode;
 import gurux.dlms.enums.InterfaceType;
 import gurux.dlms.enums.MethodAccessMode;
 import gurux.dlms.enums.ObjectType;
@@ -61,6 +69,7 @@ import gurux.dlms.objects.GXDLMSCaptureObject;
 import gurux.dlms.objects.GXDLMSObject;
 import gurux.dlms.objects.GXDLMSObjectCollection;
 import gurux.dlms.objects.GXDLMSProfileGeneric;
+import gurux.dlms.objects.IGXDLMSBase;
 import gurux.dlms.secure.GXSecure;
 
 /**
@@ -327,17 +336,28 @@ public class GXDLMSClient {
     }
 
     /**
-     * @return Logical Name settings.
+     * @return Functionality what server offers.
      */
-    public final GXDLMSLNSettings getLNSettings() {
-        return settings.getLnSettings();
+    public final java.util.Set<Conformance> getNegotiatedConformance() {
+        return settings.getNegotiatedConformance();
     }
 
     /**
-     * @return Short Name settings.
+     * @return When connection is made client tells what kind of services it
+     *         want's to use.
      */
-    public final GXDLMSSNSettings getSNSettings() {
-        return settings.getSnSettings();
+    public final java.util.Set<Conformance> getProposedConformance() {
+        return settings.getProposedConformance();
+    }
+
+    /**
+     * @param value
+     *            When connection is made client tells what kind of services it
+     *            want's to use.
+     */
+    public final void
+            setProposedConformance(final java.util.Set<Conformance> value) {
+        settings.setProposedConformance(value);
     }
 
     /**
@@ -601,8 +621,8 @@ public class GXDLMSClient {
      *            Received data.
      * @see GXDLMSClient#aarqRequest
      * @see GXDLMSClient#getUseLogicalNameReferencing
-     * @see GXDLMSClient#getLNSettings
-     * @see GXDLMSClient#getSNSettings
+     * @see GXDLMSClient#getNegotiatedConformance
+     * @see GXDLMSClient#getProposedConformance
      */
     public final void parseAareResponse(final GXByteBuffer reply) {
         settings.setConnected(true);
@@ -639,7 +659,7 @@ public class GXDLMSClient {
         }
         long ic = 0;
         if (settings.getCipher() != null) {
-            ic = settings.getCipher().getFrameCounter();
+            ic = settings.getCipher().getInvocationCounter();
         }
         byte[] challenge = GXSecure.secure(settings, settings.getCipher(), ic,
                 settings.getStoCChallenge(), pw);
@@ -672,8 +692,8 @@ public class GXDLMSClient {
             if (settings.getAuthentication() == Authentication.HIGH_ECDSA) {
                 try {
                     Signature ver = Signature.getInstance("SHA256withECDSA");
-                    ver.initVerify(
-                            settings.getCertificates().get(0).getPublicKey());
+                    ver.initVerify(settings.getCipher().getCertificates().get(0)
+                            .getPublicKey());
                     GXByteBuffer bb = new GXByteBuffer();
                     bb.set(settings.getSourceSystemTitle());
                     bb.set(settings.getCipher().getSystemTitle());
@@ -721,10 +741,10 @@ public class GXDLMSClient {
      * @return Disconnected request, as byte array.
      */
     public final byte[] disconnectRequest() {
+        settings.setMaxPduSize(0xFFFF);
         // If connection is not established, there is no need to send
         // DisconnectRequest.
-        if (settings.getSnSettings() == null
-                && settings.getLnSettings() == null) {
+        if (!settings.isConnected()) {
             return new byte[0];
         }
         if (this.getInterfaceType() == InterfaceType.HDLC) {
@@ -999,7 +1019,7 @@ public class GXDLMSClient {
      *            Byte array received from the meter.
      * @return Received data.
      */
-    public final Object getValue(final GXByteBuffer data) {
+    public static Object getValue(final GXByteBuffer data) {
         GXDataInfo info = new GXDataInfo();
         return GXCommon.getData(data, info);
     }
@@ -1908,5 +1928,144 @@ public class GXDLMSClient {
         }
         throw new IllegalArgumentException(
                 "Invalid logical or physical address.");
+    }
+
+    /**
+     * Generates a access service message.
+     * 
+     * @param time
+     *            Send time. Set to DateTime.MinValue is not used.
+     * @param list
+     *            List of access items.
+     * @return Read request as byte array. {@link parseAccessResponse}
+     */
+    public final byte[][] accessRequest(final Date time,
+            final ArrayList<GXDLMSAccessItem> list) {
+        GXByteBuffer bb = new GXByteBuffer();
+        GXCommon.setObjectCount(list.size(), bb);
+        for (GXDLMSAccessItem it : list) {
+            bb.setUInt8(it.getCommand());
+            bb.setUInt16(it.getTarget().getObjectType().getValue());
+            // LN
+            String[] items = it.getTarget().getLogicalName().split("[.]");
+            if (items.length != 6) {
+                throw new IllegalArgumentException("Invalid Logical Name.");
+            }
+            for (String it2 : items) {
+                bb.setUInt8(Integer.valueOf(it2).byteValue());
+            }
+            // Attribute ID.
+            bb.setUInt8(it.getIndex());
+        }
+        // Data
+        GXCommon.setObjectCount(list.size(), bb);
+        for (GXDLMSAccessItem it : list) {
+            if (it.getCommand() == AccessServiceCommandType.GET) {
+                bb.setUInt8(0);
+            } else {
+                Object value =
+                        ((IGXDLMSBase) ((it.getTarget() instanceof IGXDLMSBase)
+                                ? it.getTarget() : null)).getValue(null,
+                                        new ValueEventArgs(it.getTarget(),
+                                                it.getIndex(), 0, null));
+                DataType type = it.getTarget().getDataType(it.getIndex());
+                if (type == DataType.NONE) {
+                    type = GXCommon.getValueType(value);
+                }
+                GXCommon.setData(bb, type, value);
+            }
+        }
+        GXDLMSLNParameters p = new GXDLMSLNParameters(settings,
+                Command.ACCESS_REQUEST, 0xFF, null, bb, 0xff);
+        if (time != null && time != new Date(0)) {
+            p.setTime(new GXDateTime(time));
+        }
+        return GXDLMS.getLnMessages(p).toArray(new byte[0][0]);
+    }
+
+    /**
+     * Parse access response.
+     * 
+     * @param list
+     *            Collection of access items.
+     * @param data
+     *            Received data from the meter.
+     * @return Collection of received data and status codes.
+     *         {@link accessRequest}
+     */
+    public final List<Map.Entry<Object, ErrorCode>> parseAccessResponse(
+            final List<GXDLMSAccessItem> list, final GXByteBuffer data) {
+        int pos;
+        // Get count
+        GXDataInfo info = new GXDataInfo();
+        int cnt = GXCommon.getObjectCount(data);
+        if (list.size() != cnt) {
+            throw new IllegalArgumentException(
+                    "List size and values size do not match.");
+        }
+        List<Object> values = new ArrayList<Object>(cnt);
+        List<Map.Entry<Object, ErrorCode>> reply =
+                new ArrayList<Map.Entry<Object, ErrorCode>>(cnt);
+        for (pos = 0; pos != cnt; ++pos) {
+            info.clear();
+            Object value = GXCommon.getData(data, info);
+            values.add(value);
+        }
+        // Get status codes.
+        cnt = GXCommon.getObjectCount(data);
+        if (values.size() != cnt) {
+            throw new IllegalArgumentException(
+                    "List size and values size do not match.");
+        }
+        pos = 0;
+        for (Object it : values) {
+            // Get access type.
+            data.getUInt8();
+            // Get status.
+            reply.add(new GXSimpleEntry<Object, ErrorCode>(values.get(pos),
+                    ErrorCode.forValue(data.getUInt8())));
+        }
+        pos = 0;
+        for (GXDLMSAccessItem it : list) {
+            if (it.getCommand() == AccessServiceCommandType.GET
+                    && reply.get(pos).getValue() == ErrorCode.OK) {
+                ValueEventArgs ve = new ValueEventArgs(settings, it.getTarget(),
+                        it.getIndex(), 0, null);
+                ve.setValue(values.get(pos));
+                ((IGXDLMSBase) ((it.getTarget() instanceof IGXDLMSBase)
+                        ? it.getTarget() : null)).setValue(settings, ve);
+            }
+            ++pos;
+        }
+        return reply;
+    }
+
+    /**
+     * Get initial Conformance.
+     * 
+     * @param useLogicalNameReferencing
+     *            Is logical name referencing used.
+     * @return Initial Conformance.
+     */
+    public static Set<Conformance>
+            getInitialConformance(final boolean useLogicalNameReferencing) {
+        Set<Conformance> list = new HashSet<Conformance>();
+        if (useLogicalNameReferencing) {
+            list.addAll(Arrays.asList(
+                    new Conformance[] { Conformance.BLOCK_TRANSFER_WITH_ACTION,
+                            Conformance.BLOCK_TRANSFER_WITH_SET_OR_WRITE,
+                            Conformance.BLOCK_TRANSFER_WITH_GET_OR_READ,
+                            Conformance.SET, Conformance.SELECTIVE_ACCESS,
+                            Conformance.ACTION, Conformance.MULTIPLE_REFERENCES,
+                            Conformance.GET, Conformance.GENERAL_PROTECTION }));
+        } else {
+            list.addAll(Arrays
+                    .asList(new Conformance[] { Conformance.INFORMATION_REPORT,
+                            Conformance.READ, Conformance.UN_CONFIRMED_WRITE,
+                            Conformance.WRITE, Conformance.PARAMETERIZED_ACCESS,
+                            Conformance.MULTIPLE_REFERENCES,
+                            Conformance.GENERAL_PROTECTION }));
+        }
+        return list;
     }
 }

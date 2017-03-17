@@ -61,6 +61,10 @@ public class GXDLMSTranslatorStructure {
      * Amount of spaces.
      */
     private int offset;
+    /**
+     * Add comments.
+     */
+    private boolean comments;
 
     /**
      * @return Amount of spaces.
@@ -103,11 +107,12 @@ public class GXDLMSTranslatorStructure {
      */
     GXDLMSTranslatorStructure(final TranslatorOutputType type,
             final boolean numericsAshex, final boolean hex,
-            final HashMap<Integer, String> list) {
+            final boolean addComments, final HashMap<Integer, String> list) {
         outputType = type;
         showNumericsAsHex = numericsAshex;
         setShowStringAsHex(hex);
         tags = list;
+        comments = addComments;
     }
 
     @Override
@@ -173,6 +178,53 @@ public class GXDLMSTranslatorStructure {
         }
         sb.append('\r');
         sb.append('\n');
+    }
+
+    /**
+     * Append comment.
+     * 
+     * @param comment
+     *            Comment to add.
+     */
+    public final void appendComment(final String comment) {
+        if (comments) {
+            appendSpaces(sb, 2 * offset);
+            sb.append("<!--");
+            sb.append(comment);
+            sb.append("-->");
+            sb.append('\r');
+            sb.append('\n');
+        }
+    }
+
+    /**
+     * Start comment section.
+     * 
+     * @param comment
+     *            Comment to add.
+     */
+    public void startComment(final String comment) {
+        if (comments) {
+            appendSpaces(sb, 2 * offset);
+            sb.append("<!--");
+            sb.append(comment);
+            sb.append('\r');
+            sb.append('\n');
+            ++offset;
+        }
+    }
+
+    /**
+     * End comment section.
+     */
+    public final void endComment() {
+        if (comments) {
+            --offset;
+            appendSpaces(sb, 2 * offset);
+            sb.append("-->");
+            sb.append('\r');
+            sb.append('\n');
+        }
     }
 
     public final void append(final String value) {
@@ -289,5 +341,20 @@ public class GXDLMSTranslatorStructure {
             return GXCommon.integerToHex(value, desimals);
         }
         return String.valueOf(value);
+    }
+
+    /**
+     * @return Are comments added.
+     */
+    public boolean isComments() {
+        return comments;
+    }
+
+    /**
+     * @param value
+     *            Are comments added.
+     */
+    public void setComments(final boolean value) {
+        comments = value;
     }
 }

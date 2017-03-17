@@ -34,19 +34,19 @@
 
 package gurux.dlms.objects;
 
-import gurux.dlms.GXDLMSServer;
+import gurux.dlms.GXDLMSServerBase;
 
 /*
  * This class is reserved for internal use. Do not use.
  */
 public class GXProfileGenericUpdater extends Thread {
-    private GXDLMSServer server;
+    private GXDLMSServerBase server;
     private GXDLMSProfileGeneric target;
 
     /*
      * Constructor.
      */
-    public GXProfileGenericUpdater(final GXDLMSServer svr,
+    public GXProfileGenericUpdater(final GXDLMSServerBase svr,
             final GXDLMSProfileGeneric pg) {
         target = pg;
         server = svr;
