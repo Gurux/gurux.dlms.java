@@ -39,9 +39,12 @@ import java.util.logging.Logger;
 
 import gurux.dlms.GXByteBuffer;
 import gurux.dlms.GXDLMSException;
+import gurux.dlms.GXICipher;
 import gurux.dlms.enums.Command;
 import gurux.dlms.enums.Security;
 import gurux.dlms.internal.GXCommon;
+import gurux.dlms.objects.enums.CertificateType;
+import gurux.dlms.objects.enums.SecuritySuite;
 
 final class GXDLMSChippering {
     private static final Logger LOGGER =
@@ -56,76 +59,80 @@ final class GXDLMSChippering {
 
     /*
      * Get nonse from frame counter and system title.
-     * @param frameCounter Frame counter.
+     * @param invocationCounter Invocation counter.
      * @param systemTitle System title.
      * @return Generated nonse.
      */
-    private static byte[] getNonse(final long frameCounter,
+    private static byte[] getNonse(final long invocationCounter,
             final byte[] systemTitle) {
         byte[] nonce = new byte[12];
         System.arraycopy(systemTitle, 0, nonce, 0, systemTitle.length);
-        nonce[8] = (byte) ((frameCounter >> 24) & 0xFF);
-        nonce[9] = (byte) ((frameCounter >> 16) & 0xFF);
-        nonce[10] = (byte) ((frameCounter >> 8) & 0xFF);
-        nonce[11] = (byte) (frameCounter & 0xFF);
+        nonce[8] = (byte) ((invocationCounter >> 24) & 0xFF);
+        nonce[9] = (byte) ((invocationCounter >> 16) & 0xFF);
+        nonce[10] = (byte) ((invocationCounter >> 8) & 0xFF);
+        nonce[11] = (byte) (invocationCounter & 0xFF);
         return nonce;
     }
 
-    static byte[] encryptAesGcm(final AesGcmParameter param,
+    static byte[] encryptAesGcm(final AesGcmParameter p,
             final byte[] plainText) {
-        LOGGER.log(Level.INFO, "Encrypt settings: " + param.toString());
-        param.setCountTag(null);
+        LOGGER.log(Level.INFO, "Encrypt settings: " + p.toString());
+        p.setCountTag(null);
         GXByteBuffer data = new GXByteBuffer();
-        if (param.getType() == CountType.PACKET) {
-            data.setUInt8(param.getSecurity().getValue());
+        if (p.getType() == CountType.PACKET) {
+            data.setUInt8(p.getSecurity().getValue());
         }
         byte[] tmp = new byte[4];
-        long frameCounter = param.getFrameCounter();
-        tmp[0] = (byte) ((frameCounter >> 24) & 0xFF);
-        tmp[1] = (byte) ((frameCounter >> 16) & 0xFF);
-        tmp[2] = (byte) ((frameCounter >> 8) & 0xFF);
-        tmp[3] = (byte) (frameCounter & 0xFF);
-        byte[] aad = getAuthenticatedData(param.getSecurity(),
-                param.getAuthenticationKey(), plainText);
-        GXDLMSChipperingStream gcm = new GXDLMSChipperingStream(
-                param.getSecurity(), true, param.getBlockCipherKey(), aad,
-                getNonse(frameCounter, param.getSystemTitle()), null);
+        long invocationCounter = 0;
+        if (p.getSecuritySuite() == SecuritySuite.AES_GCM_128) {
+            invocationCounter = p.getInvocationCounter();
+        }
+        tmp[0] = (byte) ((invocationCounter >> 24) & 0xFF);
+        tmp[1] = (byte) ((invocationCounter >> 16) & 0xFF);
+        tmp[2] = (byte) ((invocationCounter >> 8) & 0xFF);
+        tmp[3] = (byte) (invocationCounter & 0xFF);
+        byte[] aad = getAuthenticatedData(p, plainText);
+        byte[] iv = getNonse(invocationCounter, p.getSystemTitle());
+        GXDLMSChipperingStream gcm = new GXDLMSChipperingStream(p.getSecurity(),
+                true, p.getBlockCipherKey(), aad, iv, null);
         // Encrypt the secret message
-        if (param.getSecurity() != Security.AUTHENTICATION) {
+        if (p.getSecurity() != Security.AUTHENTICATION) {
             gcm.write(plainText);
         }
         byte[] ciphertext = gcm.flushFinalBlock();
-        if (param.getSecurity() == Security.AUTHENTICATION) {
-            if (param.getType() == CountType.PACKET) {
+        if (p.getSecurity() == Security.AUTHENTICATION) {
+            if (p.getType() == CountType.PACKET) {
                 data.set(tmp);
             }
-            if ((param.getType().getValue() & CountType.DATA.getValue()) != 0) {
+            if ((p.getType() & CountType.DATA) != 0) {
                 data.set(plainText);
             }
-            if ((param.getType().getValue() & CountType.TAG.getValue()) != 0) {
-                param.setCountTag(gcm.getTag());
-                data.set(param.getCountTag());
+            if ((p.getType() & CountType.TAG) != 0) {
+                p.setCountTag(gcm.getTag());
+                data.set(p.getCountTag());
             }
-        } else if (param.getSecurity() == Security.ENCRYPTION) {
-            data.set(tmp);
-            data.set(ciphertext);
-        } else if (param.getSecurity() == Security.AUTHENTICATION_ENCRYPTION) {
-            if (param.getType() == CountType.PACKET) {
+        } else if (p.getSecurity() == Security.ENCRYPTION) {
+            if (p.getType() == CountType.PACKET) {
                 data.set(tmp);
             }
-            if ((param.getType().getValue() & CountType.DATA.getValue()) != 0) {
+            data.set(ciphertext);
+        } else if (p.getSecurity() == Security.AUTHENTICATION_ENCRYPTION) {
+            if (p.getType() == CountType.PACKET) {
+                data.set(tmp);
+            }
+            if ((p.getType() & CountType.DATA) != 0) {
                 data.set(ciphertext);
             }
-            if ((param.getType().getValue() & CountType.TAG.getValue()) != 0) {
-                param.setCountTag(gcm.getTag());
-                data.set(param.getCountTag());
+            if ((p.getType() & CountType.TAG) != 0) {
+                p.setCountTag(gcm.getTag());
+                data.set(p.getCountTag());
             }
         } else {
             throw new IllegalArgumentException("security");
         }
-        if (param.getType() == CountType.PACKET) {
+        if (p.getType() == CountType.PACKET) {
             GXByteBuffer tmp2 = new GXByteBuffer(10 + data.size());
-            tmp2.setUInt8(param.getTag());
+            tmp2.setUInt8(p.getTag());
             gurux.dlms.internal.GXCommon.setObjectCount(data.size(), tmp2);
             tmp2.set(data.getData(), 0, data.size());
             data = tmp2;
@@ -135,45 +142,74 @@ final class GXDLMSChippering {
         return crypted;
     }
 
-    private static byte[] getAuthenticatedData(final Security security,
-            final byte[] authenticationKey, final byte[] plainText) {
-        if (security == Security.AUTHENTICATION) {
-            GXByteBuffer tmp2 = new GXByteBuffer();
-            tmp2.setUInt8((byte) security.getValue());
-            tmp2.set(authenticationKey);
-            tmp2.set(plainText);
-            return tmp2.array();
-        } else if (security == Security.ENCRYPTION) {
-            return authenticationKey;
-        } else if (security == Security.AUTHENTICATION_ENCRYPTION) {
-            GXByteBuffer tmp2 = new GXByteBuffer();
-            tmp2.setUInt8((byte) security.getValue());
-            tmp2.set(authenticationKey);
-            return tmp2.array();
+    private static byte[] getAuthenticatedData(final AesGcmParameter p,
+            final byte[] plainText) {
+        GXByteBuffer data = new GXByteBuffer();
+        int sc = p.getSecurity().getValue() | p.getSecuritySuite().getValue();
+
+        switch (p.getSecurity()) {
+        case AUTHENTICATION:
+            data.setUInt8(sc);
+            data.set(p.getAuthenticationKey());
+            data.set(plainText);
+            break;
+        case AUTHENTICATION_ENCRYPTION:
+            data.setUInt8(sc);
+            data.set(p.getAuthenticationKey());
+            if (p.getSecuritySuite() != SecuritySuite.AES_GCM_128) {
+                // transaction-id
+                GXByteBuffer transactionId = new GXByteBuffer();
+                transactionId.setUInt64(p.getInvocationCounter());
+                data.setUInt8(8);
+                data.set(transactionId);
+                // originator-system-title
+                GXCommon.setObjectCount(p.getSystemTitle().length, data);
+                data.set(p.getSystemTitle());
+                // recipient-system-title
+                GXCommon.setObjectCount(p.getRecipientSystemTitle().length,
+                        data);
+                data.set(p.getRecipientSystemTitle());
+                // date-time not present
+                data.setUInt8(0);
+                // other-information not present
+                data.setUInt8(0);
+            }
+            break;
+        case ENCRYPTION:
+            data.set(p.getAuthenticationKey());
+            break;
+        default:
+            break;
         }
-        return null;
+        return data.array();
     }
 
     /**
      * Decrypt data.
      * 
+     * @param c
+     *            Cipher settings.
      * @param p
-     *            Aes GcmParameter.
-     * @return Crypted data.
+     *            GMAC Parameter.
+     * @return Encrypted data.
      */
-    static byte[] decryptAesGcm(final AesGcmParameter p,
+    static byte[] decryptAesGcm(final GXICipher c, final AesGcmParameter p,
             final GXByteBuffer data) {
         if (data == null || data.size() - data.position() < 2) {
             throw new IllegalArgumentException("cryptedData");
         }
-        int cmd = data.getUInt8();
+        byte[] tmp;
+        // byte[] cipheredContent, tmp, transactionId, originatorSystemTitle,
+        // recipientSystemTitle;
+        int len, cmd = data.getUInt8();
         switch (cmd) {
-        case Command.GLO_GENERAL_CIPHERING:
-            int len = GXCommon.getObjectCount(data);
+        case Command.GENERAL_GLO_CIPHERING:
+            len = GXCommon.getObjectCount(data);
             byte[] title = new byte[len];
             data.get(title);
             p.setSystemTitle(title);
             break;
+        case Command.GENERAL_CIPHERING:
         case Command.GLO_INITIATE_REQUEST:
         case Command.GLO_INITIATE_RESPONSE:
         case Command.GLO_READ_REQUEST:
@@ -192,14 +228,89 @@ final class GXDLMSChippering {
             throw new IllegalArgumentException("cryptedData");
         }
 
-        GXCommon.getObjectCount(data);
-        Security security = Security.forValue(data.getUInt8());
+        if (cmd == Command.GENERAL_CIPHERING) {
+            len = GXCommon.getObjectCount(data);
+            tmp = new byte[len];
+            data.get(tmp);
+            GXByteBuffer transactionId = new GXByteBuffer(tmp);
+            p.setInvocationCounter(transactionId.getInt64());
+            len = GXCommon.getObjectCount(data);
+            tmp = new byte[len];
+            data.get(tmp);
+            p.setSystemTitle(tmp);
+            len = GXCommon.getObjectCount(data);
+            tmp = new byte[len];
+            data.get(tmp);
+            p.setRecipientSystemTitle(tmp);
+            // Get date time.
+            len = GXCommon.getObjectCount(data);
+            if (len != 0) {
+                tmp = new byte[len];
+                data.get(tmp);
+                // data.setTime(((GXDateTime) GXDLMSClient.changeType(tmp,
+                // DataType.DATETIME)).getValue());
+            }
+            // other-information
+            len = data.getUInt8();
+            if (len != 0) {
+                byte[] otherInformation = new byte[len];
+                data.get(otherInformation);
+            }
+            // KeyInfo OPTIONAL
+            len = data.getUInt8();
+            // AgreedKey CHOICE
+            int tag = data.getUInt8();
+            // key-parameters
+            len = data.getUInt8();
+            int value = data.getUInt8();
+            byte[] algID = GXCommon.hexToBytes("60857405080300");
+            if (value == 1) {
+                // KeyAgreement.ONE_PASS_DIFFIE_HELLMAN
+                // key-ciphered-data
+                len = GXCommon.getObjectCount(data);
+                byte[] cipheredData = new byte[len];
+                data.get(cipheredData);
+                GXByteBuffer kdf = new GXByteBuffer(GXASymmetric.generateKDF(
+                        "SHA-256", p.getSharedSecret(), 256, algID,
+                        p.getSystemTitle(), p.getRecipientSystemTitle(), null,
+                        null, SecuritySuite.ECDH_ECDSA_AES_GCM_128_SHA_256));
+                p.setBlockCipherKey(kdf.array());
+            } else if (value == 2) {
+                // KeyAgreement.STATIC_UNIFIED_MODEL
+                len = GXCommon.getObjectCount(data);
+                if (len != 0) {
+                    throw new IllegalArgumentException(
+                            "Invalid key parameters");
+                }
+                GXByteBuffer tmp2 = new GXByteBuffer();
+                if (p.getSharedSecret() == null) {
+                    byte[] z = GXCommon.getSharedSecret(c,
+                            CertificateType.KEY_AGREEMENT);
+                    p.setSharedSecret(z);
+                }
+                tmp2.setUInt8(0x8);
+                tmp2.set(transactionId.getData(), 0, 8);
+                tmp2.set(p.getRecipientSystemTitle());
+                GXByteBuffer kdf =
+                        new GXByteBuffer(GXASymmetric.generateKDF("SHA-256",
+                                p.getSharedSecret(), 256, algID,
+                                p.getSystemTitle(), tmp2.array(), null, null,
+                                SecuritySuite.ECDH_ECDSA_AES_GCM_128_SHA_256));
+                p.setBlockCipherKey(kdf.subArray(0, 16));
+            } else {
+                throw new IllegalArgumentException("key-parameters");
+            }
+        }
+        len = GXCommon.getObjectCount(data);
+        byte sc = (byte) data.getUInt8();
+        Security security = Security.forValue(sc & 0x30);
+        SecuritySuite ss = SecuritySuite.forValue(sc & 0x3);
         p.setSecurity(security);
-        long frameCounter = data.getUInt32();
-        p.setFrameCounter(frameCounter);
+        long invocationCounter = data.getUInt32();
+        p.setInvocationCounter(invocationCounter);
         LOGGER.log(Level.INFO, "Decrypt settings: " + p.toString());
-        LOGGER.log(Level.INFO, "Encrypted: "
-                + GXCommon.toHex(data.getData(), false, 0, data.size()));
+        LOGGER.log(Level.INFO, "Encrypted: " + GXCommon.toHex(data.getData(),
+                false, data.position(), data.size() - data.position()));
         byte[] tag = new byte[12];
         byte[] encryptedData;
         int length;
@@ -226,11 +337,10 @@ final class GXDLMSChippering {
             data.get(ciphertext);
             data.get(tag);
         }
-        byte[] aad = getAuthenticatedData(security, p.getAuthenticationKey(),
-                ciphertext);
+        byte[] aad = getAuthenticatedData(p, ciphertext),
+                iv = getNonse(invocationCounter, p.getSystemTitle());
         GXDLMSChipperingStream gcm = new GXDLMSChipperingStream(security, true,
-                p.getBlockCipherKey(), aad,
-                getNonse(frameCounter, p.getSystemTitle()), tag);
+                p.getBlockCipherKey(), aad, iv, tag);
         gcm.write(ciphertext);
         return gcm.flushFinalBlock();
     }

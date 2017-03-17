@@ -5,10 +5,16 @@
 package gurux.dlms.asn;
 
 import java.io.StringReader;
+import java.security.InvalidAlgorithmParameterException;
 import java.security.KeyFactory;
+import java.security.KeyPair;
+import java.security.KeyPairGenerator;
 import java.security.NoSuchAlgorithmException;
+import java.security.PrivateKey;
 import java.security.PublicKey;
+import java.security.spec.ECGenParameterSpec;
 import java.security.spec.InvalidKeySpecException;
+import java.security.spec.PKCS8EncodedKeySpec;
 import java.security.spec.X509EncodedKeySpec;
 import java.text.DateFormat;
 import java.text.ParseException;
@@ -31,9 +37,7 @@ import org.xml.sax.InputSource;
 
 import gurux.dlms.GXByteBuffer;
 import gurux.dlms.GXSimpleEntry;
-import gurux.dlms.asn.enums.GXOid;
 import gurux.dlms.asn.enums.X509Name;
-import gurux.dlms.asn.enums.X9ObjectIdentifier;
 import gurux.dlms.enums.BerType;
 import gurux.dlms.internal.GXCommon;
 
@@ -50,52 +54,36 @@ public final class GXAsn1Converter {
 
     }
 
+    /**
+     * Get private key from bytes.
+     * 
+     * @param value
+     *            Private key bytes.
+     * @return Private key.
+     * @throws InvalidKeySpecException
+     *             Invalid key spec.
+     * @throws NoSuchAlgorithmException
+     *             No such Algorithm.
+     */
+    public static PrivateKey getPrivateKey(final byte[] value)
+            throws InvalidKeySpecException, NoSuchAlgorithmException {
+        if (value == null || value.length != 32) {
+            throw new IllegalArgumentException("Invalid private key.");
+        }
+        byte[] privKeyBytes =
+                GXCommon.hexToBytes("3041020100301306072A8648CE3D0201"
+                        + "06082A8648CE3D030107042730250201010420");
+        byte[] key = new byte[privKeyBytes.length + value.length];
+        System.arraycopy(privKeyBytes, 0, key, 0, privKeyBytes.length);
+        System.arraycopy(value, 0, key, privKeyBytes.length, value.length);
+        PKCS8EncodedKeySpec priv = new PKCS8EncodedKeySpec(key);
+        KeyFactory kf = KeyFactory.getInstance("EC");
+        System.out.println(GXCommon.toHex(key));
+        return kf.generatePrivate(priv);
+    }
+
     private static byte[] p256Head =
             GXCommon.fromBase64("MFkwEwYHKoZIzj0CAQYIKoZIzj0DAQcDQgAE");
-
-    public static PublicKey getPublicKey4(final GXOid algorithm,
-            final GXAsn1BitString key) {
-        byte[] encodedKey = GXAsn1Converter.toByteArray(new Object[] {
-                new Object[] { new GXAsn1ObjectIdentifier(algorithm.getValue()),
-                        null },
-                key });
-        System.out.println(GXCommon.toHex(encodedKey));
-        KeyFactory eckf;
-        try {
-            eckf = KeyFactory.getInstance("EC");
-        } catch (NoSuchAlgorithmException e) {
-            throw new IllegalStateException(
-                    "EC key factory not present in runtime");
-        }
-        try {
-            X509EncodedKeySpec ecpks = new X509EncodedKeySpec(encodedKey);
-            return eckf.generatePublic(ecpks);
-        } catch (InvalidKeySpecException e) {
-            throw new RuntimeException(e.getMessage());
-        }
-    }
-
-    public static PublicKey getPublicKey2(final GXOid algorithm,
-            final X9ObjectIdentifier parameters, final GXAsn1PublicKey key) {
-        byte[] encodedKey = GXAsn1Converter.toByteArray(new Object[] {
-                new Object[] { new GXAsn1ObjectIdentifier(algorithm.getValue()),
-                        new GXAsn1ObjectIdentifier(parameters.getValue()) },
-                key });
-        System.out.println(GXCommon.toHex(encodedKey));
-        KeyFactory eckf;
-        try {
-            eckf = KeyFactory.getInstance("EC");
-        } catch (NoSuchAlgorithmException e) {
-            throw new IllegalStateException(
-                    "EC key factory not present in runtime");
-        }
-        try {
-            X509EncodedKeySpec ecpks = new X509EncodedKeySpec(encodedKey);
-            return eckf.generatePublic(ecpks);
-        } catch (InvalidKeySpecException e) {
-            throw new RuntimeException(e.getMessage());
-        }
-    }
 
     /*
      * Get public key from bytes (P256Key).
@@ -103,6 +91,9 @@ public final class GXAsn1Converter {
      * @return Public key.
      */
     public static PublicKey getPublicKey(final byte[] value) {
+        if (value == null || value.length != 64) {
+            throw new IllegalArgumentException("Invalid public key.");
+        }
         byte[] encodedKey = new byte[p256Head.length + value.length];
         System.arraycopy(p256Head, 0, encodedKey, 0, p256Head.length);
         System.arraycopy(value, 0, encodedKey, p256Head.length, value.length);
@@ -119,6 +110,43 @@ public final class GXAsn1Converter {
         } catch (InvalidKeySpecException e) {
             throw new RuntimeException(e.getMessage());
         }
+    }
+
+    /**
+     * Convert public key to UInt 64.
+     * 
+     * @param key
+     *            Public key.
+     * @return Public key in byte array.
+     */
+    public static byte[] toUIn64(final PublicKey key) {
+        if (key == null) {
+            throw new IllegalArgumentException("Invalid public key.");
+        }
+        GXAsn1BitString tmp =
+                (GXAsn1BitString) ((GXAsn1Sequence) GXAsn1Converter
+                        .fromByteArray(key.getEncoded())).get(1);
+        GXByteBuffer bb = new GXByteBuffer();
+        bb.set(tmp.getValue(), 1, 64);
+        return bb.array();
+    }
+
+    /**
+     * Generates new key pair.
+     * 
+     * @return New Key pair.
+     * @throws NoSuchAlgorithmException
+     *             No such algorithm.
+     * @throws InvalidAlgorithmParameterException
+     *             Invalid algorithm parameter.
+     */
+    public static KeyPair generateKeyPair() throws NoSuchAlgorithmException,
+            InvalidAlgorithmParameterException {
+        // Generate keys.
+        KeyPairGenerator g = KeyPairGenerator.getInstance("EC");
+        ECGenParameterSpec kpgparams = new ECGenParameterSpec("secp256r1");
+        g.initialize(kpgparams);
+        return g.generateKeyPair();
     }
 
     static List<GXSimpleEntry<Object, Object>>
@@ -202,10 +230,12 @@ public final class GXAsn1Converter {
         case BerType.CONSTRUCTED | BerType.CONTEXT:
         case BerType.CONSTRUCTED | BerType.CONTEXT | 1:
         case BerType.CONSTRUCTED | BerType.CONTEXT | 2:
+        case BerType.CONSTRUCTED | BerType.CONTEXT | 3:
             if (s != null) {
                 s.increase();
             }
             tmp = new GXAsn1Context();
+            ((GXAsn1Context) tmp).setIndex(type & 0xF);
             objects.add(tmp);
             while (bb.position() < start + len) {
                 getValue(bb, tmp, s);
@@ -320,6 +350,7 @@ public final class GXAsn1Converter {
                 s.append(String.valueOf(objects.get(objects.size() - 1)));
             }
             break;
+        case BerType.CONTEXT:
         case BerType.OCTET_STRING:
             tmp2 = new byte[len];
             bb.get(tmp2);
@@ -327,6 +358,9 @@ public final class GXAsn1Converter {
             if (s != null) {
                 s.append(GXCommon.toHex(tmp2));
             }
+            break;
+        case BerType.BOOLEAN:
+            objects.add(bb.getUInt8() != 0);
             break;
         default:
             throw new RuntimeException("Invalid type: " + type);
@@ -460,6 +494,17 @@ public final class GXAsn1Converter {
             cnt += bb.size() - start;
             bb.set(tmp);
             return cnt;
+        } else if (target instanceof GXAsn1Sequence) {
+            tmp = new GXByteBuffer();
+            for (Object it : (List<Object>) target) {
+                cnt += getBytes(tmp, it);
+            }
+            start = bb.size();
+            bb.setUInt8(BerType.CONSTRUCTED | BerType.SEQUENCE);
+            GXCommon.setObjectCount(cnt, bb);
+            cnt += bb.size() - start;
+            bb.set(tmp);
+            return cnt;
         } else if (target instanceof List) {
             tmp = new GXByteBuffer();
             for (Object it : (List<Object>) target) {
@@ -503,6 +548,14 @@ public final class GXAsn1Converter {
         } else if (target == null) {
             bb.setUInt8(BerType.NULL);
             GXCommon.setObjectCount(0, bb);
+        } else if (target instanceof Boolean) {
+            bb.setUInt8(BerType.BOOLEAN);
+            bb.setUInt8(1);
+            if ((Boolean) target) {
+                bb.setUInt8(255);
+            } else {
+                bb.setUInt8(0);
+            }
         } else if (target instanceof GXAsn1ObjectIdentifier) {
             bb.setUInt8(BerType.OBJECT_IDENTIFIER);
             byte[] t = ((GXAsn1ObjectIdentifier) target).getEncoded();

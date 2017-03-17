@@ -19,7 +19,7 @@ import gurux.dlms.objects.GXDLMSObject;
 
 final class GXDLMSLNCommandHandler {
     private static final Logger LOGGER =
-            Logger.getLogger(GXDLMSServer.class.getName());
+            Logger.getLogger(GXDLMSServerBase.class.getName());
 
     /**
      * Constructor.
@@ -29,11 +29,11 @@ final class GXDLMSLNCommandHandler {
     }
 
     static void handleGetRequest(final GXDLMSSettings settings,
-            final GXDLMSServer server, final GXByteBuffer data,
+            final GXDLMSServerBase server, final GXByteBuffer data,
             final GXByteBuffer replyData, final GXDLMSTranslatorStructure xml) {
         // Return error if connection is not established.
-        if (xml == null && !settings.isConnected()) {
-            replyData.set(GXDLMSServer.generateConfirmedServiceError(
+        if (xml == null && !settings.acceptConnection()) {
+            replyData.set(GXDLMSServerBase.generateConfirmedServiceError(
                     ConfirmedServiceError.INITIATE_ERROR, ServiceError.SERVICE,
                     Service.UNSUPPORTED.getValue()));
             return;
@@ -82,11 +82,11 @@ final class GXDLMSLNCommandHandler {
      * @return Reply to the client.
      */
     public static void handleSetRequest(final GXDLMSSettings settings,
-            final GXDLMSServer server, final GXByteBuffer data,
+            final GXDLMSServerBase server, final GXByteBuffer data,
             final GXByteBuffer replyData, final GXDLMSTranslatorStructure xml) {
         // Return error if connection is not established.
         if (xml == null && !settings.isConnected()) {
-            replyData.set(GXDLMSServer.generateConfirmedServiceError(
+            replyData.set(GXDLMSServerBase.generateConfirmedServiceError(
                     ConfirmedServiceError.INITIATE_ERROR, ServiceError.SERVICE,
                     Service.UNSUPPORTED.getValue()));
             return;
@@ -162,7 +162,7 @@ final class GXDLMSLNCommandHandler {
      *            Received data.
      */
     private static void getRequestNormal(final GXDLMSSettings settings,
-            final GXDLMSServer server, final GXByteBuffer data,
+            final GXDLMSServerBase server, final GXByteBuffer data,
             final GXByteBuffer replyData, final GXDLMSTranslatorStructure xml) {
         GXByteBuffer bb = new GXByteBuffer();
         ValueEventArgs e = null;
@@ -225,7 +225,12 @@ final class GXDLMSLNCommandHandler {
                 } else {
                     value = obj.getValue(settings, e);
                 }
-                GXDLMS.appendData(obj, attributeIndex, bb, value);
+                server.notifyPostRead(new ValueEventArgs[] { e });
+                if (e.isByteArray()) {
+                    bb.set((byte[]) value);
+                } else {
+                    GXDLMS.appendData(obj, attributeIndex, bb, value);
+                }
                 status = e.getError();
             }
         }
@@ -245,7 +250,7 @@ final class GXDLMSLNCommandHandler {
      *            Received data.
      */
     private static void getRequestNextDataBlock(final GXDLMSSettings settings,
-            final GXDLMSServer server, final GXByteBuffer data,
+            final GXDLMSServerBase server, final GXByteBuffer data,
             final GXByteBuffer replyData, final GXDLMSTranslatorStructure xml) {
         GXByteBuffer bb = new GXByteBuffer();
         int index = (int) data.getUInt32();
@@ -288,8 +293,12 @@ final class GXDLMSLNCommandHandler {
                                 value = arg.getTarget().getValue(settings, arg);
                             }
                             // Add data.
-                            GXDLMS.appendData(arg.getTarget(), arg.getIndex(),
-                                    bb, value);
+                            if (arg.isByteArray()) {
+                                bb.set((byte[]) value);
+                            } else {
+                                GXDLMS.appendData(arg.getTarget(),
+                                        arg.getIndex(), bb, value);
+                            }
                         }
                     }
                 }
@@ -311,7 +320,7 @@ final class GXDLMSLNCommandHandler {
      *            Received data.
      */
     private static void getRequestWithList(final GXDLMSSettings settings,
-            final GXDLMSServer server, final GXByteBuffer data,
+            final GXDLMSServerBase server, final GXByteBuffer data,
             final GXByteBuffer replyData, final GXDLMSTranslatorStructure xml) {
         ValueEventArgs e = null;
         GXByteBuffer bb = new GXByteBuffer();
@@ -393,7 +402,11 @@ final class GXDLMSLNCommandHandler {
                     value = it.getTarget().getValue(settings, it);
                 }
                 bb.setUInt8(it.getError().getValue());
-                GXDLMS.appendData(it.getTarget(), it.getIndex(), bb, value);
+                if (it.isByteArray()) {
+                    bb.set((byte[]) value);
+                } else {
+                    GXDLMS.appendData(it.getTarget(), it.getIndex(), bb, value);
+                }
             } catch (Exception ex) {
                 bb.setUInt8(ErrorCode.HARDWARE_FAULT.getValue());
             }
@@ -404,14 +417,15 @@ final class GXDLMSLNCommandHandler {
             }
             ++pos;
         }
+        server.notifyPostRead(list.toArray(new ValueEventArgs[list.size()]));
         GXDLMS.getLNPdu(new GXDLMSLNParameters(settings, Command.GET_RESPONSE,
                 3, null, bb, 0xFF), replyData);
     }
 
     private static void handleSetRequestNormal(final GXDLMSSettings settings,
-            final GXDLMSServer server, final GXByteBuffer data, final int type,
-            final GXDLMSLNParameters p, final GXByteBuffer replyData,
-            final GXDLMSTranslatorStructure xml) {
+            final GXDLMSServerBase server, final GXByteBuffer data,
+            final int type, final GXDLMSLNParameters p,
+            final GXByteBuffer replyData, final GXDLMSTranslatorStructure xml) {
         Object value = null;
         GXDataInfo reply = new GXDataInfo();
         // CI
@@ -502,6 +516,7 @@ final class GXDLMSLNCommandHandler {
                     } else if (!e.getHandled() && !p.isMultipleBlocks()) {
                         obj.setValue(settings, e);
                     }
+                    server.notifyPostWrite(list);
                 } catch (Exception e) {
                     p.setStatus(ErrorCode.HARDWARE_FAULT.getValue());
                 }
@@ -510,7 +525,7 @@ final class GXDLMSLNCommandHandler {
     }
 
     private static void hanleSetRequestWithDataBlock(
-            final GXDLMSSettings settings, final GXDLMSServer server,
+            final GXDLMSSettings settings, final GXDLMSServerBase server,
             final GXByteBuffer data, final GXDLMSLNParameters p,
             final GXByteBuffer replyData, final GXDLMSTranslatorStructure xml) {
         GXDataInfo reply = new GXDataInfo();
@@ -553,6 +568,8 @@ final class GXDLMSLNCommandHandler {
                                 .setValue(settings, server.getTransaction()
                                         .getTargets()[0]);
                     }
+                    server.notifyPostWrite(
+                            server.getTransaction().getTargets());
                 } catch (RuntimeException e) {
                     p.setStatus(ErrorCode.HARDWARE_FAULT.getValue());
                 } finally {
@@ -572,7 +589,7 @@ final class GXDLMSLNCommandHandler {
      * @return Reply.
      */
     static void handleMethodRequest(final GXDLMSSettings settings,
-            final GXDLMSServer server, final GXByteBuffer data,
+            final GXDLMSServerBase server, final GXByteBuffer data,
             final GXDLMSConnectionEventArgs connectionInfo,
             final GXByteBuffer replyData, final GXDLMSTranslatorStructure xml) {
         ErrorCode error = ErrorCode.OK;
@@ -624,7 +641,7 @@ final class GXDLMSLNCommandHandler {
         if (!settings.isConnected()
                 && (ci != ObjectType.ASSOCIATION_LOGICAL_NAME.getValue()
                         || id != 1)) {
-            replyData.set(GXDLMSServer.generateConfirmedServiceError(
+            replyData.set(GXDLMSServerBase.generateConfirmedServiceError(
                     ConfirmedServiceError.INITIATE_ERROR, ServiceError.SERVICE,
                     Service.UNSUPPORTED.getValue()));
             return;
@@ -649,14 +666,19 @@ final class GXDLMSLNCommandHandler {
                 } else {
                     actionReply = obj.invoke(settings, e);
                 }
+                server.notifyPostAction(new ValueEventArgs[] { e });
                 // Set default action reply if not given.
                 if (actionReply != null && e.getError() == ErrorCode.OK) {
                     // Add return parameters
                     bb.setUInt8(1);
                     // Add parameters error code.
                     bb.setUInt8(0);
-                    GXCommon.setData(bb, GXCommon.getValueType(actionReply),
-                            actionReply);
+                    if (e.isByteArray()) {
+                        bb.set(actionReply);
+                    } else {
+                        GXCommon.setData(bb, GXCommon.getValueType(actionReply),
+                                actionReply);
+                    }
                 } else {
                     // Add parameters error code.
                     error = e.getError();
@@ -690,11 +712,11 @@ final class GXDLMSLNCommandHandler {
      *            XML settings.
      */
     public static void handleAccessRequest(final GXDLMSSettings settings,
-            final GXDLMSServer server, final GXByteBuffer data,
+            final GXDLMSServerBase server, final GXByteBuffer data,
             final GXByteBuffer reply, final GXDLMSTranslatorStructure xml) {
         // Return error if connection is not established.
         if (xml == null && !settings.isConnected()) {
-            reply.set(GXDLMSServer.generateConfirmedServiceError(
+            reply.set(GXDLMSServerBase.generateConfirmedServiceError(
                     ConfirmedServiceError.INITIATE_ERROR, ServiceError.SERVICE,
                     Service.UNSUPPORTED.getValue()));
             return;
@@ -753,7 +775,6 @@ final class GXDLMSLNCommandHandler {
                 xml.appendStartTag(Command.ACCESS_REQUEST, type);
                 appendAttributeDescriptor(xml, ci.getValue(), ln,
                         attributeIndex);
-
                 xml.appendEndTag(Command.ACCESS_REQUEST, type);
                 xml.appendEndTag(TranslatorTags.ACCESS_REQUEST_SPECIFICATION);
             }

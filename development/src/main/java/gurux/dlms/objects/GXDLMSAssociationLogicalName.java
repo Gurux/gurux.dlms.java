@@ -42,7 +42,6 @@ import java.util.logging.Logger;
 import gurux.dlms.GXByteBuffer;
 import gurux.dlms.GXDLMSSettings;
 import gurux.dlms.ValueEventArgs;
-import gurux.dlms.asn.GXAsn1Converter;
 import gurux.dlms.enums.AccessMode;
 import gurux.dlms.enums.Authentication;
 import gurux.dlms.enums.DataType;
@@ -219,8 +218,8 @@ public class GXDLMSAssociationLogicalName extends GXDLMSObject
                     GXByteBuffer signature =
                             new GXByteBuffer((byte[]) e.getParameters());
                     Signature ver = Signature.getInstance("SHA256withECDSA");
-                    ver.initVerify(
-                            settings.getCertificates().get(0).getPublicKey());
+                    ver.initVerify(settings.getCipher().getCertificates().get(0)
+                            .getPublicKey());
                     GXByteBuffer bb = new GXByteBuffer();
                     bb.set(settings.getSourceSystemTitle());
                     bb.set(settings.getCipher().getSystemTitle());
@@ -251,7 +250,7 @@ public class GXDLMSAssociationLogicalName extends GXDLMSObject
             if (accept) {
                 if (settings.getAuthentication() == Authentication.HIGH_GMAC) {
                     readSecret = settings.getCipher().getSystemTitle();
-                    ic = settings.getCipher().getFrameCounter();
+                    ic = settings.getCipher().getInvocationCounter();
                 } else {
                     readSecret = hlsSecret;
                 }

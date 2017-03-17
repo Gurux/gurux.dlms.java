@@ -34,11 +34,19 @@
 
 package gurux.dlms.secure;
 
-import java.security.PrivateKey;
+import java.security.KeyPair;
+import java.security.PublicKey;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Map;
 
 import gurux.dlms.GXByteBuffer;
 import gurux.dlms.GXICipher;
+import gurux.dlms.asn.GXx509Certificate;
 import gurux.dlms.enums.Security;
+import gurux.dlms.internal.GXCommon;
+import gurux.dlms.objects.enums.CertificateType;
+import gurux.dlms.objects.enums.SecuritySuite;
 
 /**
  * Gurux DLMS/COSEM Transport security (Ciphering) settings.
@@ -46,18 +54,60 @@ import gurux.dlms.enums.Security;
 public class GXCiphering implements GXICipher {
     private Security security = Security.NONE;
     private byte[] authenticationKey;
+
+    /**
+     * Certificates.
+     */
+    private List<GXx509Certificate> certificates;
+
+    /**
+     * Ephemeral key pair.
+     */
+    private KeyPair ephemeralKeyPair;
+
     /**
      * System title.
      */
     private byte[] systemTitle;
 
-    private byte[] blockCipherKey;
-    private long frameCounter = 0;
+    /**
+     * recipient system title.
+     */
+    private byte[] recipientSystemTitle;
 
     /**
-     * Private key.
+     * Block cipher key.
      */
-    private PrivateKey privateKey;
+    private byte[] blockCipherKey;
+    /**
+     * Invocation Counter.
+     */
+    private long invocationCounter = 0;
+
+    /**
+     * Used security suite.
+     */
+    private SecuritySuite securitySuite = SecuritySuite.AES_GCM_128;
+
+    /**
+     * Signing key pair.
+     */
+    private KeyPair signingKeyPair;
+
+    /**
+     * Client key agreement key pair.
+     */
+    private KeyPair keyAgreementKeyPair;
+
+    /**
+     * Target (Server or client) Public key.
+     */
+    private List<Map.Entry<CertificateType, PublicKey>> publicKeys;
+
+    /**
+     * Shared secret is generated when connection is made.
+     */
+    private byte[] sharedSecret;
 
     /**
      * Constructor. Default values are from the Green Book.
@@ -66,6 +116,8 @@ public class GXCiphering implements GXICipher {
      *            Used system title.
      */
     public GXCiphering(final byte[] title) {
+        publicKeys = new ArrayList<Map.Entry<CertificateType, PublicKey>>();
+        certificates = new ArrayList<GXx509Certificate>();
         setSecurity(Security.NONE);
         setSystemTitle(title);
         setBlockCipherKey(new byte[] { 0x00, 0x01, 0x02, 0x03, 0x04, 0x05, 0x06,
@@ -91,30 +143,51 @@ public class GXCiphering implements GXICipher {
     public final byte[] encrypt(final int tag, final byte[] title,
             final byte[] data) {
         if (getSecurity() != Security.NONE) {
-            AesGcmParameter p =
-                    new AesGcmParameter(tag, getSecurity(), getFrameCounter(),
-                            title, getBlockCipherKey(), getAuthenticationKey());
+            AesGcmParameter p = new AesGcmParameter(tag, getSecurity(),
+                    getInvocationCounter(), title, getBlockCipherKey(),
+                    getAuthenticationKey());
             byte[] tmp = GXDLMSChippering.encryptAesGcm(p, data);
-            setFrameCounter(getFrameCounter() + 1);
+            setInvocationCounter(getInvocationCounter() + 1);
             return tmp;
         }
         return data;
     }
 
     @Override
-    public final Security decrypt(final byte[] title, final GXByteBuffer data) {
+    public final AesGcmParameter decrypt(final byte[] title,
+            final GXByteBuffer data) {
         AesGcmParameter p =
                 new AesGcmParameter(title, blockCipherKey, authenticationKey);
-        byte[] tmp = GXDLMSChippering.decryptAesGcm(p, data);
+        p.setSharedSecret(getSharedSecret());
+        byte[] tmp = GXDLMSChippering.decryptAesGcm(this, p, data);
+        this.setSharedSecret(p.getSharedSecret());
         data.clear();
         data.set(tmp);
-        return p.getSecurity();
+        return p;
+    }
+
+    /**
+     * Cipher PDU.
+     * 
+     * @param p
+     *            Aes GCM Parameter.
+     * @param data
+     *            Plain text.
+     * @return Secured data.
+     */
+    public static byte[] encrypt(final AesGcmParameter p, final byte[] data) {
+        if (p.getSecurity() != Security.NONE) {
+            byte[] tmp = GXDLMSChippering.encryptAesGcm(p, data);
+            p.setInvocationCounter(p.getInvocationCounter() + 1);
+            return tmp;
+        }
+        return data;
     }
 
     @Override
     public final void reset() {
         setSecurity(Security.NONE);
-        setFrameCounter(0);
+        setInvocationCounter(0);
     }
 
     @Override
@@ -123,14 +196,18 @@ public class GXCiphering implements GXICipher {
     }
 
     /**
-     * @return Used security.
+     * @param value
+     *            Invocation Counter.
      */
-    public final long getFrameCounter() {
-        return frameCounter;
+    public final void setInvocationCounter(final long value) {
+        invocationCounter = value;
     }
 
-    public final void setFrameCounter(final long value) {
-        frameCounter = value;
+    /**
+     * @return .
+     */
+    public final long getInvocationCounter() {
+        return invocationCounter;
     }
 
     /**
@@ -170,6 +247,21 @@ public class GXCiphering implements GXICipher {
     }
 
     /**
+     * @return Recipient system title.
+     */
+    public final byte[] getRecipientSystemTitle() {
+        return recipientSystemTitle;
+    }
+
+    /**
+     * @param value
+     *            Recipient system title.
+     */
+    public final void setRecipientSystemTitle(final byte[] value) {
+        recipientSystemTitle = value;
+    }
+
+    /**
      * Each block is ciphered with this key.
      * 
      * @return Block cipher key.
@@ -200,17 +292,93 @@ public class GXCiphering implements GXICipher {
     }
 
     /**
-     * @return Private key.
+     * @return Available certificates.
      */
-    public final PrivateKey getPrivateKey() {
-        return privateKey;
+    public final List<GXx509Certificate> getCertificates() {
+        return certificates;
+    }
+
+    /**
+     * @return Ephemeral key pair.
+     */
+    public KeyPair getEphemeralKeyPair() {
+        return ephemeralKeyPair;
     }
 
     /**
      * @param value
-     *            Private key.
+     *            Ephemeral key pair.
      */
-    public final void setPrivateKey(final PrivateKey value) {
-        this.privateKey = value;
+    public void setEphemeralKeyPair(final KeyPair value) {
+        ephemeralKeyPair = value;
+    }
+
+    /**
+     * @return Signing key pair.
+     */
+    public final KeyPair getSigningKeyPair() {
+        return signingKeyPair;
+    }
+
+    /**
+     * @param value
+     *            Signing key pair.
+     */
+    public final void setSigningKeyPair(final KeyPair value) {
+        signingKeyPair = value;
+    }
+
+    /**
+     * @return Client's key agreement key pair.
+     */
+    public final KeyPair getKeyAgreementKeyPair() {
+        return keyAgreementKeyPair;
+    }
+
+    /**
+     * @param value
+     *            Client's key agreement key pair.
+     */
+    public final void setKeyAgreementKeyPair(final KeyPair value) {
+        keyAgreementKeyPair = value;
+    }
+
+    /**
+     * @return Target (Server or client) Public key.
+     */
+    public final List<Map.Entry<CertificateType, PublicKey>> getPublicKeys() {
+        return publicKeys;
+    }
+
+    /**
+     * @return Used security suite.
+     */
+    public SecuritySuite getSecuritySuite() {
+        return securitySuite;
+    }
+
+    /**
+     * @param value
+     *            Used security suite.
+     */
+    public void setSecuritySuite(final SecuritySuite value) {
+        securitySuite = value;
+    }
+
+    /**
+     * @return Shared secret is generated when connection is made.
+     */
+    public byte[] getSharedSecret() {
+        return sharedSecret;
+    }
+
+    /**
+     * @param value
+     *            Shared secret is generated when connection is made.
+     */
+    public void setSharedSecret(final byte[] value) {
+        sharedSecret = value;
+        System.out.println("SharedSecret: " + GXCommon.toHex(value));
+
     }
 }

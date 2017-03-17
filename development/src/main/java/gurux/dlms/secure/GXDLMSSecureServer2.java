@@ -31,35 +31,54 @@
 // This code is licensed under the GNU General Public License v2. 
 // Full text may be retrieved at http://www.gnu.org/licenses/gpl-2.0.txt
 //---------------------------------------------------------------------------
-package gurux.dlms.objects.enums;
+
+package gurux.dlms.secure;
+
+import gurux.dlms.GXDLMSServer2;
+import gurux.dlms.enums.InterfaceType;
 
 /**
- * Security suite Specifies authentication, encryption and key wrapping
- * algorithm.
+ * Implements secured DLMS server.
+ * 
+ * @author Gurux Ltd.
  */
-public enum SecuritySuite {
+public abstract class GXDLMSSecureServer2 extends GXDLMSServer2 {
     /**
-     * AES-GCM-128 for authenticated encryption and AES-128 for key wrapping.
-     * <br>
-     * A.K.A Security Suite 0.
+     * Ciphering settings.
      */
-    AES_GCM_128,
-    /**
-     * ECDH-ECDSAAES-GCM-128SHA-256. <br>
-     * A.K.A Security Suite 1.
-     */
-    ECDH_ECDSA_AES_GCM_128_SHA_256,
-    /**
-     * ECDH-ECDSAAES-GCM-256SHA-384. <br>
-     * A.K.A Security Suite 2.
-     */
-    ECDHE_CDSA_AES_GCM_256_SHA_384;
+    private GXCiphering ciphering;
 
-    public int getValue() {
-        return this.ordinal();
+    /**
+     * Constructor.
+     * 
+     * @param logicalNameReferencing
+     *            Is logical name referencing used.
+     * @param type
+     *            Interface type.
+     */
+    public GXDLMSSecureServer2(final boolean logicalNameReferencing,
+            final InterfaceType type) {
+        super(logicalNameReferencing, type);
+        ciphering = new GXCiphering("ABCDEFGH".getBytes());
+        setCipher(ciphering);
     }
 
-    public static SecuritySuite forValue(final int value) {
-        return values()[value];
+    public final GXCiphering getCiphering() {
+        return ciphering;
+    }
+
+    /**
+     * @return Key Encrypting Key, also known as Master key.
+     */
+    public final byte[] getKek() {
+        return getSettings().getKek();
+    }
+
+    /**
+     * @param value
+     *            Key Encrypting Key, also known as Master key.
+     */
+    public final void setKek(final byte[] value) {
+        getSettings().setKek(value);
     }
 }

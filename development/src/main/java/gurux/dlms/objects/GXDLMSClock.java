@@ -142,6 +142,22 @@ public class GXDLMSClock extends GXDLMSObject implements IGXDLMSBase {
     }
 
     /**
+     * @param value
+     *            Time of COSEM Clock object.
+     */
+    public final void setTime(final Date value) {
+        time = new GXDateTime(value);
+    }
+
+    /**
+     * @param value
+     *            Time of COSEM Clock object.
+     */
+    public final void setTime(final java.util.Calendar value) {
+        time = new GXDateTime(value.getTime());
+    }
+
+    /**
      * @return TimeZone of COSEM Clock object.
      */
     public final int getTimeZone() {
@@ -234,7 +250,7 @@ public class GXDLMSClock extends GXDLMSObject implements IGXDLMSBase {
         if (e.getIndex() == 1) {
             GXDateTime dt = getTime();
             java.util.Calendar tm = Calendar.getInstance();
-            tm.setTime(dt.getValue());
+            tm.setTime(dt.getCalendar().getTime());
             int minutes = tm.get(java.util.Calendar.MINUTE);
             if (minutes < 8) {
                 minutes = 0;
@@ -251,20 +267,20 @@ public class GXDLMSClock extends GXDLMSObject implements IGXDLMSBase {
             tm.set(java.util.Calendar.MINUTE, minutes);
             tm.set(java.util.Calendar.SECOND, 0);
             tm.set(java.util.Calendar.MILLISECOND, 0);
-            dt.setValue(tm.getTime());
+            dt.setCalendar(tm);
             setTime(dt);
         } else if (e.getIndex() == 3) {
             // Sets the meter's time to the nearest minute.
             GXDateTime dt = getTime();
             java.util.Calendar tm = Calendar.getInstance();
-            tm.setTime(dt.getValue());
+            tm.setTime(dt.getCalendar().getTime());
             int s = tm.get(java.util.Calendar.SECOND);
             if (s > 30) {
                 tm.add(java.util.Calendar.MINUTE, 1);
             }
             tm.set(java.util.Calendar.SECOND, 0);
             tm.set(java.util.Calendar.MILLISECOND, 0);
-            dt.setValue(tm.getTime());
+            dt.setCalendar(tm);
             setTime(dt);
 
         } else if (e.getIndex() == 5) {
@@ -287,9 +303,9 @@ public class GXDLMSClock extends GXDLMSObject implements IGXDLMSBase {
             int shift = ((Number) e.getParameters()).intValue();
             GXDateTime dt = getTime();
             java.util.Calendar tm = Calendar.getInstance();
-            tm.setTime(dt.getValue());
+            tm.setTime(dt.getCalendar().getTime());
             tm.add(java.util.Calendar.SECOND, shift);
-            dt.setValue(tm.getTime());
+            dt.setCalendar(tm);
             setTime(dt);
         } else {
             e.setError(ErrorCode.READ_WRITE_DENIED);

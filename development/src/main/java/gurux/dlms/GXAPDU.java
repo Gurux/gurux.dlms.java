@@ -34,13 +34,19 @@
 
 package gurux.dlms;
 
+import java.security.InvalidKeyException;
+import java.security.NoSuchAlgorithmException;
+import java.util.Set;
+
 import gurux.dlms.enums.AssociationResult;
 import gurux.dlms.enums.Authentication;
 import gurux.dlms.enums.BerType;
 import gurux.dlms.enums.Command;
+import gurux.dlms.enums.Conformance;
 import gurux.dlms.enums.Security;
 import gurux.dlms.enums.SourceDiagnostic;
 import gurux.dlms.internal.GXCommon;
+import gurux.dlms.secure.AesGcmParameter;
 
 /**
  * The services to access the attributes and methods of COSEM objects are
@@ -199,11 +205,9 @@ final class GXAPDU {
         data.setUInt8(0x04);
         // encoding the number of unused bits in the bit string
         data.setUInt8(0x00);
-        if (settings.getUseLogicalNameReferencing()) {
-            data.set(settings.getLnSettings().getConformanceBlock());
-        } else {
-            data.set(settings.getSnSettings().getConformanceBlock());
-        }
+        GXByteBuffer bb = new GXByteBuffer(4);
+        bb.setUInt32(Conformance.toInteger(settings.getProposedConformance()));
+        data.set(bb.subArray(1, 3));
         data.setUInt16(settings.getMaxPduSize());
     }
 
@@ -259,6 +263,9 @@ final class GXAPDU {
 
     /**
      * Generates Aarq.
+     * 
+     * @throws NoSuchAlgorithmException
+     * @throws InvalidKeyException
      */
     public static void generateAarq(final GXDLMSSettings settings,
             final GXICipher cipher, final GXByteBuffer encryptedData,
@@ -276,100 +283,21 @@ final class GXAPDU {
         data.setUInt8(offset, (data.size() - offset - 1));
     }
 
-    static String conformancetoString(final int value) {
-        String str;
-        switch (value) {
-        case Conformance.ACCESS:
-            str = "access";
-            break;
-        case Conformance.ACTION:
-            str = "action";
-            break;
-        case Conformance.ATTRIBUTE_0_SUPPORTED_WITH_GET:
-            str = "attribute0-supported-with-get";
-            break;
-        case Conformance.ATTRIBUTE_0_SUPPORTED_WITH_SET:
-            str = "attribute0-supported-with-set";
-            break;
-        case Conformance.BLOCK_TRANSFER_WITH_ACTION:
-            str = "block-transfer-with-action";
-            break;
-        case Conformance.BLOCK_TRANSFER_WITH_GET_OR_READ:
-            str = "block-transfer-with-get-or-read";
-            break;
-        case Conformance.BLOCK_TRANSFER_WITH_SET_OR_WRITE:
-            str = "block-transfer-with-set-or-write";
-            break;
-        case Conformance.DATA_NOTIFICATION:
-            str = "data-notification";
-            break;
-        case Conformance.EVENT_NOTIFICATION:
-            str = "event-notification";
-            break;
-        case Conformance.GENERAL_BLOCK_TRANSFER:
-            str = "general-block-transfer";
-            break;
-        case Conformance.GENERAL_PROTECTION:
-            str = "general-protection";
-            break;
-        case Conformance.GET:
-            str = "get";
-            break;
-        case Conformance.INFORMATION_REPORT:
-            str = "information-report";
-            break;
-        case Conformance.MULTIPLE_REFERENCES:
-            str = "multiple-references";
-            break;
-        case Conformance.PARAMETERIZED_ACCESS:
-            str = "parameterized-access";
-            break;
-        case Conformance.PRIORITY_MGMT_SUPPORTED:
-            str = "priority-mgmt-supported";
-            break;
-        case Conformance.READ:
-            str = "read";
-            break;
-        case Conformance.RESERVED_SEVEN:
-            str = "reserved-seven";
-            break;
-        case Conformance.RESERVED_SIX:
-            str = "reserved-six";
-            break;
-        case Conformance.RESERVED_ZERO:
-            str = "reserved-zero";
-            break;
-        case Conformance.SELECTIVE_ACCESS:
-            str = "selective-access";
-            break;
-        case Conformance.SET:
-            str = "set";
-            break;
-        case Conformance.UN_CONFIRMED_WRITE:
-            str = "unconfirmed-write";
-            break;
-        case Conformance.WRITE:
-            str = "write";
-            break;
-        default:
-            throw new IllegalArgumentException(String.valueOf(value));
-        }
-        return str;
-    }
-
     private static void getConformance(final long value,
             final GXDLMSTranslatorStructure xml) {
         if (xml.getOutputType() == TranslatorOutputType.SIMPLE_XML) {
-            for (int it : Conformance.getEnumConstants()) {
-                if ((it & value) != 0) {
+            for (Conformance it : Conformance.getEnumConstants()) {
+                if ((it.getValue() & value) != 0) {
                     xml.appendLine(TranslatorGeneralTags.CONFORMANCE_BIT,
-                            "Name", Conformance.toString(it));
+                            "Name",
+                            TranslatorSimpleTags.conformancetoString(it));
                 }
             }
         } else {
-            for (int it : Conformance.getEnumConstants()) {
-                if ((it & value) != 0) {
-                    xml.append(conformancetoString(it) + " ");
+            for (Conformance it : Conformance.getEnumConstants()) {
+                if ((it.getValue() & value) != 0) {
+                    xml.append(TranslatorStandardTags.conformancetoString(it)
+                            + " ");
                 }
             }
         }
@@ -383,7 +311,10 @@ final class GXAPDU {
             final GXDLMSTranslatorStructure xml) {
         short len = data.getUInt8();
         if (data.size() - data.position() < len) {
-            throw new RuntimeException("Not enough data.");
+            if (xml == null) {
+                throw new RuntimeException("Not enough data.");
+            }
+            xml.appendComment("Error: Invalid data size.");
         }
         // Encoding the choice for user information
         short tag = data.getUInt8();
@@ -392,7 +323,10 @@ final class GXAPDU {
         }
         len = data.getUInt8();
         if (data.size() - data.position() < len) {
-            throw new RuntimeException("Not enough data.");
+            if (xml == null) {
+                throw new RuntimeException("Not enough data.");
+            }
+            xml.appendComment("Error: Invalid data size.");
         }
         if (xml != null
                 && xml.getOutputType() == TranslatorOutputType.STANDARD_XML) {
@@ -405,47 +339,15 @@ final class GXAPDU {
         parseInitiate(false, settings, cipher, data, xml);
     }
 
-    static void parseInitiate(final boolean initiateRequest,
+    static void parse(final boolean initiateRequest,
             final GXDLMSSettings settings, final GXICipher cipher,
-            final GXByteBuffer data, final GXDLMSTranslatorStructure xml) {
+            final GXByteBuffer data, final GXDLMSTranslatorStructure xml,
+            final int tag2) {
         int len;
+        int tag;
         GXByteBuffer tmp2 = new GXByteBuffer();
         tmp2.setUInt8(0);
-        // Tag for xDLMS-Initate.response
-        int tag = data.getUInt8();
-        if (tag == Command.GLO_INITIATE_RESPONSE) {
-            if (xml != null
-                    && xml.getOutputType() == TranslatorOutputType.SIMPLE_XML) {
-                int cnt = GXCommon.getObjectCount(data);
-                byte[] tmp = new byte[cnt];
-                data.get(tmp);
-                // <glo_InitiateResponse>
-                xml.appendLine(Command.GLO_INITIATE_RESPONSE, "Value",
-                        GXCommon.toHex(tmp, false));
-                return;
-            }
-            data.position(data.position() - 1);
-            cipher.setSecurity(
-                    cipher.decrypt(settings.getSourceSystemTitle(), data));
-            tag = data.getUInt8();
-        } else if (tag == Command.GLO_INITIATE_REQUEST) {
-            if (xml != null
-                    && xml.getOutputType() == TranslatorOutputType.SIMPLE_XML) {
-                int cnt = GXCommon.getObjectCount(data);
-                byte[] tmp = new byte[cnt];
-                data.get(tmp);
-                // <glo_InitiateRequest>
-                xml.appendLine(Command.GLO_INITIATE_REQUEST, "Value",
-                        GXCommon.toHex(tmp, false));
-                return;
-            }
-            data.position(data.position() - 1);
-            // InitiateRequest
-            cipher.setSecurity(
-                    cipher.decrypt(settings.getSourceSystemTitle(), data));
-            tag = data.getUInt8();
-        }
-        boolean response = tag == Command.INITIATE_RESPONSE;
+        boolean response = tag2 == Command.INITIATE_RESPONSE;
         if (response) {
             if (xml != null) {
                 // <InitiateResponse>
@@ -465,14 +367,13 @@ final class GXAPDU {
                             "Value", "00");
                 }
             }
-        } else if (tag == Command.INITIATE_REQUEST) {
+        } else if (tag2 == Command.INITIATE_REQUEST) {
             if (xml != null) {
                 xml.appendStartTag(Command.INITIATE_REQUEST);
             }
             // Optional usage field of the negotiated quality of service
             // component
             tag = data.getUInt8();
-
             if (tag != 0) {
                 len = data.getUInt8();
                 byte[] tmp = new byte[len];
@@ -513,7 +414,43 @@ final class GXAPDU {
                 len = data.getUInt8();
                 data.position(data.position() + len);
             }
+        } else if (tag2 == Command.CONFIRMED_SERVICE_ERROR) {
+            if (xml != null) {
+                xml.appendStartTag(Command.CONFIRMED_SERVICE_ERROR);
+                if (xml.getOutputType() == TranslatorOutputType.STANDARD_XML) {
+                    data.getUInt8();
+                    xml.appendStartTag(TranslatorTags.INITIATE_ERROR);
+                    ServiceError type = ServiceError.forValue(data.getUInt8());
+
+                    String str =
+                            TranslatorStandardTags.serviceErrorToString(type);
+                    String value = TranslatorStandardTags
+                            .getServiceErrorValue(type, (byte) data.getUInt8());
+                    xml.appendLine("x:" + str, null, value);
+                    xml.appendEndTag(TranslatorTags.INITIATE_ERROR);
+                } else {
+                    xml.appendLine(TranslatorTags.SERVICE, "Value",
+                            xml.integerToHex(data.getUInt8(), 2));
+                    ServiceError type = ServiceError.forValue(data.getUInt8());
+                    xml.appendStartTag(TranslatorTags.SERVICE_ERROR);
+                    xml.appendLine(
+                            TranslatorSimpleTags.serviceErrorToString(type),
+                            "Value", TranslatorSimpleTags.getServiceErrorValue(
+                                    type, (byte) data.getUInt8()));
+                    xml.appendEndTag(TranslatorTags.SERVICE_ERROR);
+                }
+                xml.appendEndTag(Command.CONFIRMED_SERVICE_ERROR);
+                return;
+            }
+            throw new GXDLMSException(
+                    ConfirmedServiceError.forValue(data.getUInt8()),
+                    ServiceError.forValue(data.getUInt8()), data.getUInt8());
         } else {
+            if (xml != null) {
+                xml.appendComment("Error: Failed to descypt data.");
+                data.position(data.size());
+                return;
+            }
             throw new RuntimeException("Invalid tag.");
         }
         // Get DLMS version number.
@@ -556,42 +493,28 @@ final class GXAPDU {
         len = data.getUInt8();
         // The number of unused bits in the bit string.
         tag = data.getUInt8();
-        if (!response) {
-            // ProposedConformance
+        byte[] tmp = new byte[3];
+        GXByteBuffer bb = new GXByteBuffer(4);
+        data.get(tmp);
+        bb.setUInt8(0);
+        bb.set(tmp);
+        int v = bb.getInt32();
+        if (settings.isServer()) {
+            settings.setNegotiatedConformance(
+                    Conformance.forValue(v & Conformance
+                            .toInteger(settings.getProposedConformance())));
             if (xml != null) {
-                if ((xml.getOutputType() == TranslatorOutputType.SIMPLE_XML)) {
-                    xml.appendStartTag(
-                            TranslatorGeneralTags.PROPOSED_CONFORMANCE);
-                } else if (initiateRequest) {
-                    xml.append(TranslatorGeneralTags.PROPOSED_CONFORMANCE,
-                            true);
-
-                }
+                xml.appendStartTag(TranslatorGeneralTags.PROPOSED_CONFORMANCE);
+                getConformance(v, xml);
             }
-            data.get(settings.getConformanceBlock());
-            tmp2.set(settings.getConformanceBlock());
         } else {
-            // NegotiatedConformance
             if (xml != null) {
-                if (xml.getOutputType() == TranslatorOutputType.SIMPLE_XML) {
-                    xml.appendStartTag(
-                            TranslatorGeneralTags.NEGOTIATED_CONFORMANCE);
-                } else if (initiateRequest) {
-                    xml.append(TranslatorGeneralTags.NEGOTIATED_CONFORMANCE,
-                            true);
-                }
+                xml.appendStartTag(
+                        TranslatorGeneralTags.NEGOTIATED_CONFORMANCE);
+                getConformance(v, xml);
             }
-            if (settings.getUseLogicalNameReferencing()) {
-                data.get(settings.getLnSettings().getConformanceBlock());
-                tmp2.set(settings.getLnSettings().getConformanceBlock());
-            } else {
-                data.get(settings.getSnSettings().getConformanceBlock());
-                tmp2.set(settings.getSnSettings().getConformanceBlock());
-            }
-        }
-        if (xml != null && (initiateRequest
-                || xml.getOutputType() == TranslatorOutputType.SIMPLE_XML)) {
-            getConformance(tmp2.getUInt32(), xml);
+            Set<Conformance> c = Conformance.forValue(v);
+            settings.setNegotiatedConformance(c);
         }
 
         if (!response) {
@@ -670,6 +593,75 @@ final class GXAPDU {
         } else if (xml != null) {
             xml.appendEndTag(Command.INITIATE_REQUEST);
         }
+    }
+
+    static void parseInitiate(final boolean initiateRequest,
+            final GXDLMSSettings settings, final GXICipher cipher,
+            final GXByteBuffer data, final GXDLMSTranslatorStructure xml) {
+        // Tag for xDLMS-Initate.response
+        int tag = data.getUInt8();
+        int originalPos;
+        byte[] encrypted;
+        AesGcmParameter p;
+        if (tag == Command.GLO_INITIATE_RESPONSE) {
+            if (xml != null) {
+                originalPos = data.position();
+                int cnt = GXCommon.getObjectCount(data);
+                encrypted = new byte[cnt];
+                data.get(encrypted);
+                if (cipher != null && xml.isComments()) {
+                    data.position(originalPos - 1);
+                    p = cipher.decrypt(settings.getSourceSystemTitle(), data);
+                    cipher.setSecurity(p.getSecurity());
+                    tag = data.getUInt8();
+                    xml.startComment("Decrypted data:");
+                    xml.appendLine("Security: " + p.getSecurity());
+                    xml.appendLine(
+                            "Invocation Counter: " + p.getInvocationCounter());
+                    parse(initiateRequest, settings, cipher, data, xml, tag);
+                    xml.endComment();
+                }
+                // <glo_InitiateResponse>
+                xml.appendLine(Command.GLO_INITIATE_RESPONSE, "Value",
+                        GXCommon.toHex(encrypted, false));
+                return;
+            }
+            data.position(data.position() - 1);
+            cipher.setSecurity(
+                    cipher.decrypt(settings.getSourceSystemTitle(), data)
+                            .getSecurity());
+            tag = data.getUInt8();
+        } else if (tag == Command.GLO_INITIATE_REQUEST) {
+            if (xml != null) {
+                originalPos = data.position();
+                int cnt = GXCommon.getObjectCount(data);
+                encrypted = new byte[cnt];
+                data.get(encrypted);
+                if (cipher != null && xml.isComments()) {
+                    data.position(originalPos - 1);
+                    p = cipher.decrypt(settings.getSourceSystemTitle(), data);
+                    cipher.setSecurity(p.getSecurity());
+                    tag = data.getUInt8();
+                    xml.startComment("Decrypted data:");
+                    xml.appendLine("Security: " + p.getSecurity());
+                    xml.appendLine(
+                            "Invocation Counter: " + p.getInvocationCounter());
+                    parse(initiateRequest, settings, cipher, data, xml, tag);
+                    xml.endComment();
+                }
+                // <glo_InitiateRequest>
+                xml.appendLine(Command.GLO_INITIATE_REQUEST, "Value",
+                        GXCommon.toHex(encrypted, false));
+                return;
+            }
+            data.position(data.position() - 1);
+            // InitiateRequest
+            cipher.setSecurity(
+                    cipher.decrypt(settings.getSourceSystemTitle(), data)
+                            .getSecurity());
+            tag = data.getUInt8();
+        }
+        parse(initiateRequest, settings, cipher, data, xml, tag);
     }
 
     /**
@@ -791,7 +783,10 @@ final class GXAPDU {
         int len = buff.getUInt8();
         int size = buff.size() - buff.position();
         if (len > size) {
-            throw new RuntimeException("Not enough data.");
+            if (xml == null) {
+                throw new RuntimeException("Not enough data.");
+            }
+            xml.appendComment("Error: Invalid data size.");
         }
         // Opening tags
         if (xml != null) {
@@ -1103,15 +1098,16 @@ final class GXAPDU {
         data.setUInt8(06);
         data.setUInt8(0x5F);
         data.setUInt8(0x1F);
-        data.setUInt8(0x04); // length of the conformance block
-        data.setUInt8(0x00); // encoding the number of unused bits in the bit
-                             // string
-        if (settings.getUseLogicalNameReferencing()) {
-            data.set(settings.getLnSettings().getConformanceBlock());
-        } else {
-            data.set(settings.getSnSettings().getConformanceBlock());
+        // length of the conformance block
+        data.setUInt8(0x04);
+        // encoding the number of unused bits in the bit string
+        data.setUInt8(0x00);
 
-        }
+        GXByteBuffer bb = new GXByteBuffer(4);
+        bb.setUInt32(
+                Conformance.toInteger(settings.getNegotiatedConformance()));
+        data.set(bb.subArray(1, 3));
+
         data.setUInt16(settings.getMaxPduSize());
         // VAA Name VAA name (0x0007 for LN referencing and 0xFA00 for SN)
         if (settings.getUseLogicalNameReferencing()) {

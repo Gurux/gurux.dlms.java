@@ -34,20 +34,63 @@
 
 package gurux.dlms.secure;
 
+import gurux.dlms.GXDateTime;
 import gurux.dlms.enums.Security;
 import gurux.dlms.internal.GXCommon;
+import gurux.dlms.objects.enums.SecuritySuite;
 
 public class AesGcmParameter {
 
     private byte tag;
     private Security security;
-    private long frameCounter;
+    /**
+     * Invocation counter.
+     */
+    private long invocationCounter;
 
+    /**
+     * System title.
+     */
     private byte[] systemTitle;
+    /**
+     * Block cipher key.
+     */
     private byte[] blockCipherKey;
+    /**
+     * Authentication key.
+     */
     private byte[] authenticationKey;
-    private CountType type;
+    /**
+     * Count type.
+     */
+    private int type;
+    /**
+     * Counted tag.
+     */
     private byte[] countTag;
+
+    /**
+     * Recipient system title.
+     */
+    private byte[] recipientSystemTitle;
+    /**
+     * Date time.
+     */
+    private GXDateTime dateTime;
+    /**
+     * Other information.
+     */
+    private byte[] otherInformation;
+
+    /**
+     * Shared secret is generated when connection is made.
+     */
+    private byte[] sharedSecret;
+
+    /**
+     * Used security suite.
+     */
+    private SecuritySuite securitySuite = SecuritySuite.AES_GCM_128;
 
     /**
      * Constructor.
@@ -56,26 +99,69 @@ public class AesGcmParameter {
      *            Tag.
      * @param forSecurity
      *            Security level.
-     * @param forFrameCounter
-     *            Frame counter.
+     * @param forInvocationCounter
+     *            Invocation counter.
      * @param forSystemTitle
      *            System title.
      * @param forBlockCipherKey
-     *            Block cipher key.
+     *            Block cipher key. A.k.a EK.
      * @param forAuthenticationKey
      *            Authentication key.
      */
     public AesGcmParameter(final int forTag, final Security forSecurity,
-            final long forFrameCounter, final byte[] forSystemTitle,
+            final long forInvocationCounter, final byte[] forSystemTitle,
             final byte[] forBlockCipherKey, final byte[] forAuthenticationKey) {
         tag = (byte) forTag;
         security = forSecurity;
-        frameCounter = forFrameCounter;
-
+        invocationCounter = forInvocationCounter;
         systemTitle = forSystemTitle;
         blockCipherKey = forBlockCipherKey;
         authenticationKey = forAuthenticationKey;
         type = CountType.PACKET;
+    }
+
+    /**
+     * Constructor.
+     * 
+     * @param forTag
+     *            Tag.
+     * @param forSecurity
+     *            Security level.
+     * @param forSecuritySuite
+     *            Security suite.
+     * @param forInvocationCounter
+     *            Invocation counter.
+     * @param kdf
+     *            KDF.
+     * @param forAuthenticationKey
+     *            Authentication key.
+     * @param forOriginatorSystemTitle
+     *            Originator system title.
+     * @param forRecipientSystemTitle
+     *            Recipient system title.
+     * @param forDateTime
+     *            Date and time.
+     * @param forOtherInformation
+     *            Other information.
+     */
+    public AesGcmParameter(final int forTag, final Security forSecurity,
+            final SecuritySuite forSecuritySuite,
+            final long forInvocationCounter, final byte[] kdf,
+            final byte[] forAuthenticationKey,
+            final byte[] forOriginatorSystemTitle,
+            final byte[] forRecipientSystemTitle, final GXDateTime forDateTime,
+            final byte[] forOtherInformation) {
+        tag = (byte) forTag;
+        security = forSecurity;
+        invocationCounter = forInvocationCounter;
+        securitySuite = forSecuritySuite;
+        blockCipherKey = kdf;
+        authenticationKey = forAuthenticationKey;
+        systemTitle = forOriginatorSystemTitle;
+        recipientSystemTitle = forRecipientSystemTitle;
+        type = CountType.PACKET;
+        dateTime = forDateTime;
+        otherInformation = forOtherInformation;
     }
 
     /**
@@ -108,12 +194,19 @@ public class AesGcmParameter {
         security = value;
     }
 
-    public final long getFrameCounter() {
-        return frameCounter;
+    /**
+     * @return Invocation counter.
+     */
+    public final long getInvocationCounter() {
+        return invocationCounter;
     }
 
-    public final void setFrameCounter(final long value) {
-        frameCounter = value;
+    /**
+     * @param value
+     *            Invocation counter.
+     */
+    public final void setInvocationCounter(final long value) {
+        invocationCounter = value;
     }
 
     public final byte[] getSystemTitle() {
@@ -140,11 +233,11 @@ public class AesGcmParameter {
         authenticationKey = value;
     }
 
-    public final CountType getType() {
+    public final int getType() {
         return type;
     }
 
-    public final void setType(final CountType value) {
+    public final void setType(final int value) {
         type = value;
     }
 
@@ -161,8 +254,8 @@ public class AesGcmParameter {
         StringBuilder sb = new StringBuilder();
         sb.append("Security: ");
         sb.append(getSecurity());
-        sb.append(" FrameCounter: ");
-        sb.append(getFrameCounter());
+        sb.append(" InvocationCounter: ");
+        sb.append(getInvocationCounter());
         sb.append(" SystemTitle: ");
         sb.append(GXCommon.toHex(systemTitle, true));
         sb.append(" AuthenticationKey: ");
@@ -170,5 +263,64 @@ public class AesGcmParameter {
         sb.append(" BlockCipherKey: ");
         sb.append(GXCommon.toHex(blockCipherKey, true));
         return sb.toString();
+    }
+
+    /**
+     * @return Optional Date time.
+     */
+    public GXDateTime getDateTime() {
+        return dateTime;
+    }
+
+    /**
+     * @return Optional other information.
+     */
+    public byte[] getOtherInformation() {
+        return otherInformation;
+    }
+
+    /**
+     * @return Recipient system title.
+     */
+    public byte[] getRecipientSystemTitle() {
+        return recipientSystemTitle;
+    }
+
+    /**
+     * @param value
+     *            Recipient system title.
+     */
+    public final void setRecipientSystemTitle(final byte[] value) {
+        recipientSystemTitle = value;
+    }
+
+    /**
+     * @return Shared secret is generated when connection is made.
+     */
+    public byte[] getSharedSecret() {
+        return sharedSecret;
+    }
+
+    /**
+     * @param value
+     *            Shared secret is generated when connection is made.
+     */
+    public void setSharedSecret(final byte[] value) {
+        sharedSecret = value;
+    }
+
+    /**
+     * @return Used security suite.
+     */
+    public SecuritySuite getSecuritySuite() {
+        return securitySuite;
+    }
+
+    /**
+     * @param value
+     *            Used security suite.
+     */
+    public void setSecuritySuite(final SecuritySuite value) {
+        securitySuite = value;
     }
 }

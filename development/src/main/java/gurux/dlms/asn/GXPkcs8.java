@@ -33,11 +33,6 @@ public class GXPkcs8 {
     private GXOid algorithm;
 
     /**
-     * Parameters.
-     */
-    private Object parameters;
-
-    /**
      * Private key.
      */
     private PrivateKey privateKey;
@@ -96,8 +91,6 @@ public class GXPkcs8 {
             if (algorithm == null) {
                 algorithm = X9ObjectIdentifier.forValue(tmp.get(0).toString());
             }
-
-            parameters = tmp.get(1);
             // Make public key.
             KeyFactory eckf;
             try {

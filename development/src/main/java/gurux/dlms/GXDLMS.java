@@ -34,11 +34,13 @@
 
 package gurux.dlms;
 
+import java.security.InvalidKeyException;
 import java.util.ArrayList;
-import java.util.Date;
 import java.util.List;
 
+import gurux.dlms.asn.GXAsn1Converter;
 import gurux.dlms.enums.Command;
+import gurux.dlms.enums.Conformance;
 import gurux.dlms.enums.DataType;
 import gurux.dlms.enums.ErrorCode;
 import gurux.dlms.enums.ExceptionServiceError;
@@ -88,6 +90,12 @@ import gurux.dlms.objects.GXDLMSScriptTable;
 import gurux.dlms.objects.GXDLMSSecuritySetup;
 import gurux.dlms.objects.GXDLMSSpecialDaysTable;
 import gurux.dlms.objects.GXDLMSTcpUdpSetup;
+import gurux.dlms.objects.enums.CertificateType;
+import gurux.dlms.objects.enums.SecuritySuite;
+import gurux.dlms.secure.AesGcmParameter;
+import gurux.dlms.secure.CountType;
+import gurux.dlms.secure.GXASymmetric;
+import gurux.dlms.secure.GXCiphering;
 
 /**
  * GXDLMS implements methods to communicate with DLMS/COSEM metering devices.
@@ -425,7 +433,7 @@ abstract class GXDLMS {
             cmd = Command.GLO_METHOD_RESPONSE;
             break;
         case Command.DATA_NOTIFICATION:
-            cmd = Command.GLO_GENERAL_CIPHERING;
+            cmd = Command.GENERAL_GLO_CIPHERING;
             break;
         default:
             throw new GXDLMSException("Invalid GLO command.");
@@ -492,10 +500,14 @@ abstract class GXDLMS {
      *            LN parameters.
      * @param reply
      *            Generated message.
+     * @throws NoSuchAlgorithmExceptionp
+     * @throws InvalidKeyException
      */
     public static void getLNPdu(final GXDLMSLNParameters p,
             final GXByteBuffer reply) {
-        boolean ciphering = p.getSettings().getCipher() != null
+        boolean ciphering = p.getCommand() != Command.AARQ
+                && p.getCommand() != Command.AARE
+                && p.getSettings().getCipher() != null
                 && p.getSettings().getCipher().getSecurity() != Security.NONE;
         int len = 0;
         if (!ciphering
@@ -505,7 +517,8 @@ abstract class GXDLMS {
         if (p.getCommand() == Command.AARQ) {
             reply.set(p.getAttributeDescriptor());
         } else {
-            if (p.getSettings().getLnSettings().getGeneralBlockTransfer()) {
+            if (p.getSettings().getNegotiatedConformance()
+                    .contains(Conformance.GENERAL_BLOCK_TRANSFER)) {
                 reply.setUInt8(Command.GENERAL_BLOCK_TRANSFER);
                 multipleBlocks(p, reply, ciphering);
                 // Is last block
@@ -574,8 +587,9 @@ abstract class GXDLMS {
             }
             // Add attribute descriptor.
             reply.set(p.getAttributeDescriptor());
-            if (p.getCommand() != Command.DATA_NOTIFICATION && !p.getSettings()
-                    .getLnSettings().getGeneralBlockTransfer()) {
+            if (p.getCommand() != Command.DATA_NOTIFICATION
+                    && !p.getSettings().getNegotiatedConformance()
+                            .contains(Conformance.GENERAL_BLOCK_TRANSFER)) {
                 // If multiple blocks.
                 if (p.isMultipleBlocks()) {
                     // Is last block.
@@ -641,28 +655,195 @@ abstract class GXDLMS {
                 }
             }
             if (ciphering) {
-                byte[] tmp = p.getSettings().getCipher().encrypt(
-                        (byte) getGloMessage(p.getCommand()),
-                        p.getSettings().getCipher().getSystemTitle(),
-                        reply.array());
-                reply.size(0);
-                if (p.getSettings().getInterfaceType() == InterfaceType.HDLC) {
-                    addLLCBytes(p.getSettings(), reply);
-                }
-                if (p.getCommand() == Command.DATA_NOTIFICATION) {
-                    // Add command.
-                    reply.setUInt8(tmp[0]);
-                    // Add system title.
-                    GXCommon.setObjectCount(
-                            p.getSettings().getCipher().getSystemTitle().length,
-                            reply);
-                    reply.set(p.getSettings().getCipher().getSystemTitle());
-                    // Add data.
-                    reply.set(tmp, 1, tmp.length - 1);
+                if (p.getSettings().getCipher()
+                        .getSecuritySuite() == SecuritySuite.AES_GCM_128) {
+                    cipher0(p, reply);
                 } else {
-                    reply.set(tmp);
+                    cipher1(p, reply);
                 }
             }
+        }
+    }
+
+    /**
+     * Cipher using security suite 1 or 2.
+     * 
+     * @param p
+     *            LN settings.
+     * @param reply
+     *            Data to encrypt.
+     */
+    private static void cipher1(final GXDLMSLNParameters p,
+            final GXByteBuffer reply) {
+        byte keyid = 0;
+        if (p.getSettings().getTargetEphemeralKey() != null) {
+            keyid = 1;
+        } else if (p.getSettings().getCipher()
+                .getKeyAgreementKeyPair() != null) {
+            keyid = 2;
+        }
+        // If connection is not establish yet.
+        if (keyid == 0) {
+            return;
+        }
+        byte[] tmp;
+        byte sc = 0;
+        GXICipher c = p.getSettings().getCipher();
+        if (c.getRecipientSystemTitle() == null) {
+            throw new IllegalArgumentException(
+                    "Invalid Recipient System Title.");
+        }
+        if (c.getSystemTitle() == null) {
+            throw new IllegalArgumentException("Invalid System Title.");
+        }
+
+        Security security = c.getSecurity();
+        switch (security) {
+        case AUTHENTICATION:
+            sc = 0x10;
+            break;
+        case AUTHENTICATION_ENCRYPTION:
+            sc = 0x30;
+            break;
+        case ENCRYPTION:
+            sc = 0x20;
+            break;
+        default:
+            throw new IllegalArgumentException("Invalid security.");
+        }
+        String alg, algID;
+        int keyDataLen;
+        switch (c.getSecuritySuite()) {
+        case ECDH_ECDSA_AES_GCM_128_SHA_256:
+            sc |= 1;
+            alg = "SHA-256";
+            // AES-GCM-128
+            algID = "60857405080300";
+            keyDataLen = 256;
+            break;
+        case ECDHE_CDSA_AES_GCM_256_SHA_384:
+            sc |= 2;
+            alg = "SHA-384";
+            // AES-GCM-256
+            algID = "60857405080301";
+            keyDataLen = 384;
+            break;
+        default:
+            throw new IllegalArgumentException("Invalid security suite.");
+        }
+        GXByteBuffer tmp2 = new GXByteBuffer();
+        GXByteBuffer transactionId = new GXByteBuffer();
+        transactionId.setUInt64(c.getInvocationCounter());
+        byte[] z = p.getSettings().getCipher().getSharedSecret();
+        if (z == null) {
+            if (keyid == 1) {
+                z = GXCommon.getSharedSecret(c,
+                        CertificateType.DIGITAL_SIGNATURE);
+            } else {
+                z = GXCommon.getSharedSecret(c, CertificateType.KEY_AGREEMENT);
+                tmp2.setUInt8(0x8);
+                tmp2.set(transactionId.getData(), 0, 8);
+            }
+        }
+        tmp2.set(c.getRecipientSystemTitle());
+        tmp = reply.array();
+        reply.clear();
+        byte[] kdf = GXASymmetric.generateKDF(alg, z, keyDataLen,
+                GXCommon.hexToBytes(algID), c.getSystemTitle(), tmp2.array(),
+                null, null, c.getSecuritySuite());
+        System.out.println("kdf: " + GXCommon.toHex(kdf));
+        AesGcmParameter s = new AesGcmParameter(0xDD, security,
+                c.getSecuritySuite(), c.getInvocationCounter(),
+                // KDF
+                kdf,
+                // Authentication key.
+                c.getAuthenticationKey(),
+                // Originator system title.
+                c.getSystemTitle(),
+                // recipient system title.
+                c.getRecipientSystemTitle(),
+                // Date time
+                null,
+                // Other information.
+                null);
+
+        reply.setUInt8(Command.GENERAL_CIPHERING);
+        GXCommon.setObjectCount(transactionId.size(), reply);
+        reply.set(transactionId);
+        GXCommon.setObjectCount(s.getSystemTitle().length, reply);
+        reply.set(s.getSystemTitle());
+        GXCommon.setObjectCount(s.getRecipientSystemTitle().length, reply);
+        reply.set(s.getRecipientSystemTitle());
+        // date-time not present.
+        reply.setUInt8(0);
+        // other-information not present
+        reply.setUInt8(0);
+        // optional flag
+        reply.setUInt8(1);
+        // agreed-key CHOICE
+        reply.setUInt8(2);
+        // key-parameters
+        reply.setUInt8(1);
+        reply.setUInt8(keyid);
+        if (keyid == 1) {
+            try {
+                // key-ciphered-data
+                GXCommon.setObjectCount(0x80, reply);
+                // Ephemeral public key client.
+                reply.set(GXAsn1Converter
+                        .toUIn64(c.getEphemeralKeyPair().getPublic()));
+
+                // Ephemeral Public Key Signature.
+                reply.set(GXASymmetric.getEphemeralPublicKeySignature(keyid,
+                        c.getEphemeralKeyPair().getPublic(), p.getSettings()
+                                .getCipher().getSigningKeyPair().getPrivate()));
+            } catch (Exception e) {
+                throw new RuntimeException(e.getMessage());
+            }
+        } else {
+            reply.setUInt8(0);
+        }
+        // ciphered-content
+        s.setType(CountType.DATA | CountType.TAG);
+        tmp = GXCiphering.encrypt(s, tmp);
+        // Len
+        GXCommon.setObjectCount(5 + tmp.length, reply);
+        // Add SC
+        reply.setUInt8(sc);
+        // Add IC.
+        reply.setUInt32(0);
+        reply.set(tmp);
+    }
+
+    /**
+     * Cipher using security suite 0.
+     * 
+     * @param p
+     *            LN settings.
+     * @param reply
+     *            Data to encrypt.
+     */
+    private static void cipher0(final GXDLMSLNParameters p,
+            final GXByteBuffer reply) {
+        byte[] tmp;
+        tmp = p.getSettings().getCipher().encrypt(
+                (byte) getGloMessage(p.getCommand()),
+                p.getSettings().getCipher().getSystemTitle(), reply.array());
+        reply.size(0);
+        if (p.getSettings().getInterfaceType() == InterfaceType.HDLC) {
+            addLLCBytes(p.getSettings(), reply);
+        }
+        if (p.getCommand() == Command.DATA_NOTIFICATION) {
+            // Add command.
+            reply.setUInt8(tmp[0]);
+            // Add system title.
+            GXCommon.setObjectCount(
+                    p.getSettings().getCipher().getSystemTitle().length, reply);
+            reply.set(p.getSettings().getCipher().getSystemTitle());
+            // Add data.
+            reply.set(tmp, 1, tmp.length - 1);
+        } else {
+            reply.set(tmp);
         }
     }
 
@@ -694,10 +875,18 @@ abstract class GXDLMS {
                 if (p.getSettings()
                         .getInterfaceType() == InterfaceType.WRAPPER) {
                     messages.add(getWrapperFrame(p.getSettings(), reply));
-                } else {
+                } else if (p.getSettings()
+                        .getInterfaceType() == InterfaceType.HDLC) {
                     messages.add(
                             GXDLMS.getHdlcFrame(p.getSettings(), frame, reply));
                     frame = 0;
+                } else if (p.getSettings()
+                        .getInterfaceType() == InterfaceType.PDU) {
+                    messages.add(reply.array());
+                    frame = 0;
+                    break;
+                } else {
+                    throw new IllegalArgumentException("InterfaceType");
                 }
             }
             reply.clear();
@@ -734,15 +923,24 @@ abstract class GXDLMS {
                 if (p.getSettings()
                         .getInterfaceType() == InterfaceType.WRAPPER) {
                     messages.add(getWrapperFrame(p.getSettings(), reply));
-                } else {
+                } else if (p.getSettings()
+                        .getInterfaceType() == InterfaceType.HDLC) {
                     messages.add(getHdlcFrame(p.getSettings(), frame, reply));
                     frame = 0;
+                } else if (p.getSettings()
+                        .getInterfaceType() == InterfaceType.PDU) {
+                    messages.add(reply.array());
+                    frame = 0;
+                    break;
+                } else {
+                    throw new IllegalArgumentException("InterfaceType");
                 }
             }
             reply.clear();
         } while (p.getData() != null
                 && p.getData().position() != p.getData().size());
         return messages;
+
     }
 
     private static int appendMultipleSNBlocks(final GXDLMSSNParameters p,
@@ -801,7 +999,8 @@ abstract class GXDLMS {
             final GXByteBuffer reply) {
         boolean ciphering = p.getSettings().getCipher() != null
                 && p.getSettings().getCipher().getSecurity() != Security.NONE;
-        if (!ciphering
+        if ((!ciphering || p.getCommand() == Command.AARQ
+                || p.getCommand() == Command.AARE)
                 && p.getSettings().getInterfaceType() == InterfaceType.HDLC) {
             if (p.getSettings().isServer()) {
                 reply.set(GXCommon.LLC_REPLY_BYTES);
@@ -1181,6 +1380,9 @@ abstract class GXDLMS {
             if (reply.position() == packetStartID + frameLen + 1) {
                 // Get EOP.
                 reply.getUInt8();
+            }
+            if (frame == 0x97) {
+                data.setError((short) ErrorCode.UNACCEPTABLE_FRAME.getValue());
             }
             data.setCommand(frame);
         } else if ((frame
@@ -1796,10 +1998,9 @@ abstract class GXDLMS {
 
     private static void handleAccessResponse(final GXDLMSSettings settings,
             final GXReplyData reply) {
-        int start = reply.getData().position() - 1;
         // Get invoke id.
         long invokeId = reply.getData().getUInt32();
-        reply.setTime(new Date(0));
+        reply.setTime(new GXDateTime());
         int len = reply.getData().getUInt8();
         byte[] tmp = null;
         // If date time is given.
@@ -1807,12 +2008,15 @@ abstract class GXDLMS {
             tmp = new byte[len];
             reply.getData().get(tmp);
             reply.setTime(((GXDateTime) GXDLMSClient.changeType(tmp,
-                    DataType.DATETIME)).getValue());
+                    DataType.DATETIME)));
         }
         if (reply.getXml() != null) {
             reply.getXml().appendStartTag(Command.ACCESS_RESPONSE);
             reply.getXml().appendLine(TranslatorTags.LONG_INVOKE_ID, null,
                     reply.getXml().integerToHex(invokeId, 8));
+            if (reply.getTime() != null) {
+                reply.getXml().appendComment(reply.getTime().toString());
+            }
             reply.getXml().appendLine(TranslatorTags.DATE_TIME, "Value",
                     GXCommon.toHex(tmp, false));
 
@@ -1872,16 +2076,6 @@ abstract class GXDLMS {
         } else {
             // Skip access-request-specification
             reply.getData().getUInt8();
-            // Get count
-            int cnt = GXCommon.getObjectCount(reply.getData());
-            List<Object> list = new ArrayList<Object>(cnt);
-            for (int pos = 0; pos != cnt; ++pos) {
-                getDataFromBlock(reply.getData(), start);
-                getValueFromData(settings, reply);
-                list.add(reply.getValue());
-                reply.setValue(null);
-            }
-            reply.setValue(list.toArray(new Object[list.size()]));
         }
     }
 
@@ -1906,23 +2100,24 @@ abstract class GXDLMS {
         if (len != 0) {
             tmp = new byte[len];
             reply.getData().get(tmp);
-            if (reply.getXml() == null) {
-                DataType dt = DataType.DATETIME;
-                if (len == 4) {
-                    dt = DataType.TIME;
-                } else if (len == 5) {
-                    dt = DataType.DATE;
-                }
-                GXDataInfo info = new GXDataInfo();
-                info.setType(dt);
-                Object ret = GXCommon.getData(new GXByteBuffer(tmp), info);
-                reply.setTime(((GXDateTime) ret).getValue());
+            DataType dt = DataType.DATETIME;
+            if (len == 4) {
+                dt = DataType.TIME;
+            } else if (len == 5) {
+                dt = DataType.DATE;
             }
+            GXDataInfo info = new GXDataInfo();
+            info.setType(dt);
+            Object ret = GXCommon.getData(new GXByteBuffer(tmp), info);
+            reply.setTime(((GXDateTime) ret));
         }
         if (reply.getXml() != null) {
             reply.getXml().appendStartTag(Command.DATA_NOTIFICATION);
             reply.getXml().appendLine(TranslatorTags.LONG_INVOKE_ID, null,
                     reply.getXml().integerToHex(invokeId, 8));
+            if (reply.getTime() != null) {
+                reply.getXml().appendComment(String.valueOf(reply.getTime()));
+            }
             reply.getXml().appendLine(TranslatorTags.DATE_TIME, null,
                     GXCommon.toHex(tmp, false));
             reply.getXml().appendStartTag(TranslatorTags.NOTIFICATION_BODY);
@@ -2316,8 +2511,10 @@ abstract class GXDLMS {
                 break;
             case Command.CONFIRMED_SERVICE_ERROR:
                 handleConfirmedServiceError(data);
+                break;
             case Command.EXCEPTION_RESPONSE:
                 handleExceptionResponse(data);
+                break;
             case Command.GET_REQUEST:
             case Command.READ_REQUEST:
             case Command.WRITE_REQUEST:
@@ -2343,12 +2540,15 @@ abstract class GXDLMS {
             case Command.GLO_GET_RESPONSE:
             case Command.GLO_SET_RESPONSE:
             case Command.GLO_METHOD_RESPONSE:
-            case Command.GLO_GENERAL_CIPHERING:
+            case Command.GENERAL_GLO_CIPHERING:
             case Command.GLO_EVENT_NOTIFICATION_REQUEST:
                 handleGloResponse(settings, data, index);
                 break;
             case Command.DATA_NOTIFICATION:
                 handleDataNotification(settings, data);
+                break;
+            case Command.GENERAL_CIPHERING:
+                handleGeneralCiphering(settings, data);
                 break;
             default:
                 throw new IllegalArgumentException("Invalid Command.");
@@ -2507,6 +2707,24 @@ abstract class GXDLMS {
         }
     }
 
+    private static void handleGeneralCiphering(final GXDLMSSettings settings,
+            final GXReplyData data) {
+        if (settings.getCipher() == null) {
+            throw new RuntimeException("Secure connection is not supported.");
+        }
+        // If all frames are read.
+        if ((data.getMoreData().getValue()
+                & RequestTypes.FRAME.getValue()) == 0) {
+            data.getData().position(data.getData().position() - 1);
+            settings.getCipher().decrypt(null, data.getData());
+            data.setCommand(Command.NONE);
+            getPdu(settings, data);
+            if (data.getXml() != null) {
+
+            }
+        }
+    }
+
     /**
      * Get value from data.
      * 
@@ -2577,6 +2795,9 @@ abstract class GXDLMS {
             data.setFrameId(frame);
         } else if (settings.getInterfaceType() == InterfaceType.WRAPPER) {
             getTcpData(settings, reply, data);
+        } else if (settings.getInterfaceType() == InterfaceType.PDU) {
+            data.setPacketLength(reply.size());
+            data.setComplete(true);
         } else {
             throw new IllegalArgumentException("Invalid Interface type.");
         }
@@ -2590,7 +2811,8 @@ abstract class GXDLMS {
         // If keepalive or get next frame request.
         if (data.getXml() != null || (frame & 0x1) != 0) {
             if (settings.getInterfaceType() == InterfaceType.HDLC
-                    && data.getData().size() != 0) {
+                    && (data.getError() == ErrorCode.REJECTED.getValue()
+                            || data.getData().size() != 0)) {
                 reply.position(reply.position() + 3);
             }
             return true;
@@ -2607,7 +2829,6 @@ abstract class GXDLMS {
                 reply.position(0);
             }
         }
-
         return true;
     }
 

@@ -48,7 +48,6 @@ final class TranslatorTags {
     static final int DATE_TIME = 0xFF22;
     static final int REASON = 0xFF23;
     static final int VARIABLE_ACCESS_SPECIFICATION = 0xFF24;
-    static final int LIST_OF_RESULT = 0xFF25;
     static final int PDU_CSE = 0xFF26;
     static final int CHOICE = 0xFF27;
     static final int LONG_INVOKE_ID = 0xFF28;
@@ -66,5 +65,7 @@ final class TranslatorTags {
     static final int SERVICE = 0xFF40;
     static final int SERVICE_ERROR = 0xFF41;
     static final int INITIATE_ERROR = 0xFF42;
+    static final int CIPHERED_SERVICE = 0xFF43;
+    static final int SYSTEM_TITLE = 0xFF44;
 
 }

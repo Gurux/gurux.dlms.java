@@ -57,6 +57,7 @@ import gurux.dlms.GXDLMSException;
 import gurux.dlms.GXReplyData;
 import gurux.dlms.GXSimpleEntry;
 import gurux.dlms.enums.Authentication;
+import gurux.dlms.enums.Conformance;
 import gurux.dlms.enums.DataType;
 import gurux.dlms.enums.ErrorCode;
 import gurux.dlms.enums.InterfaceType;
@@ -528,24 +529,34 @@ public class GXCommunicate {
      * Read Scalers and units from the register objects.
      */
     void readScalerAndUnits(final GXDLMSObjectCollection objects,
-            final PrintWriter logFile) {
+            final PrintWriter logFile) throws Exception {
         GXDLMSObjectCollection objs = objects.getObjects(new ObjectType[] {
                 ObjectType.REGISTER, ObjectType.DEMAND_REGISTER,
                 ObjectType.EXTENDED_REGISTER });
-
         try {
-            List<Entry<GXDLMSObject, Integer>> list =
-                    new ArrayList<Entry<GXDLMSObject, Integer>>();
-            for (GXDLMSObject it : objs) {
-                if (it instanceof GXDLMSRegister) {
-                    list.add(new GXSimpleEntry<GXDLMSObject, Integer>(it, 3));
+            if (dlms.getNegotiatedConformance()
+                    .contains(Conformance.MULTIPLE_REFERENCES)) {
+                List<Entry<GXDLMSObject, Integer>> list =
+                        new ArrayList<Entry<GXDLMSObject, Integer>>();
+                for (GXDLMSObject it : objs) {
+                    if (it instanceof GXDLMSRegister) {
+                        list.add(new GXSimpleEntry<GXDLMSObject, Integer>(it,
+                                3));
+                    }
+                    if (it instanceof GXDLMSDemandRegister) {
+                        list.add(new GXSimpleEntry<GXDLMSObject, Integer>(it,
+                                4));
+                    }
                 }
-                if (it instanceof GXDLMSDemandRegister) {
-                    list.add(new GXSimpleEntry<GXDLMSObject, Integer>(it, 4));
-                }
+                readList(list);
             }
-            readList(list);
-        } catch (Exception ex) {
+        } catch (Exception e) {
+            // Some meters are set multiple references, but don't support it.
+            dlms.getNegotiatedConformance()
+                    .remove(Conformance.MULTIPLE_REFERENCES);
+        }
+        if (!dlms.getNegotiatedConformance()
+                .contains(Conformance.MULTIPLE_REFERENCES)) {
             for (GXDLMSObject it : objs) {
                 try {
                     if (it instanceof GXDLMSRegister) {

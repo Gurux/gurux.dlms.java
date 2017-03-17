@@ -34,33 +34,27 @@
 
 package gurux.dlms.secure;
 
-enum CountType {
-    TAG(0x1), DATA(0x2), PACKET(0x3);
+/**
+ * Enumerate values that are add to counted GMAC.
+ */
+public final class CountType {
+    /**
+     * Constructor.
+     */
+    private CountType() {
 
-    private int intValue;
-    private static java.util.HashMap<Integer, CountType> mappings;
-
-    private static java.util.HashMap<Integer, CountType> getMappings() {
-        if (mappings == null) {
-            synchronized (CountType.class) {
-                if (mappings == null) {
-                    mappings = new java.util.HashMap<Integer, CountType>();
-                }
-            }
-        }
-        return mappings;
     }
 
-    CountType(final int value) {
-        intValue = value;
-        getMappings().put(new Integer(value), this);
-    }
-
-    public int getValue() {
-        return intValue;
-    }
-
-    public static CountType forValue(final int value) {
-        return getMappings().get(new Integer(value));
-    }
+    /**
+     * Total packet is created.
+     */
+    public static final byte PACKET = -1;
+    /**
+     * Counted Tag is added.
+     */
+    public static final byte TAG = 0x1;
+    /**
+     * Data is added.
+     */
+    public static final byte DATA = 0x2;
 }

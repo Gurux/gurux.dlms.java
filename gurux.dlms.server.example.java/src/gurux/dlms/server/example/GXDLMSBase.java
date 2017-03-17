@@ -57,6 +57,7 @@ import gurux.dlms.enums.DataType;
 import gurux.dlms.enums.InterfaceType;
 import gurux.dlms.enums.ObjectType;
 import gurux.dlms.enums.SourceDiagnostic;
+import gurux.dlms.enums.UpdateType;
 import gurux.dlms.objects.GXDLMSActionSchedule;
 import gurux.dlms.objects.GXDLMSActivityCalendar;
 import gurux.dlms.objects.GXDLMSAssociationLogicalName;
@@ -91,14 +92,14 @@ import gurux.dlms.objects.enums.LocalPortResponseTime;
 import gurux.dlms.objects.enums.OpticalProtocolMode;
 import gurux.dlms.objects.enums.SingleActionScheduleType;
 import gurux.dlms.objects.enums.SortMethod;
-import gurux.dlms.secure.GXDLMSSecureServer;
+import gurux.dlms.secure.GXDLMSSecureServer2;
 import gurux.net.GXNet;
 import gurux.net.enums.NetworkType;
 
 /**
  * All example servers are using same objects.
  */
-public class GXDLMSBase extends GXDLMSSecureServer
+public class GXDLMSBase extends GXDLMSSecureServer2
         implements IGXMediaListener, gurux.net.IGXNetListener {
 
     boolean Trace = false;
@@ -301,11 +302,9 @@ public class GXDLMSBase extends GXDLMSSecureServer
         actionS.setExecutedScriptSelector(1);
         actionS.setType(SingleActionScheduleType.SingleActionScheduleType1);
         actionS.setExecutionTime(
-                new GXDateTime[] {
-                        new GXDateTime(java.util.Calendar
-                                .getInstance(
-                                        java.util.TimeZone.getTimeZone("UTC"))
-                                .getTime()) });
+                new GXDateTime[] { new GXDateTime(java.util.Calendar
+                        .getInstance(java.util.TimeZone.getTimeZone("UTC"))
+                        .getTime()) });
         getItems().add(actionS);
     }
 
@@ -476,7 +475,7 @@ public class GXDLMSBase extends GXDLMSSecureServer
     }
 
     @Override
-    public void read(ValueEventArgs[] args) {
+    public void onPreRead(ValueEventArgs[] args) {
         for (ValueEventArgs e : args) {
             // Framework will handle Association objects automatically.
             if (e.getTarget() instanceof GXDLMSAssociationLogicalName
@@ -493,18 +492,14 @@ public class GXDLMSBase extends GXDLMSSecureServer
                     || e.getTarget()
                             .getDataType(e.getIndex()) == DataType.DATETIME)
                     && !(e.getTarget() instanceof GXDLMSClock)) {
-                e.setValue(java.util.Calendar
-                        .getInstance(java.util.TimeZone.getTimeZone("UTC"))
-                        .getTime());
+                e.setValue(java.util.Calendar.getInstance().getTime());
                 e.setHandled(true);
             } else if (e.getTarget() instanceof GXDLMSClock) {
                 // Implement specific clock handling here.
                 // Otherwise initial values are used.
                 if (e.getIndex() == 2) {
-                    e.setValue(java.util.Calendar
-                            .getInstance(java.util.TimeZone.getTimeZone("UTC"))
-                            .getTime());
-                    e.setHandled(true);
+                    ((GXDLMSClock) e.getTarget()).setTime(
+                            java.util.Calendar.getInstance().getTime());
                 }
             } else if (e.getTarget() instanceof GXDLMSRegisterMonitor
                     && e.getIndex() == 2) {
@@ -539,7 +534,12 @@ public class GXDLMSBase extends GXDLMSSecureServer
     }
 
     @Override
-    public void write(ValueEventArgs[] args) {
+    public void onPostRead(ValueEventArgs[] args) {
+
+    }
+
+    @Override
+    public void onPreWrite(ValueEventArgs[] args) {
         for (ValueEventArgs e : args) {
             System.out.println(String.format(
                     "Client Write new value %1$s to object: %2$s.",
@@ -548,7 +548,16 @@ public class GXDLMSBase extends GXDLMSSecureServer
     }
 
     @Override
-    public void action(ValueEventArgs[] args) {
+    public void onPostWrite(ValueEventArgs[] args) {
+    }
+
+    @Override
+    public void onPreAction(ValueEventArgs[] args) {
+
+    }
+
+    @Override
+    public void onPostAction(ValueEventArgs[] args) {
 
     }
 
@@ -642,7 +651,7 @@ public class GXDLMSBase extends GXDLMSSecureServer
     }
 
     @Override
-    public final SourceDiagnostic validateAuthentication(
+    public final SourceDiagnostic onValidateAuthentication(
             final Authentication authentication, final byte[] password) {
         // Accept all passwords.
         // return SourceDiagnostic.NONE;
@@ -670,21 +679,36 @@ public class GXDLMSBase extends GXDLMSSecureServer
         return SourceDiagnostic.NONE;
     }
 
+    /**
+     * DLMS client connection succeeded.
+     */
     @Override
-    protected void connected(GXDLMSConnectionEventArgs connectionInfo) {
-        // TODO Auto-generated method stub
+    protected void onConnected(GXDLMSConnectionEventArgs connectionInfo) {
+    }
+
+    /**
+     * DLMS client connection failed.
+     */
+    @Override
+    protected void
+            onInvalidConnection(GXDLMSConnectionEventArgs connectionInfo) {
 
     }
 
+    /**
+     * DLMS client connection closed.
+     */
+
     @Override
-    protected void invalidConnection(GXDLMSConnectionEventArgs connectionInfo) {
-        // TODO Auto-generated method stub
+    protected void onDisconnected(GXDLMSConnectionEventArgs connectionInfo) {
 
     }
 
+    /**
+     * Schedule or profile generic asks current value.
+     */
     @Override
-    protected void disconnected(GXDLMSConnectionEventArgs connectionInfo) {
-        // TODO Auto-generated method stub
+    public void onGet(UpdateType type, ValueEventArgs[] e) {
 
     }
 }

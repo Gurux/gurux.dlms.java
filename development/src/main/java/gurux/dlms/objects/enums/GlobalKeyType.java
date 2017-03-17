@@ -39,7 +39,9 @@ package gurux.dlms.objects.enums;
  */
 public enum GlobalKeyType {
     /**
-     * Global unicast encryption key.
+     * Global unicast encryption key. <br>
+     * Client and server uses this message to send Ephemeral Public Key to other
+     * party.
      */
     UNICAST_ENCRYPTION,
     /**

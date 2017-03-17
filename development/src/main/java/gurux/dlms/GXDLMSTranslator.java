@@ -37,6 +37,7 @@ package gurux.dlms;
 import java.io.StringReader;
 import java.util.HashMap;
 import java.util.Map.Entry;
+import java.util.Set;
 
 import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.DocumentBuilderFactory;
@@ -50,14 +51,17 @@ import gurux.dlms.enums.AssociationResult;
 import gurux.dlms.enums.Authentication;
 import gurux.dlms.enums.BerType;
 import gurux.dlms.enums.Command;
+import gurux.dlms.enums.Conformance;
 import gurux.dlms.enums.DataType;
 import gurux.dlms.enums.ErrorCode;
 import gurux.dlms.enums.InterfaceType;
 import gurux.dlms.enums.Priority;
 import gurux.dlms.enums.RequestTypes;
+import gurux.dlms.enums.Security;
 import gurux.dlms.enums.ServiceClass;
 import gurux.dlms.enums.SourceDiagnostic;
 import gurux.dlms.internal.GXCommon;
+import gurux.dlms.secure.GXCiphering;
 
 /**
  * This class is used to translate DLMS frame or PDU to xml.
@@ -105,6 +109,35 @@ public class GXDLMSTranslator {
     private boolean omitXmlNameSpace = false;
 
     /**
+     * Add comments.
+     */
+    private boolean comments = false;
+
+    /**
+     * Used security.
+     */
+    private Security security;
+
+    /**
+     * System title.
+     */
+    private byte[] systemTitle;
+    /**
+     * Block cipher key.
+     */
+    private byte[] blockCipherKey;
+
+    /**
+     * Authentication key.
+     */
+    private byte[] authenticationKey;
+
+    /**
+     * Invocation Counter.
+     */
+    private int invocationCounter;
+
+    /**
      * Constructor.
      * 
      * @param type
@@ -128,6 +161,81 @@ public class GXDLMSTranslator {
      */
     public final void setPduOnly(final boolean value) {
         pduOnly = value;
+    }
+
+    /**
+     * @return Used security.
+     */
+    public final Security getSecurity() {
+        return security;
+    }
+
+    /**
+     * @param value
+     *            Used security.
+     */
+    public final void setSecurity(final Security value) {
+        security = value;
+    }
+
+    /**
+     * @return System title.
+     */
+    public final byte[] getSystemTitle() {
+        return systemTitle;
+    }
+
+    /**
+     * @param value
+     *            System title.
+     */
+    public final void setSystemTitle(final byte[] value) {
+        systemTitle = value;
+    }
+
+    /**
+     * @return Block cipher key.
+     */
+    public final byte[] getBlockCipherKey() {
+        return blockCipherKey;
+    }
+
+    /**
+     * @param value
+     *            Block cipher key.
+     */
+    public final void setBlockCipherKey(final byte[] value) {
+        blockCipherKey = value;
+    }
+
+    /**
+     * @return Authentication key.
+     */
+    public final byte[] getAuthenticationKey() {
+        return authenticationKey;
+    }
+
+    /**
+     * @param value
+     *            Authentication key.
+     */
+    public final void setAuthenticationKey(final byte[] value) {
+        authenticationKey = value;
+    }
+
+    /**
+     * @return Invocation Counter.
+     */
+    public final int getInvocationCounter() {
+        return invocationCounter;
+    }
+
+    /**
+     * @param value
+     *            Invocation Counter.
+     */
+    public final void setInvocationCounter(final int value) {
+        invocationCounter = value;
     }
 
     /**
@@ -185,19 +293,23 @@ public class GXDLMSTranslator {
         GXDLMSSettings settings = new GXDLMSSettings(true);
         GXReplyData reply = new GXReplyData();
         reply.setXml(new GXDLMSTranslatorStructure(outputType, hex,
-                getShowStringAsHex(), null));
+                getShowStringAsHex(), comments, tags));
         int pos;
         while (data.position() != data.size()) {
             if (data.getUInt8(data.position()) == 0x7e) {
                 pos = data.position();
                 settings.setInterfaceType(InterfaceType.HDLC);
-                GXDLMS.getData(settings, data, reply);
+                if (!GXDLMS.getData(settings, data, reply)) {
+                    ++pos;
+                }
                 data.position(pos);
                 break;
             } else if (data.getUInt16(data.position()) == 0x1) {
                 pos = data.position();
                 settings.setInterfaceType(InterfaceType.WRAPPER);
-                GXDLMS.getData(settings, data, reply);
+                if (!GXDLMS.getData(settings, data, reply)) {
+                    ++pos;
+                }
                 data.position(pos);
                 break;
             }
@@ -228,19 +340,23 @@ public class GXDLMSTranslator {
         settings.setInterfaceType(type);
         GXReplyData reply = new GXReplyData();
         reply.setXml(new GXDLMSTranslatorStructure(outputType, hex,
-                getShowStringAsHex(), null));
+                getShowStringAsHex(), comments, tags));
         int pos;
         while (data.position() != data.size()) {
             if (type == InterfaceType.HDLC
                     && data.getUInt8(data.position()) == 0x7e) {
                 pos = data.position();
-                GXDLMS.getData(settings, data, reply);
+                if (!GXDLMS.getData(settings, data, reply)) {
+                    ++pos;
+                }
                 data.position(pos);
                 break;
             } else if (type == InterfaceType.WRAPPER
                     && data.getUInt16(data.position()) == 0x1) {
                 pos = data.position();
-                GXDLMS.getData(settings, data, reply);
+                if (!GXDLMS.getData(settings, data, reply)) {
+                    ++pos;
+                }
                 data.position(pos);
                 break;
             }
@@ -330,11 +446,32 @@ public class GXDLMSTranslator {
 
         GXReplyData data = new GXReplyData();
         data.setXml(new GXDLMSTranslatorStructure(outputType, hex,
-                getShowStringAsHex(), tags));
+                getShowStringAsHex(), comments, tags));
         GXDLMSSettings settings = new GXDLMSSettings(true);
         settings.setInterfaceType(framing);
         GXDLMS.getData(settings, value, data);
         return data.getData().array();
+    }
+
+    private GXCiphering getCiphering() {
+        if (security != Security.NONE) {
+            GXCiphering c = new GXCiphering(systemTitle);
+            c.setSecurity(security);
+            c.setSystemTitle(systemTitle);
+            c.setBlockCipherKey(blockCipherKey);
+            c.setAuthenticationKey(authenticationKey);
+            c.setInvocationCounter(invocationCounter);
+            return c;
+        }
+        return null;
+    }
+
+    /**
+     * Clear {@link messageToXml} internal settings.
+     */
+    public void clear() {
+        multipleFrames = false;
+        pduFrames.clear();
     }
 
     /**
@@ -353,21 +490,23 @@ public class GXDLMSTranslator {
      * 
      * @param value
      *            Bytes to convert.
-     * @return Converted XML. {@link setPduOnly} {@link setCompleatePdu}
+     * @return Converted XML. {@link clear} {@link setPduOnly}
+     *         {@link setCompleatePdu}
      */
     public final String messageToXml(final GXByteBuffer value) {
         if (value == null || value.size() == 0) {
             throw new IllegalArgumentException("value");
         }
         try {
-            GXReplyData data = new GXReplyData();
             GXDLMSTranslatorStructure xml = new GXDLMSTranslatorStructure(
-                    outputType, hex, getShowStringAsHex(), tags);
+                    outputType, hex, getShowStringAsHex(), comments, tags);
+            GXReplyData data = new GXReplyData();
             data.setXml(xml);
             int offset = value.position();
+            GXDLMSSettings settings = new GXDLMSSettings(true);
+            settings.setCipher(getCiphering());
             // If HDLC framing.
             if (value.getUInt8(value.position()) == 0x7e) {
-                GXDLMSSettings settings = new GXDLMSSettings(true);
                 settings.setInterfaceType(InterfaceType.HDLC);
                 if (GXDLMS.getData(settings, value, data)) {
                     if (!getPduOnly()) {
@@ -399,8 +538,7 @@ public class GXDLMSTranslator {
                             xml.appendEndTag(data.getCommand());
                         }
                     } else {
-                        if (multipleFrames || (data.getMoreData().getValue()
-                                & RequestTypes.FRAME.getValue()) != 0) {
+                        if (multipleFrames || data.isMoreData()) {
                             if (getCompletePdu()) {
                                 pduFrames.set(data.getData().getData());
                             } else {
@@ -412,7 +550,9 @@ public class GXDLMSTranslator {
                                                         .getData().position())
                                         + "\" />");
                             }
-                            multipleFrames = false;
+                            if (data.getMoreData() != RequestTypes.DATABLOCK) {
+                                multipleFrames = false;
+                            }
                         } else {
                             if (!getPduOnly()) {
                                 xml.appendLine("<PDU>");
@@ -440,7 +580,6 @@ public class GXDLMSTranslator {
             }
             // If wrapper.
             if (value.getUInt16(value.position()) == 1) {
-                GXDLMSSettings settings = new GXDLMSSettings(true);
                 settings.setInterfaceType(InterfaceType.WRAPPER);
                 GXDLMS.getData(settings, value, data);
                 if (!getPduOnly()) {
@@ -476,6 +615,7 @@ public class GXDLMSTranslator {
                 return xml.toString();
             }
         } catch (RuntimeException ex) {
+            System.out.println(ex.getMessage());
         }
         throw new IllegalArgumentException("Invalid DLMS framing.");
     }
@@ -558,6 +698,21 @@ public class GXDLMSTranslator {
     }
 
     /**
+     * @return Are comments added.
+     */
+    public boolean isComments() {
+        return comments;
+    }
+
+    /**
+     * @param value
+     *            Are comments added.
+     */
+    public void setComments(final boolean value) {
+        comments = value;
+    }
+
+    /**
      * Convert bytes to XML.
      * 
      * @param value
@@ -566,18 +721,31 @@ public class GXDLMSTranslator {
      */
     private String pduToXml(final GXByteBuffer value,
             final boolean omitDeclaration, final boolean omitNameSpace) {
+        GXDLMSTranslatorStructure xml = new GXDLMSTranslatorStructure(
+                outputType, hex, getShowStringAsHex(), comments, tags);
+        return pduToXml(xml, value, omitDeclaration, omitNameSpace);
+    }
+
+    /**
+     * Convert bytes to XML.
+     * 
+     * @param value
+     *            Bytes to convert.
+     * @return Converted XML.
+     */
+    private String pduToXml(final GXDLMSTranslatorStructure xml,
+            final GXByteBuffer value, final boolean omitDeclaration,
+            final boolean omitNameSpace) {
         if (value == null || value.size() == 0) {
             throw new IllegalArgumentException("value");
         }
-        GXDLMSTranslatorStructure xml = new GXDLMSTranslatorStructure(
-                outputType, hex, getShowStringAsHex(), tags);
         GXDLMSSettings settings = new GXDLMSSettings(true);
+        settings.setCipher(getCiphering());
         GXReplyData data = new GXReplyData();
         short cmd = value.getUInt8();
         switch (cmd) {
         case Command.AARQ:
             value.position(0);
-            settings = new GXDLMSSettings(true);
             GXAPDU.parsePDU(settings, settings.getCipher(), value, xml);
             break;
         case Command.INITIATE_REQUEST:
@@ -589,6 +757,7 @@ public class GXDLMSTranslator {
         case Command.INITIATE_RESPONSE:
             value.position(0);
             settings = new GXDLMSSettings(false);
+            settings.setCipher(getCiphering());
             GXAPDU.parseInitiate(true, settings, settings.getCipher(), value,
                     xml);
             break;
@@ -599,6 +768,7 @@ public class GXDLMSTranslator {
         case Command.AARE:
             value.position(0);
             settings = new GXDLMSSettings(false);
+            settings.setCipher(getCiphering());
             GXAPDU.parsePDU(settings, settings.getCipher(), value, xml);
             break;
         case Command.GET_REQUEST:
@@ -642,6 +812,13 @@ public class GXDLMSTranslator {
             value.position(0);
             GXDLMS.getPdu(settings, data);
             break;
+        case Command.GENERAL_CIPHERING:
+            settings.setCipher(new GXCiphering("ABCDEFGH".getBytes()));
+            data.setXml(xml);
+            data.setData(value);
+            value.position(0);
+            GXDLMS.getPdu(settings, data);
+            break;
         case Command.RELEASE_REQUEST:
         case Command.RELEASE_RESPONSE:
             xml.appendStartTag(cmd);
@@ -667,12 +844,37 @@ public class GXDLMSTranslator {
         case Command.GLO_SET_RESPONSE:
         case Command.GLO_METHOD_REQUEST:
         case Command.GLO_METHOD_RESPONSE:
+
+            if (settings.getCipher() != null && comments) {
+                GXByteBuffer tmp = new GXByteBuffer();
+                tmp.set(value.getData(), value.position() - 1,
+                        value.size() - value.position() + 1);
+                settings.getCipher()
+                        .decrypt(settings.getCipher().getSystemTitle(), tmp);
+                xml.startComment("Decrypt data:");
+                pduToXml(xml, tmp, omitDeclaration, omitNameSpace);
+                xml.endComment();
+            }
             int cnt = GXCommon.getObjectCount(value);
             if (cnt != value.size() - value.position()) {
                 throw new IllegalArgumentException();
             }
             xml.appendLine(cmd, "Value", GXCommon.toHex(value.getData(), false,
                     value.position(), value.size() - value.position()));
+            break;
+        case Command.GENERAL_GLO_CIPHERING:
+            int len = GXCommon.getObjectCount(value);
+            byte[] tmp = new byte[len];
+            value.get(tmp);
+            xml.appendStartTag(Command.GENERAL_GLO_CIPHERING);
+            xml.appendLine(TranslatorTags.SYSTEM_TITLE, null,
+                    GXCommon.toHex(tmp, false, 0, len));
+            len = GXCommon.getObjectCount(value);
+            tmp = new byte[len];
+            value.get(tmp);
+            xml.appendLine(TranslatorTags.CIPHERED_SERVICE, null,
+                    GXCommon.toHex(tmp, false, 0, len));
+            xml.appendEndTag(Command.GENERAL_GLO_CIPHERING);
             break;
         case Command.CONFIRMED_SERVICE_ERROR:
             data.setXml(xml);
@@ -774,12 +976,14 @@ public class GXDLMSTranslator {
         case Command.GLO_READ_RESPONSE:
         case Command.GLO_WRITE_RESPONSE:
         case Command.GLO_EVENT_NOTIFICATION_REQUEST:
-        case Command.GLO_GENERAL_CIPHERING:
             s.setCommand(tag);
             tmp = GXCommon.hexToBytes(getValue(node, s));
             s.getSettings().getCipher()
                     .setSecurity(gurux.dlms.enums.Security.forValue(tmp[0]));
             s.getData().set(tmp);
+            break;
+        case Command.GENERAL_GLO_CIPHERING:
+            s.setCommand(tag);
             break;
         default:
             throw new IllegalArgumentException(
@@ -828,62 +1032,6 @@ public class GXDLMSTranslator {
         return cnt;
     }
 
-    private static int valueOfConformance(final String value) {
-        int ret;
-        if ("access".equalsIgnoreCase(value)) {
-            ret = Conformance.ACCESS;
-        } else if ("action".equalsIgnoreCase(value)) {
-            ret = Conformance.ACTION;
-        } else if ("attribute0-supported-with-get".equalsIgnoreCase(value)) {
-            ret = Conformance.ATTRIBUTE_0_SUPPORTED_WITH_GET;
-        } else if ("attribute0-supported-with-set".equalsIgnoreCase(value)) {
-            ret = Conformance.ATTRIBUTE_0_SUPPORTED_WITH_SET;
-        } else if ("block-transfer-with-action".equalsIgnoreCase(value)) {
-            ret = Conformance.BLOCK_TRANSFER_WITH_ACTION;
-        } else if ("block-transfer-with-get-or-read".equalsIgnoreCase(value)) {
-            ret = Conformance.BLOCK_TRANSFER_WITH_GET_OR_READ;
-        } else if ("block-transfer-with-set-or-write".equalsIgnoreCase(value)) {
-            ret = Conformance.BLOCK_TRANSFER_WITH_SET_OR_WRITE;
-        } else if ("data-notification".equalsIgnoreCase(value)) {
-            ret = Conformance.DATA_NOTIFICATION;
-        } else if ("event-notification".equalsIgnoreCase(value)) {
-            ret = Conformance.EVENT_NOTIFICATION;
-        } else if ("general-block-transfer".equalsIgnoreCase(value)) {
-            ret = Conformance.GENERAL_BLOCK_TRANSFER;
-        } else if ("general-protection".equalsIgnoreCase(value)) {
-            ret = Conformance.GENERAL_PROTECTION;
-        } else if ("get".equalsIgnoreCase(value)) {
-            ret = Conformance.GET;
-        } else if ("information-report".equalsIgnoreCase(value)) {
-            ret = Conformance.INFORMATION_REPORT;
-        } else if ("multiple-references".equalsIgnoreCase(value)) {
-            ret = Conformance.MULTIPLE_REFERENCES;
-        } else if ("parameterized-access".equalsIgnoreCase(value)) {
-            ret = Conformance.PARAMETERIZED_ACCESS;
-        } else if ("priority-mgmt-supported".equalsIgnoreCase(value)) {
-            ret = Conformance.PRIORITY_MGMT_SUPPORTED;
-        } else if ("read".equalsIgnoreCase(value)) {
-            ret = Conformance.READ;
-        } else if ("reserved-seven".equalsIgnoreCase(value)) {
-            ret = Conformance.RESERVED_SEVEN;
-        } else if ("reserved-six".equalsIgnoreCase(value)) {
-            ret = Conformance.RESERVED_SIX;
-        } else if ("reserved-zero".equalsIgnoreCase(value)) {
-            ret = Conformance.RESERVED_ZERO;
-        } else if ("selective-access".equalsIgnoreCase(value)) {
-            ret = Conformance.SELECTIVE_ACCESS;
-        } else if ("set".equalsIgnoreCase(value)) {
-            ret = Conformance.SET;
-        } else if ("unconfirmed-write".equalsIgnoreCase(value)) {
-            ret = Conformance.UN_CONFIRMED_WRITE;
-        } else if ("write".equalsIgnoreCase(value)) {
-            ret = Conformance.WRITE;
-        } else {
-            throw new IllegalArgumentException(value);
-        }
-        return ret;
-    }
-
     /**
      * Handle AARE and AARQ XML tags.
      * 
@@ -897,6 +1045,7 @@ public class GXDLMSTranslator {
     private static void handleAarqAare(final Node node,
             final GXDLMSXmlSettings s, final int tag) {
         byte[] tmp;
+        Set<Conformance> list;
         int value;
         switch (tag) {
         case TranslatorGeneralTags.APPLICATION_CONTEXT_NAME:
@@ -961,15 +1110,6 @@ public class GXDLMSTranslator {
                 bb.set(tmp);
                 GXAPDU.parseInitiate(false, s.getSettings(),
                         s.getSettings().getCipher(), bb, null);
-                if (s.getCommand() == Command.AARQ) {
-                    if (s.getSettings().getUseLogicalNameReferencing()) {
-                        s.getSettings().getLnSettings().setConformanceBlock(
-                                s.getSettings().getConformanceBlock());
-                    } else {
-                        s.getSettings().getSnSettings().setConformanceBlock(
-                                s.getSettings().getConformanceBlock());
-                    }
-                }
             }
             break;
         case 0xBE00:
@@ -1022,54 +1162,32 @@ public class GXDLMSTranslator {
         case 0xBE03:
         case 0xBE05:
             // ProposedConformance or NegotiatedConformance
-            if (s.getSettings().getUseLogicalNameReferencing()) {
-                s.getSettings().getLnSettings().clear();
+            if (s.getSettings().isServer()) {
+                list = s.getSettings().getNegotiatedConformance();
             } else {
-                s.getSettings().getSnSettings().clear();
+                list = s.getSettings().getProposedConformance();
             }
+            list.clear();
             if (s.getOutputType() == TranslatorOutputType.STANDARD_XML) {
                 String nodes = node.getFirstChild().getNodeValue();
-                byte[] conformanceBlock;
-                if (s.getSettings().getUseLogicalNameReferencing()) {
-                    conformanceBlock = s.getSettings().getLnSettings()
-                            .getConformanceBlock();
-                } else {
-                    conformanceBlock = s.getSettings().getSnSettings()
-                            .getConformanceBlock();
-                }
                 for (String it : nodes.split(" ")) {
                     if (!it.trim().isEmpty()) {
-                        value = valueOfConformance(it.trim());
-                        if (value < 0x100) {
-                            conformanceBlock[2] |= value;
-                        } else if (value < 0x10000) {
-                            conformanceBlock[1] |= (value >> 8);
-                        } else {
-                            conformanceBlock[0] |= (value >> 16);
-                        }
+                        list.add(TranslatorStandardTags
+                                .valueOfConformance(it.trim()));
                     }
                 }
             }
             break;
         case 0xBE08:
             // ConformanceBit.
-            value = Conformance.valueOf(
-                    node.getAttributes().getNamedItem("Name").getNodeValue());
-            byte[] conformanceBlock;
-            if (s.getSettings().getUseLogicalNameReferencing()) {
-                conformanceBlock =
-                        s.getSettings().getLnSettings().getConformanceBlock();
+            // ProposedConformance or NegotiatedConformance
+            if (s.getSettings().isServer()) {
+                list = s.getSettings().getNegotiatedConformance();
             } else {
-                conformanceBlock =
-                        s.getSettings().getSnSettings().getConformanceBlock();
+                list = s.getSettings().getProposedConformance();
             }
-            if (value < 0x100) {
-                conformanceBlock[2] |= value;
-            } else if (value < 0x10000) {
-                conformanceBlock[1] |= (value >> 8);
-            } else {
-                conformanceBlock[0] |= (value >> 16);
-            }
+            list.add(TranslatorSimpleTags.valueOfConformance(
+                    node.getAttributes().getNamedItem("Name").getNodeValue()));
             break;
         case 0xA2:
             // AssociationResult
@@ -1117,6 +1235,10 @@ public class GXDLMSTranslator {
         case TranslatorTags.RESULT:
             s.setResult(AssociationResult
                     .forValue(Integer.parseInt(getValue(node, s))));
+            break;
+        case Command.CONFIRMED_SERVICE_ERROR:
+            s.getSettings().setServer(false);
+            s.setCommand(tag);
             break;
         default:
             throw new IllegalArgumentException(
@@ -1218,8 +1340,7 @@ public class GXDLMSTranslator {
                             .getError(se, getValue(node, s)));
                 }
             } else {
-                if (tag == TranslatorTags.SERVICE_ERROR) {
-                } else {
+                if (tag != TranslatorTags.SERVICE_ERROR) {
                     if (s.getAttributeDescriptor().size() == 0) {
                         s.getAttributeDescriptor()
                                 .setUInt8(s.parseShort(getValue(node, s)));
@@ -1348,7 +1469,6 @@ public class GXDLMSTranslator {
                 s.getSettings().setInvokeID((int) (value & 0xF));
                 break;
             case TranslatorTags.LONG_INVOKE_ID:
-                // Long InvokeIdAndPriority.
                 value = s.parseLong(getValue(node, s));
                 if ((value & 0x80000000) != 0) {
                     s.getSettings().setPriority(Priority.HIGH);
@@ -1461,7 +1581,6 @@ public class GXDLMSTranslator {
             case TranslatorTags.VALUE:
                 break;
             case TranslatorTags.SERVICE:
-                // Mikko
                 if (s.getAttributeDescriptor().size() == 0) {
                     s.getAttributeDescriptor()
                             .setUInt8(s.parseShort(getValue(node, s)));
@@ -1558,6 +1677,14 @@ public class GXDLMSTranslator {
                 s.getData().setUInt8(getNodeCount(node));
                 break;
             case TranslatorTags.SINGLE_RESPONSE:
+                break;
+            case TranslatorTags.SYSTEM_TITLE:
+                tmp = GXCommon.hexToBytes(getValue(node, s));
+                s.getSettings().setSourceSystemTitle(tmp);
+                break;
+            case TranslatorTags.CIPHERED_SERVICE:
+                tmp = GXCommon.hexToBytes(getValue(node, s));
+                s.getData().set(tmp);
                 break;
             default:
                 throw new IllegalArgumentException(
@@ -1756,6 +1883,8 @@ public class GXDLMSTranslator {
      * 
      * @param xml
      *            Converted XML.
+     * @param addSpace
+     *            Add spaces between bytes.
      * @return Converted PDU in hex string.
      */
     public final String xmlToHexPdu(final String xml, final boolean addSpace) {
@@ -1829,7 +1958,7 @@ public class GXDLMSTranslator {
             GXCommon.setObjectCount(s.getData().size(), bb);
             bb.set(s.getData());
             break;
-        case Command.REJECTED:
+        case Command.UNACCEPTABLE_FRAME:
             break;
         case Command.SNRM:
             s.getSettings().setServer(false);
@@ -1892,7 +2021,13 @@ public class GXDLMSTranslator {
             ln.setTime(s.getTime());
             GXDLMS.getLNPdu(ln, bb);
             break;
-        case Command.GLO_GENERAL_CIPHERING:
+        case Command.GENERAL_GLO_CIPHERING:
+            bb.setUInt8(s.getCommand());
+            GXCommon.setObjectCount(
+                    s.getSettings().getSourceSystemTitle().length, bb);
+            bb.set(s.getSettings().getSourceSystemTitle());
+            GXCommon.setObjectCount(s.getData().size(), bb);
+            bb.set(s.getData());
             break;
         case Command.GLO_EVENT_NOTIFICATION_REQUEST:
             break;

@@ -34,27 +34,29 @@
 
 package gurux.dlms.objects;
 
+import java.security.InvalidKeyException;
 import java.security.KeyPair;
-import java.security.KeyPairGenerator;
 import java.security.NoSuchAlgorithmException;
-import java.security.cert.CertificateEncodingException;
-import java.security.cert.X509Certificate;
+import java.security.PublicKey;
+import java.security.SignatureException;
 import java.util.ArrayList;
-import java.util.Hashtable;
+import java.util.Arrays;
 import java.util.List;
 import java.util.Set;
 
-// TODO: This is removed for now because all JVMs are not supporting this.
-//import javax.security.auth.x500.X500Principal;
+import javax.crypto.KeyAgreement;
 
 import gurux.dlms.GXByteBuffer;
 import gurux.dlms.GXDLMSClient;
 import gurux.dlms.GXDLMSSettings;
 import gurux.dlms.GXSimpleEntry;
 import gurux.dlms.ValueEventArgs;
+import gurux.dlms.asn.GXAsn1BitString;
+import gurux.dlms.asn.GXAsn1Converter;
+import gurux.dlms.asn.GXAsn1Sequence;
 import gurux.dlms.asn.GXPkcs10;
 import gurux.dlms.asn.GXx509Certificate;
-import gurux.dlms.asn.enums.HashAlgorithm;
+import gurux.dlms.asn.enums.KeyUsage;
 import gurux.dlms.enums.DataType;
 import gurux.dlms.enums.ErrorCode;
 import gurux.dlms.enums.ObjectType;
@@ -66,14 +68,10 @@ import gurux.dlms.objects.enums.GlobalKeyType;
 import gurux.dlms.objects.enums.SecurityPolicy;
 import gurux.dlms.objects.enums.SecurityPolicy1;
 import gurux.dlms.objects.enums.SecuritySuite;
+import gurux.dlms.secure.GXASymmetric;
 import gurux.dlms.secure.GXDLMSSecureClient;
 
 public class GXDLMSSecuritySetup extends GXDLMSObject implements IGXDLMSBase {
-    /**
-     * Asymmetric key pair as required by the security suite.
-     */
-    private Hashtable<CertificateType, KeyPair> keys =
-            new Hashtable<CertificateType, KeyPair>();
     /**
      * Security policy.
      */
@@ -304,6 +302,7 @@ public class GXDLMSSecuritySetup extends GXDLMSObject implements IGXDLMSBase {
         if (list == null || list.size() == 0) {
             throw new IllegalArgumentException("Invalid list. It is empty.");
         }
+
         GXByteBuffer bb = new GXByteBuffer();
         bb.setUInt8(DataType.ARRAY.getValue());
         bb.setUInt8((byte) list.size());
@@ -314,6 +313,46 @@ public class GXDLMSSecuritySetup extends GXDLMSObject implements IGXDLMSBase {
             GXCommon.setData(bb, DataType.OCTET_STRING, it.getValue());
         }
         return client.method(this, 3, bb.array(), DataType.ARRAY);
+    }
+
+    /**
+     * Agree on one or more symmetric keys using the key agreement algorithm.
+     * 
+     * @param client
+     *            DLMS client that is used to generate action.
+     * @param type
+     *            Global key type.
+     * @return Generated action.
+     * @throws NoSuchAlgorithmException
+     *             No such algorithm exception.
+     * @throws InvalidKeyException
+     *             Invalid key.
+     * @throws SignatureException
+     *             Invalid signature.
+     */
+    public final byte[][] keyAgreement(final GXDLMSSecureClient client,
+            final GlobalKeyType type) throws NoSuchAlgorithmException,
+            InvalidKeyException, SignatureException {
+        GXByteBuffer bb = new GXByteBuffer();
+        byte[] data = getEphemeralPublicKeyData(type.ordinal(),
+                client.getCiphering().getEphemeralKeyPair().getPublic());
+        bb.set(data, 1, 64);
+        System.out.println("Signin public key: " + client.getCiphering()
+                .getSigningKeyPair().getPublic().toString());
+
+        // Add signature.
+        byte[] sign =
+                GXASymmetric.getEphemeralPublicKeySignature(type.ordinal(),
+                        client.getCiphering().getEphemeralKeyPair().getPublic(),
+                        client.getCiphering().getSigningKeyPair().getPrivate());
+        bb.set(sign);
+        System.out.println("Data: " + GXCommon.toHex(data));
+        System.out.println("Sign: " + GXCommon.toHex(sign));
+
+        List<GXSimpleEntry<GlobalKeyType, byte[]>> list =
+                new ArrayList<GXSimpleEntry<GlobalKeyType, byte[]>>();
+        list.add(new GXSimpleEntry<GlobalKeyType, byte[]>(type, bb.array()));
+        return keyAgreement(client, list);
     }
 
     /**
@@ -355,12 +394,8 @@ public class GXDLMSSecuritySetup extends GXDLMSObject implements IGXDLMSBase {
      * @return Generated action.
      */
     public final byte[][] importCertificate(final GXDLMSClient client,
-            final X509Certificate certificate) {
-        try {
-            return importCertificate(client, certificate.getEncoded());
-        } catch (CertificateEncodingException e) {
-            throw new RuntimeException(e.getMessage());
-        }
+            final GXx509Certificate certificate) {
+        return importCertificate(client, certificate.getEncoded());
     }
 
     /**
@@ -394,9 +429,12 @@ public class GXDLMSSecuritySetup extends GXDLMSObject implements IGXDLMSBase {
      *            System title.
      * @return Generated action.
      */
-    public final byte[][] exportCertificateByEntity(final GXDLMSClient client,
-            final CertificateEntity entity, final CertificateType type,
-            final byte[] systemTitle) {
+    public final byte[][] exportCertificateByEntity(
+            final GXDLMSSecureClient client, final CertificateEntity entity,
+            final CertificateType type, final byte[] systemTitle) {
+        if (systemTitle == null || systemTitle.length == 0) {
+            throw new IllegalArgumentException("Invalid system title.");
+        }
         GXByteBuffer bb = new GXByteBuffer();
         bb.setUInt8(DataType.STRUCTURE.getValue());
         bb.setUInt8(2);
@@ -428,8 +466,9 @@ public class GXDLMSSecuritySetup extends GXDLMSObject implements IGXDLMSBase {
      *            Issuer
      * @return Generated action.
      */
-    public final byte[][] exportCertificateBySerial(final GXDLMSClient client,
-            final String serialNumber, final String issuer) {
+    public final byte[][] exportCertificateBySerial(
+            final GXDLMSSecureClient client, final String serialNumber,
+            final String issuer) {
         GXByteBuffer bb = new GXByteBuffer();
         bb.setUInt8(DataType.STRUCTURE.getValue());
         bb.setUInt8(2);
@@ -459,9 +498,9 @@ public class GXDLMSSecuritySetup extends GXDLMSObject implements IGXDLMSBase {
      *            System title.
      * @return Generated action.
      */
-    public final byte[][] removeCertificateByEntity(final GXDLMSClient client,
-            final CertificateEntity entity, final CertificateType type,
-            final byte[] systemTitle) {
+    public final byte[][] removeCertificateByEntity(
+            final GXDLMSSecureClient client, final CertificateEntity entity,
+            final CertificateType type, final byte[] systemTitle) {
         GXByteBuffer bb = new GXByteBuffer();
         bb.setUInt8(DataType.STRUCTURE.getValue());
         bb.setUInt8(2);
@@ -493,8 +532,9 @@ public class GXDLMSSecuritySetup extends GXDLMSObject implements IGXDLMSBase {
      *            Issuer.
      * @return Generated action.
      */
-    public final byte[][] removeCertificateBySerial(final GXDLMSClient client,
-            final String serialNumber, final String issuer) {
+    public final byte[][] removeCertificateBySerial(
+            final GXDLMSSecureClient client, final String serialNumber,
+            final String issuer) {
         GXByteBuffer bb = new GXByteBuffer();
         bb.setUInt8(DataType.STRUCTURE.getValue());
         bb.setUInt8(2);
@@ -509,6 +549,23 @@ public class GXDLMSSecuritySetup extends GXDLMSObject implements IGXDLMSBase {
         // issuer
         GXCommon.setData(bb, DataType.OCTET_STRING, issuer.getBytes());
         return client.method(this, 8, bb.array(), DataType.OCTET_STRING);
+    }
+
+    /**
+     * Convert system title to subject.
+     * 
+     * @param systemTitle
+     *            System title.
+     * @return Subject.
+     */
+    public static String systemTitleToSubject(final byte[] systemTitle) {
+        GXByteBuffer bb = new GXByteBuffer(systemTitle);
+        bb.getData()[0] = 0;
+        bb.getData()[1] = 0;
+        bb.getData()[2] = 0;
+        String subject = "CN=" + new String(systemTitle, 0, 3);
+        subject += String.valueOf(bb.getUInt64());
+        return subject;
     }
 
     @Override
@@ -570,14 +627,89 @@ public class GXDLMSSecuritySetup extends GXDLMSObject implements IGXDLMSBase {
             }
         } else if (e.getIndex() == 3) {
             // key_agreement
+            try {
+                Object[] tmp = (Object[]) ((Object[]) e.getParameters())[0];
+                short keyId = (short) tmp[0];
+                if (keyId != 0) {
+                    e.setError(ErrorCode.READ_WRITE_DENIED);
+                } else {
+                    byte[] data = (byte[]) tmp[1];
+                    // ephemeral public key
+                    GXByteBuffer data2 = new GXByteBuffer(65);
+                    data2.setUInt8(keyId);
+                    data2.set(data, 0, 64);
+                    GXByteBuffer sign = new GXByteBuffer();
+                    sign.set(data, 64, 64);
+                    PublicKey pk = null;
+                    String subject = systemTitleToSubject(
+                            settings.getSourceSystemTitle());
+                    for (GXx509Certificate it : settings.getCipher()
+                            .getCertificates()) {
+                        if (it.getKeyUsage()
+                                .contains(KeyUsage.DIGITAL_SIGNATURE)
+                                && it.getSubject().equals(subject)) {
+                            pk = it.getPublicKey();
+                            break;
+                        }
+                    }
+                    if (pk == null || !GXASymmetric
+                            .validateEphemeralPublicKeySignature(data2.array(),
+                                    sign.array(), pk)) {
+                        e.setError(ErrorCode.READ_WRITE_DENIED);
+                        settings.setTargetEphemeralKey(null);
+                    } else {
+                        settings.setTargetEphemeralKey(GXAsn1Converter
+                                .getPublicKey(data2.subArray(1, 64)));
+                        // Generate ephemeral keys.
+                        KeyPair eKpS =
+                                settings.getCipher().getEphemeralKeyPair();
+                        if (eKpS == null) {
+                            eKpS = GXAsn1Converter.generateKeyPair();
+                            settings.getCipher().setEphemeralKeyPair(eKpS);
+                        }
+                        // Generate shared secret.
+                        KeyAgreement ka = KeyAgreement.getInstance("ECDH");
+                        ka.init(eKpS.getPrivate());
+                        ka.doPhase(settings.getTargetEphemeralKey(), true);
+                        byte[] sharedSecret = ka.generateSecret();
+                        settings.getCipher().setSharedSecret(sharedSecret);
+                        System.out.println("Server's shared secret: "
+                                + GXCommon.toHex(sharedSecret));
+                        GXByteBuffer bb = new GXByteBuffer();
+                        data = getEphemeralPublicKeyData(keyId,
+                                eKpS.getPublic());
+                        bb.set(data, 1, 64);
+                        // Add signature.
+                        byte[] tmp2 =
+                                GXASymmetric.getEphemeralPublicKeySignature(
+                                        keyId, eKpS.getPublic(),
+                                        settings.getCipher().getSigningKeyPair()
+                                                .getPrivate());
+                        bb.set(tmp2);
+                        System.out.println("Data: " + GXCommon.toHex(data));
+                        System.out.println("Sign: " + GXCommon.toHex(tmp2));
+                        return bb.array();
+                    }
+                }
+            } catch (Exception ex) {
+                e.setError(ErrorCode.HARDWARE_FAULT);
+            }
         } else if (e.getIndex() == 4) {
             // generate_key_pair
             CertificateType key = CertificateType
                     .forValue(((Number) e.getParameters()).intValue());
             try {
-                KeyPairGenerator kpg = KeyPairGenerator.getInstance("RSA");
-                KeyPair value = kpg.genKeyPair();
-                keys.put(key, value);
+                KeyPair value = GXAsn1Converter.generateKeyPair();
+                switch (key) {
+                case DIGITAL_SIGNATURE:
+                    settings.getCipher().setSigningKeyPair(value);
+                    break;
+                case KEY_AGREEMENT:
+                    settings.getCipher().setKeyAgreementKeyPair(value);
+                    break;
+                default:
+                    e.setError(ErrorCode.READ_WRITE_DENIED);
+                }
             } catch (Exception e1) {
                 e.setError(ErrorCode.HARDWARE_FAULT);
             }
@@ -586,32 +718,160 @@ public class GXDLMSSecuritySetup extends GXDLMSObject implements IGXDLMSBase {
             CertificateType key = CertificateType
                     .forValue(((Number) e.getParameters()).intValue());
             try {
-
-                KeyPairGenerator kpg = KeyPairGenerator.getInstance("RSA");
-                KeyPair kp = kpg.genKeyPair();
-                GXPkcs10 pkc10 = new GXPkcs10();
-                pkc10.setPublicKey(keys.get(key).getPublic());
-                pkc10.setSubject(
-                        "CN=gurux.fi, O=Gurux Ltd, L=Tampere, C=FI, E=gurux@gurux.fi");
-                pkc10.sign(kp, HashAlgorithm.SHA256withECDSA);
-                return pkc10.getEncoded();
-            } catch (NoSuchAlgorithmException e1) {
+                KeyPair kp = null;
+                switch (key) {
+                case DIGITAL_SIGNATURE:
+                    kp = settings.getCipher().getSigningKeyPair();
+                    break;
+                case KEY_AGREEMENT:
+                    kp = settings.getCipher().getKeyAgreementKeyPair();
+                    break;
+                default:
+                    break;
+                }
+                if (kp == null) {
+                    e.setError(ErrorCode.READ_WRITE_DENIED);
+                } else {
+                    GXPkcs10 pkc10 = GXPkcs10.createCertificateSigningRequest(
+                            kp, systemTitleToSubject(
+                                    settings.getCipher().getSystemTitle()));
+                    return pkc10.getEncoded();
+                }
+            } catch (Exception e1) {
                 e.setError(ErrorCode.HARDWARE_FAULT);
             }
         } else if (e.getIndex() == 6) {
             // import_certificate
             GXx509Certificate cert =
                     new GXx509Certificate((byte[]) e.getParameters());
-            settings.getCertificates().add(cert);
+            if (cert.getKeyUsage().isEmpty()) {
+                // At least one bit must be used.
+                e.setError(ErrorCode.READ_WRITE_DENIED);
+            } else {
+                settings.getCipher().getCertificates().add(cert);
+            }
         } else if (e.getIndex() == 7) {
-            // TODO: export_certificate
+            // export_certificate
+            Object[] tmp = ((Object[]) e.getParameters());
+            short type = (short) tmp[0];
+            GXx509Certificate cert = null;
+            synchronized (settings.getCipher().getCertificates()) {
+                if (type == 0) {
+                    tmp = (Object[]) tmp[1];
+                    cert = findCertificateByEntity(settings,
+                            CertificateEntity.forValue((short) tmp[0]),
+                            CertificateType.forValue((short) tmp[1]),
+                            (byte[]) tmp[2]);
+                } else if (type == 1) {
+                    tmp = (Object[]) tmp[1];
+                    cert = findCertificateBySerial(settings, (byte[]) tmp[1],
+                            new String((byte[]) tmp[2]));
+                }
+                if (cert == null) {
+                    e.setError(ErrorCode.HARDWARE_FAULT);
+                } else {
+                    return cert.getEncoded();
+                }
+            }
         } else if (e.getIndex() == 8) {
-            // TODO: remove_certificate
+            // remove_certificate
+            Object[] tmp = (Object[]) ((Object[]) e.getParameters())[0];
+            short type = (short) tmp[0];
+            GXx509Certificate cert = null;
+            synchronized (settings.getCipher().getCertificates()) {
+                if (type == 0) {
+                    cert = findCertificateByEntity(settings,
+                            CertificateEntity.forValue((int) tmp[1]),
+                            CertificateType.forValue((int) tmp[2]),
+                            (byte[]) tmp[3]);
+                } else if (type == 1) {
+                    cert = findCertificateBySerial(settings, (byte[]) tmp[1],
+                            new String((byte[]) tmp[2]));
+                }
+                if (cert == null) {
+                    e.setError(ErrorCode.HARDWARE_FAULT);
+                } else {
+                    settings.getCipher().getCertificates().remove(cert);
+                }
+            }
         } else {
             // Invalid type
             e.setError(ErrorCode.READ_WRITE_DENIED);
         }
         // Return standard reply.
+        return null;
+    }
+
+    private static KeyUsage
+            certificateTypeToKeyUsage(final CertificateType type) {
+        KeyUsage k = KeyUsage.NONE;
+        switch (type) {
+        case DIGITAL_SIGNATURE:
+            k = KeyUsage.DIGITAL_SIGNATURE;
+            break;
+        case KEY_AGREEMENT:
+            k = KeyUsage.KEY_AGREEMENT;
+            break;
+        case TLS:
+            k = KeyUsage.KEY_CERT_SIGN;
+            break;
+        case OTHER:
+            k = KeyUsage.CRL_SIGN;
+            break;
+        default:
+            // At least one bit must be used.
+            return null;
+        }
+        return k;
+    }
+
+    /**
+     * Find certificate using entity information.
+     * 
+     * @param settings
+     *            DLMS Settings.
+     * @param entity
+     *            Certificate entity type.
+     * @param type
+     *            Certificate type.
+     * @param systemtitle
+     *            System title.
+     * @return
+     */
+    private static GXx509Certificate findCertificateByEntity(
+            final GXDLMSSettings settings, final CertificateEntity entity,
+            final CertificateType type, final byte[] systemtitle) {
+        String subject = systemTitleToSubject(systemtitle);
+        KeyUsage k = certificateTypeToKeyUsage(type);
+        for (GXx509Certificate it : settings.getCipher().getCertificates()) {
+            if (it.getKeyUsage().contains(k)
+                    && it.getSubject().equalsIgnoreCase(subject)) {
+                return it;
+            }
+        }
+        return null;
+    }
+
+    /**
+     * Find certificate using serial information.
+     * 
+     * @param settings
+     *            DLMS Settings.
+     * @param serialNumber
+     *            Serial number.
+     * @param issuer
+     *            Issuer.
+     * @return
+     */
+    private static GXx509Certificate findCertificateBySerial(
+            final GXDLMSSettings settings, final byte[] serialNumber,
+            final String issuer) {
+        for (GXx509Certificate it : settings.getCipher().getCertificates()) {
+            if (Arrays.equals(it.getSerialNumber().getByteArray(), serialNumber)
+                    && it.getIssuer().equalsIgnoreCase(issuer)) {
+                return it;
+            }
+        }
         return null;
     }
 
@@ -705,8 +965,9 @@ public class GXDLMSSecuritySetup extends GXDLMSObject implements IGXDLMSBase {
     private byte[] getCertificatesByteArray(final GXDLMSSettings settings) {
         GXByteBuffer bb = new GXByteBuffer();
         bb.setUInt8((byte) DataType.ARRAY.getValue());
-        GXCommon.setObjectCount(settings.getCertificates().size(), bb);
-        for (GXx509Certificate it : settings.getCertificates()) {
+        GXCommon.setObjectCount(settings.getCipher().getCertificates().size(),
+                bb);
+        for (GXx509Certificate it : settings.getCipher().getCertificates()) {
             bb.setUInt8((byte) DataType.STRUCTURE.getValue());
             GXCommon.setObjectCount(6, bb);
             bb.setUInt8((byte) DataType.ENUM.getValue());
@@ -795,4 +1056,27 @@ public class GXDLMSSecuritySetup extends GXDLMSObject implements IGXDLMSBase {
             e.setError(ErrorCode.READ_WRITE_DENIED);
         }
     }
+
+    /**
+     * Get Ephemeral Public Key Signature.
+     * 
+     * @param keyId
+     *            Key ID.
+     * @param ephemeralKey
+     *            Ephemeral key.
+     * @return Ephemeral Public Key Signature.
+     */
+    public static byte[] getEphemeralPublicKeyData(final int keyId,
+            final PublicKey ephemeralKey) {
+        GXAsn1BitString tmp =
+                (GXAsn1BitString) ((GXAsn1Sequence) GXAsn1Converter
+                        .fromByteArray(ephemeralKey.getEncoded())).get(1);
+
+        // Ephemeral public key client
+        GXByteBuffer epk = new GXByteBuffer(tmp.getValue());
+        // First byte is 4 in Java and that is not used. We can override it.
+        epk.getData()[0] = (byte) keyId;
+        return epk.array();
+    }
+
 }

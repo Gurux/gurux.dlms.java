@@ -31,35 +31,24 @@
 // This code is licensed under the GNU General Public License v2. 
 // Full text may be retrieved at http://www.gnu.org/licenses/gpl-2.0.txt
 //---------------------------------------------------------------------------
-package gurux.dlms.objects.enums;
+package gurux.dlms.enums;
 
 /**
- * Security suite Specifies authentication, encryption and key wrapping
- * algorithm.
+ * Key agreement.
  */
-public enum SecuritySuite {
+public enum KeyAgreement {
     /**
-     * AES-GCM-128 for authenticated encryption and AES-128 for key wrapping.
-     * <br>
-     * A.K.A Security Suite 0.
+     * The Ephemeral Unified Model C(2e, 0s, ECC CDH) scheme.
      */
-    AES_GCM_128,
-    /**
-     * ECDH-ECDSAAES-GCM-128SHA-256. <br>
-     * A.K.A Security Suite 1.
-     */
-    ECDH_ECDSA_AES_GCM_128_SHA_256,
-    /**
-     * ECDH-ECDSAAES-GCM-256SHA-384. <br>
-     * A.K.A Security Suite 2.
-     */
-    ECDHE_CDSA_AES_GCM_256_SHA_384;
+    EPHEMERAL_UNIFIED_MODEL,
 
-    public int getValue() {
-        return this.ordinal();
-    }
+    /**
+     * The One-Pass Diffie-Hellman C(1e, 1s, ECC CDH) scheme.
+     */
+    ONE_PASS_DIFFIE_HELLMAN,
 
-    public static SecuritySuite forValue(final int value) {
-        return values()[value];
-    }
+    /**
+     * the Static Unified Model C(0e, 2s, ECC CDH) scheme.
+     */
+    STATIC_UNIFIED_MODEL
 }

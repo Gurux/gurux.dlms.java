@@ -251,11 +251,11 @@ public class GXManufacturer {
     }
 
     /**
-     * @param webAddress
+     * @param value
      *            Web address where is more information.
      */
-    public void setWebAddress(final String webAddress) {
-        this.webAddress = webAddress;
+    public void setWebAddress(final String value) {
+        this.webAddress = value;
     }
 
     /**
@@ -266,10 +266,10 @@ public class GXManufacturer {
     }
 
     /**
-     * @param info
+     * @param value
      *            Additional info.
      */
-    public void setInfo(final String info) {
-        this.info = info;
+    public void setInfo(final String value) {
+        info = value;
     }
 }

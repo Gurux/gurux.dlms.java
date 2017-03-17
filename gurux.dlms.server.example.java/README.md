@@ -24,7 +24,7 @@ You can get source codes from http://www.github.com/gurux/gurux.dlms.java or if 
 <dependency>
   <groupId>org.gurux</groupId>
   <artifactId>gurux.dlms</artifactId>
-  <version>1.0.10</version>
+  <version>2.0.1</version>
 </dependency>
 ```
 

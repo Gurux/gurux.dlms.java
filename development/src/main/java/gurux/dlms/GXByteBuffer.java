@@ -473,6 +473,12 @@ public class GXByteBuffer {
         }
     }
 
+    /**
+     * Append the given byte array into this buffer.
+     * 
+     * @param value
+     *            Data to append.
+     */
     public final void set(final byte[] value) {
         if (value != null) {
             set(value, 0, value.length);
@@ -567,6 +573,12 @@ public class GXByteBuffer {
                 }
             } else if (value instanceof BigInteger) {
                 set(((BigInteger) value).toByteArray());
+            } else if (value instanceof Boolean) {
+                if ((Boolean) value) {
+                    setUInt8(1);
+                } else {
+                    setUInt8(0);
+                }
             } else {
                 throw new RuntimeException("Invalid object type.");
             }
