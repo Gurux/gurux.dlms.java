@@ -38,6 +38,7 @@ import java.math.BigInteger;
 import java.net.InetAddress;
 import java.net.UnknownHostException;
 import java.util.AbstractMap;
+import java.util.Calendar;
 
 import gurux.common.IGXMediaListener;
 import gurux.common.MediaStateEventArgs;
@@ -108,6 +109,7 @@ public class GXDLMSBase extends GXDLMSSecureServer2
     public GXDLMSBase(boolean logicalNameReferencing,
             InterfaceType interfaceType) {
         super(logicalNameReferencing, interfaceType);
+        this.setMaxReceivePDUSize(1024);
     }
 
     /*
@@ -479,12 +481,46 @@ public class GXDLMSBase extends GXDLMSSecureServer2
         for (ValueEventArgs e : args) {
             // Framework will handle Association objects automatically.
             if (e.getTarget() instanceof GXDLMSAssociationLogicalName
-                    || e.getTarget() instanceof GXDLMSAssociationShortName
-                    || e.getTarget() instanceof GXDLMSProfileGeneric)
-            // Framework will handle profile generic automatically.
-            {
+                    || e.getTarget() instanceof GXDLMSAssociationShortName) {
                 continue;
             }
+            // Framework will handle profile generic automatically.
+            if (e.getTarget() instanceof GXDLMSProfileGeneric) {
+                // If buffer is read and we want to save memory.
+                if (e.getIndex() == 2) {
+                    GXDLMSProfileGeneric p =
+                            (GXDLMSProfileGeneric) e.getTarget();
+                    // Clear old data. It's serialized already.
+                    p.clearBuffer();
+                    // Return maximum row count. If row count is Zero we know
+                    // that this is the first time.
+                    if (e.getRowCount() == 0) {
+                        // In this example we generate 1000 rows.
+                        e.setRowCount(1000);
+                    }
+                    // Add data.
+                    int startIndex = e.getRowIndex();
+                    int count = e.getRowCount() - startIndex;
+                    // Lets get only rows that fit to PDU. It will save memory.
+                    if (count > e.getMaxRowCount()) {
+                        count = e.getMaxRowCount();
+                    }
+                    // Row index will tell last handled row index
+                    int index = e.getRowIndex();
+                    Calendar cal = Calendar.getInstance();
+                    cal.add(Calendar.HOUR, -(e.getRowCount() - index));
+                    cal.set(Calendar.MINUTE, 0);
+                    cal.set(Calendar.SECOND, 0);
+                    cal.set(Calendar.MILLISECOND, 0);
+                    while (p.getBuffer().length != count) {
+                        // Get data.
+                        p.addRow(new Object[] { cal.getTime(), ++index });
+                        cal.add(Calendar.HOUR, 1);
+                    }
+                }
+                continue;
+            }
+
             System.out.println(
                     String.format("Client Read value from %s attribute: %d.",
                             e.getTarget().getName(), e.getIndex()));
