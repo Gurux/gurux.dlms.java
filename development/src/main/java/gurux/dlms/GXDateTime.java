@@ -452,26 +452,7 @@ public class GXDateTime {
         } else {
             str = "GMT" + tmp;
         }
-        String[] ids = TimeZone.getAvailableIDs(-deviation * 10000);
         return TimeZone.getTimeZone(str);
-
-        // TimeZone tz = Calendar.getInstance().getTimeZone();
-        // if (deviation == 0x8000 || tz.getRawOffset() / 60000 == -deviation) {
-        // return tz;
-        // }
-        // int value = -deviation;
-        // String str;
-        // DecimalFormat df = new DecimalFormat("00");
-        // String tmp = df.format(value / 60) + ":" + df.format(value % 60);
-        // if (value == 0) {
-        // str = "GMT";
-        // } else if (value > 0) {
-        // str = "GMT+" + tmp;
-        // } else {
-        // str = "GMT" + tmp;
-        // }
-        // TimeZone.getAvailableIDs(rawOffset)
-        // return TimeZone.getTimeZone(str);
     }
 
 }

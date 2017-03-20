@@ -94,6 +94,20 @@ public class ValueEventArgs {
     private boolean byteArray = false;
 
     /**
+     * Max row count is used with Profile Generic to tell how many rows are read
+     * to one PDU.
+     */
+    private int maxRowCount;
+    /**
+     * Total row count.
+     */
+    private int rowCount;
+    /**
+     * Row Index.
+     */
+    private int rowIndex;
+
+    /**
      * @return Target DLMS object.
      */
     public final GXDLMSObject getTarget() {
@@ -301,5 +315,50 @@ public class ValueEventArgs {
      */
     public void setByteArray(final boolean value) {
         byteArray = value;
+    }
+
+    /**
+     * @return How many rows are read to one PDU.
+     */
+    public final int getMaxRowCount() {
+        return maxRowCount;
+    }
+
+    /**
+     * @param value
+     *            How many rows are read to one PDU.
+     */
+    public final void setMaxRowCount(final int value) {
+        maxRowCount = value;
+    }
+
+    /**
+     * @return Total row count.
+     */
+    public final int getRowCount() {
+        return rowCount;
+    }
+
+    /**
+     * @param value
+     *            Total row count.
+     */
+    public final void setRowCount(final int value) {
+        rowCount = value;
+    }
+
+    /**
+     * @return Row Index.
+     */
+    public final int getRowIndex() {
+        return rowIndex;
+    }
+
+    /**
+     * @param value
+     *            Row Index.
+     */
+    final void setRowIndex(final int value) {
+        rowIndex = value;
     }
 }

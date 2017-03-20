@@ -2,6 +2,7 @@ package gurux.dlms;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map.Entry;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
@@ -15,7 +16,9 @@ import gurux.dlms.enums.ObjectType;
 import gurux.dlms.internal.GXCommon;
 import gurux.dlms.internal.GXDataInfo;
 import gurux.dlms.objects.GXDLMSAssociationLogicalName;
+import gurux.dlms.objects.GXDLMSCaptureObject;
 import gurux.dlms.objects.GXDLMSObject;
+import gurux.dlms.objects.GXDLMSProfileGeneric;
 
 final class GXDLMSLNCommandHandler {
     private static final Logger LOGGER =
@@ -218,11 +221,46 @@ final class GXDLMSLNCommandHandler {
             } else {
                 e = new ValueEventArgs(settings, obj, attributeIndex, selector,
                         parameters);
+                if (obj instanceof GXDLMSProfileGeneric
+                        && attributeIndex == 2) {
+                    DataType dt;
+                    int rowsize = 0;
+                    GXDLMSProfileGeneric pg =
+                            (GXDLMSProfileGeneric) e.getTarget();
+                    // Count how many rows we can fit to one PDU.
+                    for (Entry<GXDLMSObject, GXDLMSCaptureObject> it : pg
+                            .getCaptureObjects()) {
+                        dt = it.getKey()
+                                .getDataType(it.getValue().getAttributeIndex());
+                        if (dt == DataType.OCTET_STRING) {
+                            dt = it.getKey().getUIDataType(
+                                    it.getValue().getAttributeIndex());
+                            if (dt == DataType.DATETIME) {
+                                rowsize += GXCommon
+                                        .getDataTypeSize(DataType.DATETIME);
+                            } else if (dt == DataType.DATE) {
+                                rowsize +=
+                                        GXCommon.getDataTypeSize(DataType.DATE);
+                            } else if (dt == DataType.TIME) {
+                                rowsize +=
+                                        GXCommon.getDataTypeSize(DataType.TIME);
+                            }
+                        } else if (dt == DataType.NONE) {
+                            rowsize += 2;
+                        } else {
+                            rowsize += GXCommon.getDataTypeSize(dt);
+                        }
+                    }
+                    if (rowsize != 0) {
+                        e.setMaxRowCount(settings.getMaxPduSize() / rowsize);
+                    }
+                }
                 server.notifyRead(new ValueEventArgs[] { e });
                 Object value;
                 if (e.getHandled()) {
                     value = e.getValue();
                 } else {
+                    settings.setCount(e.getRowCount());
                     value = obj.getValue(settings, e);
                 }
                 server.notifyPostRead(new ValueEventArgs[] { e });
@@ -287,6 +325,8 @@ final class GXDLMSLNCommandHandler {
                         Object value;
                         for (ValueEventArgs arg : server.getTransaction()
                                 .getTargets()) {
+                            arg.setRowIndex(settings.getIndex());
+                            server.notifyRead(new ValueEventArgs[] { arg });
                             if (arg.getHandled()) {
                                 value = arg.getValue();
                             } else {

@@ -5,39 +5,39 @@
   <version>0.0.1-SNAPSHOT</version>
   <build>
     <sourceDirectory>src</sourceDirectory>
-     <plugins>
-    <!-- Build an executable JAR -->
-    <plugin>
-      <groupId>org.apache.maven.plugins</groupId>
+    <plugins>
+      <!-- Build an executable JAR -->
+      <plugin>
+        <groupId>org.apache.maven.plugins</groupId>
         <artifactId>maven-shade-plugin</artifactId>
         <version>2.1</version>
         <executions>
-            <execution>
-                <phase>package</phase>
-                <goals>
-                    <goal>shade</goal>
-                </goals>
-                <configuration>
-                  <transformers>
-                    <transformer implementation="org.apache.maven.plugins.shade.resource.ManifestResourceTransformer">
-                      <mainClass>gurux.dlms.push.listener.example.GuruxDlmsPushListenerExample</mainClass>
-                    </transformer>
-                  </transformers>
-                </configuration>
-            </execution>
+          <execution>
+            <phase>package</phase>
+            <goals>
+              <goal>shade</goal>
+            </goals>
+            <configuration>
+              <transformers>
+                <transformer implementation="org.apache.maven.plugins.shade.resource.ManifestResourceTransformer">
+                  <mainClass>gurux.dlms.push.listener.example.GuruxDlmsPushListenerExample</mainClass>
+                </transformer>
+              </transformers>
+            </configuration>
+          </execution>
         </executions>
       </plugin>
-    <!-- Set used JRE version. -->
-    <plugin>
-       <groupId>org.apache.maven.plugins</groupId>
-       <artifactId>maven-compiler-plugin</artifactId>
-       <version>3.0</version>
-       <configuration>
-       <source>1.7</source>
-       <target>1.7</target>
-       </configuration>
-    </plugin>
-  </plugins>
+      <!-- Set used JRE version. -->
+      <plugin>
+        <groupId>org.apache.maven.plugins</groupId>
+        <artifactId>maven-compiler-plugin</artifactId>
+        <version>3.0</version>
+        <configuration>
+          <source>1.7</source>
+          <target>1.7</target>
+        </configuration>
+      </plugin>
+    </plugins>
   </build>
   <dependencies>
     <dependency>
@@ -45,20 +45,20 @@
       <artifactId>gurux.net</artifactId>
       <version>1.0.11</version>
     </dependency>
-  <dependency>
-    <groupId>org.gurux</groupId>
+    <dependency>
+      <groupId>org.gurux</groupId>
       <artifactId>gurux.dlms</artifactId>
-      <version>2.0.1</version>
-  </dependency>
+      <version>2.0.2</version>
+    </dependency>
   </dependencies>
   <licenses>
-  <license>
-  <name>GNU General Public License, version 2</name> 
-  <url>http://www.gnu.org/licenses/gpl-2.0.txt</url>
-  </license>
-</licenses>
- <organization>
- 	<url>www.gurux.org</url>
- 	<name>Gurux Ltd.</name>
-</organization>
+    <license>
+      <name>GNU General Public License, version 2</name>
+      <url>http://www.gnu.org/licenses/gpl-2.0.txt</url>
+    </license>
+  </licenses>
+  <organization>
+    <url>www.gurux.org</url>
+    <name>Gurux Ltd.</name>
+  </organization>
 </project>

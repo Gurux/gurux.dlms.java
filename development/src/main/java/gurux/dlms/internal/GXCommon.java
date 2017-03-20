@@ -2044,6 +2044,73 @@ public final class GXCommon {
         }
     }
 
+    /**
+     * Get data type in bytes.
+     * 
+     * @param type
+     *            Data type.
+     * @return Size of data type in bytes.
+     */
+    public static int getDataTypeSize(final DataType type) {
+        int size = -1;
+        switch (type) {
+        case BCD:
+            size = 1;
+            break;
+        case BOOLEAN:
+            size = 1;
+            break;
+        case DATE:
+            size = 5;
+            break;
+        case DATETIME:
+            size = 12;
+            break;
+        case ENUM:
+            size = 1;
+            break;
+        case FLOAT32:
+            size = 4;
+            break;
+        case FLOAT64:
+            size = 8;
+            break;
+        case INT16:
+            size = 2;
+            break;
+        case INT32:
+            size = 4;
+            break;
+        case INT64:
+            size = 8;
+            break;
+        case INT8:
+            size = 1;
+            break;
+        case NONE:
+            size = 0;
+            break;
+        case TIME:
+            size = 4;
+            break;
+        case UINT16:
+            size = 2;
+            break;
+        case UINT32:
+            size = 4;
+            break;
+        case UINT64:
+            size = 8;
+            break;
+        case UINT8:
+            size = 1;
+            break;
+        default:
+            break;
+        }
+        return size;
+    }
+
     public static DataType getValueType(final Object value) {
         if (value == null) {
             return DataType.NONE;
