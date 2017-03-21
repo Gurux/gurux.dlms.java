@@ -876,31 +876,31 @@ public class GXDLMSProfileGeneric extends GXDLMSObject implements IGXDLMSBase {
         synchronized (this) {
             Object[] values = new Object[captureObjects.size()];
             int pos = -1;
-            ValueEventArgs e;
+            List<ValueEventArgs> args = new ArrayList<ValueEventArgs>();
             // CHECKSTYLE:OFF
             for (Entry<GXDLMSObject, GXDLMSCaptureObject> obj : captureObjects) {
                 // CHECKSTYLE:ON
-                if (server instanceof GXDLMSServer) {
-                    e = new ValueEventArgs(
-                            ((GXDLMSServer) server).getSettings(), obj.getKey(),
-                            obj.getValue().getAttributeIndex(), 0, null);
-                    ((GXDLMSServer) server).read(new ValueEventArgs[] { e });
+                ValueEventArgs e = new ValueEventArgs(
+                        ((GXDLMSServer2) server).getSettings(), obj.getKey(),
+                        obj.getValue().getAttributeIndex(), 0, null);
+                args.add(e);
+            }
+            if (server instanceof GXDLMSServer) {
+                ((GXDLMSServer) server)
+                        .read(args.toArray(new ValueEventArgs[args.size()]));
+            }
+            if (server instanceof GXDLMSServer2) {
+                ((GXDLMSServer2) server).onPreGet(UpdateType.PROFILE_GENERIC,
+                        args.toArray(new ValueEventArgs[args.size()]));
+            }
+
+            // CHECKSTYLE:OFF
+            for (ValueEventArgs it : args) {
+                // CHECKSTYLE:ON
+                if (it.getHandled()) {
+                    values[++pos] = it.getValue();
                 } else {
-                    e = new ValueEventArgs(
-                            ((GXDLMSServer2) server).getSettings(),
-                            obj.getKey(), obj.getValue().getAttributeIndex(), 0,
-                            null);
-                    ((GXDLMSServer2) server).onGet(UpdateType.PROFILE_GENERIC,
-                            new ValueEventArgs[] { e });
-                }
-                if (e.getHandled()) {
-                    values[++pos] = e.getValue();
-                } else {
-                    values[++pos] = obj.getKey().getValue(null, e);
-                }
-                if (server instanceof GXDLMSServer) {
-                    ((GXDLMSServer2) server)
-                            .onPostRead(new ValueEventArgs[] { e });
+                    values[++pos] = it.getTarget().getValue(null, it);
                 }
             }
             synchronized (this) {
@@ -910,6 +910,11 @@ public class GXDLMSProfileGeneric extends GXDLMSObject implements IGXDLMSBase {
                 }
                 buffer.add(values);
                 entriesInUse = buffer.size();
+            }
+
+            if (server instanceof GXDLMSServer2) {
+                ((GXDLMSServer2) server).onPostGet(UpdateType.PROFILE_GENERIC,
+                        args.toArray(new ValueEventArgs[args.size()]));
             }
         }
     }

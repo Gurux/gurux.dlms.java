@@ -472,7 +472,7 @@ public class GXDLMSBase extends GXDLMSSecureServer2
         // Add TCP/IP UDP setup object.
         addTcpUdpSetup();
         // Add profile generic object.
-        GXDLMSProfileGeneric pg = addProfileGeneric(clock, register);
+        addProfileGeneric(clock, register);
         // Add Auto connect object.
         addAutoConnect();
         // Add Activity Calendar object.
@@ -911,7 +911,16 @@ public class GXDLMSBase extends GXDLMSSecureServer2
      * Schedule or profile generic asks current value.
      */
     @Override
-    public void onGet(UpdateType type, ValueEventArgs[] e) {
+    public void onPreGet(UpdateType type, ValueEventArgs[] e) {
 
     }
+
+    /**
+     * Schedule or profile generic asks current value.
+     */
+    @Override
+    public void onPostGet(UpdateType type, ValueEventArgs[] e) {
+
+    }
+
 }
