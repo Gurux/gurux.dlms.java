@@ -226,3 +226,4 @@ gurux.dlms.client.example.java/ManufacturerSettings/files.xml
 ManufacturerSettings/files.xml
 gurux.dlms.client.example.java/logFile.txt
 gurux.dlms.client.example.java/trace.txt
+gurux.dlms.server.example.java/data.csv

@@ -252,7 +252,7 @@ final class GXDLMSLNCommandHandler {
                         }
                     }
                     if (rowsize != 0) {
-                        e.setMaxRowCount(settings.getMaxPduSize() / rowsize);
+                        e.setRowToPdu(settings.getMaxPduSize() / rowsize);
                     }
                 }
                 server.notifyRead(new ValueEventArgs[] { e });
@@ -260,7 +260,8 @@ final class GXDLMSLNCommandHandler {
                 if (e.getHandled()) {
                     value = e.getValue();
                 } else {
-                    settings.setCount(e.getRowCount());
+                    settings.setCount(
+                            e.getRowEndIndex() - e.getRowBeginIndex());
                     value = obj.getValue(settings, e);
                 }
                 server.notifyPostRead(new ValueEventArgs[] { e });
@@ -325,7 +326,6 @@ final class GXDLMSLNCommandHandler {
                         Object value;
                         for (ValueEventArgs arg : server.getTransaction()
                                 .getTargets()) {
-                            arg.setRowIndex(settings.getIndex());
                             server.notifyRead(new ValueEventArgs[] { arg });
                             if (arg.getHandled()) {
                                 value = arg.getValue();
@@ -340,6 +340,7 @@ final class GXDLMSLNCommandHandler {
                                         arg.getIndex(), bb, value);
                             }
                         }
+                        moreData = settings.getIndex() != settings.getCount();
                     }
                 }
                 p.setMultipleBlocks(true);

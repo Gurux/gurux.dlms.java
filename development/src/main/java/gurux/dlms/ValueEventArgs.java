@@ -94,18 +94,18 @@ public class ValueEventArgs {
     private boolean byteArray = false;
 
     /**
-     * Max row count is used with Profile Generic to tell how many rows are read
-     * to one PDU.
+     * Row to PDU is used with Profile Generic to tell how many rows are fit to
+     * one PDU.
      */
-    private int maxRowCount;
+    private int rowToPdu;
     /**
-     * Total row count.
+     * Rows begin index.
      */
-    private int rowCount;
+    private long rowBeginIndex;
     /**
-     * Row Index.
+     * Rows end index.
      */
-    private int rowIndex;
+    private long rowEndIndex;
 
     /**
      * @return Target DLMS object.
@@ -320,45 +320,45 @@ public class ValueEventArgs {
     /**
      * @return How many rows are read to one PDU.
      */
-    public final int getMaxRowCount() {
-        return maxRowCount;
+    public final int getRowToPdu() {
+        return rowToPdu;
     }
 
     /**
      * @param value
      *            How many rows are read to one PDU.
      */
-    public final void setMaxRowCount(final int value) {
-        maxRowCount = value;
+    public final void setRowToPdu(final int value) {
+        rowToPdu = value;
     }
 
     /**
-     * @return Total row count.
+     * @return Rows end index.
      */
-    public final int getRowCount() {
-        return rowCount;
-    }
-
-    /**
-     * @param value
-     *            Total row count.
-     */
-    public final void setRowCount(final int value) {
-        rowCount = value;
-    }
-
-    /**
-     * @return Row Index.
-     */
-    public final int getRowIndex() {
-        return rowIndex;
+    public final long getRowEndIndex() {
+        return rowEndIndex;
     }
 
     /**
      * @param value
-     *            Row Index.
+     *            Rows end index.
      */
-    final void setRowIndex(final int value) {
-        rowIndex = value;
+    public final void setRowEndIndex(final long value) {
+        rowEndIndex = value;
+    }
+
+    /**
+     * @return Rows begin index.
+     */
+    public final long getRowBeginIndex() {
+        return rowBeginIndex;
+    }
+
+    /**
+     * @param value
+     *            Rows begin index.
+     */
+    public final void setRowBeginIndex(final long value) {
+        rowBeginIndex = value;
     }
 }

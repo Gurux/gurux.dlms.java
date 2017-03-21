@@ -240,7 +240,7 @@ public class GXDLMSServerBase {
         for (int pos = 0; pos != settings.getObjects().size(); ++pos) {
             GXDLMSObject it = settings.getObjects().get(pos);
             if (it.getLogicalName() == null) {
-                throw new RuntimeException("Invalid Logical Name.");
+                throw new IllegalArgumentException("Invalid Logical Name.");
             }
             if (it instanceof GXDLMSProfileGeneric) {
                 GXDLMSProfileGeneric pg = null;

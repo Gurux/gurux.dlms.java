@@ -159,12 +159,12 @@ public class GXDLMSSettings {
     /**
      * Long data count.
      */
-    private int count;
+    private long count;
 
     /**
      * Long data index.
      */
-    private int index;
+    private long index;
 
     /**
      * Target ephemeral public key.
@@ -794,7 +794,7 @@ public class GXDLMSSettings {
     /**
      * @return Long data count.
      */
-    public final int getCount() {
+    public final long getCount() {
         return count;
     }
 
@@ -802,14 +802,17 @@ public class GXDLMSSettings {
      * @param value
      *            Data count.
      */
-    public final void setCount(final int value) {
+    public final void setCount(final long value) {
+        if (value < 0) {
+            throw new IllegalArgumentException("Invalid count.");
+        }
         count = value;
     }
 
     /**
      * @return Long data index.
      */
-    public final int getIndex() {
+    public final long getIndex() {
         return index;
     }
 
@@ -817,7 +820,10 @@ public class GXDLMSSettings {
      * @param value
      *            Long data index
      */
-    public final void setIndex(final int value) {
+    public final void setIndex(final long value) {
+        if (value < 0) {
+            throw new IllegalArgumentException("Invalid Index.");
+        }
         index = value;
     }
 
