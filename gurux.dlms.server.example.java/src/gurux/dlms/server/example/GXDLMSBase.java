@@ -34,11 +34,17 @@
 
 package gurux.dlms.server.example;
 
+import java.io.BufferedReader;
+import java.io.FileReader;
+import java.io.FileWriter;
+import java.io.IOException;
 import java.math.BigInteger;
 import java.net.InetAddress;
 import java.net.UnknownHostException;
+import java.text.SimpleDateFormat;
 import java.util.AbstractMap;
 import java.util.Calendar;
+import java.util.Date;
 
 import gurux.common.IGXMediaListener;
 import gurux.common.MediaStateEventArgs;
@@ -46,6 +52,7 @@ import gurux.common.PropertyChangedEventArgs;
 import gurux.common.ReceiveEventArgs;
 import gurux.common.TraceEventArgs;
 import gurux.common.enums.TraceLevel;
+import gurux.dlms.GXDLMSClient;
 import gurux.dlms.GXDLMSConnectionEventArgs;
 import gurux.dlms.GXDate;
 import gurux.dlms.GXDateTime;
@@ -105,6 +112,7 @@ public class GXDLMSBase extends GXDLMSSecureServer2
 
     boolean Trace = false;
     private GXNet media;
+    static final String dataFile = "data.csv";
 
     public GXDLMSBase(boolean logicalNameReferencing,
             InterfaceType interfaceType) {
@@ -180,6 +188,38 @@ public class GXDLMSBase extends GXDLMSSecureServer2
         pg.addCaptureObject(clock, 2, 0);
         pg.addCaptureObject(register, 2, 0);
         getItems().add(pg);
+        // Create 10 000 rows for profile generic file.
+        // In example profile generic we have two columns.
+        // Date time and integer value.
+        int rowCount = 10000;
+        Calendar cal = Calendar.getInstance();
+        cal.add(Calendar.HOUR, -(rowCount - 1));
+        cal.set(Calendar.MINUTE, 0);
+        cal.set(Calendar.SECOND, 0);
+        cal.set(Calendar.MILLISECOND, 0);
+        StringBuilder sb = new StringBuilder();
+        SimpleDateFormat df = new SimpleDateFormat();
+        for (int pos = 0; pos != rowCount; ++pos) {
+            sb.append(df.format(cal.getTime()));
+            sb.append(';');
+            sb.append(String.valueOf(pos + 1));
+            sb.append(System.lineSeparator());
+            cal.add(Calendar.HOUR, 1);
+        }
+        FileWriter writer = null;
+        try {
+            writer = new FileWriter(dataFile, false);
+            writer.write(sb.toString());
+            writer.close();
+        } catch (IOException e) {
+            if (writer != null) {
+                try {
+                    writer.close();
+                } catch (IOException e1) {
+                }
+            }
+            throw new RuntimeException(e.getMessage());
+        }
         return pg;
     }
 
@@ -470,10 +510,123 @@ public class GXDLMSBase extends GXDLMSSecureServer2
         ///////////////////////////////////////////////////////////////////////
         // Server must initialize after all objects are added.
         initialize();
-        // Add rows after Initialize.
-        Object[][] rows = new Object[][] { new Object[] {
-                java.util.Calendar.getInstance().getTime(), 10 } };
-        pg.setBuffer((Object[][]) rows);
+    }
+
+    /**
+     * Return data using start and end indexes.
+     * 
+     * @param p
+     *            ProfileGeneric
+     * @param index
+     * @param count
+     * @return Add data Rows
+     */
+    private void getProfileGenericDataByEntry(final GXDLMSProfileGeneric p,
+            long index, final long count) {
+        // Clear old data. It's already serialized.
+        p.clearBuffer();
+        BufferedReader reader = null;
+        SimpleDateFormat df = new SimpleDateFormat();
+        try {
+            reader = new BufferedReader(new FileReader(dataFile));
+            String line;
+            while ((line = reader.readLine()) != null) {
+                // Skip row
+                if (index > 0) {
+                    --index;
+                } else if (line.length() != 0) {
+                    String[] values = line.split("[;]", -1);
+                    p.addRow(new Object[] { df.parse(values[0]),
+                            Integer.parseInt(values[1]) });
+                }
+                if (p.getBuffer().length == count) {
+                    break;
+                }
+            }
+            reader.close();
+        } catch (Exception e) {
+            if (reader != null) {
+                try {
+                    reader.close();
+                } catch (Exception e1) {
+                }
+            }
+            throw new RuntimeException(e.getMessage());
+        }
+    }
+
+    /**
+     * Find start index and row count using start and end date time.
+     * 
+     * @param start
+     *            Start time.
+     * @param end
+     *            End time
+     * @param index
+     *            Start index.
+     * @param count
+     *            Item count.
+     */
+    private void getProfileGenericDataByRange(ValueEventArgs e) {
+        GXDateTime start = (GXDateTime) GXDLMSClient.changeType(
+                (byte[]) ((Object[]) e.getParameters())[1], DataType.DATETIME);
+        GXDateTime end = (GXDateTime) GXDLMSClient.changeType(
+                (byte[]) ((Object[]) e.getParameters())[2], DataType.DATETIME);
+
+        BufferedReader reader = null;
+        try {
+            reader = new BufferedReader(new FileReader(dataFile));
+            String line;
+            SimpleDateFormat df = new SimpleDateFormat();
+            while ((line = reader.readLine()) != null) {
+                String[] values = line.split("[;]", -1);
+                Date tm = df.parse(values[0]);
+                if (tm.compareTo(end.getCalendar().getTime()) > 0) {
+                    // If all data is read.
+                    break;
+                }
+                if (tm.compareTo(start.getCalendar().getTime()) < 0) {
+                    // If we have not find first item.
+                    e.setRowBeginIndex(e.getRowBeginIndex() + 1);
+                }
+                e.setRowEndIndex(e.getRowEndIndex() + 1);
+            }
+            reader.close();
+        } catch (Exception ex) {
+            if (reader != null) {
+                try {
+                    reader.close();
+                } catch (Exception e1) {
+                }
+            }
+            throw new RuntimeException(ex.getMessage());
+        }
+    }
+
+    /**
+     * Get row count.
+     * 
+     * @return
+     */
+    private int getProfileGenericDataCount() {
+        int rows = 0;
+        BufferedReader reader = null;
+        try {
+            reader = new BufferedReader(new FileReader(dataFile));
+            while (reader.readLine() != null) {
+                ++rows;
+            }
+            reader.close();
+        } catch (Exception e) {
+            if (reader != null) {
+                try {
+                    reader.close();
+                } catch (Exception e1) {
+                }
+            }
+            throw new RuntimeException(e.getMessage());
+        }
+        return rows;
     }
 
     @Override
@@ -487,36 +640,50 @@ public class GXDLMSBase extends GXDLMSSecureServer2
             // Framework will handle profile generic automatically.
             if (e.getTarget() instanceof GXDLMSProfileGeneric) {
                 // If buffer is read and we want to save memory.
-                if (e.getIndex() == 2) {
+                if (e.getIndex() == 6) {
+                    // If client wants to know EntriesInUse.
                     GXDLMSProfileGeneric p =
                             (GXDLMSProfileGeneric) e.getTarget();
-                    // Clear old data. It's serialized already.
-                    p.clearBuffer();
-                    // Return maximum row count. If row count is Zero we know
-                    // that this is the first time.
-                    if (e.getRowCount() == 0) {
-                        // In this example we generate 1000 rows.
-                        e.setRowCount(1000);
+                    p.setEntriesInUse(getProfileGenericDataCount());
+                }
+                if (e.getIndex() == 2) {
+                    // Client reads buffer.
+                    GXDLMSProfileGeneric p =
+                            (GXDLMSProfileGeneric) e.getTarget();
+                    // Read rows from file.
+                    // If reading first time.
+                    if (e.getRowEndIndex() == 0) {
+                        if (e.getSelector() == 0) {
+                            e.setRowEndIndex(getProfileGenericDataCount());
+                        } else if (e.getSelector() == 1) {
+                            // Read by entry.
+                            getProfileGenericDataByRange(e);
+                        } else if (e.getSelector() == 2) {
+                            // Read by range.
+                            e.setRowBeginIndex(
+                                    ((long) ((Object[]) e.getParameters())[0]));
+                            e.setRowEndIndex(e.getRowBeginIndex()
+                                    + (long) ((Object[]) e.getParameters())[1]);
+                            // If client wants to read more data what we have.
+                            int cnt = getProfileGenericDataCount();
+                            if (e.getRowEndIndex() - e.getRowBeginIndex() > cnt
+                                    - e.getRowBeginIndex()) {
+                                e.setRowEndIndex(cnt - e.getRowBeginIndex());
+                                if (e.getRowEndIndex() < 0) {
+                                    e.setRowEndIndex(0);
+                                }
+                            }
+                        }
                     }
-                    // Add data.
-                    int startIndex = e.getRowIndex();
-                    int count = e.getRowCount() - startIndex;
-                    // Lets get only rows that fit to PDU. It will save memory.
-                    if (count > e.getMaxRowCount()) {
-                        count = e.getMaxRowCount();
+                    long count = e.getRowEndIndex() - e.getRowBeginIndex();
+                    // Read only rows that can fit to one PDU.
+                    if (e.getRowEndIndex() - e.getRowBeginIndex() > e
+                            .getRowToPdu()) {
+                        count = e.getRowToPdu();
                     }
-                    // Row index will tell last handled row index
-                    int index = e.getRowIndex();
-                    Calendar cal = Calendar.getInstance();
-                    cal.add(Calendar.HOUR, -(e.getRowCount() - index));
-                    cal.set(Calendar.MINUTE, 0);
-                    cal.set(Calendar.SECOND, 0);
-                    cal.set(Calendar.MILLISECOND, 0);
-                    while (p.getBuffer().length != count) {
-                        // Get data.
-                        p.addRow(new Object[] { cal.getTime(), ++index });
-                        cal.add(Calendar.HOUR, 1);
-                    }
+                    getProfileGenericDataByEntry(p, e.getRowBeginIndex(),
+                            count);
+                    e.setRowBeginIndex(e.getRowBeginIndex() + count);
                 }
                 continue;
             }

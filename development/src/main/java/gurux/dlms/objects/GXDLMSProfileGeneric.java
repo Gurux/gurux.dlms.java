@@ -261,10 +261,11 @@ public class GXDLMSProfileGeneric extends GXDLMSObject implements IGXDLMSBase {
     }
 
     /**
-     * @return Entries (rows) in Use.
+     * @param value
+     *            Entries (rows) in Use.
      */
-    public final int setEntriesInUse() {
-        return entriesInUse;
+    public final void setEntriesInUse(final int value) {
+        entriesInUse = value;
     }
 
     /**
@@ -378,20 +379,14 @@ public class GXDLMSProfileGeneric extends GXDLMSObject implements IGXDLMSBase {
         return data.array();
     }
 
-    /**
-     * @param table
-     *            Table where rows are get.
-     * @param columns
-     *            Columns to get. Null if not used.
-     * @return Buffer rows as byte array.
-     */
-    private byte[] getData(final GXDLMSSettings settings, final Object[] table,
+    private byte[] getData(final GXDLMSSettings settings,
+            final ValueEventArgs e, final Object[] table,
             final List<Entry<GXDLMSObject, GXDLMSCaptureObject>> columns) {
         GXByteBuffer data = new GXByteBuffer();
         if (settings.getIndex() == 0) {
             data.setUInt8((byte) DataType.ARRAY.getValue());
-            if (settings.getCount() != 0) {
-                GXCommon.setObjectCount(settings.getCount(), data);
+            if (e.getRowEndIndex() != 0) {
+                GXCommon.setObjectCount((int) e.getRowEndIndex(), data);
             } else {
                 GXCommon.setObjectCount(table.length, data);
             }
@@ -492,7 +487,6 @@ public class GXDLMSProfileGeneric extends GXDLMSObject implements IGXDLMSBase {
      * @return Selected columns.
      */
     public final List<Entry<GXDLMSObject, GXDLMSCaptureObject>>
-
             getSelectedColumns(final int selector, final Object parameters) {
         if (selector == 0) {
             // Return all rows.
@@ -529,17 +523,18 @@ public class GXDLMSProfileGeneric extends GXDLMSObject implements IGXDLMSBase {
     }
 
     final byte[] getProfileGenericData(final GXDLMSSettings settings,
-            final int selector, final Object parameters) {
+            final ValueEventArgs e) {
         List<Entry<GXDLMSObject, GXDLMSCaptureObject>> columns = null;
         // If all data is read.
-        if (selector == 0 || parameters == null || settings.getCount() != 0) {
-            return getData(settings, getBuffer(), columns);
+        if (e.getSelector() == 0 || e.getParameters() == null
+                || e.getRowEndIndex() != 0) {
+            return getData(settings, e, getBuffer(), columns);
         }
-        Object[] arr = (Object[]) parameters;
-        columns = getSelectedColumns(selector, arr);
+        Object[] arr = (Object[]) e.getParameters();
+        columns = getSelectedColumns(e.getSelector(), arr);
         ArrayList<Object[]> table = new ArrayList<Object[]>();
         // Read by range
-        if (selector == 1) {
+        if (e.getSelector() == 1) {
             GXDataInfo info = new GXDataInfo();
             info.setType(DataType.DATETIME);
             java.util.Date start = ((GXDateTime) GXCommon
@@ -562,7 +557,7 @@ public class GXDLMSProfileGeneric extends GXDLMSObject implements IGXDLMSBase {
                     table.add((Object[]) row);
                 }
             }
-        } else if (selector == 2) {
+        } else if (e.getSelector() == 2) {
             // Read by entry.
             int start = ((Number) arr[0]).intValue();
             if (start == 0) {
@@ -585,7 +580,7 @@ public class GXDLMSProfileGeneric extends GXDLMSObject implements IGXDLMSBase {
         } else {
             throw new IllegalArgumentException("Invalid selector.");
         }
-        return getData(settings, table.toArray(), columns);
+        return getData(settings, e, table.toArray(), columns);
     }
 
     @Override
@@ -628,8 +623,7 @@ public class GXDLMSProfileGeneric extends GXDLMSObject implements IGXDLMSBase {
             return getLogicalName();
         }
         if (e.getIndex() == 2) {
-            return getProfileGenericData(settings, e.getSelector(),
-                    e.getParameters());
+            return getProfileGenericData(settings, e);
         }
         if (e.getIndex() == 3) {
             return getColumns();
