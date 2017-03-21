@@ -305,7 +305,18 @@ public abstract class GXDLMSServer2 {
      * @param e
      *            Value event arguments.
      */
-    public abstract void onGet(UpdateType type, ValueEventArgs[] e);
+    public abstract void onPreGet(UpdateType type, ValueEventArgs[] e);
+
+    /**
+     * Get selected value(s). This is called when example profile generic
+     * request current value.
+     * 
+     * @param type
+     *            Update type.
+     * @param e
+     *            Value event arguments.
+     */
+    public abstract void onPostGet(UpdateType type, ValueEventArgs[] e);
 
     /**
      * Find object.
