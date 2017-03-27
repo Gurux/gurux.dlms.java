@@ -508,6 +508,7 @@ abstract class GXDLMS {
         boolean ciphering = p.getCommand() != Command.AARQ
                 && p.getCommand() != Command.AARE
                 && p.getSettings().getCipher() != null
+                && p.getSettings().getCipher().getSecurity() != null
                 && p.getSettings().getCipher().getSecurity() != Security.NONE;
         int len = 0;
         if (!ciphering

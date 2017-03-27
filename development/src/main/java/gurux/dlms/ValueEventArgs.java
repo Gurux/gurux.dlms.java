@@ -108,6 +108,11 @@ public class ValueEventArgs {
     private long rowEndIndex;
 
     /**
+     * DLMS server.
+     */
+    private GXDLMSServerBase server;
+
+    /**
      * @return Target DLMS object.
      */
     public final GXDLMSObject getTarget() {
@@ -125,7 +130,7 @@ public class ValueEventArgs {
         return index;
     }
 
-    private void setIndex(final int value) {
+    public final void setIndex(final int value) {
         index = value;
     }
 
@@ -202,6 +207,32 @@ public class ValueEventArgs {
      */
     public final void setParameters(final Object value) {
         parameters = value;
+    }
+
+    /**
+     * Constructor.
+     * 
+     * @param svr
+     *            DLMS server.
+     * @param eventTarget
+     *            Event target.
+     * @param eventIndex
+     *            Event index.
+     * @param readSelector
+     *            Optional read event selector.
+     * @param forParameters
+     *            Optional parameters.
+     */
+    public ValueEventArgs(final GXDLMSServerBase svr,
+            final GXDLMSObject eventTarget, final int eventIndex,
+            final int readSelector, final Object forParameters) {
+        server = svr;
+        settings = svr.getSettings();
+        dataType = DataType.NONE;
+        setTarget(eventTarget);
+        setIndex(eventIndex);
+        selector = readSelector;
+        parameters = forParameters;
     }
 
     /**
@@ -360,5 +391,12 @@ public class ValueEventArgs {
      */
     public final void setRowBeginIndex(final long value) {
         rowBeginIndex = value;
+    }
+
+    /**
+     * @return DLMS server.
+     */
+    public final GXDLMSServerBase getServer() {
+        return server;
     }
 }

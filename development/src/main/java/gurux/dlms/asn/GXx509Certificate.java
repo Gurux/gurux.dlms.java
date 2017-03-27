@@ -3,7 +3,11 @@
 //  Gurux Ltd
 package gurux.dlms.asn;
 
+import java.io.IOException;
 import java.math.BigInteger;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.StandardOpenOption;
 import java.security.KeyFactory;
 import java.security.KeyPair;
 import java.security.NoSuchAlgorithmException;
@@ -147,7 +151,9 @@ public class GXx509Certificate {
      *            Base64 string.
      */
     public GXx509Certificate(final String data) {
-        init(GXCommon.fromBase64(data));
+        String tmp = data.replace("-----BEGIN CERTIFICATE-----", "");
+        tmp = tmp.replace("-----END CERTIFICATE-----", "");
+        init(GXCommon.fromBase64(tmp.trim()));
     }
 
     static String getAlgorithm(final String algorithm) {
@@ -673,5 +679,40 @@ public class GXx509Certificate {
      */
     public void setBasicConstraints(final boolean value) {
         basicConstraints = value;
+    }
+
+    /**
+     * Load private key from the PEM file.
+     * 
+     * @param path
+     *            File path.
+     * @return Created GXPkcs8 object.
+     * @throws IOException
+     *             IO exception.
+     */
+    public static GXx509Certificate load(final Path path) throws IOException {
+        String tmp = new String(Files.readAllBytes(path));
+        return new GXx509Certificate(tmp);
+    }
+
+    /**
+     * Save private key to PEM file.
+     * 
+     * @param path
+     *            File path.
+     * @throws IOException
+     *             IO exception.
+     */
+    public void save(final Path path) throws IOException {
+        StringBuffer sb = new StringBuffer();
+        if (publicKey != null) {
+            sb.append("-----BEGIN CERTIFICATE-----" + System.lineSeparator());
+            sb.append(GXCommon.toBase64(getEncoded()));
+            sb.append(System.lineSeparator() + "-----END CERTIFICATE-----");
+        } else {
+            throw new IllegalArgumentException(
+                    "Public or private key is not set.");
+        }
+        Files.write(path, sb.toString().getBytes(), StandardOpenOption.CREATE);
     }
 }

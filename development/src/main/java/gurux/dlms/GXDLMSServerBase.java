@@ -3,17 +3,21 @@ package gurux.dlms;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
+import gurux.dlms.enums.AccessMode;
 import gurux.dlms.enums.AssociationResult;
 import gurux.dlms.enums.Authentication;
 import gurux.dlms.enums.Command;
 import gurux.dlms.enums.ErrorCode;
 import gurux.dlms.enums.InterfaceType;
+import gurux.dlms.enums.MethodAccessMode;
 import gurux.dlms.enums.ObjectType;
 import gurux.dlms.enums.Priority;
 import gurux.dlms.enums.RequestTypes;
 import gurux.dlms.enums.ServiceClass;
 import gurux.dlms.enums.SourceDiagnostic;
 import gurux.dlms.internal.GXCommon;
+import gurux.dlms.manufacturersettings.GXAttributeCollection;
+import gurux.dlms.manufacturersettings.GXDLMSAttributeSettings;
 import gurux.dlms.objects.GXDLMSAssociationLogicalName;
 import gurux.dlms.objects.GXDLMSAssociationShortName;
 import gurux.dlms.objects.GXDLMSObject;
@@ -321,7 +325,7 @@ public class GXDLMSServerBase {
      * @return Reply to the client.
      */
     private void handleAarqRequest(final GXByteBuffer data,
-            final GXDLMSConnectionEventArgs connectionInfo) {
+            final GXDLMSConnectionEventArgs connectionInfo) throws Exception {
         AssociationResult result = AssociationResult.ACCEPTED;
         // Reset settings for wrapper.
         if (settings.getInterfaceType() == InterfaceType.WRAPPER) {
@@ -545,7 +549,10 @@ public class GXDLMSServerBase {
 
                     } else {
                         GXDLMSServer2 b = (GXDLMSServer2) owner;
-                        b.onDisconnected(connectionInfo);
+                        try {
+                            b.onDisconnected(connectionInfo);
+                        } catch (Exception ex) {
+                        }
                     }
                 }
                 return null;
@@ -602,7 +609,7 @@ public class GXDLMSServerBase {
      * @return Response for the client.
      */
     private byte[] handleCommand(final int cmd, final GXByteBuffer data,
-            final GXDLMSConnectionEventArgs connectionInfo) {
+            final GXDLMSConnectionEventArgs connectionInfo) throws Exception {
         byte frame = 0;
         switch (cmd) {
         case Command.ACCESS_REQUEST:
@@ -685,7 +692,7 @@ public class GXDLMSServerBase {
     }
 
     final GXDLMSObject notifyFindObject(final ObjectType objectType,
-            final int sn, final String ln) {
+            final int sn, final String ln) throws Exception {
         if (owner instanceof GXDLMSServer) {
             return ((GXDLMSServer) owner).onFindObject(objectType, sn, ln);
         }
@@ -696,7 +703,7 @@ public class GXDLMSServerBase {
      * Read selected item(s).
      * @param args Handled read requests.
      */
-    final void notifyRead(final ValueEventArgs[] args) {
+    final void notifyRead(final ValueEventArgs[] args) throws Exception {
         if (owner instanceof GXDLMSServer) {
             ((GXDLMSServer) owner).read(args);
         } else {
@@ -708,7 +715,7 @@ public class GXDLMSServerBase {
      * Write selected item(s).
      * @param args Handled write requests.
      */
-    final void notifyWrite(final ValueEventArgs[] args) {
+    final void notifyWrite(final ValueEventArgs[] args) throws Exception {
         if (owner instanceof GXDLMSServer) {
             ((GXDLMSServer) owner).write(args);
         } else {
@@ -720,7 +727,7 @@ public class GXDLMSServerBase {
      * Action is occurred.
      * @param args Handled action requests.
      */
-    final void notifyAction(final ValueEventArgs[] args) {
+    final void notifyAction(final ValueEventArgs[] args) throws Exception {
         if (owner instanceof GXDLMSServer) {
             ((GXDLMSServer) owner).action(args);
         } else {
@@ -733,7 +740,7 @@ public class GXDLMSServerBase {
      * @param connectionInfo Connection info.
      */
     final void notifyInvalidConnection(
-            final GXDLMSConnectionEventArgs connectionInfo) {
+            final GXDLMSConnectionEventArgs connectionInfo) throws Exception {
         if (owner instanceof GXDLMSServer) {
             ((GXDLMSServer) owner).invalidConnection(connectionInfo);
         } else {
@@ -741,11 +748,45 @@ public class GXDLMSServerBase {
         }
     }
 
+    public final AccessMode notifyGetAttributeAccess(final ValueEventArgs arg)
+            throws Exception {
+        if (owner instanceof GXDLMSServer) {
+            GXAttributeCollection attributes = arg.getTarget().getAttributes();
+            GXDLMSAttributeSettings att = attributes.find(arg.getIndex());
+            /// If attribute is not set return read only.
+            if (att == null) {
+                return AccessMode.READ;
+            }
+            return att.getAccess();
+        } else {
+            if (arg.getIndex() == 1) {
+                return AccessMode.READ;
+            }
+            return ((GXDLMSServer2) owner).onGetAttributeAccess(arg);
+        }
+    }
+
+    public final MethodAccessMode
+            notifyGetMethodAccess(final ValueEventArgs arg) throws Exception {
+        if (owner instanceof GXDLMSServer) {
+            GXAttributeCollection attributes =
+                    arg.getTarget().getMethodAttributes();
+            GXDLMSAttributeSettings att = attributes.find(arg.getIndex());
+            /// If attribute is not set return read only.
+            if (att == null) {
+                return MethodAccessMode.NO_ACCESS;
+            }
+            return att.getMethodAccess();
+        } else {
+            return ((GXDLMSServer2) owner).onGetMethodAccess(arg);
+        }
+    }
+
     /*
      * Read selected item(s).
      * @param args Handled read requests.
      */
-    final void notifyPostRead(final ValueEventArgs[] args) {
+    final void notifyPostRead(final ValueEventArgs[] args) throws Exception {
         if (owner instanceof GXDLMSServer2) {
             ((GXDLMSServer2) owner).onPostRead(args);
         }
@@ -755,7 +796,7 @@ public class GXDLMSServerBase {
      * Write selected item(s).
      * @param args Handled write requests.
      */
-    final void notifyPostWrite(final ValueEventArgs[] args) {
+    final void notifyPostWrite(final ValueEventArgs[] args) throws Exception {
         if (owner instanceof GXDLMSServer2) {
             ((GXDLMSServer2) owner).onPostWrite(args);
         }
@@ -765,9 +806,25 @@ public class GXDLMSServerBase {
      * Action is occurred.
      * @param args Handled action requests.
      */
-    final void notifyPostAction(final ValueEventArgs[] args) {
+    final void notifyPostAction(final ValueEventArgs[] args) throws Exception {
         if (owner instanceof GXDLMSServer2) {
             ((GXDLMSServer2) owner).onPostAction(args);
+        }
+    }
+
+    public final void notifyPreGet(final ValueEventArgs[] args)
+            throws Exception {
+        if (owner instanceof GXDLMSServer2) {
+            ((GXDLMSServer2) owner).onPreGet(args);
+        } else if (owner instanceof GXDLMSServer) {
+            ((GXDLMSServer) owner).read(args);
+        }
+    }
+
+    public final void notifyPostGet(final ValueEventArgs[] args)
+            throws Exception {
+        if (owner instanceof GXDLMSServer2) {
+            ((GXDLMSServer2) owner).onPostGet(args);
         }
     }
 }

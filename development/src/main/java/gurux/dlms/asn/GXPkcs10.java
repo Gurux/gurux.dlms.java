@@ -3,6 +3,10 @@
 //  Gurux Ltd
 package gurux.dlms.asn;
 
+import java.io.IOException;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.StandardOpenOption;
 import java.security.KeyFactory;
 import java.security.KeyPair;
 import java.security.NoSuchAlgorithmException;
@@ -72,7 +76,11 @@ public class GXPkcs10 {
      *            Base64 string.
      */
     public GXPkcs10(final String data) {
-        init(GXCommon.fromBase64(data));
+        String tmp = data.replace("-----BEGIN CERTIFICATE REQUEST-----", "");
+        tmp = tmp.replace("-----END CERTIFICATE REQUEST-----", "");
+        tmp = tmp.replace("-----BEGIN NEW CERTIFICATE REQUEST-----", "");
+        tmp = tmp.replace("-----END NEW CERTIFICATE REQUEST-----", "");
+        init(GXCommon.fromBase64(tmp.trim()));
     }
 
     /**
@@ -387,5 +395,34 @@ public class GXPkcs10 {
         pkc10.setSubject(subject);
         pkc10.sign(kp, HashAlgorithm.SHA256withECDSA);
         return pkc10;
+    }
+
+    /**
+     * Load public key from the PEM file.
+     * 
+     * @param path
+     *            File path.
+     * @return Created GXPkcs10 object.
+     */
+    public static GXPkcs10 load(final Path path) throws IOException {
+        byte[] encoded = Files.readAllBytes(path);
+        return new GXPkcs10(new String(encoded));
+    }
+
+    /**
+     * Save public key to PEM file.
+     * 
+     * @param path
+     *            File path.
+     * @throws IOException
+     *             IO exception.
+     */
+    public void save(final Path path) throws IOException {
+        StringBuffer sb = new StringBuffer();
+        sb.append(
+                "-----BEGIN CERTIFICATE REQUEST-----" + System.lineSeparator());
+        sb.append(GXCommon.toBase64(getEncoded()));
+        sb.append(System.lineSeparator() + "-----END CERTIFICATE REQUEST-----");
+        Files.write(path, sb.toString().getBytes(), StandardOpenOption.CREATE);
     }
 }

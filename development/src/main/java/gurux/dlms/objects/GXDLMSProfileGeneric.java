@@ -42,8 +42,7 @@ import java.util.Map.Entry;
 import gurux.dlms.GXByteBuffer;
 import gurux.dlms.GXDLMSClient;
 import gurux.dlms.GXDLMSException;
-import gurux.dlms.GXDLMSServer;
-import gurux.dlms.GXDLMSServer2;
+import gurux.dlms.GXDLMSServerBase;
 import gurux.dlms.GXDLMSSettings;
 import gurux.dlms.GXDateTime;
 import gurux.dlms.GXSimpleEntry;
@@ -51,7 +50,6 @@ import gurux.dlms.ValueEventArgs;
 import gurux.dlms.enums.DataType;
 import gurux.dlms.enums.ErrorCode;
 import gurux.dlms.enums.ObjectType;
-import gurux.dlms.enums.UpdateType;
 import gurux.dlms.internal.GXCommon;
 import gurux.dlms.internal.GXDataInfo;
 import gurux.dlms.objects.enums.SortMethod;
@@ -148,6 +146,29 @@ public class GXDLMSProfileGeneric extends GXDLMSObject implements IGXDLMSBase {
     public final void clearBuffer() {
         buffer.clear();
         entriesInUse = 0;
+    }
+
+    /**
+     * Clears the buffer.
+     * 
+     * @param client
+     *            DLMS client.
+     * @return Action bytes.
+     */
+    public final byte[][] reset(final GXDLMSClient client) {
+        return client.method(this, 1, new Integer(0), DataType.UINT8);
+    }
+
+    /**
+     * Copies the values of the objects to capture into the buffer by reading
+     * each capture object.
+     * 
+     * @param client
+     *            DLMS client.
+     * @return Action bytes.
+     */
+    public final byte[][] capture(final GXDLMSClient client) {
+        return client.method(this, 2, new Integer(0), DataType.UINT8);
     }
 
     /*
@@ -288,6 +309,25 @@ public class GXDLMSProfileGeneric extends GXDLMSObject implements IGXDLMSBase {
         return new Object[] { getLogicalName(), getBuffer(),
                 getCaptureObjects(), getCapturePeriod(), getSortMethod(),
                 getSortObject(), getEntriesInUse(), getProfileEntries() };
+    }
+
+    @Override
+    public final byte[] invoke(final GXDLMSSettings settings,
+            final ValueEventArgs e) {
+        if (e.getIndex() == 1) {
+            // Reset.
+            reset();
+        } else if (e.getIndex() == 2) {
+            // Capture.
+            try {
+                capture(e.getServer());
+            } catch (Exception e1) {
+                e.setError(ErrorCode.HARDWARE_FAULT);
+            }
+        } else {
+            e.setError(ErrorCode.READ_WRITE_DENIED);
+        }
+        return null;
     }
 
     /*
@@ -872,50 +912,31 @@ public class GXDLMSProfileGeneric extends GXDLMSObject implements IGXDLMSBase {
      * Copies the values of the objects to capture into the buffer by reading
      * capture objects.
      */
-    public final void capture(final Object server) {
+    public final void capture(final Object server) throws Exception {
         synchronized (this) {
+            GXDLMSServerBase srv = (GXDLMSServerBase) server;
             Object[] values = new Object[captureObjects.size()];
-            int pos = -1;
-            List<ValueEventArgs> args = new ArrayList<ValueEventArgs>();
-            // CHECKSTYLE:OFF
-            for (Entry<GXDLMSObject, GXDLMSCaptureObject> obj : captureObjects) {
-                // CHECKSTYLE:ON
-                ValueEventArgs e = new ValueEventArgs(
-                        ((GXDLMSServer2) server).getSettings(), obj.getKey(),
-                        obj.getValue().getAttributeIndex(), 0, null);
-                args.add(e);
-            }
-            if (server instanceof GXDLMSServer) {
-                ((GXDLMSServer) server)
-                        .read(args.toArray(new ValueEventArgs[args.size()]));
-            }
-            if (server instanceof GXDLMSServer2) {
-                ((GXDLMSServer2) server).onPreGet(UpdateType.PROFILE_GENERIC,
-                        args.toArray(new ValueEventArgs[args.size()]));
-            }
-
-            // CHECKSTYLE:OFF
-            for (ValueEventArgs it : args) {
-                // CHECKSTYLE:ON
-                if (it.getHandled()) {
-                    values[++pos] = it.getValue();
-                } else {
-                    values[++pos] = it.getTarget().getValue(null, it);
+            int pos = 0;
+            ValueEventArgs[] args = new ValueEventArgs[] {
+                    new ValueEventArgs(srv, this, 2, 0, null) };
+            srv.notifyPreGet(args);
+            if (!args[0].getHandled()) {
+                // CHECKSTYLE:OFF
+                for (Entry<GXDLMSObject, GXDLMSCaptureObject> it : captureObjects) {
+                    values[pos] = it.getKey()
+                            .getValues()[it.getValue().getAttributeIndex() - 1];
+                    ++pos;
+                }
+                synchronized (this) {
+                    // Remove first items if buffer is full.
+                    if (getProfileEntries() == getBuffer().length) {
+                        buffer.remove(0);
+                    }
+                    buffer.add(values);
+                    entriesInUse = buffer.size();
                 }
             }
-            synchronized (this) {
-                // Remove first items if buffer is full.
-                if (getProfileEntries() == getBuffer().length) {
-                    buffer.remove(0);
-                }
-                buffer.add(values);
-                entriesInUse = buffer.size();
-            }
-
-            if (server instanceof GXDLMSServer2) {
-                ((GXDLMSServer2) server).onPostGet(UpdateType.PROFILE_GENERIC,
-                        args.toArray(new ValueEventArgs[args.size()]));
-            }
+            srv.notifyPostGet(args);
         }
     }
 }

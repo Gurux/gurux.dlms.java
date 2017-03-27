@@ -32,7 +32,7 @@ final class GXDLMSSNCommandHandler {
             final GXByteBuffer data, final List<ValueEventArgs> list,
             final List<ValueEventArgs> reads,
             final List<ValueEventArgs> actions, final GXByteBuffer replyData,
-            final GXDLMSTranslatorStructure xml) {
+            final GXDLMSTranslatorStructure xml) throws Exception {
         // CHECKSTYLE:ON
         // GetRequest normal
         int sn = data.getInt16();
@@ -72,8 +72,8 @@ final class GXDLMSSNCommandHandler {
         }
         sn = sn & 0xFFFF;
         GXSNInfo i = findSNObject(server, sn);
-        ValueEventArgs e = new ValueEventArgs(settings, i.getItem(),
-                i.getIndex(), 0, null);
+        ValueEventArgs e =
+                new ValueEventArgs(server, i.getItem(), i.getIndex(), 0, null);
         e.setAction(i.isAction());
         if (type == VariableAccessSpecification.PARAMETERISED_ACCESS) {
             e.setSelector(data.getUInt8());
@@ -91,11 +91,11 @@ final class GXDLMSSNCommandHandler {
         }
 
         list.add(e);
-        if (!e.isAction() && i.getItem()
-                .getAccess(i.getIndex()) == AccessMode.NO_ACCESS) {
+        if (!e.isAction()
+                && server.notifyGetAttributeAccess(e) == AccessMode.NO_ACCESS) {
             e.setError(ErrorCode.READ_WRITE_DENIED);
-        } else if (e.isAction() && i.getItem()
-                .getMethodAccess(i.getIndex()) == MethodAccessMode.NO_ACCESS) {
+        } else if (e.isAction() && server
+                .notifyGetMethodAccess(e) == MethodAccessMode.NO_ACCESS) {
             e.setError(ErrorCode.READ_WRITE_DENIED);
         } else {
             if (e.isAction()) {
@@ -115,7 +115,7 @@ final class GXDLMSSNCommandHandler {
     private static void handleReadBlockNumberAccess(
             final GXDLMSSettings settings, final GXDLMSServerBase server,
             final GXByteBuffer data, final GXByteBuffer replyData,
-            final GXDLMSTranslatorStructure xml) {
+            final GXDLMSTranslatorStructure xml) throws Exception {
         int blockNumber = data.getUInt16();
         if (xml != null) {
             xml.appendStartTag(Command.READ_REQUEST,
@@ -237,7 +237,8 @@ final class GXDLMSSNCommandHandler {
     private static void handleReadDataBlockAccess(final GXDLMSSettings settings,
             final GXDLMSServerBase server, final int command,
             final GXByteBuffer data, final int cnt,
-            final GXByteBuffer replyData, final GXDLMSTranslatorStructure xml) {
+            final GXByteBuffer replyData, final GXDLMSTranslatorStructure xml)
+            throws Exception {
         GXByteBuffer bb = new GXByteBuffer();
         short lastBlock = data.getUInt8();
         int blockNumber = data.getUInt16();
@@ -329,7 +330,8 @@ final class GXDLMSSNCommandHandler {
      */
     static void handleReadRequest(final GXDLMSSettings settings,
             final GXDLMSServerBase server, final GXByteBuffer data,
-            final GXByteBuffer replyData, final GXDLMSTranslatorStructure xml) {
+            final GXByteBuffer replyData, final GXDLMSTranslatorStructure xml)
+            throws Exception {
         GXByteBuffer bb = new GXByteBuffer();
         int cnt = 0xFF;
         byte type;
@@ -435,7 +437,7 @@ final class GXDLMSSNCommandHandler {
      * @param sn
      */
     private static GXSNInfo findSNObject(final GXDLMSServerBase server,
-            final int sn) {
+            final int sn) throws Exception {
         GXSNInfo i = new GXSNInfo();
         int[] offset = new int[1], count = new int[1];
         for (GXDLMSObject it : server.getItems()) {
@@ -474,7 +476,8 @@ final class GXDLMSSNCommandHandler {
      */
     static void handleWriteRequest(final GXDLMSSettings settings,
             final GXDLMSServerBase server, final GXByteBuffer data,
-            final GXByteBuffer replyData, final GXDLMSTranslatorStructure xml) {
+            final GXByteBuffer replyData, final GXDLMSTranslatorStructure xml)
+            throws Exception {
         // Return error if connection is not established.
         if (xml == null && !settings.isConnected()) {
             replyData.set(GXDLMSServerBase.generateConfirmedServiceError(
@@ -576,14 +579,14 @@ final class GXDLMSSNCommandHandler {
                         value = GXDLMSClient.changeType((byte[]) value, dt);
                     }
                 }
-                AccessMode am = target.getItem().getAccess(target.getIndex());
+                ValueEventArgs e = new ValueEventArgs(server, target.getItem(),
+                        target.getIndex(), 0, null);
+                AccessMode am = server.notifyGetAttributeAccess(e);
                 // If write is denied.
                 if (am != AccessMode.WRITE && am != AccessMode.READ_WRITE) {
                     results.setUInt8(pos,
                             ErrorCode.READ_WRITE_DENIED.getValue());
                 } else {
-                    ValueEventArgs e = new ValueEventArgs(settings,
-                            target.getItem(), target.getIndex(), 0, null);
                     e.setValue(value);
                     server.notifyWrite(new ValueEventArgs[] { e });
                     if (e.getError() != ErrorCode.OK) {

@@ -630,7 +630,7 @@ public class GXDLMSClient {
                 GXAPDU.parsePDU(settings, settings.getCipher(), reply,
                         null) == SourceDiagnostic.AUTHENTICATION_REQUIRED;
         if (getDLMSVersion() != 6) {
-            throw new GXDLMSException("Invalid DLMS version number.");
+            throw new IllegalArgumentException("Invalid DLMS version number.");
         }
     }
 

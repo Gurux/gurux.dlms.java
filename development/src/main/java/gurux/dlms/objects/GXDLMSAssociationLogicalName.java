@@ -40,6 +40,7 @@ import java.util.logging.Level;
 import java.util.logging.Logger;
 
 import gurux.dlms.GXByteBuffer;
+import gurux.dlms.GXDLMSServerBase;
 import gurux.dlms.GXDLMSSettings;
 import gurux.dlms.ValueEventArgs;
 import gurux.dlms.enums.AccessMode;
@@ -49,8 +50,6 @@ import gurux.dlms.enums.ErrorCode;
 import gurux.dlms.enums.MethodAccessMode;
 import gurux.dlms.enums.ObjectType;
 import gurux.dlms.internal.GXCommon;
-import gurux.dlms.manufacturersettings.GXAttributeCollection;
-import gurux.dlms.manufacturersettings.GXDLMSAttributeSettings;
 import gurux.dlms.objects.enums.AssociationStatus;
 import gurux.dlms.secure.GXSecure;
 
@@ -340,93 +339,81 @@ public class GXDLMSAssociationLogicalName extends GXDLMSObject
      */
     private byte[] getObjects(final GXDLMSSettings settings,
             final ValueEventArgs e) {
-        GXByteBuffer data = new GXByteBuffer();
-
-        // Add count only for first time.
-        if (settings.getIndex() == 0) {
-            settings.setCount(objectList.size());
-            data.setUInt8(DataType.ARRAY.getValue());
-            GXCommon.setObjectCount(objectList.size(), data);
-        }
-        int pos = 0;
-        for (GXDLMSObject it : objectList) {
-            ++pos;
-            if (!(pos <= settings.getIndex())) {
-                data.setUInt8(DataType.STRUCTURE.getValue());
-                // Count
-                data.setUInt8(4);
-                // ClassID
-                GXCommon.setData(data, DataType.UINT16,
-                        it.getObjectType().getValue());
-                // Version
-                GXCommon.setData(data, DataType.UINT8, it.getVersion());
-                // LN
-                GXCommon.setData(data, DataType.OCTET_STRING,
-                        it.getLogicalName());
-                getAccessRights(it, data); // Access rights.
-                settings.setIndex(settings.getIndex() + 1);
-                // If PDU is full.
-                if (!e.isSkipMaxPduSize()
-                        && data.size() >= settings.getMaxPduSize()) {
-                    break;
-                }
+        try {
+            GXByteBuffer data = new GXByteBuffer();
+            // Add count only for first time.
+            if (settings.getIndex() == 0) {
+                settings.setCount(objectList.size());
+                data.setUInt8(DataType.ARRAY.getValue());
+                GXCommon.setObjectCount(objectList.size(), data);
             }
+            int pos = 0;
+            for (GXDLMSObject it : objectList) {
+                ++pos;
+                if (!(pos <= settings.getIndex())) {
+                    data.setUInt8(DataType.STRUCTURE.getValue());
+                    // Count
+                    data.setUInt8(4);
+                    // ClassID
+                    GXCommon.setData(data, DataType.UINT16,
+                            it.getObjectType().getValue());
+                    // Version
+                    GXCommon.setData(data, DataType.UINT8, it.getVersion());
+                    // LN
+                    GXCommon.setData(data, DataType.OCTET_STRING,
+                            it.getLogicalName());
+                    getAccessRights(it, e.getServer(), data); // Access rights.
+                    settings.setIndex(settings.getIndex() + 1);
+                    // If PDU is full.
+                    if (!e.isSkipMaxPduSize()
+                            && data.size() >= settings.getMaxPduSize()) {
+                        break;
+                    }
+                }
 
+            }
+            return data.array();
+        } catch (Exception ex) {
+            e.setError(ErrorCode.HARDWARE_FAULT);
+            return null;
         }
-        return data.array();
+
     }
 
     private void getAccessRights(final GXDLMSObject item,
-            final GXByteBuffer data) {
+            final GXDLMSServerBase server, final GXByteBuffer data)
+            throws Exception {
         data.setUInt8(DataType.STRUCTURE.getValue());
         data.setUInt8(2);
         data.setUInt8(DataType.ARRAY.getValue());
-        GXAttributeCollection attributes = item.getAttributes();
         int cnt = item.getAttributeCount();
         data.setUInt8(cnt);
+        ValueEventArgs e = new ValueEventArgs(server, item, 0, 0, null);
         for (int pos = 0; pos != cnt; ++pos) {
-            GXDLMSAttributeSettings att = attributes.find(pos + 1);
+            e.setIndex(pos + 1);
+            AccessMode m = server.notifyGetAttributeAccess(e);
             // attribute_access_item
             data.setUInt8(DataType.STRUCTURE.getValue());
             data.setUInt8(3);
             GXCommon.setData(data, DataType.INT8, pos + 1);
-            /// If attribute is not set return read only.
-            if (att == null) {
-                GXCommon.setData(data, DataType.ENUM,
-                        AccessMode.READ.getValue());
-            } else {
-                GXCommon.setData(data, DataType.ENUM,
-                        att.getAccess().getValue());
-            }
+            GXCommon.setData(data, DataType.ENUM, m.getValue());
             GXCommon.setData(data, DataType.NONE, null);
         }
         data.setUInt8(DataType.ARRAY.getValue());
-        attributes = item.getMethodAttributes();
         cnt = item.getMethodCount();
         data.setUInt8(cnt);
         for (int pos = 0; pos != cnt; ++pos) {
-            GXDLMSAttributeSettings att = attributes.find(pos + 1);
+            e.setIndex(pos + 1);
             // attribute_access_item
             data.setUInt8(DataType.STRUCTURE.getValue());
             data.setUInt8(2);
             GXCommon.setData(data, DataType.INT8, pos + 1);
+            MethodAccessMode m = server.notifyGetMethodAccess(e);
             // If version is 0.
             if (getVersion() == 0) {
-                if (att == null) {
-                    GXCommon.setData(data, DataType.BOOLEAN, false);
-                } else {
-                    GXCommon.setData(data, DataType.BOOLEAN,
-                            att.getMethodAccess().getValue() != 0);
-                }
+                GXCommon.setData(data, DataType.BOOLEAN, m.getValue() != 0);
             } else {
-                /// If method attribute is not set return no access.
-                if (att == null) {
-                    GXCommon.setData(data, DataType.ENUM,
-                            MethodAccessMode.NO_ACCESS.getValue());
-                } else {
-                    GXCommon.setData(data, DataType.ENUM,
-                            att.getMethodAccess().getValue());
-                }
+                GXCommon.setData(data, DataType.ENUM, m.getValue());
             }
         }
     }

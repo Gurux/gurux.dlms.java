@@ -63,9 +63,9 @@ import gurux.dlms.enums.AccessMode;
 import gurux.dlms.enums.Authentication;
 import gurux.dlms.enums.DataType;
 import gurux.dlms.enums.InterfaceType;
+import gurux.dlms.enums.MethodAccessMode;
 import gurux.dlms.enums.ObjectType;
 import gurux.dlms.enums.SourceDiagnostic;
-import gurux.dlms.enums.UpdateType;
 import gurux.dlms.objects.GXDLMSActionSchedule;
 import gurux.dlms.objects.GXDLMSActivityCalendar;
 import gurux.dlms.objects.GXDLMSAssociationLogicalName;
@@ -243,7 +243,7 @@ public class GXDLMSBase extends GXDLMSSecureServer2
      * Add Activity Calendar object.
      */
     void addActivityCalendar() {
-        java.util.Calendar tm = java.util.Calendar.getInstance();
+        java.util.Calendar tm = Calendar.getInstance();
         java.util.Date now = tm.getTime();
 
         GXDLMSActivityCalendar activity = new GXDLMSActivityCalendar();
@@ -309,7 +309,7 @@ public class GXDLMSBase extends GXDLMSSecureServer2
      * Add Demand Register object.
      */
     void addDemandRegister() {
-        java.util.Calendar tm = java.util.Calendar.getInstance();
+        java.util.Calendar tm = Calendar.getInstance();
         java.util.Date now = tm.getTime();
         GXDLMSDemandRegister dr = new GXDLMSDemandRegister();
         dr.setLogicalName("0.0.1.0.0.255");
@@ -343,10 +343,8 @@ public class GXDLMSBase extends GXDLMSSecureServer2
         actionS.setExecutedScriptLogicalName("1.2.3.4.5.6");
         actionS.setExecutedScriptSelector(1);
         actionS.setType(SingleActionScheduleType.SingleActionScheduleType1);
-        actionS.setExecutionTime(
-                new GXDateTime[] { new GXDateTime(java.util.Calendar
-                        .getInstance(java.util.TimeZone.getTimeZone("UTC"))
-                        .getTime()) });
+        actionS.setExecutionTime(new GXDateTime[] {
+                new GXDateTime(Calendar.getInstance().getTime()) });
         getItems().add(actionS);
     }
 
@@ -695,14 +693,14 @@ public class GXDLMSBase extends GXDLMSSecureServer2
                     || e.getTarget()
                             .getDataType(e.getIndex()) == DataType.DATETIME)
                     && !(e.getTarget() instanceof GXDLMSClock)) {
-                e.setValue(java.util.Calendar.getInstance().getTime());
+                e.setValue(Calendar.getInstance().getTime());
                 e.setHandled(true);
             } else if (e.getTarget() instanceof GXDLMSClock) {
                 // Implement specific clock handling here.
                 // Otherwise initial values are used.
                 if (e.getIndex() == 2) {
-                    ((GXDLMSClock) e.getTarget()).setTime(
-                            java.util.Calendar.getInstance().getTime());
+                    ((GXDLMSClock) e.getTarget())
+                            .setTime(Calendar.getInstance().getTime());
                 }
             } else if (e.getTarget() instanceof GXDLMSRegisterMonitor
                     && e.getIndex() == 2) {
@@ -759,9 +757,48 @@ public class GXDLMSBase extends GXDLMSSecureServer2
 
     }
 
-    @Override
-    public void onPostAction(ValueEventArgs[] args) {
+    private void handleProfileGenericActions(ValueEventArgs it)
+            throws IOException {
+        GXDLMSProfileGeneric pg = (GXDLMSProfileGeneric) it.getTarget();
+        FileWriter writer = null;
+        try {
+            if (it.getIndex() == 1) {
+                // Profile generic clear is called. Clear data.
+                writer = new FileWriter(dataFile, false);
+            } else if (it.getIndex() == 2) {
+                // Profile generic Capture is called.
+                SimpleDateFormat df = new SimpleDateFormat();
+                writer = new FileWriter(dataFile, true);
+                StringBuilder sb = new StringBuilder();
+                for (int pos = pg.getBuffer().length - 1; pos != pg
+                        .getBuffer().length; ++pos) {
+                    for (int c = 0; c != pg.getCaptureObjects().size(); ++c) {
+                        if (c != 0) {
+                            sb.append(';');
+                        }
+                        Object col = ((Object[]) pg.getBuffer()[pos])[c];
+                        if (col instanceof Date) {
+                            sb.append(df.format((Date) col));
+                        } else {
+                            sb.append(col);
+                        }
+                    }
+                    sb.append("\n");
+                }
+                writer.write(sb.toString());
+            }
+        } finally {
+            writer.close();
+        }
+    }
 
+    @Override
+    public void onPostAction(ValueEventArgs[] args) throws Exception {
+        for (ValueEventArgs it : args) {
+            if (it.getTarget() instanceof GXDLMSProfileGeneric) {
+                handleProfileGenericActions(it);
+            }
+        }
     }
 
     @Override
@@ -864,22 +901,69 @@ public class GXDLMSBase extends GXDLMSSecureServer2
 
     SourceDiagnostic checkPassword(final Authentication authentication,
             final byte[] password) {
-        // Default password is Gurux.
-        byte[] expectedPassword = "Gurux".getBytes();
         if (authentication == Authentication.LOW) {
-            if (!java.util.Arrays.equals(password, expectedPassword)) {
-                String actual = "";
-                if (getSettings().getPassword() != null) {
-                    actual = new String(password);
-                }
-                String expected = new String(expectedPassword);
-                System.out.println("Password does not match. Actual: '" + actual
-                        + "' Expected: '" + expected + "'");
-                return SourceDiagnostic.AUTHENTICATION_FAILURE;
+
+            byte[] expected;
+            if (getUseLogicalNameReferencing()) {
+                GXDLMSAssociationLogicalName ln =
+                        (GXDLMSAssociationLogicalName) getItems().findByLN(
+                                ObjectType.ASSOCIATION_LOGICAL_NAME,
+                                "0.0.40.0.0.255");
+                expected = ln.getSecret();
+            } else {
+                GXDLMSAssociationShortName sn =
+                        (GXDLMSAssociationShortName) getItems().findByLN(
+                                ObjectType.ASSOCIATION_SHORT_NAME,
+                                "0.0.40.0.0.255");
+                expected = sn.getSecret();
             }
+            if (java.util.Arrays.equals(expected, password)) {
+                return SourceDiagnostic.NONE;
+            }
+            String actual = "";
+            if (password != null) {
+                actual = new String(password);
+            }
+            System.out.println("Password does not match. Actual: '" + actual
+                    + "' Expected: '" + new String(expected) + "'");
+            return SourceDiagnostic.AUTHENTICATION_FAILURE;
         }
         // Other authentication levels are check on phase two.
         return SourceDiagnostic.NONE;
+
+    }
+
+    @Override
+    protected AccessMode onGetAttributeAccess(final ValueEventArgs arg) {
+        // Only read is allowed
+        if (arg.getSettings().getAuthentication() == Authentication.NONE) {
+            return AccessMode.READ;
+        }
+        // Only clock write is allowed.
+        if (arg.getSettings().getAuthentication() == Authentication.LOW) {
+            if (arg.getTarget() instanceof GXDLMSClock) {
+                return AccessMode.READ_WRITE;
+            }
+            return AccessMode.READ;
+        }
+        // All writes are allowed.
+        return AccessMode.READ_WRITE;
+    }
+
+    @Override
+    protected MethodAccessMode onGetMethodAccess(final ValueEventArgs arg) {
+        // Methods are not allowed.
+        if (arg.getSettings().getAuthentication() == Authentication.NONE) {
+            return MethodAccessMode.NO_ACCESS;
+        }
+        // Only clock methods are allowed.
+        if (arg.getSettings().getAuthentication() == Authentication.LOW) {
+            if (arg.getTarget() instanceof GXDLMSClock) {
+                return MethodAccessMode.ACCESS;
+            }
+            return MethodAccessMode.NO_ACCESS;
+        }
+        return MethodAccessMode.ACCESS;
     }
 
     /**
@@ -911,15 +995,25 @@ public class GXDLMSBase extends GXDLMSSecureServer2
      * Schedule or profile generic asks current value.
      */
     @Override
-    public void onPreGet(UpdateType type, ValueEventArgs[] e) {
-
+    public void onPreGet(ValueEventArgs[] args) {
+        for (ValueEventArgs it : args) {
+            if (it.getTarget() instanceof GXDLMSProfileGeneric) {
+                GXDLMSProfileGeneric pg = (GXDLMSProfileGeneric) it.getTarget();
+                pg.clearBuffer();
+                int cnt = getProfileGenericDataCount() + 1;
+                // Update last average value.
+                pg.addRow(
+                        new Object[] { Calendar.getInstance().getTime(), cnt });
+                it.setHandled(true);
+            }
+        }
     }
 
     /**
      * Schedule or profile generic asks current value.
      */
     @Override
-    public void onPostGet(UpdateType type, ValueEventArgs[] e) {
+    public void onPostGet(ValueEventArgs[] e) {
 
     }
 
