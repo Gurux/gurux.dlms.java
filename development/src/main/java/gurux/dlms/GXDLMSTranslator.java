@@ -739,181 +739,198 @@ public class GXDLMSTranslator {
         if (value == null || value.size() == 0) {
             throw new IllegalArgumentException("value");
         }
-        GXDLMSSettings settings = new GXDLMSSettings(true);
-        settings.setCipher(getCiphering());
-        GXReplyData data = new GXReplyData();
-        short cmd = value.getUInt8();
-        switch (cmd) {
-        case Command.AARQ:
-            value.position(0);
-            GXAPDU.parsePDU(settings, settings.getCipher(), value, xml);
-            break;
-        case Command.INITIATE_REQUEST:
-            value.position(0);
-            settings = new GXDLMSSettings(true);
-            GXAPDU.parseInitiate(true, settings, settings.getCipher(), value,
-                    xml);
-            break;
-        case Command.INITIATE_RESPONSE:
-            value.position(0);
-            settings = new GXDLMSSettings(false);
+        try {
+            GXDLMSSettings settings = new GXDLMSSettings(true);
             settings.setCipher(getCiphering());
-            GXAPDU.parseInitiate(true, settings, settings.getCipher(), value,
-                    xml);
-            break;
-        case 0x81: // Ua
-            value.position(0);
-            getUa(value, xml);
-            break;
-        case Command.AARE:
-            value.position(0);
-            settings = new GXDLMSSettings(false);
-            settings.setCipher(getCiphering());
-            GXAPDU.parsePDU(settings, settings.getCipher(), value, xml);
-            break;
-        case Command.GET_REQUEST:
-            GXDLMSLNCommandHandler.handleGetRequest(settings, null, value, null,
-                    xml);
-            break;
-        case Command.SET_REQUEST:
-            GXDLMSLNCommandHandler.handleSetRequest(settings, null, value, null,
-                    xml);
-            break;
-        case Command.READ_REQUEST:
-            GXDLMSSNCommandHandler.handleReadRequest(settings, null, value,
-                    null, xml);
-            break;
-        case Command.METHOD_REQUEST:
-            GXDLMSLNCommandHandler.handleMethodRequest(settings, null, value,
-                    null, null, xml);
-            break;
-        case Command.WRITE_REQUEST:
-            GXDLMSSNCommandHandler.handleWriteRequest(settings, null, value,
-                    null, xml);
-            break;
-        case Command.ACCESS_REQUEST:
-            GXDLMSLNCommandHandler.handleAccessRequest(settings, null, value,
-                    null, xml);
-            break;
-        case Command.DATA_NOTIFICATION:
-            data.setXml(xml);
-            data.setData(value);
-            value.position(0);
-            GXDLMS.getPdu(settings, data);
-            break;
-        case Command.READ_RESPONSE:
-        case Command.WRITE_RESPONSE:
-        case Command.GET_RESPONSE:
-        case Command.SET_RESPONSE:
-        case Command.METHOD_RESPONSE:
-        case Command.ACCESS_RESPONSE:
-            data.setXml(xml);
-            data.setData(value);
-            value.position(0);
-            GXDLMS.getPdu(settings, data);
-            break;
-        case Command.GENERAL_CIPHERING:
-            settings.setCipher(new GXCiphering("ABCDEFGH".getBytes()));
-            data.setXml(xml);
-            data.setData(value);
-            value.position(0);
-            GXDLMS.getPdu(settings, data);
-            break;
-        case Command.RELEASE_REQUEST:
-        case Command.RELEASE_RESPONSE:
-            xml.appendStartTag(cmd);
-            // Len.
-            if (value.getUInt8() != 0) {
-                // BerType
-                value.getUInt8();
+            GXReplyData data = new GXReplyData();
+            short cmd = value.getUInt8();
+            switch (cmd) {
+            case Command.AARQ:
+                value.position(0);
+                GXAPDU.parsePDU(settings, settings.getCipher(), value, xml);
+                break;
+            case Command.INITIATE_REQUEST:
+                value.position(0);
+                settings = new GXDLMSSettings(true);
+                GXAPDU.parseInitiate(true, settings, settings.getCipher(),
+                        value, xml);
+                break;
+            case Command.INITIATE_RESPONSE:
+                value.position(0);
+                settings = new GXDLMSSettings(false);
+                settings.setCipher(getCiphering());
+                GXAPDU.parseInitiate(true, settings, settings.getCipher(),
+                        value, xml);
+                break;
+            case 0x81: // Ua
+                value.position(0);
+                getUa(value, xml);
+                break;
+            case Command.AARE:
+                value.position(0);
+                settings = new GXDLMSSettings(false);
+                settings.setCipher(getCiphering());
+                GXAPDU.parsePDU(settings, settings.getCipher(), value, xml);
+                break;
+            case Command.GET_REQUEST:
+                GXDLMSLNCommandHandler.handleGetRequest(settings, null, value,
+                        null, xml);
+                break;
+            case Command.SET_REQUEST:
+                GXDLMSLNCommandHandler.handleSetRequest(settings, null, value,
+                        null, xml);
+                break;
+            case Command.READ_REQUEST:
+                GXDLMSSNCommandHandler.handleReadRequest(settings, null, value,
+                        null, xml);
+                break;
+            case Command.METHOD_REQUEST:
+                GXDLMSLNCommandHandler.handleMethodRequest(settings, null,
+                        value, null, null, xml);
+                break;
+            case Command.WRITE_REQUEST:
+                GXDLMSSNCommandHandler.handleWriteRequest(settings, null, value,
+                        null, xml);
+                break;
+            case Command.ACCESS_REQUEST:
+                GXDLMSLNCommandHandler.handleAccessRequest(settings, null,
+                        value, null, xml);
+                break;
+            case Command.DATA_NOTIFICATION:
+                data.setXml(xml);
+                data.setData(value);
+                value.position(0);
+                GXDLMS.getPdu(settings, data);
+                break;
+            case Command.READ_RESPONSE:
+            case Command.WRITE_RESPONSE:
+            case Command.GET_RESPONSE:
+            case Command.SET_RESPONSE:
+            case Command.METHOD_RESPONSE:
+            case Command.ACCESS_RESPONSE:
+                data.setXml(xml);
+                data.setData(value);
+                value.position(0);
+                GXDLMS.getPdu(settings, data);
+                break;
+            case Command.GENERAL_CIPHERING:
+                settings.setCipher(new GXCiphering("ABCDEFGH".getBytes()));
+                data.setXml(xml);
+                data.setData(value);
+                value.position(0);
+                GXDLMS.getPdu(settings, data);
+                break;
+            case Command.RELEASE_REQUEST:
+            case Command.RELEASE_RESPONSE:
+                xml.appendStartTag(cmd);
                 // Len.
-                value.getUInt8();
-                xml.appendLine(TranslatorTags.REASON, "Value",
-                        ReleaseRequestReason.forValue(value.getUInt8())
-                                .toString());
-            }
-            xml.appendEndTag(cmd);
-            break;
-        case Command.GLO_READ_REQUEST:
-        case Command.GLO_WRITE_REQUEST:
-        case Command.GLO_GET_REQUEST:
-        case Command.GLO_SET_REQUEST:
-        case Command.GLO_READ_RESPONSE:
-        case Command.GLO_WRITE_RESPONSE:
-        case Command.GLO_GET_RESPONSE:
-        case Command.GLO_SET_RESPONSE:
-        case Command.GLO_METHOD_REQUEST:
-        case Command.GLO_METHOD_RESPONSE:
+                if (value.getUInt8() != 0) {
+                    // BerType
+                    value.getUInt8();
+                    // Len.
+                    value.getUInt8();
+                    xml.appendLine(TranslatorTags.REASON, "Value",
+                            ReleaseRequestReason.forValue(value.getUInt8())
+                                    .toString());
+                }
+                xml.appendEndTag(cmd);
+                break;
+            case Command.GLO_READ_REQUEST:
+            case Command.GLO_WRITE_REQUEST:
+            case Command.GLO_GET_REQUEST:
+            case Command.GLO_SET_REQUEST:
+            case Command.GLO_READ_RESPONSE:
+            case Command.GLO_WRITE_RESPONSE:
+            case Command.GLO_GET_RESPONSE:
+            case Command.GLO_SET_RESPONSE:
+            case Command.GLO_METHOD_REQUEST:
+            case Command.GLO_METHOD_RESPONSE:
 
-            if (settings.getCipher() != null && comments) {
-                GXByteBuffer tmp = new GXByteBuffer();
-                tmp.set(value.getData(), value.position() - 1,
-                        value.size() - value.position() + 1);
-                settings.getCipher()
-                        .decrypt(settings.getCipher().getSystemTitle(), tmp);
-                xml.startComment("Decrypt data:");
-                pduToXml(xml, tmp, omitDeclaration, omitNameSpace);
-                xml.endComment();
-            }
-            int cnt = GXCommon.getObjectCount(value);
-            if (cnt != value.size() - value.position()) {
-                throw new IllegalArgumentException();
-            }
-            xml.appendLine(cmd, "Value", GXCommon.toHex(value.getData(), false,
-                    value.position(), value.size() - value.position()));
-            break;
-        case Command.GENERAL_GLO_CIPHERING:
-            int len = GXCommon.getObjectCount(value);
-            byte[] tmp = new byte[len];
-            value.get(tmp);
-            xml.appendStartTag(Command.GENERAL_GLO_CIPHERING);
-            xml.appendLine(TranslatorTags.SYSTEM_TITLE, null,
-                    GXCommon.toHex(tmp, false, 0, len));
-            len = GXCommon.getObjectCount(value);
-            tmp = new byte[len];
-            value.get(tmp);
-            xml.appendLine(TranslatorTags.CIPHERED_SERVICE, null,
-                    GXCommon.toHex(tmp, false, 0, len));
-            xml.appendEndTag(Command.GENERAL_GLO_CIPHERING);
-            break;
-        case Command.CONFIRMED_SERVICE_ERROR:
-            data.setXml(xml);
-            data.setData(value);
-            GXDLMS.handleConfirmedServiceError(data);
-            break;
-        default:
-            xml.appendLine("<Data=\"" + GXCommon.toHex(value.getData(), false,
-                    value.position(), value.size() - value.position())
-                    + "\" />");
-            break;
-        }
-        if (outputType == TranslatorOutputType.STANDARD_XML) {
-            StringBuilder sb = new StringBuilder();
-            if (!omitDeclaration) {
-                sb.append("<?xml version=\"1.0\" encoding=\"utf-8\"?>\r\n");
-            }
-            if (!omitNameSpace) {
-                // CHECKSTYLE:OFF
-                if (cmd != Command.AARE && cmd != Command.AARQ) {
-                    sb.append(
-                            "<x:xDLMS-APDU xmlns:x=\"http://www.dlms.com/COSEMpdu\">\r\n");
-                } else {
-                    sb.append(
-                            "<x:aCSE-APDU xmlns:x=\"http://www.dlms.com/COSEMpdu\">\r\n");
+                if (settings.getCipher() != null && comments) {
+                    GXByteBuffer tmp = new GXByteBuffer();
+                    tmp.set(value.getData(), value.position() - 1,
+                            value.size() - value.position() + 1);
+                    settings.getCipher().decrypt(
+                            settings.getCipher().getSystemTitle(), tmp);
+                    xml.startComment("Decrypt data:");
+                    pduToXml(xml, tmp, omitDeclaration, omitNameSpace);
+                    xml.endComment();
                 }
-                // CHECKSTYLE:ON
-            }
-            sb.append(xml.toString());
-            if (!omitNameSpace) {
-                if (cmd != Command.AARE && cmd != Command.AARQ) {
-                    sb.append("</x:xDLMS-APDU>\r\n");
-                } else {
-                    sb.append("</x:aCSE-APDU>\r\n");
+                int cnt = GXCommon.getObjectCount(value);
+                if (cnt != value.size() - value.position()) {
+                    throw new IllegalArgumentException();
                 }
+                xml.appendLine(cmd, "Value",
+                        GXCommon.toHex(value.getData(), false, value.position(),
+                                value.size() - value.position()));
+                break;
+            case Command.GENERAL_GLO_CIPHERING:
+                if (settings.getCipher() != null && comments) {
+                    GXByteBuffer tmp = new GXByteBuffer();
+                    tmp.set(value.getData(), value.position() - 1,
+                            value.size() - value.position() + 1);
+                    settings.getCipher().decrypt(
+                            settings.getCipher().getSystemTitle(), tmp);
+                    xml.startComment("Decrypt data:");
+                    pduToXml(xml, tmp, omitDeclaration, omitNameSpace);
+                    xml.endComment();
+                }
+                int len = GXCommon.getObjectCount(value);
+                byte[] tmp = new byte[len];
+                value.get(tmp);
+                xml.appendStartTag(Command.GENERAL_GLO_CIPHERING);
+                xml.appendLine(TranslatorTags.SYSTEM_TITLE, null,
+                        GXCommon.toHex(tmp, false, 0, len));
+                len = GXCommon.getObjectCount(value);
+                tmp = new byte[len];
+                value.get(tmp);
+                xml.appendLine(TranslatorTags.CIPHERED_SERVICE, null,
+                        GXCommon.toHex(tmp, false, 0, len));
+                xml.appendEndTag(Command.GENERAL_GLO_CIPHERING);
+                break;
+            case Command.CONFIRMED_SERVICE_ERROR:
+                data.setXml(xml);
+                data.setData(value);
+                GXDLMS.handleConfirmedServiceError(data);
+                break;
+            default:
+                xml.appendLine("<Data=\""
+                        + GXCommon.toHex(value.getData(), false,
+                                value.position(),
+                                value.size() - value.position())
+                        + "\" />");
+                break;
             }
-            return sb.toString();
+            if (outputType == TranslatorOutputType.STANDARD_XML) {
+                StringBuilder sb = new StringBuilder();
+                if (!omitDeclaration) {
+                    sb.append("<?xml version=\"1.0\" encoding=\"utf-8\"?>\r\n");
+                }
+                if (!omitNameSpace) {
+                    // CHECKSTYLE:OFF
+                    if (cmd != Command.AARE && cmd != Command.AARQ) {
+                        sb.append(
+                                "<x:xDLMS-APDU xmlns:x=\"http://www.dlms.com/COSEMpdu\">\r\n");
+                    } else {
+                        sb.append(
+                                "<x:aCSE-APDU xmlns:x=\"http://www.dlms.com/COSEMpdu\">\r\n");
+                    }
+                    // CHECKSTYLE:ON
+                }
+                sb.append(xml.toString());
+                if (!omitNameSpace) {
+                    if (cmd != Command.AARE && cmd != Command.AARQ) {
+                        sb.append("</x:xDLMS-APDU>\r\n");
+                    } else {
+                        sb.append("</x:aCSE-APDU>\r\n");
+                    }
+                }
+                return sb.toString();
+            }
+            return xml.toString();
+        } catch (Exception ex) {
+            throw new RuntimeException(ex.getMessage());
         }
-        return xml.toString();
     }
 
     /**

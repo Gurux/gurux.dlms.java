@@ -243,6 +243,9 @@ public class GXCiphering implements GXICipher {
      *            System title.
      */
     public final void setSystemTitle(final byte[] value) {
+        if (value != null && value.length != 8) {
+            throw new IllegalArgumentException("Invalid system title.");
+        }
         systemTitle = value;
     }
 
@@ -258,6 +261,10 @@ public class GXCiphering implements GXICipher {
      *            Recipient system title.
      */
     public final void setRecipientSystemTitle(final byte[] value) {
+        if (value != null && value.length != 8) {
+            throw new IllegalArgumentException(
+                    "Invalid recipient system title.");
+        }
         recipientSystemTitle = value;
     }
 

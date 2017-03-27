@@ -2189,7 +2189,7 @@ public final class GXCommon {
                 }
             }
             if (pk == null) {
-                throw new IllegalArgumentException("Agreement Key not set.");
+                throw new IllegalArgumentException("Certificate not set.");
             }
             KeyAgreement ka = KeyAgreement.getInstance("ECDH");
             ka.init(p);

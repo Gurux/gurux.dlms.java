@@ -34,14 +34,15 @@
 
 package gurux.dlms;
 
+import gurux.dlms.enums.AccessMode;
 import gurux.dlms.enums.Authentication;
 import gurux.dlms.enums.Conformance;
 import gurux.dlms.enums.InterfaceType;
+import gurux.dlms.enums.MethodAccessMode;
 import gurux.dlms.enums.ObjectType;
 import gurux.dlms.enums.Priority;
 import gurux.dlms.enums.ServiceClass;
 import gurux.dlms.enums.SourceDiagnostic;
-import gurux.dlms.enums.UpdateType;
 import gurux.dlms.objects.GXDLMSObject;
 import gurux.dlms.objects.GXDLMSObjectCollection;
 
@@ -281,8 +282,11 @@ public abstract class GXDLMSServer2 {
      * @param clientAddress
      *            Client address.
      * @return True, if data is sent to this server.
+     * @throws Exception
+     *             Server handler occurred exceptions.
      */
-    protected abstract boolean isTarget(int serverAddress, int clientAddress);
+    protected abstract boolean isTarget(int serverAddress, int clientAddress)
+            throws Exception;
 
     /**
      * Check whether the authentication and password are correct.
@@ -292,31 +296,33 @@ public abstract class GXDLMSServer2 {
      * @param password
      *            Password.
      * @return Source diagnostic.
+     * @throws Exception
+     *             Server handler occurred exceptions.
      */
     protected abstract SourceDiagnostic onValidateAuthentication(
-            Authentication authentication, byte[] password);
+            Authentication authentication, byte[] password) throws Exception;
 
     /**
      * Get selected value(s). This is called when example profile generic
      * request current value.
      * 
-     * @param type
-     *            Update type.
-     * @param e
+     * @param args
      *            Value event arguments.
+     * @throws Exception
+     *             Server handler occurred exceptions.
      */
-    public abstract void onPreGet(UpdateType type, ValueEventArgs[] e);
+    public abstract void onPreGet(ValueEventArgs[] args) throws Exception;
 
     /**
      * Get selected value(s). This is called when example profile generic
      * request current value.
      * 
-     * @param type
-     *            Update type.
-     * @param e
+     * @param args
      *            Value event arguments.
+     * @throws Exception
+     *             Server handler occurred exceptions.
      */
-    public abstract void onPostGet(UpdateType type, ValueEventArgs[] e);
+    public abstract void onPostGet(ValueEventArgs[] args) throws Exception;
 
     /**
      * Find object.
@@ -328,41 +334,51 @@ public abstract class GXDLMSServer2 {
      * @param ln
      *            Logical Name. In Short Name referencing this is not used.
      * @return Found object or null if object is not found.
+     * @throws Exception
+     *             Server handler occurred exceptions.
      */
     protected abstract GXDLMSObject onFindObject(ObjectType objectType, int sn,
-            String ln);
+            String ln) throws Exception;
 
     /**
      * Called before read is executed.
      * 
      * @param args
      *            Handled read requests.
+     * @throws Exception
+     *             Server handler occurred exceptions.
      */
-    public abstract void onPreRead(ValueEventArgs[] args);
+    public abstract void onPreRead(ValueEventArgs[] args) throws Exception;
 
     /**
      * Called after read is executed.
      * 
      * @param args
      *            Handled read requests.
+     * @throws Exception
+     *             Server handler occurred exceptions.
      */
-    public abstract void onPostRead(ValueEventArgs[] args);
+    public abstract void onPostRead(ValueEventArgs[] args) throws Exception;
 
     /**
      * Called before write is executed..
      * 
      * @param args
      *            Handled write requests.
+     * @throws Exception
+     *             Server handler occurred exceptions.
      */
-    protected abstract void onPreWrite(ValueEventArgs[] args);
+    protected abstract void onPreWrite(ValueEventArgs[] args) throws Exception;
 
     /**
      * Called after write is executed.
      * 
      * @param args
      *            Handled write requests.
+     * @throws Exception
+     *             Server handler occurred exceptions.
      */
-    protected abstract void onPostWrite(ValueEventArgs[] args);
+    protected abstract void onPostWrite(ValueEventArgs[] args) throws Exception;
 
     /**
      * Accepted connection is made for the server. All initialization is done
@@ -370,41 +386,76 @@ public abstract class GXDLMSServer2 {
      * 
      * @param connectionInfo
      *            Connection info.
+     * @throws Exception
+     *             Server handler occurred exceptions.
      */
-    protected abstract void
-            onConnected(GXDLMSConnectionEventArgs connectionInfo);
+    protected abstract void onConnected(
+            GXDLMSConnectionEventArgs connectionInfo) throws Exception;
 
     /**
      * Client has try to made invalid connection. Password is incorrect.
      * 
      * @param connectionInfo
      *            Connection info.
+     * @throws Exception
+     *             Server handler occurred exceptions.
      */
-    protected abstract void
-            onInvalidConnection(GXDLMSConnectionEventArgs connectionInfo);
+    protected abstract void onInvalidConnection(
+            GXDLMSConnectionEventArgs connectionInfo) throws Exception;
 
     /**
      * Server has close the connection. All clean up is made here.
      * 
      * @param connectionInfo
      *            Connection info.
+     * @throws Exception
+     *             Server handler occurred exceptions.
      */
-    protected abstract void
-            onDisconnected(GXDLMSConnectionEventArgs connectionInfo);
+    protected abstract void onDisconnected(
+            GXDLMSConnectionEventArgs connectionInfo) throws Exception;
+
+    /**
+     * Get attribute access mode.
+     * 
+     * @param arg
+     *            Value event argument.
+     * @return Access mode.
+     * @throws Exception
+     *             Server handler occurred exceptions.
+     */
+    protected abstract AccessMode onGetAttributeAccess(ValueEventArgs arg)
+            throws Exception;
+
+    /**
+     * Get method access mode.
+     * 
+     * @param arg
+     *            Value event argument.
+     * @return Method access mode.
+     * @throws Exception
+     *             Server handler occurred exceptions.
+     */
+    protected abstract MethodAccessMode onGetMethodAccess(ValueEventArgs arg)
+            throws Exception;
 
     /**
      * Called before action is executed.
      * 
      * @param args
      *            Handled action requests.
+     * @throws Exception
+     *             Server handler occurred exceptions.
      */
-    protected abstract void onPreAction(ValueEventArgs[] args);
+    protected abstract void onPreAction(ValueEventArgs[] args) throws Exception;
 
     /**
      * Called after action is executed.
      * 
      * @param args
      *            Handled action requests.
+     * @throws Exception
+     *             Server handler occurred exceptions.
      */
-    protected abstract void onPostAction(ValueEventArgs[] args);
+    protected abstract void onPostAction(ValueEventArgs[] args)
+            throws Exception;
 }

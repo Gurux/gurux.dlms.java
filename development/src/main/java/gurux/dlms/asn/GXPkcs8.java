@@ -3,6 +3,10 @@
 //  Gurux Ltd
 package gurux.dlms.asn;
 
+import java.io.IOException;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.StandardOpenOption;
 import java.security.KeyFactory;
 import java.security.NoSuchAlgorithmException;
 import java.security.PrivateKey;
@@ -58,13 +62,9 @@ public class GXPkcs8 {
     public GXPkcs8(final String data) {
         String tmp = data.replace("-----BEGIN PUBLIC KEY-----", "");
         tmp = tmp.replace("-----END PUBLIC KEY-----", "");
-        tmp = tmp.replace("-----BEGIN RSA PRIVATE KEY-----", "");
-        tmp = tmp.replace("-----END RSA PRIVATE KEY-----", "");
-        tmp = tmp.replace("-----BEGIN EC PRIVATE KEY-----", "");
-        tmp = tmp.replace("-----END EC PRIVATE KEY-----", "");
         tmp = tmp.replace("-----BEGIN PRIVATE KEY-----", "");
         tmp = tmp.replace("-----END PRIVATE KEY-----", "");
-        init(GXCommon.fromBase64(tmp));
+        init(GXCommon.fromBase64(tmp.trim()));
     }
 
     /**
@@ -242,5 +242,42 @@ public class GXPkcs8 {
      */
     public void setPublicKey(final PublicKey value) {
         publicKey = value;
+    }
+
+    /**
+     * Load private key from the PEM file.
+     * 
+     * @param path
+     *            File path.
+     * @return Created GXPkcs8 object.
+     */
+    public static GXPkcs8 load(final Path path) throws IOException {
+        String tmp = new String(Files.readAllBytes(path));
+        return new GXPkcs8(tmp);
+    }
+
+    /**
+     * Save private key to PEM file.
+     * 
+     * @param path
+     *            File path.
+     * @throws IOException
+     *             IO exception.
+     */
+    public void save(final Path path) throws IOException {
+        StringBuffer sb = new StringBuffer();
+        if (publicKey != null) {
+            sb.append("-----BEGIN PUBLIC KEY-----" + System.lineSeparator());
+            sb.append(GXCommon.toBase64(publicKey.getEncoded()));
+            sb.append(System.lineSeparator() + "-----END PUBLIC KEY-----");
+        } else if (privateKey != null) {
+            sb.append("-----BEGIN PRIVATE KEY-----" + System.lineSeparator());
+            sb.append(GXCommon.toBase64(privateKey.getEncoded()));
+            sb.append(System.lineSeparator() + "-----END PRIVATE KEY-----");
+        } else {
+            throw new IllegalArgumentException(
+                    "Public or private key is not set.");
+        }
+        Files.write(path, sb.toString().getBytes(), StandardOpenOption.CREATE);
     }
 }

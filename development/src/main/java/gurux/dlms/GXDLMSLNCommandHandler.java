@@ -33,7 +33,8 @@ final class GXDLMSLNCommandHandler {
 
     static void handleGetRequest(final GXDLMSSettings settings,
             final GXDLMSServerBase server, final GXByteBuffer data,
-            final GXByteBuffer replyData, final GXDLMSTranslatorStructure xml) {
+            final GXByteBuffer replyData, final GXDLMSTranslatorStructure xml)
+            throws Exception {
         // Return error if connection is not established.
         if (xml == null && !settings.acceptConnection()) {
             replyData.set(GXDLMSServerBase.generateConfirmedServiceError(
@@ -86,7 +87,8 @@ final class GXDLMSLNCommandHandler {
      */
     public static void handleSetRequest(final GXDLMSSettings settings,
             final GXDLMSServerBase server, final GXByteBuffer data,
-            final GXByteBuffer replyData, final GXDLMSTranslatorStructure xml) {
+            final GXByteBuffer replyData, final GXDLMSTranslatorStructure xml)
+            throws Exception {
         // Return error if connection is not established.
         if (xml == null && !settings.isConnected()) {
             replyData.set(GXDLMSServerBase.generateConfirmedServiceError(
@@ -166,7 +168,8 @@ final class GXDLMSLNCommandHandler {
      */
     private static void getRequestNormal(final GXDLMSSettings settings,
             final GXDLMSServerBase server, final GXByteBuffer data,
-            final GXByteBuffer replyData, final GXDLMSTranslatorStructure xml) {
+            final GXByteBuffer replyData, final GXDLMSTranslatorStructure xml)
+            throws Exception {
         GXByteBuffer bb = new GXByteBuffer();
         ValueEventArgs e = null;
         ErrorCode status = ErrorCode.OK;
@@ -215,12 +218,12 @@ final class GXDLMSLNCommandHandler {
             // "Access Error : Device reports a undefined object."
             status = ErrorCode.UNDEFINED_OBJECT;
         } else {
-            if (obj.getAccess(attributeIndex) == AccessMode.NO_ACCESS) {
+            e = new ValueEventArgs(server, obj, attributeIndex, selector,
+                    parameters);
+            if (server.notifyGetAttributeAccess(e) == AccessMode.NO_ACCESS) {
                 // Read Write denied.
                 status = ErrorCode.READ_WRITE_DENIED;
             } else {
-                e = new ValueEventArgs(settings, obj, attributeIndex, selector,
-                        parameters);
                 if (obj instanceof GXDLMSProfileGeneric
                         && attributeIndex == 2) {
                     DataType dt;
@@ -290,7 +293,8 @@ final class GXDLMSLNCommandHandler {
      */
     private static void getRequestNextDataBlock(final GXDLMSSettings settings,
             final GXDLMSServerBase server, final GXByteBuffer data,
-            final GXByteBuffer replyData, final GXDLMSTranslatorStructure xml) {
+            final GXByteBuffer replyData, final GXDLMSTranslatorStructure xml)
+            throws Exception {
         GXByteBuffer bb = new GXByteBuffer();
         int index = (int) data.getUInt32();
         // Get block index.
@@ -362,8 +366,8 @@ final class GXDLMSLNCommandHandler {
      */
     private static void getRequestWithList(final GXDLMSSettings settings,
             final GXDLMSServerBase server, final GXByteBuffer data,
-            final GXByteBuffer replyData, final GXDLMSTranslatorStructure xml) {
-        ValueEventArgs e = null;
+            final GXByteBuffer replyData, final GXDLMSTranslatorStructure xml)
+            throws Exception {
         GXByteBuffer bb = new GXByteBuffer();
         int pos;
         int cnt = GXCommon.getObjectCount(data);
@@ -408,21 +412,18 @@ final class GXDLMSLNCommandHandler {
                     obj = server.notifyFindObject(ci, 0,
                             GXDLMSObject.toLogicalName(ln));
                 }
+                ValueEventArgs arg = new ValueEventArgs(server, obj,
+                        attributeIndex, selector, parameters);
                 if (obj == null) {
-                    // "Access Error : Device reports a undefined object."
-                    e = new ValueEventArgs(settings, obj, attributeIndex, 0, 0);
-                    e.setError(ErrorCode.UNDEFINED_OBJECT);
-                    list.add(e);
+                    arg.setError(ErrorCode.UNDEFINED_OBJECT);
+                    list.add(arg);
                 } else {
-                    if (obj.getAccess(attributeIndex) == AccessMode.NO_ACCESS) {
+                    if (server.notifyGetAttributeAccess(
+                            arg) == AccessMode.NO_ACCESS) {
                         // Read Write denied.
-                        ValueEventArgs arg = new ValueEventArgs(settings, obj,
-                                attributeIndex, 0, null);
                         arg.setError(ErrorCode.READ_WRITE_DENIED);
                         list.add(arg);
                     } else {
-                        ValueEventArgs arg = new ValueEventArgs(settings, obj,
-                                attributeIndex, selector, parameters);
                         list.add(arg);
                     }
                 }
@@ -466,7 +467,8 @@ final class GXDLMSLNCommandHandler {
     private static void handleSetRequestNormal(final GXDLMSSettings settings,
             final GXDLMSServerBase server, final GXByteBuffer data,
             final int type, final GXDLMSLNParameters p,
-            final GXByteBuffer replyData, final GXDLMSTranslatorStructure xml) {
+            final GXByteBuffer replyData, final GXDLMSTranslatorStructure xml)
+            throws Exception {
         Object value = null;
         GXDataInfo reply = new GXDataInfo();
         // CI
@@ -529,7 +531,8 @@ final class GXDLMSLNCommandHandler {
             // Device reports a undefined object.
             p.setStatus(ErrorCode.UNDEFINED_OBJECT.getValue());
         } else {
-            AccessMode am = obj.getAccess(index);
+            ValueEventArgs e = new ValueEventArgs(server, obj, index, 0, null);
+            AccessMode am = server.notifyGetAttributeAccess(e);
             // If write is denied.
             if (am != AccessMode.WRITE && am != AccessMode.READ_WRITE) {
                 // Read Write denied.
@@ -543,8 +546,6 @@ final class GXDLMSLNCommandHandler {
                             value = GXDLMSClient.changeType((byte[]) value, dt);
                         }
                     }
-                    ValueEventArgs e =
-                            new ValueEventArgs(settings, obj, index, 0, null);
                     e.setValue(value);
                     ValueEventArgs[] list = new ValueEventArgs[] { e };
                     if (p.isMultipleBlocks()) {
@@ -558,7 +559,7 @@ final class GXDLMSLNCommandHandler {
                         obj.setValue(settings, e);
                     }
                     server.notifyPostWrite(list);
-                } catch (Exception e) {
+                } catch (Exception ex) {
                     p.setStatus(ErrorCode.HARDWARE_FAULT.getValue());
                 }
             }
@@ -568,7 +569,8 @@ final class GXDLMSLNCommandHandler {
     private static void hanleSetRequestWithDataBlock(
             final GXDLMSSettings settings, final GXDLMSServerBase server,
             final GXByteBuffer data, final GXDLMSLNParameters p,
-            final GXByteBuffer replyData, final GXDLMSTranslatorStructure xml) {
+            final GXByteBuffer replyData, final GXDLMSTranslatorStructure xml)
+            throws Exception {
         GXDataInfo reply = new GXDataInfo();
         p.setMultipleBlocks(data.getUInt8() == 0);
         long blockNumber = data.getUInt32();
@@ -632,7 +634,8 @@ final class GXDLMSLNCommandHandler {
     static void handleMethodRequest(final GXDLMSSettings settings,
             final GXDLMSServerBase server, final GXByteBuffer data,
             final GXDLMSConnectionEventArgs connectionInfo,
-            final GXByteBuffer replyData, final GXDLMSTranslatorStructure xml) {
+            final GXByteBuffer replyData, final GXDLMSTranslatorStructure xml)
+            throws Exception {
         ErrorCode error = ErrorCode.OK;
         GXByteBuffer bb = new GXByteBuffer();
         // Get type.
@@ -695,11 +698,11 @@ final class GXDLMSLNCommandHandler {
             // Device reports a undefined object.
             error = ErrorCode.UNDEFINED_OBJECT;
         } else {
-            if (obj.getMethodAccess(id) == MethodAccessMode.NO_ACCESS) {
+            ValueEventArgs e =
+                    new ValueEventArgs(server, obj, id, 0, parameters);
+            if (server.notifyGetMethodAccess(e) == MethodAccessMode.NO_ACCESS) {
                 error = ErrorCode.READ_WRITE_DENIED;
             } else {
-                ValueEventArgs e =
-                        new ValueEventArgs(settings, obj, id, 0, parameters);
                 server.notifyAction(new ValueEventArgs[] { e });
                 byte[] actionReply;
                 if (e.getHandled()) {

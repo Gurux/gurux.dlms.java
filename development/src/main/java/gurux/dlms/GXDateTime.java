@@ -365,7 +365,7 @@ public class GXDateTime {
                 }
             }
             if (separator != 0) {
-                String sep = "\\" + String.valueOf(separator);
+                String sep = String.valueOf(separator);
                 date.addAll(GXCommon.split(tmp.get(0), sep));
                 tm.addAll(GXCommon.split(tmp.get(1), ":"));
                 if (getSkip().contains(DateTimeSkips.YEAR)) {
