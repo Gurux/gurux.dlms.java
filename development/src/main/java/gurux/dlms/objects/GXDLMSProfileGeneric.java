@@ -426,7 +426,9 @@ public class GXDLMSProfileGeneric extends GXDLMSObject implements IGXDLMSBase {
         if (settings.getIndex() == 0) {
             data.setUInt8((byte) DataType.ARRAY.getValue());
             if (e.getRowEndIndex() != 0) {
-                GXCommon.setObjectCount((int) e.getRowEndIndex(), data);
+                GXCommon.setObjectCount(
+                        (int) (e.getRowEndIndex() - e.getRowBeginIndex()),
+                        data);
             } else {
                 GXCommon.setObjectCount(table.length, data);
             }
@@ -469,6 +471,9 @@ public class GXDLMSProfileGeneric extends GXDLMSObject implements IGXDLMSBase {
                 }
             }
             settings.setIndex(settings.getIndex() + 1);
+        }
+        if (e.getRowEndIndex() != 0) {
+            e.setRowBeginIndex(e.getRowBeginIndex() + table.length);
         }
         return data.array();
 
