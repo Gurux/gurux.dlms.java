@@ -681,7 +681,6 @@ public class GXDLMSBase extends GXDLMSSecureServer2
                     }
                     getProfileGenericDataByEntry(p, e.getRowBeginIndex(),
                             count);
-                    e.setRowBeginIndex(e.getRowBeginIndex() + count);
                 }
                 continue;
             }
