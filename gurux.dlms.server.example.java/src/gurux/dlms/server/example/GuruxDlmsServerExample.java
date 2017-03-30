@@ -52,26 +52,26 @@ public class GuruxDlmsServerExample {
             // Create Gurux DLMS server component for Short Name
             // and start listen events.
             GXDLMSServerSN SNServer = new GXDLMSServerSN();
-            SNServer.Initialize(4060);
+            SNServer.initialize(4060);
             System.out.println("Short Name DLMS Server in port 4060");
             ///////////////////////////////////////////////////////////////////////
             // Create Gurux DLMS server component for Logical Name
             // and start listen events.
             GXDLMSServerLN LNServer = new GXDLMSServerLN();
-            LNServer.Initialize(4061);
+            LNServer.initialize(4061);
             System.out.println("Logical Name DLMS Server in port 4061");
             ///////////////////////////////////////////////////////////////////////
             // Create Gurux DLMS server component for Short Name
             // and start listen events.
             GXDLMSServerSN_47 SN_47Server = new GXDLMSServerSN_47();
-            SN_47Server.Initialize(4062);
+            SN_47Server.initialize(4062);
             System.out.println(
                     "Short Name DLMS Server with IEC 62056-47 in port 4062");
             ///////////////////////////////////////////////////////////////////////
             // Create Gurux DLMS server component for Logical Name
             // and start listen events.
             GXDLMSServerLN_47 LN_47Server = new GXDLMSServerLN_47();
-            LN_47Server.Initialize(4063);
+            LN_47Server.initialize(4063);
             System.out.println(
                     "Logical Name DLMS Server with IEC 62056-47 in port 4063");
 
@@ -79,6 +79,13 @@ public class GuruxDlmsServerExample {
             while (System.in.read() != 0) {
                 System.out.println("Press ESC close.");
             }
+            /// Close servers.
+            System.out.println("Closing servers.");
+            SNServer.close();
+            LNServer.close();
+            SN_47Server.close();
+            LN_47Server.close();
+            System.out.println("Servers closed.");
         } catch (RuntimeException ex) {
             System.out.println(ex.getMessage());
         }

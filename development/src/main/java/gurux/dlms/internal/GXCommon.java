@@ -922,8 +922,14 @@ public final class GXCommon {
                 skip.add(DateTimeSkips.MILLISECOND);
                 ms = 0;
             }
-            java.util.Calendar tm =
-                    Calendar.getInstance(GXDateTime.getTimeZone(deviation));
+            java.util.Calendar tm;
+            if (deviation == 0x8000) {
+                tm = Calendar.getInstance();
+
+            } else {
+                tm = Calendar.getInstance(GXDateTime.getTimeZone(deviation));
+
+            }
             tm.set(year, month, day, hour, minute, second);
             if (ms != 0xFF) {
                 tm.set(Calendar.MILLISECOND, ms);
@@ -1829,12 +1835,17 @@ public final class GXCommon {
             buff.setUInt16(dt.getDeviation());
         }
         // Add clock_status
-        if (!dt.getSkip().contains(DateTimeSkips.DEVITATION)
-                && tm.getTimeZone().observesDaylightTime()) {
-            buff.setUInt8(ClockStatus.toInteger(dt.getStatus())
-                    | ClockStatus.DAYLIGHT_SAVE_ACTIVE.getValue());
+        if (!dt.getSkip().contains(DateTimeSkips.STATUS)) {
+            if (!dt.getSkip().contains(DateTimeSkips.DEVITATION)
+                    && tm.getTimeZone().observesDaylightTime()) {
+                buff.setUInt8(ClockStatus.toInteger(dt.getStatus())
+                        | ClockStatus.DAYLIGHT_SAVE_ACTIVE.getValue());
+            } else {
+                buff.setUInt8(ClockStatus.toInteger(dt.getStatus()));
+            }
         } else {
-            buff.setUInt8(ClockStatus.toInteger(dt.getStatus()));
+            // Status is not used.
+            buff.setUInt8(0xFF);
         }
     }
 

@@ -22,8 +22,6 @@ import gurux.dlms.objects.GXDLMSAssociationLogicalName;
 import gurux.dlms.objects.GXDLMSAssociationShortName;
 import gurux.dlms.objects.GXDLMSObject;
 import gurux.dlms.objects.GXDLMSObjectCollection;
-import gurux.dlms.objects.GXDLMSProfileGeneric;
-import gurux.dlms.objects.GXProfileGenericUpdater;
 import gurux.dlms.objects.IGXDLMSBase;
 import gurux.dlms.secure.GXSecure;
 
@@ -235,6 +233,17 @@ public class GXDLMSServerBase {
         return settings;
     }
 
+    /**
+     * Close server.
+     * 
+     * @throws InterruptedException
+     */
+    public void close() throws InterruptedException {
+        for (GXDLMSObject it : settings.getObjects()) {
+            it.stop(this);
+        }
+    }
+
     /*
      * Initialize server. This must call after server objects are set.
      */
@@ -246,21 +255,8 @@ public class GXDLMSServerBase {
             if (it.getLogicalName() == null) {
                 throw new IllegalArgumentException("Invalid Logical Name.");
             }
-            if (it instanceof GXDLMSProfileGeneric) {
-                GXDLMSProfileGeneric pg = null;
-                if (it instanceof GXDLMSProfileGeneric) {
-                    pg = (GXDLMSProfileGeneric) it;
-                }
-                /*
-                 * TODO: Fix unit cases. if (pg.getProfileEntries() < 1) { throw
-                 * new RuntimeException("Invalid Profile Entries. " +
-                 * "Profile entries tells amount of rows " + " in the table.");
-                 * }
-                 */
-                if (pg.getCapturePeriod() > 0) {
-                    new GXProfileGenericUpdater(this, pg).start();
-                }
-            } else if (it instanceof GXDLMSAssociationShortName
+            it.start(this);
+            if (it instanceof GXDLMSAssociationShortName
                     && !this.getUseLogicalNameReferencing()) {
                 if (((GXDLMSAssociationShortName) it).getObjectList()
                         .size() == 0) {

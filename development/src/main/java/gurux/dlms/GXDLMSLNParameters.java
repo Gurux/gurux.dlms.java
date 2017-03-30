@@ -104,7 +104,7 @@ class GXDLMSLNParameters {
         data = forData;
         setTime(null);
         setStatus(forStatus);
-        setMultipleBlocks(forSettings.getCount() != 0);
+        setMultipleBlocks(forSettings.getCount() != forSettings.getIndex());
         setLastBlock(forSettings.getCount() == forSettings.getIndex());
     }
 

@@ -125,20 +125,18 @@ public class GXDLMSDisconnectControl extends GXDLMSObject
 
     /*
      * Forces the disconnect control object into 'disconnected' state if remote
-     * disconnection is enabled (control mode > 0).
+     * disconnection is enabled.
      */
     public final byte[][] remoteDisconnect(final GXDLMSClient client) {
-        return client.method(this, 1, new Integer(0), DataType.UINT8);
+        return client.method(this, 1, new Integer(0), DataType.INT8);
     }
 
     /*
      * Forces the disconnect control object into the 'ready_for_reconnection'
-     * state if a direct remote reconnection is disabled (control_mode = 1, 3,
-     * 5, 6). Forces the disconnect control object into the 'connected' state if
-     * a direct remote reconnection is enabled (control_mode = 2, 4).
+     * state if a direct remote reconnection is disabled.
      */
     public final byte[][] remoteReconnect(final GXDLMSClient client) {
-        return client.method(this, 2, new Integer(0), DataType.UINT8);
+        return client.method(this, 2, new Integer(0), DataType.INT8);
     }
 
     @Override

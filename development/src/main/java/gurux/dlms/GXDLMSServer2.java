@@ -136,6 +136,15 @@ public abstract class GXDLMSServer2 {
     }
 
     /**
+     * Close server.
+     * 
+     * @throws InterruptedException
+     */
+    public void close() throws InterruptedException {
+        base.close();
+    }
+
+    /**
      * Reset after connection is closed.
      */
     public final void reset() {

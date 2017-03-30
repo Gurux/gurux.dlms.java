@@ -39,6 +39,7 @@ import java.util.List;
 import java.util.Map;
 
 import gurux.dlms.GXDLMSException;
+import gurux.dlms.GXDLMSServerBase;
 import gurux.dlms.GXDLMSSettings;
 import gurux.dlms.ValueEventArgs;
 import gurux.dlms.enums.AccessMode;
@@ -491,5 +492,28 @@ public class GXDLMSObject {
             attributes.add(att);
         }
         return att.getStatic();
+    }
+
+    /**
+     * Server calls this when it's started.<br>
+     * This is reserved for internal use. Do not use.
+     * 
+     * @param server
+     *            Server.
+     */
+    public void start(final GXDLMSServerBase server) {
+
+    }
+
+    /**
+     * Server calls this when it's closed.<br>
+     * This is reserved for internal use. Do not use.
+     * 
+     * @param server
+     *            Server.
+     */
+    public void stop(final GXDLMSServerBase server)
+            throws InterruptedException {
+
     }
 }
