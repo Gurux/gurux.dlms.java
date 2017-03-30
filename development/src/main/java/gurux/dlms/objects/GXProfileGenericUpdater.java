@@ -35,31 +35,38 @@
 package gurux.dlms.objects;
 
 import gurux.dlms.GXDLMSServerBase;
+import gurux.dlms.internal.AutoResetEvent;
 
 /*
  * This class is reserved for internal use. Do not use.
  */
-public class GXProfileGenericUpdater extends Thread {
+final class GXProfileGenericUpdater extends Thread {
     private GXDLMSServerBase server;
     private GXDLMSProfileGeneric target;
+
+    private AutoResetEvent receivedEvent;
+
+    public AutoResetEvent getReceivedEvent() {
+        return receivedEvent;
+    }
 
     /*
      * Constructor.
      */
-    public GXProfileGenericUpdater(final GXDLMSServerBase svr,
+    GXProfileGenericUpdater(final GXDLMSServerBase svr,
             final GXDLMSProfileGeneric pg) {
+        receivedEvent = new AutoResetEvent(false);
         target = pg;
         server = svr;
     }
 
-    public final void run() {
-        try {
-            while (true) {
-                Thread.sleep(target.getCapturePeriod() * 1000);
+    public void run() {
+        do {
+            try {
                 target.capture(server);
+            } catch (Exception ex) {
+                System.out.printf(ex.getMessage());
             }
-        } catch (Exception ex) {
-            System.out.printf(ex.getMessage());
-        }
+        } while (!receivedEvent.waitOne(target.getCapturePeriod() * 1000));
     }
 }

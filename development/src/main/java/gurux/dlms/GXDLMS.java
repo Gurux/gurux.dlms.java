@@ -483,12 +483,12 @@ abstract class GXDLMS {
         }
         if (p.isMultipleBlocks()) {
             // Add command type and invoke and priority.
-            p.setLastBlock(!(2 + reply.size() + len > p.getSettings()
+            p.setLastBlock(!(8 + reply.size() + len > p.getSettings()
                     .getMaxPduSize()));
         }
         if (p.isLastBlock()) {
             // Add command type and invoke and priority.
-            p.setLastBlock(!(2 + reply.size() + len > p.getSettings()
+            p.setLastBlock(!(8 + reply.size() + len > p.getSettings()
                     .getMaxPduSize()));
         }
     }

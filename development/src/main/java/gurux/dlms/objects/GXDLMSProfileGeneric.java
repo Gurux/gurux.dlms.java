@@ -55,6 +55,8 @@ import gurux.dlms.internal.GXDataInfo;
 import gurux.dlms.objects.enums.SortMethod;
 
 public class GXDLMSProfileGeneric extends GXDLMSObject implements IGXDLMSBase {
+    private GXProfileGenericUpdater updater = null;
+
     private ArrayList<Object[]> buffer = new ArrayList<Object[]>();
     private List<Entry<GXDLMSObject, GXDLMSCaptureObject>> captureObjects;
     private int capturePeriod;
@@ -156,7 +158,7 @@ public class GXDLMSProfileGeneric extends GXDLMSObject implements IGXDLMSBase {
      * @return Action bytes.
      */
     public final byte[][] reset(final GXDLMSClient client) {
-        return client.method(this, 1, new Integer(0), DataType.UINT8);
+        return client.method(this, 1, new Integer(0), DataType.INT8);
     }
 
     /**
@@ -168,7 +170,7 @@ public class GXDLMSProfileGeneric extends GXDLMSObject implements IGXDLMSBase {
      * @return Action bytes.
      */
     public final byte[][] capture(final GXDLMSClient client) {
-        return client.method(this, 2, new Integer(0), DataType.UINT8);
+        return client.method(this, 2, new Integer(0), DataType.INT8);
     }
 
     /*
@@ -435,12 +437,11 @@ public class GXDLMSProfileGeneric extends GXDLMSObject implements IGXDLMSBase {
         }
 
         DataType[] types = new DataType[captureObjects.size()];
-        int pos = -1;
-        // CHECKSTYLE:OFF
+        int pos = 0;
         for (Entry<GXDLMSObject, GXDLMSCaptureObject> it : captureObjects) {
-            // CHECKSTYLE:ON
-            types[++pos] =
+            types[pos] =
                     it.getKey().getDataType(it.getValue().getAttributeIndex());
+            ++pos;
         }
         DataType tp;
         for (Object row : table) {
@@ -451,24 +452,18 @@ public class GXDLMSProfileGeneric extends GXDLMSObject implements IGXDLMSBase {
             } else {
                 GXCommon.setObjectCount(columns.size(), data);
             }
-            pos = -1;
+            pos = 0;
             for (Object value : items) {
-                tp = DataType.NONE;
-                if (types.length == items.length) {
-                    tp = types[++pos];
-                } else {
-                    ++pos;
-                }
                 if (columns == null
                         || columns.contains(captureObjects.get(pos))) {
+                    tp = types[pos];
                     if (tp == DataType.NONE) {
                         tp = GXCommon.getValueType(value);
-                        if (types.length == items.length) {
-                            types[pos] = tp;
-                        }
+                        types[pos] = tp;
                     }
                     GXCommon.setData(data, tp, value);
                 }
+                ++pos;
             }
             settings.setIndex(settings.getIndex() + 1);
         }
@@ -729,7 +724,7 @@ public class GXDLMSProfileGeneric extends GXDLMSObject implements IGXDLMSBase {
         } else if (e.getIndex() == 3) {
             captureObjects.clear();
             buffer.clear();
-            entriesInUse = buffer.size();
+            entriesInUse = 0;
             if (e.getValue() != null) {
                 for (Object it : (Object[]) e.getValue()) {
                     Object[] tmp = (Object[]) it;
@@ -752,6 +747,13 @@ public class GXDLMSProfileGeneric extends GXDLMSObject implements IGXDLMSBase {
                 }
             }
         } else if (e.getIndex() == 4) {
+            // Any write access to one of the attributes will automatically call
+            // a reset and this call will propagate to all other profiles
+            // capturing this profile.
+            if (settings != null && settings.isServer()) {
+                reset();
+            }
+
             if (e.getValue() == null) {
                 capturePeriod = 0;
             } else {
@@ -759,6 +761,13 @@ public class GXDLMSProfileGeneric extends GXDLMSObject implements IGXDLMSBase {
             }
 
         } else if (e.getIndex() == 5) {
+            // Any write access to one of the attributes will automatically call
+            // a reset and this call will propagate to all other profiles
+            // capturing this profile.
+            if (settings != null && settings.isServer()) {
+                reset();
+            }
+
             if (e.getValue() == null) {
                 sortMethod = SortMethod.FIFO;
             } else {
@@ -767,6 +776,13 @@ public class GXDLMSProfileGeneric extends GXDLMSObject implements IGXDLMSBase {
             }
 
         } else if (e.getIndex() == 6) {
+            // Any write access to one of the attributes will automatically call
+            // a reset and this call will propagate to all other profiles
+            // capturing this profile.
+            if (settings != null && settings.isServer()) {
+                reset();
+            }
+
             if (e.getValue() == null) {
                 sortObject = null;
             } else {
@@ -795,6 +811,13 @@ public class GXDLMSProfileGeneric extends GXDLMSObject implements IGXDLMSBase {
                 entriesInUse = ((Number) e.getValue()).intValue();
             }
         } else if (e.getIndex() == 8) {
+            // Any write access to one of the attributes will automatically call
+            // a reset and this call will propagate to all other profiles
+            // capturing this profile.
+            if (settings != null && settings.isServer()) {
+                reset();
+            }
+
             if (e.getValue() == null) {
                 profileEntries = 0;
             } else {
@@ -942,6 +965,23 @@ public class GXDLMSProfileGeneric extends GXDLMSObject implements IGXDLMSBase {
                 }
             }
             srv.notifyPostGet(args);
+        }
+    }
+
+    @Override
+    public void start(final GXDLMSServerBase server) {
+        if (getCapturePeriod() > 0) {
+            updater = new GXProfileGenericUpdater(server, this);
+            updater.start();
+        }
+    }
+
+    @Override
+    public void stop(final GXDLMSServerBase server)
+            throws InterruptedException {
+        if (updater != null) {
+            updater.getReceivedEvent().set();
+            updater.join(10000);
         }
     }
 }

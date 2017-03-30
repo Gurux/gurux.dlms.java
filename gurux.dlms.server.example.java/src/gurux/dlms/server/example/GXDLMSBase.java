@@ -206,19 +206,21 @@ public class GXDLMSBase extends GXDLMSSecureServer2
             sb.append(System.lineSeparator());
             cal.add(Calendar.HOUR, 1);
         }
-        FileWriter writer = null;
-        try {
-            writer = new FileWriter(dataFile, false);
-            writer.write(sb.toString());
-            writer.close();
-        } catch (IOException e) {
-            if (writer != null) {
-                try {
-                    writer.close();
-                } catch (IOException e1) {
+        synchronized (dataFile) {
+            FileWriter writer = null;
+            try {
+                writer = new FileWriter(dataFile, false);
+                writer.write(sb.toString());
+                writer.close();
+            } catch (IOException e) {
+                if (writer != null) {
+                    try {
+                        writer.close();
+                    } catch (IOException e1) {
+                    }
                 }
+                throw new RuntimeException(e.getMessage());
             }
-            throw new RuntimeException(e.getMessage());
         }
         return pg;
     }
@@ -453,7 +455,7 @@ public class GXDLMSBase extends GXDLMSSecureServer2
      * 
      * @param server
      */
-    public void Initialize(int port) throws Exception {
+    public void initialize(int port) throws Exception {
         media = new gurux.net.GXNet(NetworkType.TCP, port);
         media.setTrace(TraceLevel.VERBOSE);
         media.addListener(this);
@@ -507,7 +509,13 @@ public class GXDLMSBase extends GXDLMSSecureServer2
         addPushSetup();
         ///////////////////////////////////////////////////////////////////////
         // Server must initialize after all objects are added.
-        initialize();
+        super.initialize();
+    }
+
+    @Override
+    public void close() throws InterruptedException {
+        super.close();
+        media.close();
     }
 
     /**
@@ -525,31 +533,33 @@ public class GXDLMSBase extends GXDLMSSecureServer2
         p.clearBuffer();
         BufferedReader reader = null;
         SimpleDateFormat df = new SimpleDateFormat();
-        try {
-            reader = new BufferedReader(new FileReader(dataFile));
-            String line;
-            while ((line = reader.readLine()) != null) {
-                // Skip row
-                if (index > 0) {
-                    --index;
-                } else if (line.length() != 0) {
-                    String[] values = line.split("[;]", -1);
-                    p.addRow(new Object[] { df.parse(values[0]),
-                            Integer.parseInt(values[1]) });
+        synchronized (dataFile) {
+            try {
+                reader = new BufferedReader(new FileReader(dataFile));
+                String line;
+                while ((line = reader.readLine()) != null) {
+                    // Skip row
+                    if (index > 0) {
+                        --index;
+                    } else if (line.length() != 0) {
+                        String[] values = line.split("[;]", -1);
+                        p.addRow(new Object[] { df.parse(values[0]),
+                                Integer.parseInt(values[1]) });
+                    }
+                    if (p.getBuffer().length == count) {
+                        break;
+                    }
                 }
-                if (p.getBuffer().length == count) {
-                    break;
+                reader.close();
+            } catch (Exception e) {
+                if (reader != null) {
+                    try {
+                        reader.close();
+                    } catch (Exception e1) {
+                    }
                 }
+                throw new RuntimeException(e.getMessage());
             }
-            reader.close();
-        } catch (Exception e) {
-            if (reader != null) {
-                try {
-                    reader.close();
-                } catch (Exception e1) {
-                }
-            }
-            throw new RuntimeException(e.getMessage());
         }
     }
 
@@ -571,33 +581,35 @@ public class GXDLMSBase extends GXDLMSSecureServer2
         GXDateTime end = (GXDateTime) GXDLMSClient.changeType(
                 (byte[]) ((Object[]) e.getParameters())[2], DataType.DATETIME);
 
-        BufferedReader reader = null;
-        try {
-            reader = new BufferedReader(new FileReader(dataFile));
-            String line;
-            SimpleDateFormat df = new SimpleDateFormat();
-            while ((line = reader.readLine()) != null) {
-                String[] values = line.split("[;]", -1);
-                Date tm = df.parse(values[0]);
-                if (tm.compareTo(end.getCalendar().getTime()) > 0) {
-                    // If all data is read.
-                    break;
+        synchronized (dataFile) {
+            BufferedReader reader = null;
+            try {
+                reader = new BufferedReader(new FileReader(dataFile));
+                String line;
+                SimpleDateFormat df = new SimpleDateFormat();
+                while ((line = reader.readLine()) != null) {
+                    String[] values = line.split("[;]", -1);
+                    Date tm = df.parse(values[0]);
+                    if (tm.compareTo(end.getCalendar().getTime()) > 0) {
+                        // If all data is read.
+                        break;
+                    }
+                    if (tm.compareTo(start.getCalendar().getTime()) < 0) {
+                        // If we have not find first item.
+                        e.setRowBeginIndex(e.getRowBeginIndex() + 1);
+                    }
+                    e.setRowEndIndex(e.getRowEndIndex() + 1);
                 }
-                if (tm.compareTo(start.getCalendar().getTime()) < 0) {
-                    // If we have not find first item.
-                    e.setRowBeginIndex(e.getRowBeginIndex() + 1);
+                reader.close();
+            } catch (Exception ex) {
+                if (reader != null) {
+                    try {
+                        reader.close();
+                    } catch (Exception e1) {
+                    }
                 }
-                e.setRowEndIndex(e.getRowEndIndex() + 1);
+                throw new RuntimeException(ex.getMessage());
             }
-            reader.close();
-        } catch (Exception ex) {
-            if (reader != null) {
-                try {
-                    reader.close();
-                } catch (Exception e1) {
-                }
-            }
-            throw new RuntimeException(ex.getMessage());
         }
     }
 
@@ -609,20 +621,22 @@ public class GXDLMSBase extends GXDLMSSecureServer2
     private int getProfileGenericDataCount() {
         int rows = 0;
         BufferedReader reader = null;
-        try {
-            reader = new BufferedReader(new FileReader(dataFile));
-            while (reader.readLine() != null) {
-                ++rows;
-            }
-            reader.close();
-        } catch (Exception e) {
-            if (reader != null) {
-                try {
-                    reader.close();
-                } catch (Exception e1) {
+        synchronized (dataFile) {
+            try {
+                reader = new BufferedReader(new FileReader(dataFile));
+                while (reader.readLine() != null) {
+                    ++rows;
                 }
+                reader.close();
+            } catch (Exception e) {
+                if (reader != null) {
+                    try {
+                        reader.close();
+                    } catch (Exception e1) {
+                    }
+                }
+                throw new RuntimeException(e.getMessage());
             }
-            throw new RuntimeException(e.getMessage());
         }
         return rows;
     }
@@ -760,34 +774,37 @@ public class GXDLMSBase extends GXDLMSSecureServer2
             throws IOException {
         GXDLMSProfileGeneric pg = (GXDLMSProfileGeneric) it.getTarget();
         FileWriter writer = null;
-        try {
-            if (it.getIndex() == 1) {
-                // Profile generic clear is called. Clear data.
-                writer = new FileWriter(dataFile, false);
-            } else if (it.getIndex() == 2) {
-                // Profile generic Capture is called.
-                SimpleDateFormat df = new SimpleDateFormat();
-                writer = new FileWriter(dataFile, true);
-                StringBuilder sb = new StringBuilder();
-                for (int pos = pg.getBuffer().length - 1; pos != pg
-                        .getBuffer().length; ++pos) {
-                    for (int c = 0; c != pg.getCaptureObjects().size(); ++c) {
-                        if (c != 0) {
-                            sb.append(';');
+        synchronized (dataFile) {
+            try {
+                if (it.getIndex() == 1) {
+                    // Profile generic clear is called. Clear data.
+                    writer = new FileWriter(dataFile, false);
+                } else if (it.getIndex() == 2) {
+                    // Profile generic Capture is called.
+                    SimpleDateFormat df = new SimpleDateFormat();
+                    writer = new FileWriter(dataFile, true);
+                    StringBuilder sb = new StringBuilder();
+                    for (int pos = pg.getBuffer().length - 1; pos != pg
+                            .getBuffer().length; ++pos) {
+                        for (int c = 0; c != pg.getCaptureObjects()
+                                .size(); ++c) {
+                            if (c != 0) {
+                                sb.append(';');
+                            }
+                            Object col = ((Object[]) pg.getBuffer()[pos])[c];
+                            if (col instanceof Date) {
+                                sb.append(df.format((Date) col));
+                            } else {
+                                sb.append(col);
+                            }
                         }
-                        Object col = ((Object[]) pg.getBuffer()[pos])[c];
-                        if (col instanceof Date) {
-                            sb.append(df.format((Date) col));
-                        } else {
-                            sb.append(col);
-                        }
+                        sb.append("\n");
                     }
-                    sb.append("\n");
+                    writer.write(sb.toString());
                 }
-                writer.write(sb.toString());
+            } finally {
+                writer.close();
             }
-        } finally {
-            writer.close();
         }
     }
 
