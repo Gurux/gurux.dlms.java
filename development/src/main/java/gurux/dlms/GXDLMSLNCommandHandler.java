@@ -138,8 +138,12 @@ final class GXDLMSLNCommandHandler {
             final GXDLMSTranslatorStructure xml, final int ci, final byte[] ln,
             final short attributeIndex) {
         xml.appendStartTag(TranslatorTags.ATTRIBUTE_DESCRIPTOR);
+        if (xml.isComments()) {
+            xml.appendComment(ObjectType.forValue(ci).toString());
+        }
         xml.appendLine(TranslatorTags.CLASS_ID, "Value",
                 xml.integerToHex(ci, 4));
+        xml.appendComment(GXDLMSObject.toLogicalName(ln));
         xml.appendLine(TranslatorTags.INSTANCE_ID, "Value",
                 GXCommon.toHex(ln, false));
         xml.appendLine(TranslatorTags.ATTRIBUTE_ID, "Value",
@@ -151,8 +155,12 @@ final class GXDLMSLNCommandHandler {
             final GXDLMSTranslatorStructure xml, final int ci, final byte[] ln,
             final short attributeIndex) {
         xml.appendStartTag(TranslatorTags.METHOD_DESCRIPTOR);
+        if (xml.isComments()) {
+            xml.appendComment(ObjectType.forValue(ci).toString());
+        }
         xml.appendLine(TranslatorTags.CLASS_ID, "Value",
                 xml.integerToHex(ci, 4));
+        xml.appendComment(GXDLMSObject.toLogicalName(ln));
         xml.appendLine(TranslatorTags.INSTANCE_ID, "Value",
                 GXCommon.toHex(ln, false));
         xml.appendLine(TranslatorTags.METHOD_ID, "Value",
@@ -396,8 +404,12 @@ final class GXDLMSLNCommandHandler {
                 xml.appendStartTag(
                         TranslatorTags.ATTRIBUTE_DESCRIPTOR_WITH_SELECTION);
                 xml.appendStartTag(TranslatorTags.ATTRIBUTE_DESCRIPTOR);
+                if (xml.isComments()) {
+                    xml.appendComment(ci.toString());
+                }
                 xml.appendLine(TranslatorTags.CLASS_ID, "Value",
                         xml.integerToHex(ci.getValue(), 4));
+                xml.appendComment(GXDLMSObject.toLogicalName(ln));
                 xml.appendLine(TranslatorTags.INSTANCE_ID, "Value",
                         GXCommon.toHex(ln, false));
                 xml.appendLine(TranslatorTags.ATTRIBUTE_ID, "Value",

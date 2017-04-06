@@ -51,6 +51,11 @@ import gurux.dlms.objects.GXDLMSObjectCollection;
  * @author Gurux Ltd.
  */
 public class GXDLMSSettings {
+
+    /**
+     * Frame check is skipped for some unit tests. This is internal use only.
+     */
+    private boolean skipFrameCheck = false;
     /**
      * Server sender frame sequence starting number.
      */
@@ -406,6 +411,11 @@ public class GXDLMSSettings {
             receiverFrame = frame;
             return true;
         }
+        // This is for unit tests.
+        if (skipFrameCheck) {
+            receiverFrame = frame;
+            return true;
+        }
         System.out.println("Invalid HDLC Frame ID.");
         return true;
         // TODO: unit test must fix first. return false;
@@ -419,7 +429,7 @@ public class GXDLMSSettings {
      * @return Increased receiver frame sequence.
      */
     static byte increaseReceiverSequence(final short value) {
-        return (byte) (value + 0x20 | 0x10 | value & 0xE);
+        return (byte) ((value & 0xFF) + 0x20 | 0x10 | value & 0xE);
     }
 
     /**
@@ -429,8 +439,8 @@ public class GXDLMSSettings {
      *            Frame value.
      * @return Increased sender frame sequence.
      */
-    static byte increaseSendSequence(final short value) {
-        return (byte) (value & 0xF0 | (value + 0x2) & 0xE);
+    static short increaseSendSequence(final short value) {
+        return (short) ((value & 0xF0 | (value + 0x2) & 0xE) & 0xFF);
     }
 
     /**
@@ -887,5 +897,12 @@ public class GXDLMSSettings {
      */
     public void setNegotiatedConformance(final Set<Conformance> value) {
         negotiatedConformance = value;
+    }
+
+    /*
+     * @param value Frame check is skipped for some unit tests.
+     */
+    final void setSkipFrameCheck(final boolean value) {
+        skipFrameCheck = value;
     }
 }

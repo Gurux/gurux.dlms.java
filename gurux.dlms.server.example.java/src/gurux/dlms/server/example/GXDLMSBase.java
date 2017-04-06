@@ -513,7 +513,7 @@ public class GXDLMSBase extends GXDLMSSecureServer2
     }
 
     @Override
-    public void close() throws InterruptedException {
+    public void close() throws Exception {
         super.close();
         media.close();
     }
@@ -818,7 +818,7 @@ public class GXDLMSBase extends GXDLMSSecureServer2
     }
 
     @Override
-    public void onError(Object sender, RuntimeException ex) {
+    public void onError(Object sender, Exception ex) {
         System.out.println("Error has occurred:" + ex.getMessage());
     }
 

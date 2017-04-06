@@ -99,7 +99,7 @@ public class GXDLMSPushListener extends GXDLMSSecureNotify
     }
 
     @Override
-    public void onError(Object sender, RuntimeException ex) {
+    public void onError(Object sender, Exception ex) {
         System.out.println("Error has occurred:" + ex.getMessage());
     }
 

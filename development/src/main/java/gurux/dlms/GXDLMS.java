@@ -2001,7 +2001,6 @@ abstract class GXDLMS {
             final GXReplyData reply) {
         // Get invoke id.
         long invokeId = reply.getData().getUInt32();
-        reply.setTime(new GXDateTime());
         int len = reply.getData().getUInt8();
         byte[] tmp = null;
         // If date time is given.

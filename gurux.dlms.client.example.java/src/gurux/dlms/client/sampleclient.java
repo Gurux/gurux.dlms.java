@@ -42,6 +42,7 @@ import gurux.dlms.enums.Authentication;
 import gurux.dlms.manufacturersettings.GXManufacturer;
 import gurux.dlms.manufacturersettings.GXManufacturerCollection;
 import gurux.dlms.secure.GXDLMSSecureClient;
+import gurux.io.BaudRate;
 import gurux.io.Parity;
 import gurux.io.StopBits;
 import gurux.net.GXNet;
@@ -208,12 +209,12 @@ public class sampleclient {
             GXSerial serial = (GXSerial) media;
             serial.setPortName(port);
             if (iec) {
-                serial.setBaudRate(300);
+                serial.setBaudRate(BaudRate.BAUD_RATE_300);
                 serial.setDataBits(7);
                 serial.setParity(Parity.EVEN);
                 serial.setStopBits(StopBits.ONE);
             } else {
-                serial.setBaudRate(startBaudRate);
+                serial.setBaudRate(BaudRate.forValue(startBaudRate));
                 serial.setDataBits(8);
                 serial.setParity(Parity.NONE);
                 serial.setStopBits(StopBits.ONE);
@@ -226,7 +227,7 @@ public class sampleclient {
         } else if (media instanceof GXTerminal) {
             GXTerminal terminal = (GXTerminal) media;
             terminal.setPortName(port);
-            terminal.setBaudRate(startBaudRate);
+            terminal.setBaudRate(BaudRate.forValue(startBaudRate));
             terminal.setDataBits(8);
             terminal.setParity(gurux.io.Parity.NONE);
             terminal.setStopBits(gurux.io.StopBits.ONE);
