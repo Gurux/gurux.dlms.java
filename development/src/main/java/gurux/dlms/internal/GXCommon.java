@@ -855,7 +855,7 @@ public final class GXCommon {
         if (info.getXml() != null) {
             str = GXCommon.toHex(buff.getData(), false, buff.position(), 12);
         }
-
+        GXDateTime dt = new GXDateTime();
         try {
             // Get year.
             int year = buff.getUInt16();
@@ -883,7 +883,6 @@ public final class GXCommon {
                 skip.add(DateTimeSkips.DEVITATION);
             }
             int status = buff.getUInt8();
-            GXDateTime dt = new GXDateTime();
             dt.setStatus(ClockStatus.forValue(status));
             if (year < 1 || year == 0xFFFF) {
                 skip.add(DateTimeSkips.YEAR);
@@ -944,7 +943,7 @@ public final class GXCommon {
             }
         }
         if (info.getXml() != null) {
-            if (value != null) {
+            if (!dt.getSkip().contains(DateTimeSkips.YEAR) && value != null) {
                 info.getXml().appendComment(String.valueOf(value));
             }
             info.getXml().appendLine(info.getXml().getDataType(info.getType()),

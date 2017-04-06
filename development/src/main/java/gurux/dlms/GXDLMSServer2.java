@@ -138,9 +138,10 @@ public abstract class GXDLMSServer2 {
     /**
      * Close server.
      * 
-     * @throws InterruptedException
+     * @throws Exception
+     *             Occurred exception.
      */
-    public void close() throws InterruptedException {
+    public void close() throws Exception {
         base.close();
     }
 

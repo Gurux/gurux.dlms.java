@@ -74,6 +74,7 @@ import gurux.dlms.objects.GXDLMSProfileGeneric;
 import gurux.dlms.objects.GXDLMSRegister;
 import gurux.dlms.objects.IGXDLMSBase;
 import gurux.dlms.secure.GXDLMSSecureClient;
+import gurux.io.BaudRate;
 import gurux.io.Parity;
 import gurux.io.StopBits;
 import gurux.net.GXNet;
@@ -388,7 +389,7 @@ public class GXCommunicate {
                     serial.setDataBits(8);
                     serial.setParity(Parity.NONE);
                     serial.setStopBits(StopBits.ONE);
-                    serial.setBaudRate(bitrate);
+                    serial.setBaudRate(BaudRate.forValue(bitrate));
                     Media.open();
                     serial.setDtrEnable(true);
                     serial.setRtsEnable(true);

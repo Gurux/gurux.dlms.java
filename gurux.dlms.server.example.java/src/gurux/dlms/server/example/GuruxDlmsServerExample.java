@@ -75,9 +75,9 @@ public class GuruxDlmsServerExample {
             System.out.println(
                     "Logical Name DLMS Server with IEC 62056-47 in port 4063");
 
-            System.out.println("Press any key to close.");
-            while (System.in.read() != 0) {
-                System.out.println("Press ESC close.");
+            System.out.println("Press Enter to close.");
+            while (System.in.read() != 13) {
+                System.out.println("Press Enter to close.");
             }
             /// Close servers.
             System.out.println("Closing servers.");

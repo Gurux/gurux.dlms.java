@@ -236,9 +236,10 @@ public class GXDLMSServerBase {
     /**
      * Close server.
      * 
-     * @throws InterruptedException
+     * @throws Exception
+     *             Occurred exception.
      */
-    public void close() throws InterruptedException {
+    public void close() throws Exception {
         for (GXDLMSObject it : settings.getObjects()) {
             it.stop(this);
         }
