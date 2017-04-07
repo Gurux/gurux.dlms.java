@@ -36,8 +36,6 @@ package gurux.dlms.secure;
 
 import gurux.dlms.GXDLMSServer2;
 import gurux.dlms.enums.InterfaceType;
-import gurux.dlms.objects.GXDLMSAssociationLogicalName;
-import gurux.dlms.objects.GXDLMSAssociationShortName;
 
 /**
  * Implements secured DLMS server.
@@ -53,29 +51,14 @@ public abstract class GXDLMSSecureServer2 extends GXDLMSServer2 {
     /**
      * Constructor.
      * 
-     * @param ln
-     *            Association logical name.
+     * @param logicalNameReferencing
+     *            Is logical name referencing used.
      * @param type
      *            Interface type.
      */
-    public GXDLMSSecureServer2(final GXDLMSAssociationLogicalName ln,
+    public GXDLMSSecureServer2(final boolean logicalNameReferencing,
             final InterfaceType type) {
-        super(ln, type);
-        ciphering = new GXCiphering("ABCDEFGH".getBytes());
-        setCipher(ciphering);
-    }
-
-    /**
-     * Constructor.
-     * 
-     * @param sn
-     *            Association short name.
-     * @param type
-     *            Interface type.
-     */
-    public GXDLMSSecureServer2(final GXDLMSAssociationShortName sn,
-            final InterfaceType type) {
-        super(sn, type);
+        super(logicalNameReferencing, type);
         ciphering = new GXCiphering("ABCDEFGH".getBytes());
         setCipher(ciphering);
     }

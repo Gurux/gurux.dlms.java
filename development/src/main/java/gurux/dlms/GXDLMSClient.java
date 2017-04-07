@@ -595,7 +595,7 @@ public class GXDLMSClient {
         GXAPDU.generateAarq(settings, settings.getCipher(), null, buff);
         List<byte[]> reply;
         if (settings.getUseLogicalNameReferencing()) {
-            GXDLMSLNParameters p = new GXDLMSLNParameters(settings, 0,
+            GXDLMSLNParameters p = new GXDLMSLNParameters(settings,
                     Command.AARQ, 0, buff, null, 0xff);
             reply = GXDLMS.getLnMessages(p);
         } else {
@@ -1186,7 +1186,7 @@ public class GXDLMSClient {
             } else {
                 attributeDescriptor.setUInt8(1);
             }
-            GXDLMSLNParameters p = new GXDLMSLNParameters(settings, 0,
+            GXDLMSLNParameters p = new GXDLMSLNParameters(settings,
                     Command.METHOD_REQUEST, ActionRequestType.NORMAL,
                     attributeDescriptor, data, 0xff);
             reply = GXDLMS.getLnMessages(p);
@@ -1287,7 +1287,7 @@ public class GXDLMSClient {
             attributeDescriptor.setUInt8(index);
             // Access selection is not used.
             attributeDescriptor.setUInt8(0);
-            GXDLMSLNParameters p = new GXDLMSLNParameters(settings, 0,
+            GXDLMSLNParameters p = new GXDLMSLNParameters(settings,
                     Command.SET_REQUEST, SetRequestType.NORMAL,
                     attributeDescriptor, data, 0xff);
             reply = GXDLMS.getLnMessages(p);
@@ -1372,7 +1372,7 @@ public class GXDLMSClient {
         }
         if (this.getUseLogicalNameReferencing()) {
             GXDLMSLNParameters p =
-                    new GXDLMSLNParameters(settings, Command.SET_REQUEST, 0,
+                    new GXDLMSLNParameters(settings, Command.SET_REQUEST,
                             SetRequestType.WITH_LIST, bb, data, 0xff);
             reply = GXDLMS.getLnMessages(p);
         } else {
@@ -1440,7 +1440,7 @@ public class GXDLMSClient {
                 // Access selection is used.
                 attributeDescriptor.setUInt8(1);
             }
-            GXDLMSLNParameters p = new GXDLMSLNParameters(settings, 0,
+            GXDLMSLNParameters p = new GXDLMSLNParameters(settings,
                     Command.GET_REQUEST, GetCommandType.NORMAL,
                     attributeDescriptor, data, 0xFF);
             reply = GXDLMS.getLnMessages(p);
@@ -1495,7 +1495,7 @@ public class GXDLMSClient {
         settings.resetBlockIndex();
         if (this.getUseLogicalNameReferencing()) {
             GXDLMSLNParameters p =
-                    new GXDLMSLNParameters(settings, 0, Command.GET_REQUEST,
+                    new GXDLMSLNParameters(settings, Command.GET_REQUEST,
                             GetCommandType.WITH_LIST, data, null, 0xff);
             // Request service primitive shall always fit in a single APDU.
             int pos = 0, count = (settings.getMaxPduSize() - 12) / 10;
@@ -1975,7 +1975,7 @@ public class GXDLMSClient {
                 GXCommon.setData(bb, type, value);
             }
         }
-        GXDLMSLNParameters p = new GXDLMSLNParameters(settings, 0,
+        GXDLMSLNParameters p = new GXDLMSLNParameters(settings,
                 Command.ACCESS_REQUEST, 0xFF, null, bb, 0xff);
         if (time != null && time != new Date(0)) {
             p.setTime(new GXDateTime(time));

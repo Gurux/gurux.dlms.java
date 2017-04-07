@@ -80,17 +80,10 @@ class GXDLMSLNParameters {
     private int blockIndex;
 
     /**
-     * Invoke ID.
-     */
-    private long invokeId;
-
-    /**
      * Constructor.
      * 
      * @param forSettings
      *            DLMS settings.
-     * @param forInvokeId
-     *            Invoke ID.
      * @param forCommand
      *            Command.
      * @param forCommandType
@@ -100,12 +93,10 @@ class GXDLMSLNParameters {
      * @param forData
      *            Data.
      */
-    GXDLMSLNParameters(final GXDLMSSettings forSettings, final long forInvokeId,
-            final int forCommand, final int forCommandType,
-            final GXByteBuffer forAttributeDescriptor,
+    GXDLMSLNParameters(final GXDLMSSettings forSettings, final int forCommand,
+            final int forCommandType, final GXByteBuffer forAttributeDescriptor,
             final GXByteBuffer forData, final int forStatus) {
         settings = forSettings;
-        invokeId = forInvokeId;
         setBlockIndex(settings.getBlockIndex());
         command = forCommand;
         setRequestType(forCommandType);
@@ -233,20 +224,5 @@ class GXDLMSLNParameters {
      */
     void setBlockIndex(final int value) {
         blockIndex = value;
-    }
-
-    /**
-     * @return Invoke ID.
-     */
-    public final long getInvokeId() {
-        return invokeId;
-    }
-
-    /**
-     * @param value
-     *            Invoke ID.
-     */
-    public final void setInvokeId(final long value) {
-        invokeId = value;
     }
 }

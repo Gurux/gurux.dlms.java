@@ -34,111 +34,45 @@
 
 package gurux.dlms.objects;
 
-import java.util.HashSet;
-import java.util.Set;
-
-import gurux.dlms.GXDLMSSettings;
-import gurux.dlms.enums.Conformance;
 import gurux.dlms.internal.GXCommon;
 
 public class GXxDLMSContextType {
-
-    /**
-     * Server settings.
-     */
-    private GXDLMSSettings settings;
-    /**
-     * Conformance.
-     */
-    private Set<Conformance> conformance;
-    /**
-     * Maximum receive PDU size.
-     */
+    private String conformance;
     private int maxReceivePduSize;
-    /**
-     * Maximum Send PDU size.
-     */
     private int maxSendPpuSize;
-    /**
-     * DLMS Version Number.
-     */
-    private byte dlmsVersionNumber;
-    /**
-     * Quality Of Service.
-     */
+    private int dlmsVersionNumber;
     private int qualityOfService;
-    /**
-     * CypheringInfo.
-     */
     private byte[] cypheringInfo;
 
-    /**
-     * Constructor.
-     */
-    public GXxDLMSContextType() {
-        conformance = new HashSet<Conformance>();
-    }
-
-    /**
-     * @return Conformance
-     */
-    public final Set<Conformance> getConformance() {
-        if (settings != null) {
-            return settings.getProposedConformance();
-        }
+    public final String getConformance() {
         return conformance;
     }
 
-    /**
-     * @param value
-     *            Conformance
-     */
-    public final void setConformance(final Set<Conformance> value) {
-        if (settings != null) {
-            settings.setProposedConformance(value);
-        }
+    public final void setConformance(final String value) {
         conformance = value;
     }
 
     public final int getMaxReceivePduSize() {
-        if (settings != null) {
-            settings.getMaxServerPDUSize();
-        }
         return maxReceivePduSize;
     }
 
     public final void setMaxReceivePduSize(final int value) {
-        if (settings != null) {
-            settings.setMaxServerPDUSize(value);
-        }
         maxReceivePduSize = value;
     }
 
     public final int getMaxSendPpuSize() {
-        if (settings != null) {
-            return settings.getMaxServerPDUSize();
-        }
         return maxSendPpuSize;
     }
 
     public final void setMaxSendPpuSize(final int value) {
-        if (settings != null) {
-            settings.setMaxServerPDUSize(value);
-        }
         maxSendPpuSize = value;
     }
 
-    public final byte getDlmsVersionNumber() {
-        if (settings != null) {
-            return settings.getDlmsVersionNumber();
-        }
+    public final int getDlmsVersionNumber() {
         return dlmsVersionNumber;
     }
 
-    public final void setDlmsVersionNumber(final byte value) {
-        if (settings != null) {
-            settings.setDlmsVersionNumber(value);
-        }
+    public final void setDlmsVersionNumber(final int value) {
         dlmsVersionNumber = value;
     }
 
@@ -156,14 +90,6 @@ public class GXxDLMSContextType {
 
     public final void setCypheringInfo(final byte[] value) {
         cypheringInfo = value;
-    }
-
-    public final GXDLMSSettings getSettings() {
-        return settings;
-    }
-
-    public final void setSettings(final GXDLMSSettings value) {
-        settings = value;
     }
 
     @Override

@@ -534,25 +534,8 @@ public class GXDLMSServerBase {
             return reply;
         } catch (Exception e) {
             LOGGER.log(Level.SEVERE, e.toString());
-            if (e instanceof GXDLMSConfirmedServiceError) {
-                byte[] reply = reportConfirmedServiceError(
-                        (GXDLMSConfirmedServiceError) e);
-                transaction = null;
-                settings.setCount(0);
-                settings.setIndex(0);
-                info.clear();
-                receivedData.clear();
-                return reply;
-            }
             if (info.getCommand() != Command.NONE) {
-                byte[] reply = reportError(info.getCommand(),
-                        ErrorCode.HARDWARE_FAULT);
-                transaction = null;
-                settings.setCount(0);
-                settings.setIndex(0);
-                info.clear();
-                receivedData.clear();
-                return reply;
+                return reportError(info.getCommand(), ErrorCode.HARDWARE_FAULT);
             } else {
                 reset();
                 if (settings.isConnected()) {
@@ -560,6 +543,7 @@ public class GXDLMSServerBase {
                     if (owner instanceof GXDLMSServer) {
                         GXDLMSServer b = (GXDLMSServer) owner;
                         b.disconnected(connectionInfo);
+
                     } else {
                         GXDLMSServer2 b = (GXDLMSServer2) owner;
                         try {
@@ -570,24 +554,6 @@ public class GXDLMSServerBase {
                 }
                 return null;
             }
-        }
-    }
-
-    // GXDLMSConfirmedServiceError
-    private byte[]
-            reportConfirmedServiceError(final GXDLMSConfirmedServiceError e) {
-        replyData.clear();
-        if (getSettings().getInterfaceType() == InterfaceType.HDLC) {
-            GXDLMS.addLLCBytes(getSettings(), replyData);
-        }
-        replyData.setUInt8(Command.CONFIRMED_SERVICE_ERROR);
-        replyData.setUInt8(e.getConfirmedServiceError().getValue());
-        replyData.setUInt8(e.getServiceError().getValue());
-        replyData.setUInt8(e.getServiceErrorValue());
-        if (settings.getInterfaceType() == InterfaceType.WRAPPER) {
-            return GXDLMS.getWrapperFrame(settings, replyData);
-        } else {
-            return GXDLMS.getHdlcFrame(settings, (byte) 0, replyData);
         }
     }
 
@@ -615,7 +581,7 @@ public class GXDLMSServerBase {
             break;
         }
         if (settings.getUseLogicalNameReferencing()) {
-            GXDLMSLNParameters p = new GXDLMSLNParameters(settings, 0, cmd, 1,
+            GXDLMSLNParameters p = new GXDLMSLNParameters(settings, cmd, 1,
                     null, null, error.getValue());
             GXDLMS.getLNPdu(p, replyData);
         } else {
