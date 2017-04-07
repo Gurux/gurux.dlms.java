@@ -403,6 +403,8 @@ public class GXPkcs10 {
      * @param path
      *            File path.
      * @return Created GXPkcs10 object.
+     * @throws IOException
+     *             IO exception.
      */
     public static GXPkcs10 load(final Path path) throws IOException {
         byte[] encoded = Files.readAllBytes(path);

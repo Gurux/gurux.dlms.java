@@ -114,10 +114,38 @@ public class GXDLMSBase extends GXDLMSSecureServer2
     private GXNet media;
     static final String dataFile = "data.csv";
 
-    public GXDLMSBase(boolean logicalNameReferencing,
+    /**
+     * Constructor.
+     * 
+     * @param ln
+     *            Association logical name.
+     * @param type
+     *            Interface type.
+     */
+    public GXDLMSBase(GXDLMSAssociationLogicalName ln,
             InterfaceType interfaceType) {
-        super(logicalNameReferencing, interfaceType);
+        super(ln, interfaceType);
         this.setMaxReceivePDUSize(1024);
+        byte[] secret = "Gurux".getBytes();
+        ln.setSecret(secret);
+        ln.setHlsSecret(secret);
+    }
+
+    /**
+     * Constructor.
+     * 
+     * @param sn
+     *            Association short name.
+     * @param type
+     *            Interface type.
+     */
+    public GXDLMSBase(GXDLMSAssociationShortName sn,
+            InterfaceType interfaceType) {
+        super(sn, interfaceType);
+        this.setMaxReceivePDUSize(1024);
+        byte[] secret = "Gurux".getBytes();
+        sn.setSecret(secret);
+        sn.setHlsSecret(secret);
     }
 
     /*
@@ -247,7 +275,6 @@ public class GXDLMSBase extends GXDLMSSecureServer2
     void addActivityCalendar() {
         java.util.Calendar tm = Calendar.getInstance();
         java.util.Date now = tm.getTime();
-
         GXDLMSActivityCalendar activity = new GXDLMSActivityCalendar();
         activity.setCalendarNameActive("Active");
         activity.setSeasonProfileActive(

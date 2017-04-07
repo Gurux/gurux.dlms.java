@@ -43,6 +43,8 @@ import gurux.dlms.enums.ObjectType;
 import gurux.dlms.enums.Priority;
 import gurux.dlms.enums.ServiceClass;
 import gurux.dlms.enums.SourceDiagnostic;
+import gurux.dlms.objects.GXDLMSAssociationLogicalName;
+import gurux.dlms.objects.GXDLMSAssociationShortName;
 import gurux.dlms.objects.GXDLMSObject;
 import gurux.dlms.objects.GXDLMSObjectCollection;
 
@@ -53,9 +55,33 @@ public abstract class GXDLMSServer2 {
 
     private final GXDLMSServerBase base;
 
-    public GXDLMSServer2(final boolean logicalNameReferencing,
+    /**
+     * Constructor for logical name referencing.
+     * 
+     * @param ln
+     *            Association logical name.
+     * @param type
+     *            Interface type.
+     */
+    public GXDLMSServer2(final GXDLMSAssociationLogicalName ln,
             final InterfaceType type) {
-        base = new GXDLMSServerBase(this, logicalNameReferencing, type);
+        base = new GXDLMSServerBase(this, true, type);
+        ln.getXDLMSContextInfo().setSettings(getSettings());
+        base.getItems().add(ln);
+    }
+
+    /**
+     * Constructor for short name referencing.
+     * 
+     * @param sn
+     *            Association short name.
+     * @param type
+     *            Interface type.
+     */
+    public GXDLMSServer2(final GXDLMSAssociationShortName sn,
+            final InterfaceType type) {
+        base = new GXDLMSServerBase(this, false, type);
+        base.getItems().add(sn);
     }
 
     /**
