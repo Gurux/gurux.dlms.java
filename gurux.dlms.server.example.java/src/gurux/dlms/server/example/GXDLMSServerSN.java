@@ -35,6 +35,7 @@
 package gurux.dlms.server.example;
 
 import gurux.dlms.enums.InterfaceType;
+import gurux.dlms.objects.GXDLMSAssociationShortName;
 
 /**
  * DLMS Server that uses Short Name referencing with IEC 62056-46 Data link
@@ -42,6 +43,6 @@ import gurux.dlms.enums.InterfaceType;
  */
 public class GXDLMSServerSN extends GXDLMSBase {
     public GXDLMSServerSN() {
-        super(false, InterfaceType.HDLC);
+        super(new GXDLMSAssociationShortName(), InterfaceType.HDLC);
     }
 }

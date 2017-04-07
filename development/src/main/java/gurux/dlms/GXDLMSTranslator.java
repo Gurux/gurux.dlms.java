@@ -1956,7 +1956,7 @@ public class GXDLMSTranslator {
         case Command.SET_RESPONSE:
         case Command.METHOD_REQUEST:
         case Command.METHOD_RESPONSE:
-            ln = new GXDLMSLNParameters(s.getSettings(), s.getCommand(),
+            ln = new GXDLMSLNParameters(s.getSettings(), 0, s.getCommand(),
                     s.getRequestType(), s.getAttributeDescriptor(), s.getData(),
                     0xff);
             GXDLMS.getLNPdu(ln, bb);
@@ -2020,19 +2020,19 @@ public class GXDLMSTranslator {
         case Command.GENERAL_BLOCK_TRANSFER:
             break;
         case Command.ACCESS_REQUEST:
-            ln = new GXDLMSLNParameters(s.getSettings(), s.getCommand(),
+            ln = new GXDLMSLNParameters(s.getSettings(), 0, s.getCommand(),
                     s.getRequestType(), s.getAttributeDescriptor(), s.getData(),
                     0xff);
             GXDLMS.getLNPdu(ln, bb);
             break;
         case Command.ACCESS_RESPONSE:
-            ln = new GXDLMSLNParameters(s.getSettings(), s.getCommand(),
+            ln = new GXDLMSLNParameters(s.getSettings(), 0, s.getCommand(),
                     s.getRequestType(), s.getAttributeDescriptor(), s.getData(),
                     0xff);
             GXDLMS.getLNPdu(ln, bb);
             break;
         case Command.DATA_NOTIFICATION:
-            ln = new GXDLMSLNParameters(s.getSettings(), s.getCommand(),
+            ln = new GXDLMSLNParameters(s.getSettings(), 0, s.getCommand(),
                     s.getRequestType(), s.getAttributeDescriptor(), s.getData(),
                     0xff);
             ln.setTime(s.getTime());

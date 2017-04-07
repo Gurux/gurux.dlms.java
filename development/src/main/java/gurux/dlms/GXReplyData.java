@@ -131,6 +131,11 @@ public class GXReplyData {
     private GXDLMSTranslatorStructure xml;
 
     /**
+     * Invoke ID.
+     */
+    private long invokeId;
+
+    /**
      * Constructor.
      * 
      * @param more
@@ -451,6 +456,21 @@ public class GXReplyData {
      */
     public final void setFrameId(final short value) {
         frameId = value;
+    }
+
+    /**
+     * @return Invoke ID.
+     */
+    public final long getInvokeId() {
+        return invokeId;
+    }
+
+    /**
+     * @param value
+     *            Invoke ID.
+     */
+    public final void setInvokeId(final long value) {
+        invokeId = value;
     }
 
 }

@@ -45,6 +45,7 @@ import gurux.dlms.GXDLMSSettings;
 import gurux.dlms.ValueEventArgs;
 import gurux.dlms.enums.AccessMode;
 import gurux.dlms.enums.Authentication;
+import gurux.dlms.enums.Conformance;
 import gurux.dlms.enums.DataType;
 import gurux.dlms.enums.ErrorCode;
 import gurux.dlms.enums.MethodAccessMode;
@@ -96,8 +97,6 @@ public class GXDLMSAssociationLogicalName extends GXDLMSObject
         applicationContextName = new GXApplicationContextName();
         xDLMSContextInfo = new GXxDLMSContextType();
         authenticationMechanismMame = new GXAuthenticationMechanismName();
-        llsSecret = "Gurux".getBytes();
-        hlsSecret = "Gurux".getBytes();
         setVersion(1);
     }
 
@@ -530,8 +529,10 @@ public class GXDLMSAssociationLogicalName extends GXDLMSObject
             GXByteBuffer data = new GXByteBuffer();
             data.setUInt8(DataType.STRUCTURE.getValue());
             data.setUInt8(6);
-            GXCommon.setData(data, DataType.BITSTRING,
-                    xDLMSContextInfo.getConformance());
+            GXByteBuffer bb = new GXByteBuffer();
+            bb.setUInt32(
+                    Conformance.toInteger(xDLMSContextInfo.getConformance()));
+            GXCommon.setData(data, DataType.BITSTRING, bb.subArray(1, 3));
             GXCommon.setData(data, DataType.UINT16,
                     xDLMSContextInfo.getMaxReceivePduSize());
             GXCommon.setData(data, DataType.UINT16,
@@ -787,14 +788,14 @@ public class GXDLMSAssociationLogicalName extends GXDLMSObject
             break;
         case 5:
             if (e.getValue() != null) {
-                xDLMSContextInfo
-                        .setConformance(Array.get(e.getValue(), 0).toString());
+                xDLMSContextInfo.setConformance(Conformance.forValue(
+                        ((Number) Array.get(e.getValue(), 1)).intValue()));
                 xDLMSContextInfo.setMaxReceivePduSize(
                         ((Number) Array.get(e.getValue(), 1)).intValue());
                 xDLMSContextInfo.setMaxSendPpuSize(
                         ((Number) Array.get(e.getValue(), 2)).intValue());
                 xDLMSContextInfo.setDlmsVersionNumber(
-                        ((Number) Array.get(e.getValue(), 3)).intValue());
+                        ((Number) Array.get(e.getValue(), 3)).byteValue());
                 xDLMSContextInfo.setQualityOfService(
                         ((Number) Array.get(e.getValue(), 4)).intValue());
                 xDLMSContextInfo

@@ -35,6 +35,7 @@
 package gurux.dlms.server.example;
 
 import gurux.dlms.enums.InterfaceType;
+import gurux.dlms.objects.GXDLMSAssociationShortName;
 
 /**
  * DLMS Server that uses Short Same referencing with IEC 62056-47 COSEM
@@ -43,6 +44,6 @@ import gurux.dlms.enums.InterfaceType;
  */
 public class GXDLMSServerSN_47 extends GXDLMSBase {
     public GXDLMSServerSN_47() {
-        super(false, InterfaceType.WRAPPER);
+        super(new GXDLMSAssociationShortName(), InterfaceType.WRAPPER);
     }
 }

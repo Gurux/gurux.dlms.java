@@ -35,7 +35,6 @@
 package gurux.dlms.objects;
 
 public class GXApplicationContextName {
-    private String logicalName;
     private int jointIsoCtt;
     private int country;
     private int countryName;
@@ -43,14 +42,6 @@ public class GXApplicationContextName {
     private int dlmsUA;
     private int applicationContext;
     private int contextId;
-
-    public final String getLogicalName() {
-        return logicalName;
-    }
-
-    public final void setLogicalName(final String value) {
-        logicalName = value;
-    }
 
     public final int getJointIsoCtt() {
         return jointIsoCtt;
@@ -110,13 +101,9 @@ public class GXApplicationContextName {
 
     @Override
     public final String toString() {
-        String name = "";
-        if (logicalName != null) {
-            name = logicalName;
-        }
-        return name + " " + String.valueOf(jointIsoCtt) + " "
-                + String.valueOf(country) + " " + String.valueOf(countryName)
-                + " " + String.valueOf(identifiedOrganization) + " "
+        return String.valueOf(jointIsoCtt) + " " + String.valueOf(country) + " "
+                + String.valueOf(countryName) + " "
+                + String.valueOf(identifiedOrganization) + " "
                 + String.valueOf(dlmsUA) + " "
                 + String.valueOf(applicationContext) + " "
                 + String.valueOf(contextId);

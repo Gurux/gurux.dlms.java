@@ -297,7 +297,7 @@ public class GXDLMSNotify {
             final GXByteBuffer data) {
         List<byte[]> reply;
         if (getUseLogicalNameReferencing()) {
-            GXDLMSLNParameters p = new GXDLMSLNParameters(settings,
+            GXDLMSLNParameters p = new GXDLMSLNParameters(settings, 0,
                     Command.DATA_NOTIFICATION, 0, null, data, 0xff);
             if (time == null) {
                 p.setTime(null);
