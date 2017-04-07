@@ -43,7 +43,6 @@ import gurux.dlms.enums.Authentication;
 import gurux.dlms.enums.BerType;
 import gurux.dlms.enums.Command;
 import gurux.dlms.enums.Conformance;
-import gurux.dlms.enums.Initiate;
 import gurux.dlms.enums.Security;
 import gurux.dlms.enums.SourceDiagnostic;
 import gurux.dlms.internal.GXCommon;
@@ -443,7 +442,7 @@ final class GXAPDU {
                 xml.appendEndTag(Command.CONFIRMED_SERVICE_ERROR);
                 return;
             }
-            throw new GXDLMSConfirmedServiceError(
+            throw new GXDLMSException(
                     ConfirmedServiceError.forValue(data.getUInt8()),
                     ServiceError.forValue(data.getUInt8()), data.getUInt8());
         } else {
@@ -457,12 +456,6 @@ final class GXAPDU {
         // Get DLMS version number.
         if (!response) {
             if (data.getUInt8() != 6) {
-                if (settings.isServer()) {
-                    throw new GXDLMSConfirmedServiceError(
-                            ConfirmedServiceError.INITIATE_ERROR,
-                            ServiceError.INITIATE,
-                            Initiate.DLMS_VERSION_TOO_LOW.getValue());
-                }
                 throw new IllegalArgumentException(
                         "Invalid DLMS version number.");
             }
@@ -545,14 +538,8 @@ final class GXAPDU {
                 settings.setMaxPduSize(settings.getMaxServerPDUSize());
             }
         } else {
-            int pdu = data.getUInt16();
-            if (xml == null && pdu < 64) {
-                throw new GXDLMSConfirmedServiceError(
-                        ConfirmedServiceError.INITIATE_ERROR,
-                        ServiceError.SERVICE, Service.PDU_SIZE.getValue());
-            }
             // Max PDU size.
-            settings.setMaxPduSize(pdu);
+            settings.setMaxPduSize(data.getUInt16());
             if (xml != null) {
                 // NegotiatedConformance closing
                 if (xml.getOutputType() == TranslatorOutputType.SIMPLE_XML) {

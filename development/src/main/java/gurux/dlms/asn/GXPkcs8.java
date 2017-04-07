@@ -250,8 +250,6 @@ public class GXPkcs8 {
      * @param path
      *            File path.
      * @return Created GXPkcs8 object.
-     * @throws IOException
-     *             IO exception.
      */
     public static GXPkcs8 load(final Path path) throws IOException {
         String tmp = new String(Files.readAllBytes(path));

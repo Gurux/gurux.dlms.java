@@ -2045,7 +2045,7 @@ public final class GXCommon {
             }
         } else if (value instanceof byte[]) {
             byte[] arr = (byte[]) value;
-            setObjectCount(8 * arr.length, buff);
+            setObjectCount(arr.length, buff);
             buff.set(arr);
         } else if (value == null) {
             buff.setUInt8(0);

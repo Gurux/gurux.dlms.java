@@ -35,7 +35,6 @@
 package gurux.dlms.server.example;
 
 import gurux.dlms.enums.InterfaceType;
-import gurux.dlms.objects.GXDLMSAssociationLogicalName;
 
 /**
  * DLMS Server that uses Logical Name referencing with IEC 62056-46 Data link
@@ -43,6 +42,6 @@ import gurux.dlms.objects.GXDLMSAssociationLogicalName;
  */
 public class GXDLMSServerLN extends GXDLMSBase {
     public GXDLMSServerLN() {
-        super(new GXDLMSAssociationLogicalName(), InterfaceType.HDLC);
+        super(true, InterfaceType.HDLC);
     }
 }
