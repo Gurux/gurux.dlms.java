@@ -113,6 +113,11 @@ public class ValueEventArgs {
     private GXDLMSServerBase server;
 
     /**
+     * Invoke ID.
+     */
+    private long invokeId;
+
+    /**
      * @return Target DLMS object.
      */
     public final GXDLMSObject getTarget() {
@@ -398,5 +403,20 @@ public class ValueEventArgs {
      */
     public final GXDLMSServerBase getServer() {
         return server;
+    }
+
+    /**
+     * @return Invoke ID.
+     */
+    public final long getInvokeId() {
+        return invokeId;
+    }
+
+    /**
+     * @param value
+     *            Invoke ID.
+     */
+    public final void setInvokeId(final long value) {
+        invokeId = value;
     }
 }

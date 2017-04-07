@@ -88,8 +88,6 @@ public class GXDLMSAssociationShortName extends GXDLMSObject
     public GXDLMSAssociationShortName(final String ln, final int sn) {
         super(ObjectType.ASSOCIATION_SHORT_NAME, ln, sn);
         objectList = new GXDLMSObjectCollection(this);
-        llsSecret = "Gurux".getBytes();
-        hlsSecret = "Gurux".getBytes();
     }
 
     /**
@@ -234,19 +232,24 @@ public class GXDLMSAssociationShortName extends GXDLMSObject
         if (!isRead(2)) {
             attributes.add(new Integer(2));
         }
-        // AccessRightsList is static and read only once.
-        if (!isRead(3)) {
-            attributes.add(new Integer(3));
-        }
-        // SecuritySetupReference is static and read only once.
-        if (!isRead(4)) {
-            attributes.add(new Integer(4));
+        if (getVersion() > 1) {
+            // AccessRightsList is static and read only once.
+            if (!isRead(3)) {
+                attributes.add(new Integer(3));
+            }
+            // SecuritySetupReference is static and read only once.
+            if (!isRead(4)) {
+                attributes.add(new Integer(4));
+            }
         }
         return GXDLMSObjectHelpers.toIntArray(attributes);
     }
 
     @Override
     public final int getAttributeCount() {
+        if (getVersion() < 2) {
+            return 2;
+        }
         return 4;
     }
 
