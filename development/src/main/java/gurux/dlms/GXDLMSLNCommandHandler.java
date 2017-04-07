@@ -55,13 +55,15 @@ final class GXDLMSLNCommandHandler {
 
         // GetRequest normal
         if (type == GetCommandType.NORMAL) {
-            getRequestNormal(settings, server, data, replyData, xml);
+            getRequestNormal(settings, invokeID, server, data, replyData, xml);
         } else if (type == GetCommandType.NEXT_DATA_BLOCK) {
             // Get request for next data block
-            getRequestNextDataBlock(settings, server, data, replyData, xml);
+            getRequestNextDataBlock(settings, invokeID, server, data, replyData,
+                    xml);
         } else if (type == GetCommandType.WITH_LIST) {
             // Get request with a list.
-            getRequestWithList(settings, server, data, replyData, xml);
+            getRequestWithList(settings, invokeID, server, data, replyData,
+                    xml);
         } else {
             LOGGER.log(Level.INFO,
                     "HandleGetRequest failed. Invalid command type.");
@@ -69,10 +71,9 @@ final class GXDLMSLNCommandHandler {
             settings.resetBlockIndex();
             // Access Error : Device reports a hardware fault.
             bb.setUInt8(ErrorCode.HARDWARE_FAULT.getValue());
-            GXDLMS.getLNPdu(
-                    new GXDLMSLNParameters(settings, Command.GET_RESPONSE, type,
-                            null, bb, ErrorCode.OK.getValue()),
-                    replyData);
+            GXDLMS.getLNPdu(new GXDLMSLNParameters(settings, invokeID,
+                    Command.GET_RESPONSE, type, null, bb,
+                    ErrorCode.OK.getValue()), replyData);
         }
         if (xml != null) {
             xml.appendEndTag(Command.GET_REQUEST, type);
@@ -101,7 +102,7 @@ final class GXDLMSLNCommandHandler {
         // Get invoke ID and priority.
         short invoke = data.getUInt8();
         // SetRequest normal or Set Request With First Data Block
-        GXDLMSLNParameters p = new GXDLMSLNParameters(settings,
+        GXDLMSLNParameters p = new GXDLMSLNParameters(settings, invoke,
                 Command.SET_RESPONSE, type, null, null, 0);
         if (xml != null) {
             xml.appendStartTag(Command.SET_REQUEST);
@@ -175,9 +176,9 @@ final class GXDLMSLNCommandHandler {
      *            Received data.
      */
     private static void getRequestNormal(final GXDLMSSettings settings,
-            final GXDLMSServerBase server, final GXByteBuffer data,
-            final GXByteBuffer replyData, final GXDLMSTranslatorStructure xml)
-            throws Exception {
+            final short invokeID, final GXDLMSServerBase server,
+            final GXByteBuffer data, final GXByteBuffer replyData,
+            final GXDLMSTranslatorStructure xml) throws Exception {
         GXByteBuffer bb = new GXByteBuffer();
         ValueEventArgs e = null;
         ErrorCode status = ErrorCode.OK;
@@ -228,6 +229,7 @@ final class GXDLMSLNCommandHandler {
         } else {
             e = new ValueEventArgs(server, obj, attributeIndex, selector,
                     parameters);
+            e.setInvokeId(invokeID);
             if (server.notifyGetAttributeAccess(e) == AccessMode.NO_ACCESS) {
                 // Read Write denied.
                 status = ErrorCode.READ_WRITE_DENIED;
@@ -284,8 +286,10 @@ final class GXDLMSLNCommandHandler {
                 status = e.getError();
             }
         }
-        GXDLMS.getLNPdu(new GXDLMSLNParameters(settings, Command.GET_RESPONSE,
-                1, null, bb, status.getValue()), replyData);
+        GXDLMS.getLNPdu(
+                new GXDLMSLNParameters(settings, e.getInvokeId(),
+                        Command.GET_RESPONSE, 1, null, bb, status.getValue()),
+                replyData);
         if (settings.getCount() != settings.getIndex()
                 || bb.size() != bb.position()) {
             server.setTransaction(new GXDLMSLongTransaction(
@@ -300,9 +304,9 @@ final class GXDLMSLNCommandHandler {
      *            Received data.
      */
     private static void getRequestNextDataBlock(final GXDLMSSettings settings,
-            final GXDLMSServerBase server, final GXByteBuffer data,
-            final GXByteBuffer replyData, final GXDLMSTranslatorStructure xml)
-            throws Exception {
+            final short invokeID, final GXDLMSServerBase server,
+            final GXByteBuffer data, final GXByteBuffer replyData,
+            final GXDLMSTranslatorStructure xml) throws Exception {
         GXByteBuffer bb = new GXByteBuffer();
         int index = (int) data.getUInt32();
         // Get block index.
@@ -316,13 +320,13 @@ final class GXDLMSLNCommandHandler {
                     "getRequestNextDataBlock failed. Invalid block number. "
                             + settings.getBlockIndex() + "/" + index);
             GXDLMS.getLNPdu(
-                    new GXDLMSLNParameters(settings, Command.GET_RESPONSE, 2,
-                            null, bb,
+                    new GXDLMSLNParameters(settings, invokeID,
+                            Command.GET_RESPONSE, 2, null, bb,
                             ErrorCode.DATA_BLOCK_NUMBER_INVALID.getValue()),
                     replyData);
         } else {
             settings.increaseBlockIndex();
-            GXDLMSLNParameters p = new GXDLMSLNParameters(settings,
+            GXDLMSLNParameters p = new GXDLMSLNParameters(settings, invokeID,
                     Command.GET_RESPONSE, 2, null, bb, ErrorCode.OK.getValue());
             // If transaction is not in progress.
             if (server.getTransaction() == null) {
@@ -338,12 +342,14 @@ final class GXDLMSLNCommandHandler {
                         Object value;
                         for (ValueEventArgs arg : server.getTransaction()
                                 .getTargets()) {
+                            arg.setInvokeId(p.getInvokeId());
                             server.notifyRead(new ValueEventArgs[] { arg });
                             if (arg.getHandled()) {
                                 value = arg.getValue();
                             } else {
                                 value = arg.getTarget().getValue(settings, arg);
                             }
+                            p.setInvokeId(arg.getInvokeId());
                             // Add data.
                             if (arg.isByteArray()) {
                                 bb.set((byte[]) value);
@@ -373,9 +379,9 @@ final class GXDLMSLNCommandHandler {
      *            Received data.
      */
     private static void getRequestWithList(final GXDLMSSettings settings,
-            final GXDLMSServerBase server, final GXByteBuffer data,
-            final GXByteBuffer replyData, final GXDLMSTranslatorStructure xml)
-            throws Exception {
+            final short invokeID, final GXDLMSServerBase server,
+            final GXByteBuffer data, final GXByteBuffer replyData,
+            final GXDLMSTranslatorStructure xml) throws Exception {
         GXByteBuffer bb = new GXByteBuffer();
         int pos;
         int cnt = GXCommon.getObjectCount(data);
@@ -426,6 +432,7 @@ final class GXDLMSLNCommandHandler {
                 }
                 ValueEventArgs arg = new ValueEventArgs(server, obj,
                         attributeIndex, selector, parameters);
+                arg.setInvokeId(invokeID);
                 if (obj == null) {
                     arg.setError(ErrorCode.UNDEFINED_OBJECT);
                     list.add(arg);
@@ -448,6 +455,8 @@ final class GXDLMSLNCommandHandler {
         server.notifyRead(list.toArray(new ValueEventArgs[list.size()]));
         Object value;
         pos = 0;
+        GXDLMSLNParameters p = new GXDLMSLNParameters(settings, invokeID,
+                Command.GET_RESPONSE, 3, null, bb, 0xFF);
         for (ValueEventArgs it : list) {
             try {
                 if (it.getHandled()) {
@@ -461,6 +470,7 @@ final class GXDLMSLNCommandHandler {
                 } else {
                     GXDLMS.appendData(it.getTarget(), it.getIndex(), bb, value);
                 }
+                p.setInvokeId(it.getInvokeId());
             } catch (Exception ex) {
                 bb.setUInt8(ErrorCode.HARDWARE_FAULT.getValue());
             }
@@ -472,8 +482,7 @@ final class GXDLMSLNCommandHandler {
             ++pos;
         }
         server.notifyPostRead(list.toArray(new ValueEventArgs[list.size()]));
-        GXDLMS.getLNPdu(new GXDLMSLNParameters(settings, Command.GET_RESPONSE,
-                3, null, bb, 0xFF), replyData);
+        GXDLMS.getLNPdu(p, replyData);
     }
 
     private static void handleSetRequestNormal(final GXDLMSSettings settings,
@@ -544,6 +553,7 @@ final class GXDLMSLNCommandHandler {
             p.setStatus(ErrorCode.UNDEFINED_OBJECT.getValue());
         } else {
             ValueEventArgs e = new ValueEventArgs(server, obj, index, 0, null);
+            e.setInvokeId(p.getInvokeId());
             AccessMode am = server.notifyGetAttributeAccess(e);
             // If write is denied.
             if (am != AccessMode.WRITE && am != AccessMode.READ_WRITE) {
@@ -571,6 +581,7 @@ final class GXDLMSLNCommandHandler {
                         obj.setValue(settings, e);
                     }
                     server.notifyPostWrite(list);
+                    p.setInvokeId(e.getInvokeId());
                 } catch (Exception ex) {
                     p.setStatus(ErrorCode.HARDWARE_FAULT.getValue());
                 }
@@ -712,6 +723,7 @@ final class GXDLMSLNCommandHandler {
         } else {
             ValueEventArgs e =
                     new ValueEventArgs(server, obj, id, 0, parameters);
+            e.setInvokeId(invokeId);
             if (server.notifyGetMethodAccess(e) == MethodAccessMode.NO_ACCESS) {
                 error = ErrorCode.READ_WRITE_DENIED;
             } else {
@@ -741,9 +753,10 @@ final class GXDLMSLNCommandHandler {
                     // Add return parameters
                     bb.setUInt8(0);
                 }
+                invokeId = (short) e.getInvokeId();
             }
         }
-        GXDLMSLNParameters p = new GXDLMSLNParameters(settings,
+        GXDLMSLNParameters p = new GXDLMSLNParameters(settings, invokeId,
                 Command.METHOD_RESPONSE, 1, null, bb, error.getValue());
         GXDLMS.getLNPdu(p, replyData);
         // If High level authentication fails.

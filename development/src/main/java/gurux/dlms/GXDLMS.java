@@ -283,7 +283,7 @@ abstract class GXDLMS {
         settings.increaseBlockIndex();
         List<byte[]> reply;
         if (settings.getUseLogicalNameReferencing()) {
-            GXDLMSLNParameters p = new GXDLMSLNParameters(settings, cmd,
+            GXDLMSLNParameters p = new GXDLMSLNParameters(settings, 0, cmd,
                     GetCommandType.NEXT_DATA_BLOCK, bb, null, 0xff);
             reply = getLnMessages(p);
         } else {
@@ -449,7 +449,7 @@ abstract class GXDLMS {
      * @param data
      *            Data where bytes are added.
      */
-    private static void addLLCBytes(final GXDLMSSettings settings,
+    static void addLLCBytes(final GXDLMSSettings settings,
             final GXByteBuffer data) {
         if (settings.isServer()) {
             data.set(0, GXCommon.LLC_REPLY_BYTES);
@@ -545,7 +545,12 @@ abstract class GXDLMS {
                     || p.getCommand() == Command.ACCESS_REQUEST
                     || p.getCommand() == Command.ACCESS_RESPONSE) {
                 // Add Long-Invoke-Id-And-Priority
-                reply.setUInt32(getLongInvokeIDPriority(p.getSettings()));
+                if (p.getInvokeId() != 0) {
+                    reply.setUInt32(p.getInvokeId());
+
+                } else {
+                    reply.setUInt32(getLongInvokeIDPriority(p.getSettings()));
+                }
                 // Add date time.
                 if (p.getTime() == null) {
                     reply.setUInt8(DataType.NONE.getValue());
@@ -583,8 +588,11 @@ abstract class GXDLMS {
                 }
                 reply.setUInt8(p.getRequestType());
                 // Add Invoke Id And Priority.
-                reply.setUInt8(getInvokeIDPriority(p.getSettings()));
-
+                if (p.getInvokeId() != 0) {
+                    reply.setUInt8((byte) p.getInvokeId());
+                } else {
+                    reply.setUInt8(getInvokeIDPriority(p.getSettings()));
+                }
             }
             // Add attribute descriptor.
             reply.set(p.getAttributeDescriptor());
@@ -2661,7 +2669,8 @@ abstract class GXDLMS {
                     ConfirmedServiceError.forValue(data.getData().getUInt8());
             ServiceError type =
                     ServiceError.forValue(data.getData().getUInt8());
-            throw new GXDLMSException(service, type, data.getData().getUInt8());
+            throw new GXDLMSConfirmedServiceError(service, type,
+                    data.getData().getUInt8());
         }
     }
 

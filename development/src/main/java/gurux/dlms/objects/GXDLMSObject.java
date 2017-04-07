@@ -511,9 +511,10 @@ public class GXDLMSObject {
      * 
      * @param server
      *            Server.
+     * @throws Exception
+     *             Occurred exception.
      */
-    public void stop(final GXDLMSServerBase server)
-            throws InterruptedException {
+    public void stop(final GXDLMSServerBase server) throws Exception {
 
     }
 }

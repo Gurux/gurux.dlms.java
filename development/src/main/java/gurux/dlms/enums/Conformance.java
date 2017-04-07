@@ -233,6 +233,9 @@ public enum Conformance {
      * @return The integer value.
      */
     public static int toInteger(final Set<Conformance> value) {
+        if (value == null) {
+            return 0;
+        }
         int tmp = 0;
         for (Conformance it : value) {
             tmp |= it.getValue();
