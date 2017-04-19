@@ -888,7 +888,11 @@ abstract class GXDLMS {
                         .getInterfaceType() == InterfaceType.HDLC) {
                     messages.add(
                             GXDLMS.getHdlcFrame(p.getSettings(), frame, reply));
-                    frame = 0;
+                    if (p.getSettings().isServer()) {
+                        frame = 0;
+                    } else {
+                        frame = p.getSettings().getNextSend(false);
+                    }
                 } else if (p.getSettings()
                         .getInterfaceType() == InterfaceType.PDU) {
                     messages.add(reply.array());
@@ -919,7 +923,7 @@ abstract class GXDLMS {
         if (p.getCommand() == Command.AARQ) {
             frame = 0x10;
         } else if (p.getCommand() == Command.NONE) {
-            frame = p.getSettings().getNextSend();
+            frame = p.getSettings().getNextSend(true);
         }
         do {
             getSNPdu(p, reply);
@@ -935,11 +939,16 @@ abstract class GXDLMS {
                 } else if (p.getSettings()
                         .getInterfaceType() == InterfaceType.HDLC) {
                     messages.add(getHdlcFrame(p.getSettings(), frame, reply));
-                    frame = 0;
+                    if (reply.position() != reply.size()) {
+                        if (p.getSettings().isServer()) {
+                            frame = 0;
+                        } else {
+                            frame = p.getSettings().getNextSend(false);
+                        }
+                    }
                 } else if (p.getSettings()
                         .getInterfaceType() == InterfaceType.PDU) {
                     messages.add(reply.array());
-                    frame = 0;
                     break;
                 } else {
                     throw new IllegalArgumentException("InterfaceType");
@@ -1219,13 +1228,13 @@ abstract class GXDLMS {
         if (data == null || data.size() == 0) {
             bb.setUInt8(0xA0);
         } else if (data.size() - data.position() <= frameSize) {
-            // Is last packet.
-            bb.setUInt8(0xA0);
             len = data.size() - data.position();
+            // Is last packet.
+            bb.setUInt8(0xA0 | ((len >> 8) & 0x7));
         } else {
-            // More data to left.
-            bb.setUInt8(0xA8);
             len = frameSize;
+            // More data to left.
+            bb.setUInt8(0xA8 | ((len >> 8) & 0x7));
         }
         // Frame len.
         if (len == 0) {
@@ -1242,7 +1251,7 @@ abstract class GXDLMS {
 
         // Add frame ID.
         if (frame == 0) {
-            bb.setUInt8(settings.getNextSend());
+            bb.setUInt8(settings.getNextSend(true));
         } else {
             bb.setUInt8(frame);
         }
@@ -1383,8 +1392,9 @@ abstract class GXDLMS {
             data.setPacketLength(reply.position() + 1);
         }
 
-        if ((frame & HdlcFrameType.U_FRAME.getValue()) == HdlcFrameType.U_FRAME
-                .getValue()) {
+        if (frame != 0x13 && (frame
+                & HdlcFrameType.U_FRAME.getValue()) == HdlcFrameType.U_FRAME
+                        .getValue()) {
             // Get Eop if there is no data.
             if (reply.position() == packetStartID + frameLen + 1) {
                 // Get EOP.
@@ -1392,9 +1402,11 @@ abstract class GXDLMS {
             }
             if (frame == 0x97) {
                 data.setError((short) ErrorCode.UNACCEPTABLE_FRAME.getValue());
+            } else if (frame == 0x1f) {
+                data.setError((short) ErrorCode.DISCONNECT_MODE.getValue());
             }
             data.setCommand(frame);
-        } else if ((frame
+        } else if (frame != 0x13 && (frame
                 & HdlcFrameType.S_FRAME.getValue()) == HdlcFrameType.S_FRAME
                         .getValue()) {
             // If S-frame
@@ -1403,7 +1415,7 @@ abstract class GXDLMS {
             if (tmp == HdlcControlFrame.REJECT.getValue()) {
                 data.setError((short) ErrorCode.REJECTED.getValue());
             } else if (tmp == HdlcControlFrame.RECEIVE_NOT_READY.getValue()) {
-                data.setError((short) ErrorCode.REJECTED.getValue());
+                data.setError((short) ErrorCode.RECEIVE_NOT_READY.getValue());
             } else if (tmp == HdlcControlFrame.RECEIVE_READY.getValue()) {
                 data.setError((short) ErrorCode.OK.getValue());
                 // Get next frame.

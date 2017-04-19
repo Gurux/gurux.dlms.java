@@ -217,10 +217,8 @@ public class GXDLMSActionSchedule extends GXDLMSObject implements IGXDLMSBase {
                 for (GXDateTime it : getExecutionTime()) {
                     bb.setUInt8(DataType.STRUCTURE.getValue());
                     bb.setUInt8(2); // Count
-                    GXCommon.setData(bb, DataType.OCTET_STRING,
-                            new GXTime(it.getCalendar().getTime())); // Time
-                    GXCommon.setData(bb, DataType.OCTET_STRING,
-                            new GXDate(it.getCalendar().getTime())); // Date
+                    GXCommon.setData(bb, DataType.OCTET_STRING, new GXTime(it)); // Time
+                    GXCommon.setData(bb, DataType.OCTET_STRING, new GXDate(it)); // Date
                 }
             }
             return bb.array();

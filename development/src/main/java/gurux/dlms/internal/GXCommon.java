@@ -833,6 +833,21 @@ public final class GXCommon {
     }
 
     /**
+     * Get the number of days in that month.
+     * 
+     * @param year
+     *            Year.
+     * @param month
+     *            Month.
+     * @return Number of days in month.
+     */
+    public static int daysInMonth(final int year, final int month) {
+        Calendar cal = Calendar.getInstance();
+        cal.set(year, month, 1);
+        return cal.getActualMaximum(Calendar.DAY_OF_MONTH);
+    }
+
+    /**
      * Get date and time from DLMS data.
      * 
      * @param buff

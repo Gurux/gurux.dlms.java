@@ -67,6 +67,21 @@ public class GXDate extends GXDateTime {
     /**
      * Constructor.
      * 
+     * @param forvalue
+     *            Date value.
+     */
+    public GXDate(final GXDateTime forvalue) {
+        super(forvalue.getCalendar());
+        getSkip().addAll(forvalue.getSkip());
+        getSkip().add(DateTimeSkips.HOUR);
+        getSkip().add(DateTimeSkips.MINUTE);
+        getSkip().add(DateTimeSkips.SECOND);
+        getSkip().add(DateTimeSkips.MILLISECOND);
+    }
+
+    /**
+     * Constructor.
+     * 
      * @param year
      *            Used year.
      * @param month

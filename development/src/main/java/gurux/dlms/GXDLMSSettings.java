@@ -445,10 +445,17 @@ public class GXDLMSSettings {
 
     /**
      * @return Generates I-frame.
+     * @param first
+     *            Is this first packet.
+     * @return Generated I-frame
      */
-    final byte getNextSend() {
-        senderFrame = increaseReceiverSequence(
-                increaseSendSequence((byte) senderFrame));
+    final byte getNextSend(final boolean first) {
+        if (first) {
+            senderFrame = increaseReceiverSequence(
+                    increaseSendSequence((byte) senderFrame));
+        } else {
+            senderFrame = increaseSendSequence((byte) senderFrame);
+        }
         return (byte) senderFrame;
     }
 
