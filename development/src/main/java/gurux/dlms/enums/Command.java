@@ -111,17 +111,21 @@ public final class Command {
     public static final int METHOD_RESPONSE = 0xC7;
 
     /**
-     * Unacceptable frame.
+     * HDLC Disconnect Mode.
+     */
+    public static final int DISCONNECT_MODE = 0x1F;
+    /**
+     * HDLC Unacceptable frame.
      */
     public static final int UNACCEPTABLE_FRAME = 0x97;
 
     /**
-     * SNRM request.
+     * HDLC SNRM request.
      */
     public static final int SNRM = 0x93;
 
     /**
-     * UA request.
+     * HDLC UA request.
      */
     public static final int UA = 0x73;
 

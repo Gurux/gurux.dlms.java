@@ -295,23 +295,24 @@ public class GXDLMSTranslator {
         reply.setXml(new GXDLMSTranslatorStructure(outputType, hex,
                 getShowStringAsHex(), comments, tags));
         int pos;
+        boolean found;
         while (data.position() != data.size()) {
             if (data.getUInt8(data.position()) == 0x7e) {
                 pos = data.position();
                 settings.setInterfaceType(InterfaceType.HDLC);
-                if (!GXDLMS.getData(settings, data, reply)) {
-                    ++pos;
-                }
+                found = GXDLMS.getData(settings, data, reply);
                 data.position(pos);
-                break;
+                if (found) {
+                    break;
+                }
             } else if (data.getUInt16(data.position()) == 0x1) {
                 pos = data.position();
                 settings.setInterfaceType(InterfaceType.WRAPPER);
-                if (!GXDLMS.getData(settings, data, reply)) {
-                    ++pos;
-                }
+                found = GXDLMS.getData(settings, data, reply);
                 data.position(pos);
-                break;
+                if (found) {
+                    break;
+                }
             }
             data.position(data.position() + 1);
         }
@@ -342,22 +343,24 @@ public class GXDLMSTranslator {
         reply.setXml(new GXDLMSTranslatorStructure(outputType, hex,
                 getShowStringAsHex(), comments, tags));
         int pos;
+        boolean found;
         while (data.position() != data.size()) {
             if (type == InterfaceType.HDLC
                     && data.getUInt8(data.position()) == 0x7e) {
                 pos = data.position();
-                if (!GXDLMS.getData(settings, data, reply)) {
-                    ++pos;
-                }
+                found = GXDLMS.getData(settings, data, reply);
                 data.position(pos);
-                break;
+                if (found) {
+                    break;
+                }
             } else if (type == InterfaceType.WRAPPER
                     && data.getUInt16(data.position()) == 0x1) {
                 pos = data.position();
-                if (!GXDLMS.getData(settings, data, reply)) {
-                    ++pos;
-                }
+                found = GXDLMS.getData(settings, data, reply);
                 data.position(pos);
+                if (found) {
+                    break;
+                }
                 break;
             }
             data.position(data.position() + 1);

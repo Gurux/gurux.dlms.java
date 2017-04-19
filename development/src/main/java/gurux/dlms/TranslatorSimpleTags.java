@@ -37,6 +37,8 @@ final class TranslatorSimpleTags {
         GXDLMSTranslator.addTag(list, Command.SNRM, "Snrm");
         GXDLMSTranslator.addTag(list, Command.UNACCEPTABLE_FRAME,
                 "UnacceptableFrame");
+        GXDLMSTranslator.addTag(list, Command.DISCONNECT_MODE,
+                "DisconnectMode");
         GXDLMSTranslator.addTag(list, Command.UA, "Ua");
         GXDLMSTranslator.addTag(list, Command.AARQ, "AssociationRequest");
         GXDLMSTranslator.addTag(list, Command.AARE, "AssociationResponse");

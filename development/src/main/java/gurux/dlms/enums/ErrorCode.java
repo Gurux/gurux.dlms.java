@@ -44,6 +44,15 @@ import java.util.HashMap;
 public enum ErrorCode {
 
     /**
+     * Disconnect Mode.
+     */
+    DISCONNECT_MODE(-4),
+    /**
+     * Receive Not Ready.
+     */
+    RECEIVE_NOT_READY(-3),
+
+    /**
      * Connection is rejected.
      */
     REJECTED(-2),

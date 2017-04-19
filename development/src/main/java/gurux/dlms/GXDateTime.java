@@ -52,7 +52,7 @@ public class GXDateTime {
      * Clock status.
      */
     private java.util.Set<ClockStatus> status;
-    Calendar calendar;
+    private Calendar calendar;
     /**
      * Skipped fields.
      */
@@ -425,6 +425,103 @@ public class GXDateTime {
             }
         }
         return sd.format(calendar.getTime());
+    }
+
+    /**
+     * Get difference between given time and run time in ms.
+     * 
+     * @param start
+     *            Start date time.
+     * @param to
+     *            Compared time.
+     * @return Difference in milliseconds.
+     */
+    public static long getDifference(final Calendar start,
+            final GXDateTime to) {
+        long diff = 0;
+        // Compare seconds.
+        if (!to.getSkip().contains(DateTimeSkips.SECOND)) {
+            if (start.get(Calendar.SECOND) < to.getCalendar()
+                    .get(Calendar.SECOND)) {
+                diff += (to.getCalendar().get(Calendar.SECOND)
+                        - start.get(Calendar.SECOND)) * 1000L;
+            } else {
+                diff -= (start.get(Calendar.SECOND)
+                        - to.getCalendar().get(Calendar.SECOND)) * 1000L;
+            }
+        } else if (diff < 0) {
+            diff = 60000 + diff;
+        }
+        // Compare minutes.
+        if (!to.getSkip().contains(DateTimeSkips.MINUTE)) {
+            if (start.get(Calendar.MINUTE) < to.getCalendar()
+                    .get(Calendar.MINUTE)) {
+                diff += (to.getCalendar().get(Calendar.MINUTE)
+                        - start.get(Calendar.MINUTE)) * 60000L;
+            } else {
+                diff -= (start.get(Calendar.MINUTE)
+                        - to.getCalendar().get(Calendar.MINUTE)) * 60000L;
+            }
+        } else if (diff < 0) {
+            diff = 60 * 60000 + diff;
+        }
+        // Compare hours.
+        if (!to.getSkip().contains(DateTimeSkips.HOUR)) {
+            if (start.get(Calendar.HOUR) < to.getCalendar()
+                    .get(Calendar.HOUR)) {
+                diff += (to.getCalendar().get(Calendar.HOUR)
+                        - start.get(Calendar.HOUR)) * 60 * 60000L;
+            } else {
+                diff -= (start.get(Calendar.HOUR)
+                        - to.getCalendar().get(Calendar.HOUR)) * 60 * 60000L;
+            }
+        } else if (diff < 0) {
+            diff = 60 * 60000 + diff;
+        }
+        // Compare days.
+        if (!to.getSkip().contains(DateTimeSkips.DAY)) {
+            if (start.get(Calendar.DAY_OF_MONTH) < to.getCalendar()
+                    .get(Calendar.DAY_OF_MONTH)) {
+                diff += (to.getCalendar().get(Calendar.DAY_OF_MONTH)
+                        - start.get(Calendar.DAY_OF_MONTH)) * 24 * 60 * 60000;
+            } else if (start.get(Calendar.DAY_OF_MONTH) != to.getCalendar()
+                    .get(Calendar.DAY_OF_MONTH)) {
+                if (!to.getSkip().contains(DateTimeSkips.DAY)) {
+                    diff += (to.getCalendar().get(Calendar.DAY_OF_MONTH)
+                            - start.get(Calendar.DAY_OF_MONTH)) * 24 * 60
+                            * 60000L;
+                } else {
+                    diff = ((GXCommon.daysInMonth(start.get(Calendar.YEAR),
+                            start.get(Calendar.MONTH))
+                            - start.get(Calendar.DAY_OF_MONTH)
+                            + to.getCalendar().get(Calendar.DAY_OF_MONTH)) * 24
+                            * 60 * 60000L) + diff;
+                }
+            }
+        } else if (diff < 0) {
+            diff = 24 * 60 * 60000 + diff;
+        }
+        // Compare months.
+        if (!to.getSkip().contains(DateTimeSkips.MONTH)) {
+            if (start.get(Calendar.MONTH) < to.getCalendar()
+                    .get(Calendar.MONTH)) {
+                for (int m = start.get(Calendar.MONTH); m != to.getCalendar()
+                        .get(Calendar.MONTH); ++m) {
+                    diff += GXCommon.daysInMonth(start.get(Calendar.YEAR), m)
+                            * 24 * 60 * 60000L;
+                }
+            } else {
+                for (int m = to.getCalendar().get(Calendar.MONTH); m != start
+                        .get(Calendar.MONTH); ++m) {
+                    diff += -GXCommon.daysInMonth(start.get(Calendar.YEAR), m)
+                            * 24 * 60 * 60000L;
+                }
+            }
+        } else if (diff < 0) {
+            diff = GXCommon.daysInMonth(start.get(Calendar.YEAR),
+                    start.get(Calendar.MONTH)) * 24 * 60 * 60000L + diff;
+        }
+        return diff;
     }
 
     /**
