@@ -419,7 +419,7 @@ public class GXDLMSBase extends GXDLMSSecureServer2
    */
   private void saveObjects(final String path) {
     synchronized (settingsLock) {
-      // Mikko getItems().save(path, true);
+      // getItems().save(path, true);
     }
   }
 
@@ -813,7 +813,7 @@ public class GXDLMSBase extends GXDLMSSecureServer2
             if (it.getKey() instanceof GXDLMSClock
                 && it.getValue().getAttributeIndex() == 2) {
               GXDLMSClock c = (GXDLMSClock) it.getKey();
-              // Mikko c.setTime(c.now());
+              c.setTime(c.now());
             } else if (it.getKey() == temperature
                 && it.getValue().getAttributeIndex() == 2) {
               // Get CPU temperature.

@@ -314,7 +314,7 @@ public class GXDateTime {
 
     /**
      * @return Used calendar.
-     * @deprecated use {@link #getLocalTimeCalendar} instead.
+     * @deprecated use {@link #getLocalCalendar} instead.
      */
     public final Calendar getCalendar() {
         return meterCalendar;
@@ -345,7 +345,8 @@ public class GXDateTime {
     }
 
     /**
-     * @return Used meter calendar.
+     * @param value
+     *            Used meter calendar.
      */
     public final void setMeterCalendar(final Calendar value) {
         meterCalendar = value;
@@ -353,7 +354,7 @@ public class GXDateTime {
 
     /**
      * @return Used date time value.
-     * @deprecated use {@link #getLocalTimeCalendar} instead.
+     * @deprecated use {@link #getLocalCalendar} instead.
      */
     @Deprecated
     public final java.util.Date getValue() {
@@ -365,7 +366,7 @@ public class GXDateTime {
      * 
      * @param forvalue
      *            Used date time value.
-     * @deprecated use {@link #getLocalTimeCalendar} instead.
+     * @deprecated use {@link #getLocalCalendar} instead.
      */
     @Deprecated
     public final void setValue(final java.util.Date forvalue) {
@@ -379,7 +380,7 @@ public class GXDateTime {
      *            Used date time value.
      * @param forDeviation
      *            Used deviation.
-     * @deprecated use {@link #setCalendar} instead.
+     * @deprecated use {@link #setMeterCalendar} instead.
      */
     @Deprecated
     public final void setValue(final java.util.Date forvalue,
@@ -452,7 +453,7 @@ public class GXDateTime {
     /**
      * @param forValue
      *            Deviation is time from current time zone to UTC time.
-     * @deprecated use {@link #setCalendar} instead.
+     * @deprecated use {@link #setMeterCalendar} instead.
      */
     @Deprecated
     public final void setDeviation(final int forValue) {
