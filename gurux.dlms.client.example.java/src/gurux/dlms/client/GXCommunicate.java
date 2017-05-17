@@ -635,7 +635,6 @@ public class GXCommunicate {
                 try {
 
                     Object val = readObject(it, pos);
-                    writeObject(it, pos);
                     if (val instanceof byte[]) {
                         val = GXCommon.bytesToHex((byte[]) val);
                     } else if (val instanceof Double) {
@@ -757,11 +756,6 @@ public class GXCommunicate {
      * no need to read all data from the meter.
      */
     void readAllObjects(PrintWriter logFile) throws Exception {
-        // System.out.println("Reading association view");
-        // GXDLMSActionSchedule it = new GXDLMSActionSchedule("0.0.15.0.0.255");
-        // Object val = readObject(it, 4);
-        // writeObject(it, 4);
-
         GXReplyData reply = new GXReplyData();
         // Get Association view from the meter.
         readDataBlock(dlms.getObjectsRequest(), reply);
