@@ -34,12 +34,12 @@
 
 package gurux.dlms.objects;
 
-import gurux.dlms.GXDLMSClient;
 import gurux.dlms.GXDLMSSettings;
 import gurux.dlms.ValueEventArgs;
 import gurux.dlms.enums.DataType;
 import gurux.dlms.enums.ErrorCode;
 import gurux.dlms.enums.ObjectType;
+import gurux.dlms.internal.GXCommon;
 
 public class GXDLMSTcpUdpSetup extends GXDLMSObject implements IGXDLMSBase {
     private int port;
@@ -93,6 +93,10 @@ public class GXDLMSTcpUdpSetup extends GXDLMSObject implements IGXDLMSBase {
     }
 
     public final void setIPReference(final String value) {
+        // Check that IP reference is OBIS code.
+        if (value != null && value.length() != 0) {
+            GXCommon.logicalNameToBytes(value);
+        }
         ipReference = value;
     }
 
@@ -210,13 +214,13 @@ public class GXDLMSTcpUdpSetup extends GXDLMSObject implements IGXDLMSBase {
     public final Object getValue(final GXDLMSSettings settings,
             final ValueEventArgs e) {
         if (e.getIndex() == 1) {
-            return getLogicalName();
+            return GXCommon.logicalNameToBytes(getLogicalName());
         }
         if (e.getIndex() == 2) {
             return new Integer(getPort());
         }
         if (e.getIndex() == 3) {
-            return getIPReference();
+            return GXCommon.logicalNameToBytes(getIPReference());
         }
         if (e.getIndex() == 4) {
             return new Integer(getMaximumSegmentSize());
@@ -238,7 +242,7 @@ public class GXDLMSTcpUdpSetup extends GXDLMSObject implements IGXDLMSBase {
     public final void setValue(final GXDLMSSettings settings,
             final ValueEventArgs e) {
         if (e.getIndex() == 1) {
-            super.setValue(settings, e);
+            setLogicalName(GXCommon.toLogicalName(e.getValue()));
         } else if (e.getIndex() == 2) {
             if (e.getValue() == null) {
                 setPort(4059);
@@ -250,9 +254,7 @@ public class GXDLMSTcpUdpSetup extends GXDLMSObject implements IGXDLMSBase {
                 setIPReference(null);
             } else {
                 if (e.getValue() instanceof byte[]) {
-                    setIPReference(
-                            GXDLMSClient.changeType((byte[]) e.getValue(),
-                                    DataType.OCTET_STRING).toString());
+                    setIPReference(GXCommon.toLogicalName(e.getValue()));
                 } else {
                     setIPReference(String.valueOf(e.getValue()));
                 }

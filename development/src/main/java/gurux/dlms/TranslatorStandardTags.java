@@ -388,7 +388,7 @@ final class TranslatorStandardTags {
                 "x:ciphered-content");
         GXDLMSTranslator.addTag(list, TranslatorTags.SYSTEM_TITLE,
                 "x:system-title");
-
+        GXDLMSTranslator.addTag(list, TranslatorTags.DATA_BLOCK, "x:DataBlock");
     }
 
     static void getDataTypeTags(final HashMap<Integer, String> list) {

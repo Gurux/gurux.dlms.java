@@ -60,7 +60,7 @@ public class GXDLMSActionSchedule extends GXDLMSObject implements IGXDLMSBase {
      * Constructor.
      */
     public GXDLMSActionSchedule() {
-        super(ObjectType.ACTION_SCHEDULE);
+        this(null, 0);
     }
 
     /**
@@ -70,7 +70,7 @@ public class GXDLMSActionSchedule extends GXDLMSObject implements IGXDLMSBase {
      *            Logical Name of the object.
      */
     public GXDLMSActionSchedule(final String ln) {
-        super(ObjectType.ACTION_SCHEDULE, ln, 0);
+        this(ln, 0);
     }
 
     /**
@@ -83,6 +83,7 @@ public class GXDLMSActionSchedule extends GXDLMSObject implements IGXDLMSBase {
      */
     public GXDLMSActionSchedule(final String ln, final int sn) {
         super(ObjectType.ACTION_SCHEDULE, ln, sn);
+        type = SingleActionScheduleType.SingleActionScheduleType1;
     }
 
     public final String getExecutedScriptLogicalName() {
@@ -192,20 +193,20 @@ public class GXDLMSActionSchedule extends GXDLMSObject implements IGXDLMSBase {
     public final Object getValue(final GXDLMSSettings settings,
             final ValueEventArgs e) {
         if (e.getIndex() == 1) {
-            return getLogicalName();
+            return GXCommon.logicalNameToBytes(getLogicalName());
         }
         if (e.getIndex() == 2) {
             GXByteBuffer stream = new GXByteBuffer();
             stream.setUInt8(DataType.STRUCTURE.getValue());
             stream.setUInt8(2);
             GXCommon.setData(stream, DataType.OCTET_STRING,
-                    executedScriptLogicalName);
+                    GXCommon.logicalNameToBytes(executedScriptLogicalName));
             GXCommon.setData(stream, DataType.UINT16,
                     new Integer(executedScriptSelector));
             return stream.array();
         }
         if (e.getIndex() == 3) {
-            return new Integer(this.getType().getValue());
+            return new Integer(getType().getValue());
         }
         if (e.getIndex() == 4) {
             GXByteBuffer bb = new GXByteBuffer();
@@ -217,8 +218,10 @@ public class GXDLMSActionSchedule extends GXDLMSObject implements IGXDLMSBase {
                 for (GXDateTime it : getExecutionTime()) {
                     bb.setUInt8(DataType.STRUCTURE.getValue());
                     bb.setUInt8(2); // Count
-                    GXCommon.setData(bb, DataType.OCTET_STRING, new GXTime(it)); // Time
-                    GXCommon.setData(bb, DataType.OCTET_STRING, new GXDate(it)); // Date
+                    // Time
+                    GXCommon.setData(bb, DataType.OCTET_STRING, new GXTime(it));
+                    // Date
+                    GXCommon.setData(bb, DataType.OCTET_STRING, new GXDate(it));
                 }
             }
             return bb.array();
@@ -234,12 +237,10 @@ public class GXDLMSActionSchedule extends GXDLMSObject implements IGXDLMSBase {
     public final void setValue(final GXDLMSSettings settings,
             final ValueEventArgs e) {
         if (e.getIndex() == 1) {
-            super.setValue(settings, e);
+            setLogicalName(GXCommon.toLogicalName(e.getValue()));
         } else if (e.getIndex() == 2) {
-            setExecutedScriptLogicalName(GXDLMSClient
-                    .changeType((byte[]) ((Object[]) e.getValue())[0],
-                            DataType.OCTET_STRING)
-                    .toString());
+            setExecutedScriptLogicalName(
+                    GXCommon.toLogicalName(((Object[]) e.getValue())[0]));
             setExecutedScriptSelector(
                     ((Number) ((Object[]) e.getValue())[1]).intValue());
         } else if (e.getIndex() == 3) {
@@ -251,25 +252,32 @@ public class GXDLMSActionSchedule extends GXDLMSObject implements IGXDLMSBase {
                 java.util.ArrayList<GXDateTime> items =
                         new java.util.ArrayList<GXDateTime>();
                 for (Object it : (Object[]) e.getValue()) {
-                    GXDateTime dt = (GXDateTime) GXDLMSClient.changeType(
+                    GXDateTime time = (GXDateTime) GXDLMSClient.changeType(
                             (byte[]) ((Object[]) it)[0], DataType.TIME);
-                    GXDateTime dt2 = (GXDateTime) GXDLMSClient.changeType(
+                    time.setSkip(DateTimeSkips.forValue(DateTimeSkips
+                            .toInteger(time.getSkip())
+                            & ~(DateTimeSkips.YEAR.getValue()
+                                    | DateTimeSkips.MONTH.getValue()
+                                    | DateTimeSkips.DAY.getValue()
+                                    | DateTimeSkips.DAY_OF_WEEK.getValue())));
+                    GXDateTime date = (GXDateTime) GXDLMSClient.changeType(
                             (byte[]) ((Object[]) it)[1], DataType.DATE);
-                    java.util.Calendar tm = Calendar.getInstance();
-                    tm.setTime(dt.getCalendar().getTime());
-                    java.util.Calendar date = Calendar.getInstance();
-                    date.setTime(dt2.getCalendar().getTime());
-                    tm.set(java.util.Calendar.YEAR,
-                            date.get(java.util.Calendar.YEAR) - 1);
-                    tm.set(java.util.Calendar.MONTH,
-                            date.get(java.util.Calendar.MONTH));
-                    tm.set(java.util.Calendar.DAY_OF_MONTH,
-                            date.get(java.util.Calendar.DAY_OF_MONTH) - 1);
-                    java.util.Set<DateTimeSkips> skip = dt.getSkip();
-                    skip.addAll(dt2.getSkip());
-                    dt.setSkip(skip);
-                    dt.setCalendar(tm);
-                    items.add(dt);
+                    date.setSkip(DateTimeSkips.forValue(DateTimeSkips
+                            .toInteger(date.getSkip())
+                            & ~(DateTimeSkips.HOUR.getValue()
+                                    | DateTimeSkips.MINUTE.getValue()
+                                    | DateTimeSkips.SECOND.getValue()
+                                    | DateTimeSkips.MILLISECOND.getValue())));
+                    GXDateTime tmp = new GXDateTime(date.getCalendar());
+                    tmp.getCalendar().add(Calendar.HOUR,
+                            time.getCalendar().get(Calendar.HOUR));
+                    tmp.getCalendar().add(Calendar.MINUTE,
+                            time.getCalendar().get(Calendar.MINUTE));
+                    tmp.getCalendar().add(Calendar.SECOND,
+                            time.getCalendar().get(Calendar.SECOND));
+                    tmp.getSkip().addAll(date.getSkip());
+                    tmp.getSkip().addAll(time.getSkip());
+                    items.add(tmp);
                 }
                 setExecutionTime(items.toArray(new GXDateTime[items.size()]));
             }

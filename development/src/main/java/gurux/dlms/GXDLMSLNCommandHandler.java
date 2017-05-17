@@ -144,7 +144,7 @@ final class GXDLMSLNCommandHandler {
         }
         xml.appendLine(TranslatorTags.CLASS_ID, "Value",
                 xml.integerToHex(ci, 4));
-        xml.appendComment(GXDLMSObject.toLogicalName(ln));
+        xml.appendComment(GXCommon.toLogicalName(ln));
         xml.appendLine(TranslatorTags.INSTANCE_ID, "Value",
                 GXCommon.toHex(ln, false));
         xml.appendLine(TranslatorTags.ATTRIBUTE_ID, "Value",
@@ -161,7 +161,7 @@ final class GXDLMSLNCommandHandler {
         }
         xml.appendLine(TranslatorTags.CLASS_ID, "Value",
                 xml.integerToHex(ci, 4));
-        xml.appendComment(GXDLMSObject.toLogicalName(ln));
+        xml.appendComment(GXCommon.toLogicalName(ln));
         xml.appendLine(TranslatorTags.INSTANCE_ID, "Value",
                 GXCommon.toHex(ln, false));
         xml.appendLine(TranslatorTags.METHOD_ID, "Value",
@@ -217,18 +217,17 @@ final class GXDLMSLNCommandHandler {
         if (selection != 0) {
             parameters = GXCommon.getData(data, info);
         }
-        GXDLMSObject obj = settings.getObjects().findByLN(ci,
-                GXDLMSObject.toLogicalName(ln));
+        GXDLMSObject obj =
+                settings.getObjects().findByLN(ci, GXCommon.toLogicalName(ln));
         if (obj == null) {
-            obj = server.notifyFindObject(ci, 0,
-                    GXDLMSObject.toLogicalName(ln));
+            obj = server.notifyFindObject(ci, 0, GXCommon.toLogicalName(ln));
         }
+        e = new ValueEventArgs(server, obj, attributeIndex, selector,
+                parameters);
         if (obj == null) {
             // "Access Error : Device reports a undefined object."
             status = ErrorCode.UNDEFINED_OBJECT;
         } else {
-            e = new ValueEventArgs(server, obj, attributeIndex, selector,
-                    parameters);
             e.setInvokeId(invokeID);
             if (server.notifyGetAttributeAccess(e) == AccessMode.NO_ACCESS) {
                 // Read Write denied.
@@ -367,6 +366,7 @@ final class GXDLMSLNCommandHandler {
                     server.getTransaction().setData(bb);
                 } else {
                     server.setTransaction(null);
+                    settings.resetBlockIndex();
                 }
             }
         }
@@ -415,7 +415,7 @@ final class GXDLMSLNCommandHandler {
                 }
                 xml.appendLine(TranslatorTags.CLASS_ID, "Value",
                         xml.integerToHex(ci.getValue(), 4));
-                xml.appendComment(GXDLMSObject.toLogicalName(ln));
+                xml.appendComment(GXCommon.toLogicalName(ln));
                 xml.appendLine(TranslatorTags.INSTANCE_ID, "Value",
                         GXCommon.toHex(ln, false));
                 xml.appendLine(TranslatorTags.ATTRIBUTE_ID, "Value",
@@ -425,10 +425,10 @@ final class GXDLMSLNCommandHandler {
                         TranslatorTags.ATTRIBUTE_DESCRIPTOR_WITH_SELECTION);
             } else {
                 GXDLMSObject obj = settings.getObjects().findByLN(ci,
-                        GXDLMSObject.toLogicalName(ln));
+                        GXCommon.toLogicalName(ln));
                 if (obj == null) {
                     obj = server.notifyFindObject(ci, 0,
-                            GXDLMSObject.toLogicalName(ln));
+                            GXCommon.toLogicalName(ln));
                 }
                 ValueEventArgs arg = new ValueEventArgs(server, obj,
                         attributeIndex, selector, parameters);
@@ -541,11 +541,10 @@ final class GXDLMSLNCommandHandler {
             value = GXCommon.getData(data, reply);
         }
 
-        GXDLMSObject obj = settings.getObjects().findByLN(ot,
-                GXDLMSObject.toLogicalName(ln));
+        GXDLMSObject obj =
+                settings.getObjects().findByLN(ot, GXCommon.toLogicalName(ln));
         if (obj == null) {
-            obj = server.notifyFindObject(ot, 0,
-                    GXDLMSObject.toLogicalName(ln));
+            obj = server.notifyFindObject(ot, 0, GXCommon.toLogicalName(ln));
         }
         // If target is unknown.
         if (obj == null) {
@@ -595,20 +594,33 @@ final class GXDLMSLNCommandHandler {
             final GXByteBuffer replyData, final GXDLMSTranslatorStructure xml)
             throws Exception {
         GXDataInfo reply = new GXDataInfo();
-        p.setMultipleBlocks(data.getUInt8() == 0);
+        short lastBlock = data.getUInt8();
+        p.setMultipleBlocks(lastBlock == 0);
         long blockNumber = data.getUInt32();
-        if (blockNumber != settings.getBlockIndex()) {
+        if (xml == null && blockNumber != settings.getBlockIndex()) {
             LOGGER.log(Level.INFO,
                     "handleSetRequest failed. Invalid block number. "
                             + settings.getBlockIndex() + "/" + blockNumber);
             p.setStatus(ErrorCode.DATA_BLOCK_NUMBER_INVALID.getValue());
         } else {
+            settings.increaseBlockIndex();
             int size = GXCommon.getObjectCount(data);
             int realSize = data.size() - data.position();
             if (size != realSize) {
                 LOGGER.log(Level.INFO,
                         "handleSetRequest failed. Invalid block size.");
                 p.setStatus(ErrorCode.DATA_BLOCK_UNAVAILABLE.getValue());
+            }
+            if (xml != null) {
+                xml.appendStartTag(TranslatorTags.DATA_BLOCK);
+                xml.appendLine(TranslatorTags.LAST_BLOCK, "Value",
+                        xml.integerToHex(lastBlock, 2));
+                xml.appendLine(TranslatorTags.BLOCK_NUMBER, "Value",
+                        xml.integerToHex(blockNumber, 8));
+                xml.appendLine(TranslatorTags.RAW_DATA, "Value",
+                        data.remainingHexString(false));
+                xml.appendEndTag(TranslatorTags.DATA_BLOCK);
+                return;
             }
             server.getTransaction().getData().set(data);
             // If all data is received.
@@ -703,8 +715,8 @@ final class GXDLMSLNCommandHandler {
             GXDataInfo info = new GXDataInfo();
             parameters = GXCommon.getData(data, info);
         }
-        GXDLMSObject obj = settings.getObjects().findByLN(ot,
-                GXDLMSObject.toLogicalName(ln));
+        GXDLMSObject obj =
+                settings.getObjects().findByLN(ot, GXCommon.toLogicalName(ln));
         if (!settings.isConnected()
                 && (ci != ObjectType.ASSOCIATION_LOGICAL_NAME.getValue()
                         || id != 1)) {
@@ -714,8 +726,7 @@ final class GXDLMSLNCommandHandler {
             return;
         }
         if (obj == null) {
-            obj = server.notifyFindObject(ot, 0,
-                    GXDLMSObject.toLogicalName(ln));
+            obj = server.notifyFindObject(ot, 0, GXCommon.toLogicalName(ln));
         }
         if (obj == null) {
             // Device reports a undefined object.

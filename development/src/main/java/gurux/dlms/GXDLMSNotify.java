@@ -390,7 +390,7 @@ public class GXDLMSNotify {
                 if (classID > 0) {
                     GXDLMSObject comp;
                     comp = getObjects().findByLN(ObjectType.forValue(classID),
-                            GXDLMSObject.toLogicalName((byte[]) tmp[1]));
+                            GXCommon.toLogicalName((byte[]) tmp[1]));
                     if (comp == null) {
                         comp = GXDLMSClient.createDLMSObject(classID, 0, 0,
                                 tmp[1], null);
@@ -403,7 +403,7 @@ public class GXDLMSNotify {
                     } else {
                         System.out.println("Unknown object: "
                                 + String.valueOf(classID) + " "
-                                + GXDLMSObject.toLogicalName((byte[]) tmp[1]));
+                                + GXCommon.toLogicalName((byte[]) tmp[1]));
                     }
                 }
             }

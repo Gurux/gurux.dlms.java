@@ -183,10 +183,13 @@ public class GXDLMSGprsSetup extends GXDLMSObject implements IGXDLMSBase {
     public final Object getValue(final GXDLMSSettings settings,
             final ValueEventArgs e) {
         if (e.getIndex() == 1) {
-            return getLogicalName();
+            return GXCommon.logicalNameToBytes(getLogicalName());
         }
         if (e.getIndex() == 2) {
-            return getAPN();
+            if (apn == null) {
+                return null;
+            }
+            return apn.getBytes();
         }
         if (e.getIndex() == 3) {
             return new Long(getPINCode());
@@ -207,6 +210,7 @@ public class GXDLMSGprsSetup extends GXDLMSObject implements IGXDLMSBase {
                     new Integer(defaultQualityOfService.getPeakThroughput()));
             GXCommon.setData(data, DataType.UINT8,
                     new Integer(defaultQualityOfService.getMeanThroughput()));
+            data.setUInt8(DataType.STRUCTURE.getValue());
             data.setUInt8(5);
             GXCommon.setData(data, DataType.UINT8,
                     new Integer(requestedQualityOfService.getPrecedence()));
@@ -231,7 +235,7 @@ public class GXDLMSGprsSetup extends GXDLMSObject implements IGXDLMSBase {
     public final void setValue(final GXDLMSSettings settings,
             final ValueEventArgs e) {
         if (e.getIndex() == 1) {
-            super.setValue(settings, e);
+            setLogicalName(GXCommon.toLogicalName(e.getValue()));
         } else if (e.getIndex() == 2) {
             if (e.getValue() instanceof String) {
                 setAPN(e.getValue().toString());

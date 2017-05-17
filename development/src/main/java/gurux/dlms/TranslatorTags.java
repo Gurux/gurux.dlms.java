@@ -67,5 +67,6 @@ final class TranslatorTags {
     static final int INITIATE_ERROR = 0xFF42;
     static final int CIPHERED_SERVICE = 0xFF43;
     static final int SYSTEM_TITLE = 0xFF44;
+    static final int DATA_BLOCK = 0xFF45;
 
 }

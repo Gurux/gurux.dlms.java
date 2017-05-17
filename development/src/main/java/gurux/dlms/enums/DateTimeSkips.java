@@ -138,4 +138,19 @@ public enum DateTimeSkips {
         }
         return types;
     }
+
+    /**
+     * Converts the enumerated value to integer value.
+     * 
+     * @param value
+     *            The enumerated value.
+     * @return The integer value.
+     */
+    public static int toInteger(final Set<DateTimeSkips> value) {
+        int tmp = 0;
+        for (DateTimeSkips it : value) {
+            tmp |= it.getValue();
+        }
+        return tmp;
+    }
 }

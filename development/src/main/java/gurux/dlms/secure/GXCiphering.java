@@ -386,6 +386,24 @@ public class GXCiphering implements GXICipher {
     public void setSharedSecret(final byte[] value) {
         sharedSecret = value;
         System.out.println("SharedSecret: " + GXCommon.toHex(value));
+    }
 
+    /**
+     * Generate GMAC password from given challenge.
+     * 
+     * @param challenge
+     *            Client to Server or Server to Client challenge.
+     * @return Generated challenge.
+     */
+    public byte[] generateGmacPassword(final byte[] challenge) {
+        AesGcmParameter p = new AesGcmParameter(0x10, Security.AUTHENTICATION,
+                invocationCounter, systemTitle, blockCipherKey,
+                authenticationKey);
+        GXByteBuffer bb = new GXByteBuffer();
+        GXDLMSChippering.encryptAesGcm(p, challenge);
+        bb.setUInt8(0x10);
+        bb.setUInt32(invocationCounter);
+        bb.set(p.getCountTag());
+        return bb.array();
     }
 }

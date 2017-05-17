@@ -335,12 +335,14 @@ public class GXDLMSAssociationShortName extends GXDLMSObject
                     GXCommon.setData(bb, DataType.UINT8, 0);
                     // LN
                     GXCommon.setData(bb, DataType.OCTET_STRING,
-                            it.getLogicalName());
+                            GXCommon.logicalNameToBytes(it.getLogicalName()));
                     settings.setIndex(settings.getIndex() + 1);
-                    // If PDU is full.
-                    if (!e.isSkipMaxPduSize()
-                            && bb.size() >= settings.getMaxPduSize()) {
-                        break;
+                    if (settings.isServer()) {
+                        // If PDU is full.
+                        if (!e.isSkipMaxPduSize()
+                                && bb.size() >= settings.getMaxPduSize()) {
+                            break;
+                        }
                     }
                 }
             }
@@ -356,7 +358,7 @@ public class GXDLMSAssociationShortName extends GXDLMSObject
             final ValueEventArgs e) {
         GXByteBuffer bb = new GXByteBuffer();
         if (e.getIndex() == 1) {
-            return getLogicalName();
+            return GXCommon.logicalNameToBytes(getLogicalName());
         } else if (e.getIndex() == 2) {
             return getObjects(settings, e);
         } else if (e.getIndex() == 3) {
@@ -413,7 +415,7 @@ public class GXDLMSAssociationShortName extends GXDLMSObject
     public final void setValue(final GXDLMSSettings settings,
             final ValueEventArgs e) {
         if (e.getIndex() == 1) {
-            super.setValue(settings, e);
+            setLogicalName(GXCommon.toLogicalName(e.getValue()));
         } else if (e.getIndex() == 2) {
             objectList.clear();
             if (e.getValue() != null) {
@@ -422,8 +424,8 @@ public class GXDLMSAssociationShortName extends GXDLMSObject
                     ObjectType type = ObjectType
                             .forValue(((Number) Array.get(item, 1)).intValue());
                     int version = ((Number) Array.get(item, 2)).intValue();
-                    String ln = GXDLMSObject
-                            .toLogicalName((byte[]) Array.get(item, 3));
+                    String ln =
+                            GXCommon.toLogicalName((byte[]) Array.get(item, 3));
                     GXDLMSObject obj =
                             gurux.dlms.GXDLMSClient.createObject(type);
                     obj.setLogicalName(ln);

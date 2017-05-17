@@ -275,7 +275,7 @@ public class GXDLMSPushSetup extends GXDLMSObject implements IGXDLMSBase {
     public final Object getValue(final GXDLMSSettings settings,
             final ValueEventArgs e) {
         if (e.getIndex() == 1) {
-            return getLogicalName();
+            return GXCommon.logicalNameToBytes(getLogicalName());
         }
         GXByteBuffer buff = new GXByteBuffer();
         if (e.getIndex() == 2) {
@@ -286,8 +286,8 @@ public class GXDLMSPushSetup extends GXDLMSObject implements IGXDLMSBase {
                 buff.setUInt8(4);
                 GXCommon.setData(buff, DataType.UINT16,
                         new Integer(it.getKey().getObjectType().getValue()));
-                GXCommon.setData(buff, DataType.OCTET_STRING,
-                        it.getKey().getLogicalName());
+                GXCommon.setData(buff, DataType.OCTET_STRING, GXCommon
+                        .logicalNameToBytes(it.getKey().getLogicalName()));
                 GXCommon.setData(buff, DataType.INT8,
                         new Integer(it.getValue().getAttributeIndex()));
                 GXCommon.setData(buff, DataType.UINT16,
@@ -341,7 +341,7 @@ public class GXDLMSPushSetup extends GXDLMSObject implements IGXDLMSBase {
     public final void setValue(final GXDLMSSettings settings,
             final ValueEventArgs e) {
         if (e.getIndex() == 1) {
-            super.setValue(settings, e);
+            setLogicalName(GXCommon.toLogicalName(e.getValue()));
         } else if (e.getIndex() == 2) {
             pushObjectList.clear();
             Entry<GXDLMSObject, GXDLMSCaptureObject> ent;
@@ -350,9 +350,7 @@ public class GXDLMSPushSetup extends GXDLMSObject implements IGXDLMSBase {
                     Object[] tmp = (Object[]) it;
                     ObjectType type =
                             ObjectType.forValue(((Number) tmp[0]).intValue());
-                    String ln = GXDLMSClient
-                            .changeType((byte[]) tmp[1], DataType.OCTET_STRING)
-                            .toString();
+                    String ln = GXCommon.toLogicalName(tmp[1]);
                     GXDLMSObject obj = settings.getObjects().findByLN(type, ln);
                     if (obj == null) {
                         obj = gurux.dlms.GXDLMSClient.createObject(type);

@@ -646,6 +646,7 @@ public class GXDLMSClient {
      */
     public final byte[][] getApplicationAssociationRequest() {
         if (settings.getAuthentication() != Authentication.HIGH_ECDSA
+                && settings.getAuthentication() != Authentication.HIGH_GMAC
                 && (settings.getPassword() == null
                         || settings.getPassword().length == 0)) {
             throw new IllegalArgumentException("Password is invalid.");
@@ -885,7 +886,7 @@ public class GXDLMSClient {
         if (version != null) {
             obj.setVersion(((Number) version).intValue());
         }
-        obj.setLogicalName(GXDLMSObject.toLogicalName(logicalName));
+        obj.setLogicalName(GXCommon.toLogicalName(logicalName));
     }
 
     /**
@@ -955,7 +956,7 @@ public class GXDLMSClient {
                 } else {
                     System.out.println("Unknown object : "
                             + String.valueOf(classID) + " "
-                            + GXDLMSObject.toLogicalName((byte[]) objects[2]));
+                            + GXCommon.toLogicalName((byte[]) objects[2]));
                 }
             }
         }
@@ -1065,6 +1066,16 @@ public class GXDLMSClient {
                 && (type == DataType.STRING || type == DataType.OCTET_STRING)) {
             return "";
         }
+        if (value.length == 0 && type == DataType.DATETIME) {
+            return new GXDateTime(new Date(0));
+        }
+        if (value.length == 0 && type == DataType.DATE) {
+            return new GXDate(new Date(0));
+        }
+        if (value.length == 0 && type == DataType.TIME) {
+            return new GXTime(new Date(0));
+        }
+
         GXDataInfo info = new GXDataInfo();
         info.setType(type);
         Object ret = GXCommon.getData(new GXByteBuffer(value), info);
@@ -1073,21 +1084,7 @@ public class GXDLMSClient {
                     "Change type failed. Not enought data.");
         }
         if (type == DataType.OCTET_STRING && ret instanceof byte[]) {
-            String str;
-            byte[] arr = (byte[]) ret;
-            if (arr.length == 0) {
-                str = "";
-            } else {
-                StringBuilder bcd = new StringBuilder(arr.length * 4);
-                for (int it : arr) {
-                    if (bcd.length() != 0) {
-                        bcd.append(".");
-                    }
-                    bcd.append(String.valueOf(it & 0xFF));
-                }
-                str = bcd.toString();
-            }
-            return str;
+            return GXCommon.toHex((byte[]) ret);
         }
         return ret;
     }
@@ -1171,15 +1168,9 @@ public class GXDLMSClient {
             // CI
             attributeDescriptor.setUInt16(objectType.getValue());
             // Add LN
-            List<String> items = GXCommon.split((String) name, '.');
-            if (items.size() != 6) {
-                throw new IllegalArgumentException("Invalid Logical Name.");
-            }
-            for (String it2 : items) {
-                attributeDescriptor.setUInt8(Integer.valueOf(it2).byteValue());
-            }
+            attributeDescriptor.set(GXCommon.logicalNameToBytes((String) name));
             // Attribute ID.
-            attributeDescriptor.setUInt8(index);
+            attributeDescriptor.setUInt8((byte) methodIndex);
             // Method Invocation Parameters is not used.
             if (type == DataType.NONE) {
                 attributeDescriptor.setUInt8(0);
@@ -1235,6 +1226,13 @@ public class GXDLMSClient {
         ValueEventArgs e = new ValueEventArgs(settings, item, index, 0, null);
         Object value = item.getValue(settings, e);
         DataType type = item.getDataType(index);
+        if (type == DataType.OCTET_STRING && value instanceof String) {
+            DataType ui = item.getUIDataType(index);
+            if (ui == DataType.STRING) {
+                return write(item.getName(), ((String) value).getBytes(), type,
+                        item.getObjectType(), index);
+            }
+        }
         return write(item.getName(), value, type, item.getObjectType(), index);
     }
 
@@ -1276,13 +1274,7 @@ public class GXDLMSClient {
             // Add CI.
             attributeDescriptor.setUInt16(objectType.getValue());
             // Add LN.
-            List<String> items = GXCommon.split((String) name, '.');
-            if (items.size() != 6) {
-                throw new IllegalArgumentException("Invalid Logical Name.");
-            }
-            for (String it2 : items) {
-                attributeDescriptor.setUInt8(Integer.valueOf(it2).byteValue());
-            }
+            attributeDescriptor.set(GXCommon.logicalNameToBytes((String) name));
             // Attribute ID.
             attributeDescriptor.setUInt8(index);
             // Access selection is not used.
@@ -1424,13 +1416,7 @@ public class GXDLMSClient {
             // CI
             attributeDescriptor.setUInt16(objectType.getValue());
             // Add LN
-            List<String> items = GXCommon.split((String) name, '.');
-            if (items.size() != 6) {
-                throw new IllegalArgumentException("Invalid Logical Name.");
-            }
-            for (String it2 : items) {
-                attributeDescriptor.setUInt8(Integer.valueOf(it2).byteValue());
-            }
+            attributeDescriptor.set(GXCommon.logicalNameToBytes((String) name));
             // Attribute ID.
             attributeDescriptor.setUInt8(attributeOrdinal);
             if (data == null || data.size() == 0) {
@@ -1772,13 +1758,16 @@ public class GXDLMSClient {
         GXCommon.setData(buff, DataType.UINT16,
                 sort.getObjectType().getValue());
         // LN
-        GXCommon.setData(buff, DataType.OCTET_STRING, sort.getLogicalName());
+        GXCommon.setData(buff, DataType.OCTET_STRING,
+                GXCommon.logicalNameToBytes(sort.getLogicalName()));
         // Add attribute index.
         GXCommon.setData(buff, DataType.INT8, 2);
         // Add version
         GXCommon.setData(buff, DataType.UINT16, sort.getVersion());
-        GXCommon.setData(buff, DataType.OCTET_STRING, s); // Add start time
-        GXCommon.setData(buff, DataType.OCTET_STRING, e); // Add start time
+        // Add start time
+        GXCommon.setData(buff, DataType.OCTET_STRING, s);
+        // Add end time
+        GXCommon.setData(buff, DataType.OCTET_STRING, e);
         // Add array of read columns.
         buff.setUInt8(DataType.ARRAY.getValue());
         if (columns == null) {
@@ -1794,8 +1783,8 @@ public class GXDLMSClient {
                 GXCommon.setData(buff, DataType.UINT16,
                         it.getKey().getObjectType().getValue());
                 // LN
-                GXCommon.setData(buff, DataType.OCTET_STRING,
-                        it.getKey().getLogicalName());
+                GXCommon.setData(buff, DataType.OCTET_STRING, GXCommon
+                        .logicalNameToBytes(it.getKey().getLogicalName()));
                 // Add attribute index.
                 GXCommon.setData(buff, DataType.INT8,
                         it.getValue().getAttributeIndex());

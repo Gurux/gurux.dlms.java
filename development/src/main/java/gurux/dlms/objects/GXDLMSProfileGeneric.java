@@ -94,6 +94,8 @@ public class GXDLMSProfileGeneric extends GXDLMSObject implements IGXDLMSBase {
      */
     public GXDLMSProfileGeneric(final String ln, final int sn) {
         super(ObjectType.PROFILE_GENERIC, ln, sn);
+        setVersion(1);
+        sortMethod = SortMethod.LIFO;
         captureObjects =
                 new ArrayList<Entry<GXDLMSObject, GXDLMSCaptureObject>>();
     }
@@ -410,7 +412,7 @@ public class GXDLMSProfileGeneric extends GXDLMSObject implements IGXDLMSBase {
                     it.getKey().getObjectType().getValue());
             // LN
             GXCommon.setData(data, DataType.OCTET_STRING,
-                    it.getKey().getLogicalName());
+                    GXCommon.logicalNameToBytes(it.getKey().getLogicalName()));
             // Attribute Index
             GXCommon.setData(data, DataType.INT8,
                     it.getValue().getAttributeIndex());
@@ -490,7 +492,7 @@ public class GXDLMSProfileGeneric extends GXDLMSObject implements IGXDLMSBase {
                 Object[] tmp = (Object[]) it;
                 ObjectType ot =
                         ObjectType.forValue(((Number) tmp[0]).intValue());
-                String ln = GXDLMSObject.toLogicalName((byte[]) tmp[1]);
+                String ln = GXCommon.toLogicalName((byte[]) tmp[1]);
                 byte attributeIndex = ((Number) tmp[2]).byteValue();
                 int dataIndex = ((Number) tmp[3]).intValue();
                 // Find columns and update only them.
@@ -660,7 +662,7 @@ public class GXDLMSProfileGeneric extends GXDLMSObject implements IGXDLMSBase {
     public final Object getValue(final GXDLMSSettings settings,
             final ValueEventArgs e) {
         if (e.getIndex() == 1) {
-            return getLogicalName();
+            return GXCommon.logicalNameToBytes(getLogicalName());
         }
         if (e.getIndex() == 2) {
             return getProfileGenericData(settings, e);
@@ -692,8 +694,8 @@ public class GXDLMSProfileGeneric extends GXDLMSObject implements IGXDLMSBase {
                 GXCommon.setData(data, DataType.UINT16,
                         sortObject.getObjectType().getValue());
                 // LN
-                GXCommon.setData(data, DataType.OCTET_STRING,
-                        sortObject.getLogicalName());
+                GXCommon.setData(data, DataType.OCTET_STRING, GXCommon
+                        .logicalNameToBytes(sortObject.getLogicalName()));
                 // Attribute Index
                 GXCommon.setData(data, DataType.INT8, sortObjectAttributeIndex);
                 // Data Index
@@ -718,7 +720,7 @@ public class GXDLMSProfileGeneric extends GXDLMSObject implements IGXDLMSBase {
     public final void setValue(final GXDLMSSettings settings,
             final ValueEventArgs e) {
         if (e.getIndex() == 1) {
-            super.setValue(settings, e);
+            setLogicalName(GXCommon.toLogicalName(e.getValue()));
         } else if (e.getIndex() == 2) {
             setBuffer(e);
         } else if (e.getIndex() == 3) {
@@ -733,7 +735,7 @@ public class GXDLMSProfileGeneric extends GXDLMSObject implements IGXDLMSBase {
                     }
                     ObjectType type =
                             ObjectType.forValue(((Number) tmp[0]).intValue());
-                    String ln = GXDLMSObject.toLogicalName((byte[]) tmp[1]);
+                    String ln = GXCommon.toLogicalName((byte[]) tmp[1]);
                     GXDLMSObject obj = null;
                     if (settings != null && settings.getObjects() != null) {
                         obj = settings.getObjects().findByLN(type, ln);
@@ -793,7 +795,7 @@ public class GXDLMSProfileGeneric extends GXDLMSObject implements IGXDLMSBase {
                 }
                 ObjectType type =
                         ObjectType.forValue(((Number) tmp[0]).intValue());
-                String ln = GXDLMSObject.toLogicalName((byte[]) tmp[1]);
+                String ln = GXCommon.toLogicalName((byte[]) tmp[1]);
                 int attributeIndex = ((Number) tmp[2]).intValue();
                 int dataIndex = ((Number) tmp[3]).intValue();
                 sortObject = settings.getObjects().findByLN(type, ln);
@@ -951,20 +953,25 @@ public class GXDLMSProfileGeneric extends GXDLMSObject implements IGXDLMSBase {
             if (!args[0].getHandled()) {
                 // CHECKSTYLE:OFF
                 for (Entry<GXDLMSObject, GXDLMSCaptureObject> it : captureObjects) {
+                    // CHECKSTYLE:ON
                     values[pos] = it.getKey()
                             .getValues()[it.getValue().getAttributeIndex() - 1];
                     ++pos;
                 }
                 synchronized (this) {
                     // Remove first items if buffer is full.
-                    if (getProfileEntries() == getBuffer().length) {
+                    if (getProfileEntries() != 0
+                            && getProfileEntries() == getBuffer().length) {
+                        --entriesInUse;
                         buffer.remove(0);
                     }
                     buffer.add(values);
-                    entriesInUse = buffer.size();
+                    ++entriesInUse;
                 }
             }
             srv.notifyPostGet(args);
+            srv.notifyAction(args);
+            srv.notifyPostAction(args);
         }
     }
 

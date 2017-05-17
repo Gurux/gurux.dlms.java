@@ -59,7 +59,19 @@ public enum ServiceType {
     /**
      * Transport service type is SMS.
      */
-    SMS(4);
+    SMS(4),
+    /**
+     * Transport service type is HDLC.
+     */
+    HDLC(5),
+    /**
+     * Transport service type is MBUS.
+     */
+    M_BUS(6),
+    /**
+     * Transport service type is ZigBee.
+     */
+    ZIGBEE(7);
 
     private int intValue;
     private static java.util.HashMap<Integer, ServiceType> mappings;

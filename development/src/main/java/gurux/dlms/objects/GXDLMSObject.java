@@ -169,22 +169,6 @@ public class GXDLMSObject {
     }
 
     /**
-     * Converts Logical Name to string.
-     * 
-     * @param buff
-     *            Logical name as byte array.
-     * @return Logical Name as a string.
-     */
-    public static String toLogicalName(final byte[] buff) {
-        if (buff != null && buff.length == 6) {
-            return (buff[0] & 0xFF) + "." + (buff[1] & 0xFF) + "."
-                    + (buff[2] & 0xFF) + "." + (buff[3] & 0xFF) + "."
-                    + (buff[4] & 0xFF) + "." + (buff[5] & 0xFF);
-        }
-        return "";
-    }
-
-    /**
      * @return Interface type of the COSEM object.
      */
     public final ObjectType getObjectType() {
@@ -402,25 +386,20 @@ public class GXDLMSObject {
     /**
      * @return Object values as an array.
      */
-    // CHECKSTYLE:OFF
     public Object[] getValues() {
         throw new UnsupportedOperationException("getValues");
     }
-    // CHECKSTYLE:ON
 
     /*
      * Get value.
      * @param settings DLMS settings.
-     * @param index Attribute index.
-     * @param selector Optional selector.
-     * @param parameters Optional parameters.
+     * @param e Value event parameters.
      * @return Value of given attribute.
      */
-    // CHECKSTYLE:OFF
-    public Object getValue(final GXDLMSSettings settings, ValueEventArgs e) {
+    public Object getValue(final GXDLMSSettings settings,
+            final ValueEventArgs e) {
         throw new UnsupportedOperationException("getValue");
     }
-    // CHECKSTYLE:ON
 
     /**
      * Set value of given attribute.
@@ -430,20 +409,10 @@ public class GXDLMSObject {
      * @param e
      *            Value event parameters.
      */
-    // CHECKSTYLE:OFF
-    public void setValue(final GXDLMSSettings settings, ValueEventArgs e) {
-        if (e.getIndex() == 1) {
-            if (e.getValue() instanceof String) {
-                setLogicalName(e.getValue().toString());
-            } else {
-                setLogicalName(
-                        GXDLMSObject.toLogicalName((byte[]) e.getValue()));
-            }
-        } else {
-            throw new UnsupportedOperationException("setValue");
-        }
+    public void setValue(final GXDLMSSettings settings,
+            final ValueEventArgs e) {
+        throw new UnsupportedOperationException("setValue");
     }
-    // CHECKSTYLE:ON
 
     /*
      * Server calls this invokes method.

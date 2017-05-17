@@ -677,4 +677,54 @@ public class GXByteBuffer {
     public final String toString() {
         return GXCommon.toHex(data, true, 0, size);
     }
+
+    /**
+     * Get remaining data.
+     * 
+     * @return Remaining data as byte array.
+     */
+    public byte[] remaining() {
+        return subArray(position, size - position);
+    }
+
+    /**
+     * Get remaining data as a hex string.
+     * 
+     * @param addSpace
+     *            Add space between bytes.
+     * @return Remaining data as a hex string.
+     */
+    public String remainingHexString(final boolean addSpace) {
+        return GXCommon.toHex(data, addSpace, position, size - position);
+    }
+
+    /**
+     * Get data as hex string.
+     * 
+     * @param addSpace
+     *            Add space between bytes.
+     * @param index
+     *            Byte index.
+     * @return Data as hex string.
+     */
+    public final String toHex(final boolean addSpace, final int index) {
+        return GXCommon.toHex(data, addSpace, index, size - index);
+    }
+
+    /**
+     * Get data as hex string.
+     * 
+     * @param addSpace
+     *            Add space between bytes.
+     * @param index
+     *            Byte index.
+     * @param count
+     *            Byte count.
+     * @return Data as hex string.
+     */
+    public final String toHex(final boolean addSpace, final int index,
+            final int count) {
+        return GXCommon.toHex(data, addSpace, index, count);
+    }
+
 }

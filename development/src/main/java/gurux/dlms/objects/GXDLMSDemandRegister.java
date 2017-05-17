@@ -34,8 +34,6 @@
 
 package gurux.dlms.objects;
 
-import java.math.BigInteger;
-
 import gurux.dlms.GXByteBuffer;
 import gurux.dlms.GXDLMSClient;
 import gurux.dlms.GXDLMSSettings;
@@ -55,8 +53,8 @@ public class GXDLMSDemandRegister extends GXDLMSObject implements IGXDLMSBase {
     private Object status;
     private GXDateTime captureTime = new GXDateTime();
     private GXDateTime startTimeCurrent = new GXDateTime();
-    private int numberOfPeriods;
-    private BigInteger period;
+    private long numberOfPeriods;
+    private long period;
 
     /**
      * Constructor.
@@ -193,19 +191,19 @@ public class GXDLMSDemandRegister extends GXDLMSObject implements IGXDLMSBase {
         startTimeCurrent = value;
     }
 
-    public final BigInteger getPeriod() {
+    public final long getPeriod() {
         return period;
     }
 
-    public final void setPeriod(final BigInteger value) {
+    public final void setPeriod(final long value) {
         period = value;
     }
 
-    public final int getNumberOfPeriods() {
+    public final long getNumberOfPeriods() {
         return numberOfPeriods;
     }
 
-    public final void setNumberOfPeriods(final int value) {
+    public final void setNumberOfPeriods(final long value) {
         numberOfPeriods = value;
     }
 
@@ -229,8 +227,8 @@ public class GXDLMSDemandRegister extends GXDLMSObject implements IGXDLMSBase {
                 + getUnit().toString();
         return new Object[] { getLogicalName(), getCurrentAvarageValue(),
                 getLastAvarageValue(), str, getStatus(), getCaptureTime(),
-                getStartTimeCurrent(), getPeriod(),
-                new Integer(getNumberOfPeriods()) };
+                getStartTimeCurrent(), new Long(getPeriod()),
+                new Long(getNumberOfPeriods()) };
     }
 
     @Override
@@ -344,7 +342,7 @@ public class GXDLMSDemandRegister extends GXDLMSObject implements IGXDLMSBase {
     public final Object getValue(final GXDLMSSettings settings,
             final ValueEventArgs e) {
         if (e.getIndex() == 1) {
-            return getLogicalName();
+            return GXCommon.logicalNameToBytes(getLogicalName());
         }
         if (e.getIndex() == 2) {
             return getCurrentAvarageValue();
@@ -370,10 +368,10 @@ public class GXDLMSDemandRegister extends GXDLMSObject implements IGXDLMSBase {
             return getStartTimeCurrent();
         }
         if (e.getIndex() == 8) {
-            return getPeriod();
+            return new Long(getPeriod());
         }
         if (e.getIndex() == 9) {
-            return new Integer(getNumberOfPeriods());
+            return new Long(getNumberOfPeriods());
         }
         e.setError(ErrorCode.READ_WRITE_DENIED);
         return null;
@@ -386,7 +384,7 @@ public class GXDLMSDemandRegister extends GXDLMSObject implements IGXDLMSBase {
     public final void setValue(final GXDLMSSettings settings,
             final ValueEventArgs e) {
         if (e.getIndex() == 1) {
-            super.setValue(settings, e);
+            setLogicalName(GXCommon.toLogicalName(e.getValue()));
         } else if (e.getIndex() == 2) {
             setCurrentAvarageValue(e.getValue());
         } else if (e.getIndex() == 3) {
@@ -439,16 +437,15 @@ public class GXDLMSDemandRegister extends GXDLMSObject implements IGXDLMSBase {
             }
         } else if (e.getIndex() == 8) {
             if (e.getValue() == null) {
-                setPeriod(BigInteger.valueOf(0));
+                setPeriod(0);
             } else {
-                setPeriod(BigInteger
-                        .valueOf(((Number) e.getValue()).longValue()));
+                setPeriod(((Number) e.getValue()).longValue());
             }
         } else if (e.getIndex() == 9) {
             if (e.getValue() == null) {
-                setNumberOfPeriods(1);
+                setNumberOfPeriods(0);
             } else {
-                setNumberOfPeriods(((Number) e.getValue()).intValue());
+                setNumberOfPeriods(((Number) e.getValue()).longValue());
             }
         } else {
             e.setError(ErrorCode.READ_WRITE_DENIED);

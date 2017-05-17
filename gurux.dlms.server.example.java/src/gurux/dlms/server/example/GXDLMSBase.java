@@ -38,7 +38,6 @@ import java.io.BufferedReader;
 import java.io.FileReader;
 import java.io.FileWriter;
 import java.io.IOException;
-import java.math.BigInteger;
 import java.net.InetAddress;
 import java.net.UnknownHostException;
 import java.text.SimpleDateFormat;
@@ -195,7 +194,6 @@ public class GXDLMSBase extends GXDLMSSecureServer2
      * Add TCP/IP UDP setup object.
      */
     void addTcpUdpSetup() {
-        // Add TCP/IP UDP setup. Default Logical Name is 0.0.25.0.0.255.
         GXDLMSTcpUdpSetup tcp = new GXDLMSTcpUdpSetup();
         getItems().add(tcp);
     }
@@ -347,7 +345,7 @@ public class GXDLMSBase extends GXDLMSSecureServer2
         dr.setStatus((int) 1);
         dr.setStartTimeCurrent(new GXDateTime(now));
         dr.setCaptureTime(new GXDateTime(now));
-        dr.setPeriod(BigInteger.valueOf(10));
+        dr.setPeriod(10);
         dr.setNumberOfPeriods(1);
         getItems().add(dr);
     }
@@ -676,6 +674,10 @@ public class GXDLMSBase extends GXDLMSSecureServer2
                     || e.getTarget() instanceof GXDLMSAssociationShortName) {
                 continue;
             }
+            if (e.getTarget() instanceof GXDLMSClock && e.getIndex() == 2) {
+                GXDLMSClock c = (GXDLMSClock) e.getTarget();
+                c.setTime(c.now());
+            }
             // Framework will handle profile generic automatically.
             if (e.getTarget() instanceof GXDLMSProfileGeneric) {
                 // If buffer is read and we want to save memory.
@@ -736,12 +738,7 @@ public class GXDLMSBase extends GXDLMSSecureServer2
                 e.setValue(Calendar.getInstance().getTime());
                 e.setHandled(true);
             } else if (e.getTarget() instanceof GXDLMSClock) {
-                // Implement specific clock handling here.
-                // Otherwise initial values are used.
-                if (e.getIndex() == 2) {
-                    ((GXDLMSClock) e.getTarget())
-                            .setTime(Calendar.getInstance().getTime());
-                }
+                continue;
             } else if (e.getTarget() instanceof GXDLMSRegisterMonitor
                     && e.getIndex() == 2) {
                 // Update Register Monitor Thresholds values.
@@ -899,7 +896,7 @@ public class GXDLMSBase extends GXDLMSSecureServer2
     public void onClientDisconnected(Object sender,
             gurux.net.ConnectionEventArgs e) {
         // Reset server settings when connection closed.
-        // this.reset();
+        this.reset();
         System.out.println("Client Disconnected.");
     }
 

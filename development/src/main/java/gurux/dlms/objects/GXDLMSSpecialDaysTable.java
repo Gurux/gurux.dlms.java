@@ -183,7 +183,7 @@ public class GXDLMSSpecialDaysTable extends GXDLMSObject
     public final Object getValue(final GXDLMSSettings settings,
             final ValueEventArgs e) {
         if (e.getIndex() == 1) {
-            return getLogicalName();
+            return GXCommon.logicalNameToBytes(getLogicalName());
         }
         if (e.getIndex() == 2) {
             int cnt = entries.length;
@@ -213,7 +213,7 @@ public class GXDLMSSpecialDaysTable extends GXDLMSObject
     public final void setValue(final GXDLMSSettings settings,
             final ValueEventArgs e) {
         if (e.getIndex() == 1) {
-            super.setValue(settings, e);
+            setLogicalName(GXCommon.toLogicalName(e.getValue()));
         } else if (e.getIndex() == 2) {
             entries = null;
             if (e.getValue() != null) {

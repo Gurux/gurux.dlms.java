@@ -40,6 +40,7 @@ import gurux.dlms.ValueEventArgs;
 import gurux.dlms.enums.DataType;
 import gurux.dlms.enums.ErrorCode;
 import gurux.dlms.enums.ObjectType;
+import gurux.dlms.internal.GXCommon;
 import gurux.dlms.objects.enums.ControlMode;
 import gurux.dlms.objects.enums.ControlState;
 
@@ -200,7 +201,7 @@ public class GXDLMSDisconnectControl extends GXDLMSObject
     public final Object getValue(final GXDLMSSettings settings,
             final ValueEventArgs e) {
         if (e.getIndex() == 1) {
-            return getLogicalName();
+            return GXCommon.logicalNameToBytes(getLogicalName());
         }
         if (e.getIndex() == 2) {
             return new Boolean(getOutputState());
@@ -219,7 +220,7 @@ public class GXDLMSDisconnectControl extends GXDLMSObject
     public final void setValue(final GXDLMSSettings settings,
             final ValueEventArgs e) {
         if (e.getIndex() == 1) {
-            super.setValue(settings, e);
+            setLogicalName(GXCommon.toLogicalName(e.getValue()));
         } else if (e.getIndex() == 2) {
             if (e.getValue() == null) {
                 setOutputState(false);
