@@ -38,7 +38,6 @@ import java.util.ArrayList;
 import java.util.List;
 
 import gurux.dlms.GXByteBuffer;
-import gurux.dlms.GXDLMSClient;
 import gurux.dlms.GXDLMSSettings;
 import gurux.dlms.ValueEventArgs;
 import gurux.dlms.enums.DataType;
@@ -187,7 +186,7 @@ public class GXDLMSRegisterMonitor extends GXDLMSObject implements IGXDLMSBase {
     public final Object getValue(final GXDLMSSettings settings,
             final ValueEventArgs e) {
         if (e.getIndex() == 1) {
-            return getLogicalName();
+            return GXCommon.logicalNameToBytes(getLogicalName());
         }
         if (e.getIndex() == 2) {
             return getThresholds();
@@ -200,8 +199,8 @@ public class GXDLMSRegisterMonitor extends GXDLMSObject implements IGXDLMSBase {
             GXCommon.setData(stream, DataType.UINT16,
                     new Integer(monitoredValue.getObjectType().getValue()));
             // LN.
-            GXCommon.setData(stream, DataType.OCTET_STRING,
-                    monitoredValue.getLogicalName());
+            GXCommon.setData(stream, DataType.OCTET_STRING, GXCommon
+                    .logicalNameToBytes(monitoredValue.getLogicalName()));
             // Attribute index.
             GXCommon.setData(stream, DataType.INT8,
                     new Integer(monitoredValue.getAttributeIndex()));
@@ -221,7 +220,8 @@ public class GXDLMSRegisterMonitor extends GXDLMSObject implements IGXDLMSBase {
                     bb.setUInt8(2);
                     // LN
                     GXCommon.setData(bb, DataType.OCTET_STRING,
-                            it.getActionUp().getLogicalName());
+                            GXCommon.logicalNameToBytes(
+                                    it.getActionUp().getLogicalName()));
                     // ScriptSelector
                     GXCommon.setData(bb, DataType.UINT16,
                             new Integer(it.getActionUp().getScriptSelector()));
@@ -229,7 +229,8 @@ public class GXDLMSRegisterMonitor extends GXDLMSObject implements IGXDLMSBase {
                     bb.setUInt8(2);
                     // LN
                     GXCommon.setData(bb, DataType.OCTET_STRING,
-                            it.getActionDown().getLogicalName());
+                            GXCommon.logicalNameToBytes(
+                                    it.getActionDown().getLogicalName()));
                     // ScriptSelector
                     GXCommon.setData(bb, DataType.UINT16, new Integer(
                             it.getActionDown().getScriptSelector()));
@@ -248,7 +249,7 @@ public class GXDLMSRegisterMonitor extends GXDLMSObject implements IGXDLMSBase {
     public final void setValue(final GXDLMSSettings settings,
             final ValueEventArgs e) {
         if (e.getIndex() == 1) {
-            super.setValue(settings, e);
+            setLogicalName(GXCommon.toLogicalName(e.getValue()));
         } else if (e.getIndex() == 2) {
             setThresholds((Object[]) e.getValue());
         } else if (e.getIndex() == 3) {
@@ -257,14 +258,8 @@ public class GXDLMSRegisterMonitor extends GXDLMSObject implements IGXDLMSBase {
             }
             getMonitoredValue().setObjectType(ObjectType.forValue(
                     ((Number) ((Object[]) e.getValue())[0]).intValue()));
-            getMonitoredValue()
-                    .setLogicalName(
-                            GXDLMSClient
-                                    .changeType(
-                                            (byte[]) ((Object[]) e
-                                                    .getValue())[1],
-                                            DataType.OCTET_STRING)
-                                    .toString());
+            getMonitoredValue().setLogicalName(
+                    GXCommon.toLogicalName(((Object[]) e.getValue())[1]));
             getMonitoredValue().setAttributeIndex(
                     ((Number) ((Object[]) e.getValue())[2]).intValue());
         } else if (e.getIndex() == 4) {
@@ -275,20 +270,12 @@ public class GXDLMSRegisterMonitor extends GXDLMSObject implements IGXDLMSBase {
                     GXDLMSActionSet set = new GXDLMSActionSet();
                     Object[] target = (Object[]) ((Object[]) as)[0];
                     set.getActionUp()
-                            .setLogicalName(
-                                    GXDLMSClient
-                                            .changeType((byte[]) target[0],
-                                                    DataType.OCTET_STRING)
-                                            .toString());
+                            .setLogicalName(GXCommon.toLogicalName(target[0]));
                     set.getActionUp()
                             .setScriptSelector(((Number) target[1]).intValue());
                     target = (Object[]) ((Object[]) as)[1];
                     set.getActionDown()
-                            .setLogicalName(
-                                    GXDLMSClient
-                                            .changeType((byte[]) target[0],
-                                                    DataType.OCTET_STRING)
-                                            .toString());
+                            .setLogicalName(GXCommon.toLogicalName(target[0]));
                     set.getActionDown()
                             .setScriptSelector(((Number) target[1]).intValue());
                     items.add(set);

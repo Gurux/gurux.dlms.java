@@ -72,10 +72,8 @@ import gurux.dlms.objects.GXDLMSImageTransfer;
 import gurux.dlms.objects.GXDLMSIp4Setup;
 import gurux.dlms.objects.GXDLMSLimiter;
 import gurux.dlms.objects.GXDLMSMBusClient;
-import gurux.dlms.objects.GXDLMSMBusMasterPortSetup;
 import gurux.dlms.objects.GXDLMSMBusSlavePortSetup;
 import gurux.dlms.objects.GXDLMSMacAddressSetup;
-import gurux.dlms.objects.GXDLMSMessageHandler;
 import gurux.dlms.objects.GXDLMSModemConfiguration;
 import gurux.dlms.objects.GXDLMSObject;
 import gurux.dlms.objects.GXDLMSPppSetup;
@@ -217,8 +215,6 @@ abstract class GXDLMS {
             return new GXDLMSSchedule();
         case SCRIPT_TABLE:
             return new GXDLMSScriptTable();
-        case SMTP_SETUP:
-            return new GXDLMSObject();
         case SPECIAL_DAYS_TABLE:
             return new GXDLMSSpecialDaysTable();
         case STATUS_MAPPING:
@@ -229,12 +225,8 @@ abstract class GXDLMS {
             return new GXDLMSObject();
         case UTILITY_TABLES:
             return new GXDLMSObject();
-        case MBUS_MASTER_PORT_SETUP:
-            return new GXDLMSMBusMasterPortSetup();
         case PUSH_SETUP:
             return new GXDLMSPushSetup();
-        case MESSAGE_HANDLER:
-            return new GXDLMSMessageHandler();
         default:
             return new GXDLMSObject();
         }
@@ -386,6 +378,12 @@ abstract class GXDLMS {
                 // octet string.
                 if (tp == DataType.DATETIME) {
                     tp = DataType.OCTET_STRING;
+                }
+            } else if (value instanceof String && tp == DataType.OCTET_STRING) {
+                DataType ui = obj.getUIDataType(index);
+                if (ui == DataType.STRING) {
+                    GXCommon.setData(bb, tp, ((String) value).getBytes());
+                    return;
                 }
             }
         }
@@ -632,8 +630,7 @@ abstract class GXDLMS {
                     }
 
                     if (totalLength > p.getSettings().getMaxPduSize()) {
-                        len = p.getSettings().getMaxPduSize() - reply.size()
-                                - p.getData().position();
+                        len = p.getSettings().getMaxPduSize() - reply.size();
                         if (ciphering) {
                             len -= CIPHERING_HEADER_SIZE;
                         }
@@ -2162,32 +2159,36 @@ abstract class GXDLMS {
      */
     static void handleSetResponse(final GXDLMSSettings settings,
             final GXReplyData data) {
-        short ret = data.getData().getUInt8();
-        // SetResponseNormal
-        if (ret == 1) {
-            // Invoke ID and priority.
-            short ch = data.getData().getUInt8();
-            ret = data.getData().getUInt8();
-            if (ret != 0) {
-                data.setError(ret);
-            }
-            if (data.getXml() != null) {
-                data.getXml().appendStartTag(Command.SET_RESPONSE);
-                data.getXml().appendStartTag(Command.SET_RESPONSE,
-                        SetResponseType.NORMAL);
-                // InvokeIdAndPriority
-                data.getXml().appendLine(TranslatorTags.INVOKE_ID, "Value",
-                        data.getXml().integerToHex(ch, 2));
+        byte type = (byte) data.getData().getUInt8();
+        // Invoke ID and priority.
+        short invokeId = data.getData().getUInt8();
+        if (data.getXml() != null) {
+            data.getXml().appendStartTag(Command.SET_RESPONSE);
+            data.getXml().appendStartTag(Command.SET_RESPONSE, type);
+            // InvokeIdAndPriority
+            data.getXml().appendLine(TranslatorTags.INVOKE_ID, "Value",
+                    data.getXml().integerToHex(invokeId, 2));
+        }
 
+        // SetResponseNormal
+        if (type == SetResponseType.NORMAL) {
+            data.setError(data.getData().getUInt8());
+            if (data.getXml() != null) {
                 // Result start tag.
                 data.getXml().appendLine(TranslatorTags.RESULT, "Value",
                         GXDLMSTranslator.errorCodeToString(
                                 data.getXml().getOutputType(),
                                 ErrorCode.forValue(data.getError())));
-                data.getXml().appendEndTag(Command.SET_RESPONSE,
-                        SetResponseType.NORMAL);
-                data.getXml().appendEndTag(Command.SET_RESPONSE);
             }
+        } else if (type == SetResponseType.DATA_BLOCK
+                || type == SetResponseType.LAST_DATA_BLOCK) {
+            data.getData().getUInt32();
+        } else {
+            throw new IllegalArgumentException("Invalid data type.");
+        }
+        if (data.getXml() != null) {
+            data.getXml().appendEndTag(Command.SET_RESPONSE, type);
+            data.getXml().appendEndTag(Command.SET_RESPONSE);
         }
     }
 
@@ -2834,7 +2835,9 @@ abstract class GXDLMS {
             if (settings.getInterfaceType() == InterfaceType.HDLC
                     && (data.getError() == ErrorCode.REJECTED.getValue()
                             || data.getData().size() != 0)) {
-                reply.position(reply.position() + 3);
+                if (reply.position() != reply.size()) {
+                    reply.position(reply.position() + 3);
+                }
             }
             return true;
         }
@@ -2928,7 +2931,6 @@ abstract class GXDLMS {
         case ZIG_BEE_SAS_JOIN:
         case ZIG_BEE_SAS_APS_FRAGMENTATION:
         case SCHEDULE:
-        case SMTP_SETUP:
         case STATUS_MAPPING:
         case TCP_UDP_SETUP:
         case UTILITY_TABLES:

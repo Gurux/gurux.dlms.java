@@ -87,7 +87,7 @@ public class GXCommunicate {
     public GXDLMSSecureClient dlms;
     boolean iec;
     java.nio.ByteBuffer replyBuff;
-    int WaitTime = 10000;
+    int WaitTime = 60000;
 
     static void trace(PrintWriter logFile, String text) {
         logFile.write(text);
@@ -411,12 +411,7 @@ public class GXCommunicate {
             replyBuff = java.nio.ByteBuffer.allocate(size);
         }
         reply.clear();
-        // Generate AARQ request.
-        // Split requests to multiple packets if needed.
-        // If password is used all data might not fit to one packet.
-        for (byte[] it : dlms.aarqRequest()) {
-            readDLMSPacket(it, reply);
-        }
+        readDataBlock(dlms.aarqRequest(), reply);
         // Parse reply.
         dlms.parseAareResponse(reply.getData());
         reply.clear();
@@ -631,13 +626,16 @@ public class GXCommunicate {
                 // and this is only a example.
                 continue;
             }
+
             traceLn(logFile,
                     "-------- Reading " + it.getClass().getSimpleName() + " "
                             + it.getName().toString() + " "
                             + it.getDescription());
             for (int pos : ((IGXDLMSBase) it).getAttributeIndexToRead()) {
                 try {
+
                     Object val = readObject(it, pos);
+                    writeObject(it, pos);
                     if (val instanceof byte[]) {
                         val = GXCommon.bytesToHex((byte[]) val);
                     } else if (val instanceof Double) {
@@ -759,7 +757,11 @@ public class GXCommunicate {
      * no need to read all data from the meter.
      */
     void readAllObjects(PrintWriter logFile) throws Exception {
-        System.out.println("Reading association view");
+        // System.out.println("Reading association view");
+        // GXDLMSActionSchedule it = new GXDLMSActionSchedule("0.0.15.0.0.255");
+        // Object val = readObject(it, 4);
+        // writeObject(it, 4);
+
         GXReplyData reply = new GXReplyData();
         // Get Association view from the meter.
         readDataBlock(dlms.getObjectsRequest(), reply);

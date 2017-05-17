@@ -38,7 +38,6 @@ import java.net.InetAddress;
 import java.net.UnknownHostException;
 
 import gurux.dlms.GXByteBuffer;
-import gurux.dlms.GXDLMSClient;
 import gurux.dlms.GXDLMSSettings;
 import gurux.dlms.ValueEventArgs;
 import gurux.dlms.enums.DataType;
@@ -50,7 +49,7 @@ import gurux.dlms.objects.enums.GXDLMSIp4SetupIpOptionType;
 public class GXDLMSIp4Setup extends GXDLMSObject implements IGXDLMSBase {
     private String dataLinkLayerReference;
     private String ipAddress;
-    private long[] multicastIPAddress;
+    private int[] multicastIPAddress;
     private GXDLMSIp4SetupIpOption[] ipOptions;
     private long subnetMask;
     private long gatewayIPAddress;
@@ -103,11 +102,11 @@ public class GXDLMSIp4Setup extends GXDLMSObject implements IGXDLMSBase {
         ipAddress = value;
     }
 
-    public final long[] getMulticastIPAddress() {
+    public final int[] getMulticastIPAddress() {
         return multicastIPAddress;
     }
 
-    public final void setMulticastIPAddress(final long[] value) {
+    public final void setMulticastIPAddress(final int[] value) {
         multicastIPAddress = value;
     }
 
@@ -278,10 +277,10 @@ public class GXDLMSIp4Setup extends GXDLMSObject implements IGXDLMSBase {
     public final Object getValue(final GXDLMSSettings settings,
             final ValueEventArgs e) {
         if (e.getIndex() == 1) {
-            return getLogicalName();
+            return GXCommon.logicalNameToBytes(getLogicalName());
         }
         if (e.getIndex() == 2) {
-            return this.getDataLinkLayerReference();
+            return GXCommon.logicalNameToBytes(getDataLinkLayerReference());
         }
         if (e.getIndex() == 3) {
             if (getIPAddress() == null || getIPAddress().isEmpty()) {
@@ -297,7 +296,13 @@ public class GXDLMSIp4Setup extends GXDLMSObject implements IGXDLMSBase {
             }
         }
         if (e.getIndex() == 4) {
-            return this.getMulticastIPAddress();
+            GXByteBuffer data = new GXByteBuffer();
+            data.setUInt8(DataType.ARRAY.getValue());
+            GXCommon.setObjectCount(getMulticastIPAddress().length, data);
+            for (long it : getMulticastIPAddress()) {
+                GXCommon.setData(data, DataType.UINT16, it);
+            }
+            return data.array();
         }
         if (e.getIndex() == 5) {
             GXByteBuffer data = new GXByteBuffer();
@@ -343,32 +348,32 @@ public class GXDLMSIp4Setup extends GXDLMSObject implements IGXDLMSBase {
     public final void setValue(final GXDLMSSettings settings,
             final ValueEventArgs e) {
         if (e.getIndex() == 1) {
-            super.setValue(settings, e);
+            setLogicalName(GXCommon.toLogicalName(e.getValue()));
         } else if (e.getIndex() == 2) {
             if (e.getValue() instanceof String) {
-                this.setDataLinkLayerReference(e.getValue().toString());
+                setDataLinkLayerReference(e.getValue().toString());
             } else {
-                this.setDataLinkLayerReference(
-                        GXDLMSClient.changeType((byte[]) e.getValue(),
-                                DataType.OCTET_STRING).toString());
+                setDataLinkLayerReference(GXCommon.toLogicalName(e.getValue()));
             }
         } else if (e.getIndex() == 3) {
             GXByteBuffer bb = new GXByteBuffer();
             bb.setUInt32(((Number) e.getValue()).intValue());
             bb.reverse();
             try {
-                setIPAddress(InetAddress.getByAddress(bb.array()).toString());
+                setIPAddress(InetAddress.getByAddress(bb.array())
+                        .getCanonicalHostName());
             } catch (UnknownHostException e1) {
                 throw new RuntimeException("Invalid IP address.");
             }
         } else if (e.getIndex() == 4) {
-            java.util.ArrayList<Long> data = new java.util.ArrayList<Long>();
+            java.util.ArrayList<Integer> data =
+                    new java.util.ArrayList<Integer>();
             if (e.getValue() != null) {
                 for (Object it : (Object[]) e.getValue()) {
-                    data.add(new Long(((Number) it).longValue()));
+                    data.add(new Integer(((Number) it).intValue()));
                 }
             }
-            setMulticastIPAddress(GXDLMSObjectHelpers.toLongArray(data));
+            setMulticastIPAddress(GXDLMSObjectHelpers.toIntArray(data));
         } else if (e.getIndex() == 5) {
             java.util.ArrayList<GXDLMSIp4SetupIpOption> data =
                     new java.util.ArrayList<GXDLMSIp4SetupIpOption>();

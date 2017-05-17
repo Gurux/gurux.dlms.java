@@ -208,7 +208,7 @@ public class GXDLMSRegisterActivation extends GXDLMSObject
     public final Object getValue(final GXDLMSSettings settings,
             final ValueEventArgs e) {
         if (e.getIndex() == 1) {
-            return getLogicalName();
+            return GXCommon.logicalNameToBytes(getLogicalName());
         }
         if (e.getIndex() == 2) {
             GXByteBuffer data = new GXByteBuffer();
@@ -218,9 +218,9 @@ public class GXDLMSRegisterActivation extends GXDLMSObject
                 data.setUInt8(DataType.STRUCTURE.getValue());
                 data.setUInt8(2);
                 GXCommon.setData(data, DataType.UINT16,
-                        new Integer(it.getClassId().getValue()));
+                        new Integer(it.getObjectType().getValue()));
                 GXCommon.setData(data, DataType.OCTET_STRING,
-                        it.getLogicalName());
+                        GXCommon.logicalNameToBytes(it.getLogicalName()));
             }
             return data.array();
         }
@@ -254,15 +254,15 @@ public class GXDLMSRegisterActivation extends GXDLMSObject
     public final void setValue(final GXDLMSSettings settings,
             final ValueEventArgs e) {
         if (e.getIndex() == 1) {
-            super.setValue(settings, e);
+            setLogicalName(GXCommon.toLogicalName(e.getValue()));
         } else if (e.getIndex() == 2) {
             registerAssignment.clear();
             if (e.getValue() != null) {
                 for (Object it : (Object[]) e.getValue()) {
                     GXDLMSObjectDefinition item = new GXDLMSObjectDefinition();
-                    item.setClassId(ObjectType.forValue(
+                    item.setObjectType(ObjectType.forValue(
                             ((Number) ((Object[]) it)[0]).intValue()));
-                    item.setLogicalName(GXDLMSObject
+                    item.setLogicalName(GXCommon
                             .toLogicalName((byte[]) ((Object[]) it)[1]));
                     registerAssignment.add(item);
                 }

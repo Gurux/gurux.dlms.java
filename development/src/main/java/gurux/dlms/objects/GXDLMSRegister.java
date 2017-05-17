@@ -250,7 +250,7 @@ public class GXDLMSRegister extends GXDLMSObject implements IGXDLMSBase {
             final ValueEventArgs e) {
         // CHECKSTYLE:ON
         if (e.getIndex() == 1) {
-            return getLogicalName();
+            return GXCommon.logicalNameToBytes(getLogicalName());
         }
         if (e.getIndex() == 2) {
             return getValue();
@@ -277,7 +277,7 @@ public class GXDLMSRegister extends GXDLMSObject implements IGXDLMSBase {
         // CHECKSTYLE:ON
 
         if (e.getIndex() == 1) {
-            super.setValue(settings, e);
+            setLogicalName(GXCommon.toLogicalName(e.getValue()));
         } else if (e.getIndex() == 2) {
             if (scaler != 0) {
                 try {

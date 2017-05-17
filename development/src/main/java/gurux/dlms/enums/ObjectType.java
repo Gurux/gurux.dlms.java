@@ -207,8 +207,8 @@ public enum ObjectType {
     /*
      * Instances of the Disconnect control IC manage an internal or external
      * disconnect unit of the meter (e.g. electricity breaker, gas valve) in
-     * order to connect or disconnect – partly or entirely – the premises of
-     * the consumer to / from the supply.
+     * order to connect or disconnect – partly or entirely – the premises of the
+     * consumer to / from the supply.
      */
     DISCONNECT_CONTROL(70),
 
@@ -217,13 +217,6 @@ public enum ObjectType {
     MBUS_CLIENT(72),
 
     PUSH_SETUP(40),
-    /*
-     * How the device manages incoming messages such as SMS, MMS, e-mail, etc.
-     * as well as the execution of dedicated actions based on the identification
-     * of the sender. The message service used is implicitly defined by the
-     * modem used.
-     */
-    MESSAGE_HANDLER(60),
 
     PARAMETER_MONITOR(65), WIRELESS_MODE_Q_CHANNEL(73),
     MBUS_MASTER_PORT_SETUP(74),

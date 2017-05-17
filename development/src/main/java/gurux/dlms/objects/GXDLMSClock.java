@@ -242,6 +242,33 @@ public class GXDLMSClock extends GXDLMSObject implements IGXDLMSBase {
                 getClockBase() };
     }
 
+    /**
+     * @return Returns current time.
+     */
+    public GXDateTime now() {
+        Calendar now = Calendar.getInstance();
+        GXDateTime tm = new GXDateTime(now);
+        // -32768 == 0x8000
+        if (timeZone == -1 || timeZone == -32768) {
+            tm.getSkip().add(DateTimeSkips.DEVITATION);
+        } else {
+            // If clock's time zone is different what user want's to use.
+            int offset =
+                    timeZone + (int) now.getTimeZone().getRawOffset() / 60000;
+            if (offset != 0) {
+                now = Calendar
+                        .getInstance(GXDateTime.getTimeZone(timeZone, enabled));
+                tm.setMeterCalendar(now);
+            }
+        }
+        // If clock's daylight saving is active but user do not want to use it.
+        if (!enabled && now.getTimeZone().observesDaylightTime()) {
+            tm.getStatus().remove(ClockStatus.DAYLIGHT_SAVE_ACTIVE);
+            tm.getMeterCalendar().add(Calendar.MINUTE, -deviation);
+        }
+        return tm;
+    }
+
     @Override
     public final byte[] invoke(final GXDLMSSettings settings,
             final ValueEventArgs e) {
@@ -250,7 +277,7 @@ public class GXDLMSClock extends GXDLMSObject implements IGXDLMSBase {
         if (e.getIndex() == 1) {
             GXDateTime dt = getTime();
             java.util.Calendar tm = Calendar.getInstance();
-            tm.setTime(dt.getCalendar().getTime());
+            tm.setTime(dt.getMeterCalendar().getTime());
             int minutes = tm.get(java.util.Calendar.MINUTE);
             if (minutes < 8) {
                 minutes = 0;
@@ -267,20 +294,20 @@ public class GXDLMSClock extends GXDLMSObject implements IGXDLMSBase {
             tm.set(java.util.Calendar.MINUTE, minutes);
             tm.set(java.util.Calendar.SECOND, 0);
             tm.set(java.util.Calendar.MILLISECOND, 0);
-            dt.setCalendar(tm);
+            dt.setMeterCalendar(tm);
             setTime(dt);
         } else if (e.getIndex() == 3) {
             // Sets the meter's time to the nearest minute.
             GXDateTime dt = getTime();
             java.util.Calendar tm = Calendar.getInstance();
-            tm.setTime(dt.getCalendar().getTime());
+            tm.setTime(dt.getMeterCalendar().getTime());
             int s = tm.get(java.util.Calendar.SECOND);
             if (s > 30) {
                 tm.add(java.util.Calendar.MINUTE, 1);
             }
             tm.set(java.util.Calendar.SECOND, 0);
             tm.set(java.util.Calendar.MILLISECOND, 0);
-            dt.setCalendar(tm);
+            dt.setMeterCalendar(tm);
             setTime(dt);
 
         } else if (e.getIndex() == 5) {
@@ -303,9 +330,9 @@ public class GXDLMSClock extends GXDLMSObject implements IGXDLMSBase {
             int shift = ((Number) e.getParameters()).intValue();
             GXDateTime dt = getTime();
             java.util.Calendar tm = Calendar.getInstance();
-            tm.setTime(dt.getCalendar().getTime());
+            tm.setTime(dt.getMeterCalendar().getTime());
             tm.add(java.util.Calendar.SECOND, shift);
-            dt.setCalendar(tm);
+            dt.setMeterCalendar(tm);
             setTime(dt);
         } else {
             e.setError(ErrorCode.READ_WRITE_DENIED);
@@ -478,7 +505,7 @@ public class GXDLMSClock extends GXDLMSObject implements IGXDLMSBase {
     public final Object getValue(final GXDLMSSettings settings,
             final ValueEventArgs e) {
         if (e.getIndex() == 1) {
-            return getLogicalName();
+            return GXCommon.logicalNameToBytes(getLogicalName());
         }
         if (e.getIndex() == 2) {
             return getTime();
@@ -515,7 +542,7 @@ public class GXDLMSClock extends GXDLMSObject implements IGXDLMSBase {
     public final void setValue(final GXDLMSSettings settings,
             final ValueEventArgs e) {
         if (e.getIndex() == 1) {
-            super.setValue(settings, e);
+            setLogicalName(GXCommon.toLogicalName(e.getValue()));
         } else if (e.getIndex() == 2) {
             if (e.getValue() == null) {
                 setTime(new GXDateTime());

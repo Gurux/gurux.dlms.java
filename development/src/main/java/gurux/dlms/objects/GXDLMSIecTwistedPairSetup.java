@@ -48,6 +48,7 @@ import gurux.dlms.ValueEventArgs;
 import gurux.dlms.enums.DataType;
 import gurux.dlms.enums.ErrorCode;
 import gurux.dlms.enums.ObjectType;
+import gurux.dlms.internal.GXCommon;
 import gurux.dlms.objects.enums.BaudRate;
 import gurux.dlms.objects.enums.IecTwistedPairSetupMode;
 
@@ -261,7 +262,7 @@ public class GXDLMSIecTwistedPairSetup extends GXDLMSObject
     public final Object getValue(final GXDLMSSettings settings,
             final ValueEventArgs e) {
         if (e.getIndex() == 1) {
-            return getLogicalName();
+            return GXCommon.logicalNameToBytes(getLogicalName());
         }
         e.setError(ErrorCode.READ_WRITE_DENIED);
         return null;
@@ -274,7 +275,7 @@ public class GXDLMSIecTwistedPairSetup extends GXDLMSObject
     public final void setValue(final GXDLMSSettings settings,
             final ValueEventArgs e) {
         if (e.getIndex() == 1) {
-            super.setValue(settings, e);
+            setLogicalName(GXCommon.toLogicalName(e.getValue()));
         } else if (e.getIndex() == 2) {
             setMode(IecTwistedPairSetupMode.values()[((Number) e.getValue())
                     .intValue()]);

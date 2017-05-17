@@ -1542,7 +1542,11 @@ public class GXDLMSTranslator {
                 break;
             case TranslatorTags.BLOCK_NUMBER:
                 if (s.getCommand() == Command.GET_REQUEST
-                        || s.getCommand() == Command.GET_RESPONSE) {
+                        || s.getCommand() == Command.GET_RESPONSE
+                        || s.getCommand() == Command.SET_REQUEST
+                        || s.getCommand() == Command.SET_RESPONSE
+                        || s.getCommand() == Command.METHOD_REQUEST
+                        || s.getCommand() == Command.METHOD_RESPONSE) {
                     s.getData().setUInt32(s.parseLong(getValue(node, s)));
                 } else {
                     s.getData().setUInt16(s.parseInt(getValue(node, s)));
@@ -1705,6 +1709,8 @@ public class GXDLMSTranslator {
             case TranslatorTags.CIPHERED_SERVICE:
                 tmp = GXCommon.hexToBytes(getValue(node, s));
                 s.getData().set(tmp);
+                break;
+            case TranslatorTags.DATA_BLOCK:
                 break;
             default:
                 throw new IllegalArgumentException(

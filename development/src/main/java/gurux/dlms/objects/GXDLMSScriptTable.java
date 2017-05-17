@@ -143,7 +143,7 @@ public class GXDLMSScriptTable extends GXDLMSObject implements IGXDLMSBase {
     public final Object getValue(final GXDLMSSettings settings,
             final ValueEventArgs e) {
         if (e.getIndex() == 1) {
-            return getLogicalName();
+            return GXCommon.logicalNameToBytes(getLogicalName());
         }
         if (e.getIndex() == 2) {
             int cnt = scripts.size();
@@ -165,13 +165,13 @@ public class GXDLMSScriptTable extends GXDLMSObject implements IGXDLMSBase {
                     data.setUInt8(5);
                     // service_id
                     GXCommon.setData(data, DataType.ENUM,
-                            new Integer(a.getType().ordinal() + 1));
+                            new Integer(a.getType().ordinal()));
                     // class_id
                     GXCommon.setData(data, DataType.UINT16,
                             new Integer(a.getObjectType().getValue()));
                     // logical_name
                     GXCommon.setData(data, DataType.OCTET_STRING,
-                            a.getLogicalName());
+                            GXCommon.logicalNameToBytes(a.getLogicalName()));
                     // index
                     GXCommon.setData(data, DataType.INT8,
                             new Integer(a.getIndex()));
@@ -194,7 +194,7 @@ public class GXDLMSScriptTable extends GXDLMSObject implements IGXDLMSBase {
     public final void setValue(final GXDLMSSettings settings,
             final ValueEventArgs e) {
         if (e.getIndex() == 1) {
-            super.setValue(settings, e);
+            setLogicalName(GXCommon.toLogicalName(e.getValue()));
         } else if (e.getIndex() == 2) {
             scripts.clear();
             // Fix Xemex bug here.
@@ -222,12 +222,14 @@ public class GXDLMSScriptTable extends GXDLMSObject implements IGXDLMSBase {
                             ObjectType ot = ObjectType.forValue(
                                     ((Number) ((Object[]) arr)[1]).intValue());
                             it.setObjectType(ot);
-                            String ln = GXDLMSObject.toLogicalName(
+                            String ln = GXCommon.toLogicalName(
                                     (byte[]) ((Object[]) arr)[2]);
                             it.setLogicalName(ln);
                             it.setIndex(
                                     ((Number) ((Object[]) arr)[3]).intValue());
-                            it.setParameter(((Object[]) arr)[4], DataType.NONE);
+                            Object param = ((Object[]) arr)[4];
+                            it.setParameter(param,
+                                    GXCommon.getValueType(param));
                             script.getActions().add(it);
                         }
                     }
@@ -245,7 +247,7 @@ public class GXDLMSScriptTable extends GXDLMSObject implements IGXDLMSBase {
                     ObjectType ot = ObjectType.forValue(
                             ((Number) ((Object[]) arr)[1]).intValue());
                     it.setObjectType(ot);
-                    String ln = GXDLMSObject
+                    String ln = GXCommon
                             .toLogicalName((byte[]) ((Object[]) arr)[2]);
                     it.setLogicalName(ln);
                     it.setIndex(((Number) ((Object[]) arr)[3]).intValue());

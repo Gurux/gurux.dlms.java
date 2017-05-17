@@ -364,6 +364,19 @@ class GXStandardObisCodeCollection
     // CHECKSTYLE:ON
 
     /**
+     * Get OBIS value.
+     * 
+     * @param formula
+     *            OBIS formula.
+     * @param value
+     *            OBIS value.
+     * @return OBIS value as integer.
+     */
+    private static int getObisValue(String formula, int value) {
+        return value + Integer.parseInt(formula.substring(1));
+    }
+
+    /**
      * Find Standard OBIS Code description.
      */
     public final GXStandardObisCode[] find(final int[] obisCode, final int ic) {
@@ -414,31 +427,37 @@ class GXStandardObisCodeCollection
                     desc = desc.replace("$E", Integer.toString(obisCode[4]));
                     desc = desc.replace("$F", Integer.toString(obisCode[5]));
                     // Increase value
-                    int begin = desc.indexOf("#$");
+                    int begin = desc.indexOf("#$(");
                     if (begin != -1) {
-                        int start = desc.indexOf('(');
-                        int end = desc.indexOf(')');
-                        char channel = desc.charAt(start + 1);
-                        int ch = 0;
-                        if (channel == 'A') {
-                            ch = obisCode[0];
-                        } else if (channel == 'B') {
-                            ch = obisCode[1];
-                        } else if (channel == 'C') {
-                            ch = obisCode[2];
-                        } else if (channel == 'D') {
-                            ch = obisCode[3];
-                        } else if (channel == 'E') {
-                            ch = obisCode[4];
-                        } else if (channel == 'F') {
-                            ch = obisCode[5];
+                        List<String> arr =
+                                GXCommon.split(desc.substring(begin + 2),
+                                        new char[] { '(', ')', '$' });
+                        desc = desc.substring(0, begin);
+                        for (String v : arr) {
+                            switch (v.charAt(0)) {
+                            case 'A':
+                                desc += "#" + getObisValue(v, obisCode[0]);
+                                break;
+                            case 'B':
+                                desc += "#" + getObisValue(v, obisCode[1]);
+                                break;
+                            case 'C':
+                                desc += "#" + getObisValue(v, obisCode[2]);
+                                break;
+                            case 'D':
+                                desc += "#" + getObisValue(v, obisCode[3]);
+                                break;
+                            case 'E':
+                                desc += "#" + getObisValue(v, obisCode[4]);
+                                break;
+                            case 'F':
+                                desc += "#" + getObisValue(v, obisCode[5]);
+                                break;
+                            default:
+                                desc += v;
+                                break;
+                            }
                         }
-                        int plus = desc.indexOf('+');
-                        if (plus != -1) {
-                            ch += Integer.parseInt(desc.substring(plus + 1,
-                                    plus + 1 + end - plus - 1));
-                        }
-                        desc = desc.substring(0, begin) + Integer.toString(ch);
                     }
                     desc = desc.replace(';', ' ').replace("  ", " ").trim();
                     tmp.setDescription(desc);

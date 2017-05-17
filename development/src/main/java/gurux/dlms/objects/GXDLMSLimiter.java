@@ -395,17 +395,23 @@ public class GXDLMSLimiter extends GXDLMSObject implements IGXDLMSBase {
     public final Object getValue(final GXDLMSSettings settings,
             final ValueEventArgs e) {
         if (e.getIndex() == 1) {
-            return getLogicalName();
+            return GXCommon.logicalNameToBytes(getLogicalName());
         } else if (e.getIndex() == 2) {
             GXByteBuffer data = new GXByteBuffer();
             data.setUInt8(DataType.STRUCTURE.getValue());
             data.setUInt8(3);
-            GXCommon.setData(data, DataType.INT16,
-                    new Integer(monitoredValue.getObjectType().getValue()));
-            GXCommon.setData(data, DataType.OCTET_STRING,
-                    monitoredValue.getLogicalName());
-            // TODO: GXCommon.setData(data, DataType.UINT8,
-            // MonitoredValue.getSelectedAttributeIndex());
+            if (monitoredValue == null) {
+                GXCommon.setData(data, DataType.INT16, new Integer(0));
+                GXCommon.setData(data, DataType.OCTET_STRING,
+                        GXCommon.logicalNameToBytes(null));
+                GXCommon.setData(data, DataType.UINT8, 0);
+            } else {
+                GXCommon.setData(data, DataType.INT16,
+                        new Integer(monitoredValue.getObjectType().getValue()));
+                GXCommon.setData(data, DataType.OCTET_STRING, GXCommon
+                        .logicalNameToBytes(monitoredValue.getLogicalName()));
+                GXCommon.setData(data, DataType.UINT8, monitoredAttributeIndex);
+            }
             return data.array();
         } else if (e.getIndex() == 3) {
             return thresholdActive;
@@ -444,14 +450,14 @@ public class GXDLMSLimiter extends GXDLMSObject implements IGXDLMSBase {
             data.setUInt8(2);
             data.setUInt8(DataType.STRUCTURE.getValue());
             data.setUInt8(2);
-            GXCommon.setData(data, DataType.OCTET_STRING,
-                    actionOverThreshold.getLogicalName());
+            GXCommon.setData(data, DataType.OCTET_STRING, GXCommon
+                    .logicalNameToBytes(actionOverThreshold.getLogicalName()));
             GXCommon.setData(data, DataType.UINT16,
                     new Integer(actionOverThreshold.getScriptSelector()));
             data.setUInt8(DataType.STRUCTURE.getValue());
             data.setUInt8(2);
-            GXCommon.setData(data, DataType.OCTET_STRING,
-                    actionUnderThreshold.getLogicalName());
+            GXCommon.setData(data, DataType.OCTET_STRING, GXCommon
+                    .logicalNameToBytes(actionUnderThreshold.getLogicalName()));
             GXCommon.setData(data, DataType.UINT16,
                     new Integer(actionUnderThreshold.getScriptSelector()));
             return data.array();
@@ -467,14 +473,11 @@ public class GXDLMSLimiter extends GXDLMSObject implements IGXDLMSBase {
     public final void setValue(final GXDLMSSettings settings,
             final ValueEventArgs e) {
         if (e.getIndex() == 1) {
-            super.setValue(settings, e);
+            setLogicalName(GXCommon.toLogicalName(e.getValue()));
         } else if (e.getIndex() == 2) {
             ObjectType ot = ObjectType.forValue(
                     ((Number) (((Object[]) e.getValue())[0])).intValue());
-            String ln = GXDLMSClient
-                    .changeType((byte[]) ((Object[]) e.getValue())[1],
-                            DataType.OCTET_STRING)
-                    .toString();
+            String ln = GXCommon.toLogicalName(((Object[]) e.getValue())[1]);
             monitoredAttributeIndex =
                     ((Number) (((Object[]) e.getValue())[2])).intValue();
             monitoredValue = settings.getObjects().findByLN(ot, ln);
@@ -509,14 +512,11 @@ public class GXDLMSLimiter extends GXDLMSObject implements IGXDLMSBase {
             Object[] tmp = (Object[]) e.getValue();
             Object[] tmp1 = (Object[]) tmp[0];
             Object[] tmp2 = (Object[]) tmp[1];
-            actionOverThreshold.setLogicalName(GXDLMSClient
-                    .changeType((byte[]) tmp1[0], DataType.OCTET_STRING)
-                    .toString());
+            actionOverThreshold.setLogicalName(GXCommon.toLogicalName(tmp1[0]));
             actionOverThreshold
                     .setScriptSelector(((Number) (tmp1[1])).intValue());
-            actionUnderThreshold.setLogicalName(GXDLMSClient
-                    .changeType((byte[]) tmp2[0], DataType.OCTET_STRING)
-                    .toString());
+            actionUnderThreshold
+                    .setLogicalName(GXCommon.toLogicalName(tmp2[0]));
             actionUnderThreshold
                     .setScriptSelector(((Number) (tmp2[1])).intValue());
         } else {

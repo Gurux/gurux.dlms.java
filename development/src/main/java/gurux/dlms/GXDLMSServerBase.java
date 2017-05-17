@@ -294,24 +294,33 @@ public class GXDLMSServerBase {
             }
         }
         // Arrange items by Short Name.
-        short sn = 0xA0;
         if (!this.getUseLogicalNameReferencing()) {
-            int[] offset = new int[1];
-            int[] count = new int[1];
+            updateShortNames(false);
+        }
+    }
 
-            for (GXDLMSObject it : settings.getObjects()) {
-                // Generate Short Name if not given.
-                if (it.getShortName() == 0) {
-                    it.setShortName(sn);
-                    // Add method index addresses.
-                    GXDLMS.getActionInfo(it.getObjectType(), offset, count);
-                    if (count[0] != 0) {
-                        sn += offset[0] + (8 * count[0]);
-                    } else {
-                        // If there are no methods.
-                        // Add attribute index addresses.
-                        sn += 8 * it.getAttributeCount();
-                    }
+    /**
+     * Update short names.
+     * 
+     * @param force
+     *            Force update.
+     */
+    final void updateShortNames(final boolean force) {
+        short sn = 0xA0;
+        int[] offset = new int[1];
+        int[] count = new int[1];
+        for (GXDLMSObject it : settings.getObjects()) {
+            // Generate Short Name if not given.
+            if (force || it.getShortName() == 0) {
+                it.setShortName(sn);
+                // Add method index addresses.
+                GXDLMS.getActionInfo(it.getObjectType(), offset, count);
+                if (count[0] != 0) {
+                    sn += offset[0] + (8 * count[0]);
+                } else {
+                    // If there are no methods.
+                    // Add attribute index addresses.
+                    sn += 8 * it.getAttributeCount();
                 }
             }
         }
@@ -758,7 +767,8 @@ public class GXDLMSServerBase {
      * Action is occurred.
      * @param args Handled action requests.
      */
-    final void notifyAction(final ValueEventArgs[] args) throws Exception {
+    public final void notifyAction(final ValueEventArgs[] args)
+            throws Exception {
         if (owner instanceof GXDLMSServer) {
             ((GXDLMSServer) owner).action(args);
         } else {
@@ -837,7 +847,8 @@ public class GXDLMSServerBase {
      * Action is occurred.
      * @param args Handled action requests.
      */
-    final void notifyPostAction(final ValueEventArgs[] args) throws Exception {
+    public final void notifyPostAction(final ValueEventArgs[] args)
+            throws Exception {
         if (owner instanceof GXDLMSServer2) {
             ((GXDLMSServer2) owner).onPostAction(args);
         }

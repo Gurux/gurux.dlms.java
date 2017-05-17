@@ -57,7 +57,6 @@ import gurux.dlms.GXTime;
 import gurux.dlms.enums.ClockStatus;
 import gurux.dlms.enums.DataType;
 import gurux.dlms.enums.DateTimeSkips;
-import gurux.dlms.objects.GXDLMSObject;
 import gurux.dlms.objects.enums.CertificateType;
 
 /*
@@ -939,17 +938,16 @@ public final class GXCommon {
             java.util.Calendar tm;
             if (deviation == 0x8000) {
                 tm = Calendar.getInstance();
-
             } else {
-                tm = Calendar.getInstance(GXDateTime.getTimeZone(deviation));
-
+                tm = Calendar.getInstance(
+                        GXDateTime.getTimeZone(-deviation, dt.getStatus()
+                                .contains(ClockStatus.DAYLIGHT_SAVE_ACTIVE)));
             }
             tm.set(year, month, day, hour, minute, second);
             if (ms != 0xFF) {
                 tm.set(Calendar.MILLISECOND, ms);
             }
-
-            dt.setCalendar(tm);
+            dt.setMeterCalendar(tm);
             dt.setSkip(skip);
             value = dt;
         } catch (Exception ex) {
@@ -1297,8 +1295,7 @@ public final class GXCommon {
             if (info.getXml().isComments() && tmp.length != 0) {
                 // This might be logical name.
                 if (tmp.length == 6 && tmp[5] == -1) {
-                    info.getXml()
-                            .appendComment(GXDLMSObject.toLogicalName(tmp));
+                    info.getXml().appendComment(toLogicalName(tmp));
                 } else {
                     boolean isString = true;
                     // Try to move octect string to DateTie, Date or time.
@@ -1850,8 +1847,10 @@ public final class GXCommon {
         }
         // Add clock_status
         if (!dt.getSkip().contains(DateTimeSkips.STATUS)) {
-            if (!dt.getSkip().contains(DateTimeSkips.DEVITATION)
-                    && tm.getTimeZone().observesDaylightTime()) {
+            if ((dt.getCalendar().getTimeZone()
+                    .inDaylightTime(dt.getCalendar().getTime())
+                    || dt.getStatus()
+                            .contains(ClockStatus.DAYLIGHT_SAVE_ACTIVE))) {
                 buff.setUInt8(ClockStatus.toInteger(dt.getStatus())
                         | ClockStatus.DAYLIGHT_SAVE_ACTIVE.getValue());
             } else {
@@ -1896,6 +1895,37 @@ public final class GXCommon {
         } else {
             setObjectCount(0, buff);
         }
+    }
+
+    /**
+     * Split string to array.
+     * 
+     * @param str
+     *            String to split.
+     * @param separators
+     *            Separators.
+     * @return Split values.
+     */
+    public static List<String> split(final String str,
+            final char[] separators) {
+        int lastPos = 0;
+        List<String> arr = new ArrayList<String>();
+        for (int pos = 0; pos != str.length(); ++pos) {
+            char ch = str.charAt(pos);
+            for (char sep : separators) {
+                if (ch == sep) {
+                    if (lastPos != pos) {
+                        arr.add(str.substring(lastPos, pos));
+                    }
+                    lastPos = pos + 1;
+                    break;
+                }
+            }
+        }
+        if (lastPos != str.length()) {
+            arr.add(str.substring(lastPos, str.length() - 1));
+        }
+        return arr;
     }
 
     /**
@@ -1956,21 +1986,10 @@ public final class GXCommon {
      */
     private static void setOctetString(final GXByteBuffer buff,
             final Object value) {
-        // Example Logical name is octet string, so do not change to
-        // string...
         if (value instanceof String) {
-            List<String> items = split((String) value, '.');
-            // If data is string.
-            if (items.size() == 1) {
-                byte[] tmp = ((String) value).getBytes();
-                setObjectCount(tmp.length, buff);
-                buff.set(tmp);
-            } else {
-                setObjectCount(items.size(), buff);
-                for (String it : items) {
-                    buff.setUInt8(Integer.parseInt(it));
-                }
-            }
+            byte[] tmp = GXCommon.hexToBytes((String) value);
+            setObjectCount(tmp.length, buff);
+            buff.set(tmp);
         } else if (value instanceof byte[]) {
             setObjectCount(((byte[]) value).length, buff);
             buff.set((byte[]) value);
@@ -2226,4 +2245,55 @@ public final class GXCommon {
             throw new RuntimeException(ex.getMessage());
         }
     }
+
+    /// <summary>
+    /// Reserved for internal use.
+    /// </summary>
+    /// <param name="buff"></param>
+    /// <returns>Logical name as a string.</returns>
+    public static String toLogicalName(Object value) {
+        if (value instanceof byte[]) {
+            byte[] buff = (byte[]) value;
+            if (buff.length == 0) {
+                buff = new byte[6];
+            }
+            if (buff.length == 6) {
+                return (buff[0] & 0xFF) + "." + (buff[1] & 0xFF) + "."
+                        + (buff[2] & 0xFF) + "." + (buff[3] & 0xFF) + "."
+                        + (buff[4] & 0xFF) + "." + (buff[5] & 0xFF);
+            }
+            throw new IllegalArgumentException("Invalid Logical name.");
+        }
+        return (String) value;
+    }
+
+    /**
+     * Convert logical name to byte array.
+     * 
+     * @param value
+     *            Logical name.
+     * @return Logical name as byte array.
+     */
+    public static byte[] logicalNameToBytes(final String value) {
+        if (value == null || value.length() == 0) {
+            return new byte[6];
+        }
+        List<String> items = GXCommon.split(value, '.');
+        // If data is string.
+        if (items.size() != 6) {
+            throw new IllegalArgumentException("Invalid Logical name.");
+        }
+        byte[] buff = new byte[6];
+        byte pos = 0;
+        for (String it : items) {
+            int v = Integer.parseInt(it);
+            if (v < 0 || v > 255) {
+                throw new IllegalArgumentException("Invalid Logical name.");
+            }
+            buff[pos] = (byte) v;
+            ++pos;
+        }
+        return buff;
+    }
+
 }

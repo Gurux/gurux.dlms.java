@@ -76,6 +76,26 @@ public enum AutoConnectMode {
     EMAIL_SENDING(6),
 
     /**
+     * The device is permanently connected to the communication network.
+     */
+    PERMANENTLY_CONNECT(101),
+    /**
+     * The device is permanently connected to the communication network. No
+     * connection possible outside the calling window.
+     */
+    CONNECT_WITH_CALLING_WINDOW(102),
+    /**
+     * The device is permanently connected to the communication network.
+     * Connection is possible as soon as the connect method is invoked.
+     */
+    CONNECT_INVOKED(103),
+    /**
+     * The device is usually disconnected. It connects to the communication
+     * network as soon as the connect method is invoked
+     */
+    DISCONNECT_CONNECT_INVOKED(104),
+
+    /**
      * (200..255) manufacturer specific modes
      */
     MANUFACTURE_SPESIFIC(200);

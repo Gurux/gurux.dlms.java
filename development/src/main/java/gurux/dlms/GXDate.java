@@ -34,9 +34,13 @@
 
 package gurux.dlms;
 
+import java.text.SimpleDateFormat;
+import java.util.ArrayList;
 import java.util.Date;
+import java.util.List;
 
 import gurux.dlms.enums.DateTimeSkips;
+import gurux.dlms.internal.GXCommon;
 
 public class GXDate extends GXDateTime {
     /**
@@ -92,4 +96,68 @@ public class GXDate extends GXDateTime {
     public GXDate(final int year, final int month, final int day) {
         super(year, month, day, -1, -1, -1, -1);
     }
+
+    /**
+     * Constructor
+     * 
+     * @param value
+     *            Date time value as a string.
+     */
+    public GXDate(final String value) {
+        if (value != null) {
+            int year = 2000, month = 1, day = 1;
+            SimpleDateFormat sd = new SimpleDateFormat();
+            // Separate date and time parts.
+            List<String> tmp = GXCommon.split(sd.toPattern(), " ");
+            List<String> shortDatePattern = new ArrayList<String>();
+            // Find date time separator.
+            char separator = 0;
+            for (char it : tmp.get(0).toCharArray()) {
+                if (!Character.isLetter(it)) {
+                    separator = it;
+                    break;
+                }
+            }
+            String sep = String.valueOf(separator);
+            shortDatePattern.addAll(GXCommon.split(tmp.get(0), sep));
+
+            List<String> values = GXCommon.split(value.trim(),
+                    new char[] { separator, ':', ' ' });
+            if (shortDatePattern.size() != values.size()
+                    && shortDatePattern.size() != values.size()) {
+                throw new IllegalArgumentException("Invalid Date.");
+            }
+            for (int pos = 0; pos != shortDatePattern.size(); ++pos) {
+                boolean ignore = false;
+                if (values.get(pos) == "*") {
+                    ignore = true;
+                }
+                if (shortDatePattern.get(pos) == "yyyy") {
+                    if (ignore) {
+                        year = -1;
+                    } else {
+                        year = Integer.parseInt(values.get(pos));
+                    }
+                } else if ("M"
+                        .compareToIgnoreCase(shortDatePattern.get(pos)) == 0) {
+                    if (ignore) {
+                        month = -1;
+                    } else {
+                        month = Integer.parseInt(values.get(pos));
+                    }
+                } else if ("d"
+                        .compareToIgnoreCase(shortDatePattern.get(pos)) == 0) {
+                    if (ignore) {
+                        day = -1;
+                    } else {
+                        day = Integer.parseInt(values.get(pos));
+                    }
+                } else {
+                    throw new IllegalArgumentException("Invalid Date pattern.");
+                }
+            }
+            init(year, month, day, -1, -1, -1, -1);
+        }
+    }
+
 }

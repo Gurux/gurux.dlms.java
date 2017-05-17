@@ -361,7 +361,8 @@ public class GXDLMSSettings {
      * @return Is connection accepted.
      */
     public final boolean acceptConnection() {
-        return connected || cipher.getSharedSecret() != null;
+        return connected
+                || (cipher != null && cipher.getSharedSecret() != null);
     }
 
     /**

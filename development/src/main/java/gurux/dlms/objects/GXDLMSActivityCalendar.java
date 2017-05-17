@@ -358,8 +358,8 @@ public class GXDLMSActivityCalendar extends GXDLMSObject
                     data.setUInt8(3);
                     GXCommon.setData(data, DataType.OCTET_STRING,
                             action.getStartTime());
-                    GXCommon.setData(data, DataType.OCTET_STRING,
-                            action.getScriptLogicalName());
+                    GXCommon.setData(data, DataType.OCTET_STRING, GXCommon
+                            .logicalNameToBytes(action.getScriptLogicalName()));
                     GXCommon.setData(data, DataType.UINT16,
                             new Integer(action.getScriptSelector()));
                 }
@@ -376,11 +376,12 @@ public class GXDLMSActivityCalendar extends GXDLMSObject
             final ValueEventArgs e) {
         switch (e.getIndex()) {
         case 1:
-            return getLogicalName();
+            return GXCommon.logicalNameToBytes(getLogicalName());
         case 2:
-            return GXDLMSClient.changeType(
-                    GXCommon.getBytes(getCalendarNameActive()),
-                    DataType.OCTET_STRING);
+            if (calendarNameActive == null) {
+                return null;
+            }
+            return calendarNameActive.getBytes();
         case 3:
             return getSeasonProfile(seasonProfileActive);
         case 4:
@@ -388,9 +389,10 @@ public class GXDLMSActivityCalendar extends GXDLMSObject
         case 5:
             return getDayProfileTable(dayProfileTableActive);
         case 6:
-            return GXDLMSClient.changeType(
-                    GXCommon.getBytes(getCalendarNamePassive()),
-                    DataType.OCTET_STRING);
+            if (calendarNamePassive == null) {
+                return null;
+            }
+            return calendarNamePassive.getBytes();
         case 7:
             return getSeasonProfile(seasonProfilePassive);
         case 8:
@@ -468,10 +470,8 @@ public class GXDLMSActivityCalendar extends GXDLMSObject
                             new GXDLMSDayProfileAction();
                     ac.setStartTime((GXTime) GXDLMSClient.changeType(
                             (byte[]) ((Object[]) it2)[0], DataType.TIME));
-                    ac.setScriptLogicalName(GXDLMSClient
-                            .changeType((byte[]) ((Object[]) it2)[1],
-                                    DataType.OCTET_STRING)
-                            .toString());
+                    ac.setScriptLogicalName(
+                            GXCommon.toLogicalName(((Object[]) it2)[1]));
                     ac.setScriptSelector(
                             ((Number) ((Object[]) it2)[2]).intValue());
                     actions.add(ac);
@@ -492,12 +492,10 @@ public class GXDLMSActivityCalendar extends GXDLMSObject
             final ValueEventArgs e) {
         switch (e.getIndex()) {
         case 1:
-            super.setValue(settings, e);
+            setLogicalName(GXCommon.toLogicalName(e.getValue()));
             break;
         case 2:
-            setCalendarNameActive(GXDLMSClient
-                    .changeType((byte[]) e.getValue(), DataType.STRING)
-                    .toString());
+            setCalendarNameActive(new String((byte[]) e.getValue()));
             break;
         case 3:
             setSeasonProfileActive(getSeasonProfile(e.getValue()));
@@ -509,9 +507,7 @@ public class GXDLMSActivityCalendar extends GXDLMSObject
             setDayProfileTableActive(getDayProfileTable(e.getValue()));
             break;
         case 6:
-            setCalendarNamePassive(GXDLMSClient
-                    .changeType((byte[]) e.getValue(), DataType.STRING)
-                    .toString());
+            setCalendarNamePassive(new String((byte[]) e.getValue()));
             break;
         case 7:
             setSeasonProfilePassive(getSeasonProfile(e.getValue()));

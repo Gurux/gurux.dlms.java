@@ -364,6 +364,7 @@ final class TranslatorSimpleTags {
                 "CipheredService");
         GXDLMSTranslator.addTag(list, TranslatorTags.SYSTEM_TITLE,
                 "SystemTitle");
+        GXDLMSTranslator.addTag(list, TranslatorTags.DATA_BLOCK, "DataBlock");
     }
 
     static void getDataTypeTags(final HashMap<Integer, String> list) {

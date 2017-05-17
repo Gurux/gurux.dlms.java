@@ -162,6 +162,16 @@ public abstract class GXDLMSServer2 {
     }
 
     /**
+     * Update short names.
+     * 
+     * @param force
+     *            Force update.
+     */
+    public void updateShortNames() {
+        base.updateShortNames(true);
+    }
+
+    /**
      * Close server.
      * 
      * @throws Exception

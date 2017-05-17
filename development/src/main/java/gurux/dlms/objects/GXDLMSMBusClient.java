@@ -35,7 +35,9 @@
 package gurux.dlms.objects;
 
 import java.util.List;
+import java.util.Map;
 
+import gurux.dlms.GXByteBuffer;
 import gurux.dlms.GXDLMSClient;
 import gurux.dlms.GXDLMSSettings;
 import gurux.dlms.GXSimpleEntry;
@@ -43,6 +45,7 @@ import gurux.dlms.ValueEventArgs;
 import gurux.dlms.enums.DataType;
 import gurux.dlms.enums.ErrorCode;
 import gurux.dlms.enums.ObjectType;
+import gurux.dlms.internal.GXCommon;
 
 public class GXDLMSMBusClient extends GXDLMSObject implements IGXDLMSBase {
     private long capturePeriod;
@@ -326,14 +329,27 @@ public class GXDLMSMBusClient extends GXDLMSObject implements IGXDLMSBase {
     public final Object getValue(final GXDLMSSettings settings,
             final ValueEventArgs e) {
         if (e.getIndex() == 1) {
-            return getLogicalName();
+            return GXCommon.logicalNameToBytes(getLogicalName());
         }
         if (e.getIndex() == 2) {
-            return mBusPortReference;
+            return GXCommon.logicalNameToBytes(mBusPortReference);
         }
         if (e.getIndex() == 3) {
-            // TODO;
-            return captureDefinition;
+            GXByteBuffer buff = new GXByteBuffer();
+            buff.setUInt8(DataType.ARRAY.getValue());
+            GXCommon.setObjectCount(captureDefinition.size(), buff);
+            for (Map.Entry<String, String> it : captureDefinition) {
+                buff.setUInt8(DataType.STRUCTURE.getValue());
+                buff.setUInt8(2);
+                GXCommon.setData(buff, DataType.UINT8, it.getKey());
+                if (it.getValue() == null) {
+                    GXCommon.setData(buff, DataType.OCTET_STRING, null);
+                } else {
+                    GXCommon.setData(buff, DataType.OCTET_STRING,
+                            it.getValue().getBytes());
+                }
+            }
+            return buff.array();
         }
         if (e.getIndex() == 4) {
             return new Long(capturePeriod);
@@ -373,11 +389,9 @@ public class GXDLMSMBusClient extends GXDLMSObject implements IGXDLMSBase {
     public final void setValue(final GXDLMSSettings settings,
             final ValueEventArgs e) {
         if (e.getIndex() == 1) {
-            super.setValue(settings, e);
+            setLogicalName(GXCommon.toLogicalName(e.getValue()));
         } else if (e.getIndex() == 2) {
-            mBusPortReference = GXDLMSClient
-                    .changeType((byte[]) e.getValue(), DataType.OCTET_STRING)
-                    .toString();
+            mBusPortReference = GXCommon.toLogicalName(e.getValue());
         } else if (e.getIndex() == 3) {
             captureDefinition.clear();
             if (e.getValue() != null) {

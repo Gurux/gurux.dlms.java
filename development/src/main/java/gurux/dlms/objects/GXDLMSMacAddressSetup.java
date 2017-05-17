@@ -40,6 +40,7 @@ import gurux.dlms.ValueEventArgs;
 import gurux.dlms.enums.DataType;
 import gurux.dlms.enums.ErrorCode;
 import gurux.dlms.enums.ObjectType;
+import gurux.dlms.internal.GXCommon;
 
 public class GXDLMSMacAddressSetup extends GXDLMSObject implements IGXDLMSBase {
     private String macAddress;
@@ -147,7 +148,7 @@ public class GXDLMSMacAddressSetup extends GXDLMSObject implements IGXDLMSBase {
     public final Object getValue(final GXDLMSSettings settings,
             final ValueEventArgs e) {
         if (e.getIndex() == 1) {
-            return getLogicalName();
+            return GXCommon.logicalNameToBytes(getLogicalName());
         }
         if (e.getIndex() == 2) {
             if (macAddress == null) {
@@ -166,7 +167,7 @@ public class GXDLMSMacAddressSetup extends GXDLMSObject implements IGXDLMSBase {
     public final void setValue(final GXDLMSSettings settings,
             final ValueEventArgs e) {
         if (e.getIndex() == 1) {
-            super.setValue(settings, e);
+            setLogicalName(GXCommon.toLogicalName(e.getValue()));
         } else if (e.getIndex() == 2) {
             String add = GXDLMSClient
                     .changeType((byte[]) e.getValue(), DataType.OCTET_STRING)

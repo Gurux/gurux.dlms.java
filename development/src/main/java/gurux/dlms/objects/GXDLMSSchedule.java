@@ -43,6 +43,7 @@ import gurux.dlms.ValueEventArgs;
 import gurux.dlms.enums.DataType;
 import gurux.dlms.enums.ErrorCode;
 import gurux.dlms.enums.ObjectType;
+import gurux.dlms.internal.GXCommon;
 
 /**
  * Base class where class is derived.
@@ -119,17 +120,9 @@ public class GXDLMSSchedule extends GXDLMSObject implements IGXDLMSBase {
         if (getLogicalName() == null || getLogicalName().compareTo("") == 0) {
             attributes.add(new Integer(1));
         }
-        // ExecutedScriptLogicalName is static and read only once.
+        // Entries
         if (!isRead(2)) {
             attributes.add(new Integer(2));
-        }
-        // Type is static and read only once.
-        if (!isRead(3)) {
-            attributes.add(new Integer(3));
-        }
-        // ExecutionTime is static and read only once.
-        if (!isRead(4)) {
-            attributes.add(new Integer(4));
         }
         return GXDLMSObjectHelpers.toIntArray(attributes);
     }
@@ -169,7 +162,7 @@ public class GXDLMSSchedule extends GXDLMSObject implements IGXDLMSBase {
     public final Object getValue(final GXDLMSSettings settings,
             final ValueEventArgs e) {
         if (e.getIndex() == 1) {
-            return getLogicalName();
+            return GXCommon.logicalNameToBytes(getLogicalName());
         }
         // TODO:
         e.setError(ErrorCode.READ_WRITE_DENIED);
@@ -183,7 +176,7 @@ public class GXDLMSSchedule extends GXDLMSObject implements IGXDLMSBase {
     public final void setValue(final GXDLMSSettings settings,
             final ValueEventArgs e) {
         if (e.getIndex() == 1) {
-            super.setValue(settings, e);
+            setLogicalName(GXCommon.toLogicalName(e.getValue()));
         } else if (e.getIndex() == 2) {
             entries.clear();
             Object[] arr = (Object[]) e.getValue();

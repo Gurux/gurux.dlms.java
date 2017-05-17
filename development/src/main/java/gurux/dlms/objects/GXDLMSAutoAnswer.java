@@ -236,7 +236,7 @@ public class GXDLMSAutoAnswer extends GXDLMSObject implements IGXDLMSBase {
     public final Object getValue(final GXDLMSSettings settings,
             final ValueEventArgs e) {
         if (e.getIndex() == 1) {
-            return getLogicalName();
+            return GXCommon.logicalNameToBytes(getLogicalName());
         }
         if (e.getIndex() == 2) {
             return new Integer(getMode().ordinal());
@@ -288,7 +288,7 @@ public class GXDLMSAutoAnswer extends GXDLMSObject implements IGXDLMSBase {
     public final void setValue(final GXDLMSSettings settings,
             final ValueEventArgs e) {
         if (e.getIndex() == 1) {
-            super.setValue(settings, e);
+            setLogicalName(GXCommon.toLogicalName(e.getValue()));
         } else if (e.getIndex() == 2) {
             setMode(AutoConnectMode
                     .forValue(((Number) e.getValue()).byteValue() & 0xFF));

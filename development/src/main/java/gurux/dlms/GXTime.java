@@ -34,9 +34,13 @@
 
 package gurux.dlms;
 
+import java.text.SimpleDateFormat;
+import java.util.ArrayList;
 import java.util.Date;
+import java.util.List;
 
 import gurux.dlms.enums.DateTimeSkips;
+import gurux.dlms.internal.GXCommon;
 
 public class GXTime extends GXDateTime {
     /**
@@ -94,5 +98,66 @@ public class GXTime extends GXDateTime {
     public GXTime(final int hour, final int minute, final int second,
             final int millisecond) {
         super(-1, -1, -1, hour, minute, second, millisecond);
+    }
+
+    /**
+     * Constructor
+     * 
+     * @param value
+     *            Date time value as a string.
+     */
+    public GXTime(final String value) {
+        if (value != null) {
+            int hour = 0, min = 0, sec = 0;
+            SimpleDateFormat sd = new SimpleDateFormat();
+            // Separate date and time parts.
+            List<String> tmp = GXCommon.split(sd.toPattern(), " ");
+            List<String> shortTimePattern = new ArrayList<String>();
+            // Find date time separator.
+            char separator = 0;
+            for (char it : tmp.get(0).toCharArray()) {
+                if (!Character.isLetter(it)) {
+                    separator = it;
+                    break;
+                }
+            }
+            shortTimePattern.addAll(GXCommon.split(tmp.get(1), ":"));
+            List<String> values = GXCommon.split(value.trim(),
+                    new char[] { separator, ':', ' ' });
+            if (shortTimePattern.size() != values.size()) {
+                throw new IllegalArgumentException("Invalid Time");
+            }
+
+            for (int pos = 0; pos != shortTimePattern.size(); ++pos) {
+                boolean ignore = false;
+                if (values.get(3 + pos) == "*") {
+                    ignore = true;
+                }
+                if ("h".compareToIgnoreCase(shortTimePattern.get(pos)) == 0) {
+                    if (ignore) {
+                        hour = -1;
+                    } else {
+                        hour = Integer.parseInt(values.get(3 + pos));
+                    }
+                } else if ("mm"
+                        .compareToIgnoreCase(shortTimePattern.get(pos)) == 0) {
+                    if (ignore) {
+                        min = -1;
+                    } else {
+                        min = Integer.parseInt(values.get(3 + pos));
+                    }
+                } else if ("ss"
+                        .compareToIgnoreCase(shortTimePattern.get(pos)) == 0) {
+                    if (ignore) {
+                        sec = -1;
+                    } else {
+                        sec = Integer.parseInt(values.get(3 + pos));
+                    }
+                } else {
+                    throw new IllegalArgumentException("Invalid time pattern.");
+                }
+            }
+            init(-1, -1, -1, hour, min, sec, -1);
+        }
     }
 }
