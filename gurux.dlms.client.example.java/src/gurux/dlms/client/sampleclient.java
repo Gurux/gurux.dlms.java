@@ -243,7 +243,7 @@ public class sampleclient {
             throw new RuntimeException("Invalid manufacturer.");
         }
         dlms.setObisCodes(man.getObisCodes());
-        com = new GXCommunicate(50000, dlms, man, iec, auth, pw, media);
+        com = new GXCommunicate(5000, dlms, man, iec, auth, pw, media);
         com.Trace = trace;
         return com;
     }
