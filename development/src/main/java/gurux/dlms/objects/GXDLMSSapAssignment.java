@@ -39,6 +39,8 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Map.Entry;
 
+import javax.xml.stream.XMLStreamException;
+
 import gurux.dlms.GXByteBuffer;
 import gurux.dlms.GXDLMSClient;
 import gurux.dlms.GXDLMSSettings;
@@ -206,5 +208,38 @@ public class GXDLMSSapAssignment extends GXDLMSObject implements IGXDLMSBase {
         } else {
             e.setError(ErrorCode.READ_WRITE_DENIED);
         }
+    }
+
+    @Override
+    public final void load(final GXXmlReader reader) throws XMLStreamException {
+        sapAssignmentList.clear();
+        if (reader.isStartElement("SapAssignmentList", true)) {
+            while (reader.isStartElement("Item", true)) {
+                int sap = reader.readElementContentAsInt("SAP");
+                String ldn = reader.readElementContentAsString("LDN");
+                sapAssignmentList
+                        .add(new GXSimpleEntry<Integer, String>(sap, ldn));
+            }
+            reader.readEndElement("SapAssignmentList");
+        }
+    }
+
+    @Override
+    public final void save(final GXXmlWriter writer) throws XMLStreamException {
+        if (sapAssignmentList != null) {
+            writer.writeStartElement("SapAssignmentList");
+            for (Entry<Integer, String> it : sapAssignmentList) {
+                writer.writeStartElement("Item");
+                writer.writeElementString("SAP", it.getKey());
+                writer.writeElementString("LDN", it.getValue());
+                writer.writeEndElement();
+            }
+            writer.writeEndElement();
+        }
+
+    }
+
+    @Override
+    public final void postLoad(final GXXmlReader reader) {
     }
 }

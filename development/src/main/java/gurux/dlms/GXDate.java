@@ -129,24 +129,23 @@ public class GXDate extends GXDateTime {
             }
             for (int pos = 0; pos != shortDatePattern.size(); ++pos) {
                 boolean ignore = false;
-                if (values.get(pos) == "*") {
+                if ("*".compareTo(values.get(pos)) == 0) {
                     ignore = true;
                 }
-                if (shortDatePattern.get(pos) == "yyyy") {
+                String val = shortDatePattern.get(pos);
+                if ("yyyy".compareToIgnoreCase(val) == 0) {
                     if (ignore) {
                         year = -1;
                     } else {
                         year = Integer.parseInt(values.get(pos));
                     }
-                } else if ("M"
-                        .compareToIgnoreCase(shortDatePattern.get(pos)) == 0) {
+                } else if ("M".compareToIgnoreCase(val) == 0) {
                     if (ignore) {
                         month = -1;
                     } else {
                         month = Integer.parseInt(values.get(pos));
                     }
-                } else if ("d"
-                        .compareToIgnoreCase(shortDatePattern.get(pos)) == 0) {
+                } else if ("d".compareToIgnoreCase(val) == 0) {
                     if (ignore) {
                         day = -1;
                     } else {

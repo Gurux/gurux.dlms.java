@@ -37,15 +37,18 @@ package gurux.dlms.objects;
 import java.util.ArrayList;
 import java.util.List;
 
+import javax.xml.stream.XMLStreamException;
+
 import gurux.dlms.GXByteBuffer;
 import gurux.dlms.GXDLMSClient;
+import gurux.dlms.GXDLMSConverter;
 import gurux.dlms.GXDLMSSettings;
 import gurux.dlms.ValueEventArgs;
 import gurux.dlms.enums.DataType;
 import gurux.dlms.enums.ErrorCode;
 import gurux.dlms.enums.ObjectType;
 import gurux.dlms.internal.GXCommon;
-import gurux.dlms.objects.enums.GXDLMSScriptActionType;
+import gurux.dlms.objects.enums.ScriptActionType;
 
 public class GXDLMSScriptTable extends GXDLMSObject implements IGXDLMSBase {
     private List<GXDLMSScript> scripts;
@@ -166,12 +169,22 @@ public class GXDLMSScriptTable extends GXDLMSObject implements IGXDLMSBase {
                     // service_id
                     GXCommon.setData(data, DataType.ENUM,
                             new Integer(a.getType().ordinal()));
-                    // class_id
-                    GXCommon.setData(data, DataType.UINT16,
-                            new Integer(a.getObjectType().getValue()));
-                    // logical_name
-                    GXCommon.setData(data, DataType.OCTET_STRING,
-                            GXCommon.logicalNameToBytes(a.getLogicalName()));
+                    if (a.getTarget() == null) {
+                        // class_id
+                        GXCommon.setData(data, DataType.UINT16,
+                                new Integer(a.getObjectType().getValue()));
+                        // logical_name
+                        GXCommon.setData(data, DataType.OCTET_STRING, GXCommon
+                                .logicalNameToBytes(a.getLogicalName()));
+                    } else {
+                        // class_id
+                        GXCommon.setData(data, DataType.UINT16, new Integer(
+                                a.getTarget().getObjectType().getValue()));
+                        // logical_name
+                        GXCommon.setData(data, DataType.OCTET_STRING,
+                                GXCommon.logicalNameToBytes(
+                                        a.getTarget().getLogicalName()));
+                    }
                     // index
                     GXCommon.setData(data, DataType.INT8,
                             new Integer(a.getIndex()));
@@ -211,25 +224,29 @@ public class GXDLMSScriptTable extends GXDLMSObject implements IGXDLMSBase {
                         for (Object arr : (Object[]) ((Object[]) item)[1]) {
                             GXDLMSScriptAction it = new GXDLMSScriptAction();
                             int val = ((Number) ((Object[]) arr)[0]).intValue();
-                            GXDLMSScriptActionType type =
-                                    GXDLMSScriptActionType.NONE;
+                            ScriptActionType type = ScriptActionType.NONE;
                             // Some Iskra meters return -1 here.
                             // It is not standard value.
                             if (val > 0) {
-                                type = GXDLMSScriptActionType.values()[val];
+                                type = ScriptActionType.values()[val];
                             }
                             it.setType(type);
                             ObjectType ot = ObjectType.forValue(
                                     ((Number) ((Object[]) arr)[1]).intValue());
-                            it.setObjectType(ot);
                             String ln = GXCommon.toLogicalName(
                                     (byte[]) ((Object[]) arr)[2]);
-                            it.setLogicalName(ln);
+                            GXDLMSObject t =
+                                    settings.getObjects().findByLN(ot, ln);
+                            if (t == null) {
+                                t = GXDLMSClient.createObject(ot);
+                                t.setLogicalName(ln);
+                            }
+                            it.setTarget(t);
                             it.setIndex(
                                     ((Number) ((Object[]) arr)[3]).intValue());
                             Object param = ((Object[]) arr)[4];
                             it.setParameter(param,
-                                    GXCommon.getValueType(param));
+                                    GXDLMSConverter.getDLMSDataType(param));
                             script.getActions().add(it);
                         }
                     }
@@ -240,16 +257,20 @@ public class GXDLMSScriptTable extends GXDLMSObject implements IGXDLMSBase {
                             ((Number) ((Object[]) e.getValue())[0]).intValue());
                     Object[] arr = (Object[]) ((Object[]) e.getValue())[1];
                     GXDLMSScriptAction it = new GXDLMSScriptAction();
-                    GXDLMSScriptActionType type = GXDLMSScriptActionType
+                    ScriptActionType type = ScriptActionType
                             .values()[((Number) ((Object[]) arr)[0]).intValue()
                                     - 1];
                     it.setType(type);
                     ObjectType ot = ObjectType.forValue(
                             ((Number) ((Object[]) arr)[1]).intValue());
-                    it.setObjectType(ot);
                     String ln = GXCommon
                             .toLogicalName((byte[]) ((Object[]) arr)[2]);
-                    it.setLogicalName(ln);
+                    GXDLMSObject t = settings.getObjects().findByLN(ot, ln);
+                    if (t == null) {
+                        t = GXDLMSClient.createObject(ot);
+                        t.setLogicalName(ln);
+                    }
+                    it.setTarget(t);
                     it.setIndex(((Number) ((Object[]) arr)[3]).intValue());
                     it.setParameter(((Object[]) arr)[4], DataType.NONE);
                     script.getActions().add(it);
@@ -267,4 +288,82 @@ public class GXDLMSScriptTable extends GXDLMSObject implements IGXDLMSBase {
             final DataType type) {
         return client.method(this, 1, data, type);
     }
+
+    @Override
+    public final void load(final GXXmlReader reader) throws XMLStreamException {
+        scripts.clear();
+        if (reader.isStartElement("Scripts", true)) {
+            while (reader.isStartElement("Script", true)) {
+                GXDLMSScript it = new GXDLMSScript();
+                scripts.add(it);
+                it.setId(reader.readElementContentAsInt("ID"));
+                if (reader.isStartElement("Actions", true)) {
+                    while (reader.isStartElement("Action", true)) {
+                        GXDLMSScriptAction a = new GXDLMSScriptAction();
+                        a.setType(ScriptActionType.values()[reader
+                                .readElementContentAsInt("Type")]);
+                        ObjectType ot = ObjectType.forValue(
+                                reader.readElementContentAsInt("ObjectType"));
+                        String ln = reader.readElementContentAsString("LN");
+                        GXDLMSObject t = reader.getObjects().findByLN(ot, ln);
+                        if (t == null) {
+                            t = GXDLMSClient.createObject(ot);
+                            t.setLogicalName(ln);
+                        }
+                        a.setTarget(t);
+                        a.setIndex(reader.readElementContentAsInt("Index"));
+                        DataType dt = DataType.forValue(reader
+                                .readElementContentAsInt("ParameterDataType"));
+                        a.setParameter(reader.readElementContentAsObject(
+                                "Parameter", null), dt);
+                        it.getActions().add(a);
+                    }
+                    reader.readEndElement("Actions");
+                }
+            }
+            reader.readEndElement("Scripts");
+        }
+    }
+
+    @Override
+    public final void save(final GXXmlWriter writer) throws XMLStreamException {
+        if (scripts != null) {
+            writer.writeStartElement("Scripts");
+            for (GXDLMSScript it : scripts) {
+                writer.writeStartElement("Script");
+                writer.writeElementString("ID", it.getId());
+                writer.writeStartElement("Actions");
+                for (GXDLMSScriptAction a : it.getActions()) {
+                    writer.writeStartElement("Action");
+                    writer.writeElementString("Type", a.getType().ordinal());
+                    if (a.getTarget() == null) {
+                        writer.writeElementString("ObjectType",
+                                ObjectType.NONE.getValue());
+                        writer.writeElementString("LN", "0.0.0.0.0.0");
+                        writer.writeElementString("Index", "0");
+                        writer.writeElementString("ParameterDataType",
+                                DataType.NONE.getValue());
+                        writer.writeElementObject("Parameter", "");
+                    } else {
+                        writer.writeElementString("ObjectType",
+                                a.getTarget().getObjectType().getValue());
+                        writer.writeElementString("LN",
+                                a.getTarget().getLogicalName());
+                        writer.writeElementString("Index", a.getIndex());
+                        writer.writeElementObject("Parameter",
+                                a.getParameter());
+                    }
+                    writer.writeEndElement();
+                }
+                writer.writeEndElement();
+                writer.writeEndElement();
+            }
+            writer.writeEndElement();
+        }
+    }
+
+    @Override
+    public final void postLoad(final GXXmlReader reader) {
+    }
+
 }

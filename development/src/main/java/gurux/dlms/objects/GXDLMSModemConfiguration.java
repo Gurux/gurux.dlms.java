@@ -37,6 +37,8 @@ package gurux.dlms.objects;
 import java.util.ArrayList;
 import java.util.List;
 
+import javax.xml.stream.XMLStreamException;
+
 import gurux.dlms.GXByteBuffer;
 import gurux.dlms.GXDLMSClient;
 import gurux.dlms.GXDLMSSettings;
@@ -294,5 +296,51 @@ public class GXDLMSModemConfiguration extends GXDLMSObject
         } else {
             e.setError(ErrorCode.READ_WRITE_DENIED);
         }
+    }
+
+    @Override
+    public final void load(final GXXmlReader reader) throws XMLStreamException {
+        communicationSpeed = BaudRate.values()[reader
+                .readElementContentAsInt("CommunicationSpeed")];
+        if (reader.isStartElement("InitialisationStrings", true)) {
+            while (reader.isStartElement("Initialisation", true)) {
+                GXDLMSModemInitialisation it = new GXDLMSModemInitialisation();
+                it.setRequest(reader.readElementContentAsString("Request"));
+                it.setResponse(reader.readElementContentAsString("Response"));
+                it.setDelay(reader.readElementContentAsInt("Delay"));
+            }
+            reader.readEndElement("InitialisationStrings");
+        }
+        modemProfile = GXCommon
+                .split(reader.readElementContentAsString("ModemProfile", ""),
+                        ';')
+                .toArray(new String[0]);
+    }
+
+    @Override
+    public final void save(final GXXmlWriter writer) throws XMLStreamException {
+        if (communicationSpeed != BaudRate.BAUDRATE_300) {
+            writer.writeElementString("CommunicationSpeed",
+                    communicationSpeed.ordinal());
+        }
+        if (initialisationStrings != null) {
+            writer.writeStartElement("InitialisationStrings");
+            for (GXDLMSModemInitialisation it : initialisationStrings) {
+                writer.writeStartElement("Initialisation");
+                writer.writeElementString("Request", it.getRequest());
+                writer.writeElementString("Response", it.getResponse());
+                writer.writeElementString("Delay", it.getDelay());
+                writer.writeEndElement();
+            }
+            writer.writeEndElement();
+        }
+        if (modemProfile != null) {
+            writer.writeElementString("ModemProfile",
+                    String.join(";", modemProfile));
+        }
+    }
+
+    @Override
+    public final void postLoad(final GXXmlReader reader) {
     }
 }

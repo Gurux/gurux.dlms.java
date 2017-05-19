@@ -1149,7 +1149,7 @@ public class GXDLMSClient {
         int index = methodIndex;
         DataType type = dataType;
         if (type == DataType.NONE && value != null) {
-            type = GXCommon.getValueType(value);
+            type = GXDLMSConverter.getDLMSDataType(value);
             if (type == DataType.NONE) {
                 throw new GXDLMSException(
                         "Invalid parameter. In java value type must give.");
@@ -1260,7 +1260,7 @@ public class GXDLMSClient {
         settings.resetBlockIndex();
         DataType type = dataType;
         if (type == DataType.NONE && value != null) {
-            type = GXCommon.getValueType(value);
+            type = GXDLMSConverter.getDLMSDataType(value);
             if (type == DataType.NONE) {
                 throw new GXDLMSException(
                         "Invalid parameter. In java value type must give.");
@@ -1353,7 +1353,7 @@ public class GXDLMSClient {
             } else {
                 DataType type = it.getDataType();
                 if (type == DataType.NONE && value != null) {
-                    type = GXCommon.getValueType(value);
+                    type = GXDLMSConverter.getDLMSDataType(value);
                     if (type == DataType.NONE) {
                         throw new GXDLMSException("Invalid parameter. "
                                 + " In java value type must give.");
@@ -1959,7 +1959,7 @@ public class GXDLMSClient {
                                                 it.getIndex(), 0, null));
                 DataType type = it.getTarget().getDataType(it.getIndex());
                 if (type == DataType.NONE) {
-                    type = GXCommon.getValueType(value);
+                    type = GXDLMSConverter.getDLMSDataType(value);
                 }
                 GXCommon.setData(bb, type, value);
             }

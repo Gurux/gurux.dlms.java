@@ -34,6 +34,8 @@
 
 package gurux.dlms.objects;
 
+import javax.xml.stream.XMLStreamException;
+
 import gurux.dlms.GXDLMSSettings;
 import gurux.dlms.ValueEventArgs;
 
@@ -88,4 +90,32 @@ public interface IGXDLMSBase {
      * @return Reply for the client.
      */
     byte[] invoke(GXDLMSSettings settings, ValueEventArgs e);
+
+    /**
+     * Load object content from XML.
+     * 
+     * @param reader
+     *            XML reader.
+     * @throws XMLStreamException
+     *             XML stream exception.
+     */
+    void load(GXXmlReader reader) throws XMLStreamException;
+
+    /**
+     * Save object content to XML.
+     * 
+     * @param writer
+     *            XML writer.
+     * @throws XMLStreamException
+     *             XML stream exception.
+     */
+    void save(GXXmlWriter writer) throws XMLStreamException;
+
+    /**
+     * Handle actions after Load.
+     * 
+     * @param reader
+     *            XML reader.
+     */
+    void postLoad(GXXmlReader reader);
 }

@@ -250,6 +250,17 @@ public class GXDLMSTranslator {
     }
 
     /**
+     * Convert byte array to hex string.
+     * 
+     * @param bytes
+     *            Byte array.
+     * @return Hex string.
+     */
+    public static String toHex(final byte[] bytes) {
+        return GXCommon.toHex(bytes, true);
+    }
+
+    /**
      * Is only complete PDU parsed and shown. {@link messageToXml}
      * {@link PduOnly}
      */

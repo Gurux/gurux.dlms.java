@@ -39,6 +39,8 @@ import java.util.Date;
 import java.util.HashSet;
 import java.util.Set;
 
+import javax.xml.stream.XMLStreamException;
+
 import gurux.dlms.GXByteBuffer;
 import gurux.dlms.GXDLMSClient;
 import gurux.dlms.GXDLMSSettings;
@@ -615,5 +617,50 @@ public class GXDLMSClock extends GXDLMSObject implements IGXDLMSBase {
         } else {
             e.setError(ErrorCode.READ_WRITE_DENIED);
         }
+    }
+
+    @Override
+    public final void load(final GXXmlReader reader) throws XMLStreamException {
+        if ("Time".compareToIgnoreCase(reader.getName()) == 0) {
+            time = new GXDateTime(reader.readElementContentAsString("Time"));
+        }
+        timeZone = reader.readElementContentAsInt("TimeZone");
+        status = ClockStatus.forValue(reader.readElementContentAsInt("Status"));
+        String str = reader.readElementContentAsString("Begin");
+        if (str != null) {
+            begin = new GXDateTime(str);
+        }
+        str = reader.readElementContentAsString("End");
+        if (str != null) {
+            end = new GXDateTime(str);
+        }
+        deviation = reader.readElementContentAsInt("Deviation");
+        enabled = reader.readElementContentAsInt("Enabled") != 0;
+        clockBase =
+                ClockBase.values()[reader.readElementContentAsInt("ClockBase")];
+    }
+
+    @Override
+    public final void save(final GXXmlWriter writer) throws XMLStreamException {
+        if (time != null) {
+            writer.writeElementString("Time", time.toFormatString());
+        }
+        if (timeZone != 0) {
+            writer.writeElementString("TimeZone", timeZone);
+        }
+        writer.writeElementString("Status", ClockStatus.toInteger(status));
+        if (begin != null) {
+            writer.writeElementString("Begin", begin.toFormatString());
+        }
+        if (end != null) {
+            writer.writeElementString("End", end.toFormatString());
+        }
+        writer.writeElementString("Deviation", deviation);
+        writer.writeElementString("Enabled", enabled);
+        writer.writeElementString("ClockBase", clockBase.ordinal());
+    }
+
+    @Override
+    public final void postLoad(final GXXmlReader reader) {
     }
 }

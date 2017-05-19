@@ -34,6 +34,8 @@
 
 package gurux.dlms.objects;
 
+import javax.xml.stream.XMLStreamException;
+
 import gurux.dlms.GXDLMSSettings;
 import gurux.dlms.ValueEventArgs;
 import gurux.dlms.enums.DataType;
@@ -333,5 +335,40 @@ public class GXDLMSHdlcSetup extends GXDLMSObject implements IGXDLMSBase {
         } else {
             e.setError(ErrorCode.READ_WRITE_DENIED);
         }
+    }
+
+    @Override
+    public final void load(final GXXmlReader reader) throws XMLStreamException {
+        communicationSpeed =
+                BaudRate.values()[reader.readElementContentAsInt("Speed")];
+        windowSizeTransmit = reader.readElementContentAsInt("WindowSizeTx");
+        windowSizeReceive = reader.readElementContentAsInt("WindowSizeRx");
+        maximumInfoLengthTransmit =
+                reader.readElementContentAsInt("MaximumInfoLengthTx");
+        maximumInfoLengthReceive =
+                reader.readElementContentAsInt("MaximumInfoLengthRx");
+        interCharachterTimeout =
+                reader.readElementContentAsInt("InterCharachterTimeout");
+        inactivityTimeout = reader.readElementContentAsInt("InactivityTimeout");
+        deviceAddress = reader.readElementContentAsInt("DeviceAddress");
+    }
+
+    @Override
+    public final void save(final GXXmlWriter writer) throws XMLStreamException {
+        writer.writeElementString("Speed", communicationSpeed.ordinal());
+        writer.writeElementString("WindowSizeTx", windowSizeTransmit);
+        writer.writeElementString("WindowSizeRx", windowSizeReceive);
+        writer.writeElementString("MaximumInfoLengthTx",
+                maximumInfoLengthTransmit);
+        writer.writeElementString("MaximumInfoLengthRx",
+                maximumInfoLengthReceive);
+        writer.writeElementString("InterCharachterTimeout",
+                interCharachterTimeout);
+        writer.writeElementString("InactivityTimeout", inactivityTimeout);
+        writer.writeElementString("DeviceAddress", deviceAddress);
+    }
+
+    @Override
+    public final void postLoad(final GXXmlReader reader) {
     }
 }

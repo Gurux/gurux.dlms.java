@@ -34,6 +34,8 @@
 
 package gurux.dlms.objects;
 
+import javax.xml.stream.XMLStreamException;
+
 import gurux.dlms.GXDLMSClient;
 import gurux.dlms.GXDLMSSettings;
 import gurux.dlms.ValueEventArgs;
@@ -329,5 +331,38 @@ public class GXDLMSIECOpticalPortSetup extends GXDLMSObject
         } else {
             e.setError(ErrorCode.READ_WRITE_DENIED);
         }
+    }
+
+    @Override
+    public final void load(final GXXmlReader reader) throws XMLStreamException {
+        defaultMode = OpticalProtocolMode
+                .forValue(reader.readElementContentAsInt("DefaultMode"));
+        defaultBaudrate = BaudRate.values()[reader
+                .readElementContentAsInt("DefaultBaudrate")];
+        proposedBaudrate = BaudRate.values()[reader
+                .readElementContentAsInt("ProposedBaudrate")];
+        responseTime = LocalPortResponseTime
+                .forValue(reader.readElementContentAsInt("ResponseTime"));
+        deviceAddress = reader.readElementContentAsString("DeviceAddress");
+        password1 = reader.readElementContentAsString("Password1");
+        password2 = reader.readElementContentAsString("Password2");
+        password5 = reader.readElementContentAsString("Password5");
+    }
+
+    @Override
+    public final void save(final GXXmlWriter writer) throws XMLStreamException {
+        writer.writeElementString("DefaultMode", defaultMode.getValue());
+        writer.writeElementString("DefaultBaudrate", defaultBaudrate.ordinal());
+        writer.writeElementString("ProposedBaudrate",
+                proposedBaudrate.ordinal());
+        writer.writeElementString("ResponseTime", responseTime.getValue());
+        writer.writeElementString("DeviceAddress", deviceAddress);
+        writer.writeElementString("Password1", password1);
+        writer.writeElementString("Password2", password2);
+        writer.writeElementString("Password5", password5);
+    }
+
+    @Override
+    public final void postLoad(final GXXmlReader reader) {
     }
 }

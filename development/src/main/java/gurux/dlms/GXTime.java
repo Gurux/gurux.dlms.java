@@ -122,6 +122,9 @@ public class GXTime extends GXDateTime {
                 }
             }
             shortTimePattern.addAll(GXCommon.split(tmp.get(1), ":"));
+            if (!shortTimePattern.contains("ss")) {
+                shortTimePattern.add("ss");
+            }
             List<String> values = GXCommon.split(value.trim(),
                     new char[] { separator, ':', ' ' });
             if (shortTimePattern.size() != values.size()) {
@@ -130,28 +133,27 @@ public class GXTime extends GXDateTime {
 
             for (int pos = 0; pos != shortTimePattern.size(); ++pos) {
                 boolean ignore = false;
-                if (values.get(3 + pos) == "*") {
+                if ("*".compareTo(values.get(pos)) == 0) {
                     ignore = true;
                 }
-                if ("h".compareToIgnoreCase(shortTimePattern.get(pos)) == 0) {
+                String val = shortTimePattern.get(pos);
+                if ("h".compareToIgnoreCase(val) == 0) {
                     if (ignore) {
                         hour = -1;
                     } else {
-                        hour = Integer.parseInt(values.get(3 + pos));
+                        hour = Integer.parseInt(values.get(pos));
                     }
-                } else if ("mm"
-                        .compareToIgnoreCase(shortTimePattern.get(pos)) == 0) {
+                } else if ("mm".compareToIgnoreCase(val) == 0) {
                     if (ignore) {
                         min = -1;
                     } else {
-                        min = Integer.parseInt(values.get(3 + pos));
+                        min = Integer.parseInt(values.get(pos));
                     }
-                } else if ("ss"
-                        .compareToIgnoreCase(shortTimePattern.get(pos)) == 0) {
+                } else if ("ss".compareToIgnoreCase(val) == 0) {
                     if (ignore) {
                         sec = -1;
                     } else {
-                        sec = Integer.parseInt(values.get(3 + pos));
+                        sec = Integer.parseInt(values.get(pos));
                     }
                 } else {
                     throw new IllegalArgumentException("Invalid time pattern.");

@@ -36,6 +36,8 @@ package gurux.dlms.objects;
 
 import java.util.List;
 
+import javax.xml.stream.XMLStreamException;
+
 import gurux.dlms.GXDLMSClient;
 import gurux.dlms.GXDLMSSettings;
 import gurux.dlms.GXDateTime;
@@ -203,5 +205,63 @@ public class GXDLMSSchedule extends GXDLMSObject implements IGXDLMSBase {
         } else {
             e.setError(ErrorCode.READ_WRITE_DENIED);
         }
+    }
+
+    @Override
+    public final void load(final GXXmlReader reader) throws XMLStreamException {
+        entries.clear();
+        if (reader.isStartElement("Entries", true)) {
+            while (reader.isStartElement("Item", true)) {
+                GXDLMSScheduleEntry it = new GXDLMSScheduleEntry();
+                it.setIndex((byte) reader.readElementContentAsInt("Index"));
+                it.setEnable(reader.readElementContentAsInt("Enable") != 0);
+                it.setLogicalName(
+                        reader.readElementContentAsString("LogicalName"));
+                it.setScriptSelector((byte) reader
+                        .readElementContentAsInt("ScriptSelector"));
+                it.setSwitchTime((GXDateTime) reader.readElementContentAsObject(
+                        "SwitchTime", new GXDateTime()));
+                it.setValidityWindow((byte) reader
+                        .readElementContentAsInt("ValidityWindow"));
+                it.setExecWeekdays(
+                        reader.readElementContentAsString("ExecWeekdays"));
+                it.setExecSpecDays(
+                        reader.readElementContentAsString("ExecSpecDays"));
+                it.setBeginDate((GXDateTime) reader.readElementContentAsObject(
+                        "BeginDate", new GXDateTime()));
+                it.setEndDate((GXDateTime) reader.readElementContentAsObject(
+                        "EndDate", new GXDateTime()));
+                entries.add(it);
+            }
+            reader.readEndElement("Entries");
+        }
+    }
+
+    @Override
+    public final void save(final GXXmlWriter writer) throws XMLStreamException {
+        if (entries != null) {
+            writer.writeStartElement("Entries");
+            for (GXDLMSScheduleEntry it : entries) {
+                writer.writeStartElement("Item");
+                writer.writeElementString("Index", it.getIndex());
+                writer.writeElementString("Enable", it.getEnable());
+                writer.writeElementString("LogicalName", it.getLogicalName());
+                writer.writeElementString("ScriptSelector",
+                        it.getScriptSelector());
+                writer.writeElementObject("SwitchTime", it.getSwitchTime());
+                writer.writeElementString("ValidityWindow",
+                        it.getValidityWindow());
+                writer.writeElementString("ExecWeekdays", it.getExecWeekdays());
+                writer.writeElementString("ExecSpecDays", it.getExecSpecDays());
+                writer.writeElementObject("BeginDate", it.getBeginDate());
+                writer.writeElementObject("EndDate", it.getEndDate());
+                writer.writeEndElement();
+            }
+            writer.writeEndElement();
+        }
+    }
+
+    @Override
+    public final void postLoad(final GXXmlReader reader) {
     }
 }

@@ -58,7 +58,7 @@ public class GXxDLMSContextType {
     /**
      * Maximum Send PDU size.
      */
-    private int maxSendPpuSize;
+    private int maxSendPduSize;
     /**
      * DLMS Version Number.
      */
@@ -114,18 +114,18 @@ public class GXxDLMSContextType {
         maxReceivePduSize = value;
     }
 
-    public final int getMaxSendPpuSize() {
+    public final int getMaxSendPduSize() {
         if (settings != null) {
             return settings.getMaxServerPDUSize();
         }
-        return maxSendPpuSize;
+        return maxSendPduSize;
     }
 
-    public final void setMaxSendPpuSize(final int value) {
+    public final void setMaxSendPduSize(final int value) {
         if (settings != null) {
             settings.setMaxServerPDUSize(value);
         }
-        maxSendPpuSize = value;
+        maxSendPduSize = value;
     }
 
     public final byte getDlmsVersionNumber() {
@@ -170,7 +170,7 @@ public class GXxDLMSContextType {
     public final String toString() {
         return String.valueOf(conformance) + " "
                 + String.valueOf(maxReceivePduSize) + " "
-                + String.valueOf(maxSendPpuSize) + " "
+                + String.valueOf(maxSendPduSize) + " "
                 + String.valueOf(dlmsVersionNumber) + " "
                 + String.valueOf(qualityOfService) + " "
                 + GXCommon.toHex(cypheringInfo, true);

@@ -36,6 +36,9 @@ package gurux.dlms.objects;
 
 import java.util.List;
 import java.util.Map;
+import java.util.Map.Entry;
+
+import javax.xml.stream.XMLStreamException;
 
 import gurux.dlms.GXByteBuffer;
 import gurux.dlms.GXDLMSClient;
@@ -424,5 +427,54 @@ public class GXDLMSMBusClient extends GXDLMSObject implements IGXDLMSBase {
         } else {
             e.setError(ErrorCode.READ_WRITE_DENIED);
         }
+    }
+
+    @Override
+    public final void load(final GXXmlReader reader) throws XMLStreamException {
+        mBusPortReference =
+                reader.readElementContentAsString("MBusPortReference");
+        captureDefinition.clear();
+        if (reader.isStartElement("CaptureDefinition", true)) {
+            while (reader.isStartElement("Item", true)) {
+                String d = reader.readElementContentAsString("Data");
+                String v = reader.readElementContentAsString("Value");
+                captureDefinition.add(new GXSimpleEntry<String, String>(d, v));
+            }
+            reader.readEndElement("CaptureDefinition");
+        }
+        capturePeriod = reader.readElementContentAsInt("CapturePeriod");
+        primaryAddress = reader.readElementContentAsInt("PrimaryAddress");
+        identificationNumber =
+                reader.readElementContentAsInt("IdentificationNumber");
+        manufacturerID = reader.readElementContentAsInt("ManufacturerID");
+        dataHeaderVersion = reader.readElementContentAsInt("DataHeaderVersion");
+        deviceType = reader.readElementContentAsInt("DeviceType");
+        accessNumber = reader.readElementContentAsInt("AccessNumber");
+    }
+
+    @Override
+    public final void save(final GXXmlWriter writer) throws XMLStreamException {
+        writer.writeElementString("MBusPortReference", mBusPortReference);
+        if (captureDefinition != null) {
+            writer.writeStartElement("CaptureDefinition");
+            for (Entry<String, String> it : captureDefinition) {
+                writer.writeStartElement("Item");
+                writer.writeElementString("Data", it.getKey());
+                writer.writeElementString("Value", it.getValue());
+                writer.writeEndElement();
+            }
+            writer.writeEndElement();
+        }
+        writer.writeElementString("CapturePeriod", capturePeriod);
+        writer.writeElementString("PrimaryAddress", primaryAddress);
+        writer.writeElementString("IdentificationNumber", identificationNumber);
+        writer.writeElementString("ManufacturerID", manufacturerID);
+        writer.writeElementString("DataHeaderVersion", dataHeaderVersion);
+        writer.writeElementString("DeviceType", deviceType);
+        writer.writeElementString("AccessNumber", accessNumber);
+    }
+
+    @Override
+    public final void postLoad(final GXXmlReader reader) {
     }
 }

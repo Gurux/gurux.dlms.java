@@ -34,9 +34,12 @@
 
 package gurux.dlms.objects;
 
+import java.util.AbstractMap.SimpleEntry;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map.Entry;
+
+import javax.xml.stream.XMLStreamException;
 
 import gurux.dlms.GXByteBuffer;
 import gurux.dlms.GXDLMSClient;
@@ -48,11 +51,11 @@ import gurux.dlms.enums.DataType;
 import gurux.dlms.enums.ErrorCode;
 import gurux.dlms.enums.ObjectType;
 import gurux.dlms.internal.GXCommon;
+import gurux.dlms.objects.enums.AutoAnswerMode;
 import gurux.dlms.objects.enums.AutoAnswerStatus;
-import gurux.dlms.objects.enums.AutoConnectMode;
 
 public class GXDLMSAutoAnswer extends GXDLMSObject implements IGXDLMSBase {
-    private AutoConnectMode mode;
+    private AutoAnswerMode mode;
     private List<Entry<GXDateTime, GXDateTime>> listeningWindow;
     private AutoAnswerStatus status = AutoAnswerStatus.INACTIVE;
     private int numberOfCalls;
@@ -90,11 +93,11 @@ public class GXDLMSAutoAnswer extends GXDLMSObject implements IGXDLMSBase {
         listeningWindow = new ArrayList<Entry<GXDateTime, GXDateTime>>();
     }
 
-    public final AutoConnectMode getMode() {
+    public final AutoAnswerMode getMode() {
         return mode;
     }
 
-    public final void setMode(final AutoConnectMode value) {
+    public final void setMode(final AutoAnswerMode value) {
         mode = value;
     }
 
@@ -290,8 +293,8 @@ public class GXDLMSAutoAnswer extends GXDLMSObject implements IGXDLMSBase {
         if (e.getIndex() == 1) {
             setLogicalName(GXCommon.toLogicalName(e.getValue()));
         } else if (e.getIndex() == 2) {
-            setMode(AutoConnectMode
-                    .forValue(((Number) e.getValue()).byteValue() & 0xFF));
+            setMode(AutoAnswerMode
+                    .values()[(((Number) e.getValue()).byteValue() & 0xFF)]);
         } else if (e.getIndex() == 3) {
             getListeningWindow().clear();
             if (e.getValue() != null) {
@@ -322,5 +325,56 @@ public class GXDLMSAutoAnswer extends GXDLMSObject implements IGXDLMSBase {
         } else {
             e.setError(ErrorCode.READ_WRITE_DENIED);
         }
+    }
+
+    @Override
+    public final void load(final GXXmlReader reader) throws XMLStreamException {
+        mode = AutoAnswerMode.values()[reader.readElementContentAsInt("Mode")];
+        listeningWindow.clear();
+        if (reader.isStartElement("ListeningWindow", true)) {
+            while (reader.isStartElement("Item", true)) {
+                GXDateTime start = new GXDateTime(
+                        reader.readElementContentAsString("Start"));
+                GXDateTime end = new GXDateTime(
+                        reader.readElementContentAsString("End"));
+                listeningWindow.add(
+                        new SimpleEntry<GXDateTime, GXDateTime>(start, end));
+            }
+            reader.readEndElement("ListeningWindow");
+        }
+        status = AutoAnswerStatus.values()[reader
+                .readElementContentAsInt("Status")];
+        numberOfCalls = reader.readElementContentAsInt("NumberOfCalls");
+        numberOfRingsInListeningWindow = reader
+                .readElementContentAsInt("NumberOfRingsInListeningWindow");
+        numberOfRingsOutListeningWindow = reader
+                .readElementContentAsInt("NumberOfRingsOutListeningWindow");
+    }
+
+    @Override
+    public final void save(final GXXmlWriter writer) throws XMLStreamException {
+        writer.writeElementString("Mode", mode.ordinal());
+        if (listeningWindow != null) {
+            writer.writeStartElement("ListeningWindow");
+            for (Entry<GXDateTime, GXDateTime> it : listeningWindow) {
+                writer.writeStartElement("Item");
+                writer.writeElementString("Start",
+                        it.getKey().toFormatString());
+                writer.writeElementString("End",
+                        it.getValue().toFormatString());
+                writer.writeEndElement();
+            }
+            writer.writeEndElement();
+        }
+        writer.writeElementString("Status", status.getValue());
+        writer.writeElementString("NumberOfCalls", numberOfCalls);
+        writer.writeElementString("NumberOfRingsInListeningWindow",
+                numberOfRingsInListeningWindow);
+        writer.writeElementString("NumberOfRingsOutListeningWindow",
+                numberOfRingsOutListeningWindow);
+    }
+
+    @Override
+    public final void postLoad(final GXXmlReader reader) {
     }
 }

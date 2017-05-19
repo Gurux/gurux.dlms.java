@@ -38,8 +38,11 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Map.Entry;
 
+import javax.xml.stream.XMLStreamException;
+
 import gurux.dlms.GXByteBuffer;
 import gurux.dlms.GXDLMSSettings;
+import gurux.dlms.GXDLMSTranslator;
 import gurux.dlms.GXSimpleEntry;
 import gurux.dlms.ValueEventArgs;
 import gurux.dlms.enums.DataType;
@@ -289,5 +292,69 @@ public class GXDLMSRegisterActivation extends GXDLMSObject
         } else {
             e.setError(ErrorCode.READ_WRITE_DENIED);
         }
+    }
+
+    @Override
+    public final void load(final GXXmlReader reader) throws XMLStreamException {
+        registerAssignment.clear();
+        if (reader.isStartElement("RegisterAssignment", true)) {
+            while (reader.isStartElement("Item", true)) {
+                GXDLMSObjectDefinition it = new GXDLMSObjectDefinition();
+                it.setObjectType(ObjectType.forValue(
+                        reader.readElementContentAsInt("ObjectType")));
+                it.setLogicalName(reader.readElementContentAsString("LN"));
+                registerAssignment.add(it);
+            }
+            reader.readEndElement("RegisterAssignment");
+        }
+        maskList.clear();
+        if (reader.isStartElement("MaskList", true)) {
+            while (reader.isStartElement("Item", true)) {
+                byte[] mask = GXDLMSTranslator
+                        .hexToBytes(reader.readElementContentAsString("Mask"));
+                byte[] i = GXDLMSTranslator
+                        .hexToBytes(reader.readElementContentAsString("Index"));
+                maskList.add(new GXSimpleEntry<byte[], byte[]>(mask, i));
+            }
+            reader.readEndElement("MaskList");
+        }
+        activeMask = GXDLMSTranslator
+                .hexToBytes(reader.readElementContentAsString("ActiveMask"));
+    }
+
+    @Override
+    public final void save(final GXXmlWriter writer) throws XMLStreamException {
+        if (registerAssignment != null) {
+            writer.writeStartElement("RegisterAssignment");
+            for (GXDLMSObjectDefinition it : registerAssignment) {
+                writer.writeStartElement("Item");
+                writer.writeElementString("ObjectType",
+                        it.getObjectType().getValue());
+                writer.writeElementString("LN", it.getLogicalName());
+                writer.writeEndElement();
+            }
+            writer.writeEndElement();
+        }
+
+        if (maskList != null) {
+            writer.writeStartElement("MaskList");
+            for (Entry<byte[], byte[]> it : maskList) {
+                writer.writeStartElement("Item");
+                writer.writeElementString("Mask",
+                        GXDLMSTranslator.toHex(it.getKey()));
+                writer.writeElementString("Index", GXDLMSTranslator
+                        .toHex(it.getValue()).replace(" ", ";"));
+                writer.writeEndElement();
+            }
+            writer.writeEndElement();
+        }
+        if (activeMask != null) {
+            writer.writeElementString("ActiveMask",
+                    GXDLMSTranslator.toHex(activeMask));
+        }
+    }
+
+    @Override
+    public final void postLoad(final GXXmlReader reader) {
     }
 }

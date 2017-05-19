@@ -34,18 +34,18 @@
 
 package gurux.dlms.objects;
 
-import gurux.dlms.objects.enums.GXDLMSPppSetupIPCPOptionType;
+import gurux.dlms.objects.enums.PppSetupIPCPOptionType;
 
 public class GXDLMSPppSetupIPCPOption {
-    private GXDLMSPppSetupIPCPOptionType type;
+    private PppSetupIPCPOptionType type;
     private int length;
     private Object data;
 
-    public final GXDLMSPppSetupIPCPOptionType getType() {
+    public final PppSetupIPCPOptionType getType() {
         return type;
     }
 
-    public final void setType(final GXDLMSPppSetupIPCPOptionType value) {
+    public final void setType(final PppSetupIPCPOptionType value) {
         type = value;
     }
 

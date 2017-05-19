@@ -39,8 +39,11 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.Map.Entry;
 
+import javax.xml.stream.XMLStreamException;
+
 import gurux.dlms.GXByteBuffer;
 import gurux.dlms.GXDLMSClient;
+import gurux.dlms.GXDLMSConverter;
 import gurux.dlms.GXDLMSException;
 import gurux.dlms.GXDLMSServerBase;
 import gurux.dlms.GXDLMSSettings;
@@ -460,7 +463,7 @@ public class GXDLMSProfileGeneric extends GXDLMSObject implements IGXDLMSBase {
                         || columns.contains(captureObjects.get(pos))) {
                     tp = types[pos];
                     if (tp == DataType.NONE) {
-                        tp = GXCommon.getValueType(value);
+                        tp = GXDLMSConverter.getDLMSDataType(value);
                         types[pos] = tp;
                     }
                     GXCommon.setData(data, tp, value);
@@ -581,17 +584,17 @@ public class GXDLMSProfileGeneric extends GXDLMSObject implements IGXDLMSBase {
             info.setType(DataType.DATETIME);
             java.util.Date start = ((GXDateTime) GXCommon
                     .getData(new GXByteBuffer((byte[]) arr[1]), info))
-                            .getCalendar().getTime();
+                            .getMeterCalendar().getTime();
             info.clear();
             info.setType(DataType.DATETIME);
             java.util.Date end = ((GXDateTime) GXCommon
                     .getData(new GXByteBuffer((byte[]) arr[2]), info))
-                            .getCalendar().getTime();
+                            .getMeterCalendar().getTime();
             for (Object row : getBuffer()) {
                 java.util.Date tm;
                 Object tmp = ((Object[]) row)[0];
                 if (tmp instanceof GXDateTime) {
-                    tm = ((GXDateTime) tmp).getCalendar().getTime();
+                    tm = ((GXDateTime) tmp).getMeterCalendar().getTime();
                 } else {
                     tm = (java.util.Date) tmp;
                 }
@@ -872,7 +875,7 @@ public class GXDLMSProfileGeneric extends GXDLMSObject implements IGXDLMSBase {
                         data = GXDLMSClient.changeType((byte[]) data, type);
                         if (data instanceof GXDateTime) {
                             GXDateTime dt = (GXDateTime) data;
-                            lastDate.setTime(dt.getCalendar().getTime());
+                            lastDate.setTime(dt.getMeterCalendar().getTime());
                         }
                         row[colIndex] = data;
                     } else if (type == DataType.DATETIME && data == null
@@ -881,7 +884,7 @@ public class GXDLMSProfileGeneric extends GXDLMSObject implements IGXDLMSBase {
                                 && !buffer.isEmpty()) {
                             lastDate.setTime(((GXDateTime) buffer
                                     .get(buffer.size() - 1)[colIndex])
-                                            .getCalendar().getTime());
+                                            .getMeterCalendar().getTime());
                         }
                         if (lastDate.getTimeInMillis() != 0) {
                             lastDate.add(java.util.Calendar.SECOND,
@@ -984,11 +987,105 @@ public class GXDLMSProfileGeneric extends GXDLMSObject implements IGXDLMSBase {
     }
 
     @Override
-    public void stop(final GXDLMSServerBase server)
+    public final void stop(final GXDLMSServerBase server)
             throws InterruptedException {
         if (updater != null) {
             updater.getReceivedEvent().set();
             updater.join(10000);
         }
     }
+
+    @Override
+    public final void load(final GXXmlReader reader) throws XMLStreamException {
+        buffer.clear();
+        if (reader.isStartElement("Buffer", true)) {
+            while (reader.isStartElement("Row", true)) {
+                List<Object> row = new ArrayList<Object>();
+                while (reader.isStartElement("Cell", false)) {
+                    row.add(reader.readElementContentAsObject("Cell", null));
+                }
+                this.addRow(row.toArray(new Object[row.size()]));
+            }
+            reader.readEndElement("Buffer");
+        }
+        captureObjects.clear();
+        if (reader.isStartElement("CaptureObjects", true)) {
+            while (reader.isStartElement("Item", true)) {
+                ObjectType ot = ObjectType
+                        .forValue(reader.readElementContentAsInt("ObjectType"));
+                String ln = reader.readElementContentAsString("LN");
+                int ai = reader.readElementContentAsInt("Attribute");
+                int di = reader.readElementContentAsInt("Data");
+                GXDLMSCaptureObject co = new GXDLMSCaptureObject(ai, di);
+                GXDLMSObject obj = reader.getObjects().findByLN(ot, ln);
+                if (obj == null) {
+                    obj = GXDLMSClient.createObject(ot);
+                    obj.setLogicalName(ln);
+                }
+                GXSimpleEntry<GXDLMSObject, GXDLMSCaptureObject> o =
+                        new GXSimpleEntry<GXDLMSObject, GXDLMSCaptureObject>(
+                                obj, co);
+                captureObjects.add(o);
+            }
+            reader.readEndElement("CaptureObjects");
+        }
+        capturePeriod = reader.readElementContentAsInt("CapturePeriod");
+        sortMethod = SortMethod
+                .forValue(reader.readElementContentAsInt("SortMethod"));
+        if (reader.isStartElement("SortObject", true)) {
+            capturePeriod = reader.readElementContentAsInt("CapturePeriod");
+            ObjectType ot = ObjectType
+                    .forValue(reader.readElementContentAsInt("ObjectType"));
+            String ln = reader.readElementContentAsString("LN");
+            sortObject = reader.getObjects().findByLN(ot, ln);
+            reader.readEndElement("SortObject");
+        }
+        entriesInUse = reader.readElementContentAsInt("EntriesInUse");
+        profileEntries = reader.readElementContentAsInt("ProfileEntries");
+    }
+
+    @Override
+    public final void save(final GXXmlWriter writer) throws XMLStreamException {
+        if (buffer != null) {
+            writer.writeStartElement("Buffer");
+            for (Object[] row : buffer) {
+                writer.writeStartElement("Row");
+                for (Object it : row) {
+                    writer.writeElementObject("Cell", it);
+                }
+                writer.writeEndElement();
+            }
+            writer.writeEndElement();
+        }
+        if (captureObjects != null) {
+            writer.writeStartElement("CaptureObjects");
+            for (Entry<GXDLMSObject, GXDLMSCaptureObject> it : captureObjects) {
+                writer.writeStartElement("Item");
+                writer.writeElementString("ObjectType",
+                        it.getKey().getObjectType().getValue());
+                writer.writeElementString("LN", it.getKey().getLogicalName());
+                writer.writeElementString("Attribute",
+                        it.getValue().getAttributeIndex());
+                writer.writeElementString("Data", it.getValue().getDataIndex());
+                writer.writeEndElement();
+            }
+            writer.writeEndElement();
+        }
+        writer.writeElementString("CapturePeriod", capturePeriod);
+        writer.writeElementString("SortMethod", sortMethod.getValue());
+        if (sortObject != null) {
+            writer.writeStartElement("SortObject");
+            writer.writeElementString("ObjectType",
+                    sortObject.getObjectType().getValue());
+            writer.writeElementString("LN", sortObject.getLogicalName());
+            writer.writeEndElement();
+        }
+        writer.writeElementString("EntriesInUse", entriesInUse);
+        writer.writeElementString("ProfileEntries", profileEntries);
+    }
+
+    @Override
+    public final void postLoad(final GXXmlReader reader) {
+    }
+
 }

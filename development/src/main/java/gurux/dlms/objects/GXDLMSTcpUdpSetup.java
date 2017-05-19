@@ -34,6 +34,8 @@
 
 package gurux.dlms.objects;
 
+import javax.xml.stream.XMLStreamException;
+
 import gurux.dlms.GXDLMSSettings;
 import gurux.dlms.ValueEventArgs;
 import gurux.dlms.enums.DataType;
@@ -281,5 +283,30 @@ public class GXDLMSTcpUdpSetup extends GXDLMSObject implements IGXDLMSBase {
         } else {
             e.setError(ErrorCode.READ_WRITE_DENIED);
         }
+    }
+
+    @Override
+    public final void load(final GXXmlReader reader) throws XMLStreamException {
+        port = reader.readElementContentAsInt("Port");
+        ipReference = reader.readElementContentAsString("IPReference");
+        maximumSegmentSize =
+                reader.readElementContentAsInt("MaximumSegmentSize");
+        maximumSimultaneousConnections = reader
+                .readElementContentAsInt("MaximumSimultaneousConnections");
+        inactivityTimeout = reader.readElementContentAsInt("InactivityTimeout");
+    }
+
+    @Override
+    public final void save(final GXXmlWriter writer) throws XMLStreamException {
+        writer.writeElementString("Port", port);
+        writer.writeElementString("IPReference", ipReference);
+        writer.writeElementString("MaximumSegmentSize", maximumSegmentSize);
+        writer.writeElementString("MaximumSimultaneousConnections",
+                maximumSimultaneousConnections);
+        writer.writeElementString("InactivityTimeout", inactivityTimeout);
+    }
+
+    @Override
+    public final void postLoad(final GXXmlReader reader) {
     }
 }

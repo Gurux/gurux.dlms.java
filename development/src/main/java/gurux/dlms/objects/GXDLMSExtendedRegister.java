@@ -36,12 +36,15 @@ package gurux.dlms.objects;
 
 import java.text.NumberFormat;
 
+import javax.xml.stream.XMLStreamException;
+
 import gurux.dlms.GXDLMSClient;
 import gurux.dlms.GXDLMSSettings;
 import gurux.dlms.GXDateTime;
 import gurux.dlms.ValueEventArgs;
 import gurux.dlms.enums.DataType;
 import gurux.dlms.enums.ObjectType;
+import gurux.dlms.enums.Unit;
 
 public class GXDLMSExtendedRegister extends GXDLMSRegister {
     private GXDateTime captureTime = new GXDateTime();
@@ -223,5 +226,28 @@ public class GXDLMSExtendedRegister extends GXDLMSRegister {
         } else {
             super.setValue(settings, e);
         }
+    }
+
+    @Override
+    public final void load(final GXXmlReader reader) throws XMLStreamException {
+        setUnit(Unit.forValue(reader.readElementContentAsInt("Unit", 0)));
+        setScaler(reader.readElementContentAsDouble("Scaler", 1));
+        setValue(reader.readElementContentAsObject("Value", null));
+        status = reader.readElementContentAsObject("Status", null);
+        captureTime = (GXDateTime) reader
+                .readElementContentAsObject("CaptureTime", null);
+    }
+
+    @Override
+    public final void save(final GXXmlWriter writer) throws XMLStreamException {
+        writer.writeElementString("Unit", getUnit().getValue());
+        writer.writeElementString("Scaler", getScaler(), 1);
+        writer.writeElementObject("Value", getValue());
+        writer.writeElementObject("Status", status);
+        writer.writeElementObject("CaptureTime", captureTime);
+    }
+
+    @Override
+    public final void postLoad(final GXXmlReader reader) {
     }
 }

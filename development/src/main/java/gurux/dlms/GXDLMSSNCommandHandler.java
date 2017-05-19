@@ -218,7 +218,8 @@ final class GXDLMSSNCommandHandler {
                 }
                 // If action.
                 if (e.isAction()) {
-                    GXCommon.setData(data, GXCommon.getValueType(value), value);
+                    GXCommon.setData(data,
+                            GXDLMSConverter.getDLMSDataType(value), value);
                 } else {
                     GXDLMS.appendData(e.getTarget(), e.getIndex(), data, value);
                 }

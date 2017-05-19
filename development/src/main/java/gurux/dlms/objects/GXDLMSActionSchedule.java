@@ -34,7 +34,11 @@
 
 package gurux.dlms.objects;
 
+import java.util.ArrayList;
 import java.util.Calendar;
+import java.util.List;
+
+import javax.xml.stream.XMLStreamException;
 
 import gurux.dlms.GXByteBuffer;
 import gurux.dlms.GXDLMSClient;
@@ -51,6 +55,11 @@ import gurux.dlms.internal.GXCommon;
 import gurux.dlms.objects.enums.SingleActionScheduleType;
 
 public class GXDLMSActionSchedule extends GXDLMSObject implements IGXDLMSBase {
+    /**
+     * Script to execute.
+     */
+    private GXDLMSScriptTable target;
+
     private String executedScriptLogicalName;
     private int executedScriptSelector;
     private SingleActionScheduleType type;
@@ -86,11 +95,44 @@ public class GXDLMSActionSchedule extends GXDLMSObject implements IGXDLMSBase {
         type = SingleActionScheduleType.SingleActionScheduleType1;
     }
 
+    /**
+     * @return Script to execute.
+     */
+    public final GXDLMSScriptTable getTarget() {
+        return target;
+    }
+
+    /**
+     * @param value
+     *            Script to execute.
+     */
+    public final void setTarget(final GXDLMSScriptTable value) {
+        target = value;
+    }
+
+    /**
+     * @return Executed script logical name.
+     * @deprecated use {@link #getTarget} instead.
+     */
     public final String getExecutedScriptLogicalName() {
         return executedScriptLogicalName;
     }
 
+    /**
+     * @param value
+     *            Executed script logical name.
+     * @deprecated use {@link #setTarget} instead.
+     */
     public final void setExecutedScriptLogicalName(final String value) {
+        executedScriptLogicalName = value;
+    }
+
+    /**
+     * @param value
+     *            Executed script logical name.
+     * @deprecated use {@link #getTarget} instead.
+     */
+    public final void setTarget(final String value) {
         executedScriptLogicalName = value;
     }
 
@@ -268,13 +310,13 @@ public class GXDLMSActionSchedule extends GXDLMSObject implements IGXDLMSBase {
                                     | DateTimeSkips.MINUTE.getValue()
                                     | DateTimeSkips.SECOND.getValue()
                                     | DateTimeSkips.MILLISECOND.getValue())));
-                    GXDateTime tmp = new GXDateTime(date.getCalendar());
-                    tmp.getCalendar().add(Calendar.HOUR,
-                            time.getCalendar().get(Calendar.HOUR));
-                    tmp.getCalendar().add(Calendar.MINUTE,
-                            time.getCalendar().get(Calendar.MINUTE));
-                    tmp.getCalendar().add(Calendar.SECOND,
-                            time.getCalendar().get(Calendar.SECOND));
+                    GXDateTime tmp = new GXDateTime(date.getMeterCalendar());
+                    tmp.getMeterCalendar().add(Calendar.HOUR,
+                            time.getMeterCalendar().get(Calendar.HOUR));
+                    tmp.getMeterCalendar().add(Calendar.MINUTE,
+                            time.getMeterCalendar().get(Calendar.MINUTE));
+                    tmp.getMeterCalendar().add(Calendar.SECOND,
+                            time.getMeterCalendar().get(Calendar.SECOND));
                     tmp.getSkip().addAll(date.getSkip());
                     tmp.getSkip().addAll(time.getSkip());
                     items.add(tmp);
@@ -283,6 +325,65 @@ public class GXDLMSActionSchedule extends GXDLMSObject implements IGXDLMSBase {
             }
         } else {
             e.setError(ErrorCode.READ_WRITE_DENIED);
+        }
+    }
+
+    @Override
+    public final void load(final GXXmlReader reader) throws XMLStreamException {
+        ObjectType ot = ObjectType
+                .forValue(reader.readElementContentAsInt("ObjectType"));
+        String ln = reader.readElementContentAsString("LN");
+        if (ot != ObjectType.NONE && ln != null) {
+            target = (GXDLMSScriptTable) reader.getObjects().findByLN(ot, ln);
+            // if object is not load yet.
+            if (target == null) {
+                target = new GXDLMSScriptTable(ln);
+            }
+        }
+        executedScriptSelector =
+                reader.readElementContentAsInt("ExecutedScriptSelector");
+        type = SingleActionScheduleType
+                .forValue(reader.readElementContentAsInt("Type"));
+        List<GXDateTime> list = new ArrayList<GXDateTime>();
+        if (reader.isStartElement("ExecutionTime", true)) {
+            while (reader.isStartElement("Time", false)) {
+                GXDateTime it = new GXDateTime(
+                        reader.readElementContentAsString("Time"));
+                list.add(it);
+            }
+            reader.readEndElement("ExecutionTime");
+        }
+        executionTime = list.toArray(new GXDateTime[list.size()]);
+    }
+
+    @Override
+    public final void save(final GXXmlWriter writer) throws XMLStreamException {
+        if (target != null) {
+            writer.writeElementString("ObjectType",
+                    target.getObjectType().getValue());
+            writer.writeElementString("LN", target.getLogicalName());
+        }
+        writer.writeElementString("ExecutedScriptSelector",
+                executedScriptSelector);
+        writer.writeElementString("Type", type.getValue());
+        if (executionTime != null) {
+            writer.writeStartElement("ExecutionTime");
+            for (GXDateTime it : executionTime) {
+                writer.writeElementString("Time", it.toFormatString());
+            }
+            writer.writeEndElement();
+        }
+    }
+
+    @Override
+    public final void postLoad(final GXXmlReader reader) {
+        // Upload target after load.
+        if (target != null) {
+            GXDLMSScriptTable t = (GXDLMSScriptTable) reader.getObjects()
+                    .findByLN(ObjectType.SCRIPT_TABLE, target.getLogicalName());
+            if (target != t) {
+                target = t;
+            }
         }
     }
 }

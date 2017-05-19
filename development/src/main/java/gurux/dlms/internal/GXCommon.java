@@ -50,6 +50,7 @@ import javax.crypto.KeyAgreement;
 
 import gurux.dlms.GXByteBuffer;
 import gurux.dlms.GXDLMSClient;
+import gurux.dlms.GXDLMSConverter;
 import gurux.dlms.GXDate;
 import gurux.dlms.GXDateTime;
 import gurux.dlms.GXICipher;
@@ -238,7 +239,12 @@ public final class GXCommon {
         if (bytes == null || bytes.length == 0 || count == 0) {
             return "";
         }
-        char[] str = new char[count * 3];
+        char[] str;
+        if (addSpace) {
+            str = new char[count * 3];
+        } else {
+            str = new char[count * 2];
+        }
         int tmp;
         int len = 0;
         for (int pos = 0; pos != count; ++pos) {
@@ -1639,7 +1645,7 @@ public final class GXCommon {
         java.util.Calendar tm = java.util.Calendar.getInstance();
         if (value instanceof GXDateTime) {
             GXDateTime tmp = (GXDateTime) value;
-            tm.setTime(tmp.getCalendar().getTime());
+            tm.setTime(tmp.getMeterCalendar().getTime());
             skip = tmp.getSkip();
         } else if (value instanceof java.util.Date) {
             tm.setTime((java.util.Date) value);
@@ -1707,7 +1713,7 @@ public final class GXCommon {
             throw new RuntimeException("Invalid date format.");
         }
         java.util.Calendar tm = java.util.Calendar.getInstance();
-        tm.setTime(dt.getCalendar().getTime());
+        tm.setTime(dt.getMeterCalendar().getTime());
         // Add year.
         if (dt.getSkip().contains(DateTimeSkips.YEAR)) {
             buff.setUInt16(0xFFFF);
@@ -1778,7 +1784,7 @@ public final class GXCommon {
     private static void setDateTime(final GXByteBuffer buff,
             final Object value) {
         GXDateTime dt = getDateTime(value);
-        java.util.Calendar tm = dt.getCalendar();
+        java.util.Calendar tm = dt.getMeterCalendar();
         // Add year.
         if (dt.getSkip().contains(DateTimeSkips.YEAR)) {
             buff.setUInt16(0xFFFF);
@@ -1847,8 +1853,8 @@ public final class GXCommon {
         }
         // Add clock_status
         if (!dt.getSkip().contains(DateTimeSkips.STATUS)) {
-            if ((dt.getCalendar().getTimeZone()
-                    .inDaylightTime(dt.getCalendar().getTime())
+            if ((dt.getMeterCalendar().getTimeZone()
+                    .inDaylightTime(dt.getMeterCalendar().getTime())
                     || dt.getStatus()
                             .contains(ClockStatus.DAYLIGHT_SAVE_ACTIVE))) {
                 buff.setUInt8(ClockStatus.toInteger(dt.getStatus())
@@ -1890,7 +1896,7 @@ public final class GXCommon {
             setObjectCount(len, buff);
             for (int pos = 0; pos != len; ++pos) {
                 Object it = arr[pos];
-                setData(buff, getValueType(it), it);
+                setData(buff, GXDLMSConverter.getDLMSDataType(it), it);
             }
         } else {
             setObjectCount(0, buff);
@@ -1923,7 +1929,7 @@ public final class GXCommon {
             }
         }
         if (lastPos != str.length()) {
-            arr.add(str.substring(lastPos, str.length() - 1));
+            arr.add(str.substring(lastPos, str.length()));
         }
         return arr;
     }
@@ -2155,56 +2161,6 @@ public final class GXCommon {
         return size;
     }
 
-    public static DataType getValueType(final Object value) {
-        if (value == null) {
-            return DataType.NONE;
-        }
-        if (value instanceof byte[]) {
-            return DataType.OCTET_STRING;
-        }
-        if (value instanceof Enum) {
-            return DataType.ENUM;
-        }
-        if (value instanceof Byte) {
-            return DataType.INT8;
-        }
-        if (value instanceof Short) {
-            return DataType.INT16;
-        }
-        if (value instanceof Integer) {
-            return DataType.INT32;
-        }
-        if (value instanceof Long) {
-            return DataType.INT64;
-        }
-        if (value instanceof GXTime) {
-            return DataType.TIME;
-        }
-        if (value instanceof GXDate) {
-            return DataType.DATE;
-        }
-
-        if (value instanceof java.util.Date || value instanceof GXDateTime) {
-            return DataType.DATETIME;
-        }
-        if (value.getClass().isArray()) {
-            return DataType.ARRAY;
-        }
-        if (value instanceof String) {
-            return DataType.STRING;
-        }
-        if (value instanceof Boolean) {
-            return DataType.BOOLEAN;
-        }
-        if (value instanceof Float) {
-            return DataType.FLOAT32;
-        }
-        if (value instanceof Double) {
-            return DataType.FLOAT64;
-        }
-        throw new RuntimeException("Invalid value.");
-    }
-
     /**
      * Generate shared secret from Agreement Key.
      * 
@@ -2246,12 +2202,14 @@ public final class GXCommon {
         }
     }
 
-    /// <summary>
-    /// Reserved for internal use.
-    /// </summary>
-    /// <param name="buff"></param>
-    /// <returns>Logical name as a string.</returns>
-    public static String toLogicalName(Object value) {
+    /**
+     * Convert logical name byte array to string.
+     * 
+     * @param value
+     *            Logical name as a byte array.
+     * @return Logical name as a string.
+     */
+    public static String toLogicalName(final Object value) {
         if (value instanceof byte[]) {
             byte[] buff = (byte[]) value;
             if (buff.length == 0) {
@@ -2296,4 +2254,20 @@ public final class GXCommon {
         return buff;
     }
 
+    /**
+     * Convert integer list to array.
+     * 
+     * @param list
+     *            Integer list to convert.
+     * @return Integer array.
+     */
+    public static int[] toIntArray(final List<Integer> list) {
+        int[] ret = new int[list.size()];
+        int pos = 0;
+        for (Integer it : list) {
+            ret[pos] = it.intValue();
+            ++pos;
+        }
+        return ret;
+    }
 }

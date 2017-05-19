@@ -34,9 +34,12 @@
 
 package gurux.dlms.objects;
 
+import java.util.AbstractMap.SimpleEntry;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map.Entry;
+
+import javax.xml.stream.XMLStreamException;
 
 import gurux.dlms.GXByteBuffer;
 import gurux.dlms.GXDLMSClient;
@@ -314,5 +317,55 @@ public class GXDLMSAutoConnect extends GXDLMSObject implements IGXDLMSBase {
         } else {
             e.setError(ErrorCode.READ_WRITE_DENIED);
         }
+    }
+
+    @Override
+    public final void load(final GXXmlReader reader) throws XMLStreamException {
+        mode = AutoConnectMode.forValue(reader.readElementContentAsInt("Mode"));
+        repetitions = reader.readElementContentAsInt("Repetitions");
+        repetitionDelay = reader.readElementContentAsInt("RepetitionDelay");
+        callingWindow.clear();
+        if (reader.isStartElement("CallingWindow", true)) {
+            while (reader.isStartElement("Item", true)) {
+                GXDateTime start = new GXDateTime(
+                        reader.readElementContentAsString("Start"));
+                GXDateTime end = new GXDateTime(
+                        reader.readElementContentAsString("End"));
+                callingWindow.add(
+                        new SimpleEntry<GXDateTime, GXDateTime>(start, end));
+            }
+            reader.readEndElement("CallingWindow");
+        }
+        destinations = GXCommon
+                .split(reader.readElementContentAsString("Destinations", ""),
+                        ';')
+                .toArray(new String[0]);
+    }
+
+    @Override
+    public final void save(final GXXmlWriter writer) throws XMLStreamException {
+        writer.writeElementString("Mode", mode.ordinal());
+        writer.writeElementString("Repetitions", repetitions);
+        writer.writeElementString("RepetitionDelay", repetitionDelay);
+        if (callingWindow != null) {
+            writer.writeStartElement("CallingWindow");
+            for (Entry<GXDateTime, GXDateTime> it : callingWindow) {
+                writer.writeStartElement("Item");
+                writer.writeElementString("Start",
+                        it.getKey().toFormatString());
+                writer.writeElementString("End",
+                        it.getValue().toFormatString());
+                writer.writeEndElement();
+            }
+            writer.writeEndElement();
+        }
+        if (destinations != null) {
+            writer.writeElementString("Destinations",
+                    String.join(";", destinations));
+        }
+    }
+
+    @Override
+    public final void postLoad(final GXXmlReader reader) {
     }
 }

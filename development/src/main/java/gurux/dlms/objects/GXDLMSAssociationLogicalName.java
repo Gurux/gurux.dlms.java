@@ -39,9 +39,12 @@ import java.security.Signature;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
+import javax.xml.stream.XMLStreamException;
+
 import gurux.dlms.GXByteBuffer;
 import gurux.dlms.GXDLMSServerBase;
 import gurux.dlms.GXDLMSSettings;
+import gurux.dlms.GXDLMSTranslator;
 import gurux.dlms.ValueEventArgs;
 import gurux.dlms.enums.AccessMode;
 import gurux.dlms.enums.Authentication;
@@ -63,7 +66,7 @@ public class GXDLMSAssociationLogicalName extends GXDLMSObject
     private short serverSAP;
     private GXApplicationContextName applicationContextName;
     private GXxDLMSContextType xDLMSContextInfo;
-    private GXAuthenticationMechanismName authenticationMechanismMame;
+    private GXAuthenticationMechanismName authenticationMechanismName;
     /**
      * Secret used in Low Level Authentication.
      */
@@ -96,7 +99,7 @@ public class GXDLMSAssociationLogicalName extends GXDLMSObject
         objectList = new GXDLMSObjectCollection(this);
         applicationContextName = new GXApplicationContextName();
         xDLMSContextInfo = new GXxDLMSContextType();
-        authenticationMechanismMame = new GXAuthenticationMechanismName();
+        authenticationMechanismName = new GXAuthenticationMechanismName();
         setVersion(1);
     }
 
@@ -143,8 +146,8 @@ public class GXDLMSAssociationLogicalName extends GXDLMSObject
     }
 
     public final GXAuthenticationMechanismName
-            getAuthenticationMechanismMame() {
-        return authenticationMechanismMame;
+            getauthenticationMechanismName() {
+        return authenticationMechanismName;
     }
 
     /**
@@ -197,7 +200,7 @@ public class GXDLMSAssociationLogicalName extends GXDLMSObject
     public final Object[] getValues() {
         return new Object[] { getLogicalName(), getObjectList(),
                 clientSAP + "/" + serverSAP, getApplicationContextName(),
-                getXDLMSContextInfo(), getAuthenticationMechanismMame(),
+                getXDLMSContextInfo(), getauthenticationMechanismName(),
                 getSecret(), getAssociationStatus(),
                 getSecuritySetupReference() };
     }
@@ -545,7 +548,7 @@ public class GXDLMSAssociationLogicalName extends GXDLMSObject
             GXCommon.setData(data, DataType.UINT16,
                     xDLMSContextInfo.getMaxReceivePduSize());
             GXCommon.setData(data, DataType.UINT16,
-                    xDLMSContextInfo.getMaxSendPpuSize());
+                    xDLMSContextInfo.getMaxSendPduSize());
             GXCommon.setData(data, DataType.UINT8,
                     xDLMSContextInfo.getDlmsVersionNumber());
             GXCommon.setData(data, DataType.INT8,
@@ -560,19 +563,19 @@ public class GXDLMSAssociationLogicalName extends GXDLMSObject
             // Add count
             data.setUInt8(0x7);
             GXCommon.setData(data, DataType.UINT8,
-                    authenticationMechanismMame.getJointIsoCtt());
+                    authenticationMechanismName.getJointIsoCtt());
             GXCommon.setData(data, DataType.UINT8,
-                    authenticationMechanismMame.getCountry());
+                    authenticationMechanismName.getCountry());
             GXCommon.setData(data, DataType.UINT16,
-                    authenticationMechanismMame.getCountryName());
+                    authenticationMechanismName.getCountryName());
             GXCommon.setData(data, DataType.UINT8,
-                    authenticationMechanismMame.getIdentifiedOrganization());
+                    authenticationMechanismName.getIdentifiedOrganization());
             GXCommon.setData(data, DataType.UINT8,
-                    authenticationMechanismMame.getDlmsUA());
-            GXCommon.setData(data, DataType.UINT8, authenticationMechanismMame
+                    authenticationMechanismName.getDlmsUA());
+            GXCommon.setData(data, DataType.UINT8, authenticationMechanismName
                     .getAuthenticationMechanismName());
             GXCommon.setData(data, DataType.UINT8,
-                    authenticationMechanismMame.getMechanismId().getValue());
+                    authenticationMechanismName.getMechanismId().getValue());
             return data.array();
         }
         if (e.getIndex() == 7) {
@@ -688,22 +691,22 @@ public class GXDLMSAssociationLogicalName extends GXDLMSObject
         }
     }
 
-    private void updateAuthenticationMechanismMame(final Object value) {
+    private void updateAuthenticationMechanismName(final Object value) {
         if (value != null) {
             // Value of the object identifier encoded in BER
             if (value instanceof byte[]) {
                 GXByteBuffer buff = new GXByteBuffer((byte[]) value);
                 if (buff.getUInt8(0) == 0x60) {
-                    authenticationMechanismMame.setJointIsoCtt(0);
-                    authenticationMechanismMame.setCountry(0);
-                    authenticationMechanismMame.setCountryName(0);
+                    authenticationMechanismName.setJointIsoCtt(0);
+                    authenticationMechanismName.setCountry(0);
+                    authenticationMechanismName.setCountryName(0);
                     buff.position(buff.position() + 3);
-                    authenticationMechanismMame
+                    authenticationMechanismName
                             .setIdentifiedOrganization(buff.getUInt8());
-                    authenticationMechanismMame.setDlmsUA(buff.getUInt8());
-                    authenticationMechanismMame
+                    authenticationMechanismName.setDlmsUA(buff.getUInt8());
+                    authenticationMechanismName
                             .setAuthenticationMechanismName(buff.getUInt8());
-                    authenticationMechanismMame.setMechanismId(
+                    authenticationMechanismName.setMechanismId(
                             Authentication.forValue(buff.getUInt8()));
                 } else {
                     // Get Tag and length.
@@ -714,57 +717,57 @@ public class GXDLMSAssociationLogicalName extends GXDLMSObject
                     if (buff.getUInt8() != 0x11) {
                         throw new IllegalArgumentException();
                     }
-                    authenticationMechanismMame.setJointIsoCtt(buff.getUInt8());
+                    authenticationMechanismName.setJointIsoCtt(buff.getUInt8());
                     // Get tag
                     if (buff.getUInt8() != 0x11) {
                         throw new IllegalArgumentException();
                     }
-                    authenticationMechanismMame.setCountry(buff.getUInt8());
+                    authenticationMechanismName.setCountry(buff.getUInt8());
                     // Get tag
                     if (buff.getUInt8() != 0x12) {
                         throw new IllegalArgumentException();
                     }
-                    authenticationMechanismMame
+                    authenticationMechanismName
                             .setCountryName(buff.getUInt16());
                     // Get tag
                     if (buff.getUInt8() != 0x11) {
                         throw new IllegalArgumentException();
                     }
-                    authenticationMechanismMame
+                    authenticationMechanismName
                             .setIdentifiedOrganization(buff.getUInt8());
                     // Get tag
                     if (buff.getUInt8() != 0x11) {
                         throw new IllegalArgumentException();
                     }
-                    authenticationMechanismMame.setDlmsUA(buff.getUInt8());
+                    authenticationMechanismName.setDlmsUA(buff.getUInt8());
                     // Get tag
                     if (buff.getUInt8() != 0x11) {
                         throw new IllegalArgumentException();
                     }
-                    authenticationMechanismMame
+                    authenticationMechanismName
                             .setAuthenticationMechanismName(buff.getUInt8());
                     // Get tag
                     if (buff.getUInt8() != 0x11) {
                         throw new IllegalArgumentException();
                     }
-                    authenticationMechanismMame.setMechanismId(
+                    authenticationMechanismName.setMechanismId(
                             Authentication.forValue(buff.getUInt8()));
                 }
             } else {
                 if (value != null) {
-                    authenticationMechanismMame.setJointIsoCtt(
+                    authenticationMechanismName.setJointIsoCtt(
                             ((Number) Array.get(value, 0)).intValue());
-                    authenticationMechanismMame.setCountry(
+                    authenticationMechanismName.setCountry(
                             ((Number) Array.get(value, 1)).intValue());
-                    authenticationMechanismMame.setCountryName(
+                    authenticationMechanismName.setCountryName(
                             ((Number) Array.get(value, 2)).intValue());
-                    authenticationMechanismMame.setIdentifiedOrganization(
+                    authenticationMechanismName.setIdentifiedOrganization(
                             ((Number) Array.get(value, 3)).intValue());
-                    authenticationMechanismMame.setDlmsUA(
+                    authenticationMechanismName.setDlmsUA(
                             ((Number) Array.get(value, 4)).intValue());
-                    authenticationMechanismMame.setAuthenticationMechanismName(
+                    authenticationMechanismName.setAuthenticationMechanismName(
                             ((Number) Array.get(value, 5)).intValue());
-                    authenticationMechanismMame
+                    authenticationMechanismName
                             .setMechanismId(Authentication.forValue(
                                     ((Number) Array.get(value, 6)).intValue()));
                 }
@@ -800,7 +803,7 @@ public class GXDLMSAssociationLogicalName extends GXDLMSObject
                         ((Number) Array.get(e.getValue(), 1)).intValue()));
                 xDLMSContextInfo.setMaxReceivePduSize(
                         ((Number) Array.get(e.getValue(), 1)).intValue());
-                xDLMSContextInfo.setMaxSendPpuSize(
+                xDLMSContextInfo.setMaxSendPduSize(
                         ((Number) Array.get(e.getValue(), 2)).intValue());
                 xDLMSContextInfo.setDlmsVersionNumber(
                         ((Number) Array.get(e.getValue(), 3)).byteValue());
@@ -811,7 +814,7 @@ public class GXDLMSAssociationLogicalName extends GXDLMSObject
             }
             break;
         case 6:
-            updateAuthenticationMechanismMame(e.getValue());
+            updateAuthenticationMechanismName(e.getValue());
             break;
         case 7:
             llsSecret = (byte[]) e.getValue();
@@ -831,5 +834,148 @@ public class GXDLMSAssociationLogicalName extends GXDLMSObject
         default:
             e.setError(ErrorCode.READ_WRITE_DENIED);
         }
+    }
+
+    @Override
+    public final void load(final GXXmlReader reader) throws XMLStreamException {
+        clientSAP = (byte) reader.readElementContentAsInt("ClientSAP");
+        serverSAP = (byte) reader.readElementContentAsInt("ServerSAP");
+        if (reader.isStartElement("ApplicationContextName", true)) {
+            applicationContextName.setJointIsoCtt(
+                    reader.readElementContentAsInt("JointIsoCtt"));
+            applicationContextName
+                    .setCountry(reader.readElementContentAsInt("Country"));
+            applicationContextName.setCountryName(
+                    reader.readElementContentAsInt("CountryName"));
+            applicationContextName.setIdentifiedOrganization(
+                    reader.readElementContentAsInt("IdentifiedOrganization"));
+            applicationContextName
+                    .setDlmsUA(reader.readElementContentAsInt("DlmsUA"));
+            applicationContextName.setApplicationContext(
+                    reader.readElementContentAsInt("ApplicationContext"));
+            applicationContextName
+                    .setContextId(reader.readElementContentAsInt("ContextId"));
+            reader.readEndElement("ApplicationContextName");
+        }
+
+        if (reader.isStartElement("XDLMSContextInfo", true)) {
+            xDLMSContextInfo.setConformance(Conformance
+                    .forValue(reader.readElementContentAsInt("Conformance")));
+            xDLMSContextInfo.setMaxReceivePduSize(
+                    reader.readElementContentAsInt("MaxReceivePduSize"));
+            xDLMSContextInfo.setMaxSendPduSize(
+                    reader.readElementContentAsInt("MaxSendPduSize"));
+            xDLMSContextInfo.setDlmsVersionNumber(
+                    (byte) reader.readElementContentAsInt("DlmsVersionNumber"));
+            xDLMSContextInfo.setQualityOfService(
+                    reader.readElementContentAsInt("QualityOfService"));
+            xDLMSContextInfo.setCypheringInfo(GXDLMSTranslator.hexToBytes(
+                    reader.readElementContentAsString("CypheringInfo")));
+            reader.readEndElement("XDLMSContextInfo");
+        }
+        if (reader.isStartElement("XDLMSContextInfo", true)) {
+            authenticationMechanismName.setJointIsoCtt(
+                    reader.readElementContentAsInt("JointIsoCtt"));
+            authenticationMechanismName
+                    .setCountry(reader.readElementContentAsInt("Country"));
+            authenticationMechanismName.setCountryName(
+                    reader.readElementContentAsInt("CountryName"));
+            authenticationMechanismName.setIdentifiedOrganization(
+                    reader.readElementContentAsInt("IdentifiedOrganization"));
+            authenticationMechanismName
+                    .setDlmsUA(reader.readElementContentAsInt("DlmsUA"));
+            authenticationMechanismName.setAuthenticationMechanismName(reader
+                    .readElementContentAsInt("AuthenticationMechanismName"));
+            authenticationMechanismName.setMechanismId(Authentication
+                    .forValue(reader.readElementContentAsInt("MechanismId")));
+            reader.readEndElement("XDLMSContextInfo");
+        }
+        String str = reader.readElementContentAsString("Secret");
+        if (str == null) {
+            llsSecret = null;
+        } else {
+            llsSecret = GXDLMSTranslator.hexToBytes(str);
+        }
+        str = reader.readElementContentAsString("HlsSecret");
+        if (str == null) {
+            hlsSecret = null;
+        } else {
+            hlsSecret = GXDLMSTranslator.hexToBytes(str);
+        }
+        associationStatus = AssociationStatus.values()[reader
+                .readElementContentAsInt("AssociationStatus")];
+        securitySetupReference =
+                reader.readElementContentAsString("SecuritySetupReference");
+    }
+
+    @Override
+    public final void save(final GXXmlWriter writer) throws XMLStreamException {
+        writer.writeElementString("ClientSAP", clientSAP);
+        writer.writeElementString("ServerSAP", serverSAP);
+        if (applicationContextName != null) {
+            writer.writeStartElement("ApplicationContextName");
+            writer.writeElementString("JointIsoCtt",
+                    applicationContextName.getJointIsoCtt());
+            writer.writeElementString("Country",
+                    applicationContextName.getCountry());
+            writer.writeElementString("CountryName",
+                    applicationContextName.getCountryName());
+            writer.writeElementString("IdentifiedOrganization",
+                    applicationContextName.getIdentifiedOrganization());
+            writer.writeElementString("DlmsUA",
+                    applicationContextName.getDlmsUA());
+            writer.writeElementString("ApplicationContext",
+                    applicationContextName.getApplicationContext());
+            writer.writeElementString("ContextId",
+                    applicationContextName.getContextId());
+            writer.writeEndElement();
+        }
+        if (xDLMSContextInfo != null) {
+            writer.writeStartElement("XDLMSContextInfo");
+            writer.writeElementString("Conformance",
+                    Conformance.toInteger(xDLMSContextInfo.getConformance()));
+            writer.writeElementString("MaxReceivePduSize",
+                    xDLMSContextInfo.getMaxReceivePduSize());
+            writer.writeElementString("MaxSendPduSize",
+                    xDLMSContextInfo.getMaxSendPduSize());
+            writer.writeElementString("DlmsVersionNumber",
+                    xDLMSContextInfo.getDlmsVersionNumber());
+            writer.writeElementString("QualityOfService",
+                    xDLMSContextInfo.getQualityOfService());
+            writer.writeElementString("CypheringInfo", GXDLMSTranslator
+                    .toHex(xDLMSContextInfo.getCypheringInfo()));
+            writer.writeEndElement();
+        }
+        if (authenticationMechanismName != null) {
+            writer.writeStartElement("XDLMSContextInfo");
+            writer.writeElementString("JointIsoCtt",
+                    authenticationMechanismName.getJointIsoCtt());
+            writer.writeElementString("Country",
+                    authenticationMechanismName.getCountry());
+            writer.writeElementString("CountryName",
+                    authenticationMechanismName.getCountryName());
+            writer.writeElementString("IdentifiedOrganization",
+                    authenticationMechanismName.getIdentifiedOrganization());
+            writer.writeElementString("DlmsUA",
+                    authenticationMechanismName.getDlmsUA());
+            writer.writeElementString("AuthenticationMechanismName",
+                    authenticationMechanismName
+                            .getAuthenticationMechanismName());
+            writer.writeElementString("MechanismId",
+                    authenticationMechanismName.getMechanismId().getValue());
+            writer.writeEndElement();
+        }
+        writer.writeElementString("Secret", GXDLMSTranslator.toHex(llsSecret));
+        writer.writeElementString("HlsSecret",
+                GXDLMSTranslator.toHex(hlsSecret));
+
+        writer.writeElementString("AssociationStatus",
+                associationStatus.ordinal());
+        writer.writeElementString("SecuritySetupReference",
+                securitySetupReference);
+    }
+
+    @Override
+    public final void postLoad(final GXXmlReader reader) {
     }
 }

@@ -35,16 +35,13 @@
 package gurux.dlms.objects;
 
 import java.io.FileInputStream;
+import java.io.FileOutputStream;
 import java.io.IOException;
-import java.io.PrintWriter;
+import java.io.InputStream;
+import java.io.OutputStream;
 import java.util.ArrayList;
 
-import javax.xml.stream.XMLInputFactory;
-import javax.xml.stream.XMLOutputFactory;
-import javax.xml.stream.XMLStreamConstants;
 import javax.xml.stream.XMLStreamException;
-import javax.xml.stream.XMLStreamReader;
-import javax.xml.stream.XMLStreamWriter;
 
 import gurux.dlms.GXDLMSClient;
 import gurux.dlms.enums.ObjectType;
@@ -144,104 +141,128 @@ public class GXDLMSObjectCollection extends ArrayList<GXDLMSObject>
      */
     public static GXDLMSObjectCollection load(final String path)
             throws XMLStreamException, IOException {
-        GXDLMSObjectCollection objects = new GXDLMSObjectCollection();
-        FileInputStream tmp = null;
+        FileInputStream stream = new FileInputStream(path);
         try {
-            tmp = new FileInputStream(path);
-            XMLInputFactory inputFactory = XMLInputFactory.newInstance();
-            XMLStreamReader xmlStreamReader =
-                    inputFactory.createXMLStreamReader(tmp);
-            GXDLMSObject obj = null;
-            String target;
-            ObjectType type;
-            String data = null;
-            while (xmlStreamReader.hasNext()) {
-                int event = xmlStreamReader.next();
-                if (event == XMLStreamConstants.START_ELEMENT) {
-                    data = null;
-                    target = xmlStreamReader.getLocalName();
-                    if ("object".compareToIgnoreCase(target) == 0) {
-                        type = ObjectType
-                                .valueOf(xmlStreamReader.getAttributeValue(0));
-                        obj = GXDLMSClient.createObject(type);
-                        objects.add(obj);
-                    }
-                } else if (event == XMLStreamConstants.CHARACTERS) {
-                    data = xmlStreamReader.getText();
-                } else if (event == XMLStreamConstants.END_ELEMENT) {
-                    target = xmlStreamReader.getLocalName();
-                    if ("SN".compareToIgnoreCase(target) == 0) {
-                        obj.setShortName(Integer.parseInt(data));
-                    } else if ("LN".compareToIgnoreCase(target) == 0) {
-                        obj.setLogicalName(data);
-                    } else if ("Description".compareToIgnoreCase(target) == 0) {
-                        obj.setDescription(data);
-                    }
-                }
-            }
+            return load(stream);
         } finally {
-            if (tmp != null) {
-                tmp.close();
+            if (stream != null) {
+                stream.close();
+                stream = null;
             }
         }
-        return objects;
     }
 
-    /*
-     * Save COSEM objects to the file.
-     * @param path File path.
+    /**
+     * Load COSEM objects from the stream.
+     * 
+     * @param stream
+     *            XML stream.
+     * @return Collection of serialized COSEM objects.
+     * @throws XMLStreamException
+     *             Stream exception.
      */
-    public final void save(final String path)
-            throws IOException, XMLStreamException {
-        PrintWriter pw = null;
+    public static GXDLMSObjectCollection load(final InputStream stream)
+            throws XMLStreamException {
+        GXDLMSObject obj = null;
+        String target;
+        ObjectType type;
+        GXXmlReader reader = new GXXmlReader(stream);
+        while (!reader.isEOF()) {
+            if (reader.isStartElement()) {
+                target = reader.getName();
+                if ("Objects".equalsIgnoreCase(target)) {
+                    // Skip.
+                    reader.read();
+                } else if ("Object".equalsIgnoreCase(target)) {
+                    type = ObjectType
+                            .forValue(Integer.parseInt(reader.getAttribute(0)));
+                    reader.read();
+                    obj = GXDLMSClient.createObject(type);
+                    reader.getObjects().add(obj);
+                } else if ("SN".equalsIgnoreCase(target)) {
+                    obj.setShortName(reader.readElementContentAsInt("SN"));
+                } else if ("LN".equalsIgnoreCase(target)) {
+                    obj.setLogicalName(reader.readElementContentAsString("LN"));
+                } else if ("Description".equalsIgnoreCase(target)) {
+                    obj.setDescription(
+                            reader.readElementContentAsString("Description"));
+                } else {
+                    ((IGXDLMSBase) obj).load(reader);
+                    obj = null;
+                }
+            } else {
+                reader.read();
+            }
+        }
+        return reader.getObjects();
+    }
+
+    /**
+     * Save COSEM objects to the file.
+     * 
+     * @param filename
+     *            File path.
+     * @param settings
+     *            XML write settings.
+     * @throws XMLStreamException
+     *             XML exception.
+     * @throws IOException
+     *             IO exception.
+     */
+    public final void save(final String filename,
+            final GXXmlWriterSettings settings)
+            throws XMLStreamException, IOException {
+        FileOutputStream stream = new FileOutputStream(filename);
         try {
-            pw = new PrintWriter(path, "utf-8");
-            String newline = System.getProperty("line.separator");
-            XMLOutputFactory output = XMLOutputFactory.newInstance();
-            XMLStreamWriter writer = output.createXMLStreamWriter(pw);
-            writer.writeStartDocument("utf-8", "1.0");
-            writer.setPrefix("gurux", "http://www.gurux.org");
-            writer.setDefaultNamespace("http://www.gurux.org");
-            writer.writeCharacters(newline);
-            writer.writeStartElement("objects");
-            writer.writeCharacters(newline);
+            save(stream, settings);
+        } finally {
+            if (stream != null) {
+                stream.close();
+                stream = null;
+            }
+        }
+    }
+
+    /**
+     * Save COSEM objects to the file.
+     * 
+     * @param stream
+     *            Stream.
+     * @param settings
+     *            XML write settings.
+     * @throws XMLStreamException
+     *             XML exception.
+     */
+    public final void save(final OutputStream stream,
+            final GXXmlWriterSettings settings) throws XMLStreamException {
+        GXXmlWriter writer = new GXXmlWriter(stream);
+        try {
+            writer.writeStartDocument();
+            writer.writeStartElement("Objects");
             for (GXDLMSObject it : this) {
-                writer.writeStartElement("object");
-                writer.writeAttribute("Type",
-                        String.valueOf(it.getObjectType()));
-                writer.writeCharacters(newline);
+                writer.writeStartElement("Object", "Type",
+                        String.valueOf(it.getObjectType().getValue()), true);
                 // Add SN
                 if (it.getShortName() != 0) {
-                    writer.writeStartElement("SN");
-                    writer.writeCharacters(String.valueOf(it.getShortName()));
-                    writer.writeEndElement();
-                    writer.writeCharacters(newline);
+                    writer.writeElementString("SN", it.getShortName());
                 }
                 // Add LN
-                writer.writeStartElement("LN");
-                writer.writeCharacters(it.getLogicalName());
-                writer.writeEndElement();
-                writer.writeCharacters(newline);
+                writer.writeElementString("LN", it.getLogicalName());
                 // Add description if given.
-                if (it.getDescription() != null
-                        && !it.getDescription().isEmpty()) {
-                    writer.writeStartElement("Description");
-                    writer.writeCharacters(it.getDescription());
-                    writer.writeEndElement();
-                    writer.writeCharacters(newline);
+                String d = it.getDescription();
+                if (d != null && d.length() != 0) {
+                    writer.writeElementString("Description", d);
+                }
+                if (settings.getValues()) {
+                    ((IGXDLMSBase) it).save(writer);
                 }
                 // Close object.
                 writer.writeEndElement();
-                writer.writeCharacters(newline);
             }
-            // Close objects
             writer.writeEndElement();
             writer.writeEndDocument();
-            pw.flush();
         } finally {
-            if (pw != null) {
-                pw.close();
-            }
+            writer.close();
         }
     }
 }

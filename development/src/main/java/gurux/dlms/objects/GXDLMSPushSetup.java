@@ -39,6 +39,8 @@ import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
 
+import javax.xml.stream.XMLStreamException;
+
 import gurux.dlms.GXByteBuffer;
 import gurux.dlms.GXDLMSClient;
 import gurux.dlms.GXDLMSSettings;
@@ -53,6 +55,10 @@ import gurux.dlms.objects.enums.MessageType;
 import gurux.dlms.objects.enums.ServiceType;
 
 public class GXDLMSPushSetup extends GXDLMSObject implements IGXDLMSBase {
+    private ServiceType service;
+    private String destination;
+    private MessageType message;
+
     private List<Entry<GXDLMSObject, GXDLMSCaptureObject>> pushObjectList;
     private GXSendDestinationAndMethod sendDestinationAndMethod;
     private List<Map.Entry<GXDateTime, GXDateTime>> communicationWindow;
@@ -92,6 +98,30 @@ public class GXDLMSPushSetup extends GXDLMSObject implements IGXDLMSBase {
         sendDestinationAndMethod = new GXSendDestinationAndMethod();
         communicationWindow =
                 new ArrayList<Map.Entry<GXDateTime, GXDateTime>>();
+    }
+
+    public final ServiceType getService() {
+        return service;
+    }
+
+    public final void setService(final ServiceType value) {
+        service = value;
+    }
+
+    public final String getDestination() {
+        return destination;
+    }
+
+    public final void setDestination(final String value) {
+        destination = value;
+    }
+
+    public final MessageType getMessage() {
+        return message;
+    }
+
+    public final void setMessage(final MessageType value) {
+        message = value;
     }
 
     /**
@@ -397,5 +427,89 @@ public class GXDLMSPushSetup extends GXDLMSObject implements IGXDLMSBase {
         } else {
             e.setError(ErrorCode.READ_WRITE_DENIED);
         }
+    }
+
+    @Override
+    public final void load(final GXXmlReader reader) throws XMLStreamException {
+        pushObjectList.clear();
+        if (reader.isStartElement("ObjectList", true)) {
+            while (reader.isStartElement("Item", true)) {
+                ObjectType ot = ObjectType
+                        .forValue(reader.readElementContentAsInt("ObjectType"));
+                String ln = reader.readElementContentAsString("LN");
+                int ai = reader.readElementContentAsInt("AI");
+                int di = reader.readElementContentAsInt("DI");
+                reader.readEndElement("ObjectList");
+                GXDLMSCaptureObject co = new GXDLMSCaptureObject(ai, di);
+                GXDLMSObject obj = reader.getObjects().findByLN(ot, ln);
+                pushObjectList
+                        .add(new GXSimpleEntry<GXDLMSObject, GXDLMSCaptureObject>(
+                                obj, co));
+            }
+            reader.readEndElement("ObjectList");
+        }
+
+        service =
+                ServiceType.forValue(reader.readElementContentAsInt("Service"));
+        destination = reader.readElementContentAsString("Destination");
+        message =
+                MessageType.forValue(reader.readElementContentAsInt("Message"));
+        communicationWindow.clear();
+        if (reader.isStartElement("CommunicationWindow", true)) {
+            while (reader.isStartElement("Item", true)) {
+                GXDateTime start = new GXDateTime(
+                        reader.readElementContentAsString("Start"));
+                GXDateTime end = new GXDateTime(
+                        reader.readElementContentAsString("End"));
+                communicationWindow.add(
+                        new GXSimpleEntry<GXDateTime, GXDateTime>(start, end));
+            }
+            reader.readEndElement("CommunicationWindow");
+        }
+        randomisationStartInterval =
+                reader.readElementContentAsInt("RandomisationStartInterval");
+        numberOfRetries = reader.readElementContentAsInt("NumberOfRetries");
+        repetitionDelay = reader.readElementContentAsInt("RepetitionDelay");
+    }
+
+    @Override
+    public final void save(final GXXmlWriter writer) throws XMLStreamException {
+        if (pushObjectList != null) {
+            writer.writeStartElement("ObjectList");
+            for (Entry<GXDLMSObject, GXDLMSCaptureObject> it : pushObjectList) {
+                writer.writeStartElement("Item");
+                writer.writeElementString("ObjectType",
+                        it.getKey().getObjectType().getValue());
+                writer.writeElementString("LN", it.getKey().getLogicalName());
+                writer.writeElementString("AI",
+                        it.getValue().getAttributeIndex());
+                writer.writeElementString("DI", it.getValue().getDataIndex());
+                writer.writeEndElement();
+            }
+            writer.writeEndElement();
+        }
+        writer.writeElementString("Service", service.getValue());
+        writer.writeElementString("Destination", destination);
+        writer.writeElementString("Message", message.getValue());
+        if (communicationWindow != null) {
+            writer.writeStartElement("CommunicationWindow");
+            for (Entry<GXDateTime, GXDateTime> it : communicationWindow) {
+                writer.writeStartElement("Item");
+                writer.writeElementString("Start",
+                        it.getKey().toFormatString());
+                writer.writeElementString("End",
+                        it.getValue().toFormatString());
+                writer.writeEndElement();
+            }
+            writer.writeEndElement();
+        }
+        writer.writeElementString("RandomisationStartInterval",
+                randomisationStartInterval);
+        writer.writeElementString("NumberOfRetries", numberOfRetries);
+        writer.writeElementString("RepetitionDelay", repetitionDelay);
+    }
+
+    @Override
+    public final void postLoad(final GXXmlReader reader) {
     }
 }

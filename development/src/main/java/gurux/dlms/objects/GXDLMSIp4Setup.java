@@ -36,15 +36,20 @@ package gurux.dlms.objects;
 
 import java.net.InetAddress;
 import java.net.UnknownHostException;
+import java.util.ArrayList;
+import java.util.List;
+
+import javax.xml.stream.XMLStreamException;
 
 import gurux.dlms.GXByteBuffer;
 import gurux.dlms.GXDLMSSettings;
+import gurux.dlms.GXDLMSTranslator;
 import gurux.dlms.ValueEventArgs;
 import gurux.dlms.enums.DataType;
 import gurux.dlms.enums.ErrorCode;
 import gurux.dlms.enums.ObjectType;
 import gurux.dlms.internal.GXCommon;
-import gurux.dlms.objects.enums.GXDLMSIp4SetupIpOptionType;
+import gurux.dlms.objects.enums.Ip4SetupIpOptionType;
 
 public class GXDLMSIp4Setup extends GXDLMSObject implements IGXDLMSBase {
     private String dataLinkLayerReference;
@@ -380,7 +385,7 @@ public class GXDLMSIp4Setup extends GXDLMSObject implements IGXDLMSBase {
             if (e.getValue() != null) {
                 for (Object it : (Object[]) e.getValue()) {
                     GXDLMSIp4SetupIpOption item = new GXDLMSIp4SetupIpOption();
-                    item.setType(GXDLMSIp4SetupIpOptionType.forValue(
+                    item.setType(Ip4SetupIpOptionType.forValue(
                             ((Number) ((Object[]) it)[0]).intValue()));
                     item.setLength(
                             ((Number) (((Object[]) it)[1])).shortValue());
@@ -402,5 +407,79 @@ public class GXDLMSIp4Setup extends GXDLMSObject implements IGXDLMSBase {
         } else {
             e.setError(ErrorCode.READ_WRITE_DENIED);
         }
+    }
+
+    @Override
+    public final void load(final GXXmlReader reader) throws XMLStreamException {
+        dataLinkLayerReference =
+                reader.readElementContentAsString("DataLinkLayerReference");
+        ipAddress = reader.readElementContentAsString("IPAddress");
+        List<Integer> list = new ArrayList<Integer>();
+        if (reader.isStartElement("MulticastIPAddress", true)) {
+            while (reader.isStartElement("Value", false)) {
+                list.add(reader.readElementContentAsInt("Value"));
+            }
+            reader.readEndElement("MulticastIPAddress");
+        }
+        multicastIPAddress = GXCommon.toIntArray(list);
+
+        List<GXDLMSIp4SetupIpOption> tmp =
+                new ArrayList<GXDLMSIp4SetupIpOption>();
+        if (reader.isStartElement("IPOptions", true)) {
+            while (reader.isStartElement("IPOptions", true)) {
+                GXDLMSIp4SetupIpOption it = new GXDLMSIp4SetupIpOption();
+                it.setType(Ip4SetupIpOptionType
+                        .forValue(reader.readElementContentAsInt("Type")));
+                it.setLength((short) reader.readElementContentAsInt("Length"));
+                it.setData(GXDLMSTranslator
+                        .hexToBytes(reader.readElementContentAsString("Data")));
+                tmp.add(it);
+            }
+            reader.readEndElement("IPOptions");
+        }
+        ipOptions = tmp
+                .toArray(list.toArray(new GXDLMSIp4SetupIpOption[list.size()]));
+        subnetMask = reader.readElementContentAsULong("SubnetMask");
+        gatewayIPAddress = reader.readElementContentAsULong("GatewayIPAddress");
+        useDHCP = reader.readElementContentAsInt("UseDHCP") != 0;
+        primaryDNSAddress =
+                reader.readElementContentAsULong("PrimaryDNSAddress");
+        secondaryDNSAddress =
+                reader.readElementContentAsULong("SecondaryDNSAddress");
+    }
+
+    @Override
+    public final void save(final GXXmlWriter writer) throws XMLStreamException {
+        writer.writeElementString("DataLinkLayerReference",
+                dataLinkLayerReference);
+        writer.writeElementString("IPAddress", ipAddress);
+        if (multicastIPAddress != null) {
+            writer.writeStartElement("MulticastIPAddress");
+            for (int it : multicastIPAddress) {
+                writer.writeElementString("Value", it);
+            }
+            writer.writeEndElement();
+        }
+        if (ipOptions != null) {
+            writer.writeStartElement("IPOptions");
+            for (GXDLMSIp4SetupIpOption it : ipOptions) {
+                writer.writeStartElement("IPOptions");
+                writer.writeElementString("Type", it.getType().ordinal());
+                writer.writeElementString("Length", it.getLength());
+                writer.writeElementString("Data",
+                        GXDLMSTranslator.toHex(it.getData()));
+                writer.writeEndElement();
+            }
+            writer.writeEndElement();
+        }
+        writer.writeElementString("SubnetMask", subnetMask);
+        writer.writeElementString("GatewayIPAddress", gatewayIPAddress);
+        writer.writeElementString("UseDHCP", useDHCP);
+        writer.writeElementString("PrimaryDNSAddress", primaryDNSAddress);
+        writer.writeElementString("SecondaryDNSAddress", secondaryDNSAddress);
+    }
+
+    @Override
+    public final void postLoad(final GXXmlReader reader) {
     }
 }

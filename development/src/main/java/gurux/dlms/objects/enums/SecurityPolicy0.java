@@ -32,36 +32,29 @@
 // Full text may be retrieved at http://www.gnu.org/licenses/gpl-2.0.txt
 //---------------------------------------------------------------------------
 
-package gurux.dlms.objects;
+package gurux.dlms.objects.enums;
 
-import gurux.dlms.objects.enums.Ip4SetupIpOptionType;
+/**
+ * Security policy Enforces authentication and/or encryption algorithm provided
+ * with security suite. This enumeration is used for version 0.
+ */
+public enum SecurityPolicy0 {
+    /**
+     * Security is not used.
+     */
+    NOTHING,
+    /**
+     * All messages are authenticated.
+     */
+    AUTHENTICATED,
 
-public class GXDLMSIp4SetupIpOption {
-    private Ip4SetupIpOptionType type;
-    private short length;
-    private byte[] data;
+    /**
+     * All messages are encrypted.
+     */
+    ENCRYPTED,
 
-    public final Ip4SetupIpOptionType getType() {
-        return type;
-    }
-
-    public final void setType(final Ip4SetupIpOptionType value) {
-        type = value;
-    }
-
-    public final short getLength() {
-        return length;
-    }
-
-    public final void setLength(final short value) {
-        length = value;
-    }
-
-    public final byte[] getData() {
-        return data;
-    }
-
-    public final void setData(final byte[] value) {
-        data = value;
-    }
+    /**
+     * All messages are authenticated and encrypted.
+     */
+    AUTHENTICATED_ENCRYPTED
 }

@@ -34,9 +34,15 @@
 
 package gurux.dlms.objects;
 
+import java.util.ArrayList;
+import java.util.List;
+
+import javax.xml.stream.XMLStreamException;
+
 import gurux.dlms.GXByteBuffer;
 import gurux.dlms.GXDLMSClient;
 import gurux.dlms.GXDLMSSettings;
+import gurux.dlms.GXDate;
 import gurux.dlms.GXDateTime;
 import gurux.dlms.ValueEventArgs;
 import gurux.dlms.enums.DataType;
@@ -233,5 +239,42 @@ public class GXDLMSSpecialDaysTable extends GXDLMSObject
         } else {
             e.setError(ErrorCode.READ_WRITE_DENIED);
         }
+    }
+
+    @Override
+    public final void load(final GXXmlReader reader) throws XMLStreamException {
+        List<GXDLMSSpecialDay> list = new ArrayList<GXDLMSSpecialDay>();
+        if (reader.isStartElement("Entries", true)) {
+            while (reader.isStartElement("Entry", true)) {
+                GXDLMSSpecialDay it = new GXDLMSSpecialDay();
+                it.setIndex(reader.readElementContentAsInt("Index"));
+                it.setDate(
+                        new GXDate(reader.readElementContentAsString("Date")));
+                it.setDayId(reader.readElementContentAsInt("DayId"));
+                list.add(it);
+            }
+            reader.readEndElement("Entries");
+        }
+        entries = list.toArray(new GXDLMSSpecialDay[list.size()]);
+    }
+
+    @Override
+    public final void save(final GXXmlWriter writer) throws XMLStreamException {
+        if (entries != null) {
+            writer.writeStartElement("Entries");
+            for (GXDLMSSpecialDay it : entries) {
+                writer.writeStartElement("Entry");
+                writer.writeElementString("Index", it.getIndex());
+                writer.writeElementString("Date",
+                        it.getDate().toFormatString());
+                writer.writeElementString("DayId", it.getDayId());
+                writer.writeEndElement();
+            }
+            writer.writeEndElement();
+        }
+    }
+
+    @Override
+    public final void postLoad(final GXXmlReader reader) {
     }
 }
