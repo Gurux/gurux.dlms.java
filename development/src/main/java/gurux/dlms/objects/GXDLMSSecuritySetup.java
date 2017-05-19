@@ -41,14 +41,17 @@ import java.security.PublicKey;
 import java.security.SignatureException;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 
 import javax.crypto.KeyAgreement;
+import javax.xml.stream.XMLStreamException;
 
 import gurux.dlms.GXByteBuffer;
 import gurux.dlms.GXDLMSClient;
 import gurux.dlms.GXDLMSSettings;
+import gurux.dlms.GXDLMSTranslator;
 import gurux.dlms.GXSimpleEntry;
 import gurux.dlms.ValueEventArgs;
 import gurux.dlms.asn.GXAsn1BitString;
@@ -66,16 +69,20 @@ import gurux.dlms.objects.enums.CertificateEntity;
 import gurux.dlms.objects.enums.CertificateType;
 import gurux.dlms.objects.enums.GlobalKeyType;
 import gurux.dlms.objects.enums.SecurityPolicy;
-import gurux.dlms.objects.enums.SecurityPolicy1;
+import gurux.dlms.objects.enums.SecurityPolicy0;
 import gurux.dlms.objects.enums.SecuritySuite;
 import gurux.dlms.secure.GXASymmetric;
 import gurux.dlms.secure.GXDLMSSecureClient;
 
 public class GXDLMSSecuritySetup extends GXDLMSObject implements IGXDLMSBase {
     /**
-     * Security policy.
+     * Security policy version 1.
      */
-    private int securityPolicy = 0;
+    private Set<SecurityPolicy> securityPolicy = new HashSet<SecurityPolicy>();
+    /**
+     * Security policy version 0.
+     */
+    private SecurityPolicy0 securityPolicy0 = SecurityPolicy0.NOTHING;
 
     /**
      * Security suite.
@@ -124,7 +131,6 @@ public class GXDLMSSecuritySetup extends GXDLMSObject implements IGXDLMSBase {
      */
     public GXDLMSSecuritySetup(final String ln, final int sn) {
         super(ObjectType.SECURITY_SETUP, ln, sn);
-        securityPolicy = 0;
         securitySuite = SecuritySuite.AES_GCM_128;
         certificates = new ArrayList<GXDLMSCertificateInfo>();
     }
@@ -132,36 +138,36 @@ public class GXDLMSSecuritySetup extends GXDLMSObject implements IGXDLMSBase {
     /**
      * @return Security policy for version 1.
      */
-    public final Set<SecurityPolicy1> getSecurityPolicy1() {
-        return SecurityPolicy1.forValue(securityPolicy);
+    public final Set<SecurityPolicy> getSecurityPolicy() {
+        return securityPolicy;
     }
 
     /**
      * @param value
      *            Security policy for version 1.
      */
-    public final void setSecurityPolicy1(final Set<SecurityPolicy1> value) {
-        securityPolicy = SecurityPolicy1.toInteger(value);
+    public final void setSecurityPolicy(final Set<SecurityPolicy> value) {
+        securityPolicy = value;
     }
 
     /**
      * @return Security policy for version 0.
      */
-    public final SecurityPolicy getSecurityPolicy() {
-        return SecurityPolicy.values()[securityPolicy];
+    public final SecurityPolicy0 getSecurityPolicy0() {
+        return securityPolicy0;
     }
 
     /**
      * @param value
      *            Security policy for version 0.
      */
-    public final void setSecurityPolicy(final SecurityPolicy value) {
+    public final void setSecurityPolicy0(final SecurityPolicy0 value) {
         switch (value) {
         case NOTHING:
         case AUTHENTICATED:
         case ENCRYPTED:
         case AUTHENTICATED_ENCRYPTED:
-            securityPolicy = value.ordinal();
+            securityPolicy0 = value;
             break;
         default:
             throw new IllegalArgumentException();
@@ -237,7 +243,7 @@ public class GXDLMSSecuritySetup extends GXDLMSObject implements IGXDLMSBase {
      * @return Generated action.
      */
     public final byte[][] activate(final GXDLMSClient client,
-            final SecurityPolicy security) {
+            final SecurityPolicy0 security) {
         return client.method(this, 1, security.ordinal(), DataType.ENUM);
     }
 
@@ -252,8 +258,8 @@ public class GXDLMSSecuritySetup extends GXDLMSObject implements IGXDLMSBase {
      * @return Generated action.
      */
     public final byte[][] activate(final GXDLMSClient client,
-            final Set<SecurityPolicy1> security) {
-        return client.method(this, 1, SecurityPolicy1.toInteger(security),
+            final Set<SecurityPolicy> security) {
+        return client.method(this, 1, SecurityPolicy.toInteger(security),
                 DataType.ENUM);
     }
 
@@ -575,27 +581,27 @@ public class GXDLMSSecuritySetup extends GXDLMSObject implements IGXDLMSBase {
         if (e.getIndex() == 1) {
             Security security = settings.getCipher().getSecurity();
             if (getVersion() == 0) {
-                SecurityPolicy policy = SecurityPolicy
+                SecurityPolicy0 policy = SecurityPolicy0
                         .values()[((Number) e.getParameters()).byteValue()];
-                setSecurityPolicy(policy);
-                if (policy == SecurityPolicy.AUTHENTICATED) {
+                setSecurityPolicy0(policy);
+                if (policy == SecurityPolicy0.AUTHENTICATED) {
                     settings.getCipher().setSecurity(Security.AUTHENTICATION);
-                } else if (policy == SecurityPolicy.ENCRYPTED) {
+                } else if (policy == SecurityPolicy0.ENCRYPTED) {
                     settings.getCipher().setSecurity(Security.ENCRYPTION);
-                } else if (policy == SecurityPolicy.AUTHENTICATED_ENCRYPTED) {
+                } else if (policy == SecurityPolicy0.AUTHENTICATED_ENCRYPTED) {
                     settings.getCipher()
                             .setSecurity(Security.AUTHENTICATION_ENCRYPTION);
                 }
             } else if (getVersion() == 1) {
-                java.util.Set<SecurityPolicy1> policy = SecurityPolicy1
+                java.util.Set<SecurityPolicy> policy = SecurityPolicy
                         .forValue(((Number) e.getParameters()).byteValue());
-                setSecurityPolicy1(policy);
-                if (policy.contains(SecurityPolicy1.AUTHENTICATED_RESPONSE)) {
+                setSecurityPolicy(policy);
+                if (policy.contains(SecurityPolicy.AUTHENTICATED_RESPONSE)) {
                     security = Security.forValue(security.getValue()
                             | Security.AUTHENTICATION.getValue());
                     settings.getCipher().setSecurity(security);
                 }
-                if (policy.contains(SecurityPolicy1.ENCRYPTED_RESPONSE)) {
+                if (policy.contains(SecurityPolicy.ENCRYPTED_RESPONSE)) {
                     security = Security.forValue(security.getValue()
                             | Security.ENCRYPTION.getValue());
                     settings.getCipher().setSecurity(security);
@@ -994,7 +1000,10 @@ public class GXDLMSSecuritySetup extends GXDLMSObject implements IGXDLMSBase {
             return GXCommon.logicalNameToBytes(getLogicalName());
         }
         if (e.getIndex() == 2) {
-            return new Integer(securityPolicy);
+            if (getVersion() == 0) {
+                return new Integer(securityPolicy0.ordinal());
+            }
+            return new Integer(SecurityPolicy.toInteger(securityPolicy));
         }
         if (e.getIndex() == 3) {
             return new Integer(getSecuritySuite().getValue());
@@ -1041,7 +1050,13 @@ public class GXDLMSSecuritySetup extends GXDLMSObject implements IGXDLMSBase {
             if (settings.isServer()) {
                 e.setError(ErrorCode.READ_WRITE_DENIED);
             } else {
-                this.securityPolicy = (Short) e.getValue();
+                if (getVersion() == 0) {
+                    securityPolicy0 =
+                            SecurityPolicy0.values()[(Short) e.getValue()];
+                } else {
+                    securityPolicy =
+                            SecurityPolicy.forValue((Short) e.getValue());
+                }
             }
         } else if (e.getIndex() == 3) {
             setSecuritySuite(SecuritySuite
@@ -1079,4 +1094,74 @@ public class GXDLMSSecuritySetup extends GXDLMSObject implements IGXDLMSBase {
         return epk.array();
     }
 
+    @Override
+    public final void load(final GXXmlReader reader) throws XMLStreamException {
+        securityPolicy = SecurityPolicy
+                .forValue(reader.readElementContentAsInt("SecurityPolicy"));
+        securityPolicy0 = SecurityPolicy0.values()[reader
+                .readElementContentAsInt("SecurityPolicy0")];
+        securitySuite = SecuritySuite.values()[reader
+                .readElementContentAsInt("SecuritySuite")];
+        String str = reader.readElementContentAsString("ClientSystemTitle");
+        if (str == null) {
+            clientSystemTitle = null;
+        } else {
+            clientSystemTitle = GXDLMSTranslator.hexToBytes(str);
+        }
+        str = reader.readElementContentAsString("ServerSystemTitle");
+        if (str == null) {
+            serverSystemTitle = null;
+        } else {
+            serverSystemTitle = GXDLMSTranslator.hexToBytes(str);
+        }
+        certificates.clear();
+        if (reader.isStartElement("Certificates", true)) {
+            while (reader.isStartElement("Item", true)) {
+                GXDLMSCertificateInfo it = new GXDLMSCertificateInfo();
+                certificates.add(it);
+                it.setEntity(CertificateEntity
+                        .forValue(reader.readElementContentAsInt("Entity")));
+                it.setType(CertificateType
+                        .forValue(reader.readElementContentAsInt("Type")));
+                it.setSerialNumber(
+                        reader.readElementContentAsString("SerialNumber"));
+                it.setIssuer(reader.readElementContentAsString("Issuer"));
+                it.setSubject(reader.readElementContentAsString("Subject"));
+                it.setSubjectAltName(
+                        reader.readElementContentAsString("SubjectAltName"));
+            }
+            reader.readEndElement("Certificates");
+        }
+    }
+
+    @Override
+    public final void save(final GXXmlWriter writer) throws XMLStreamException {
+        writer.writeElementString("SecurityPolicy",
+                SecurityPolicy.toInteger(securityPolicy));
+        writer.writeElementString("SecurityPolicy0", securityPolicy0.ordinal());
+        writer.writeElementString("SecuritySuite", securitySuite.ordinal());
+        writer.writeElementString("ClientSystemTitle",
+                GXDLMSTranslator.toHex(clientSystemTitle));
+        writer.writeElementString("ServerSystemTitle",
+                GXDLMSTranslator.toHex(serverSystemTitle));
+        if (certificates != null) {
+            writer.writeStartElement("Certificates");
+            for (GXDLMSCertificateInfo it : certificates) {
+                writer.writeStartElement("Item");
+                writer.writeElementString("Entity", it.getEntity().getValue());
+                writer.writeElementString("Type", it.getType().getValue());
+                writer.writeElementString("SerialNumber", it.getSerialNumber());
+                writer.writeElementString("Issuer", it.getIssuer());
+                writer.writeElementString("Subject", it.getSubject());
+                writer.writeElementString("SubjectAltName",
+                        it.getSubjectAltName());
+                writer.writeEndElement();
+            }
+            writer.writeEndElement();
+        }
+    }
+
+    @Override
+    public final void postLoad(final GXXmlReader reader) {
+    }
 }

@@ -34,6 +34,11 @@
 
 package gurux.dlms.objects;
 
+import java.util.ArrayList;
+import java.util.List;
+
+import javax.xml.stream.XMLStreamException;
+
 import gurux.dlms.GXByteBuffer;
 import gurux.dlms.GXDLMSClient;
 import gurux.dlms.GXDLMSSettings;
@@ -521,6 +526,131 @@ public class GXDLMSLimiter extends GXDLMSObject implements IGXDLMSBase {
                     .setScriptSelector(((Number) (tmp2[1])).intValue());
         } else {
             e.setError(ErrorCode.READ_WRITE_DENIED);
+        }
+    }
+
+    @Override
+    public final void load(final GXXmlReader reader) throws XMLStreamException {
+        if (reader.isStartElement("MonitoredValue", true)) {
+            ObjectType ot = ObjectType
+                    .forValue(reader.readElementContentAsInt("ObjectType"));
+            String ln = reader.readElementContentAsString("LN");
+            if (ot != ObjectType.NONE && ln != null) {
+                monitoredValue = reader.getObjects().findByLN(ot, ln);
+                // If item is not serialized yet.
+                if (monitoredValue == null) {
+                    monitoredValue = GXDLMSClient.createObject(ot);
+                    monitoredValue.setLogicalName(ln);
+                }
+            }
+            reader.readEndElement("MonitoredValue");
+        }
+        thresholdActive =
+                reader.readElementContentAsObject("ThresholdActive", null);
+        thresholdNormal =
+                reader.readElementContentAsObject("ThresholdNormal", null);
+        thresholdEmergency =
+                reader.readElementContentAsObject("ThresholdEmergency", null);
+        minOverThresholdDuration =
+                reader.readElementContentAsInt("MinOverThresholdDuration");
+        minUnderThresholdDuration =
+                reader.readElementContentAsInt("MinUnderThresholdDuration");
+        if (reader.isStartElement("EmergencyProfile", true)) {
+            emergencyProfile.setID(reader.readElementContentAsInt("ID"));
+            emergencyProfile.setActivationTime((GXDateTime) reader
+                    .readElementContentAsObject("Time", new GXDateTime()));
+            emergencyProfile
+                    .setDuration(reader.readElementContentAsInt("Duration"));
+            reader.readEndElement("EmergencyProfile");
+        }
+        List<Integer> list = new ArrayList<Integer>();
+        if (reader.isStartElement("EmergencyProfileGroupIDs", true)) {
+            while (reader.isStartElement("Value", false)) {
+                list.add(reader.readElementContentAsInt("Value"));
+            }
+            reader.readEndElement("EmergencyProfileGroupIDs");
+        }
+        emergencyProfileGroupIDs = GXCommon.toIntArray(list);
+        emergencyProfileActive = reader.readElementContentAsInt("Active") != 0;
+        if (reader.isStartElement("ActionOverThreshold", true)) {
+            actionOverThreshold
+                    .setLogicalName(reader.readElementContentAsString("LN"));
+            actionOverThreshold.setScriptSelector(
+                    reader.readElementContentAsInt("ScriptSelector"));
+            reader.readEndElement("ActionOverThreshold");
+        }
+        if (reader.isStartElement("ActionUnderThreshold", true)) {
+            actionUnderThreshold
+                    .setLogicalName(reader.readElementContentAsString("LN"));
+            actionUnderThreshold.setScriptSelector(
+                    reader.readElementContentAsInt("ScriptSelector"));
+            reader.readEndElement("ActionUnderThreshold");
+        }
+    }
+
+    @Override
+    public final void save(final GXXmlWriter writer) throws XMLStreamException {
+        if (monitoredValue != null) {
+            writer.writeStartElement("MonitoredValue");
+            writer.writeElementString("ObjectType",
+                    monitoredValue.getObjectType().ordinal());
+            writer.writeElementString("LN", monitoredValue.getLogicalName());
+            writer.writeEndElement();
+        }
+        writer.writeElementObject("ThresholdActive", thresholdActive);
+        writer.writeElementObject("ThresholdNormal", thresholdNormal);
+        writer.writeElementObject("ThresholdEmergency", thresholdEmergency);
+        writer.writeElementString("MinOverThresholdDuration",
+                minOverThresholdDuration);
+        writer.writeElementString("MinUnderThresholdDuration",
+                minUnderThresholdDuration);
+        if (emergencyProfile != null) {
+            writer.writeStartElement("EmergencyProfile");
+            writer.writeElementString("ID", emergencyProfile.getID());
+            writer.writeElementObject("Time",
+                    emergencyProfile.getActivationTime());
+            writer.writeElementString("Duration",
+                    emergencyProfile.getDuration());
+            writer.writeEndElement();
+        }
+        if (emergencyProfileGroupIDs != null) {
+            writer.writeStartElement("EmergencyProfileGroupIDs");
+            for (int it : emergencyProfileGroupIDs) {
+                writer.writeElementString("Value", it);
+            }
+            writer.writeEndElement();
+        }
+        writer.writeElementString("Active", emergencyProfileActive);
+
+        if (actionOverThreshold != null) {
+            writer.writeStartElement("ActionOverThreshold");
+            writer.writeElementString("LN",
+                    actionOverThreshold.getLogicalName());
+            writer.writeElementString("ScriptSelector",
+                    actionOverThreshold.getScriptSelector());
+            writer.writeEndElement();
+        }
+
+        if (actionUnderThreshold != null) {
+            writer.writeStartElement("ActionUnderThreshold");
+            writer.writeElementString("LN",
+                    actionUnderThreshold.getLogicalName());
+            writer.writeElementString("ScriptSelector",
+                    actionUnderThreshold.getScriptSelector());
+            writer.writeEndElement();
+        }
+    }
+
+    @Override
+    public final void postLoad(final GXXmlReader reader) {
+        // Upload Monitored Value after load.
+        if (monitoredValue != null) {
+            GXDLMSObject target =
+                    reader.getObjects().findByLN(monitoredValue.getObjectType(),
+                            monitoredValue.getLogicalName());
+            if (target != monitoredValue) {
+                monitoredValue = target;
+            }
         }
     }
 }

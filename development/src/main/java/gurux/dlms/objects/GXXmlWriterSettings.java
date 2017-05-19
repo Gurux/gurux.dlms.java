@@ -32,55 +32,36 @@
 // Full text may be retrieved at http://www.gnu.org/licenses/gpl-2.0.txt
 //---------------------------------------------------------------------------
 
-package gurux.dlms.objects.enums;
+package gurux.dlms.objects;
 
-import java.util.HashMap;
+/**
+ * XML write settings.
+ */
+public class GXXmlWriterSettings {
+    /**
+     * Are attribute values also serialized.
+     */
+    private boolean values;
 
-public enum GXDLMSPppSetupIPCPOptionType {
-    /*
-     * 
+    /**
+     * Constructor.
      */
-    IP_COMPRESSION_PROTOCOL(2),
-    /*
-     * 
-     */
-    PREF_LOCAL_IP(3),
-    /*
-     * 
-     */
-    PREF_PEER_IP(20),
-    /*
-     * 
-     */
-    GAO(21),
-    /*
-     * 
-     */
-    USIP(22);
-
-    private int intValue;
-    private static HashMap<Integer, GXDLMSPppSetupIPCPOptionType> mappings;
-
-    private static HashMap<Integer, GXDLMSPppSetupIPCPOptionType>
-            getMappings() {
-        if (mappings == null) {
-            synchronized (GXDLMSPppSetupIPCPOptionType.class) {
-                mappings = new HashMap<Integer, GXDLMSPppSetupIPCPOptionType>();
-            }
-        }
-        return mappings;
+    public GXXmlWriterSettings() {
+        values = true;
     }
 
-    GXDLMSPppSetupIPCPOptionType(final int value) {
-        intValue = value;
-        getMappings().put(new Integer(value), this);
+    /**
+     * @return Are attribute values also serialized.
+     */
+    public final boolean getValues() {
+        return values;
     }
 
-    public int getValue() {
-        return intValue;
-    }
-
-    public static GXDLMSPppSetupIPCPOptionType forValue(final int value) {
-        return getMappings().get(new Integer(value));
+    /**
+     * @param value
+     *            Are attribute values also serialized.
+     */
+    public final void setValues(final boolean value) {
+        values = value;
     }
 }

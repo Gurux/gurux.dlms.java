@@ -42,10 +42,16 @@ package gurux.dlms.objects;
 import gurux.dlms.enums.DataType;
 import gurux.dlms.enums.ObjectType;
 import gurux.dlms.internal.GXCommon;
-import gurux.dlms.objects.enums.GXDLMSScriptActionType;
+import gurux.dlms.objects.enums.ScriptActionType;
 
 public class GXDLMSScriptAction {
-    private GXDLMSScriptActionType type;
+
+    /**
+     * Executed object.
+     */
+    private GXDLMSObject target;
+
+    private ScriptActionType type;
     private ObjectType objectType;
     private String logicalName;
     private int index;
@@ -53,9 +59,24 @@ public class GXDLMSScriptAction {
     private DataType parameterType;
 
     /**
+     * @return Executed object.
+     */
+    public final GXDLMSObject getTarget() {
+        return target;
+    }
+
+    /**
+     * @param value
+     *            Executed object.
+     */
+    public final void setTarget(final GXDLMSObject value) {
+        target = value;
+    }
+
+    /**
      * @return Defines which action to be applied to the referenced object.
      */
-    public final GXDLMSScriptActionType getType() {
+    public final ScriptActionType getType() {
         return type;
     }
 
@@ -63,12 +84,13 @@ public class GXDLMSScriptAction {
      * @param value
      *            Defines which action to be applied to the referenced object.
      */
-    public final void setType(final GXDLMSScriptActionType value) {
+    public final void setType(final ScriptActionType value) {
         type = value;
     }
 
     /**
      * @return Executed object type.
+     * @deprecated use {@link #getTarget} instead.
      */
     public final ObjectType getObjectType() {
         return objectType;
@@ -77,6 +99,7 @@ public class GXDLMSScriptAction {
     /**
      * @param value
      *            Executed object type.
+     * @deprecated use {@link #setTarget} instead.
      */
     public final void setObjectType(final ObjectType value) {
         objectType = value;
@@ -84,6 +107,7 @@ public class GXDLMSScriptAction {
 
     /**
      * @return Logical name of executed object.
+     * @deprecated use {@link #getTarget} instead.
      */
     public final String getLogicalName() {
         return logicalName;
@@ -92,6 +116,7 @@ public class GXDLMSScriptAction {
     /**
      * @param value
      *            Logical name of executed object.
+     * @deprecated use {@link #setTarget} instead.
      */
     public final void setLogicalName(final String value) {
         logicalName = value;
@@ -147,6 +172,12 @@ public class GXDLMSScriptAction {
             tmp = GXCommon.toHex((byte[]) parameter, true);
         } else {
             tmp = String.valueOf(parameter);
+        }
+        if (target != null) {
+            return type.toString() + " "
+                    + String.valueOf(target.getObjectType()) + " "
+                    + target.getLogicalName() + " " + String.valueOf(index)
+                    + " " + tmp;
         }
         return type.toString() + " " + String.valueOf(objectType) + " "
                 + logicalName + " " + String.valueOf(index) + " " + tmp;

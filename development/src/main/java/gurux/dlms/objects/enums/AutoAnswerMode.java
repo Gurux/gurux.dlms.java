@@ -32,36 +32,27 @@
 // Full text may be retrieved at http://www.gnu.org/licenses/gpl-2.0.txt
 //---------------------------------------------------------------------------
 
-package gurux.dlms.objects;
+package gurux.dlms.objects.enums;
 
-import gurux.dlms.objects.enums.Ip4SetupIpOptionType;
-
-public class GXDLMSIp4SetupIpOption {
-    private Ip4SetupIpOptionType type;
-    private short length;
-    private byte[] data;
-
-    public final Ip4SetupIpOptionType getType() {
-        return type;
-    }
-
-    public final void setType(final Ip4SetupIpOptionType value) {
-        type = value;
-    }
-
-    public final short getLength() {
-        return length;
-    }
-
-    public final void setLength(final short value) {
-        length = value;
-    }
-
-    public final byte[] getData() {
-        return data;
-    }
-
-    public final void setData(final byte[] value) {
-        data = value;
-    }
+public enum AutoAnswerMode {
+    /**
+     * Line dedicated to the device.
+     */
+    DEVICE,
+    /**
+     * Shared line management with a limited number of calls allowed. Once the
+     * number of calls is reached, the window status becomes inactive until the
+     * next start date, whatever the result of the call,
+     */
+    CALL,
+    /**
+     * Shared line management with a limited number of successful calls allowed.
+     * Once the number of successful communications is reached, the window
+     * status becomes inactive until the next start date,
+     */
+    CONNECTED,
+    /**
+     * Currently no modem connected.
+     */
+    NONE
 }

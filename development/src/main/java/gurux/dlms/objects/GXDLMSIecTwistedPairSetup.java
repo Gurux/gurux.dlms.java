@@ -43,7 +43,10 @@ package gurux.dlms.objects;
 import java.util.ArrayList;
 import java.util.List;
 
+import javax.xml.stream.XMLStreamException;
+
 import gurux.dlms.GXDLMSSettings;
+import gurux.dlms.GXDLMSTranslator;
 import gurux.dlms.ValueEventArgs;
 import gurux.dlms.enums.DataType;
 import gurux.dlms.enums.ErrorCode;
@@ -296,5 +299,31 @@ public class GXDLMSIecTwistedPairSetup extends GXDLMSObject
         } else {
             e.setError(ErrorCode.READ_WRITE_DENIED);
         }
+    }
+
+    @Override
+    public final void load(final GXXmlReader reader) throws XMLStreamException {
+        mode = IecTwistedPairSetupMode.values()[reader
+                .readElementContentAsInt("Mode")];
+        speed = BaudRate.values()[reader.readElementContentAsInt("Speed")];
+        primaryAddresses = GXDLMSTranslator.hexToBytes(
+                reader.readElementContentAsString("PrimaryAddresses"));
+        tabis = GXDLMSTranslator
+                .hexToBytes(reader.readElementContentAsString("Tabis"));
+    }
+
+    @Override
+    public final void save(final GXXmlWriter writer) throws XMLStreamException {
+        writer.writeElementString("Mode", mode.ordinal());
+        writer.writeElementString("Speed", speed.ordinal());
+        writer.writeElementString("LN",
+                GXDLMSTranslator.toHex(primaryAddresses));
+        if (tabis != null) {
+            writer.writeElementString("LN", GXDLMSTranslator.toHex(tabis));
+        }
+    }
+
+    @Override
+    public final void postLoad(final GXXmlReader reader) {
     }
 }

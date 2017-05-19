@@ -77,6 +77,7 @@ import gurux.dlms.objects.GXDLMSObject;
 import gurux.dlms.objects.GXDLMSObjectCollection;
 import gurux.dlms.objects.GXDLMSProfileGeneric;
 import gurux.dlms.objects.GXDLMSRegister;
+import gurux.dlms.objects.GXXmlWriterSettings;
 import gurux.dlms.secure.GXDLMSSecureServer2;
 import gurux.net.GXNet;
 import gurux.net.enums.NetworkType;
@@ -416,10 +417,14 @@ public class GXDLMSBase extends GXDLMSSecureServer2
    * 
    * @param path
    *          File path.
+   * @throws IOException
+   * @throws XMLStreamException
    */
-  private void saveObjects(final String path) {
+  private void saveObjects(final String path)
+      throws XMLStreamException, IOException {
     synchronized (settingsLock) {
-      // getItems().save(path, true);
+      GXXmlWriterSettings settings = new GXXmlWriterSettings();
+      getItems().save(path, settings);
     }
   }
 
@@ -462,8 +467,13 @@ public class GXDLMSBase extends GXDLMSSecureServer2
 
   /**
    * Save meter settings.
+   * 
+   * @throws IOException
+   *           IO exception.
+   * @throws XMLStreamException
+   *           XML exception.
    */
-  private void saveSettings() {
+  private void saveSettings() throws XMLStreamException, IOException {
     if (getUseLogicalNameReferencing()) {
       saveObjects("AssociationLogicalName.xml");
     } else {
@@ -471,7 +481,16 @@ public class GXDLMSBase extends GXDLMSSecureServer2
     }
   }
 
-  private void updateAssociationView(final GXDLMSObjectCollection collection) {
+  /**
+   * Update association view.
+   * 
+   * @param collection
+   *          COSEM objects.
+   * @throws IOException
+   * @throws XMLStreamException
+   */
+  private void updateAssociationView(final GXDLMSObjectCollection collection)
+      throws XMLStreamException, IOException {
     // Add new items.
     boolean newItems = false;
     for (GXDLMSObject it : collection) {
@@ -500,7 +519,7 @@ public class GXDLMSBase extends GXDLMSSecureServer2
   }
 
   @Override
-  public final void onPostWrite(final ValueEventArgs[] args) {
+  public final void onPostWrite(final ValueEventArgs[] args) throws Exception {
     for (ValueEventArgs e : args) {
       // If association is updated.
       if (e.getTarget() instanceof GXDLMSAssociationLogicalName
@@ -523,7 +542,7 @@ public class GXDLMSBase extends GXDLMSSecureServer2
   }
 
   @Override
-  public final void onPreAction(final ValueEventArgs[] args) {
+  public final void onPreAction(final ValueEventArgs[] args) throws Exception {
 
   }
 

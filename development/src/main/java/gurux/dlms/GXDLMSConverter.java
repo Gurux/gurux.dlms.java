@@ -270,4 +270,203 @@ public class GXDLMSConverter {
         }
     }
 
+    @SuppressWarnings("rawtypes")
+    public static Class getDataType(final DataType value) {
+        if (value == DataType.NONE) {
+            return null;
+        }
+        if (value == DataType.OCTET_STRING) {
+            return byte[].class;
+        }
+        if (value == DataType.ENUM) {
+            return Enum.class;
+        }
+        if (value == DataType.INT8) {
+            return Byte.class;
+        }
+        if (value == DataType.INT16) {
+            return Short.class;
+        }
+        if (value == DataType.INT32) {
+            return Integer.class;
+        }
+        if (value == DataType.INT64) {
+            return Long.class;
+        }
+        if (value == DataType.TIME) {
+            return GXTime.class;
+        }
+        if (value == DataType.DATE) {
+            return GXDate.class;
+        }
+        if (value == DataType.DATETIME) {
+            return GXDateTime.class;
+        }
+        if (value == DataType.ARRAY) {
+            return Object[].class;
+        }
+        if (value == DataType.STRING) {
+            return String.class;
+        }
+        if (value == DataType.BOOLEAN) {
+            return Boolean.class;
+        }
+        if (value == DataType.FLOAT32) {
+            return Float.class;
+        }
+        if (value == DataType.FLOAT64) {
+            return Double.class;
+        }
+        throw new IllegalArgumentException("Invalid value.");
+    }
+
+    public static DataType getDLMSDataType(final Object value) {
+        if (value == null) {
+            return DataType.NONE;
+        }
+        if (value instanceof byte[]) {
+            return DataType.OCTET_STRING;
+        }
+        if (value instanceof Enum) {
+            return DataType.ENUM;
+        }
+        if (value instanceof Byte) {
+            return DataType.INT8;
+        }
+        if (value instanceof Short) {
+            return DataType.INT16;
+        }
+        if (value instanceof Integer) {
+            return DataType.INT32;
+        }
+        if (value instanceof Long) {
+            return DataType.INT64;
+        }
+        if (value instanceof GXTime) {
+            return DataType.TIME;
+        }
+        if (value instanceof GXDate) {
+            return DataType.DATE;
+        }
+
+        if (value instanceof java.util.Date || value instanceof GXDateTime) {
+            return DataType.DATETIME;
+        }
+        if (value.getClass().isArray()) {
+            return DataType.ARRAY;
+        }
+        if (value instanceof String) {
+            return DataType.STRING;
+        }
+        if (value instanceof Boolean) {
+            return DataType.BOOLEAN;
+        }
+        if (value instanceof Float) {
+            return DataType.FLOAT32;
+        }
+        if (value instanceof Double) {
+            return DataType.FLOAT64;
+        }
+        throw new IllegalArgumentException("Invalid value.");
+    }
+
+    public static Object changeType(Object value, DataType type) {
+        if (getDLMSDataType(value) == type) {
+            return value;
+        }
+        switch (type) {
+        case ARRAY:
+            throw new IllegalArgumentException("Can't change array types.");
+        case BCD:
+            break;
+        case BITSTRING:
+            break;
+        case BOOLEAN:
+            if (value instanceof String) {
+                return Boolean.parseBoolean((String) value);
+            }
+            return ((Number) value).longValue() != 0;
+        case COMPACT_ARRAY:
+            throw new IllegalArgumentException(
+                    "Can't change compact array types.");
+        case DATE:
+            return new GXDate((String) value);
+        case DATETIME:
+            return new GXDateTime((String) value);
+        case ENUM:
+            throw new IllegalArgumentException(
+                    "Can't change enumeration types.");
+        case FLOAT32:
+            if (value instanceof String) {
+                return Float.parseFloat((String) value);
+            }
+            return ((Number) value).floatValue();
+        case FLOAT64:
+            if (value instanceof String) {
+                return Double.parseDouble((String) value);
+            }
+            return ((Number) value).doubleValue();
+        case INT16:
+            if (value instanceof String) {
+                return Short.parseShort((String) value);
+            }
+            return ((Number) value).shortValue();
+        case INT32:
+            if (value instanceof String) {
+                return Integer.parseInt((String) value);
+            }
+            return ((Number) value).intValue();
+        case INT64:
+            if (value instanceof String) {
+                return Long.parseLong((String) value);
+            }
+            return ((Number) value).longValue();
+        case INT8:
+            if (value instanceof String) {
+                return Byte.parseByte((String) value);
+            }
+            return ((Number) value).byteValue();
+        case NONE:
+            return null;
+        case OCTET_STRING:
+            if (value instanceof String) {
+                return GXCommon.hexToBytes((String) value);
+            }
+            throw new IllegalArgumentException(
+                    "Can't change octect string type.");
+        case STRING:
+            return String.valueOf(value);
+        case STRING_UTF8:
+            return String.valueOf(value);
+        case STRUCTURE:
+            throw new IllegalArgumentException("Can't change structure types.");
+        case TIME:
+            return new GXTime((String) value);
+        case UINT16:
+            if (value instanceof String) {
+                return Integer.parseInt((String) value);
+            }
+            return ((Number) value).intValue();
+        case UINT32:
+            if (value instanceof String) {
+                return Long.parseLong((String) value);
+            }
+            return ((Number) value).longValue();
+        case UINT64:
+            if (value instanceof String) {
+                return Long.parseLong((String) value);
+            }
+            return ((Number) value).longValue();
+        case UINT8:
+            if (value instanceof String) {
+                return new Short(
+                        (short) (Short.parseShort((String) value) & 0xFF));
+            }
+            return ((Number) value).byteValue();
+        default:
+            break;
+        }
+        throw new IllegalArgumentException(
+                "Invalid data type: " + type.toString());
+    }
 }

@@ -37,6 +37,8 @@ package gurux.dlms.objects;
 import java.util.ArrayList;
 import java.util.List;
 
+import javax.xml.stream.XMLStreamException;
+
 import gurux.dlms.GXByteBuffer;
 import gurux.dlms.GXDLMSSettings;
 import gurux.dlms.ValueEventArgs;
@@ -285,5 +287,96 @@ public class GXDLMSRegisterMonitor extends GXDLMSObject implements IGXDLMSBase {
         } else {
             e.setError(ErrorCode.READ_WRITE_DENIED);
         }
+    }
+
+    @Override
+    public final void load(final GXXmlReader reader) throws XMLStreamException {
+        List<Object> tmp = new ArrayList<Object>();
+        if (reader.isStartElement("Thresholds", true)) {
+            while (reader.isStartElement("Value", false)) {
+                Object it = reader.readElementContentAsObject("Value", null);
+                tmp.add(it);
+            }
+            reader.readEndElement("Thresholds");
+        }
+        thresholds = tmp.toArray(new Object[tmp.size()]);
+        if (reader.isStartElement("MonitoredValue", true)) {
+            monitoredValue.setObjectType(ObjectType
+                    .forValue(reader.readElementContentAsInt("ObjectType")));
+            monitoredValue
+                    .setLogicalName(reader.readElementContentAsString("LN"));
+            monitoredValue
+                    .setAttributeIndex(reader.readElementContentAsInt("Index"));
+            reader.readEndElement("MonitoredValue");
+        }
+
+        List<GXDLMSActionSet> list = new ArrayList<GXDLMSActionSet>();
+        if (reader.isStartElement("Actions", true)) {
+            while (reader.isStartElement("Item", true)) {
+                GXDLMSActionSet it = new GXDLMSActionSet();
+                list.add(it);
+                if (reader.isStartElement("Up", true)) {
+                    it.getActionUp().setLogicalName(
+                            reader.readElementContentAsString("LN", null));
+                    it.getActionUp().setScriptSelector(
+                            reader.readElementContentAsInt("Selector"));
+                    reader.readEndElement("Up");
+                }
+                if (reader.isStartElement("Down", true)) {
+                    it.getActionUp().setLogicalName(
+                            reader.readElementContentAsString("LN", null));
+                    it.getActionUp().setScriptSelector(
+                            reader.readElementContentAsInt("Selector"));
+                    reader.readEndElement("Down");
+                }
+            }
+            reader.readEndElement("Actions");
+        }
+        actions = list.toArray(new GXDLMSActionSet[list.size()]);
+    }
+
+    @Override
+    public final void save(final GXXmlWriter writer) throws XMLStreamException {
+        if (thresholds != null) {
+            writer.writeStartElement("Thresholds");
+            for (Object it : thresholds) {
+                writer.writeElementObject("Value", it);
+            }
+            writer.writeEndElement();
+        }
+        if (monitoredValue != null) {
+            writer.writeStartElement("MonitoredValue");
+            writer.writeElementString("ObjectType",
+                    monitoredValue.getObjectType().getValue());
+            writer.writeElementString("LN", monitoredValue.getLogicalName());
+            writer.writeElementString("Index",
+                    monitoredValue.getAttributeIndex());
+            writer.writeEndElement();
+        }
+
+        if (actions != null) {
+            writer.writeStartElement("Actions");
+            for (GXDLMSActionSet it : actions) {
+                writer.writeStartElement("Item");
+                writer.writeStartElement("Up");
+                writer.writeElementString("LN",
+                        it.getActionUp().getLogicalName());
+                writer.writeElementString("Selector",
+                        it.getActionUp().getScriptSelector());
+                writer.writeEndElement();
+                writer.writeStartElement("Down");
+                writer.writeElementString("LN",
+                        it.getActionDown().getLogicalName());
+                writer.writeElementString("Selector",
+                        it.getActionDown().getScriptSelector());
+                writer.writeEndElement();
+                writer.writeEndElement();
+            }
+            writer.writeEndElement();
+        }
+    }
+
+    @Override
+    public final void postLoad(final GXXmlReader reader) {
     }
 }

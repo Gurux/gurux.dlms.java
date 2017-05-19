@@ -32,26 +32,55 @@
 // Full text may be retrieved at http://www.gnu.org/licenses/gpl-2.0.txt
 //---------------------------------------------------------------------------
 
-//
-// --------------------------------------------------------------------------
-//  Gurux Ltd
-// 
-//
-//
-// Filename:        $HeadURL$
 package gurux.dlms.objects.enums;
 
-public enum GXDLMSScriptActionType {
+import java.util.HashMap;
+
+public enum PppSetupIPCPOptionType {
     /*
-     * Nothing is executed.
+     * 
      */
-    NONE,
+    IP_COMPRESSION_PROTOCOL(2),
     /*
-     * Write attribute.
+     * 
      */
-    WRITE,
+    PREF_LOCAL_IP(3),
     /*
-     * Execute specific method
+     * 
      */
-    EXECUTE
+    PREF_PEER_IP(20),
+    /*
+     * 
+     */
+    GAO(21),
+    /*
+     * 
+     */
+    USIP(22);
+
+    private int intValue;
+    private static HashMap<Integer, PppSetupIPCPOptionType> mappings;
+
+    private static HashMap<Integer, PppSetupIPCPOptionType>
+            getMappings() {
+        if (mappings == null) {
+            synchronized (PppSetupIPCPOptionType.class) {
+                mappings = new HashMap<Integer, PppSetupIPCPOptionType>();
+            }
+        }
+        return mappings;
+    }
+
+    PppSetupIPCPOptionType(final int value) {
+        intValue = value;
+        getMappings().put(new Integer(value), this);
+    }
+
+    public int getValue() {
+        return intValue;
+    }
+
+    public static PppSetupIPCPOptionType forValue(final int value) {
+        return getMappings().get(new Integer(value));
+    }
 }

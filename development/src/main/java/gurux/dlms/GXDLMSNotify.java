@@ -247,7 +247,7 @@ public class GXDLMSNotify {
         Object value = obj.getValue(settings, e);
         dt = obj.getDataType(index);
         if (dt == DataType.NONE && value != null) {
-            dt = GXCommon.getValueType(value);
+            dt = GXDLMSConverter.getDLMSDataType(value);
         }
         GXCommon.setData(buff, dt, value);
     }

@@ -39,8 +39,11 @@ import java.security.Signature;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
+import javax.xml.stream.XMLStreamException;
+
 import gurux.dlms.GXByteBuffer;
 import gurux.dlms.GXDLMSSettings;
+import gurux.dlms.GXDLMSTranslator;
 import gurux.dlms.ValueEventArgs;
 import gurux.dlms.enums.AccessMode;
 import gurux.dlms.enums.Authentication;
@@ -453,5 +456,36 @@ public class GXDLMSAssociationShortName extends GXDLMSObject
         } else {
             e.setError(ErrorCode.READ_WRITE_DENIED);
         }
+    }
+
+    @Override
+    public final void load(final GXXmlReader reader) throws XMLStreamException {
+        String str = reader.readElementContentAsString("Secret");
+        if (str == null) {
+            llsSecret = null;
+        } else {
+            llsSecret = GXDLMSTranslator.hexToBytes(str);
+        }
+        str = reader.readElementContentAsString("HlsSecret");
+        if (str == null) {
+            hlsSecret = null;
+        } else {
+            hlsSecret = GXDLMSTranslator.hexToBytes(str);
+        }
+        securitySetupReference =
+                reader.readElementContentAsString("SecuritySetupReference");
+    }
+
+    @Override
+    public final void save(final GXXmlWriter writer) throws XMLStreamException {
+        writer.writeElementString("Secret", GXDLMSTranslator.toHex(llsSecret));
+        writer.writeElementString("HlsSecret",
+                GXDLMSTranslator.toHex(hlsSecret));
+        writer.writeElementString("SecuritySetupReference",
+                securitySetupReference);
+    }
+
+    @Override
+    public final void postLoad(final GXXmlReader reader) {
     }
 }

@@ -372,7 +372,7 @@ class GXStandardObisCodeCollection
      *            OBIS value.
      * @return OBIS value as integer.
      */
-    private static int getObisValue(String formula, int value) {
+    private static int getObisValue(final String formula, final int value) {
         return value + Integer.parseInt(formula.substring(1));
     }
 

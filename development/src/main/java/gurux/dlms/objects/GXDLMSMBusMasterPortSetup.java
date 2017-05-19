@@ -34,6 +34,8 @@
 
 package gurux.dlms.objects;
 
+import javax.xml.stream.XMLStreamException;
+
 import gurux.dlms.GXDLMSSettings;
 import gurux.dlms.ValueEventArgs;
 import gurux.dlms.enums.DataType;
@@ -169,5 +171,22 @@ public class GXDLMSMBusMasterPortSetup extends GXDLMSObject
         } else {
             e.setError(ErrorCode.READ_WRITE_DENIED);
         }
+    }
+
+    @Override
+    public final void load(final GXXmlReader reader) throws XMLStreamException {
+        commSpeed =
+                BaudRate.values()[reader.readElementContentAsInt("CommSpeed")];
+    }
+
+    @Override
+    public final void save(final GXXmlWriter writer) throws XMLStreamException {
+        if (commSpeed != BaudRate.BAUDRATE_2400) {
+            writer.writeElementString("CommSpeed", commSpeed.ordinal());
+        }
+    }
+
+    @Override
+    public final void postLoad(final GXXmlReader reader) {
     }
 }

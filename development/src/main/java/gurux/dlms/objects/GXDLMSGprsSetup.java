@@ -34,6 +34,8 @@
 
 package gurux.dlms.objects;
 
+import javax.xml.stream.XMLStreamException;
+
 import gurux.dlms.GXByteBuffer;
 import gurux.dlms.GXDLMSClient;
 import gurux.dlms.GXDLMSSettings;
@@ -269,5 +271,75 @@ public class GXDLMSGprsSetup extends GXDLMSObject implements IGXDLMSBase {
         } else {
             e.setError(ErrorCode.READ_WRITE_DENIED);
         }
+    }
+
+    @Override
+    public final void load(final GXXmlReader reader) throws XMLStreamException {
+        apn = reader.readElementContentAsString("APN");
+        pinCode = reader.readElementContentAsInt("PINCode");
+        if (reader.isStartElement("DefaultQualityOfService", true)) {
+            defaultQualityOfService.setPrecedence(
+                    reader.readElementContentAsInt("Precedence"));
+            defaultQualityOfService
+                    .setDelay(reader.readElementContentAsInt("Delay"));
+            defaultQualityOfService.setReliability(
+                    reader.readElementContentAsInt("Reliability"));
+            defaultQualityOfService.setPeakThroughput(
+                    reader.readElementContentAsInt("PeakThroughput"));
+            defaultQualityOfService.setMeanThroughput(
+                    reader.readElementContentAsInt("MeanThroughput"));
+            reader.readEndElement("DefaultQualityOfService");
+        }
+        if (reader.isStartElement("RequestedQualityOfService", true)) {
+            requestedQualityOfService.setPrecedence(
+                    reader.readElementContentAsInt("Precedence"));
+            requestedQualityOfService
+                    .setDelay(reader.readElementContentAsInt("Delay"));
+            requestedQualityOfService.setReliability(
+                    reader.readElementContentAsInt("Reliability"));
+            requestedQualityOfService.setPeakThroughput(
+                    reader.readElementContentAsInt("PeakThroughput"));
+            requestedQualityOfService.setMeanThroughput(
+                    reader.readElementContentAsInt("MeanThroughput"));
+            reader.readEndElement("DefaultQualityOfService");
+        }
+    }
+
+    @Override
+    public final void save(final GXXmlWriter writer) throws XMLStreamException {
+        writer.writeElementString("APN", apn);
+        writer.writeElementString("PINCode", pinCode);
+        if (defaultQualityOfService != null) {
+            writer.writeStartElement("DefaultQualityOfService");
+            writer.writeElementString("Precedence",
+                    defaultQualityOfService.getPrecedence());
+            writer.writeElementString("Delay",
+                    defaultQualityOfService.getDelay());
+            writer.writeElementString("Reliability",
+                    defaultQualityOfService.getReliability());
+            writer.writeElementString("PeakThroughput",
+                    defaultQualityOfService.getPeakThroughput());
+            writer.writeElementString("MeanThroughput",
+                    defaultQualityOfService.getMeanThroughput());
+            writer.writeEndElement();
+        }
+        if (requestedQualityOfService != null) {
+            writer.writeStartElement("RequestedQualityOfService");
+            writer.writeElementString("Precedence",
+                    requestedQualityOfService.getPrecedence());
+            writer.writeElementString("Delay",
+                    requestedQualityOfService.getDelay());
+            writer.writeElementString("Reliability",
+                    requestedQualityOfService.getReliability());
+            writer.writeElementString("PeakThroughput",
+                    requestedQualityOfService.getPeakThroughput());
+            writer.writeElementString("MeanThroughput",
+                    requestedQualityOfService.getMeanThroughput());
+            writer.writeEndElement();
+        }
+    }
+
+    @Override
+    public final void postLoad(final GXXmlReader reader) {
     }
 }

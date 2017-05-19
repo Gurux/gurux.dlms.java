@@ -34,6 +34,8 @@
 
 package gurux.dlms.objects;
 
+import javax.xml.stream.XMLStreamException;
+
 import gurux.dlms.GXDLMSSettings;
 import gurux.dlms.ValueEventArgs;
 import gurux.dlms.enums.DataType;
@@ -280,5 +282,28 @@ public class GXDLMSMBusSlavePortSetup extends GXDLMSObject
         } else {
             e.setError(ErrorCode.READ_WRITE_DENIED);
         }
+    }
+
+    @Override
+    public final void load(final GXXmlReader reader) throws XMLStreamException {
+        defaultBaud = BaudRate.values()[reader
+                .readElementContentAsInt("DefaultBaud")];
+        availableBaud = BaudRate.values()[reader
+                .readElementContentAsInt("AvailableBaud")];
+        addressState = AddressState.values()[reader
+                .readElementContentAsInt("AddressState")];
+        busAddress = reader.readElementContentAsInt("BusAddress");
+    }
+
+    @Override
+    public final void save(final GXXmlWriter writer) throws XMLStreamException {
+        writer.writeElementString("DefaultBaud", defaultBaud.ordinal());
+        writer.writeElementString("AvailableBaud", availableBaud.ordinal());
+        writer.writeElementString("AddressState", addressState.ordinal());
+        writer.writeElementString("BusAddress", busAddress);
+    }
+
+    @Override
+    public final void postLoad(final GXXmlReader reader) {
     }
 }

@@ -34,8 +34,10 @@
 
 package gurux.dlms.objects;
 
+import gurux.dlms.internal.GXCommon;
+
 public class GXDLMSWeekProfile {
-    private String name;
+    private byte[] name;
     private int monday;
     private int tuesday;
     private int wednesday;
@@ -50,11 +52,19 @@ public class GXDLMSWeekProfile {
     public GXDLMSWeekProfile() {
     }
 
-    public final String getName() {
+    public final byte[] getName() {
         return name;
     }
 
     public final void setName(final String value) {
+        if (value == null) {
+            name = null;
+        } else {
+            name = value.getBytes();
+        }
+    }
+
+    public final void setName(final byte[] value) {
         name = value;
     }
 
@@ -116,6 +126,9 @@ public class GXDLMSWeekProfile {
 
     @Override
     public final String toString() {
-        return name;
+        if (name == null) {
+            return null;
+        }
+        return GXCommon.toHex(name);
     }
 }

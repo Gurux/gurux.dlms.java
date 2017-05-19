@@ -755,7 +755,8 @@ final class GXDLMSLNCommandHandler {
                     if (e.isByteArray()) {
                         bb.set(actionReply);
                     } else {
-                        GXCommon.setData(bb, GXCommon.getValueType(actionReply),
+                        GXCommon.setData(bb,
+                                GXDLMSConverter.getDLMSDataType(actionReply),
                                 actionReply);
                     }
                 } else {

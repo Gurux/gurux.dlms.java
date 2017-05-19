@@ -40,6 +40,8 @@ import java.util.Enumeration;
 import java.util.Hashtable;
 import java.util.List;
 
+import javax.xml.stream.XMLStreamException;
+
 import gurux.dlms.GXByteBuffer;
 import gurux.dlms.GXDLMSClient;
 import gurux.dlms.GXDLMSSettings;
@@ -534,5 +536,62 @@ public class GXDLMSImageTransfer extends GXDLMSObject implements IGXDLMSBase {
 
     public final byte[][] imageActivate(final GXDLMSClient client) {
         return client.method(this, 4, new Integer(0), DataType.INT8);
+    }
+
+    @Override
+    public final void load(final GXXmlReader reader) throws XMLStreamException {
+        imageBlockSize = reader.readElementContentAsInt("ImageBlockSize");
+        imageTransferredBlocksStatus = reader
+                .readElementContentAsString("ImageTransferredBlocksStatus");
+        imageFirstNotTransferredBlockNumber = reader.readElementContentAsLong(
+                "ImageFirstNotTransferredBlockNumber");
+        imageTransferEnabled =
+                reader.readElementContentAsInt("ImageTransferEnabled") != 0;
+        imageTransferStatus = ImageTransferStatus.values()[reader
+                .readElementContentAsInt("ImageTransferStatus")];
+
+        List<GXDLMSImageActivateInfo> list =
+                new ArrayList<GXDLMSImageActivateInfo>();
+        if (reader.isStartElement("ImageActivateInfo", true)) {
+            while (reader.isStartElement("Item", true)) {
+                GXDLMSImageActivateInfo it = new GXDLMSImageActivateInfo();
+                it.setSize(reader.readElementContentAsULong("Size"));
+                it.setIdentification(
+                        reader.readElementContentAsString("Identification"));
+                it.setSignature(reader.readElementContentAsString("Signature"));
+                list.add(it);
+            }
+            reader.readEndElement("ImageActivateInfo");
+        }
+        imageActivateInfo =
+                list.toArray(new GXDLMSImageActivateInfo[list.size()]);
+    }
+
+    @Override
+    public final void save(final GXXmlWriter writer) throws XMLStreamException {
+        writer.writeElementString("ImageBlockSize", imageBlockSize);
+        writer.writeElementString("ImageTransferredBlocksStatus",
+                imageTransferredBlocksStatus);
+        writer.writeElementString("ImageFirstNotTransferredBlockNumber",
+                imageFirstNotTransferredBlockNumber);
+        writer.writeElementString("ImageTransferEnabled", imageTransferEnabled);
+        writer.writeElementString("ImageTransferStatus",
+                imageTransferStatus.ordinal());
+        if (imageActivateInfo != null) {
+            writer.writeStartElement("ImageActivateInfo");
+            for (GXDLMSImageActivateInfo it : imageActivateInfo) {
+                writer.writeStartElement("Item");
+                writer.writeElementString("Size", it.getSize());
+                writer.writeElementString("Identification",
+                        it.getIdentification());
+                writer.writeElementString("Signature", it.getSignature());
+                writer.writeEndElement();
+            }
+            writer.writeEndElement();
+        }
+    }
+
+    @Override
+    public final void postLoad(final GXXmlReader reader) {
     }
 }

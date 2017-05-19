@@ -36,6 +36,8 @@ package gurux.dlms.objects;
 
 import java.text.NumberFormat;
 
+import javax.xml.stream.XMLStreamException;
+
 import gurux.dlms.GXByteBuffer;
 import gurux.dlms.GXDLMSClient;
 import gurux.dlms.GXDLMSSettings;
@@ -310,4 +312,23 @@ public class GXDLMSRegister extends GXDLMSObject implements IGXDLMSBase {
             e.setError(ErrorCode.READ_WRITE_DENIED);
         }
     }
+
+    @Override
+    public void load(final GXXmlReader reader) throws XMLStreamException {
+        unit = reader.readElementContentAsInt("Unit", 0);
+        setScaler(reader.readElementContentAsDouble("Scaler", 1));
+        setValue(reader.readElementContentAsObject("Value", null));
+    }
+
+    @Override
+    public void save(final GXXmlWriter writer) throws XMLStreamException {
+        writer.writeElementString("Unit", unit);
+        writer.writeElementString("Scaler", getScaler(), 1);
+        writer.writeElementObject("Value", getValue());
+    }
+
+    @Override
+    public void postLoad(final GXXmlReader reader) {
+    }
+
 }

@@ -36,7 +36,7 @@ package gurux.dlms.objects.enums;
 
 import java.util.HashMap;
 
-public enum GXDLMSIp4SetupIpOptionType {
+public enum Ip4SetupIpOptionType {
     /**
      * If this option is present, the device shall be allowed to send security,
      * compartmentation, handling restrictions and TCC (closed user group)
@@ -79,22 +79,21 @@ public enum GXDLMSIp4SetupIpOptionType {
     INTERNET_TIMESTAMP(0x44);
 
     private int intValue;
-    private static HashMap<Integer, GXDLMSIp4SetupIpOptionType> mappings;
+    private static HashMap<Integer, Ip4SetupIpOptionType> mappings;
 
-    private static java.util.HashMap<Integer, GXDLMSIp4SetupIpOptionType>
+    private static java.util.HashMap<Integer, Ip4SetupIpOptionType>
             getMappings() {
         if (mappings == null) {
-            synchronized (GXDLMSIp4SetupIpOptionType.class) {
+            synchronized (Ip4SetupIpOptionType.class) {
                 if (mappings == null) {
-                    mappings =
-                            new HashMap<Integer, GXDLMSIp4SetupIpOptionType>();
+                    mappings = new HashMap<Integer, Ip4SetupIpOptionType>();
                 }
             }
         }
         return mappings;
     }
 
-    GXDLMSIp4SetupIpOptionType(final int value) {
+    Ip4SetupIpOptionType(final int value) {
         intValue = value;
         getMappings().put(new Integer(value), this);
     }
@@ -103,7 +102,7 @@ public enum GXDLMSIp4SetupIpOptionType {
         return intValue;
     }
 
-    public static GXDLMSIp4SetupIpOptionType forValue(final int value) {
+    public static Ip4SetupIpOptionType forValue(final int value) {
         return getMappings().get(new Integer(value));
     }
 }

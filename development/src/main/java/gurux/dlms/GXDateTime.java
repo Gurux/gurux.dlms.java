@@ -237,7 +237,10 @@ public class GXDateTime {
             String sep = String.valueOf(separator);
             shortDatePattern.addAll(GXCommon.split(tmp.get(0), sep));
             shortTimePattern.addAll(GXCommon.split(tmp.get(1), ":"));
-
+            // Add seconds if not used.
+            if (!shortTimePattern.contains("ss")) {
+                shortTimePattern.add("ss");
+            }
             List<String> values = GXCommon.split(value.trim(),
                     new char[] { separator, ':', ' ' });
             if (shortDatePattern.size() != values.size()
@@ -247,24 +250,23 @@ public class GXDateTime {
             }
             for (int pos = 0; pos != shortDatePattern.size(); ++pos) {
                 boolean ignore = false;
-                if (values.get(pos) == "*") {
+                if ("*".equals(values.get(pos))) {
                     ignore = true;
                 }
-                if (shortDatePattern.get(pos) == "yyyy") {
+                String val = shortDatePattern.get(pos);
+                if ("yyyy".compareToIgnoreCase(val) == 0) {
                     if (ignore) {
                         year = -1;
                     } else {
                         year = Integer.parseInt(values.get(pos));
                     }
-                } else if ("M"
-                        .compareToIgnoreCase(shortDatePattern.get(pos)) == 0) {
+                } else if ("M".compareToIgnoreCase(val) == 0) {
                     if (ignore) {
                         month = -1;
                     } else {
                         month = Integer.parseInt(values.get(pos));
                     }
-                } else if ("d"
-                        .compareToIgnoreCase(shortDatePattern.get(pos)) == 0) {
+                } else if ("d".compareToIgnoreCase(val) == 0) {
                     if (ignore) {
                         day = -1;
                     } else {
@@ -278,25 +280,23 @@ public class GXDateTime {
             if (values.size() > 3) {
                 for (int pos = 0; pos != shortTimePattern.size(); ++pos) {
                     boolean ignore = false;
-                    if (values.get(3 + pos) == "*") {
+                    if ("*".equals(values.get(3 + pos))) {
                         ignore = true;
                     }
-                    if ("h".compareToIgnoreCase(
-                            shortTimePattern.get(pos)) == 0) {
+                    String val = shortTimePattern.get(pos);
+                    if ("h".compareToIgnoreCase(val) == 0) {
                         if (ignore) {
                             hour = -1;
                         } else {
                             hour = Integer.parseInt(values.get(3 + pos));
                         }
-                    } else if ("mm".compareToIgnoreCase(
-                            shortTimePattern.get(pos)) == 0) {
+                    } else if ("mm".compareToIgnoreCase(val) == 0) {
                         if (ignore) {
                             min = -1;
                         } else {
                             min = Integer.parseInt(values.get(3 + pos));
                         }
-                    } else if ("ss".compareToIgnoreCase(
-                            shortTimePattern.get(pos)) == 0) {
+                    } else if ("ss".compareToIgnoreCase(val) == 0) {
                         if (ignore) {
                             sec = -1;
                         } else {
@@ -308,13 +308,14 @@ public class GXDateTime {
                     }
                 }
             }
+            meterCalendar = Calendar.getInstance();
             init(year, month, day, hour, min, sec, 0);
         }
     }
 
     /**
      * @return Used calendar.
-     * @deprecated use {@link #getLocalCalendar} instead.
+     * @deprecated use {@link #getMeterCalendar} instead.
      */
     public final Calendar getCalendar() {
         return meterCalendar;
@@ -469,6 +470,95 @@ public class GXDateTime {
 
     public final void setStatus(final java.util.Set<ClockStatus> forValue) {
         status = forValue;
+    }
+
+    public String toFormatString() {
+        SimpleDateFormat sd = new SimpleDateFormat();
+        int pos;
+        if (skip.size() != 0) {
+            String dateSeparator = null;
+            String timeSeparator = ":";
+            // Separate date and time parts.
+            List<String> tmp = GXCommon.split(sd.toPattern(), " ");
+            List<String> shortDatePattern = new ArrayList<String>();
+            List<String> shortTimePattern = new ArrayList<String>();
+            // Find date time separator.
+            char separator = 0;
+            for (char it : tmp.get(0).toCharArray()) {
+                if (dateSeparator == null && !Character.isDigit(it)) {
+                    dateSeparator = String.valueOf(it);
+                } else if (!Character.isLetter(it)) {
+                    separator = it;
+                    break;
+                }
+            }
+            String sep = String.valueOf(separator);
+            shortDatePattern.addAll(GXCommon.split(tmp.get(0), sep));
+            shortTimePattern.addAll(GXCommon.split(tmp.get(1), ":"));
+            if (!shortTimePattern.contains("ss")) {
+                shortTimePattern.add("ss");
+            }
+            if (this instanceof GXTime) {
+                shortDatePattern.clear();
+            } else {
+                if (skip.contains(DateTimeSkips.YEAR)) {
+                    pos = shortDatePattern.indexOf("yyyy");
+                    shortDatePattern.set(pos, "*");
+                }
+                if (skip.contains(DateTimeSkips.MONTH)) {
+                    pos = shortDatePattern.indexOf("M");
+                    shortDatePattern.set(pos, "*");
+                }
+                if (skip.contains(DateTimeSkips.DAY)) {
+                    pos = shortDatePattern.indexOf("d");
+                    shortDatePattern.set(pos, "*");
+                }
+            }
+            if (this instanceof GXDate) {
+                shortTimePattern.clear();
+            } else {
+                if (skip.contains(DateTimeSkips.HOUR)) {
+                    pos = shortTimePattern.indexOf("h");
+                    if (pos == -1) {
+                        pos = shortTimePattern.indexOf("H");
+                    }
+                    shortTimePattern.set(pos, "*");
+                }
+                if (skip.contains(DateTimeSkips.MINUTE)) {
+                    pos = shortTimePattern.indexOf("mm");
+                    shortTimePattern.set(pos, "*");
+                }
+                if (skip.contains(DateTimeSkips.SECOND)
+                        || (shortTimePattern.size() == 1 && getLocalCalendar()
+                                .get(Calendar.SECOND) == 0)) {
+                    pos = shortTimePattern.indexOf("ss");
+                    shortTimePattern.set(pos, "*");
+                }
+            }
+            String format = null;
+            if (!shortDatePattern.isEmpty()) {
+                format = String.join(dateSeparator,
+                        shortDatePattern.toArray(new String[0]));
+            }
+            if (!shortTimePattern.isEmpty()) {
+                if (format != null) {
+                    format += " ";
+                } else {
+                    format = "";
+                }
+                format += String.join(timeSeparator,
+                        shortTimePattern.toArray(new String[0]));
+            }
+            if (format == "H") {
+                return String.valueOf(getLocalCalendar().get(Calendar.HOUR));
+            }
+            if (format == null) {
+                return "";
+            }
+            sd = new SimpleDateFormat(format);
+            return sd.format(getLocalCalendar().getTime());
+        }
+        return sd.format(getLocalCalendar().getTime());
     }
 
     @Override
@@ -649,6 +739,8 @@ public class GXDateTime {
      * 
      * @param deviation
      *            Used deviation.
+     * @param dst
+     *            Is daylight saving time used.
      * @return Time zone.
      */
     public static TimeZone getTimeZone(final int deviation, final boolean dst) {

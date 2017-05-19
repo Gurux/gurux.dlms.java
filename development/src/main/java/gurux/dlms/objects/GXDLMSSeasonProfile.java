@@ -37,9 +37,9 @@ package gurux.dlms.objects;
 import gurux.dlms.GXDateTime;
 
 public class GXDLMSSeasonProfile {
-    private String name;
+    private byte[] name;
     private GXDateTime start;
-    private String weekName;
+    private byte[] weekName;
 
     /**
      * Constructor.
@@ -66,9 +66,26 @@ public class GXDLMSSeasonProfile {
     }
 
     /**
+     * Constructor.
+     * 
+     * @param forName
+     *            name of season profile.
+     * @param forStart
+     *            Start time.
+     * @param forWeekName
+     *            Week name.
+     */
+    public GXDLMSSeasonProfile(final String forName, final GXDateTime forStart,
+            final byte[] forWeekName) {
+        setName(forName);
+        setStart(forStart);
+        setWeekName(forWeekName);
+    }
+
+    /**
      * @return Name of season profile.
      */
-    public final String getName() {
+    public final byte[] getName() {
         return name;
     }
 
@@ -77,6 +94,18 @@ public class GXDLMSSeasonProfile {
      *            Name of season profile.
      */
     public final void setName(final String value) {
+        if (value == null) {
+            name = null;
+        } else {
+            name = value.getBytes();
+        }
+    }
+
+    /**
+     * @param value
+     *            Name of season profile.
+     */
+    public final void setName(final byte[] value) {
         name = value;
     }
 
@@ -96,9 +125,21 @@ public class GXDLMSSeasonProfile {
     }
 
     /**
+     * @param value
+     *            Week name of season profile.
+     */
+    public final void setWeekName(final String value) {
+        if (value == null) {
+            weekName = null;
+        } else {
+            weekName = value.getBytes();
+        }
+    }
+
+    /**
      * @return Week name of season profile.
      */
-    public final String getWeekName() {
+    public final byte[] getWeekName() {
         return weekName;
     }
 
@@ -106,7 +147,7 @@ public class GXDLMSSeasonProfile {
      * @param value
      *            Week name of season profile.
      */
-    public final void setWeekName(final String value) {
+    public final void setWeekName(final byte[] value) {
         weekName = value;
     }
 

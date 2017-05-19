@@ -34,6 +34,8 @@
 
 package gurux.dlms.objects;
 
+import javax.xml.stream.XMLStreamException;
+
 import gurux.dlms.GXByteBuffer;
 import gurux.dlms.GXDLMSClient;
 import gurux.dlms.GXDLMSSettings;
@@ -48,8 +50,8 @@ import gurux.dlms.internal.GXCommon;
 public class GXDLMSDemandRegister extends GXDLMSObject implements IGXDLMSBase {
     private int scaler;
     private int unit;
-    private Object currentAvarageValue;
-    private Object lastAvarageValue;
+    private Object currentAverageValue;
+    private Object lastAverageValue;
     private Object status;
     private GXDateTime captureTime = new GXDateTime();
     private GXDateTime startTimeCurrent = new GXDateTime();
@@ -89,31 +91,31 @@ public class GXDLMSDemandRegister extends GXDLMSObject implements IGXDLMSBase {
     /**
      * @return Current average value of COSEM Data object.
      */
-    public final Object getCurrentAvarageValue() {
-        return currentAvarageValue;
+    public final Object getCurrentAverageValue() {
+        return currentAverageValue;
     }
 
     /**
      * @param value
      *            Current average value of COSEM Data object.
      */
-    public final void setCurrentAvarageValue(final Object value) {
-        currentAvarageValue = value;
+    public final void setCurrentAverageValue(final Object value) {
+        currentAverageValue = value;
     }
 
     /**
      * @return Last average value of COSEM Data object.
      */
-    public final Object getLastAvarageValue() {
-        return lastAvarageValue;
+    public final Object getLastAverageValue() {
+        return lastAverageValue;
     }
 
     /**
      * @param value
      *            Last average value of COSEM Data object.
      */
-    public final void setLastAvarageValue(final Object value) {
-        lastAvarageValue = value;
+    public final void setLastAverageValue(final Object value) {
+        lastAverageValue = value;
     }
 
     /**
@@ -225,8 +227,8 @@ public class GXDLMSDemandRegister extends GXDLMSObject implements IGXDLMSBase {
     public final Object[] getValues() {
         String str = "Scaler: " + String.valueOf(getScaler()) + " Unit: "
                 + getUnit().toString();
-        return new Object[] { getLogicalName(), getCurrentAvarageValue(),
-                getLastAvarageValue(), str, getStatus(), getCaptureTime(),
+        return new Object[] { getLogicalName(), getCurrentAverageValue(),
+                getLastAverageValue(), str, getStatus(), getCaptureTime(),
                 getStartTimeCurrent(), new Long(getPeriod()),
                 new Long(getNumberOfPeriods()) };
     }
@@ -345,10 +347,10 @@ public class GXDLMSDemandRegister extends GXDLMSObject implements IGXDLMSBase {
             return GXCommon.logicalNameToBytes(getLogicalName());
         }
         if (e.getIndex() == 2) {
-            return getCurrentAvarageValue();
+            return getCurrentAverageValue();
         }
         if (e.getIndex() == 3) {
-            return getLastAvarageValue();
+            return getLastAverageValue();
         }
         if (e.getIndex() == 4) {
             GXByteBuffer data = new GXByteBuffer();
@@ -386,9 +388,9 @@ public class GXDLMSDemandRegister extends GXDLMSObject implements IGXDLMSBase {
         if (e.getIndex() == 1) {
             setLogicalName(GXCommon.toLogicalName(e.getValue()));
         } else if (e.getIndex() == 2) {
-            setCurrentAvarageValue(e.getValue());
+            setCurrentAverageValue(e.getValue());
         } else if (e.getIndex() == 3) {
-            setLastAvarageValue(e.getValue());
+            setLastAverageValue(e.getValue());
         } else if (e.getIndex() == 4) {
             // Set default values.
             if (e.getValue() == null) {
@@ -450,5 +452,47 @@ public class GXDLMSDemandRegister extends GXDLMSObject implements IGXDLMSBase {
         } else {
             e.setError(ErrorCode.READ_WRITE_DENIED);
         }
+    }
+
+    @Override
+    public final void load(final GXXmlReader reader) throws XMLStreamException {
+        currentAverageValue =
+                reader.readElementContentAsObject("CurrentAverageValue", null);
+        lastAverageValue =
+                reader.readElementContentAsObject("LastAverageValue", null);
+        setScaler(reader.readElementContentAsDouble("Scaler", 1));
+        unit = reader.readElementContentAsInt("Unit");
+        status = reader.readElementContentAsObject("Status", null);
+        String str = reader.readElementContentAsString("CaptureTime");
+        if (str == null) {
+            captureTime = null;
+        } else {
+            captureTime = new GXDateTime(str);
+        }
+        str = reader.readElementContentAsString("StartTimeCurrent");
+        if (str == null) {
+            startTimeCurrent = null;
+        } else {
+            startTimeCurrent = new GXDateTime(str);
+        }
+        period = reader.readElementContentAsInt("Period");
+        numberOfPeriods = reader.readElementContentAsInt("NumberOfPeriods");
+    }
+
+    @Override
+    public final void save(final GXXmlWriter writer) throws XMLStreamException {
+        writer.writeElementObject("CurrentAverageValue", currentAverageValue);
+        writer.writeElementObject("LastAverageValue", lastAverageValue);
+        writer.writeElementString("Scaler", getScaler(), 1);
+        writer.writeElementString("Unit", unit);
+        writer.writeElementObject("Status", status);
+        writer.writeElementString("CaptureTime", captureTime);
+        writer.writeElementString("StartTimeCurrent", startTimeCurrent);
+        writer.writeElementString("Period", period);
+        writer.writeElementString("NumberOfPeriods", numberOfPeriods);
+    }
+
+    @Override
+    public final void postLoad(final GXXmlReader reader) {
     }
 }

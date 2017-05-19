@@ -34,16 +34,23 @@
 
 package gurux.dlms.objects;
 
+import java.util.ArrayList;
+import java.util.List;
+
+import javax.xml.stream.XMLStreamException;
+
 import gurux.dlms.GXByteBuffer;
+import gurux.dlms.GXDLMSConverter;
 import gurux.dlms.GXDLMSSettings;
+import gurux.dlms.GXDLMSTranslator;
 import gurux.dlms.ValueEventArgs;
 import gurux.dlms.enums.DataType;
 import gurux.dlms.enums.ErrorCode;
 import gurux.dlms.enums.ObjectType;
 import gurux.dlms.internal.GXCommon;
-import gurux.dlms.objects.enums.GXDLMSPppSetupIPCPOptionType;
-import gurux.dlms.objects.enums.GXDLMSPppSetupLcpOptionType;
 import gurux.dlms.objects.enums.PppAuthenticationType;
+import gurux.dlms.objects.enums.PppSetupIPCPOptionType;
+import gurux.dlms.objects.enums.PppSetupLcpOptionType;
 
 public class GXDLMSPppSetup extends GXDLMSObject implements IGXDLMSBase {
     private GXDLMSPppSetupIPCPOption[] ipcpOptions;
@@ -251,7 +258,8 @@ public class GXDLMSPppSetup extends GXDLMSObject implements IGXDLMSBase {
                             it.getType().getValue());
                     GXCommon.setData(data, DataType.UINT8,
                             new Integer(it.getLength()));
-                    GXCommon.setData(data, GXCommon.getValueType(it.getData()),
+                    GXCommon.setData(data,
+                            GXDLMSConverter.getDLMSDataType(it.getData()),
                             it.getData());
                 }
             }
@@ -271,7 +279,8 @@ public class GXDLMSPppSetup extends GXDLMSObject implements IGXDLMSBase {
                             it.getType().getValue());
                     GXCommon.setData(data, DataType.UINT8,
                             new Integer(it.getLength()));
-                    GXCommon.setData(data, GXCommon.getValueType(it.getData()),
+                    GXCommon.setData(data,
+                            GXDLMSConverter.getDLMSDataType(it.getData()),
                             it.getData());
                 }
             }
@@ -304,7 +313,7 @@ public class GXDLMSPppSetup extends GXDLMSObject implements IGXDLMSBase {
             if (e.getValue() instanceof Object[]) {
                 for (Object item : (Object[]) e.getValue()) {
                     GXDLMSPppSetupLcpOption it = new GXDLMSPppSetupLcpOption();
-                    it.setType(GXDLMSPppSetupLcpOptionType.forValue(
+                    it.setType(PppSetupLcpOptionType.forValue(
                             ((Number) ((Object[]) item)[0]).intValue()));
                     it.setLength(((Number) ((Object[]) item)[1]).intValue());
                     it.setData(((Object[]) item)[2]);
@@ -320,7 +329,7 @@ public class GXDLMSPppSetup extends GXDLMSObject implements IGXDLMSBase {
                 for (Object item : (Object[]) e.getValue()) {
                     GXDLMSPppSetupIPCPOption it =
                             new GXDLMSPppSetupIPCPOption();
-                    it.setType(GXDLMSPppSetupIPCPOptionType.forValue(
+                    it.setType(PppSetupIPCPOptionType.forValue(
                             ((Number) ((Object[]) item)[0]).intValue()));
                     it.setLength(((Number) ((Object[]) item)[1]).intValue());
                     it.setData(((Object[]) item)[2]);
@@ -335,5 +344,76 @@ public class GXDLMSPppSetup extends GXDLMSObject implements IGXDLMSBase {
         } else {
             e.setError(ErrorCode.READ_WRITE_DENIED);
         }
+    }
+
+    @Override
+    public final void load(final GXXmlReader reader) throws XMLStreamException {
+        phyReference = reader.readElementContentAsString("PHYReference");
+        List<GXDLMSPppSetupLcpOption> options =
+                new ArrayList<GXDLMSPppSetupLcpOption>();
+        if (reader.isStartElement("LCPOptions", true)) {
+            while (reader.isStartElement("Item", true)) {
+                GXDLMSPppSetupLcpOption it = new GXDLMSPppSetupLcpOption();
+                it.setType(PppSetupLcpOptionType
+                        .forValue(reader.readElementContentAsInt("Type")));
+                it.setLength(reader.readElementContentAsInt("Length"));
+                it.setData(reader.readElementContentAsObject("Data", null));
+            }
+            reader.readEndElement("LCPOptions");
+        }
+        lcpOptions =
+                options.toArray(new GXDLMSPppSetupLcpOption[options.size()]);
+
+        List<GXDLMSPppSetupIPCPOption> list =
+                new ArrayList<GXDLMSPppSetupIPCPOption>();
+        if (reader.isStartElement("IPCPOptions", true)) {
+            while (reader.isStartElement("Item", true)) {
+                GXDLMSPppSetupIPCPOption it = new GXDLMSPppSetupIPCPOption();
+                it.setType(PppSetupIPCPOptionType
+                        .forValue(reader.readElementContentAsInt("Type")));
+                it.setLength(reader.readElementContentAsInt("Length"));
+                it.setData(reader.readElementContentAsObject("Data", null));
+            }
+            reader.readEndElement("IPCPOptions");
+        }
+        ipcpOptions = list.toArray(new GXDLMSPppSetupIPCPOption[list.size()]);
+
+        userName = GXDLMSTranslator
+                .hexToBytes(reader.readElementContentAsString("UserName"));
+        password = GXDLMSTranslator
+                .hexToBytes(reader.readElementContentAsString("Password"));
+    }
+
+    @Override
+    public final void save(final GXXmlWriter writer) throws XMLStreamException {
+        writer.writeElementString("PHYReference", phyReference);
+        if (lcpOptions != null) {
+            writer.writeStartElement("LCPOptions");
+            for (GXDLMSPppSetupLcpOption it : lcpOptions) {
+                writer.writeStartElement("Item");
+                writer.writeElementString("Type", it.getType().getValue());
+                writer.writeElementString("Length", it.getLength());
+                writer.writeElementObject("Data", it.getData());
+                writer.writeEndElement();
+            }
+            writer.writeEndElement();
+        }
+        if (ipcpOptions != null) {
+            writer.writeStartElement("IPCPOptions");
+            for (GXDLMSPppSetupIPCPOption it : ipcpOptions) {
+                writer.writeStartElement("Item");
+                writer.writeElementString("Type", it.getType().getValue());
+                writer.writeElementString("Length", it.getLength());
+                writer.writeElementObject("Data", it.getData());
+                writer.writeEndElement();
+            }
+            writer.writeEndElement();
+        }
+        writer.writeElementString("UserName", GXDLMSTranslator.toHex(userName));
+        writer.writeElementString("Password", GXDLMSTranslator.toHex(password));
+    }
+
+    @Override
+    public final void postLoad(final GXXmlReader reader) {
     }
 }

@@ -72,6 +72,7 @@ import gurux.dlms.objects.GXDLMSImageTransfer;
 import gurux.dlms.objects.GXDLMSIp4Setup;
 import gurux.dlms.objects.GXDLMSLimiter;
 import gurux.dlms.objects.GXDLMSMBusClient;
+import gurux.dlms.objects.GXDLMSMBusMasterPortSetup;
 import gurux.dlms.objects.GXDLMSMBusSlavePortSetup;
 import gurux.dlms.objects.GXDLMSMacAddressSetup;
 import gurux.dlms.objects.GXDLMSModemConfiguration;
@@ -227,6 +228,8 @@ abstract class GXDLMS {
             return new GXDLMSObject();
         case PUSH_SETUP:
             return new GXDLMSPushSetup();
+        case MBUS_MASTER_PORT_SETUP:
+            return new GXDLMSMBusMasterPortSetup();
         default:
             return new GXDLMSObject();
         }
@@ -373,7 +376,7 @@ abstract class GXDLMS {
             }
         } else {
             if (tp == DataType.NONE) {
-                tp = GXCommon.getValueType(value);
+                tp = GXDLMSConverter.getDLMSDataType(value);
                 // If data type is not defined for Date Time it is write as
                 // octet string.
                 if (tp == DataType.DATETIME) {

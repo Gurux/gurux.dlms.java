@@ -34,6 +34,8 @@
 
 package gurux.dlms.objects;
 
+import javax.xml.stream.XMLStreamException;
+
 import gurux.dlms.GXDLMSClient;
 import gurux.dlms.GXDLMSSettings;
 import gurux.dlms.ValueEventArgs;
@@ -245,5 +247,25 @@ public class GXDLMSDisconnectControl extends GXDLMSObject
         } else {
             e.setError(ErrorCode.READ_WRITE_DENIED);
         }
+    }
+
+    @Override
+    public final void load(final GXXmlReader reader) throws XMLStreamException {
+        outputState = reader.readElementContentAsInt("OutputState") != 0;
+        controlState = ControlState.values()[reader
+                .readElementContentAsInt("ControlState")];
+        controlMode = ControlMode.values()[reader
+                .readElementContentAsInt("ControlMode")];
+    }
+
+    @Override
+    public final void save(final GXXmlWriter writer) throws XMLStreamException {
+        writer.writeElementString("OutputState", outputState);
+        writer.writeElementString("ControlState", controlState.ordinal());
+        writer.writeElementString("ControlMode", controlMode.ordinal());
+    }
+
+    @Override
+    public final void postLoad(final GXXmlReader reader) {
     }
 }
