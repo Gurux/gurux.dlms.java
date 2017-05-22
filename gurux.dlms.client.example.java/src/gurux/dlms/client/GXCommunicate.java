@@ -325,7 +325,7 @@ public class GXCommunicate {
                     }
                 }
                 if (replyStr.length() == 0 || replyStr.charAt(0) != '/') {
-                    throw new Exception("Invalid responce.");
+                    throw new Exception("Invalid responce : " + replyStr);
                 }
                 String manufactureID = replyStr.substring(1, 4);
                 if (manufacturer.getIdentification()
