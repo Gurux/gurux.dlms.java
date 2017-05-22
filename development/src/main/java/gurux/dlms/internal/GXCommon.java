@@ -524,20 +524,21 @@ public final class GXCommon {
      * Reserved for internal use.
      */
     public static void toBitString(final StringBuilder sb, final byte value,
-            final int count2) {
-        int count = count2;
-        if (count > 8) {
-            count = 8;
-        }
-        char[] data = new char[count];
-        for (int pos = 0; pos != count; ++pos) {
-            if ((value & (1 << pos)) != 0) {
-                data[count - pos - 1] = '1';
-            } else {
-                data[count - pos - 1] = '0';
+            final int count) {
+
+        int count2 = count;
+        if (count2 > 0) {
+            if (count2 > 8) {
+                count2 = 8;
+            }
+            for (int pos = 7; pos != 8 - count2 - 1; --pos) {
+                if ((value & (1 << pos)) != 0) {
+                    sb.append('1');
+                } else {
+                    sb.append('0');
+                }
             }
         }
-        sb.append(data);
     }
 
     /**
