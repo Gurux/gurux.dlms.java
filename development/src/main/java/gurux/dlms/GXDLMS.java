@@ -888,10 +888,13 @@ abstract class GXDLMS {
                         .getInterfaceType() == InterfaceType.HDLC) {
                     messages.add(
                             GXDLMS.getHdlcFrame(p.getSettings(), frame, reply));
-                    if (p.getSettings().isServer()) {
-                        frame = 0;
-                    } else {
-                        frame = p.getSettings().getNextSend(false);
+                    if (reply.position() != reply.size()) {
+                        if (p.getSettings().isServer()
+                                || p.getCommand() == Command.SET_REQUEST) {
+                            frame = 0;
+                        } else {
+                            frame = p.getSettings().getNextSend(false);
+                        }
                     }
                 } else if (p.getSettings()
                         .getInterfaceType() == InterfaceType.PDU) {
