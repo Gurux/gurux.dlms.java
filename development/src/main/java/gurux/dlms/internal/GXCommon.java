@@ -2060,29 +2060,25 @@ public final class GXCommon {
             final Object value) {
         if (value instanceof String) {
             byte val = 0;
-            int index = 0;
-            GXByteBuffer tmp = new GXByteBuffer();
-            String str = new StringBuilder((String) value).reverse().toString();
+            String str = (String) value;
             setObjectCount(str.length(), buff);
-            for (char it : str.toCharArray()) {
+            int index = 7;
+            for (int pos = 0; pos != str.length(); ++pos) {
+                char it = str.charAt(pos);
                 if (it == '1') {
-                    val |= (byte) (1 << index++);
-                } else if (it == '0') {
-                    index++;
-                } else {
+                    val |= (byte) (1 << index);
+                } else if (it != '0') {
                     throw new RuntimeException("Not a bit string.");
                 }
-                if (index == 8) {
-                    index = 0;
-                    tmp.setUInt8(val);
+                --index;
+                if (index == -1) {
+                    index = 7;
+                    buff.setUInt8(val);
                     val = 0;
                 }
             }
-            if (index != 0) {
-                tmp.setUInt8(val);
-            }
-            for (int pos = tmp.size() - 1; pos != -1; --pos) {
-                buff.setUInt8(tmp.getUInt8(pos));
+            if (index != 7) {
+                buff.setUInt8(val);
             }
         } else if (value instanceof byte[]) {
             byte[] arr = (byte[]) value;
