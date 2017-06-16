@@ -1919,7 +1919,7 @@ abstract class GXDLMS {
                     }
                 } else {
                     throw new GXDLMSException(
-                            "parseApplicationAssociationResponse failed. "
+                            "HandleActionResponseNormal failed. "
                                     + "Invalid tag.");
                 }
                 if (data.getXml() != null) {
@@ -2744,11 +2744,47 @@ abstract class GXDLMS {
         if ((data.getMoreData().getValue()
                 & RequestTypes.FRAME.getValue()) == 0) {
             data.getData().position(data.getData().position() - 1);
-            settings.getCipher().decrypt(null, data.getData());
+            AesGcmParameter p =
+                    settings.getCipher().decrypt(null, data.getData());
             data.setCommand(Command.NONE);
-            getPdu(settings, data);
+            if (p.getSecurity() != null) {
+                try {
+                    getPdu(settings, data);
+                } catch (Exception ex) {
+                    if (data.getXml() == null) {
+                        throw ex;
+                    }
+                }
+            }
             if (data.getXml() != null) {
+                data.getXml().appendStartTag(Command.GENERAL_CIPHERING);
+                data.getXml().appendLine(TranslatorTags.TRANSACTION_ID, null,
+                        data.getXml().integerToHex(p.getInvocationCounter(), 16,
+                                true));
+                data.getXml().appendLine(TranslatorTags.ORIGINATOR_SYSTEM_TITLE,
+                        null, GXCommon.toHex(p.getSystemTitle(), false));
+                data.getXml().appendLine(TranslatorTags.RECIPIENT_SYSTEM_TITLE,
+                        null,
+                        GXCommon.toHex(p.getRecipientSystemTitle(), false));
+                data.getXml().appendLine(TranslatorTags.DATE_TIME, null,
+                        GXCommon.toHex(p.getDateTime(), false));
+                data.getXml().appendLine(TranslatorTags.OTHER_INFORMATION, null,
+                        GXCommon.toHex(p.getOtherInformation(), false));
 
+                data.getXml().appendStartTag(TranslatorTags.KEY_INFO);
+                data.getXml().appendStartTag(TranslatorTags.AGREED_KEY);
+                data.getXml().appendLine(TranslatorTags.KEY_PARAMETERS, null,
+                        data.getXml().integerToHex(p.getKeyParameters(), 2,
+                                true));
+                data.getXml().appendLine(TranslatorTags.KEY_CIPHERED_DATA, null,
+                        GXCommon.toHex(p.getKeyCipheredData(), false));
+                data.getXml().appendEndTag(TranslatorTags.AGREED_KEY);
+                data.getXml().appendEndTag(TranslatorTags.KEY_INFO);
+
+                data.getXml().appendLine(TranslatorTags.CIPHERED_CONTENT, null,
+                        GXCommon.toHex(p.getCipheredContent(), false));
+
+                data.getXml().appendEndTag(Command.GENERAL_CIPHERING);
             }
         }
     }

@@ -91,7 +91,7 @@ final class GXDLMSLNCommandHandler {
             final GXByteBuffer replyData, final GXDLMSTranslatorStructure xml)
             throws Exception {
         // Return error if connection is not established.
-        if (xml == null && !settings.isConnected()) {
+        if (xml == null && !settings.acceptConnection()) {
             replyData.set(GXDLMSServerBase.generateConfirmedServiceError(
                     ConfirmedServiceError.INITIATE_ERROR, ServiceError.SERVICE,
                     Service.UNSUPPORTED.getValue()));
@@ -717,7 +717,7 @@ final class GXDLMSLNCommandHandler {
         }
         GXDLMSObject obj =
                 settings.getObjects().findByLN(ot, GXCommon.toLogicalName(ln));
-        if (!settings.isConnected()
+        if (!settings.acceptConnection()
                 && (ci != ObjectType.ASSOCIATION_LOGICAL_NAME.getValue()
                         || id != 1)) {
             replyData.set(GXDLMSServerBase.generateConfirmedServiceError(
@@ -796,7 +796,7 @@ final class GXDLMSLNCommandHandler {
             final GXDLMSServerBase server, final GXByteBuffer data,
             final GXByteBuffer reply, final GXDLMSTranslatorStructure xml) {
         // Return error if connection is not established.
-        if (xml == null && !settings.isConnected()) {
+        if (xml == null && !settings.acceptConnection()) {
             reply.set(GXDLMSServerBase.generateConfirmedServiceError(
                     ConfirmedServiceError.INITIATE_ERROR, ServiceError.SERVICE,
                     Service.UNSUPPORTED.getValue()));

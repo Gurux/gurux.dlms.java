@@ -199,8 +199,6 @@ final class GXDLMSChippering {
             throw new IllegalArgumentException("cryptedData");
         }
         byte[] tmp;
-        // byte[] cipheredContent, tmp, transactionId, originatorSystemTitle,
-        // recipientSystemTitle;
         int len, cmd = data.getUInt8();
         switch (cmd) {
         case Command.GENERAL_GLO_CIPHERING:
@@ -227,13 +225,14 @@ final class GXDLMSChippering {
         default:
             throw new IllegalArgumentException("cryptedData");
         }
-
+        int value = 0;
+        long transactionId = 0;
         if (cmd == Command.GENERAL_CIPHERING) {
             len = GXCommon.getObjectCount(data);
             tmp = new byte[len];
             data.get(tmp);
-            GXByteBuffer transactionId = new GXByteBuffer(tmp);
-            p.setInvocationCounter(transactionId.getInt64());
+            GXByteBuffer t = new GXByteBuffer(tmp);
+            transactionId = t.getInt64();
             len = GXCommon.getObjectCount(data);
             tmp = new byte[len];
             data.get(tmp);
@@ -247,34 +246,30 @@ final class GXDLMSChippering {
             if (len != 0) {
                 tmp = new byte[len];
                 data.get(tmp);
-                // data.setTime(((GXDateTime) GXDLMSClient.changeType(tmp,
-                // DataType.DATETIME)).getValue());
+                p.setDateTime(tmp);
             }
             // other-information
             len = data.getUInt8();
             if (len != 0) {
-                byte[] otherInformation = new byte[len];
-                data.get(otherInformation);
+                tmp = new byte[len];
+                data.get(tmp);
+                p.setOtherInformation(tmp);
             }
             // KeyInfo OPTIONAL
             len = data.getUInt8();
-            // AgreedKey CHOICE
-            int tag = data.getUInt8();
+            // AgreedKey CHOICE tag.
+            data.getUInt8();
             // key-parameters
             len = data.getUInt8();
-            int value = data.getUInt8();
-            byte[] algID = GXCommon.hexToBytes("60857405080300");
+            value = data.getUInt8();
+            p.setKeyParameters(value);
             if (value == 1) {
                 // KeyAgreement.ONE_PASS_DIFFIE_HELLMAN
                 // key-ciphered-data
                 len = GXCommon.getObjectCount(data);
-                byte[] cipheredData = new byte[len];
-                data.get(cipheredData);
-                GXByteBuffer kdf = new GXByteBuffer(GXASymmetric.generateKDF(
-                        "SHA-256", p.getSharedSecret(), 256, algID,
-                        p.getSystemTitle(), p.getRecipientSystemTitle(), null,
-                        null, SecuritySuite.ECDH_ECDSA_AES_GCM_128_SHA_256));
-                p.setBlockCipherKey(kdf.array());
+                tmp = new byte[len];
+                data.get(tmp);
+                p.setKeyCipheredData(tmp);
             } else if (value == 2) {
                 // KeyAgreement.STATIC_UNIFIED_MODEL
                 len = GXCommon.getObjectCount(data);
@@ -282,6 +277,28 @@ final class GXDLMSChippering {
                     throw new IllegalArgumentException(
                             "Invalid key parameters");
                 }
+            } else {
+                throw new IllegalArgumentException("key-parameters");
+            }
+        }
+        len = GXCommon.getObjectCount(data);
+        p.setCipheredContent(data.remaining());
+        byte sc = (byte) data.getUInt8();
+        Security security = Security.forValue(sc & 0x30);
+        SecuritySuite ss = SecuritySuite.forValue(sc & 0x3);
+        if (ss != SecuritySuite.AES_GCM_128) {
+            byte[] algID = GXCommon.hexToBytes("60857405080300");
+            if (value == 1) {
+                if (p.getSharedSecret() != null) {
+                    GXByteBuffer kdf =
+                            new GXByteBuffer(GXASymmetric.generateKDF("SHA-256",
+                                    p.getSharedSecret(), 256, algID,
+                                    p.getSystemTitle(),
+                                    p.getRecipientSystemTitle(), null, null,
+                                    SecuritySuite.ECDH_ECDSA_AES_GCM_128_SHA_256));
+                    p.setBlockCipherKey(kdf.array());
+                }
+            } else if (value == 2) {
                 GXByteBuffer tmp2 = new GXByteBuffer();
                 if (p.getSharedSecret() == null) {
                     byte[] z = GXCommon.getSharedSecret(c,
@@ -289,7 +306,7 @@ final class GXDLMSChippering {
                     p.setSharedSecret(z);
                 }
                 tmp2.setUInt8(0x8);
-                tmp2.set(transactionId.getData(), 0, 8);
+                tmp2.setUInt64(transactionId);
                 tmp2.set(p.getRecipientSystemTitle());
                 GXByteBuffer kdf =
                         new GXByteBuffer(GXASymmetric.generateKDF("SHA-256",
@@ -297,14 +314,8 @@ final class GXDLMSChippering {
                                 p.getSystemTitle(), tmp2.array(), null, null,
                                 SecuritySuite.ECDH_ECDSA_AES_GCM_128_SHA_256));
                 p.setBlockCipherKey(kdf.subArray(0, 16));
-            } else {
-                throw new IllegalArgumentException("key-parameters");
             }
         }
-        len = GXCommon.getObjectCount(data);
-        byte sc = (byte) data.getUInt8();
-        Security security = Security.forValue(sc & 0x30);
-        SecuritySuite ss = SecuritySuite.forValue(sc & 0x3);
         p.setSecurity(security);
         long invocationCounter = data.getUInt32();
         p.setInvocationCounter(invocationCounter);
@@ -322,6 +333,9 @@ final class GXDLMSChippering {
             // Check tag.
             encryptAesGcm(p, encryptedData);
             if (!GXDLMSChipperingStream.tagsEquals(tag, p.getCountTag())) {
+                if (transactionId != 0) {
+                    p.setInvocationCounter(transactionId);
+                }
                 throw new GXDLMSException("Decrypt failed. Invalid tag.");
             }
             return encryptedData;
@@ -342,6 +356,9 @@ final class GXDLMSChippering {
         GXDLMSChipperingStream gcm = new GXDLMSChipperingStream(security, true,
                 p.getBlockCipherKey(), aad, iv, tag);
         gcm.write(ciphertext);
+        if (transactionId != 0) {
+            p.setInvocationCounter(transactionId);
+        }
         return gcm.flushFinalBlock();
     }
 }

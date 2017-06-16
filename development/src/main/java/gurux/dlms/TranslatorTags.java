@@ -68,5 +68,14 @@ final class TranslatorTags {
     static final int CIPHERED_SERVICE = 0xFF43;
     static final int SYSTEM_TITLE = 0xFF44;
     static final int DATA_BLOCK = 0xFF45;
+    static final int TRANSACTION_ID = 0xFF46;
+    static final int ORIGINATOR_SYSTEM_TITLE = 0xFF47;
+    static final int RECIPIENT_SYSTEM_TITLE = 0xFF48;
+    static final int OTHER_INFORMATION = 0xFF49;
+    static final int KEY_INFO = 0xFF50;
+    static final int AGREED_KEY = 0xFF51;
+    static final int KEY_PARAMETERS = 0xFF52;
+    static final int KEY_CIPHERED_DATA = 0xFF53;
+    static final int CIPHERED_CONTENT = 0xFF54;
 
 }

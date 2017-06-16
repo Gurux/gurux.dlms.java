@@ -184,6 +184,12 @@ public class GXDLMSSettings {
     private boolean connected = false;
 
     /**
+     * Can user access meter data anonymously (Without AARQ/AARE messages). In
+     * DLMS standard this is known as Pre-established application associations.
+     */
+    private boolean allowAnonymousAccess = false;
+
+    /**
      * Maximum receivers PDU size.
      */
     private int maxPduSize = MAX_RECEIVE_PDU_SIZE;
@@ -234,11 +240,6 @@ public class GXDLMSSettings {
      * List of server or client objects.
      */
     private final GXDLMSObjectCollection objects;
-
-    /**
-     * Is authentication Required.
-     */
-    private boolean isAuthenticationRequired;
 
     /**
      * Cipher interface that is used to cipher PDU.
@@ -361,7 +362,7 @@ public class GXDLMSSettings {
      * @return Is connection accepted.
      */
     public final boolean acceptConnection() {
-        return connected
+        return connected || allowAnonymousAccess
                 || (cipher != null && cipher.getSharedSecret() != null);
     }
 
@@ -912,5 +913,20 @@ public class GXDLMSSettings {
      */
     final void setSkipFrameCheck(final boolean value) {
         skipFrameCheck = value;
+    }
+
+    /**
+     * @return Can user access meter data anonymously.
+     */
+    public boolean isAllowAnonymousAccess() {
+        return allowAnonymousAccess;
+    }
+
+    /**
+     * @param value
+     *            Can user access meter data anonymously.
+     */
+    public void setAllowAnonymousAccess(final boolean value) {
+        allowAnonymousAccess = value;
     }
 }

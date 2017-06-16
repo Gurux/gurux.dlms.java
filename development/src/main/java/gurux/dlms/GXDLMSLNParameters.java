@@ -236,7 +236,8 @@ class GXDLMSLNParameters {
     }
 
     /**
-     * @return Invoke ID.
+     * @return Get Invoke ID and priority. This can be used for Priority
+     *         Management.
      */
     public final long getInvokeId() {
         return invokeId;
@@ -244,7 +245,8 @@ class GXDLMSLNParameters {
 
     /**
      * @param value
-     *            Invoke ID.
+     *            Set Invoke ID and priority. This can be used for Priority
+     *            Management.
      */
     public final void setInvokeId(final long value) {
         invokeId = value;

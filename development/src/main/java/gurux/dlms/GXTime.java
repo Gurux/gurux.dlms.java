@@ -75,7 +75,7 @@ public class GXTime extends GXDateTime {
      *            Date value.
      */
     public GXTime(final GXDateTime forvalue) {
-        super(forvalue.getCalendar());
+        super(forvalue.getLocalCalendar());
         getSkip().addAll(forvalue.getSkip());
         getSkip().add(DateTimeSkips.YEAR);
         getSkip().add(DateTimeSkips.MONTH);

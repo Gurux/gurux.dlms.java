@@ -140,6 +140,21 @@ public abstract class GXDLMSServer2 {
     }
 
     /**
+     * @return Can user access meter data anonymously.
+     */
+    public boolean isAllowAnonymousAccess() {
+        return getSettings().isAllowAnonymousAccess();
+    }
+
+    /**
+     * @param value
+     *            Can user access meter data anonymously.
+     */
+    public void setAllowAnonymousAccess(final boolean value) {
+        getSettings().setAllowAnonymousAccess(value);
+    }
+
+    /**
      * @return Get settings.
      */
     public final GXDLMSSettings getSettings() {

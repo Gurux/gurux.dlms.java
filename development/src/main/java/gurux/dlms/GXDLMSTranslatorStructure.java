@@ -319,8 +319,24 @@ public class GXDLMSTranslatorStructure {
      * @return Integer as string.
      */
     public final String integerToHex(final long value, final int desimals) {
-        if (showNumericsAsHex
-                && outputType == TranslatorOutputType.SIMPLE_XML) {
+        return integerToHex(value, desimals, false);
+    }
+
+    /**
+     * Convert integer to string.
+     * 
+     * @param value
+     *            Converted value.
+     * @param desimals
+     *            Amount of decimals.
+     * @param forceHex
+     *            Force value as hex.
+     * @return Integer as string.
+     */
+    public final String integerToHex(final long value, final int desimals,
+            final boolean forceHex) {
+        if (forceHex || (showNumericsAsHex
+                && outputType == TranslatorOutputType.SIMPLE_XML)) {
             return GXCommon.integerToHex(value, desimals);
         }
         return String.valueOf(value);

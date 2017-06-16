@@ -845,7 +845,11 @@ public class GXDLMSTranslator {
                     value.getUInt8();
                     xml.appendLine(TranslatorTags.REASON, "Value",
                             ReleaseRequestReason.forValue(value.getUInt8())
-                                    .toString());
+                                    .toString().toLowerCase());
+                    if (value.available() != 0) {
+                        GXAPDU.parsePDU2(settings, settings.getCipher(), value,
+                                xml);
+                    }
                 }
                 xml.appendEndTag(cmd);
                 break;
@@ -922,7 +926,9 @@ public class GXDLMSTranslator {
                 }
                 if (!omitNameSpace) {
                     // CHECKSTYLE:OFF
-                    if (cmd != Command.AARE && cmd != Command.AARQ) {
+                    if (cmd != Command.AARE && cmd != Command.AARQ
+                            && cmd != Command.RELEASE_REQUEST
+                            && cmd != Command.RELEASE_RESPONSE) {
                         sb.append(
                                 "<x:xDLMS-APDU xmlns:x=\"http://www.dlms.com/COSEMpdu\">\r\n");
                     } else {
@@ -933,7 +939,9 @@ public class GXDLMSTranslator {
                 }
                 sb.append(xml.toString());
                 if (!omitNameSpace) {
-                    if (cmd != Command.AARE && cmd != Command.AARQ) {
+                    if (cmd != Command.AARE && cmd != Command.AARQ
+                            && cmd != Command.RELEASE_REQUEST
+                            && cmd != Command.RELEASE_RESPONSE) {
                         sb.append("</x:xDLMS-APDU>\r\n");
                     } else {
                         sb.append("</x:aCSE-APDU>\r\n");
@@ -1014,6 +1022,9 @@ public class GXDLMSTranslator {
             s.getData().set(tmp);
             break;
         case Command.GENERAL_GLO_CIPHERING:
+            s.setCommand(tag);
+            break;
+        case Command.GENERAL_CIPHERING:
             s.setCommand(tag);
             break;
         default:
@@ -1139,8 +1150,17 @@ public class GXDLMSTranslator {
                 GXByteBuffer bb = new GXByteBuffer();
                 tmp = GXCommon.hexToBytes(getValue(node, s));
                 bb.set(tmp);
+                if (s.getSettings().isServer()) {
+                    s.getSettings().setProposedConformance(
+                            Conformance.forValue(0xFFFFFF));
+                }
                 GXAPDU.parseInitiate(false, s.getSettings(),
                         s.getSettings().getCipher(), bb, null);
+                // Update proposed conformance or XML to PDU will fail.
+                if (!s.getSettings().isServer()) {
+                    s.getSettings().setProposedConformance(
+                            s.getSettings().getNegotiatedConformance());
+                }
             }
             break;
         case 0xBE00:
@@ -1483,6 +1503,10 @@ public class GXDLMSTranslator {
                 break;
             case TranslatorTags.DATE_TIME:
                 preData = updateDateTime(node, s, preData);
+                if (preData == null
+                        && s.getCommand() == Command.GENERAL_CIPHERING) {
+                    s.getData().setUInt8(0);
+                }
                 break;
             case TranslatorTags.INVOKE_ID:
                 // InvokeIdAndPriority.
@@ -1604,7 +1628,8 @@ public class GXDLMSTranslator {
                 }
                 break;
             case TranslatorTags.REASON:
-                s.setReason(ReleaseRequestReason.valueOf(getValue(node, s)));
+                s.setReason(ReleaseRequestReason
+                        .valueOf(getValue(node, s).toUpperCase()));
                 break;
             case TranslatorTags.RETURN_PARAMETERS:
                 s.getAttributeDescriptor().setUInt8(1);
@@ -1718,10 +1743,50 @@ public class GXDLMSTranslator {
                 s.getSettings().setSourceSystemTitle(tmp);
                 break;
             case TranslatorTags.CIPHERED_SERVICE:
+            case Command.GLO_INITIATE_REQUEST:
                 tmp = GXCommon.hexToBytes(getValue(node, s));
+                if (s.getCommand() == Command.GENERAL_CIPHERING) {
+                    GXCommon.setObjectCount(tmp.length, s.getData());
+                }
                 s.getData().set(tmp);
                 break;
             case TranslatorTags.DATA_BLOCK:
+                break;
+            case TranslatorGeneralTags.USER_INFORMATION:
+                tmp = GXCommon.hexToBytes(getValue(node, s));
+                s.getData().setUInt8(0xBE);
+                s.getData().setUInt8(2 + tmp.length);
+                s.getData().setUInt8(0x4);
+                s.getData().setUInt8(tmp.length);
+                s.getData().set(tmp);
+                break;
+            case TranslatorTags.TRANSACTION_ID:
+                tmp = GXCommon.hexToBytes(getValue(node, s));
+                GXCommon.setObjectCount(tmp.length, s.getData());
+                s.getData().set(tmp);
+                break;
+            case TranslatorTags.ORIGINATOR_SYSTEM_TITLE:
+            case TranslatorTags.RECIPIENT_SYSTEM_TITLE:
+            case TranslatorTags.OTHER_INFORMATION:
+            case TranslatorTags.KEY_CIPHERED_DATA:
+                tmp = GXCommon.hexToBytes(getValue(node, s));
+                GXCommon.setObjectCount(tmp.length, s.getData());
+                s.getData().set(tmp);
+                break;
+            case TranslatorTags.CIPHERED_CONTENT:
+                tmp = GXCommon.hexToBytes(getValue(node, s));
+                GXCommon.setObjectCount(tmp.length, s.getData());
+                s.getData().set(tmp);
+                break;
+            case TranslatorTags.KEY_INFO:
+                s.getData().setUInt8(1);
+                break;
+            case TranslatorTags.AGREED_KEY:
+                s.getData().setUInt8(2);
+                break;
+            case TranslatorTags.KEY_PARAMETERS:
+                s.getData().setUInt8(1);
+                s.getData().setUInt8(Integer.parseInt(getValue(node, s)));
                 break;
             default:
                 throw new IllegalArgumentException(
@@ -1868,7 +1933,7 @@ public class GXDLMSTranslator {
             break;
         case UINT32:
             GXCommon.setData(s.getData(), DataType.UINT32,
-                    s.parseInt(getValue(node, s)));
+                    s.parseLong(getValue(node, s)));
             break;
         case UINT64:
             GXCommon.setData(s.getData(), DataType.UINT64,
@@ -2019,7 +2084,18 @@ public class GXDLMSTranslator {
             break;
         case Command.RELEASE_REQUEST:
             bb.setUInt8(s.getCommand());
-            bb.setUInt8(0);
+            // Len
+            bb.setUInt8(3 + s.getData().size());
+            // BerType
+            bb.setUInt8(BerType.CONTEXT);
+            // Len.
+            bb.setUInt8(1);
+            bb.setUInt8(s.getReason().getValue());
+            if (s.getData().size() == 0) {
+                bb.setUInt8(0);
+            } else {
+                bb.set(s.getData());
+            }
             break;
         case Command.RELEASE_RESPONSE:
             bb.setUInt8(s.getCommand());
@@ -2064,6 +2140,10 @@ public class GXDLMSTranslator {
                     s.getSettings().getSourceSystemTitle().length, bb);
             bb.set(s.getSettings().getSourceSystemTitle());
             GXCommon.setObjectCount(s.getData().size(), bb);
+            bb.set(s.getData());
+            break;
+        case Command.GENERAL_CIPHERING:
+            bb.setUInt8(s.getCommand());
             bb.set(s.getData());
             break;
         case Command.GLO_EVENT_NOTIFICATION_REQUEST:

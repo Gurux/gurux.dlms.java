@@ -791,8 +791,6 @@ final class GXAPDU {
             final GXDLMSTranslatorStructure xml) {
         // Get AARE tag and length
         validateAare(settings, buff);
-        byte[] tmp;
-        int tag;
         int len = buff.getUInt8();
         int size = buff.size() - buff.position();
         if (len > size) {
@@ -809,8 +807,28 @@ final class GXAPDU {
                 xml.appendStartTag(Command.AARE);
             }
         }
+        SourceDiagnostic ret = parsePDU2(settings, cipher, buff, xml);
+        // Closing tags
+        if (xml != null) {
+            if (settings.isServer()) {
+                xml.appendEndTag(Command.AARQ);
+            } else {
+                xml.appendEndTag(Command.AARE);
+            }
+        }
+        return ret;
+    }
+
+    /**
+     * Parse APDU.
+     */
+    public static SourceDiagnostic parsePDU2(final GXDLMSSettings settings,
+            final GXICipher cipher, final GXByteBuffer buff,
+            final GXDLMSTranslatorStructure xml) {
         AssociationResult resultComponent = AssociationResult.ACCEPTED;
         SourceDiagnostic resultDiagnosticValue = SourceDiagnostic.NONE;
+        int len, tag;
+        byte[] tmp;
         while (buff.position() < buff.size()) {
             tag = buff.getUInt8();
             switch (tag) {
@@ -929,14 +947,6 @@ final class GXAPDU {
                     buff.position(buff.position() + len);
                 }
                 break;
-            }
-        }
-        // Closing tags
-        if (xml != null) {
-            if (settings.isServer()) {
-                xml.appendEndTag(Command.AARQ);
-            } else {
-                xml.appendEndTag(Command.AARE);
             }
         }
         return resultDiagnosticValue;
