@@ -979,7 +979,7 @@ public class GXDLMSProfileGeneric extends GXDLMSObject implements IGXDLMSBase {
     }
 
     @Override
-    public void start(final GXDLMSServerBase server) {
+    public final void start(final GXDLMSServerBase server) {
         if (getCapturePeriod() > 0) {
             updater = new GXProfileGenericUpdater(server, this);
             updater.start();

@@ -95,10 +95,8 @@ final class TranslatorStandardTags {
         GXDLMSTranslator.addTag(list,
                 TranslatorGeneralTags.RESPONDING_AUTHENTICATION,
                 "x:responding-authentication-value");
-        GXDLMSTranslator.addTag(list, Command.RELEASE_REQUEST,
-                "ReleaseRequest");
-        GXDLMSTranslator.addTag(list, Command.RELEASE_RESPONSE,
-                "ReleaseResponse");
+        GXDLMSTranslator.addTag(list, Command.RELEASE_REQUEST, "x:rlrq");
+        GXDLMSTranslator.addTag(list, Command.RELEASE_RESPONSE, "x:rlre");
         GXDLMSTranslator.addTag(list, Command.DISCONNECT_REQUEST, "Disc");
         GXDLMSTranslator.addTag(list, TranslatorGeneralTags.ASSOCIATION_RESULT,
                 "x:result");
@@ -189,7 +187,7 @@ final class TranslatorStandardTags {
         list.put(Command.SET_REQUEST << 8 | SetRequestType.FIRST_DATA_BLOCK,
                 "x:set-request-first-data-block");
         list.put(Command.SET_REQUEST << 8 | SetRequestType.WITH_DATA_BLOCK,
-                "x:set-request-with-data-block");
+                "x:set-request-with-datablock");
         list.put(Command.SET_REQUEST << 8 | SetRequestType.WITH_LIST,
                 "x:set-request-with-list");
         GXDLMSTranslator.addTag(list, Command.METHOD_REQUEST,
@@ -303,6 +301,8 @@ final class TranslatorStandardTags {
                 "x:glo-write-response");
         GXDLMSTranslator.addTag(list, Command.GENERAL_GLO_CIPHERING,
                 "x:general-glo-ciphering");
+        GXDLMSTranslator.addTag(list, Command.GENERAL_CIPHERING,
+                "x:general-ciphering");
     }
 
     /**
@@ -341,10 +341,11 @@ final class TranslatorStandardTags {
                 "x:method-invocation-parameters");
         GXDLMSTranslator.addTag(list, TranslatorTags.SELECTOR, "x:selector");
         GXDLMSTranslator.addTag(list, TranslatorTags.PARAMETER, "x:parameter");
-        GXDLMSTranslator.addTag(list, TranslatorTags.LAST_BLOCK, "LastBlock");
+        GXDLMSTranslator.addTag(list, TranslatorTags.LAST_BLOCK,
+                "x:last-block");
         GXDLMSTranslator.addTag(list, TranslatorTags.BLOCK_NUMBER,
                 "x:block-number");
-        GXDLMSTranslator.addTag(list, TranslatorTags.RAW_DATA, "RawData");
+        GXDLMSTranslator.addTag(list, TranslatorTags.RAW_DATA, "x:raw-data");
         GXDLMSTranslator.addTag(list, TranslatorTags.METHOD_DESCRIPTOR,
                 "x:cosem-method-descriptor");
         GXDLMSTranslator.addTag(list, TranslatorTags.METHOD_ID, "x:method-id");
@@ -373,7 +374,7 @@ final class TranslatorStandardTags {
         GXDLMSTranslator.addTag(list, TranslatorTags.LONG_INVOKE_ID,
                 "x:long-invoke-id-and-priority");
         GXDLMSTranslator.addTag(list, TranslatorTags.DATE_TIME, "x:date-time");
-        GXDLMSTranslator.addTag(list, TranslatorTags.REASON, "Reason");
+        GXDLMSTranslator.addTag(list, TranslatorTags.REASON, "x:reason");
         GXDLMSTranslator.addTag(list,
                 TranslatorTags.VARIABLE_ACCESS_SPECIFICATION,
                 "x:Variable-Access-Specification");
@@ -388,7 +389,26 @@ final class TranslatorStandardTags {
                 "x:ciphered-content");
         GXDLMSTranslator.addTag(list, TranslatorTags.SYSTEM_TITLE,
                 "x:system-title");
-        GXDLMSTranslator.addTag(list, TranslatorTags.DATA_BLOCK, "x:DataBlock");
+        GXDLMSTranslator.addTag(list, TranslatorTags.DATA_BLOCK, "x:datablock");
+        GXDLMSTranslator.addTag(list, TranslatorTags.TRANSACTION_ID,
+                "x:transaction-id");
+        GXDLMSTranslator.addTag(list, TranslatorTags.ORIGINATOR_SYSTEM_TITLE,
+                "x:originator-system-title");
+        GXDLMSTranslator.addTag(list, TranslatorTags.RECIPIENT_SYSTEM_TITLE,
+                "x:recipient-system-title");
+        GXDLMSTranslator.addTag(list, TranslatorTags.OTHER_INFORMATION,
+                "x:other-information");
+        GXDLMSTranslator.addTag(list, TranslatorTags.KEY_INFO, "x:key-info");
+        GXDLMSTranslator.addTag(list, TranslatorTags.CIPHERED_CONTENT,
+                "x:ciphered-content");
+        GXDLMSTranslator.addTag(list, TranslatorTags.AGREED_KEY,
+                "x:agreed-key");
+        GXDLMSTranslator.addTag(list, TranslatorTags.KEY_PARAMETERS,
+                "x:key-parameters");
+        GXDLMSTranslator.addTag(list, TranslatorTags.KEY_CIPHERED_DATA,
+                "x:key-ciphered-data");
+        GXDLMSTranslator.addTag(list, TranslatorTags.CIPHERED_CONTENT,
+                "x:ciphered-content");
     }
 
     static void getDataTypeTags(final HashMap<Integer, String> list) {

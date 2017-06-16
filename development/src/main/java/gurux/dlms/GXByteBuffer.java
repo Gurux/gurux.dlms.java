@@ -187,6 +187,13 @@ public class GXByteBuffer {
     }
 
     /**
+     * @return Amount of non read bytes in the buffer.
+     */
+    public int available() {
+        return size - position;
+    }
+
+    /**
      * @return Get buffer data as byte array.
      */
     public final byte[] array() {

@@ -133,8 +133,8 @@ public class GXXmlWriter implements AutoCloseable {
     }
 
     public final void writeStartElement(final String elementName,
-            final String attributeName, final String value, boolean newLine)
-            throws XMLStreamException {
+            final String attributeName, final String value,
+            final boolean newLine) throws XMLStreamException {
         appendSpaces();
         writer.writeStartElement(elementName);
         writer.writeAttribute(attributeName, value);
@@ -280,7 +280,7 @@ public class GXXmlWriter implements AutoCloseable {
         }
     }
 
-    private final void writeEndElement(boolean addSpaces)
+    private void writeEndElement(final boolean addSpaces)
             throws XMLStreamException {
         --indenting;
         if (addSpaces) {

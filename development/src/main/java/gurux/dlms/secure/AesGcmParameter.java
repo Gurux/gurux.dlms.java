@@ -34,7 +34,6 @@
 
 package gurux.dlms.secure;
 
-import gurux.dlms.GXDateTime;
 import gurux.dlms.enums.Security;
 import gurux.dlms.internal.GXCommon;
 import gurux.dlms.objects.enums.SecuritySuite;
@@ -76,11 +75,26 @@ public class AesGcmParameter {
     /**
      * Date time.
      */
-    private GXDateTime dateTime;
+    private byte[] dateTime;
     /**
      * Other information.
      */
     private byte[] otherInformation;
+
+    /**
+     * Key parameters.
+     */
+    private int keyParameters;
+
+    /**
+     * Key ciphered data.
+     */
+    private byte[] keyCipheredData;
+
+    /**
+     * Ciphered content.
+     */
+    private byte[] cipheredContent;
 
     /**
      * Shared secret is generated when connection is made.
@@ -149,7 +163,7 @@ public class AesGcmParameter {
             final long forInvocationCounter, final byte[] kdf,
             final byte[] forAuthenticationKey,
             final byte[] forOriginatorSystemTitle,
-            final byte[] forRecipientSystemTitle, final GXDateTime forDateTime,
+            final byte[] forRecipientSystemTitle, final byte[] forDateTime,
             final byte[] forOtherInformation) {
         tag = (byte) forTag;
         security = forSecurity;
@@ -268,8 +282,16 @@ public class AesGcmParameter {
     /**
      * @return Optional Date time.
      */
-    public GXDateTime getDateTime() {
+    public byte[] getDateTime() {
         return dateTime;
+    }
+
+    /**
+     * @param value
+     *            Date time.
+     */
+    public final void setDateTime(final byte[] value) {
+        dateTime = value;
     }
 
     /**
@@ -277,6 +299,14 @@ public class AesGcmParameter {
      */
     public byte[] getOtherInformation() {
         return otherInformation;
+    }
+
+    /**
+     * @param value
+     *            Other information.
+     */
+    public final void setOtherInformation(final byte[] value) {
+        otherInformation = value;
     }
 
     /**
@@ -322,5 +352,50 @@ public class AesGcmParameter {
      */
     public void setSecuritySuite(final SecuritySuite value) {
         securitySuite = value;
+    }
+
+    /**
+     * @return Key parameters.
+     */
+    public int getKeyParameters() {
+        return keyParameters;
+    }
+
+    /**
+     * @param value
+     *            Key parameters.
+     */
+    public void setKeyParameters(final int value) {
+        keyParameters = value;
+    }
+
+    /**
+     * @return Key ciphered data.
+     */
+    public byte[] getKeyCipheredData() {
+        return keyCipheredData;
+    }
+
+    /**
+     * @param value
+     *            Key ciphered data.
+     */
+    public void setKeyCipheredData(final byte[] value) {
+        keyCipheredData = value;
+    }
+
+    /**
+     * @return Ciphered content.
+     */
+    public byte[] getCipheredContent() {
+        return cipheredContent;
+    }
+
+    /**
+     * @param value
+     *            Ciphered content.
+     */
+    public void setCipheredContent(final byte[] value) {
+        cipheredContent = value;
     }
 }

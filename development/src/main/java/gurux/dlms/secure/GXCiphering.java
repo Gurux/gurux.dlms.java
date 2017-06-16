@@ -160,9 +160,11 @@ public class GXCiphering implements GXICipher {
                 new AesGcmParameter(title, blockCipherKey, authenticationKey);
         p.setSharedSecret(getSharedSecret());
         byte[] tmp = GXDLMSChippering.decryptAesGcm(this, p, data);
-        this.setSharedSecret(p.getSharedSecret());
-        data.clear();
-        data.set(tmp);
+        setSharedSecret(p.getSharedSecret());
+        if (tmp != null) {
+            data.clear();
+            data.set(tmp);
+        }
         return p;
     }
 

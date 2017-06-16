@@ -81,7 +81,7 @@ final class GXDLMSSNCommandHandler {
             e.setParameters(GXCommon.getData(data, di));
         }
         // Return error if connection is not established.
-        if (!settings.isConnected()
+        if (!settings.acceptConnection()
                 && (!e.isAction() || e.getTarget().getShortName() != 0xFA00
                         || e.getIndex() != 8)) {
             replyData.set(GXDLMSServerBase.generateConfirmedServiceError(
@@ -480,7 +480,7 @@ final class GXDLMSSNCommandHandler {
             final GXByteBuffer replyData, final GXDLMSTranslatorStructure xml)
             throws Exception {
         // Return error if connection is not established.
-        if (xml == null && !settings.isConnected()) {
+        if (xml == null && !settings.acceptConnection()) {
             replyData.set(GXDLMSServerBase.generateConfirmedServiceError(
                     ConfirmedServiceError.INITIATE_ERROR, ServiceError.SERVICE,
                     Service.UNSUPPORTED.getValue()));

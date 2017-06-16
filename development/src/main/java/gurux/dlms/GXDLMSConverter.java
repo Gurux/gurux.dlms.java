@@ -370,7 +370,7 @@ public class GXDLMSConverter {
         throw new IllegalArgumentException("Invalid value.");
     }
 
-    public static Object changeType(Object value, DataType type) {
+    public static Object changeType(final Object value, final DataType type) {
         if (getDLMSDataType(value) == type) {
             return value;
         }

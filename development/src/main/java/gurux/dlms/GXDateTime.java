@@ -145,16 +145,34 @@ public class GXDateTime {
      *            Used second.
      * @param millisecond
      *            Used millisecond.
-     * @param deviation
-     *            Used deviation.
+     * @param timeZone
+     *            Used time Zone.
      */
     public GXDateTime(final int year, final int month, final int day,
             final int hour, final int minute, final int second,
-            final int millisecond, final int deviation) {
-        meterCalendar = Calendar.getInstance(getTimeZone(deviation, true));
+            final int millisecond, final int timeZone) {
+        meterCalendar = Calendar.getInstance(getTimeZone(timeZone, true));
         init(year, month, day, hour, minute, second, millisecond);
     }
 
+    /**
+     * Initialize settings.
+     * 
+     * @param year
+     *            Used year.
+     * @param month
+     *            Used month.
+     * @param day
+     *            Used day.
+     * @param hour
+     *            Used hour.
+     * @param minute
+     *            Used minute.
+     * @param second
+     *            Used second.
+     * @param millisecond
+     *            Used millisecond.
+     */
     protected void init(final int year, final int month, final int day,
             final int hour, final int minute, final int second,
             final int millisecond) {
@@ -461,13 +479,17 @@ public class GXDateTime {
         meterCalendar = Calendar.getInstance(getTimeZone(forValue, true));
     }
 
-    /*
-     * Status of the clock.
+    /**
+     * @return Clock status.
      */
     public final java.util.Set<ClockStatus> getStatus() {
         return status;
     }
 
+    /**
+     * @param forValue
+     *            Clock status.
+     */
     public final void setStatus(final java.util.Set<ClockStatus> forValue) {
         status = forValue;
     }

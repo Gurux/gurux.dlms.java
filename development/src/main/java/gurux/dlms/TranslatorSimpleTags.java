@@ -288,6 +288,9 @@ final class TranslatorSimpleTags {
                 "glo_WriteResponse");
         GXDLMSTranslator.addTag(list, Command.GENERAL_GLO_CIPHERING,
                 "GeneralGloCiphering");
+
+        GXDLMSTranslator.addTag(list, Command.GENERAL_CIPHERING,
+                "GeneralCiphering");
     }
 
     /**
@@ -365,6 +368,25 @@ final class TranslatorSimpleTags {
         GXDLMSTranslator.addTag(list, TranslatorTags.SYSTEM_TITLE,
                 "SystemTitle");
         GXDLMSTranslator.addTag(list, TranslatorTags.DATA_BLOCK, "DataBlock");
+
+        GXDLMSTranslator.addTag(list, TranslatorTags.TRANSACTION_ID,
+                "TransactionId");
+        GXDLMSTranslator.addTag(list, TranslatorTags.ORIGINATOR_SYSTEM_TITLE,
+                "OriginatorSystemTitle");
+        GXDLMSTranslator.addTag(list, TranslatorTags.RECIPIENT_SYSTEM_TITLE,
+                "RecipientSystemTitle");
+        GXDLMSTranslator.addTag(list, TranslatorTags.OTHER_INFORMATION,
+                "OtherInformation");
+        GXDLMSTranslator.addTag(list, TranslatorTags.KEY_INFO, "KeyInfo");
+        GXDLMSTranslator.addTag(list, TranslatorTags.CIPHERED_CONTENT,
+                "CipheredContent");
+        GXDLMSTranslator.addTag(list, TranslatorTags.AGREED_KEY, "AgreedKey");
+        GXDLMSTranslator.addTag(list, TranslatorTags.KEY_PARAMETERS,
+                "KeyParameters");
+        GXDLMSTranslator.addTag(list, TranslatorTags.KEY_CIPHERED_DATA,
+                "KeyCipheredData");
+        GXDLMSTranslator.addTag(list, TranslatorTags.CIPHERED_CONTENT,
+                "CipheredContent");
     }
 
     static void getDataTypeTags(final HashMap<Integer, String> list) {
