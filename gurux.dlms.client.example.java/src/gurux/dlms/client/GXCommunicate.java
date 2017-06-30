@@ -142,6 +142,12 @@ public class GXCommunicate {
         if (Media != null) {
             System.out.println("DisconnectRequest");
             GXReplyData reply = new GXReplyData();
+            try {
+                readDLMSPacket(dlms.releaseRequest()[0], reply);
+            } catch (Exception e) {
+                // All meters don't support release.
+            }
+            reply.clear();
             readDLMSPacket(dlms.disconnectRequest(), reply);
             Media.close();
         }

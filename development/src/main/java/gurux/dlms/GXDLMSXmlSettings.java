@@ -44,7 +44,7 @@ import gurux.dlms.secure.GXCiphering;
 class GXDLMSXmlSettings {
     private AssociationResult result = AssociationResult.ACCEPTED;
     private SourceDiagnostic diagnostic = SourceDiagnostic.NONE;
-    private ReleaseRequestReason reason = ReleaseRequestReason.NORMAL;
+    private byte reason = 0;
     private int command;
     private int count = 0;
     private int requestType = 0xFF;
@@ -118,7 +118,7 @@ class GXDLMSXmlSettings {
     /**
      * @return the reason
      */
-    public final ReleaseRequestReason getReason() {
+    public final byte getReason() {
         return reason;
     }
 
@@ -126,7 +126,7 @@ class GXDLMSXmlSettings {
      * @param value
      *            the reason to set
      */
-    public final void setReason(final ReleaseRequestReason value) {
+    public final void setReason(final byte value) {
         reason = value;
     }
 

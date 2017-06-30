@@ -758,6 +758,7 @@ public class GXDLMSTranslator {
             settings.setCipher(getCiphering());
             GXReplyData data = new GXReplyData();
             short cmd = value.getUInt8();
+            String str;
             switch (cmd) {
             case Command.AARQ:
                 value.position(0);
@@ -835,17 +836,53 @@ public class GXDLMSTranslator {
                 GXDLMS.getPdu(settings, data);
                 break;
             case Command.RELEASE_REQUEST:
-            case Command.RELEASE_RESPONSE:
                 xml.appendStartTag(cmd);
+                value.getUInt8();
                 // Len.
-                if (value.getUInt8() != 0) {
+                if (value.available() != 0) {
                     // BerType
                     value.getUInt8();
                     // Len.
                     value.getUInt8();
-                    xml.appendLine(TranslatorTags.REASON, "Value",
-                            ReleaseRequestReason.forValue(value.getUInt8())
-                                    .toString().toLowerCase());
+                    if (xml.getOutputType() == TranslatorOutputType.SIMPLE_XML) {
+                        str = TranslatorSimpleTags.releaseRequestReasonToString(
+                                ReleaseRequestReason
+                                        .forValue(value.getUInt8()));
+                    } else {
+                        str = TranslatorStandardTags
+                                .releaseRequestReasonToString(
+                                        ReleaseRequestReason
+                                                .forValue(value.getUInt8()));
+                    }
+                    xml.appendLine(TranslatorTags.REASON, "Value", str);
+                    if (value.available() != 0) {
+                        GXAPDU.parsePDU2(settings, settings.getCipher(), value,
+                                xml);
+                    }
+                }
+                xml.appendEndTag(cmd);
+                break;
+            case Command.RELEASE_RESPONSE:
+                xml.appendStartTag(cmd);
+                value.getUInt8();
+                // Len.
+                if (value.available() != 0) {
+                    // BerType
+                    value.getUInt8();
+                    // Len.
+                    value.getUInt8();
+                    if (xml.getOutputType() == TranslatorOutputType.SIMPLE_XML) {
+                        str = TranslatorSimpleTags
+                                .releaseResponseReasonToString(
+                                        ReleaseResponseReason
+                                                .forValue(value.getUInt8()));
+                    } else {
+                        str = TranslatorStandardTags
+                                .releaseResponseReasonToString(
+                                        ReleaseResponseReason
+                                                .forValue(value.getUInt8()));
+                    }
+                    xml.appendLine(TranslatorTags.REASON, "Value", str);
                     if (value.available() != 0) {
                         GXAPDU.parsePDU2(settings, settings.getCipher(), value,
                                 xml);
@@ -1628,8 +1665,27 @@ public class GXDLMSTranslator {
                 }
                 break;
             case TranslatorTags.REASON:
-                s.setReason(ReleaseRequestReason
-                        .valueOf(getValue(node, s).toUpperCase()));
+                if (s.getCommand() == Command.RELEASE_REQUEST) {
+                    if (s.getOutputType() == TranslatorOutputType.SIMPLE_XML) {
+                        s.setReason((byte) TranslatorSimpleTags
+                                .valueOfReleaseRequestReason(getValue(node, s))
+                                .getValue());
+                    } else {
+                        s.setReason((byte) TranslatorStandardTags
+                                .valueOfReleaseRequestReason(getValue(node, s))
+                                .getValue());
+                    }
+                } else {
+                    if (s.getOutputType() == TranslatorOutputType.SIMPLE_XML) {
+                        s.setReason((byte) TranslatorSimpleTags
+                                .valueOfReleaseResponseReason(getValue(node, s))
+                                .getValue());
+                    } else {
+                        s.setReason((byte) TranslatorStandardTags
+                                .valueOfReleaseResponseReason(getValue(node, s))
+                                .getValue());
+                    }
+                }
                 break;
             case TranslatorTags.RETURN_PARAMETERS:
                 s.getAttributeDescriptor().setUInt8(1);
@@ -1746,6 +1802,13 @@ public class GXDLMSTranslator {
             case Command.GLO_INITIATE_REQUEST:
                 tmp = GXCommon.hexToBytes(getValue(node, s));
                 if (s.getCommand() == Command.GENERAL_CIPHERING) {
+                    GXCommon.setObjectCount(tmp.length, s.getData());
+                } else if (s.getCommand() == Command.RELEASE_REQUEST) {
+                    s.getData().setUInt8(0xBE);
+                    GXCommon.setObjectCount(4 + tmp.length, s.getData());
+                    s.getData().setUInt8(4);
+                    GXCommon.setObjectCount(2 + tmp.length, s.getData());
+                    s.getData().setUInt8(0x21);
                     GXCommon.setObjectCount(tmp.length, s.getData());
                 }
                 s.getData().set(tmp);
@@ -2090,7 +2153,7 @@ public class GXDLMSTranslator {
             bb.setUInt8(BerType.CONTEXT);
             // Len.
             bb.setUInt8(1);
-            bb.setUInt8(s.getReason().getValue());
+            bb.setUInt8(s.getReason());
             if (s.getData().size() == 0) {
                 bb.setUInt8(0);
             } else {
@@ -2105,7 +2168,7 @@ public class GXDLMSTranslator {
             bb.setUInt8(BerType.CONTEXT);
             // Len.
             bb.setUInt8(1);
-            bb.setUInt8(s.getReason().getValue());
+            bb.setUInt8(s.getReason());
             break;
         case Command.CONFIRMED_SERVICE_ERROR:
             bb.setUInt8(s.getCommand());

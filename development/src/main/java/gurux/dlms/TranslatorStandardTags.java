@@ -1035,4 +1035,72 @@ final class TranslatorStandardTags {
         }
         return ret;
     }
+
+    static String
+            releaseResponseReasonToString(final ReleaseResponseReason value) {
+        String str;
+        switch (value) {
+        case NORMAL:
+            str = "normal";
+            break;
+        case NOT_FINISHED:
+            str = "not-finished";
+            break;
+        case USER_DEFINED:
+            str = "user-defined";
+            break;
+        default:
+            throw new IllegalArgumentException(String.valueOf(value));
+        }
+        return str;
+    }
+
+    static ReleaseResponseReason
+            valueOfReleaseResponseReason(final String value) {
+        ReleaseResponseReason ret;
+        if ("normal".equalsIgnoreCase(value)) {
+            ret = ReleaseResponseReason.NORMAL;
+        } else if ("not-finished".equalsIgnoreCase(value)) {
+            ret = ReleaseResponseReason.NOT_FINISHED;
+        } else if ("user-defined".equalsIgnoreCase(value)) {
+            ret = ReleaseResponseReason.USER_DEFINED;
+        } else {
+            throw new IllegalArgumentException(value);
+        }
+        return ret;
+    }
+
+    static String
+            releaseRequestReasonToString(final ReleaseRequestReason value) {
+        String str;
+        switch (value) {
+        case NORMAL:
+            str = "normal";
+            break;
+        case URGENT:
+            str = "not-finished";
+            break;
+        case USER_DEFINED:
+            str = "user-defined";
+            break;
+        default:
+            throw new IllegalArgumentException(String.valueOf(value));
+        }
+        return str;
+    }
+
+    static ReleaseRequestReason
+            valueOfReleaseRequestReason(final String value) {
+        ReleaseRequestReason ret;
+        if ("normal".equalsIgnoreCase(value)) {
+            ret = ReleaseRequestReason.NORMAL;
+        } else if ("not-finished".equalsIgnoreCase(value)) {
+            ret = ReleaseRequestReason.URGENT;
+        } else if ("user-defined".equalsIgnoreCase(value)) {
+            ret = ReleaseRequestReason.USER_DEFINED;
+        } else {
+            throw new IllegalArgumentException(value);
+        }
+        return ret;
+    }
 }

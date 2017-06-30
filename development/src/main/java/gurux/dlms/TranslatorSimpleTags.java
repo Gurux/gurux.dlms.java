@@ -1007,4 +1007,72 @@ final class TranslatorSimpleTags {
         return ret;
     }
 
+    static String
+            releaseResponseReasonToString(final ReleaseResponseReason value) {
+        String str;
+        switch (value) {
+        case NORMAL:
+            str = "Normal";
+            break;
+        case NOT_FINISHED:
+            str = "NotFinished";
+            break;
+        case USER_DEFINED:
+            str = "UserDefined";
+            break;
+        default:
+            throw new IllegalArgumentException(String.valueOf(value));
+        }
+        return str;
+    }
+
+    static ReleaseResponseReason
+            valueOfReleaseResponseReason(final String value) {
+        ReleaseResponseReason ret;
+        if ("Normal".equalsIgnoreCase(value)) {
+            ret = ReleaseResponseReason.NORMAL;
+        } else if ("NotFinished".equalsIgnoreCase(value)) {
+            ret = ReleaseResponseReason.NOT_FINISHED;
+        } else if ("UserDefined".equalsIgnoreCase(value)) {
+            ret = ReleaseResponseReason.USER_DEFINED;
+        } else {
+            throw new IllegalArgumentException(value);
+        }
+        return ret;
+    }
+
+    static String
+            releaseRequestReasonToString(final ReleaseRequestReason value) {
+        String str;
+        switch (value) {
+        case NORMAL:
+            str = "Normal";
+            break;
+        case URGENT:
+            str = "Urgent";
+            break;
+        case USER_DEFINED:
+            str = "UserDefined";
+            break;
+        default:
+            throw new IllegalArgumentException(String.valueOf(value));
+        }
+        return str;
+    }
+
+    static ReleaseRequestReason
+            valueOfReleaseRequestReason(final String value) {
+        ReleaseRequestReason ret;
+        if ("Normal".equalsIgnoreCase(value)) {
+            ret = ReleaseRequestReason.NORMAL;
+        } else if ("Urgent".equalsIgnoreCase(value)) {
+            ret = ReleaseRequestReason.URGENT;
+        } else if ("UserDefined".equalsIgnoreCase(value)) {
+            ret = ReleaseRequestReason.USER_DEFINED;
+        } else {
+            throw new IllegalArgumentException(value);
+        }
+        return ret;
+    }
+
 }
