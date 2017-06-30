@@ -221,7 +221,7 @@ final class GXAPDU {
      * @param data
      *            Generated user information.
      */
-    private static void generateUserInformation(final GXDLMSSettings settings,
+    static void generateUserInformation(final GXDLMSSettings settings,
             final GXICipher cipher, final GXByteBuffer encryptedData,
             final GXByteBuffer data) {
         data.setUInt8(BerType.CONTEXT | BerType.CONSTRUCTED

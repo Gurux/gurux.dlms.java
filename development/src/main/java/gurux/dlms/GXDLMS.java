@@ -561,7 +561,7 @@ abstract class GXDLMS {
                     GXCommon.setData(reply, DataType.OCTET_STRING, p.getTime());
                     reply.move(pos + 1, pos, reply.size() - pos - 1);
                 }
-            } else {
+            } else if (p.getCommand() != Command.RELEASE_REQUEST) {
                 // Get request size can be bigger than PDU size.
                 if (p.getCommand() != Command.GET_REQUEST && p.getData() != null
                         && p.getData().size() != 0) {

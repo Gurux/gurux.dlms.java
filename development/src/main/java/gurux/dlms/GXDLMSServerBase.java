@@ -376,6 +376,27 @@ public class GXDLMSServerBase {
                 settings.getCipher(), null);
     }
 
+    /**
+     * Handles release reuest.
+     * 
+     * @param data
+     *            Received data.
+     * @param connectionInfo
+     *            Connection info.
+     */
+    private void handleReleaseRequest(final GXByteBuffer data,
+            final GXDLMSConnectionEventArgs connectionInfo) {
+        if (getSettings().getInterfaceType() == InterfaceType.HDLC) {
+            replyData.set(0, GXCommon.LLC_REPLY_BYTES);
+        }
+        replyData.setUInt8(0x63);
+        // LEN.
+        replyData.setUInt8(0x03);
+        replyData.setUInt8(0x80);
+        replyData.setUInt8(0x01);
+        replyData.setUInt8(0x00);
+    }
+
     /*
      * Parse SNRM Request. If server do not accept client empty byte array is
      * returned.
@@ -407,33 +428,28 @@ public class GXDLMSServerBase {
      * @return Disconnect request.
      */
     private void generateDisconnectRequest() {
-        if (settings.getInterfaceType() == InterfaceType.WRAPPER) {
-            replyData.setUInt8(0x63);
-            replyData.setUInt8(0x0);
-        } else {
-            replyData.setUInt8(0x81); // FromatID
-            replyData.setUInt8(0x80); // GroupID
-            replyData.setUInt8(0); // Length
+        replyData.setUInt8(0x81); // FromatID
+        replyData.setUInt8(0x80); // GroupID
+        replyData.setUInt8(0); // Length
 
-            replyData.setUInt8(HDLCInfo.MAX_INFO_TX);
-            replyData.setUInt8(GXCommon.getSize(getLimits().getMaxInfoTX()));
-            replyData.add(getLimits().getMaxInfoTX());
+        replyData.setUInt8(HDLCInfo.MAX_INFO_TX);
+        replyData.setUInt8(GXCommon.getSize(getLimits().getMaxInfoTX()));
+        replyData.add(getLimits().getMaxInfoTX());
 
-            replyData.setUInt8(HDLCInfo.MAX_INFO_RX);
-            replyData.setUInt8(GXCommon.getSize(getLimits().getMaxInfoRX()));
-            replyData.add(getLimits().getMaxInfoRX());
+        replyData.setUInt8(HDLCInfo.MAX_INFO_RX);
+        replyData.setUInt8(GXCommon.getSize(getLimits().getMaxInfoRX()));
+        replyData.add(getLimits().getMaxInfoRX());
 
-            replyData.setUInt8(HDLCInfo.WINDOW_SIZE_TX);
-            replyData.setUInt8(GXCommon.getSize(getLimits().getWindowSizeTX()));
-            replyData.add(getLimits().getWindowSizeTX());
+        replyData.setUInt8(HDLCInfo.WINDOW_SIZE_TX);
+        replyData.setUInt8(GXCommon.getSize(getLimits().getWindowSizeTX()));
+        replyData.add(getLimits().getWindowSizeTX());
 
-            replyData.setUInt8(HDLCInfo.WINDOW_SIZE_RX);
-            replyData.setUInt8(GXCommon.getSize(getLimits().getWindowSizeRX()));
-            replyData.add(getLimits().getWindowSizeRX());
+        replyData.setUInt8(HDLCInfo.WINDOW_SIZE_RX);
+        replyData.setUInt8(GXCommon.getSize(getLimits().getWindowSizeRX()));
+        replyData.add(getLimits().getWindowSizeRX());
 
-            int len = replyData.size() - 3;
-            replyData.setUInt8(2, len); // Length.
-        }
+        int len = replyData.size() - 3;
+        replyData.setUInt8(2, len); // Length.
     }
 
     /*
@@ -691,6 +707,8 @@ public class GXDLMSServerBase {
             }
             break;
         case Command.RELEASE_REQUEST:
+            handleReleaseRequest(data, connectionInfo);
+            break;
         case Command.DISCONNECT_REQUEST:
             generateDisconnectRequest();
             settings.setConnected(false);

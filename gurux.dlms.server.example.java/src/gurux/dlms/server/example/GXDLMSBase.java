@@ -92,6 +92,7 @@ import gurux.dlms.objects.GXDLMSSapAssignment;
 import gurux.dlms.objects.GXDLMSSeasonProfile;
 import gurux.dlms.objects.GXDLMSTcpUdpSetup;
 import gurux.dlms.objects.GXDLMSWeekProfile;
+import gurux.dlms.objects.enums.AutoAnswerMode;
 import gurux.dlms.objects.enums.AutoAnswerStatus;
 import gurux.dlms.objects.enums.AutoConnectMode;
 import gurux.dlms.objects.enums.BaudRate;
@@ -340,8 +341,8 @@ public class GXDLMSBase extends GXDLMSSecureServer2
         java.util.Date now = tm.getTime();
         GXDLMSDemandRegister dr = new GXDLMSDemandRegister();
         dr.setLogicalName("0.0.1.0.0.255");
-        dr.setCurrentAvarageValue(10);
-        dr.setLastAvarageValue(20);
+        dr.setCurrentAverageValue(10);
+        dr.setLastAverageValue(20);
         dr.setStatus((int) 1);
         dr.setStartTimeCurrent(new GXDateTime(now));
         dr.setCaptureTime(new GXDateTime(now));
@@ -392,7 +393,7 @@ public class GXDLMSBase extends GXDLMSSecureServer2
      */
     void addAutoAnswer() {
         GXDLMSAutoAnswer aa = new GXDLMSAutoAnswer();
-        aa.setMode(AutoConnectMode.EMAIL_SENDING);
+        aa.setMode(AutoAnswerMode.CALL);
         aa.getListeningWindow()
                 .add(new AbstractMap.SimpleEntry<GXDateTime, GXDateTime>(
                         new GXDateTime(-1, -1, -1, 6, -1, -1, -1),

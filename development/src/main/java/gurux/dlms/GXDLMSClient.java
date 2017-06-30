@@ -737,6 +737,41 @@ public class GXDLMSClient {
     }
 
     /**
+     * Generates a release request.
+     * 
+     * @return Release request, as byte array.
+     */
+    public byte[][] releaseRequest() {
+        // If connection is not established, there is no need to send
+        // DisconnectRequest.
+        if (!settings.isConnected()) {
+            return null;
+        }
+        GXByteBuffer buff = new GXByteBuffer();
+        // Length.
+        buff.setUInt8(0);
+        buff.setUInt8(0x80);
+        buff.setUInt8(01);
+        buff.setUInt8(00);
+        GXAPDU.generateUserInformation(settings, settings.getCipher(), null,
+                buff);
+        buff.setUInt8(0, (byte) (buff.size() - 1));
+        List<byte[]> reply;
+        if (getUseLogicalNameReferencing()) {
+            GXDLMSLNParameters p = new GXDLMSLNParameters(settings, 0,
+                    Command.RELEASE_REQUEST, 0, buff, null, 0xff);
+            reply = GXDLMS.getLnMessages(p);
+        } else {
+            reply = GXDLMS.getSnMessages(new GXDLMSSNParameters(settings,
+                    Command.RELEASE_REQUEST, 0xFF, 0xFF, null, buff));
+        }
+        if (settings.getInterfaceType() == InterfaceType.WRAPPER) {
+            settings.setConnected(false);
+        }
+        return reply.toArray(new byte[][] {});
+    }
+
+    /**
      * Generates a disconnect request.
      * 
      * @return Disconnected request, as byte array.

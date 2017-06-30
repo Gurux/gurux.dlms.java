@@ -1535,21 +1535,20 @@ public final class GXCommon {
      */
     public static void setData(final GXByteBuffer buff, final DataType dataType,
             final Object value) {
-        DataType type = dataType;
         // If value is enum get integer value.
         if (value instanceof Enum) {
             throw new RuntimeException(
                     "Value can't be enum. Give integer value.");
         }
-        if ((type == DataType.ARRAY || type == DataType.STRUCTURE)
+        if ((dataType == DataType.ARRAY || dataType == DataType.STRUCTURE)
                 && value instanceof byte[]) {
             // If byte array is added do not add type.
             buff.set((byte[]) value);
             return;
         } else {
-            buff.setUInt8(type.getValue());
+            buff.setUInt8(dataType.getValue());
         }
-        switch (type) {
+        switch (dataType) {
         case NONE:
             break;
         case BOOLEAN:
