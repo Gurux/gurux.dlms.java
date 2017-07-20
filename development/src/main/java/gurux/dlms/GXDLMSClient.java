@@ -90,6 +90,11 @@ public class GXDLMSClient {
     private boolean isAuthenticationRequired = false;
 
     /**
+     * AARE response diagnostic
+     */
+    private SourceDiagnostic aareResponseDiagnostic = SourceDiagnostic.NONE;
+
+    /**
      * Constructor.
      */
     public GXDLMSClient() {
@@ -468,6 +473,7 @@ public class GXDLMSClient {
         settings.setConnected(false);
 
         isAuthenticationRequired = false;
+        aareResponseDiagnostic = SourceDiagnostic.NONE;
         settings.setMaxPduSize(0xFFFF);
         // SNRM request is not used in network connections.
         if (this.getInterfaceType() == InterfaceType.WRAPPER) {
@@ -626,9 +632,8 @@ public class GXDLMSClient {
      */
     public final void parseAareResponse(final GXByteBuffer reply) {
         settings.setConnected(true);
-        isAuthenticationRequired =
-                GXAPDU.parsePDU(settings, settings.getCipher(), reply,
-                        null) == SourceDiagnostic.AUTHENTICATION_REQUIRED;
+        aareResponseDiagnostic = GXAPDU.parsePDU(settings, settings.getCipher(), reply, null);
+        isAuthenticationRequired = aareResponseDiagnostic == SourceDiagnostic.AUTHENTICATION_REQUIRED;
         if (getDLMSVersion() != 6) {
             throw new IllegalArgumentException("Invalid DLMS version number.");
         }
@@ -639,6 +644,13 @@ public class GXDLMSClient {
      */
     public final boolean getIsAuthenticationRequired() {
         return isAuthenticationRequired;
+    }
+
+    /**
+     * @return AARE response diagnostic
+     */
+    public final SourceDiagnostic getAareResponseDiagnostic() {
+        return aareResponseDiagnostic;
     }
 
     /**
