@@ -2,6 +2,7 @@ package gurux.dlms;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map.Entry;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
@@ -71,7 +72,7 @@ final class GXDLMSSNCommandHandler {
             return;
         }
         sn = sn & 0xFFFF;
-        GXSNInfo i = findSNObject(server, sn);
+        GXSNInfo i = findSNObject(server, server.getSettings(), sn);
         ValueEventArgs e =
                 new ValueEventArgs(server, i.getItem(), i.getIndex(), 0, null);
         e.setAction(i.isAction());
@@ -438,10 +439,10 @@ final class GXDLMSSNCommandHandler {
      * @param sn
      */
     private static GXSNInfo findSNObject(final GXDLMSServerBase server,
-            final int sn) throws Exception {
+            final GXDLMSSettings settings, final int sn) throws Exception {
         GXSNInfo i = new GXSNInfo();
         int[] offset = new int[1], count = new int[1];
-        for (GXDLMSObject it : server.getItems()) {
+        for (GXDLMSObject it : settings.getObjects()) {
             if (sn >= it.getShortName()) {
                 // If attribute is accessed.
                 if (sn < it.getShortName() + it.getAttributeCount() * 8) {
@@ -462,7 +463,7 @@ final class GXDLMSSNCommandHandler {
                 }
             }
         }
-        if (i.getItem() == null) {
+        if (i.getItem() == null && server != null) {
             i.setItem(server.notifyFindObject(ObjectType.NONE, sn, null));
         }
         return i;
@@ -513,7 +514,7 @@ final class GXDLMSSNCommandHandler {
                                     | VariableAccessSpecification.VARIABLE_NAME,
                             "Value", xml.integerToHex(sn, 4));
                 } else {
-                    GXSNInfo i = findSNObject(server, sn);
+                    GXSNInfo i = findSNObject(server, server.getSettings(), sn);
                     targets.add(i);
                     // If target is unknown.
                     if (i == null) {
@@ -617,5 +618,115 @@ final class GXDLMSSNCommandHandler {
         GXDLMSSNParameters p = new GXDLMSSNParameters(settings,
                 Command.WRITE_RESPONSE, cnt, 0xFF, null, bb);
         GXDLMS.getSNPdu(p, replyData);
+    }
+
+    /**
+     * Handle information report.
+     * 
+     * @param settings
+     *            DLMS settings.
+     * @param reply
+     *            Received data.
+     * @param list
+     *            Received information report objects.
+     */
+    static void handleInformationReport(final GXDLMSSettings settings,
+            final GXReplyData reply,
+            final List<Entry<GXDLMSObject, Integer>> list) throws Exception {
+        reply.setTime(null);
+        int len = reply.getData().getUInt8();
+        byte[] tmp = null;
+        // If date time is given.
+        if (len != 0) {
+            tmp = new byte[len];
+            reply.getData().get(tmp);
+            reply.setTime((GXDateTime) GXDLMSClient.changeType(tmp,
+                    DataType.DATETIME));
+        }
+        short type;
+        TranslatorOutputType ot = TranslatorOutputType.SIMPLE_XML;
+        if (reply.getXml() != null) {
+            ot = reply.getXml().getOutputType();
+        }
+        int count = GXCommon.getObjectCount(reply.getData());
+        if (reply.getXml() != null) {
+            reply.getXml().appendStartTag(Command.INFORMATION_REPORT);
+            if (reply.getTime() != null) {
+                reply.getXml().appendComment(String.valueOf(reply.getTime()));
+                if (ot == TranslatorOutputType.SIMPLE_XML) {
+                    reply.getXml().appendLine(TranslatorTags.CURRENT_TIME, null,
+                            GXCommon.toHex(tmp, false));
+                } else {
+                    reply.getXml().appendLine(TranslatorTags.CURRENT_TIME, null,
+                            GXCommon.generalizedTime(reply.getTime()));
+                }
+            }
+            reply.getXml().appendStartTag(
+                    TranslatorTags.LIST_OF_VARIABLE_ACCESS_SPECIFICATION, "Qty",
+                    reply.getXml().integerToHex(count, 2));
+        }
+        for (int pos = 0; pos != count; ++pos) {
+            type = reply.getData().getUInt8();
+            if (type == VariableAccessSpecification.VARIABLE_NAME) {
+                int sn = reply.getData().getUInt16();
+                if (reply.getXml() != null) {
+                    if (ot == TranslatorOutputType.STANDARD_XML) {
+                        reply.getXml().appendStartTag(
+                                TranslatorTags.VARIABLE_ACCESS_SPECIFICATION);
+                    }
+                    reply.getXml().appendLine(
+                            Command.WRITE_REQUEST << 8
+                                    | VariableAccessSpecification.VARIABLE_NAME,
+                            "Value", reply.getXml().integerToHex(sn, 4));
+                    if (ot == TranslatorOutputType.STANDARD_XML) {
+                        reply.getXml().appendEndTag(
+                                TranslatorTags.VARIABLE_ACCESS_SPECIFICATION);
+                    }
+                } else {
+                    GXSNInfo info = findSNObject(null, settings, sn);
+                    if (info.getItem() != null) {
+                        list.add(new GXSimpleEntry<GXDLMSObject, Integer>(
+                                info.getItem(), info.getIndex()));
+                    } else {
+                        System.out.println(
+                                "InformationReport message. Unknown object : "
+                                        + String.valueOf(sn));
+                    }
+                }
+            }
+        }
+        if (reply.getXml() != null) {
+            reply.getXml().appendEndTag(
+                    TranslatorTags.LIST_OF_VARIABLE_ACCESS_SPECIFICATION);
+            reply.getXml().appendStartTag(TranslatorTags.LIST_OF_DATA, "Qty",
+                    reply.getXml().integerToHex(count, 2));
+        }
+        // Get values.
+        count = GXCommon.getObjectCount(reply.getData());
+        GXDataInfo di = new GXDataInfo();
+        di.setXml(reply.getXml());
+        for (int pos = 0; pos != count; ++pos) {
+            di.clear();
+            if (reply.getXml() != null) {
+                if (ot == TranslatorOutputType.STANDARD_XML) {
+                    reply.getXml().appendStartTag(Command.WRITE_REQUEST << 8
+                            | SingleReadResponse.DATA);
+                }
+                GXCommon.getData(reply.getData(), di);
+                if (ot == TranslatorOutputType.STANDARD_XML) {
+                    reply.getXml().appendEndTag(Command.WRITE_REQUEST << 8
+                            | SingleReadResponse.DATA);
+                }
+            } else {
+                ValueEventArgs v = new ValueEventArgs(list.get(pos).getKey(),
+                        list.get(pos).getValue(), 0, null);
+                v.setValue(GXCommon.getData(reply.getData(), di));
+                list.get(pos).getKey().setValue(settings, v);
+            }
+        }
+        if (reply.getXml() != null) {
+            reply.getXml().appendEndTag(TranslatorTags.LIST_OF_DATA);
+            reply.getXml().appendEndTag(Command.INFORMATION_REPORT);
+        }
     }
 }

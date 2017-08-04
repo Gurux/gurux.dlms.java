@@ -185,6 +185,38 @@ public class GXCommunicate {
     }
 
     /**
+     * Handle received notify messages.
+     * 
+     * @param reply
+     *            Received data.
+     * @throws Exception
+     */
+    private void handleNotifyMessages(final GXReplyData reply)
+            throws Exception {
+        List<Entry<GXDLMSObject, Integer>> items =
+                new ArrayList<Entry<GXDLMSObject, Integer>>();
+        Object value = dlms.parseReport(reply, items);
+        // If Event notification or Information report.
+        if (value == null) {
+            for (Entry<GXDLMSObject, Integer> it : items) {
+                System.out.println(it.getKey().toString() + " Value:"
+                        + it.getKey().getValues()[it.getValue() - 1]);
+            }
+        } else // Show data notification.
+        {
+            if (value instanceof Object[]) {
+                for (Object it : (Object[]) value) {
+                    System.out.println("Value:" + String.valueOf(it));
+                }
+            } else {
+                System.out.println("Value:" + String.valueOf(value));
+            }
+
+        }
+        reply.clear();
+    }
+
+    /**
      * Read DLMS Data from the device. If access is denied return null.
      */
     public void readDLMSPacket(byte[] data, GXReplyData reply)
@@ -226,9 +258,14 @@ public class GXCommunicate {
             }
             // Loop until whole DLMS packet is received.
             try {
-                while (!dlms.getData(p.getReply(), reply)) {
+                while (!dlms.getData(p.getReply(), reply) || reply.isNotify()) {
                     if (p.getEop() == null) {
                         p.setCount(1);
+                    }
+                    // Handle notify
+                    if (reply.isNotify()) {
+                        handleNotifyMessages(reply);
+                        continue;
                     }
                     if (!Media.receive(p)) {
                         // If echo.

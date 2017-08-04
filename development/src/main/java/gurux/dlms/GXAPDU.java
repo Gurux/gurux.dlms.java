@@ -623,16 +623,24 @@ final class GXAPDU {
                 encrypted = new byte[cnt];
                 data.get(encrypted);
                 if (cipher != null && xml.isComments()) {
-                    data.position(originalPos - 1);
-                    p = cipher.decrypt(settings.getSourceSystemTitle(), data);
-                    cipher.setSecurity(p.getSecurity());
-                    tag = data.getUInt8();
-                    xml.startComment("Decrypted data:");
-                    xml.appendLine("Security: " + p.getSecurity());
-                    xml.appendLine(
-                            "Invocation Counter: " + p.getInvocationCounter());
-                    parse(initiateRequest, settings, cipher, data, xml, tag);
-                    xml.endComment();
+                    int pos = xml.getXmlLength();
+                    try {
+                        data.position(originalPos - 1);
+                        p = cipher.decrypt(settings.getSourceSystemTitle(),
+                                data);
+                        cipher.setSecurity(p.getSecurity());
+                        tag = data.getUInt8();
+                        xml.startComment("Decrypted data:");
+                        xml.appendLine("Security: " + p.getSecurity());
+                        xml.appendLine("Invocation Counter: "
+                                + p.getInvocationCounter());
+                        parse(initiateRequest, settings, cipher, data, xml,
+                                tag);
+                        xml.endComment();
+                    } catch (Exception ex) {
+                        // It's OK if this fails.
+                        xml.setXmlLength(pos);
+                    }
                 }
                 // <glo_InitiateResponse>
                 xml.appendLine(Command.GLO_INITIATE_RESPONSE, "Value",
@@ -652,15 +660,23 @@ final class GXAPDU {
                 data.get(encrypted);
                 if (cipher != null && xml.isComments()) {
                     data.position(originalPos - 1);
-                    p = cipher.decrypt(settings.getSourceSystemTitle(), data);
-                    cipher.setSecurity(p.getSecurity());
-                    tag = data.getUInt8();
-                    xml.startComment("Decrypted data:");
-                    xml.appendLine("Security: " + p.getSecurity());
-                    xml.appendLine(
-                            "Invocation Counter: " + p.getInvocationCounter());
-                    parse(initiateRequest, settings, cipher, data, xml, tag);
-                    xml.endComment();
+                    int pos = xml.getXmlLength();
+                    try {
+                        p = cipher.decrypt(settings.getSourceSystemTitle(),
+                                data);
+                        cipher.setSecurity(p.getSecurity());
+                        tag = data.getUInt8();
+                        xml.startComment("Decrypted data:");
+                        xml.appendLine("Security: " + p.getSecurity());
+                        xml.appendLine("Invocation Counter: "
+                                + p.getInvocationCounter());
+                        parse(initiateRequest, settings, cipher, data, xml,
+                                tag);
+                        xml.endComment();
+                    } catch (Exception ex) {
+                        // It's OK if this fails.
+                        xml.setXmlLength(pos);
+                    }
                 }
                 // <glo_InitiateRequest>
                 xml.appendLine(Command.GLO_INITIATE_REQUEST, "Value",

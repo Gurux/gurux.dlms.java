@@ -817,6 +817,18 @@ public class GXDLMSTranslator {
                 value.position(0);
                 GXDLMS.getPdu(settings, data);
                 break;
+            case Command.INFORMATION_REPORT:
+                data.setXml(xml);
+                data.setData(value);
+                GXDLMSSNCommandHandler.handleInformationReport(settings, data,
+                        null);
+                break;
+            case Command.EVENT_NOTIFICATION:
+                data.setXml(xml);
+                data.setData(value);
+                GXDLMSLNCommandHandler.handleEventNotification(settings, data,
+                        null);
+                break;
             case Command.READ_RESPONSE:
             case Command.WRITE_RESPONSE:
             case Command.GET_RESPONSE:
@@ -900,16 +912,22 @@ public class GXDLMSTranslator {
             case Command.GLO_SET_RESPONSE:
             case Command.GLO_METHOD_REQUEST:
             case Command.GLO_METHOD_RESPONSE:
-
                 if (settings.getCipher() != null && comments) {
                     GXByteBuffer tmp = new GXByteBuffer();
                     tmp.set(value.getData(), value.position() - 1,
                             value.size() - value.position() + 1);
-                    settings.getCipher().decrypt(
-                            settings.getCipher().getSystemTitle(), tmp);
-                    xml.startComment("Decrypt data:");
-                    pduToXml(xml, tmp, omitDeclaration, omitNameSpace);
-                    xml.endComment();
+                    int len = xml.getXmlLength();
+                    try {
+                        settings.getCipher().decrypt(
+                                settings.getCipher().getSystemTitle(), tmp);
+                        xml.startComment("Decrypt data:");
+                        pduToXml(xml, tmp, omitDeclaration, omitNameSpace);
+                        xml.endComment();
+                    } catch (Exception e) {
+                        // It's OK if this fails. Ciphering settings are not
+                        // correct.
+                        xml.setXmlLength(len);
+                    }
                 }
                 int cnt = GXCommon.getObjectCount(value);
                 if (cnt != value.size() - value.position()) {
@@ -1044,6 +1062,8 @@ public class GXDLMSTranslator {
         case Command.DATA_NOTIFICATION:
         case Command.ACCESS_RESPONSE:
         case Command.INITIATE_RESPONSE:
+        case (int) Command.INFORMATION_REPORT:
+        case (int) Command.EVENT_NOTIFICATION:
             break;
         case Command.GLO_INITIATE_RESPONSE:
         case Command.GLO_GET_RESPONSE:
@@ -1411,8 +1431,14 @@ public class GXDLMSTranslator {
                 || s.getCommand() == Command.INITIATE_RESPONSE) {
             handleAarqAare(node, s, tag);
         } else if (tag >= GXDLMS.DATA_TYPE_OFFSET) {
-            if (tag == DataType.DATETIME.getValue() + GXDLMS.DATA_TYPE_OFFSET) {
+            if (tag == DataType.DATETIME.getValue() + GXDLMS.DATA_TYPE_OFFSET
+                    || (s.getCommand() == Command.EVENT_NOTIFICATION
+                            && s.getAttributeDescriptor().size() == 0)) {
                 preData = updateDateTime(node, s, preData);
+                if (preData == null
+                        && s.getCommand() == Command.GENERAL_CIPHERING) {
+                    s.getData().setUInt8(0);
+                }
             } else {
                 preData = updateDataType(node, s, tag);
             }
@@ -1545,6 +1571,17 @@ public class GXDLMSTranslator {
                     s.getData().setUInt8(0);
                 }
                 break;
+            case TranslatorTags.CURRENT_TIME:
+                if (s.getOutputType() == TranslatorOutputType.SIMPLE_XML) {
+                    updateDateTime(node, s, preData);
+                } else {
+                    str = getValue(node, s);
+                    s.setTime(new GXDateTime(GXCommon.getGeneralizedTime(str)));
+                }
+                break;
+            case TranslatorTags.TIME:
+                preData = updateDateTime(node, s, preData);
+                break;
             case TranslatorTags.INVOKE_ID:
                 // InvokeIdAndPriority.
                 value = s.parseShort(getValue(node, s));
@@ -1594,7 +1631,8 @@ public class GXDLMSTranslator {
             case TranslatorTags.ATTRIBUTE_ID:
                 s.getAttributeDescriptor()
                         .setUInt8(s.parseShort(getValue(node, s)));
-                if (s.getCommand() != Command.ACCESS_REQUEST) {
+                if (s.getCommand() != Command.ACCESS_REQUEST
+                        && s.getCommand() != Command.EVENT_NOTIFICATION) {
                     // Add AccessSelection.
                     s.getAttributeDescriptor().setUInt8(0);
                 }
@@ -1741,7 +1779,7 @@ public class GXDLMSTranslator {
                             s.setRequestType(0xFF);
                         }
                         s.setCount(s.getCount() + 1);
-                    } else {
+                    } else if (s.getCommand() != Command.INFORMATION_REPORT) {
                         s.getAttributeDescriptor().setUInt8(s.getCount());
                     }
                     if (s.getOutputType() == TranslatorOutputType.SIMPLE_XML) {
@@ -1851,6 +1889,8 @@ public class GXDLMSTranslator {
                 s.getData().setUInt8(1);
                 s.getData().setUInt8(Integer.parseInt(getValue(node, s)));
                 break;
+            case TranslatorTags.ATTRIBUTE_VALUE:
+                break;
             default:
                 throw new IllegalArgumentException(
                         "Invalid node: " + node.getNodeName());
@@ -1924,10 +1964,13 @@ public class GXDLMSTranslator {
                             DataType.DATE));
             break;
         case DATETIME:
-            GXCommon.setData(s.getData(), DataType.DATETIME,
-                    GXDLMSClient.changeType(
-                            GXCommon.hexToBytes(getValue(node, s)),
-                            DataType.DATETIME));
+            byte[] tmp = GXCommon.hexToBytes(getValue(node, s));
+            if (tmp.length == 5) {
+                dt = DataType.DATE;
+            } else if (tmp.length == 4) {
+                dt = DataType.TIME;
+            }
+            GXCommon.setData(s.getData(), dt, GXDLMSClient.changeType(tmp, dt));
             break;
         case ENUM:
             GXCommon.setData(s.getData(), DataType.ENUM,
@@ -2191,6 +2234,20 @@ public class GXDLMSTranslator {
             GXDLMS.getLNPdu(ln, bb);
             break;
         case Command.DATA_NOTIFICATION:
+            ln = new GXDLMSLNParameters(s.getSettings(), 0, s.getCommand(),
+                    s.getRequestType(), s.getAttributeDescriptor(), s.getData(),
+                    0xff);
+            ln.setTime(s.getTime());
+            GXDLMS.getLNPdu(ln, bb);
+            break;
+        case Command.INFORMATION_REPORT:
+            sn = new GXDLMSSNParameters(s.getSettings(), s.getCommand(),
+                    s.getCount(), s.getRequestType(),
+                    s.getAttributeDescriptor(), s.getData());
+            sn.setTime(s.getTime());
+            GXDLMS.getSNPdu(sn, bb);
+            break;
+        case Command.EVENT_NOTIFICATION:
             ln = new GXDLMSLNParameters(s.getSettings(), 0, s.getCommand(),
                     s.getRequestType(), s.getAttributeDescriptor(), s.getData(),
                     0xff);

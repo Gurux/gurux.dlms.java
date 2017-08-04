@@ -22,7 +22,7 @@ You can get source codes from http://www.github.com/gurux/gurux.dlms.java or if 
 <dependency>
   <groupId>org.gurux</groupId>
   <artifactId>gurux.dlms</artifactId>
-  <version>1.4.11</version>
+  <version>2.1.7</version>
 </dependency>
 ```
 Import new Project selecting "Existing Maven Project". Import examples separately. If you import only main Project, you can't debug or run examples. 

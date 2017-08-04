@@ -77,5 +77,7 @@ final class TranslatorTags {
     static final int KEY_PARAMETERS = 0xFF52;
     static final int KEY_CIPHERED_DATA = 0xFF53;
     static final int CIPHERED_CONTENT = 0xFF54;
-
+    static final int ATTRIBUTE_VALUE = 0xFF55;
+    static final int CURRENT_TIME = 0xFF56;
+    static final int TIME = 0xFF57;
 }

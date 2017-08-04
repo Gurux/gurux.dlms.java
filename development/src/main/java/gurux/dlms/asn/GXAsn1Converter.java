@@ -345,7 +345,7 @@ public final class GXAsn1Converter {
         case BerType.GENERALIZED_TIME:
             tmp2 = new byte[len];
             bb.get(tmp2);
-            objects.add(getGeneralizedTime(new String(tmp2)));
+            objects.add(GXCommon.getGeneralizedTime(new String(tmp2)));
             if (s != null) {
                 s.append(String.valueOf(objects.get(objects.size() - 1)));
             }
@@ -396,32 +396,6 @@ public final class GXAsn1Converter {
         return calendar.getTime();
     }
 
-    private static Date getGeneralizedTime(final String dateString) {
-        int year, month, day, hour, minute, second = 0;
-        Calendar calendar;
-        year = Integer.parseInt(dateString.substring(0, 4));
-        month = Integer.parseInt(dateString.substring(4, 6)) - 1;
-        day = Integer.parseInt(dateString.substring(6, 8));
-        hour = Integer.parseInt(dateString.substring(8, 10));
-        minute = Integer.parseInt(dateString.substring(10, 12));
-        // If UTC time.
-        if (dateString.endsWith("Z")) {
-            if (dateString.length() > 13) {
-                second = Integer.parseInt(dateString.substring(12, 14));
-            }
-            calendar = Calendar.getInstance(TimeZone.getTimeZone("GMT"));
-        } else {
-            if (dateString.length() > 17) {
-                second = Integer.parseInt(dateString.substring(12, 14));
-            }
-            calendar = Calendar.getInstance(TimeZone.getTimeZone(
-                    "GMT" + dateString.substring(dateString.length() - 6,
-                            dateString.length() - 1)));
-        }
-        calendar.set(year, month, day, hour, minute, second);
-        return calendar.getTime();
-    }
-
     private static String dateToString(final Date date) {
         Calendar calendar = Calendar.getInstance();
         calendar.setTime(date);
@@ -434,7 +408,8 @@ public final class GXAsn1Converter {
         sb.append(GXCommon.integerString(1 + calendar.get(Calendar.MONTH), 2));
         sb.append(
                 GXCommon.integerString(calendar.get(Calendar.DAY_OF_MONTH), 2));
-        sb.append(GXCommon.integerString(calendar.get(Calendar.HOUR), 2));
+        sb.append(
+                GXCommon.integerString(calendar.get(Calendar.HOUR_OF_DAY), 2));
         sb.append(GXCommon.integerString(calendar.get(Calendar.MINUTE), 2));
         sb.append(GXCommon.integerString(calendar.get(Calendar.SECOND), 2));
         sb.append("Z");

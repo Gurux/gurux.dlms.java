@@ -260,6 +260,16 @@ public final class Command {
      */
     public static final int GENERAL_CIPHERING = 0xDD;
 
+    /**
+     * Information Report request.
+     */
+    public static final int INFORMATION_REPORT = 0x18;
+
+    /**
+     * Event Notification request.
+     */
+    public static final int EVENT_NOTIFICATION = 0xC2;
+
     public static String toString(final int value) {
         String str;
         switch (value) {
@@ -392,6 +402,12 @@ public final class Command {
         case Command.GENERAL_CIPHERING:
             str = "GeneralCiphering";
             break;
+        case Command.INFORMATION_REPORT:
+            str = "InformationReport";
+            break;
+        case Command.EVENT_NOTIFICATION:
+            str = "EventNotification";
+            break;
         default:
             throw new IllegalArgumentException(String.valueOf(value));
         }
@@ -488,6 +504,10 @@ public final class Command {
             ret = Command.GENERAL_DED_CIPHERING;
         } else if ("GeneralCiphering".equalsIgnoreCase(value)) {
             ret = Command.GENERAL_CIPHERING;
+        } else if ("InformationReport".equalsIgnoreCase(value)) {
+            ret = Command.INFORMATION_REPORT;
+        } else if ("EventNotification".equalsIgnoreCase(value)) {
+            ret = Command.EVENT_NOTIFICATION;
         } else {
             throw new IllegalArgumentException(value);
         }

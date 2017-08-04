@@ -61,7 +61,7 @@ class GXDLMSSNParameters {
     /**
      * Send date and time. This is used in Data notification messages.
      */
-    private java.util.Date time;
+    private GXDateTime time;
     /**
      * Item Count.
      */
@@ -151,7 +151,7 @@ class GXDLMSSNParameters {
     /**
      * @return the time
      */
-    public java.util.Date getTime() {
+    public GXDateTime getTime() {
         return time;
     }
 
@@ -159,7 +159,7 @@ class GXDLMSSNParameters {
      * @param value
      *            the time to set
      */
-    public final void setTime(final java.util.Date value) {
+    public final void setTime(final GXDateTime value) {
         time = value;
     }
 

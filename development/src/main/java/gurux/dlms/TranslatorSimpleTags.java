@@ -115,6 +115,10 @@ final class TranslatorSimpleTags {
                 "DedicatedKey");
         GXDLMSTranslator.addTag(list, Command.CONFIRMED_SERVICE_ERROR,
                 "ConfirmedServiceError");
+        GXDLMSTranslator.addTag(list, Command.INFORMATION_REPORT,
+                "InformationReportRequest");
+        GXDLMSTranslator.addTag(list, Command.EVENT_NOTIFICATION,
+                "EventNotificationRequest");
     }
 
     /**
@@ -359,6 +363,10 @@ final class TranslatorSimpleTags {
         GXDLMSTranslator.addTag(list, TranslatorTags.LONG_INVOKE_ID,
                 "LongInvokeIdAndPriority");
         GXDLMSTranslator.addTag(list, TranslatorTags.DATE_TIME, "DateTime");
+        GXDLMSTranslator.addTag(list, TranslatorTags.CURRENT_TIME,
+                "CurrentTime");
+        GXDLMSTranslator.addTag(list, TranslatorTags.TIME, "Time");
+
         GXDLMSTranslator.addTag(list, TranslatorTags.REASON, "Reason");
         GXDLMSTranslator.addTag(list, TranslatorTags.NOTIFICATION_BODY,
                 "NotificationBody");
@@ -385,8 +393,8 @@ final class TranslatorSimpleTags {
                 "KeyParameters");
         GXDLMSTranslator.addTag(list, TranslatorTags.KEY_CIPHERED_DATA,
                 "KeyCipheredData");
-        GXDLMSTranslator.addTag(list, TranslatorTags.CIPHERED_CONTENT,
-                "CipheredContent");
+        GXDLMSTranslator.addTag(list, TranslatorTags.ATTRIBUTE_VALUE,
+                "AttributeValue");
     }
 
     static void getDataTypeTags(final HashMap<Integer, String> list) {

@@ -542,15 +542,19 @@ abstract class GXDLMS {
             // Add command.
             reply.setUInt8(p.getCommand());
 
-            if (p.getCommand() == Command.DATA_NOTIFICATION
+            if (p.getCommand() == Command.EVENT_NOTIFICATION
+                    || p.getCommand() == Command.DATA_NOTIFICATION
                     || p.getCommand() == Command.ACCESS_REQUEST
                     || p.getCommand() == Command.ACCESS_RESPONSE) {
                 // Add Long-Invoke-Id-And-Priority
-                if (p.getInvokeId() != 0) {
-                    reply.setUInt32(p.getInvokeId());
+                if (p.getCommand() != Command.EVENT_NOTIFICATION) {
+                    if (p.getInvokeId() != 0) {
+                        reply.setUInt32(p.getInvokeId());
 
-                } else {
-                    reply.setUInt32(getLongInvokeIDPriority(p.getSettings()));
+                    } else {
+                        reply.setUInt32(
+                                getLongInvokeIDPriority(p.getSettings()));
+                    }
                 }
                 // Add date time.
                 if (p.getTime() == null) {
@@ -597,7 +601,8 @@ abstract class GXDLMS {
             }
             // Add attribute descriptor.
             reply.set(p.getAttributeDescriptor());
-            if (p.getCommand() != Command.DATA_NOTIFICATION
+            if (p.getCommand() != Command.EVENT_NOTIFICATION
+                    && p.getCommand() != Command.DATA_NOTIFICATION
                     && !p.getSettings().getNegotiatedConformance()
                             .contains(Conformance.GENERAL_BLOCK_TRANSFER)) {
                 // If multiple blocks.
@@ -869,6 +874,8 @@ abstract class GXDLMS {
         byte frame = 0;
         if (p.getCommand() == Command.AARQ) {
             frame = 0x10;
+        } else if (p.getCommand() == Command.EVENT_NOTIFICATION) {
+            frame = 0x13;
         }
         do {
             getLNPdu(p, reply);
@@ -925,6 +932,8 @@ abstract class GXDLMS {
         byte frame = 0x0;
         if (p.getCommand() == Command.AARQ) {
             frame = 0x10;
+        } else if (p.getCommand() == Command.INFORMATION_REPORT) {
+            frame = 0x13;
         } else if (p.getCommand() == Command.NONE) {
             frame = p.getSettings().getNextSend(true);
         }
@@ -1037,7 +1046,21 @@ abstract class GXDLMS {
             cnt = p.getData().size() - p.getData().position();
         }
         // Add command.
-        if (p.getCommand() != Command.AARQ && p.getCommand() != Command.AARE) {
+        if (p.getCommand() == Command.INFORMATION_REPORT) {
+            reply.setUInt8(p.getCommand());
+            // Add date time.
+            if (p.getTime() == null) {
+                reply.setUInt8(DataType.NONE.getValue());
+            } else {
+                // Data is send in octet string. Remove data type.
+                int pos = reply.size();
+                GXCommon.setData(reply, DataType.OCTET_STRING, p.getTime());
+                reply.move(pos + 1, pos, reply.size() - pos - 1);
+            }
+            GXCommon.setObjectCount(p.getCount(), reply);
+            reply.set(p.getAttributeDescriptor());
+        } else if (p.getCommand() != Command.AARQ
+                && p.getCommand() != Command.AARE) {
             reply.setUInt8(p.getCommand());
             if (p.getCount() != 0xFF) {
                 GXCommon.setObjectCount(p.getCount(), reply);
@@ -2574,6 +2597,12 @@ abstract class GXDLMS {
             case Command.DATA_NOTIFICATION:
                 handleDataNotification(settings, data);
                 break;
+            case Command.EVENT_NOTIFICATION:
+                // Client handles this.
+                break;
+            case Command.INFORMATION_REPORT:
+                // Client handles this.
+                break;
             case Command.GENERAL_CIPHERING:
                 handleGeneralCiphering(settings, data);
                 break;
@@ -2873,7 +2902,7 @@ abstract class GXDLMS {
         getDataFromFrame(reply, data);
 
         // If keepalive or get next frame request.
-        if (data.getXml() != null || (frame & 0x1) != 0) {
+        if (data.getXml() != null || (frame != 0x13 && (frame & 0x1) != 0)) {
             if (settings.getInterfaceType() == InterfaceType.HDLC
                     && (data.getError() == ErrorCode.REJECTED.getValue()
                             || data.getData().size() != 0)) {

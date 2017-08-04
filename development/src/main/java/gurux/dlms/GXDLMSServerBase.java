@@ -377,7 +377,7 @@ public class GXDLMSServerBase {
     }
 
     /**
-     * Handles release reuest.
+     * Handles release request.
      * 
      * @param data
      *            Received data.

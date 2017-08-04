@@ -351,7 +351,7 @@ public class GXDateTime {
         local.setTimeInMillis(localtime);
         // If meter is not use daylight saving time.
         if (!meterCalendar.getTimeZone().useDaylightTime()) {
-            local.add(Calendar.HOUR, -1);
+            local.add(Calendar.HOUR_OF_DAY, -1);
         }
         return local;
     }
@@ -572,7 +572,8 @@ public class GXDateTime {
                         shortTimePattern.toArray(new String[0]));
             }
             if (format == "H") {
-                return String.valueOf(getLocalCalendar().get(Calendar.HOUR));
+                return String
+                        .valueOf(getLocalCalendar().get(Calendar.HOUR_OF_DAY));
             }
             if (format == null) {
                 return "";
@@ -701,12 +702,13 @@ public class GXDateTime {
         }
         // Compare hours.
         if (!to.getSkip().contains(DateTimeSkips.HOUR)) {
-            if (start.get(Calendar.HOUR) < cal.get(Calendar.HOUR)) {
-                diff += (cal.get(Calendar.HOUR) - start.get(Calendar.HOUR)) * 60
-                        * 60000L;
+            if (start.get(Calendar.HOUR_OF_DAY) < cal
+                    .get(Calendar.HOUR_OF_DAY)) {
+                diff += (cal.get(Calendar.HOUR_OF_DAY)
+                        - start.get(Calendar.HOUR_OF_DAY)) * 60 * 60000L;
             } else {
-                diff -= (start.get(Calendar.HOUR) - cal.get(Calendar.HOUR)) * 60
-                        * 60000L;
+                diff -= (start.get(Calendar.HOUR_OF_DAY)
+                        - cal.get(Calendar.HOUR_OF_DAY)) * 60 * 60000L;
             }
         } else if (diff < 0) {
             diff = 60 * 60000 + diff;
@@ -771,14 +773,7 @@ public class GXDateTime {
             return Calendar.getInstance().getTimeZone();
         }
         if (dst) {
-            // If we are reading meter from same time zone and time zone
-            // supports daylight saving time.
             TimeZone tz = Calendar.getInstance().getTimeZone();
-            // if (tz.observesDaylightTime()
-            // && tz.getRawOffset() / 60000 == deviation) {
-            // return tz;
-            // }
-            // If we are reading meter from different time zone.
             String[] ids = TimeZone.getAvailableIDs(deviation * 60000);
             tz = null;
             for (int pos = 0; pos != ids.length; ++pos) {

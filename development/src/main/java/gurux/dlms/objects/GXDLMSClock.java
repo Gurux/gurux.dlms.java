@@ -291,7 +291,7 @@ public class GXDLMSClock extends GXDLMSObject implements IGXDLMSBase {
                 minutes = 45;
             } else {
                 minutes = 0;
-                tm.add(java.util.Calendar.HOUR, 1);
+                tm.add(java.util.Calendar.HOUR_OF_DAY, 1);
             }
             tm.set(java.util.Calendar.MINUTE, minutes);
             tm.set(java.util.Calendar.SECOND, 0);

@@ -269,6 +269,15 @@ public class GXReplyData {
     }
 
     /**
+     * Is notify message.
+     */
+    public boolean isNotify() {
+        return command == Command.EVENT_NOTIFICATION
+                || command == Command.DATA_NOTIFICATION
+                || command == Command.INFORMATION_REPORT;
+    }
+
+    /**
      * Is more data available.
      * 
      * @return Return None if more data is not available or Frame or Block type.

@@ -311,8 +311,8 @@ public class GXDLMSActionSchedule extends GXDLMSObject implements IGXDLMSBase {
                                     | DateTimeSkips.SECOND.getValue()
                                     | DateTimeSkips.MILLISECOND.getValue())));
                     GXDateTime tmp = new GXDateTime(date.getMeterCalendar());
-                    tmp.getMeterCalendar().add(Calendar.HOUR,
-                            time.getMeterCalendar().get(Calendar.HOUR));
+                    tmp.getMeterCalendar().add(Calendar.HOUR_OF_DAY,
+                            time.getMeterCalendar().get(Calendar.HOUR_OF_DAY));
                     tmp.getMeterCalendar().add(Calendar.MINUTE,
                             time.getMeterCalendar().get(Calendar.MINUTE));
                     tmp.getMeterCalendar().add(Calendar.SECOND,

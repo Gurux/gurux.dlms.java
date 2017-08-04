@@ -2041,12 +2041,11 @@ public class GXDLMSClient {
             throw new IllegalArgumentException(
                     "List size and values size do not match.");
         }
-        pos = 0;
         for (Object it : values) {
             // Get access type.
             data.getUInt8();
             // Get status.
-            reply.add(new GXSimpleEntry<Object, ErrorCode>(values.get(pos),
+            reply.add(new GXSimpleEntry<Object, ErrorCode>(it,
                     ErrorCode.forValue(data.getUInt8())));
         }
         pos = 0;
@@ -2056,8 +2055,7 @@ public class GXDLMSClient {
                 ValueEventArgs ve = new ValueEventArgs(settings, it.getTarget(),
                         it.getIndex(), 0, null);
                 ve.setValue(values.get(pos));
-                ((IGXDLMSBase) ((it.getTarget() instanceof IGXDLMSBase)
-                        ? it.getTarget() : null)).setValue(settings, ve);
+                ((IGXDLMSBase) it.getTarget()).setValue(settings, ve);
             }
             ++pos;
         }
@@ -2091,5 +2089,34 @@ public class GXDLMSClient {
                             Conformance.GENERAL_PROTECTION }));
         }
         return list;
+    }
+
+    /**
+     * Returns collection of report objects.
+     * 
+     * @param reply
+     *            Reply.
+     * @param list
+     *            Array of objects and called indexes.
+     * @return Data notification data.
+     * @throws Exception
+     */
+    public Object parseReport(final GXReplyData reply,
+            final List<Entry<GXDLMSObject, Integer>> list) throws Exception {
+
+        if (reply.getCommand() == Command.EVENT_NOTIFICATION) {
+            GXDLMSLNCommandHandler.handleEventNotification(settings, reply,
+                    list);
+            return null;
+        } else if (reply.getCommand() == Command.INFORMATION_REPORT) {
+            GXDLMSSNCommandHandler.handleInformationReport(settings, reply,
+                    list);
+            return null;
+        } else if (reply.getCommand() == Command.DATA_NOTIFICATION) {
+            return reply.getValue();
+        } else {
+            throw new IllegalArgumentException(
+                    "Invalid command. " + reply.getCommand());
+        }
     }
 }

@@ -119,6 +119,10 @@ final class TranslatorStandardTags {
                 "x:user-information");
         GXDLMSTranslator.addTag(list, Command.CONFIRMED_SERVICE_ERROR,
                 "x:confirmedServiceError");
+        GXDLMSTranslator.addTag(list, Command.INFORMATION_REPORT,
+                "x:informationReportRequest");
+        GXDLMSTranslator.addTag(list, Command.EVENT_NOTIFICATION,
+                "x:event-notification-request");
     }
 
     /**
@@ -374,6 +378,9 @@ final class TranslatorStandardTags {
         GXDLMSTranslator.addTag(list, TranslatorTags.LONG_INVOKE_ID,
                 "x:long-invoke-id-and-priority");
         GXDLMSTranslator.addTag(list, TranslatorTags.DATE_TIME, "x:date-time");
+        GXDLMSTranslator.addTag(list, TranslatorTags.CURRENT_TIME,
+                "x:current-time");
+        GXDLMSTranslator.addTag(list, TranslatorTags.TIME, "x:time");
         GXDLMSTranslator.addTag(list, TranslatorTags.REASON, "x:reason");
         GXDLMSTranslator.addTag(list,
                 TranslatorTags.VARIABLE_ACCESS_SPECIFICATION,
@@ -407,8 +414,8 @@ final class TranslatorStandardTags {
                 "x:key-parameters");
         GXDLMSTranslator.addTag(list, TranslatorTags.KEY_CIPHERED_DATA,
                 "x:key-ciphered-data");
-        GXDLMSTranslator.addTag(list, TranslatorTags.CIPHERED_CONTENT,
-                "x:ciphered-content");
+        GXDLMSTranslator.addTag(list, TranslatorTags.ATTRIBUTE_VALUE,
+                "x:attribute-value");
     }
 
     static void getDataTypeTags(final HashMap<Integer, String> list) {

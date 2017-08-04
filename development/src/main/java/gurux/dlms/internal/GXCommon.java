@@ -42,9 +42,11 @@ import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Calendar;
+import java.util.Date;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.TimeZone;
 
 import javax.crypto.KeyAgreement;
 
@@ -2265,5 +2267,60 @@ public final class GXCommon {
             ++pos;
         }
         return ret;
+    }
+
+    public static Date getGeneralizedTime(final String dateString) {
+        int year, month, day, hour, minute, second = 0;
+        Calendar calendar;
+        year = Integer.parseInt(dateString.substring(0, 4));
+        month = Integer.parseInt(dateString.substring(4, 6)) - 1;
+        day = Integer.parseInt(dateString.substring(6, 8));
+        hour = Integer.parseInt(dateString.substring(8, 10));
+        minute = Integer.parseInt(dateString.substring(10, 12));
+        // If UTC time.
+        if (dateString.endsWith("Z")) {
+            if (dateString.length() > 13) {
+                second = Integer.parseInt(dateString.substring(12, 14));
+            }
+            calendar = Calendar.getInstance(TimeZone.getTimeZone("UTC"));
+            calendar.set(year, month, day, hour, minute, second);
+            long v = calendar.getTimeInMillis();
+            calendar = Calendar.getInstance();
+            calendar.setTimeInMillis(v);
+            calendar.set(Calendar.MILLISECOND, 0);
+            return calendar.getTime();
+        } else {
+            if (dateString.length() > 17) {
+                second = Integer.parseInt(dateString.substring(12, 14));
+            }
+            calendar = Calendar.getInstance(TimeZone.getTimeZone(
+                    "GMT" + dateString.substring(dateString.length() - 4,
+                            dateString.length())));
+        }
+        calendar.set(year, month, day, hour, minute, second);
+        calendar.set(Calendar.MILLISECOND, 0);
+        return calendar.getTime();
+    }
+
+    public static String generalizedTime(final GXDateTime date) {
+        Calendar calendar = date.getMeterCalendar();
+        calendar.add(Calendar.MINUTE, date.getDeviation());
+        // If summer time
+        if (date.getMeterCalendar().getTimeZone()
+                .inDaylightTime(date.getMeterCalendar().getTime())) {
+            calendar.add(Calendar.MINUTE, -60);
+        }
+        StringBuffer sb = new StringBuffer();
+        sb.append(GXCommon.integerString(calendar.get(Calendar.YEAR), 4));
+        sb.append(GXCommon.integerString(1 + calendar.get(Calendar.MONTH), 2));
+        sb.append(
+                GXCommon.integerString(calendar.get(Calendar.DAY_OF_MONTH), 2));
+        sb.append(
+                GXCommon.integerString(calendar.get(Calendar.HOUR_OF_DAY), 2));
+        sb.append(GXCommon.integerString(calendar.get(Calendar.MINUTE), 2));
+        sb.append(GXCommon.integerString(calendar.get(Calendar.SECOND), 2));
+        // UTC time.
+        sb.append("Z");
+        return sb.toString();
     }
 }

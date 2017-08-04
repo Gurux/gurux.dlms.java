@@ -310,6 +310,21 @@ public class GXDLMSTranslatorStructure {
     }
 
     /**
+     * @return XML Length.
+     */
+    public final int getXmlLength() {
+        return sb.length();
+    }
+
+    /**
+     * @param value
+     *            Set XML Length.
+     */
+    public final void setXmlLength(final int value) {
+        sb.setLength(value);
+    }
+
+    /**
      * Convert integer to string.
      * 
      * @param value

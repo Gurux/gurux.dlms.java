@@ -895,4 +895,66 @@ final class GXDLMSLNCommandHandler {
             xml.appendEndTag(Command.ACCESS_REQUEST);
         }
     }
+
+    /**
+     * @param settings
+     *            DLMS settings.
+     * @param reply
+     *            Received data.
+     * @param list
+     *            Received event notification objects.
+     */
+    static void handleEventNotification(final GXDLMSSettings settings,
+            final GXReplyData reply,
+            final List<Entry<GXDLMSObject, Integer>> list) {
+        reply.setTime(null);
+        int len = reply.getData().getUInt8();
+        byte[] tmp = null;
+        // If date time is given.
+        if (len != 0) {
+            tmp = new byte[len];
+            reply.getData().get(tmp);
+            reply.setTime((GXDateTime) GXDLMSClient.changeType(tmp,
+                    DataType.DATETIME));
+        }
+        if (reply.getXml() != null) {
+            reply.getXml().appendStartTag(Command.EVENT_NOTIFICATION);
+            if (reply.getTime() != null) {
+                reply.getXml().appendComment(String.valueOf(reply.getTime()));
+                reply.getXml().appendLine(TranslatorTags.TIME, null,
+                        GXCommon.toHex(tmp, false));
+            }
+        }
+        int ci = reply.getData().getUInt16();
+        byte[] ln = new byte[6];
+        reply.getData().get(ln);
+        short index = reply.getData().getUInt8();
+        if (reply.getXml() != null) {
+            appendAttributeDescriptor(reply.getXml(), ci, ln, index);
+            reply.getXml().appendStartTag(TranslatorTags.ATTRIBUTE_VALUE);
+        }
+        GXDataInfo di = new GXDataInfo();
+        di.setXml(reply.getXml());
+        Object value = GXCommon.getData(reply.getData(), di);
+
+        if (reply.getXml() != null) {
+            reply.getXml().appendEndTag(TranslatorTags.ATTRIBUTE_VALUE);
+            reply.getXml().appendEndTag(Command.EVENT_NOTIFICATION);
+        } else {
+            GXDLMSObject obj = settings.getObjects().findByLN(
+                    ObjectType.forValue(ci), GXCommon.toLogicalName(ln));
+            if (obj != null) {
+                ValueEventArgs v = new ValueEventArgs(obj, index, 0, null);
+                v.setValue(value);
+                obj.setValue(settings, v);
+                list.add(new GXSimpleEntry<GXDLMSObject, Integer>(obj,
+                        new Integer(index)));
+            } else {
+                System.out
+                        .println("InformationReport message. Unknown object : "
+                                + String.valueOf(ObjectType.forValue(ci)) + " "
+                                + GXCommon.toLogicalName(ln));
+            }
+        }
+    }
 }

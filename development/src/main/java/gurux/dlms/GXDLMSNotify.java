@@ -62,7 +62,7 @@ public class GXDLMSNotify {
     /**
      * DLMS settings.
      */
-    private final GXDLMSSettings settings = new GXDLMSSettings(false);
+    private final GXDLMSSettings settings = new GXDLMSSettings(true);
 
     /**
      * Constructor.
@@ -469,5 +469,57 @@ public class GXDLMSNotify {
             obj.setValue(settings, e);
             e.setValue(value);
         }
+    }
+
+    /**
+     * Sends Event Notification or Information Report Request.
+     * 
+     * @param time
+     *            Send time.
+     * @param list
+     *            List of COSEM object and attribute index to report.
+     * @return Report request as byte array.
+     */
+    public byte[][] generateReport(final GXDateTime time,
+            final List<Entry<GXDLMSObject, Integer>> list) {
+        if (list == null || list.size() == 0) {
+            throw new IllegalArgumentException("list");
+        }
+        if (getUseLogicalNameReferencing() && list.size() != 1) {
+            throw new IllegalArgumentException(
+                    "Only one object can send with Event Notification request.");
+        }
+
+        GXByteBuffer buff = new GXByteBuffer();
+        List<byte[]> reply;
+        if (getUseLogicalNameReferencing()) {
+            for (Entry<GXDLMSObject, Integer> it : list) {
+                buff.setUInt16(it.getKey().getObjectType().getValue());
+                buff.set(GXCommon
+                        .logicalNameToBytes(it.getKey().getLogicalName()));
+                buff.setUInt8(it.getValue());
+                addData(it.getKey(), it.getValue(), buff);
+            }
+            GXDLMSLNParameters p = new GXDLMSLNParameters(settings, 0,
+                    Command.EVENT_NOTIFICATION, 0, null, buff, 0xff);
+            p.setTime(time);
+            reply = GXDLMS.getLnMessages(p);
+        } else {
+            GXDLMSSNParameters p = new GXDLMSSNParameters(settings,
+                    Command.INFORMATION_REPORT, list.size(), 0xFF, null, buff);
+            for (Entry<GXDLMSObject, Integer> it : list) {
+                // Add variable type.
+                buff.setUInt8(VariableAccessSpecification.VARIABLE_NAME);
+                int sn = it.getKey().getShortName();
+                sn += (it.getValue() - 1) * 8;
+                buff.setUInt16(sn);
+            }
+            GXCommon.setObjectCount(list.size(), buff);
+            for (Entry<GXDLMSObject, Integer> it : list) {
+                addData(it.getKey(), it.getValue(), buff);
+            }
+            reply = GXDLMS.getSnMessages(p);
+        }
+        return reply.toArray(new byte[0][0]);
     }
 }
