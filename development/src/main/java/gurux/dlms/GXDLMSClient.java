@@ -1987,11 +1987,9 @@ public class GXDLMSClient {
             if (it.getCommand() == AccessServiceCommandType.GET) {
                 bb.setUInt8(0);
             } else {
-                Object value =
-                        ((IGXDLMSBase) ((it.getTarget() instanceof IGXDLMSBase)
-                                ? it.getTarget() : null)).getValue(null,
-                                        new ValueEventArgs(it.getTarget(),
-                                                it.getIndex(), 0, null));
+                Object value = ((IGXDLMSBase) it.getTarget()).getValue(settings,
+                        new ValueEventArgs(it.getTarget(), it.getIndex(), 0,
+                                null));
                 DataType type = it.getTarget().getDataType(it.getIndex());
                 if (type == DataType.NONE) {
                     type = GXDLMSConverter.getDLMSDataType(value);

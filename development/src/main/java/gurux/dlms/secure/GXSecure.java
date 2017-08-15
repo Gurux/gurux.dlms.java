@@ -114,6 +114,10 @@ public final class GXSecure {
                 md = MessageDigest.getInstance("SHA-1");
                 d = md.digest(d);
                 break;
+            case HIGH_SHA256:
+                md = MessageDigest.getInstance("SHA-256");
+                d = md.digest(d);
+                break;
             case HIGH_GMAC:
                 // SC is always Security.Authentication.
                 AesGcmParameter p =
@@ -126,10 +130,6 @@ public final class GXSecure {
                 challenge.setUInt32(p.getInvocationCounter());
                 challenge.set(GXDLMSChippering.encryptAesGcm(p, d));
                 d = challenge.array();
-                break;
-            case HIGH_HLS_SHA256:
-                md = MessageDigest.getInstance("SHA-256");
-                d = md.digest(d);
                 break;
             case HIGH_ECDSA:
                 Signature sig = Signature.getInstance("SHA256withECDSA");

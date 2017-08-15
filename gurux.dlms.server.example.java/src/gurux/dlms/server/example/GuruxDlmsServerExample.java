@@ -54,12 +54,22 @@ public class GuruxDlmsServerExample {
             GXDLMSServerSN SNServer = new GXDLMSServerSN();
             SNServer.initialize(4060);
             System.out.println("Short Name DLMS Server in port 4060");
+            System.out.println("Example connection settings:");
+            System.out.println(
+                    "Gurux.DLMS.Client.Example.Net /r=SN /h=localhost /p=4060");
+            System.out.println(
+                    "----------------------------------------------------------");
             ///////////////////////////////////////////////////////////////////////
             // Create Gurux DLMS server component for Logical Name
             // and start listen events.
             GXDLMSServerLN LNServer = new GXDLMSServerLN();
             LNServer.initialize(4061);
             System.out.println("Logical Name DLMS Server in port 4061");
+            System.out.println("Example connection settings:");
+            System.out.println(
+                    "Gurux.DLMS.Client.Example.Net /h=localhost /p=4061");
+            System.out.println(
+                    "----------------------------------------------------------");
             ///////////////////////////////////////////////////////////////////////
             // Create Gurux DLMS server component for Short Name
             // and start listen events.
@@ -67,6 +77,11 @@ public class GuruxDlmsServerExample {
             SN_47Server.initialize(4062);
             System.out.println(
                     "Short Name DLMS Server with IEC 62056-47 in port 4062");
+            System.out.println("Example connection settings:");
+            System.out.println(
+                    "Gurux.DLMS.Client.Example.Net /r=SN /h=localhost /p=4062 /WRAPPER");
+            System.out.println(
+                    "----------------------------------------------------------");
             ///////////////////////////////////////////////////////////////////////
             // Create Gurux DLMS server component for Logical Name
             // and start listen events.
@@ -74,6 +89,9 @@ public class GuruxDlmsServerExample {
             LN_47Server.initialize(4063);
             System.out.println(
                     "Logical Name DLMS Server with IEC 62056-47 in port 4063");
+            System.out.println("Example connection settings:");
+            System.out.println(
+                    "Gurux.DLMS.Client.Example.Net /h=localhost /p=4063 /WRAPPER");
 
             System.out.println("Press Enter to close.");
             while (System.in.read() != 13) {

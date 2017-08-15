@@ -355,26 +355,29 @@ public class GXDLMSTranslator {
                 getShowStringAsHex(), comments, tags));
         int pos;
         boolean found;
-        while (data.position() != data.size()) {
-            if (type == InterfaceType.HDLC
-                    && data.getUInt8(data.position()) == 0x7e) {
-                pos = data.position();
-                found = GXDLMS.getData(settings, data, reply);
-                data.position(pos);
-                if (found) {
-                    break;
+        try {
+            while (data.position() != data.size()) {
+                if (type == InterfaceType.HDLC
+                        && data.getUInt8(data.position()) == 0x7e) {
+                    pos = data.position();
+                    found = GXDLMS.getData(settings, data, reply);
+                    data.position(pos);
+                    if (found) {
+                        break;
+                    }
+                } else if (type == InterfaceType.WRAPPER
+                        && data.getUInt16(data.position()) == 0x1) {
+                    pos = data.position();
+                    found = GXDLMS.getData(settings, data, reply);
+                    data.position(pos);
+                    if (found) {
+                        break;
+                    }
                 }
-            } else if (type == InterfaceType.WRAPPER
-                    && data.getUInt16(data.position()) == 0x1) {
-                pos = data.position();
-                found = GXDLMS.getData(settings, data, reply);
-                data.position(pos);
-                if (found) {
-                    break;
-                }
-                break;
+                data.position(data.position() + 1);
             }
-            data.position(data.position() + 1);
+        } catch (Exception ex) {
+            throw new RuntimeException("Invalid DLMS frame.");
         }
         if (pdu != null) {
             pdu.clear();

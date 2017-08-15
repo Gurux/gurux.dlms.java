@@ -46,12 +46,12 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Date;
 import java.util.List;
+import java.util.Map;
 import java.util.Map.Entry;
 
 import gurux.common.GXCommon;
 import gurux.common.IGXMedia;
 import gurux.common.ReceiveParameters;
-import gurux.dlms.GXDLMSClient;
 import gurux.dlms.GXDLMSConverter;
 import gurux.dlms.GXDLMSException;
 import gurux.dlms.GXReplyData;
@@ -63,9 +63,6 @@ import gurux.dlms.enums.ErrorCode;
 import gurux.dlms.enums.InterfaceType;
 import gurux.dlms.enums.ObjectType;
 import gurux.dlms.enums.RequestTypes;
-import gurux.dlms.manufacturersettings.GXManufacturer;
-import gurux.dlms.manufacturersettings.GXServerAddress;
-import gurux.dlms.manufacturersettings.HDLCAddressType;
 import gurux.dlms.objects.GXDLMSCaptureObject;
 import gurux.dlms.objects.GXDLMSDemandRegister;
 import gurux.dlms.objects.GXDLMSObject;
@@ -83,7 +80,6 @@ import gurux.serial.GXSerial;
 public class GXCommunicate {
     IGXMedia Media;
     public boolean Trace = false;
-    GXManufacturer manufacturer;
     public GXDLMSSecureClient dlms;
     boolean iec;
     java.nio.ByteBuffer replyBuff;
@@ -99,34 +95,14 @@ public class GXCommunicate {
         System.out.print(text + "\r\n");
     }
 
-    public GXCommunicate(int waitTime, GXDLMSSecureClient dlms,
-            GXManufacturer manufacturer, boolean iec, Authentication auth,
-            String pw, IGXMedia media) throws Exception {
+    public GXCommunicate(final int waitTime, final GXDLMSSecureClient dlms,
+            final boolean iec, final IGXMedia media) throws Exception {
         Files.deleteIfExists(Paths.get("trace.txt"));
         Media = media;
         WaitTime = waitTime;
         this.dlms = dlms;
-        this.manufacturer = manufacturer;
         this.iec = iec;
-        boolean useIec47 =
-                manufacturer.getUseIEC47() && media instanceof gurux.net.GXNet;
-        dlms.setUseLogicalNameReferencing(
-                manufacturer.getUseLogicalNameReferencing());
-        int value = manufacturer.getAuthentication(auth).getClientAddress();
-        dlms.setClientAddress(value);
-        GXServerAddress serv = manufacturer.getServer(HDLCAddressType.DEFAULT);
-        if (useIec47) {
-            dlms.setInterfaceType(InterfaceType.WRAPPER);
-            value = serv.getPhysicalAddress();
-        } else {
-            dlms.setInterfaceType(InterfaceType.HDLC);
-            value = GXDLMSClient.getServerAddress(serv.getLogicalAddress(),
-                    serv.getPhysicalAddress());
-        }
-        dlms.setServerAddress(value);
-        dlms.setAuthentication(auth);
-        dlms.setPassword(pw.getBytes("ASCII"));
-        System.out.println("Authentication: " + auth);
+        System.out.println("Authentication: " + dlms.getAuthentication());
         System.out.println("ClientAddress: 0x"
                 + Integer.toHexString(dlms.getClientAddress()));
         System.out.println("ServerAddress: 0x"
@@ -370,13 +346,6 @@ public class GXCommunicate {
                 if (replyStr.length() == 0 || replyStr.charAt(0) != '/') {
                     throw new Exception("Invalid responce : " + replyStr);
                 }
-                String manufactureID = replyStr.substring(1, 4);
-                if (manufacturer.getIdentification()
-                        .compareToIgnoreCase(manufactureID) != 0) {
-                    throw new Exception("Manufacturer "
-                            + manufacturer.getIdentification()
-                            + " expected but " + manufactureID + " found.");
-                }
                 int bitrate = 0;
                 char baudrate = replyStr.charAt(4);
                 switch (baudrate) {
@@ -460,7 +429,8 @@ public class GXCommunicate {
         reply.clear();
 
         // Get challenge Is HLS authentication is used.
-        if (dlms.getIsAuthenticationRequired()) {
+        if (dlms.getAuthentication().getValue() > Authentication.LOW
+                .getValue()) {
             for (byte[] it : dlms.getApplicationAssociationRequest()) {
                 readDLMSPacket(it, reply);
             }
@@ -676,32 +646,8 @@ public class GXCommunicate {
                             + it.getDescription());
             for (int pos : ((IGXDLMSBase) it).getAttributeIndexToRead()) {
                 try {
-
                     Object val = readObject(it, pos);
-                    if (val instanceof byte[]) {
-                        val = GXCommon.bytesToHex((byte[]) val);
-                    } else if (val instanceof Double) {
-                        NumberFormat formatter =
-                                NumberFormat.getNumberInstance();
-                        val = formatter.format(val);
-                    } else if (val != null && val.getClass().isArray()) {
-                        String str = "";
-                        for (int pos2 = 0; pos2 != Array
-                                .getLength(val); ++pos2) {
-                            if (!str.equals("")) {
-                                str += ", ";
-                            }
-                            Object tmp = Array.get(val, pos2);
-                            if (tmp instanceof byte[]) {
-                                str += GXCommon.bytesToHex((byte[]) tmp);
-                            } else {
-                                str += String.valueOf(tmp);
-                            }
-                        }
-                        val = str;
-                    }
-                    traceLn(logFile,
-                            "Index: " + pos + " Value: " + String.valueOf(val));
+                    ShowValue(logFile, pos, val);
                 } catch (Exception ex) {
                     traceLn(logFile,
                             "Error! Index: " + pos + " " + ex.getMessage());
@@ -709,6 +655,32 @@ public class GXCommunicate {
                 }
             }
         }
+    }
+
+    static void ShowValue(final PrintWriter logFile, final int pos,
+            final Object value) {
+        Object val = value;
+        if (val instanceof byte[]) {
+            val = GXCommon.bytesToHex((byte[]) val);
+        } else if (val instanceof Double) {
+            NumberFormat formatter = NumberFormat.getNumberInstance();
+            val = formatter.format(val);
+        } else if (val != null && val.getClass().isArray()) {
+            String str = "";
+            for (int pos2 = 0; pos2 != Array.getLength(val); ++pos2) {
+                if (!str.equals("")) {
+                    str += ", ";
+                }
+                Object tmp = Array.get(val, pos2);
+                if (tmp instanceof byte[]) {
+                    str += GXCommon.bytesToHex((byte[]) tmp);
+                } else {
+                    str += String.valueOf(tmp);
+                }
+            }
+            val = str;
+        }
+        traceLn(logFile, "Index: " + pos + " Value: " + String.valueOf(val));
     }
 
     /**
@@ -798,7 +770,8 @@ public class GXCommunicate {
      * Read all objects from the meter. This is only example. Usually there is
      * no need to read all data from the meter.
      */
-    void readAllObjects(PrintWriter logFile) throws Exception {
+    void readAllObjects(PrintWriter logFile,
+            List<Map.Entry<String, Integer>> readObjects) throws Exception {
         GXReplyData reply = new GXReplyData();
         // Get Association view from the meter.
         readDataBlock(dlms.getObjectsRequest(), reply);
@@ -807,6 +780,16 @@ public class GXCommunicate {
         // Get description of the objects.
         GXDLMSConverter converter = new GXDLMSConverter();
         converter.updateOBISCodeInformation(objects);
+        // Read only wanted objects.
+        if (readObjects.size() != 0) {
+            for (Map.Entry<String, Integer> it : readObjects) {
+                Object val = readObject(
+                        objects.findByLN(ObjectType.ALL, it.getKey()),
+                        it.getValue());
+                ShowValue(logFile, it.getValue(), val);
+            }
+            return;
+        }
 
         // Read Scalers and units from the register objects.
         readScalerAndUnits(objects, logFile);

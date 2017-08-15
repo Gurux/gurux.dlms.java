@@ -73,7 +73,7 @@ public enum Authentication {
     /**
      * High authentication is used. Password is hashed with SHA-256.
      */
-    HIGH_HLS_SHA256,
+    HIGH_SHA256,
 
     /**
      * High authentication is used. Password is hashed with ECDSA.
@@ -115,6 +115,9 @@ public enum Authentication {
         case HIGH_SHA1:
             str = "HighSha1";
             break;
+        case HIGH_SHA256:
+            str = "HighSha256";
+            break;
         case LOW:
             str = "Low";
             break;
@@ -140,6 +143,8 @@ public enum Authentication {
             v = Authentication.HIGH_MD5;
         } else if ("HighSha1".equalsIgnoreCase(value)) {
             v = Authentication.HIGH_SHA1;
+        } else if ("HighSha256".equalsIgnoreCase(value)) {
+            v = Authentication.HIGH_SHA256;
         } else if ("HighGMac".equalsIgnoreCase(value)) {
             v = Authentication.HIGH_GMAC;
         } else {
