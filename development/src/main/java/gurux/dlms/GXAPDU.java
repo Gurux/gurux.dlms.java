@@ -948,11 +948,6 @@ final class GXAPDU {
                 break;
             case BerType.CONTEXT | BerType.CONSTRUCTED
                     | PduType.USER_INFORMATION:// 0xBE
-                if (xml == null && resultComponent != AssociationResult.ACCEPTED
-                        && resultDiagnosticValue != SourceDiagnostic.NONE) {
-                    throw new GXDLMSException(resultComponent,
-                            resultDiagnosticValue);
-                }
                 parseUserInformation(settings, cipher, buff, xml);
                 break;
             default:
@@ -964,6 +959,11 @@ final class GXAPDU {
                 }
                 break;
             }
+        }
+        if (xml == null && resultComponent != AssociationResult.ACCEPTED
+                && resultDiagnosticValue != SourceDiagnostic.NONE) {
+            throw new GXDLMSException(resultComponent,
+                    resultDiagnosticValue);
         }
         return resultDiagnosticValue;
     }
