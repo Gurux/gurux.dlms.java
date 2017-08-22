@@ -948,6 +948,8 @@ final class GXAPDU {
                 break;
             case BerType.CONTEXT | BerType.CONSTRUCTED
                     | PduType.USER_INFORMATION:// 0xBE
+                // Check result component. Some meters are returning invalid
+                // user-information if connection failed.
                 if (xml == null && resultComponent != AssociationResult.ACCEPTED
                         && resultDiagnosticValue != SourceDiagnostic.NONE) {
                     throw new GXDLMSException(resultComponent,
@@ -964,6 +966,12 @@ final class GXAPDU {
                 }
                 break;
             }
+        }
+        // All meters don't send user-information if connection is failed.
+        // For this reason result component is check again.
+        if (xml == null && resultComponent != AssociationResult.ACCEPTED
+                && resultDiagnosticValue != SourceDiagnostic.NONE) {
+            throw new GXDLMSException(resultComponent, resultDiagnosticValue);
         }
         return resultDiagnosticValue;
     }
