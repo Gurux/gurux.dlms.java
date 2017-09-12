@@ -716,8 +716,7 @@ public final class GXCommon {
             return null;
         }
         int startIndex = index;
-        java.util.ArrayList<Object> arr = new java.util.ArrayList<Object>(
-                info.getCount() - info.getIndex());
+        java.util.ArrayList<Object> arr = new java.util.ArrayList<Object>();
         // Position where last row was found. Cache uses this info.
         int pos = info.getIndex();
         for (; pos != info.getCount(); ++pos) {
@@ -1319,9 +1318,13 @@ public final class GXCommon {
                             } else {
                                 type = DataType.TIME;
                             }
-                            Object dt = GXDLMSClient.changeType(tmp, type);
-                            info.getXml().appendComment(dt.toString());
-                            isString = false;
+                            GXDateTime dt = (GXDateTime) GXDLMSClient
+                                    .changeType(tmp, type);
+                            int year = dt.getMeterCalendar().get(Calendar.YEAR);
+                            if (year > 1970 && year < 2100) {
+                                info.getXml().appendComment(dt.toString());
+                                isString = false;
+                            }
                         } catch (Exception e) {
                             isString = true;
                         }

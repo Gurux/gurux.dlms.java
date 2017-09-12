@@ -579,8 +579,16 @@ public class GXDLMSTranslator {
                                 xml.appendLine(pduToXml(pduFrames, true, true));
                                 pduFrames.clear();
                             } else {
-                                xml.appendLine(
-                                        pduToXml(data.getData(), true, true));
+                                if (data.getCommand() == Command.SNRM
+                                        || data.getCommand() == Command.UA) {
+                                    xml.appendStartTag(data.getCommand());
+                                    pduToXml(xml, data.getData(), true, true);
+                                    xml.appendEndTag(data.getCommand());
+                                    xml.setXmlLength(xml.getXmlLength() + 2);
+                                } else {
+                                    xml.appendLine(pduToXml(data.getData(),
+                                            true, true));
+                                }
                             }
                             // Remove \r\n.
                             xml.trim();
@@ -663,7 +671,6 @@ public class GXDLMSTranslator {
 
     private void getUa(final GXByteBuffer data,
             final GXDLMSTranslatorStructure xml) {
-        xml.appendStartTag(Command.UA);
         data.getUInt8(); // Skip FromatID
         data.getUInt8(); // Skip Group ID.
         data.getUInt8(); // Skip Group length.
@@ -707,7 +714,6 @@ public class GXDLMSTranslator {
                 throw new GXDLMSException("Invalid UA response.");
             }
         }
-        xml.appendEndTag(Command.UA);
     }
 
     public final String pduToXml(final GXByteBuffer value) {
@@ -1348,8 +1354,10 @@ public class GXDLMSTranslator {
                     .forValue(Integer.parseInt(getValue(node, s))));
             break;
         case Command.CONFIRMED_SERVICE_ERROR:
-            s.getSettings().setServer(false);
-            s.setCommand(tag);
+            if (s.getCommand() == Command.NONE) {
+                s.getSettings().setServer(false);
+                s.setCommand(tag);
+            }
             break;
         default:
             throw new IllegalArgumentException(
@@ -2187,7 +2195,7 @@ public class GXDLMSTranslator {
         case Command.GLO_INITIATE_RESPONSE:
             GXAPDU.generateAARE(s.getSettings(), bb, s.getResult(),
                     s.getDiagnostic(), s.getSettings().getCipher(),
-                    s.getData());
+                    s.getAttributeDescriptor(), s.getData());
             break;
         case Command.DISCONNECT_REQUEST:
             break;

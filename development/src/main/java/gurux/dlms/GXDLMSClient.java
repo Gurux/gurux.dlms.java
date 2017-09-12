@@ -93,6 +93,18 @@ public class GXDLMSClient {
      * Constructor.
      */
     public GXDLMSClient() {
+        this(false);
+    }
+
+    /**
+     * Constructor.
+     * 
+     * @param useLogicalNameReferencing
+     *            Is Logical Name referencing used.
+     */
+    public GXDLMSClient(final boolean useLogicalNameReferencing) {
+        this(useLogicalNameReferencing, 16, 1, Authentication.NONE, null,
+                InterfaceType.HDLC);
     }
 
     /**
@@ -115,9 +127,9 @@ public class GXDLMSClient {
             final int clientAddress, final int serverAddress,
             final Authentication forAuthentication, final String password,
             final InterfaceType interfaceType) {
-        this.setUseLogicalNameReferencing(useLogicalNameReferencing);
-        this.setClientAddress(clientAddress);
-        this.setServerAddress(serverAddress);
+        setUseLogicalNameReferencing(useLogicalNameReferencing);
+        setClientAddress(clientAddress);
+        setServerAddress(serverAddress);
         setAuthentication(forAuthentication);
         setPassword(GXCommon.getBytes(password));
         setInterfaceType(interfaceType);
@@ -664,15 +676,11 @@ public class GXDLMSClient {
         }
         byte[] challenge = GXSecure.secure(settings, settings.getCipher(), ic,
                 settings.getStoCChallenge(), pw);
-        GXByteBuffer bb = new GXByteBuffer();
-        bb.setUInt8(DataType.OCTET_STRING.getValue());
-        GXCommon.setObjectCount(challenge.length, bb);
-        bb.set(challenge);
         if (getUseLogicalNameReferencing()) {
             return method("0.0.40.0.0.255", ObjectType.ASSOCIATION_LOGICAL_NAME,
-                    1, bb.array(), DataType.OCTET_STRING);
+                    1, challenge, DataType.OCTET_STRING);
         }
-        return method(0xFA00, ObjectType.ASSOCIATION_SHORT_NAME, 8, bb.array(),
+        return method(0xFA00, ObjectType.ASSOCIATION_SHORT_NAME, 8, challenge,
                 DataType.OCTET_STRING);
     }
 
@@ -830,6 +838,7 @@ public class GXDLMSClient {
     private GXDLMSObjectCollection parseSNObjects(final GXByteBuffer buff,
             final boolean onlyKnownObjects) {
         // Get array tag.
+        buff.position(0);
         short size = buff.getUInt8();
         // Check that data is in the array
         if (size != 0x01) {
@@ -1193,11 +1202,7 @@ public class GXDLMSClient {
         List<byte[]> reply;
         GXByteBuffer data = new GXByteBuffer();
         GXByteBuffer attributeDescriptor = new GXByteBuffer();
-        if ((value instanceof byte[])) {
-            data.set((byte[]) value);
-        } else if (type != DataType.NONE) {
-            GXCommon.setData(data, type, value);
-        }
+        GXCommon.setData(data, type, value);
 
         if (getUseLogicalNameReferencing()) {
             // CI
@@ -1689,6 +1694,23 @@ public class GXDLMSClient {
      * @return Generated read message.
      */
     public final byte[][] readRowsByRange(final GXDLMSProfileGeneric pg,
+            final GXDateTime start, final GXDateTime end) {
+        return readByRange(pg, start, end, null);
+    }
+
+    /**
+     * Read rows by range. Use this method to read Profile Generic table between
+     * dates.
+     * 
+     * @param pg
+     *            Profile generic object to read.
+     * @param start
+     *            Start time.
+     * @param end
+     *            End time.
+     * @return Generated read message.
+     */
+    public final byte[][] readRowsByRange(final GXDLMSProfileGeneric pg,
             final java.util.Date start, final java.util.Date end) {
         return readByRange(pg, start, end, null);
     }
@@ -2077,14 +2099,13 @@ public class GXDLMSClient {
                             Conformance.BLOCK_TRANSFER_WITH_GET_OR_READ,
                             Conformance.SET, Conformance.SELECTIVE_ACCESS,
                             Conformance.ACTION, Conformance.MULTIPLE_REFERENCES,
-                            Conformance.GET, Conformance.GENERAL_PROTECTION }));
+                            Conformance.GET }));
         } else {
             list.addAll(Arrays
                     .asList(new Conformance[] { Conformance.INFORMATION_REPORT,
                             Conformance.READ, Conformance.UN_CONFIRMED_WRITE,
                             Conformance.WRITE, Conformance.PARAMETERIZED_ACCESS,
-                            Conformance.MULTIPLE_REFERENCES,
-                            Conformance.GENERAL_PROTECTION }));
+                            Conformance.MULTIPLE_REFERENCES }));
         }
         return list;
     }

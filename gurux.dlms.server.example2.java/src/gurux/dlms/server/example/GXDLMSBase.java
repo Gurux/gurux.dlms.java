@@ -107,7 +107,6 @@ public class GXDLMSBase extends GXDLMSSecureServer2
     this.setMaxReceivePDUSize(1024);
     byte[] secret = "Gurux".getBytes();
     ln.setSecret(secret);
-    ln.setHlsSecret(secret);
   }
 
   /**
@@ -124,7 +123,6 @@ public class GXDLMSBase extends GXDLMSSecureServer2
     this.setMaxReceivePDUSize(1024);
     byte[] secret = "Gurux".getBytes();
     sn.setSecret(secret);
-    sn.setHlsSecret(secret);
   }
 
   /**

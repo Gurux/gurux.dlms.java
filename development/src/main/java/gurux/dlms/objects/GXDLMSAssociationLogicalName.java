@@ -42,6 +42,7 @@ import java.util.logging.Logger;
 import javax.xml.stream.XMLStreamException;
 
 import gurux.dlms.GXByteBuffer;
+import gurux.dlms.GXDLMSClient;
 import gurux.dlms.GXDLMSServerBase;
 import gurux.dlms.GXDLMSSettings;
 import gurux.dlms.GXDLMSTranslator;
@@ -70,12 +71,8 @@ public class GXDLMSAssociationLogicalName extends GXDLMSObject
     /**
      * Secret used in Low Level Authentication.
      */
-    private byte[] llsSecret;
+    private byte[] secret;
 
-    /**
-     * Secret used in High Level Authentication.
-     */
-    private byte[] hlsSecret;
     private AssociationStatus associationStatus =
             AssociationStatus.NonAssociated;
     private String securitySetupReference;
@@ -146,7 +143,7 @@ public class GXDLMSAssociationLogicalName extends GXDLMSObject
     }
 
     public final GXAuthenticationMechanismName
-            getauthenticationMechanismName() {
+            getAuthenticationMechanismName() {
         return authenticationMechanismName;
     }
 
@@ -154,7 +151,7 @@ public class GXDLMSAssociationLogicalName extends GXDLMSObject
      * @return Secret used in Low Level Authentication.
      */
     public final byte[] getSecret() {
-        return llsSecret;
+        return secret;
     }
 
     /**
@@ -162,22 +159,7 @@ public class GXDLMSAssociationLogicalName extends GXDLMSObject
      *            Secret used in Low Level Authentication.
      */
     public final void setSecret(final byte[] value) {
-        llsSecret = value;
-    }
-
-    /**
-     * @return Secret used in HLS Authentication.
-     */
-    public final byte[] getHlsSecret() {
-        return hlsSecret;
-    }
-
-    /**
-     * @param value
-     *            Secret used in HLS Authentication.
-     */
-    public final void setHlsSecret(final byte[] value) {
-        hlsSecret = value;
+        secret = value;
     }
 
     public final AssociationStatus getAssociationStatus() {
@@ -196,11 +178,37 @@ public class GXDLMSAssociationLogicalName extends GXDLMSObject
         securitySetupReference = value;
     }
 
+    /**
+     * Updates secret.
+     * 
+     * @param client
+     *            DLMS client.
+     * @return Action bytes.
+     */
+    public byte[][] updateSecret(final GXDLMSClient client) {
+        if (getAuthenticationMechanismName()
+                .getMechanismId() == Authentication.NONE) {
+            throw new IllegalArgumentException(
+                    "Invalid authentication level in MechanismId.");
+        }
+        if (getAuthenticationMechanismName()
+                .getMechanismId() == Authentication.HIGH_GMAC) {
+            throw new IllegalArgumentException(
+                    "HighGMAC secret is updated using Security setup.");
+        }
+        if (getAuthenticationMechanismName()
+                .getMechanismId() == Authentication.LOW) {
+            return client.write(this, 7);
+        }
+        // Action is used to update High authentication password.
+        return client.method(this, 2, secret, DataType.OCTET_STRING);
+    }
+
     @Override
     public final Object[] getValues() {
         return new Object[] { getLogicalName(), getObjectList(),
                 clientSAP + "/" + serverSAP, getApplicationContextName(),
-                getXDLMSContextInfo(), getauthenticationMechanismName(),
+                getXDLMSContextInfo(), getAuthenticationMechanismName(),
                 getSecret(), getAssociationStatus(),
                 getSecuritySetupReference() };
     }
@@ -240,7 +248,7 @@ public class GXDLMSAssociationLogicalName extends GXDLMSObject
                     bb.getUInt8();
                     ic = bb.getUInt32();
                 } else {
-                    readSecret = hlsSecret;
+                    readSecret = secret;
                 }
                 serverChallenge =
                         GXSecure.secure(settings, settings.getCipher(), ic,
@@ -253,7 +261,7 @@ public class GXDLMSAssociationLogicalName extends GXDLMSObject
                     readSecret = settings.getCipher().getSystemTitle();
                     ic = settings.getCipher().getInvocationCounter();
                 } else {
-                    readSecret = hlsSecret;
+                    readSecret = secret;
                 }
                 byte[] tmp = GXSecure.secure(settings, settings.getCipher(), ic,
                         settings.getCtoSChallenge(), readSecret);
@@ -579,7 +587,7 @@ public class GXDLMSAssociationLogicalName extends GXDLMSObject
             return data.array();
         }
         if (e.getIndex() == 7) {
-            return llsSecret;
+            return secret;
         }
         if (e.getIndex() == 8) {
             return getAssociationStatus().ordinal();
@@ -817,7 +825,7 @@ public class GXDLMSAssociationLogicalName extends GXDLMSObject
             updateAuthenticationMechanismName(e.getValue());
             break;
         case 7:
-            llsSecret = (byte[]) e.getValue();
+            secret = (byte[]) e.getValue();
             break;
         case 8:
             if (e.getValue() == null) {
@@ -892,15 +900,9 @@ public class GXDLMSAssociationLogicalName extends GXDLMSObject
         }
         String str = reader.readElementContentAsString("Secret");
         if (str == null) {
-            llsSecret = null;
+            secret = null;
         } else {
-            llsSecret = GXDLMSTranslator.hexToBytes(str);
-        }
-        str = reader.readElementContentAsString("HlsSecret");
-        if (str == null) {
-            hlsSecret = null;
-        } else {
-            hlsSecret = GXDLMSTranslator.hexToBytes(str);
+            secret = GXDLMSTranslator.hexToBytes(str);
         }
         associationStatus = AssociationStatus.values()[reader
                 .readElementContentAsInt("AssociationStatus")];
@@ -965,10 +967,7 @@ public class GXDLMSAssociationLogicalName extends GXDLMSObject
                     authenticationMechanismName.getMechanismId().getValue());
             writer.writeEndElement();
         }
-        writer.writeElementString("Secret", GXDLMSTranslator.toHex(llsSecret));
-        writer.writeElementString("HlsSecret",
-                GXDLMSTranslator.toHex(hlsSecret));
-
+        writer.writeElementString("Secret", GXDLMSTranslator.toHex(secret));
         writer.writeElementString("AssociationStatus",
                 associationStatus.ordinal());
         writer.writeElementString("SecuritySetupReference",

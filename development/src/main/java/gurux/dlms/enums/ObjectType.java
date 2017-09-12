@@ -67,7 +67,7 @@ public enum ObjectType {
     /*
      * All object types are used.
      */
-    ALL(0),
+    NONE(0),
     /*
      * AssociationLogicalName object type is used with meters that utilize
      * Logical Name associations within a COSEM.
@@ -157,10 +157,6 @@ public enum ObjectType {
      * To determine modem settings, use ModemConfiguration object.
      */
     MODEM_CONFIGURATION(27),
-    /*
-     * Default value, no object type is set.
-     */
-    NONE(0),
     /*
      * To determine PPP = Point-to-Point Protocol settings, use the PppSetup
      * object.

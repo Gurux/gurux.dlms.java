@@ -303,9 +303,13 @@ public class GXDLMSIp4Setup extends GXDLMSObject implements IGXDLMSBase {
         if (e.getIndex() == 4) {
             GXByteBuffer data = new GXByteBuffer();
             data.setUInt8(DataType.ARRAY.getValue());
-            GXCommon.setObjectCount(getMulticastIPAddress().length, data);
-            for (long it : getMulticastIPAddress()) {
-                GXCommon.setData(data, DataType.UINT16, it);
+            if (multicastIPAddress == null) {
+                GXCommon.setObjectCount(0, data);
+            } else {
+                GXCommon.setObjectCount(getMulticastIPAddress().length, data);
+                for (long it : getMulticastIPAddress()) {
+                    GXCommon.setData(data, DataType.UINT16, it);
+                }
             }
             return data.array();
         }

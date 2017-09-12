@@ -148,7 +148,8 @@ public class GXManufacturerCollection
                 }
             }
         } catch (Exception e) {
-            return true;
+            throw new RuntimeException("Mikko " + e.getMessage());
+            // return true;
         }
         for (Map.Entry<String, Date> it : available.entrySet()) {
             // If new item is added.

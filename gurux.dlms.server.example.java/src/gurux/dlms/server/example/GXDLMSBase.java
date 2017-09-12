@@ -40,10 +40,12 @@ import java.io.FileWriter;
 import java.io.IOException;
 import java.net.InetAddress;
 import java.net.UnknownHostException;
+import java.nio.file.Paths;
 import java.text.SimpleDateFormat;
 import java.util.AbstractMap;
 import java.util.Calendar;
 import java.util.Date;
+import java.util.Map.Entry;
 
 import gurux.common.IGXMediaListener;
 import gurux.common.MediaStateEventArgs;
@@ -110,9 +112,19 @@ import gurux.net.enums.NetworkType;
 public class GXDLMSBase extends GXDLMSSecureServer2
         implements IGXMediaListener, gurux.net.IGXNetListener {
 
-    boolean Trace = false;
+    TraceLevel Trace = TraceLevel.INFO;
     private GXNet media;
-    static final String dataFile = "data.csv";
+
+    static final Object fileLock = new Object();
+
+    // Date file is saved to same directory where app is.
+    static final String getDataFile() {
+        final String dir = Paths
+                .get(GXDLMSBase.class.getProtectionDomain().getCodeSource()
+                        .getLocation().getPath().substring(1))
+                .getParent().toString();
+        return dir + "/data.csv";
+    }
 
     /**
      * Constructor.
@@ -128,7 +140,6 @@ public class GXDLMSBase extends GXDLMSSecureServer2
         this.setMaxReceivePDUSize(1024);
         byte[] secret = "Gurux".getBytes();
         ln.setSecret(secret);
-        ln.setHlsSecret(secret);
     }
 
     /**
@@ -145,7 +156,6 @@ public class GXDLMSBase extends GXDLMSSecureServer2
         this.setMaxReceivePDUSize(1024);
         byte[] secret = "Gurux".getBytes();
         sn.setSecret(secret);
-        sn.setHlsSecret(secret);
     }
 
     /*
@@ -233,10 +243,10 @@ public class GXDLMSBase extends GXDLMSSecureServer2
             sb.append(System.lineSeparator());
             cal.add(Calendar.HOUR, 1);
         }
-        synchronized (dataFile) {
+        synchronized (fileLock) {
             FileWriter writer = null;
             try {
-                writer = new FileWriter(dataFile, false);
+                writer = new FileWriter(getDataFile(), false);
                 writer.write(sb.toString());
                 writer.close();
             } catch (IOException e) {
@@ -293,7 +303,7 @@ public class GXDLMSBase extends GXDLMSSecureServer2
                 new GXDLMSDayProfile[] { new GXDLMSDayProfile(1,
                         new GXDLMSDayProfileAction[] {
                                 new GXDLMSDayProfileAction(new GXTime(now),
-                                        "test", 1) }) });
+                                        "0.1.10.1.101.255", 1) }) });
         activity.setCalendarNamePassive("Passive");
         activity.setSeasonProfilePassive(
                 new GXDLMSSeasonProfile[] { new GXDLMSSeasonProfile(
@@ -481,9 +491,10 @@ public class GXDLMSBase extends GXDLMSSecureServer2
      * 
      * @param server
      */
-    public void initialize(int port) throws Exception {
+    public void initialize(int port, TraceLevel trace) throws Exception {
         media = new gurux.net.GXNet(NetworkType.TCP, port);
         media.setTrace(TraceLevel.VERBOSE);
+        Trace = trace;
         media.addListener(this);
         media.open();
         ///////////////////////////////////////////////////////////////////////
@@ -559,9 +570,9 @@ public class GXDLMSBase extends GXDLMSSecureServer2
         p.clearBuffer();
         BufferedReader reader = null;
         SimpleDateFormat df = new SimpleDateFormat();
-        synchronized (dataFile) {
+        synchronized (fileLock) {
             try {
-                reader = new BufferedReader(new FileReader(dataFile));
+                reader = new BufferedReader(new FileReader(getDataFile()));
                 String line;
                 while ((line = reader.readLine()) != null) {
                     // Skip row
@@ -607,10 +618,10 @@ public class GXDLMSBase extends GXDLMSSecureServer2
         GXDateTime end = (GXDateTime) GXDLMSClient.changeType(
                 (byte[]) ((Object[]) e.getParameters())[2], DataType.DATETIME);
 
-        synchronized (dataFile) {
+        synchronized (fileLock) {
             BufferedReader reader = null;
             try {
-                reader = new BufferedReader(new FileReader(dataFile));
+                reader = new BufferedReader(new FileReader(getDataFile()));
                 String line;
                 SimpleDateFormat df = new SimpleDateFormat();
                 while ((line = reader.readLine()) != null) {
@@ -647,9 +658,9 @@ public class GXDLMSBase extends GXDLMSSecureServer2
     private int getProfileGenericDataCount() {
         int rows = 0;
         BufferedReader reader = null;
-        synchronized (dataFile) {
+        synchronized (fileLock) {
             try {
-                reader = new BufferedReader(new FileReader(dataFile));
+                reader = new BufferedReader(new FileReader(getDataFile()));
                 while (reader.readLine() != null) {
                     ++rows;
                 }
@@ -795,40 +806,59 @@ public class GXDLMSBase extends GXDLMSSecureServer2
 
     }
 
+    private void capture(GXDLMSProfileGeneric pg) throws IOException {
+        // Profile generic Capture is called.
+        SimpleDateFormat df = new SimpleDateFormat();
+        synchronized (fileLock) {
+            FileWriter writer = new FileWriter(getDataFile(), true);
+            try {
+                StringBuilder sb = new StringBuilder();
+                for (Entry<GXDLMSObject, GXDLMSCaptureObject> it : pg
+                        .getCaptureObjects()) {
+                    if (sb.length() != 0) {
+                        sb.append(';');
+                    }
+                    // TODO: Read value here example from the meter if it's not
+                    // updated automatically.
+                    Object value = it.getKey()
+                            .getValues()[it.getValue().getAttributeIndex() - 1];
+                    if (value == null) {
+                        // Generate random value here.
+                        value = getProfileGenericDataCount() + 1;
+                    }
+                    if (value instanceof Date) {
+                        sb.append(df.format((Date) value));
+                    } else if (value instanceof GXDateTime) {
+                        sb.append(df.format(((GXDateTime) value)
+                                .getLocalCalendar().getTime()));
+                    } else {
+                        sb.append(value);
+                    }
+                }
+                sb.append(System.lineSeparator());
+                writer.write(sb.toString());
+            } finally {
+                writer.close();
+            }
+        }
+    }
+
     private void handleProfileGenericActions(ValueEventArgs it)
             throws IOException {
         GXDLMSProfileGeneric pg = (GXDLMSProfileGeneric) it.getTarget();
         FileWriter writer = null;
-        synchronized (dataFile) {
+        synchronized (fileLock) {
             try {
                 if (it.getIndex() == 1) {
                     // Profile generic clear is called. Clear data.
-                    writer = new FileWriter(dataFile, false);
+                    writer = new FileWriter(getDataFile(), false);
                 } else if (it.getIndex() == 2) {
-                    // Profile generic Capture is called.
-                    SimpleDateFormat df = new SimpleDateFormat();
-                    writer = new FileWriter(dataFile, true);
-                    StringBuilder sb = new StringBuilder();
-                    for (int pos = pg.getBuffer().length - 1; pos != pg
-                            .getBuffer().length; ++pos) {
-                        for (int c = 0; c != pg.getCaptureObjects()
-                                .size(); ++c) {
-                            if (c != 0) {
-                                sb.append(';');
-                            }
-                            Object col = ((Object[]) pg.getBuffer()[pos])[c];
-                            if (col instanceof Date) {
-                                sb.append(df.format((Date) col));
-                            } else {
-                                sb.append(col);
-                            }
-                        }
-                        sb.append("\n");
-                    }
-                    writer.write(sb.toString());
+                    capture(pg);
                 }
             } finally {
-                writer.close();
+                if (writer != null) {
+                    writer.close();
+                }
             }
         }
     }
@@ -844,7 +874,9 @@ public class GXDLMSBase extends GXDLMSSecureServer2
 
     @Override
     public void onError(Object sender, Exception ex) {
-        System.out.println("Error has occurred:" + ex.getMessage());
+        if (Trace.ordinal() > TraceLevel.OFF.ordinal()) {
+            System.out.println("Error has occurred:" + ex.getMessage());
+        }
     }
 
     /*
@@ -854,7 +886,7 @@ public class GXDLMSBase extends GXDLMSSecureServer2
     public void onReceived(Object sender, ReceiveEventArgs e) {
         try {
             synchronized (this) {
-                if (Trace) {
+                if (Trace == TraceLevel.VERBOSE) {
                     System.out.println("<- " + gurux.common.GXCommon
                             .bytesToHex((byte[]) e.getData()));
                 }
@@ -864,7 +896,7 @@ public class GXDLMSBase extends GXDLMSSecureServer2
                 // This is done if client try to make connection with wrong
                 // server or client address.
                 if (reply != null) {
-                    if (Trace) {
+                    if (Trace == TraceLevel.VERBOSE) {
                         System.out.println("-> "
                                 + gurux.common.GXCommon.bytesToHex(reply));
                     }
@@ -887,6 +919,8 @@ public class GXDLMSBase extends GXDLMSSecureServer2
     @Override
     public void onClientConnected(Object sender,
             gurux.net.ConnectionEventArgs e) {
+        // Reset server settings when connection is established.
+        this.reset();
         System.out.println("Client Connected.");
     }
 
@@ -896,8 +930,6 @@ public class GXDLMSBase extends GXDLMSSecureServer2
     @Override
     public void onClientDisconnected(Object sender,
             gurux.net.ConnectionEventArgs e) {
-        // Reset server settings when connection closed.
-        this.reset();
         System.out.println("Client Disconnected.");
     }
 
@@ -1034,18 +1066,15 @@ public class GXDLMSBase extends GXDLMSSecureServer2
 
     /**
      * Schedule or profile generic asks current value.
+     * 
+     * @throws IOException
      */
     @Override
-    public void onPreGet(ValueEventArgs[] args) {
+    public void onPreGet(ValueEventArgs[] args) throws IOException {
         for (ValueEventArgs it : args) {
             if (it.getTarget() instanceof GXDLMSProfileGeneric) {
                 GXDLMSProfileGeneric pg = (GXDLMSProfileGeneric) it.getTarget();
-                pg.clearBuffer();
-                int cnt = getProfileGenericDataCount() + 1;
-                // Update last average value.
-                pg.addRow(
-                        new Object[] { Calendar.getInstance().getTime(), cnt });
-                it.setHandled(true);
+                capture(pg);
             }
         }
     }

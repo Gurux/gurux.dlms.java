@@ -415,11 +415,7 @@ public class GXDLMSSecuritySetup extends GXDLMSObject implements IGXDLMSBase {
      */
     public final byte[][] importCertificate(final GXDLMSClient client,
             final byte[] key) {
-        GXByteBuffer bb = new GXByteBuffer();
-        bb.setUInt8(DataType.OCTET_STRING.getValue());
-        GXCommon.setObjectCount(key.length, bb);
-        bb.set(key);
-        return client.method(this, 6, bb.array(), DataType.OCTET_STRING);
+        return client.method(this, 6, key, DataType.OCTET_STRING);
     }
 
     /**
@@ -458,7 +454,7 @@ public class GXDLMSSecuritySetup extends GXDLMSObject implements IGXDLMSBase {
         bb.setUInt8(type.getValue());
         // system_title
         GXCommon.setData(bb, DataType.OCTET_STRING, systemTitle);
-        return client.method(this, 7, bb.array(), DataType.OCTET_STRING);
+        return client.method(this, 7, bb.array(), DataType.STRUCTURE);
     }
 
     /**
@@ -488,7 +484,7 @@ public class GXDLMSSecuritySetup extends GXDLMSObject implements IGXDLMSBase {
         GXCommon.setData(bb, DataType.OCTET_STRING, serialNumber.getBytes());
         // issuer
         GXCommon.setData(bb, DataType.OCTET_STRING, issuer.getBytes());
-        return client.method(this, 7, bb.array(), DataType.OCTET_STRING);
+        return client.method(this, 7, bb.array(), DataType.STRUCTURE);
     }
 
     /**
@@ -524,7 +520,7 @@ public class GXDLMSSecuritySetup extends GXDLMSObject implements IGXDLMSBase {
         bb.setUInt8(type.getValue());
         // system_title
         GXCommon.setData(bb, DataType.OCTET_STRING, systemTitle);
-        return client.method(this, 8, bb.array(), DataType.OCTET_STRING);
+        return client.method(this, 8, bb.array(), DataType.STRUCTURE);
     }
 
     /**
@@ -554,7 +550,7 @@ public class GXDLMSSecuritySetup extends GXDLMSObject implements IGXDLMSBase {
         GXCommon.setData(bb, DataType.OCTET_STRING, serialNumber.getBytes());
         // issuer
         GXCommon.setData(bb, DataType.OCTET_STRING, issuer.getBytes());
-        return client.method(this, 8, bb.array(), DataType.OCTET_STRING);
+        return client.method(this, 8, bb.array(), DataType.STRUCTURE);
     }
 
     /**

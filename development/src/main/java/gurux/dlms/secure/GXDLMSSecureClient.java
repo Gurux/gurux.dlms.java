@@ -64,8 +64,18 @@ public class GXDLMSSecureClient extends GXDLMSClient {
      * Constructor.
      */
     public GXDLMSSecureClient() {
-        ciphering = new GXCiphering("ABCDEFGH".getBytes());
-        setCipher(ciphering);
+        this(false);
+    }
+
+    /**
+     * Constructor.
+     * 
+     * @param useLogicalNameReferencing
+     *            Is Logical Name referencing used.
+     */
+    public GXDLMSSecureClient(final boolean useLogicalNameReferencing) {
+        this(useLogicalNameReferencing, 16, 1, Authentication.NONE, null,
+                InterfaceType.HDLC);
     }
 
     /**

@@ -33,19 +33,16 @@
 //---------------------------------------------------------------------------
 package gurux.dlms.client;
 
-import java.io.BufferedWriter;
-import java.io.FileWriter;
-import java.io.PrintWriter;
 import java.util.ArrayList;
-import java.util.List;
 import java.util.Map;
 
-import gurux.common.IGXMedia;
-import gurux.dlms.GXDLMSClient;
+import gurux.common.GXCmdParameter;
+import gurux.common.GXCommon;
+import gurux.common.enums.TraceLevel;
 import gurux.dlms.GXSimpleEntry;
 import gurux.dlms.enums.Authentication;
 import gurux.dlms.enums.InterfaceType;
-import gurux.dlms.secure.GXDLMSSecureClient;
+import gurux.dlms.enums.ObjectType;
 import gurux.io.BaudRate;
 import gurux.io.Parity;
 import gurux.io.StopBits;
@@ -58,39 +55,67 @@ public class sampleclient {
      *            the command line arguments
      */
     public static void main(String[] args) {
-        GXCommunicate com = null;
-        PrintWriter logFile = null;
-        try {
-            logFile = new PrintWriter(
-                    new BufferedWriter(new FileWriter("logFile.txt")));
-            // Objects to read.
-            List<Map.Entry<String, Integer>> readObjects =
-                    new ArrayList<Map.Entry<String, Integer>>();
+        Settings settings = new Settings();
 
-            com = getManufactureSettings(args, readObjects);
-            // If help is shown.
-            if (com == null) {
+        GXDLMSReader reader = null;
+        try {
+            ////////////////////////////////////////
+            // Handle command line parameters.
+            int ret = getParameters(args, settings);
+            if (ret != 0) {
                 System.exit(1);
+                return;
             }
-            com.initializeConnection();
-            com.readAllObjects(logFile, readObjects);
-            System.out.println("Done!");
-        } catch (Exception e) {
-            System.out.println(e.toString());
+
+            ////////////////////////////////////////
+            // Initialize connection settings.
+            if (settings.media instanceof GXSerial) {
+                GXSerial serial = (GXSerial) settings.media;
+                if (settings.iec) {
+                    serial.setBaudRate(BaudRate.BAUD_RATE_300);
+                    serial.setDataBits(7);
+                    serial.setParity(Parity.EVEN);
+                    serial.setStopBits(StopBits.ONE);
+                } else {
+                    serial.setBaudRate(BaudRate.BAUD_RATE_9600);
+                    serial.setDataBits(8);
+                    serial.setParity(Parity.NONE);
+                    serial.setStopBits(StopBits.ONE);
+                }
+            } else if (settings.media instanceof GXNet) {
+            } else {
+                throw new Exception("Unknown media type.");
+            }
+            ////////////////////////////////////////
+            reader = new GXDLMSReader(settings.client, settings.media,
+                    settings.trace);
+            settings.media.open();
+            if (settings.readObjects.size() != 0) {
+                reader.initializeConnection();
+                reader.getAssociationView();
+                for (Map.Entry<String, Integer> it : settings.readObjects) {
+                    Object val = reader.read(
+                            settings.client.getObjects()
+                                    .findByLN(ObjectType.NONE, it.getKey()),
+                            it.getValue());
+                    reader.showValue(it.getValue(), val);
+                }
+            } else {
+                reader.readAll();
+            }
+        } catch (Exception ex) {
+            System.out.println(ex.getMessage());
             System.exit(1);
         } finally {
-            if (logFile != null) {
-                logFile.close();
-            }
-            try {
-                ///////////////////////////////////////////////////////////////
-                // Disconnect.
-                if (com != null) {
-                    com.close();
+            if (reader != null) {
+                try {
+                    reader.close();
+                } catch (Exception e) {
+                    System.out.println(e.getMessage());
+                    System.exit(1);
                 }
-            } catch (Exception Ex2) {
-                System.out.println(Ex2.toString());
             }
+            System.out.println("Ended. Press any key to continue.");
         }
     }
 
@@ -101,157 +126,169 @@ public class sampleclient {
         System.out.println(
                 "GuruxDlmsSample reads data from the DLMS/COSEM device.");
         System.out.println(
-                "GuruxDlmsSample /h=[Meter IP Address] /p=[Meter Port No] [/s=] /c=16 /s=1 /r=SN");
-        System.out.println(" /h=\t host name or IP address.");
-        System.out.println(" /p=\t port number or name (Example: 1000).");
-        System.out.println(" /sp=\t serial port.");
-        System.out.println(" /IEC use IEC as start protocol.");
-        System.out.println(" /a=\t Authentication (None, Low, High).");
-        System.out.println(" /pw=\t Password for authentication.");
-        System.out.println(" /c=\t Client address. (Default: 16)");
-        System.out.println(" /s=\t Server address. (Default: 1)");
-        System.out.println(" /sn=\t Server address as serial number.");
+                "GuruxDlmsSample -h [Meter IP Address] -p [Meter Port No] -c 16 -s 1 -r SN");
+        System.out.println(" -h \t host name or IP address.");
+        System.out.println(" -p \t port number or name (Example: 1000).");
+        System.out.println(" -S \t serial port.");
+        System.out.println(" -i IEC is a start protocol.");
+        System.out.println(" -a \t Authentication (None, Low, High).");
+        System.out.println(" -P \t Password for authentication.");
+        System.out.println(" -c \t Client address. (Default: 16)");
+        System.out.println(" -s \t Server address. (Default: 1)");
+        System.out.println(" -n \t Server address as serial number.");
         System.out.println(
-                " /r=[SN, LN]\t Short name or Logican Name (default) referencing is used.");
-        System.out.println(" /WRAPPER profile is used. HDLC is default.");
-        System.out.println(" /\t Trace messages.");
+                " -r [sn, sn]\t Short name or Logican Name (default) referencing is used.");
+        System.out.println(" -w WRAPPER profile is used. HDLC is default.");
+        System.out
+                .println(" -t [Error, Warning, Info, Verbose] Trace messages.");
         System.out.println(
-                " /g=\"0.0.1.0.0.255:1; 0.0.1.0.0.255:2\" Get selected object(s) with given attribute index.");
+                " -g \"0.0.1.0.0.255:1; 0.0.1.0.0.255:2\" Get selected object(s) with given attribute index.");
         System.out.println("Example:");
         System.out.println("Read LG device using TCP/IP connection.");
         System.out.println(
-                "GuruxDlmsSample /r=SN /c=16 /s=1 /h=[Meter IP Address] /p=[Meter Port No]");
+                "GuruxDlmsSample -r SN -c 16 -s 1 -h [Meter IP Address] -p [Meter Port No]");
         System.out.println("Read LG device using serial port connection.");
-        System.out.println("GuruxDlmsSample /r=SN /c=16 /s=1 /sp=COM1 /IEC");
+        System.out.println("GuruxDlmsSample -r SN -c 16 -s 1 -sp COM1 -i");
         System.out.println("Read Indian device using serial port connection.");
         System.out.println(
-                "GuruxDlmsSample /sp=COM1 /c=16 /s=1 /a=Low /pw=[password]");
+                "GuruxDlmsSample -S COM1 -c 16 -s 1 -a Low -P [password]");
+
     }
 
-    /**
-     * Get manufacturer settings from Gurux web service if not installed yet.
-     * This is something that you do not necessary seed. You can // hard code
-     * the settings. This is only for demonstration. Use hard coded settings
-     * like this:
-     * <p/>
-     * GXDLMSClient cl = new GXDLMSClient(true, 16, 1, Authentication.NONE,
-     * null, InterfaceType.HDLC);
-     * 
-     * @param args
-     *            Command line arguments.
-     * @return
-     * @throws Exception
-     */
-    static GXCommunicate getManufactureSettings(String[] args,
-            List<Map.Entry<String, Integer>> readObjects) throws Exception {
-        IGXMedia media = null;
-        GXDLMSSecureClient dlms = new GXDLMSSecureClient(true, 16, 1,
-                Authentication.NONE, null, InterfaceType.HDLC);
-        GXCommunicate com;
-        boolean trace = false, iec = true;
-        String str = null;
-        for (String it : args) {
-            String item = it.trim().toLowerCase();
-            if (item.startsWith("/sn=")) {
-                // Serial number.
-                dlms.setServerAddress(GXDLMSClient.getServerAddress(
-                        Integer.parseInt(item.replaceFirst("/sn=", ""))));
-            } else if ("/wrapper".compareToIgnoreCase(item) == 0) {
-                // Wrapper is used.
-                dlms.setInterfaceType(InterfaceType.WRAPPER);
-            } else if (item.startsWith("/r=")) {
-                // referencing
-                str = item.replace("/r=", "");
-                if ("sn".compareToIgnoreCase(str) == 0) {
-                    dlms.setUseLogicalNameReferencing(false);
-                } else if ("ln".compareToIgnoreCase(str) == 0) {
-                    dlms.setUseLogicalNameReferencing(true);
+    static int getParameters(String[] args, Settings settings) {
+        ArrayList<GXCmdParameter> parameters =
+                GXCommon.getParameters(args, "h:p:c:s:r:it:a:p:wP:g:");
+        GXNet net = null;
+        for (GXCmdParameter it : parameters) {
+            switch (it.getTag()) {
+            case 'w':
+                settings.client.setInterfaceType(InterfaceType.WRAPPER);
+                break;
+            case 'r':
+                if ("sn".compareTo(it.getValue()) == 0) {
+                    settings.client.setUseLogicalNameReferencing(false);
+                } else if ("ln".compareTo(it.getValue()) == 0) {
+                    settings.client.setUseLogicalNameReferencing(true);
                 } else {
                     throw new IllegalArgumentException(
-                            "Invalid reference. Set LN or SN.");
+                            "Invalid reference option.");
                 }
-            } else if (item.startsWith("/c="))// Client address
-            {
-                dlms.setClientAddress(
-                        Integer.parseInt(item.replace("/c=", "")));
-            } else if (item.startsWith("/s="))// Server address
-            {
-                dlms.setServerAddress(
-                        Integer.parseInt(item.replace("/c=", "")));
-            } else if (item.startsWith("/h=")) // Host
-            {
-                if (media == null) {
-                    media = new GXNet();
+                break;
+            case 'h':
+                // Host address.
+                if (settings.media == null) {
+                    settings.media = new GXNet();
                 }
-                GXNet net = (GXNet) media;
-                net.setHostName(item.replace("/h=", ""));
-            } else if (item.startsWith("/p="))// TCP/IP Port
-            {
-                if (media == null) {
-                    media = new GXNet();
+                net = (GXNet) settings.media;
+                net.setHostName(it.getValue());
+                break;
+            case 't':
+                // Trace.
+                if ("Error".compareTo(it.getValue()) == 0)
+                    settings.trace = TraceLevel.ERROR;
+                else if ("Warning".compareTo(it.getValue()) == 0)
+                    settings.trace = TraceLevel.WARNING;
+                else if ("Info".compareTo(it.getValue()) == 0)
+                    settings.trace = TraceLevel.INFO;
+                else if ("Verbose".compareTo(it.getValue()) == 0)
+                    settings.trace = TraceLevel.VERBOSE;
+                else if ("Off".compareTo(it.getValue()) == 0)
+                    settings.trace = TraceLevel.OFF;
+                else
+                    throw new IllegalArgumentException(
+                            "Invalid Authentication option. (Error, Warning, Info, Verbose, Off).");
+                break;
+            case 'p':
+                // Port.
+                if (settings.media == null) {
+                    settings.media = new GXNet();
                 }
-                GXNet net = (GXNet) media;
-                net.setPort(Integer.parseInt(item.replace("/p=", "")));
-            } else if (item.startsWith("/sp="))// Serial Port
-            {
-                media = new GXSerial();
-                GXSerial serial = (GXSerial) media;
-                serial.setPortName(item.replace("/sp=", ""));
-            } else if (item.startsWith("/t")) {
-                // Are messages traced.
-                trace = true;
-            } else if (item.startsWith("/iec")) {
-                // IEC is start protocol.
-                iec = true;
-            } else if (item.startsWith("/a=")) {
-                // Authentication
-                dlms.setAuthentication(Authentication
-                        .valueOfString(it.trim().replace("/a=", "")));
-            } else if (item.startsWith("/pw=")) {
-                // Password
-                dlms.setPassword(it.trim().replace("/pw=", "").getBytes());
-            } else if (item.startsWith("/g=")) {
-                // Get objects
-                for (String o : item.replace("/g=", "").split("[;,]")) {
+                net = (GXNet) settings.media;
+                net.setPort(Integer.parseInt(it.getValue()));
+                break;
+            case 'P':// Password
+                settings.client.setPassword(it.getValue().getBytes());
+                break;
+            case 'i':
+                // IEC.
+                settings.iec = true;
+                break;
+            case 'g':
+                // Get (read) selected objects.
+                for (String o : it.getValue().split("[;,]")) {
                     String[] tmp = o.split("[:]");
                     if (tmp.length != 2) {
                         throw new IllegalArgumentException(
                                 "Invalid Logical name or attribute index.");
                     }
-                    readObjects.add(new GXSimpleEntry<String, Integer>(
+                    settings.readObjects.add(new GXSimpleEntry<String, Integer>(
                             tmp[0].trim(), Integer.parseInt(tmp[1].trim())));
                 }
-            } else {
+                break;
+            case 'S':// Serial Port
+                settings.media = new GXSerial();
+                GXSerial serial = (GXSerial) settings.media;
+                serial.setPortName(it.getValue());
+                break;
+            case 'a':
+                try {
+                    settings.client.setAuthentication(
+                            Authentication.valueOfString(it.getValue()));
+                } catch (Exception e) {
+                    throw new IllegalArgumentException(
+                            "Invalid Authentication option: '" + it.getValue()
+                                    + "'. (None, Low, High, HighMd5, HighSha1, HighGmac, HighSha256)");
+                }
+                break;
+            case 'o':
+                break;
+            case 'c':
+                settings.client
+                        .setClientAddress(Integer.parseInt(it.getValue()));
+                break;
+            case 's':
+                settings.client
+                        .setServerAddress(Integer.parseInt(it.getValue()));
+                break;
+            case '?':
+                switch (it.getTag()) {
+                case 'c':
+                    throw new IllegalArgumentException(
+                            "Missing mandatory client option.");
+                case 's':
+                    throw new IllegalArgumentException(
+                            "Missing mandatory server option.");
+                case 'h':
+                    throw new IllegalArgumentException(
+                            "Missing mandatory host name option.");
+                case 'p':
+                    throw new IllegalArgumentException(
+                            "Missing mandatory port option.");
+                case 'r':
+                    throw new IllegalArgumentException(
+                            "Missing mandatory reference option.");
+                case 'a':
+                    throw new IllegalArgumentException(
+                            "Missing mandatory authentication option.");
+                case 'S':
+                    throw new IllegalArgumentException(
+                            "Missing mandatory Serial port option.\n");
+                case 't':
+                    throw new IllegalArgumentException(
+                            "Missing mandatory trace option.\n");
+                default:
+                    showHelp();
+                    return 1;
+                }
+            default:
                 showHelp();
-                return null;
+                return 1;
             }
         }
-        if (media == null) {
+        if (settings.media == null) {
             showHelp();
-            return null;
+            return 1;
         }
-        ////////////////////////////////////////
-        // Initialize connection settings.
-        if (media instanceof GXSerial) {
-            GXSerial serial = (GXSerial) media;
-            if (iec) {
-                serial.setBaudRate(BaudRate.BAUD_RATE_300);
-                serial.setDataBits(7);
-                serial.setParity(Parity.EVEN);
-                serial.setStopBits(StopBits.ONE);
-            } else {
-                serial.setBaudRate(BaudRate.BAUD_RATE_9600);
-                serial.setDataBits(8);
-                serial.setParity(Parity.NONE);
-                serial.setStopBits(StopBits.ONE);
-            }
-        } else if (media instanceof GXNet) {
-            GXNet net = (GXNet) media;
-        } else {
-            throw new Exception("Unknown media type.");
-        }
-        com = new GXCommunicate(5000, dlms, iec, media);
-        com.Trace = trace;
-        return com;
+        return 0;
     }
 }

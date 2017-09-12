@@ -218,6 +218,10 @@ public class GXReplyData {
         complete = value;
     }
 
+    /**
+     * @param value
+     *            Received error.
+     */
     public final void setError(final int value) {
         error = value;
     }

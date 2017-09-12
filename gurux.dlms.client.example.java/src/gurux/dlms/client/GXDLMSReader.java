@@ -46,12 +46,13 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Date;
 import java.util.List;
-import java.util.Map;
 import java.util.Map.Entry;
 
 import gurux.common.GXCommon;
 import gurux.common.IGXMedia;
 import gurux.common.ReceiveParameters;
+import gurux.common.enums.TraceLevel;
+import gurux.dlms.GXDLMSClient;
 import gurux.dlms.GXDLMSConverter;
 import gurux.dlms.GXDLMSException;
 import gurux.dlms.GXReplyData;
@@ -70,43 +71,42 @@ import gurux.dlms.objects.GXDLMSObjectCollection;
 import gurux.dlms.objects.GXDLMSProfileGeneric;
 import gurux.dlms.objects.GXDLMSRegister;
 import gurux.dlms.objects.IGXDLMSBase;
-import gurux.dlms.secure.GXDLMSSecureClient;
 import gurux.io.BaudRate;
 import gurux.io.Parity;
 import gurux.io.StopBits;
 import gurux.net.GXNet;
 import gurux.serial.GXSerial;
 
-public class GXCommunicate {
+public class GXDLMSReader {
     IGXMedia Media;
-    public boolean Trace = false;
-    public GXDLMSSecureClient dlms;
+    TraceLevel Trace;
+    GXDLMSClient dlms;
     boolean iec;
     java.nio.ByteBuffer replyBuff;
     int WaitTime = 60000;
+    final PrintWriter logFile;
 
-    static void trace(PrintWriter logFile, String text) {
-        logFile.write(text);
-        System.out.print(text);
-    }
-
-    static void traceLn(PrintWriter logFile, String text) {
-        logFile.write(text + "\r\n");
-        System.out.print(text + "\r\n");
-    }
-
-    public GXCommunicate(final int waitTime, final GXDLMSSecureClient dlms,
-            final boolean iec, final IGXMedia media) throws Exception {
+    /*
+     * void trace(String text) { logFile.write(text); System.out.print(text); }
+     * void traceLn(String text) { logFile.write(text + "\r\n");
+     * System.out.print(text + "\r\n"); }
+     */
+    public GXDLMSReader(GXDLMSClient client, IGXMedia media, TraceLevel trace)
+            throws Exception {
         Files.deleteIfExists(Paths.get("trace.txt"));
+        logFile = new PrintWriter(
+                new BufferedWriter(new FileWriter("logFile.txt")));
+
+        Trace = trace;
         Media = media;
-        WaitTime = waitTime;
-        this.dlms = dlms;
-        this.iec = iec;
-        System.out.println("Authentication: " + dlms.getAuthentication());
-        System.out.println("ClientAddress: 0x"
-                + Integer.toHexString(dlms.getClientAddress()));
-        System.out.println("ServerAddress: 0x"
-                + Integer.toHexString(dlms.getServerAddress()));
+        dlms = client;
+        if (trace.ordinal() > TraceLevel.WARNING.ordinal()) {
+            System.out.println("Authentication: " + dlms.getAuthentication());
+            System.out.println("ClientAddress: 0x"
+                    + Integer.toHexString(dlms.getClientAddress()));
+            System.out.println("ServerAddress: 0x"
+                    + Integer.toHexString(dlms.getServerAddress()));
+        }
         if (dlms.getInterfaceType() == InterfaceType.WRAPPER) {
             replyBuff = java.nio.ByteBuffer.allocate(8 + 1024);
         } else {
@@ -115,7 +115,7 @@ public class GXCommunicate {
     }
 
     void close() throws Exception {
-        if (Media != null) {
+        if (Media != null && Media.isOpen()) {
             System.out.println("DisconnectRequest");
             GXReplyData reply = new GXReplyData();
             try {
@@ -134,8 +134,8 @@ public class GXCommunicate {
                 .format(java.util.Calendar.getInstance().getTime());
     }
 
-    void writeTrace(String line) {
-        if (Trace) {
+    void writeTrace(String line, TraceLevel level) {
+        if (Trace.ordinal() >= level.ordinal()) {
             System.out.println(line);
         }
         PrintWriter logFile = null;
@@ -216,7 +216,8 @@ public class GXCommunicate {
         p.setWaitTime(WaitTime);
         synchronized (Media.getSynchronous()) {
             while (!succeeded) {
-                writeTrace("<- " + now() + "\t" + GXCommon.bytesToHex(data));
+                writeTrace("<- " + now() + "\t" + GXCommon.bytesToHex(data),
+                        TraceLevel.VERBOSE);
                 Media.send(data, null);
                 if (p.getEop() == null) {
                     p.setCount(1);
@@ -258,12 +259,15 @@ public class GXCommunicate {
                     }
                 }
             } catch (Exception e) {
-                writeTrace("-> " + now() + "\t"
-                        + GXCommon.bytesToHex(p.getReply()));
+                writeTrace(
+                        "-> " + now() + "\t"
+                                + GXCommon.bytesToHex(p.getReply()),
+                        TraceLevel.ERROR);
                 throw e;
             }
         }
-        writeTrace("-> " + now() + "\t" + GXCommon.bytesToHex(p.getReply()));
+        writeTrace("-> " + now() + "\t" + GXCommon.bytesToHex(p.getReply()),
+                TraceLevel.VERBOSE);
         if (reply.getError() != 0) {
             if (reply.getError() == ErrorCode.REJECTED.getValue()) {
                 Thread.sleep(1000);
@@ -308,7 +312,6 @@ public class GXCommunicate {
      * @throws Exception
      */
     void initializeConnection() throws Exception, InterruptedException {
-        Media.open();
         if (Media instanceof GXSerial) {
             GXSerial serial = (GXSerial) Media;
             serial.setDtrEnable(true);
@@ -323,14 +326,19 @@ public class GXCommunicate {
                 String replyStr;
                 synchronized (Media.getSynchronous()) {
                     data = "/?!\r\n";
-                    writeTrace("<- " + now() + "\t"
-                            + GXCommon.bytesToHex(data.getBytes("ASCII")));
+                    writeTrace(
+                            "<- " + now() + "\t"
+                                    + GXCommon
+                                            .bytesToHex(data.getBytes("ASCII")),
+                            TraceLevel.VERBOSE);
                     Media.send(data, null);
                     if (!Media.receive(p)) {
                         throw new Exception("Invalid meter type.");
                     }
-                    writeTrace("->" + now() + "\t"
-                            + GXCommon.bytesToHex(p.getReply()));
+                    writeTrace(
+                            "->" + now() + "\t"
+                                    + GXCommon.bytesToHex(p.getReply()),
+                            TraceLevel.VERBOSE);
                     // If echo is used.
                     replyStr = new String(p.getReply());
                     if (data.equals(replyStr)) {
@@ -338,8 +346,10 @@ public class GXCommunicate {
                         if (!Media.receive(p)) {
                             throw new Exception("Invalid meter type.");
                         }
-                        writeTrace("-> " + now() + "\t"
-                                + GXCommon.bytesToHex(p.getReply()));
+                        writeTrace(
+                                "-> " + now() + "\t"
+                                        + GXCommon.bytesToHex(p.getReply()),
+                                TraceLevel.VERBOSE);
                         replyStr = new String(p.getReply());
                     }
                 }
@@ -389,11 +399,14 @@ public class GXCommunicate {
                 p.setReply(null);
                 synchronized (Media.getSynchronous()) {
                     Media.send(tmp, null);
-                    writeTrace("<- " + now() + "\t" + GXCommon.bytesToHex(tmp));
+                    writeTrace("<- " + now() + "\t" + GXCommon.bytesToHex(tmp),
+                            TraceLevel.VERBOSE);
                     p.setWaitTime(100);
                     if (Media.receive(p)) {
-                        writeTrace("-> " + now() + "\t"
-                                + GXCommon.bytesToHex(p.getReply()));
+                        writeTrace(
+                                "-> " + now() + "\t"
+                                        + GXCommon.bytesToHex(p.getReply()),
+                                TraceLevel.VERBOSE);
                     }
                     Media.close();
                     // This sleep make sure that all meters can be read.
@@ -446,12 +459,10 @@ public class GXCommunicate {
      * @return
      * @throws Exception
      */
-    public Object readObject(GXDLMSObject item, int attributeIndex)
-            throws Exception {
+    public Object read(GXDLMSObject item, int attributeIndex) throws Exception {
         byte[] data = dlms.read(item.getName(), item.getObjectType(),
                 attributeIndex)[0];
         GXReplyData reply = new GXReplyData();
-
         readDataBlock(data, reply);
         // Update data type on read.
         if (item.getDataType(attributeIndex) == DataType.NONE) {
@@ -461,7 +472,7 @@ public class GXCommunicate {
     }
 
     /*
-     * /// Read list of attributes.
+     * Read list of attributes.
      */
     public void readList(List<Entry<GXDLMSObject, Integer>> list)
             throws Exception {
@@ -489,7 +500,7 @@ public class GXCommunicate {
      */
     public List<Entry<GXDLMSObject, GXDLMSCaptureObject>>
             GetColumns(GXDLMSProfileGeneric pg) throws Exception {
-        Object entries = readObject(pg, 7);
+        Object entries = read(pg, 7);
         System.out.println("Reading Profile Generic: " + pg.getLogicalName()
                 + " " + pg.getDescription() + " entries:" + entries.toString());
         GXReplyData reply = new GXReplyData();
@@ -537,11 +548,11 @@ public class GXCommunicate {
     /*
      * Read Scalers and units from the register objects.
      */
-    void readScalerAndUnits(final GXDLMSObjectCollection objects,
-            final PrintWriter logFile) throws Exception {
-        GXDLMSObjectCollection objs = objects.getObjects(new ObjectType[] {
-                ObjectType.REGISTER, ObjectType.DEMAND_REGISTER,
-                ObjectType.EXTENDED_REGISTER });
+    void readScalerAndUnits() throws Exception {
+        GXDLMSObjectCollection objs = dlms.getObjects()
+                .getObjects(new ObjectType[] { ObjectType.REGISTER,
+                        ObjectType.DEMAND_REGISTER,
+                        ObjectType.EXTENDED_REGISTER });
         try {
             if (dlms.getNegotiatedConformance()
                     .contains(Conformance.MULTIPLE_REFERENCES)) {
@@ -569,15 +580,12 @@ public class GXCommunicate {
             for (GXDLMSObject it : objs) {
                 try {
                     if (it instanceof GXDLMSRegister) {
-                        readObject(it, 3);
+                        read(it, 3);
                     } else if (it instanceof GXDLMSDemandRegister) {
-                        readObject(it, 4);
+                        read(it, 4);
                     }
                 } catch (Exception e) {
-                    traceLn(logFile,
-                            "Err! Failed to read scaler and unit value: "
-                                    + e.getMessage());
-                    // Continue reading.
+                    // Actaric SL7000 can return error here. Continue reading.
                 }
             }
         }
@@ -586,35 +594,37 @@ public class GXCommunicate {
     /*
      * Read profile generic columns from the meter.
      */
-    void readProfileGenericColumns(final GXDLMSObjectCollection objects,
-            final PrintWriter logFile) {
+    void getProfileGenericColumns() {
         GXDLMSObjectCollection profileGenerics =
-                objects.getObjects(ObjectType.PROFILE_GENERIC);
+                dlms.getObjects().getObjects(ObjectType.PROFILE_GENERIC);
         for (GXDLMSObject it : profileGenerics) {
-            traceLn(logFile, "Profile Generic " + it.getName() + " Columns:");
+            writeTrace("Profile Generic " + it.getName() + "Columns:",
+                    TraceLevel.INFO);
             GXDLMSProfileGeneric pg = (GXDLMSProfileGeneric) it;
             // Read columns.
             try {
-                readObject(pg, 3);
-                boolean first = true;
-                StringBuilder sb = new StringBuilder();
-                for (Entry<GXDLMSObject, GXDLMSCaptureObject> col : pg
-                        .getCaptureObjects()) {
-                    if (!first) {
-                        sb.append(" | ");
+                read(pg, 3);
+                if (Trace.ordinal() > TraceLevel.WARNING.ordinal()) {
+                    boolean first = true;
+                    StringBuilder sb = new StringBuilder();
+                    for (Entry<GXDLMSObject, GXDLMSCaptureObject> col : pg
+                            .getCaptureObjects()) {
+                        if (!first) {
+                            sb.append(" | ");
+                        }
+                        sb.append(col.getKey().getName());
+                        sb.append(" ");
+                        String desc = col.getKey().getDescription();
+                        if (desc != null) {
+                            sb.append(desc);
+                        }
+                        first = false;
                     }
-                    sb.append(col.getKey().getName());
-                    sb.append(" ");
-                    String desc = col.getKey().getDescription();
-                    if (desc != null) {
-                        sb.append(desc);
-                    }
-                    first = false;
+                    writeTrace(sb.toString(), TraceLevel.INFO);
                 }
-                traceLn(logFile, sb.toString());
             } catch (Exception ex) {
-                traceLn(logFile,
-                        "Err! Failed to read columns:" + ex.getMessage());
+                writeTrace("Err! Failed to read columns:" + ex.getMessage(),
+                        TraceLevel.ERROR);
                 // Continue reading.
             }
         }
@@ -623,9 +633,8 @@ public class GXCommunicate {
     /**
      * Read all data from the meter except profile generic (Historical) data.
      */
-    void readValues(final GXDLMSObjectCollection objects,
-            final PrintWriter logFile) {
-        for (GXDLMSObject it : objects) {
+    void getReadOut() {
+        for (GXDLMSObject it : dlms.getObjects()) {
             if (!(it instanceof IGXDLMSBase)) {
                 // If interface is not implemented.
                 System.out.println(
@@ -639,26 +648,24 @@ public class GXCommunicate {
                 // and this is only a example.
                 continue;
             }
-
-            traceLn(logFile,
-                    "-------- Reading " + it.getClass().getSimpleName() + " "
-                            + it.getName().toString() + " "
-                            + it.getDescription());
+            writeTrace("-------- Reading " + it.getClass().getSimpleName() + " "
+                    + it.getName().toString() + " " + it.getDescription(),
+                    TraceLevel.INFO);
             for (int pos : ((IGXDLMSBase) it).getAttributeIndexToRead()) {
                 try {
-                    Object val = readObject(it, pos);
-                    ShowValue(logFile, pos, val);
+                    Object val = read(it, pos);
+                    showValue(pos, val);
                 } catch (Exception ex) {
-                    traceLn(logFile,
-                            "Error! Index: " + pos + " " + ex.getMessage());
+                    writeTrace("Error! Index: " + pos + " " + ex.getMessage(),
+                            TraceLevel.ERROR);
+                    writeTrace(ex.toString(), TraceLevel.ERROR);
                     // Continue reading.
                 }
             }
         }
     }
 
-    static void ShowValue(final PrintWriter logFile, final int pos,
-            final Object value) {
+    void showValue(final int pos, final Object value) {
         Object val = value;
         if (val instanceof byte[]) {
             val = GXCommon.bytesToHex((byte[]) val);
@@ -680,27 +687,26 @@ public class GXCommunicate {
             }
             val = str;
         }
-        traceLn(logFile, "Index: " + pos + " Value: " + String.valueOf(val));
+        writeTrace("Index: " + pos + " Value: " + String.valueOf(val),
+                TraceLevel.INFO);
     }
 
     /**
      * Read profile generic (Historical) data.
      */
-    void readProfileGenerics(final GXDLMSObjectCollection objects,
-            final PrintWriter logFile) throws Exception {
+    void getProfileGenerics() throws Exception {
         Object[] cells;
         GXDLMSObjectCollection profileGenerics =
-                objects.getObjects(ObjectType.PROFILE_GENERIC);
+                dlms.getObjects().getObjects(ObjectType.PROFILE_GENERIC);
         for (GXDLMSObject it : profileGenerics) {
-            traceLn(logFile,
-                    "-------- Reading " + it.getClass().getSimpleName() + " "
-                            + it.getName().toString() + " "
-                            + it.getDescription());
+            writeTrace("-------- Reading " + it.getClass().getSimpleName() + " "
+                    + it.getName().toString() + " " + it.getDescription(),
+                    TraceLevel.INFO);
 
-            long entriesInUse = ((Number) readObject(it, 7)).longValue();
-            long entries = ((Number) readObject(it, 8)).longValue();
-            traceLn(logFile, "Entries: " + String.valueOf(entriesInUse) + "/"
-                    + String.valueOf(entries));
+            long entriesInUse = ((Number) read(it, 7)).longValue();
+            long entries = ((Number) read(it, 8)).longValue();
+            writeTrace("Entries: " + String.valueOf(entriesInUse) + "/"
+                    + String.valueOf(entries), TraceLevel.INFO);
             GXDLMSProfileGeneric pg = (GXDLMSProfileGeneric) it;
             // If there are no columns.
             if (entriesInUse == 0 || pg.getCaptureObjects().size() == 0) {
@@ -710,20 +716,23 @@ public class GXCommunicate {
             // Read first item.
             try {
                 cells = readRowsByEntry(pg, 1, 1);
-                for (Object rows : cells) {
-                    for (Object cell : (Object[]) rows) {
-                        if (cell instanceof byte[]) {
-                            trace(logFile,
-                                    GXCommon.bytesToHex((byte[]) cell) + " | ");
-                        } else {
-                            trace(logFile, cell + " | ");
+                if (Trace.ordinal() > TraceLevel.WARNING.ordinal()) {
+                    for (Object rows : cells) {
+                        for (Object cell : (Object[]) rows) {
+                            if (cell instanceof byte[]) {
+                                writeTrace(GXCommon.bytesToHex((byte[]) cell)
+                                        + " | ", TraceLevel.INFO);
+                            } else {
+                                writeTrace(cell + " | ", TraceLevel.INFO);
+                            }
                         }
+                        writeTrace("", TraceLevel.INFO);
                     }
-                    traceLn(logFile, "");
                 }
             } catch (Exception ex) {
-                traceLn(logFile,
-                        "Error! Failed to read first row: " + ex.getMessage());
+                writeTrace(
+                        "Error! Failed to read first row: " + ex.getMessage(),
+                        TraceLevel.ERROR);
                 // Continue reading if device returns access denied error.
             }
             ///////////////////////////////////////////////////////////////////
@@ -753,25 +762,25 @@ public class GXCommunicate {
                             System.out.print(
                                     GXCommon.bytesToHex((byte[]) cell) + " | ");
                         } else {
-                            trace(logFile, cell + " | ");
+                            writeTrace(cell + " | ", TraceLevel.INFO);
                         }
                     }
-                    traceLn(logFile, "");
+                    writeTrace("", TraceLevel.INFO);
                 }
             } catch (Exception ex) {
-                traceLn(logFile,
-                        "Error! Failed to read last day: " + ex.getMessage());
+                writeTrace("Error! Failed to read last day: " + ex.getMessage(),
+                        TraceLevel.ERROR);
                 // Continue reading if device returns access denied error.
             }
         }
     }
 
-    /*
-     * Read all objects from the meter. This is only example. Usually there is
-     * no need to read all data from the meter.
+    /**
+     * Read association view.
+     * 
+     * @throws Exception
      */
-    void readAllObjects(PrintWriter logFile,
-            List<Map.Entry<String, Integer>> readObjects) throws Exception {
+    public void getAssociationView() throws Exception {
         GXReplyData reply = new GXReplyData();
         // Get Association view from the meter.
         readDataBlock(dlms.getObjectsRequest(), reply);
@@ -780,24 +789,27 @@ public class GXCommunicate {
         // Get description of the objects.
         GXDLMSConverter converter = new GXDLMSConverter();
         converter.updateOBISCodeInformation(objects);
-        // Read only wanted objects.
-        if (readObjects.size() != 0) {
-            for (Map.Entry<String, Integer> it : readObjects) {
-                Object val = readObject(
-                        objects.findByLN(ObjectType.ALL, it.getKey()),
-                        it.getValue());
-                ShowValue(logFile, it.getValue(), val);
-            }
-            return;
+    }
+
+    /*
+     * Read all objects from the meter. This is only example. Usually there is
+     * no need to read all data from the meter.
+     */
+    void readAll() throws Exception {
+        try {
+            initializeConnection();
+            getAssociationView();
+            // Read Scalers and units from the register objects.
+            readScalerAndUnits();
+            // Read Profile Generic columns.
+            getProfileGenericColumns();
+            // Read all attributes from all objects.
+            getReadOut();
+            // Read historical data.
+            getProfileGenerics();
+        } finally {
+            close();
         }
 
-        // Read Scalers and units from the register objects.
-        readScalerAndUnits(objects, logFile);
-        // Read Profile Generic columns.
-        readProfileGenericColumns(objects, logFile);
-        // Read all attributes from all objects.
-        readValues(objects, logFile);
-        // Read historical data.
-        readProfileGenerics(objects, logFile);
     }
 }

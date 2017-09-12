@@ -513,6 +513,11 @@ final class GXAPDU {
             if (xml != null) {
                 xml.appendStartTag(TranslatorGeneralTags.PROPOSED_CONFORMANCE);
                 getConformance(v, xml);
+            } else if (settings.getNegotiatedConformance().size() == 0) {
+                throw new GXDLMSConfirmedServiceError(
+                        ConfirmedServiceError.INITIATE_ERROR,
+                        ServiceError.INITIATE,
+                        Initiate.INCOMPATIBLE_CONFORMANCE.getValue());
             }
         } else {
             if (xml != null) {
@@ -526,7 +531,8 @@ final class GXAPDU {
 
         if (!response) {
             // Proposed max PDU size.
-            settings.setMaxPduSize(data.getUInt16());
+            int pdu = data.getUInt16();
+            settings.setMaxPduSize(pdu);
             if (xml != null) {
                 // ProposedConformance closing
                 if (xml.getOutputType() == TranslatorOutputType.SIMPLE_XML) {
@@ -538,10 +544,17 @@ final class GXAPDU {
                 }
                 // ProposedMaxPduSize
                 xml.appendLine(TranslatorGeneralTags.PROPOSED_MAX_PDU_SIZE,
-                        "Value", xml.integerToHex(settings.getMaxPduSize(), 4));
+                        "Value", xml.integerToHex(pdu, 4));
+            }
+            // If PDU is too low.
+            else if (pdu < 64) {
+                throw new GXDLMSConfirmedServiceError(
+                        ConfirmedServiceError.INITIATE_ERROR,
+                        ServiceError.INITIATE,
+                        Initiate.PDU_SIZE_TOOSHORT.getValue());
             }
             // If client asks too high PDU.
-            if (settings.getMaxPduSize() > settings.getMaxServerPDUSize()) {
+            if (pdu > settings.getMaxServerPDUSize()) {
                 settings.setMaxPduSize(settings.getMaxServerPDUSize());
             }
         } else {
@@ -872,6 +885,9 @@ final class GXAPDU {
                 }
                 resultComponent = AssociationResult.forValue(buff.getUInt8());
                 if (xml != null) {
+                    if (resultComponent != AssociationResult.ACCEPTED) {
+                        xml.appendComment(resultComponent.toString());
+                    }
                     xml.appendLine(TranslatorGeneralTags.ASSOCIATION_RESULT,
                             "Value",
                             xml.integerToHex(resultComponent.getValue(), 2));
@@ -1017,6 +1033,9 @@ final class GXAPDU {
         }
         resultDiagnosticValue = SourceDiagnostic.forValue(buff.getUInt8());
         if (xml != null) {
+            if (resultDiagnosticValue != SourceDiagnostic.NONE) {
+                xml.appendComment(resultDiagnosticValue.toString());
+            }
             xml.appendLine(TranslatorGeneralTags.ACSE_SERVICE_USER, "Value",
                     xml.integerToHex(resultDiagnosticValue.getValue(), 2));
             xml.appendEndTag(TranslatorGeneralTags.RESULT_SOURCE_DIAGNOSTIC);
@@ -1175,7 +1194,7 @@ final class GXAPDU {
     public static void generateAARE(final GXDLMSSettings settings,
             final GXByteBuffer data, final AssociationResult result,
             final SourceDiagnostic diagnostic, final GXICipher cipher,
-            final GXByteBuffer encryptedData) {
+            final GXByteBuffer errorData, final GXByteBuffer encryptedData) {
         int offset = data.size();
         // Set AARE tag and length 0x61
         data.setUInt8(BerType.APPLICATION | BerType.CONSTRUCTED
@@ -1247,7 +1266,11 @@ final class GXAPDU {
             tmp2.set(encryptedData);
             tmp = tmp2.array();
         } else {
-            tmp = getUserInformation(settings, cipher);
+            if (errorData != null && errorData.size() != 0) {
+                tmp = errorData.array();
+            } else {
+                tmp = getUserInformation(settings, cipher);
+            }
         }
         data.setUInt8((2 + tmp.length));
         // Coding the choice for user-information (Octet STRING, universal)

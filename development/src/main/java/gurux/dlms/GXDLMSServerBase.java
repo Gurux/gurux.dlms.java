@@ -333,47 +333,61 @@ public class GXDLMSServerBase {
     private void handleAarqRequest(final GXByteBuffer data,
             final GXDLMSConnectionEventArgs connectionInfo) throws Exception {
         AssociationResult result = AssociationResult.ACCEPTED;
+        GXByteBuffer error = null;
         // Reset settings for wrapper.
         if (settings.getInterfaceType() == InterfaceType.WRAPPER) {
             reset(true);
         }
-        SourceDiagnostic diagnostic =
-                GXAPDU.parsePDU(settings, settings.getCipher(), data, null);
-
-        if (diagnostic != SourceDiagnostic.NONE) {
-            result = AssociationResult.PERMANENT_REJECTED;
-            diagnostic = SourceDiagnostic.NOT_SUPPORTED;
-            notifyInvalidConnection(connectionInfo);
-        } else {
-            if (owner instanceof GXDLMSServer) {
-                GXDLMSServer b = (GXDLMSServer) owner;
-                diagnostic = b.validateAuthentication(
-                        settings.getAuthentication(), settings.getPassword());
-            } else {
-                GXDLMSServer2 b = (GXDLMSServer2) owner;
-                diagnostic = b.onValidateAuthentication(
-                        settings.getAuthentication(), settings.getPassword());
-            }
+        SourceDiagnostic diagnostic = SourceDiagnostic.NO_REASON_GIVEN;
+        try {
+            diagnostic =
+                    GXAPDU.parsePDU(settings, settings.getCipher(), data, null);
 
             if (diagnostic != SourceDiagnostic.NONE) {
                 result = AssociationResult.PERMANENT_REJECTED;
-            } else if (settings.getAuthentication()
-                    .getValue() > Authentication.LOW.getValue()) {
-                // If High authentication is used.
-                settings.setStoCChallenge(GXSecure
-                        .generateChallenge(settings.getAuthentication()));
-                result = AssociationResult.ACCEPTED;
-                diagnostic = SourceDiagnostic.AUTHENTICATION_REQUIRED;
+                diagnostic = SourceDiagnostic.NOT_SUPPORTED;
+                notifyInvalidConnection(connectionInfo);
             } else {
-                settings.setConnected(true);
+                if (owner instanceof GXDLMSServer) {
+                    GXDLMSServer b = (GXDLMSServer) owner;
+                    diagnostic = b.validateAuthentication(
+                            settings.getAuthentication(),
+                            settings.getPassword());
+                } else {
+                    GXDLMSServer2 b = (GXDLMSServer2) owner;
+                    diagnostic = b.onValidateAuthentication(
+                            settings.getAuthentication(),
+                            settings.getPassword());
+                }
+
+                if (diagnostic != SourceDiagnostic.NONE) {
+                    result = AssociationResult.PERMANENT_REJECTED;
+                } else if (settings.getAuthentication()
+                        .getValue() > Authentication.LOW.getValue()) {
+                    // If High authentication is used.
+                    settings.setStoCChallenge(GXSecure
+                            .generateChallenge(settings.getAuthentication()));
+                    result = AssociationResult.ACCEPTED;
+                    diagnostic = SourceDiagnostic.AUTHENTICATION_REQUIRED;
+                } else {
+                    settings.setConnected(true);
+                }
             }
+        } catch (GXDLMSConfirmedServiceError e) {
+            result = AssociationResult.PERMANENT_REJECTED;
+            diagnostic = SourceDiagnostic.NO_REASON_GIVEN;
+            error = new GXByteBuffer();
+            error.setUInt8(0xE);
+            error.setUInt8(e.getConfirmedServiceError().getValue());
+            error.setUInt8(e.getServiceError().getValue());
+            error.setUInt8(e.getServiceErrorValue());
         }
         if (settings.getInterfaceType() == InterfaceType.HDLC) {
             replyData.set(GXCommon.LLC_REPLY_BYTES);
         }
         // Generate AARE packet.
         GXAPDU.generateAARE(settings, replyData, result, diagnostic,
-                settings.getCipher(), null);
+                settings.getCipher(), error, null);
     }
 
     /**

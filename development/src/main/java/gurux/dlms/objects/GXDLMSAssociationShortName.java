@@ -59,19 +59,13 @@ public class GXDLMSAssociationShortName extends GXDLMSObject
         implements IGXDLMSBase {
     private static final Logger LOGGER =
             Logger.getLogger(GXDLMSAssociationShortName.class.getName());
-    private Object accessRightsList;
     private GXDLMSObjectCollection objectList;
     private String securitySetupReference;
 
     /**
-     * Secret used in LLS Authentication.
+     * Secret used in Authentication.
      */
-    private byte[] llsSecret;
-
-    /**
-     * Secret used in HLS Authentication.
-     */
-    private byte[] hlsSecret;
+    private byte[] secret;
 
     /**
      * Constructor.
@@ -91,13 +85,14 @@ public class GXDLMSAssociationShortName extends GXDLMSObject
     public GXDLMSAssociationShortName(final String ln, final int sn) {
         super(ObjectType.ASSOCIATION_SHORT_NAME, ln, sn);
         objectList = new GXDLMSObjectCollection(this);
+        setVersion(2);
     }
 
     /**
      * @return Secret used in LLS Authentication.
      */
     public final byte[] getSecret() {
-        return llsSecret;
+        return secret;
     }
 
     /**
@@ -105,34 +100,11 @@ public class GXDLMSAssociationShortName extends GXDLMSObject
      *            Secret used in LLS Authentication.
      */
     public final void setSecret(final byte[] value) {
-        llsSecret = value;
-    }
-
-    /**
-     * @return Secret used in HLS Authentication.
-     */
-    public final byte[] getHlsSecret() {
-        return hlsSecret;
-    }
-
-    /**
-     * @param value
-     *            Secret used in HLS Authentication.
-     */
-    public final void setHlsSecret(final byte[] value) {
-        hlsSecret = value;
+        secret = value;
     }
 
     public final GXDLMSObjectCollection getObjectList() {
         return objectList;
-    }
-
-    public final Object getAccessRightsList() {
-        return accessRightsList;
-    }
-
-    public final void setAccessRightsList(final Object value) {
-        accessRightsList = value;
     }
 
     public final String getSecuritySetupReference() {
@@ -145,8 +117,8 @@ public class GXDLMSAssociationShortName extends GXDLMSObject
 
     @Override
     public final Object[] getValues() {
-        return new Object[] { getLogicalName(), getObjectList(),
-                getAccessRightsList(), getSecuritySetupReference() };
+        return new Object[] { getLogicalName(), getObjectList(), null,
+                getSecuritySetupReference() };
     }
 
     /*
@@ -188,7 +160,7 @@ public class GXDLMSAssociationShortName extends GXDLMSObject
                     bb.getUInt8();
                     ic = bb.getUInt32();
                 } else {
-                    readSecret = hlsSecret;
+                    readSecret = secret;
                 }
                 serverChallenge =
                         GXSecure.secure(settings, settings.getCipher(), ic,
@@ -201,7 +173,7 @@ public class GXDLMSAssociationShortName extends GXDLMSObject
                     readSecret = settings.getCipher().getSystemTitle();
                     ic = settings.getCipher().getInvocationCounter();
                 } else {
-                    readSecret = hlsSecret;
+                    readSecret = secret;
                 }
                 settings.setConnected(true);
                 return GXSecure.secure(settings, settings.getCipher(), ic,
@@ -462,15 +434,9 @@ public class GXDLMSAssociationShortName extends GXDLMSObject
     public final void load(final GXXmlReader reader) throws XMLStreamException {
         String str = reader.readElementContentAsString("Secret");
         if (str == null) {
-            llsSecret = null;
+            secret = null;
         } else {
-            llsSecret = GXDLMSTranslator.hexToBytes(str);
-        }
-        str = reader.readElementContentAsString("HlsSecret");
-        if (str == null) {
-            hlsSecret = null;
-        } else {
-            hlsSecret = GXDLMSTranslator.hexToBytes(str);
+            secret = GXDLMSTranslator.hexToBytes(str);
         }
         securitySetupReference =
                 reader.readElementContentAsString("SecuritySetupReference");
@@ -478,9 +444,7 @@ public class GXDLMSAssociationShortName extends GXDLMSObject
 
     @Override
     public final void save(final GXXmlWriter writer) throws XMLStreamException {
-        writer.writeElementString("Secret", GXDLMSTranslator.toHex(llsSecret));
-        writer.writeElementString("HlsSecret",
-                GXDLMSTranslator.toHex(hlsSecret));
+        writer.writeElementString("Secret", GXDLMSTranslator.toHex(secret));
         writer.writeElementString("SecuritySetupReference",
                 securitySetupReference);
     }

@@ -103,7 +103,7 @@ public class GXDLMSObjectCollection extends ArrayList<GXDLMSObject>
 
     public final GXDLMSObject findByLN(final ObjectType type, final String ln) {
         for (GXDLMSObject it : this) {
-            if ((type == ObjectType.ALL || it.getObjectType() == type)
+            if ((type == ObjectType.NONE || it.getObjectType() == type)
                     && it.getLogicalName().trim().equals(ln)) {
                 return it;
             }

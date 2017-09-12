@@ -99,7 +99,8 @@ final class TranslatorSimpleTags {
                 "ReleaseRequest");
         GXDLMSTranslator.addTag(list, Command.RELEASE_RESPONSE,
                 "ReleaseResponse");
-        GXDLMSTranslator.addTag(list, Command.DISCONNECT_REQUEST, "Disc");
+        GXDLMSTranslator.addTag(list, Command.DISCONNECT_REQUEST,
+                "DisconnectRequest");
         GXDLMSTranslator.addTag(list, TranslatorGeneralTags.ASSOCIATION_RESULT,
                 "AssociationResult");
         GXDLMSTranslator.addTag(list,
