@@ -1784,6 +1784,45 @@ public class GXDLMSClient {
      *            End time.
      * @return Generated read message.
      */
+    public final byte[][] readRowsByRange(final GXDLMSProfileGeneric pg,
+            final GXDateTime start, final GXDateTime end) {
+        return readByRange(pg, start, end, null);
+    }
+
+    /**
+     * Read rows by range. Use this method to read Profile Generic table between
+     * dates.
+     * 
+     * @param pg
+     *            Profile generic object to read.
+     * @param start
+     *            Start time.
+     * @param end
+     *            End time.
+     * @param columns
+     *            Columns to read.
+     * @return Generated read message.
+     */
+    public final byte[][] readRowsByRange(final GXDLMSProfileGeneric pg,
+            final GXDateTime start, final GXDateTime end,
+            final List<Entry<GXDLMSObject, GXDLMSCaptureObject>> columns) {
+        return readByRange(pg, start, end, columns);
+    }
+
+    /**
+     * Read rows by range. Use this method to read Profile Generic table between
+     * dates.
+     * 
+     * @param pg
+     *            Profile generic object to read.
+     * @param start
+     *            Start time.
+     * @param end
+     *            End time.
+     * @param columns
+     *            Columns to read.
+     * @return Generated read message.
+     */
     private byte[][] readByRange(final GXDLMSProfileGeneric pg,
             final Object start, final Object end,
             final List<Entry<GXDLMSObject, GXDLMSCaptureObject>> columns) {
