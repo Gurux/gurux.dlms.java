@@ -38,6 +38,7 @@ import java.util.Calendar;
 import java.util.Date;
 import java.util.HashSet;
 import java.util.Set;
+import java.util.TimeZone;
 
 import javax.xml.stream.XMLStreamException;
 
@@ -251,15 +252,25 @@ public class GXDLMSClock extends GXDLMSObject implements IGXDLMSBase {
         Calendar now = Calendar.getInstance();
         GXDateTime tm = new GXDateTime(now);
         // -32768 == 0x8000
-        if (timeZone == -1 || timeZone == -32768) {
+        int tzOffset = -deviation;
+        if (timeZone == -1 || timeZone == -32768 || timeZone == 0x8000) {
             tm.getSkip().add(DateTimeSkips.DEVITATION);
         } else {
             // If clock's time zone is different what user want's to use.
             int offset =
                     timeZone + (int) now.getTimeZone().getRawOffset() / 60000;
             if (offset != 0) {
-                now = Calendar
-                        .getInstance(GXDateTime.getTimeZone(timeZone, enabled));
+                TimeZone tz = GXDateTime.getTimeZone(timeZone, enabled);
+                if (tz != null) {
+                    now = Calendar.getInstance(tz);
+                } else {
+                    // Use current time zone if time zone is not found.
+                    now = Calendar.getInstance();
+                    tzOffset = -(timeZone
+                            + (now.getTimeZone().getRawOffset() / 60000))
+                            + -deviation;
+                }
+
                 tm.setMeterCalendar(now);
             }
         }

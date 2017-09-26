@@ -52,7 +52,7 @@ public enum Initiate {
     /**
      * PDU size is too short.
      */
-    PDU_SIZE_TOOSHORT(3),
+    PDU_SIZE_TOO_SHORT(3),
     /**
      * Refused by the VDE handler.
      */

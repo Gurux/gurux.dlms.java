@@ -39,27 +39,27 @@ package gurux.dlms;
  * length and window size, when communicating with the server.
  */
 public class GXDLMSLimits {
-    static final Object DEFAULT_MAX_INFO_TX = new Short((short) 128);
-    static final Object DEFAULT_MAX_INFO_RX = new Byte((byte) 62);
-    static final Object DEFAULT_WINDOWS_SIZE_TX = new Integer(1);
-    static final Object DEFAULT_WINDOWS_SIZE_RX = new Integer(1);
+    static final int DEFAULT_MAX_INFO_TX = 128;
+    static final int DEFAULT_MAX_INFO_RX = 128;
+    static final int DEFAULT_WINDOWS_SIZE_TX = 1;
+    static final int DEFAULT_WINDOWS_SIZE_RX = 1;
 
     /**
      * The maximum information field length in transmit. DefaultValue is 128.
      */
-    private Object maxInfoTX;
+    private int maxInfoTX;
     /**
      * The maximum information field length in receive. DefaultValue is 62.
      */
-    private Object maxInfoRX;
+    private int maxInfoRX;
     /**
      * The window size in transmit. DefaultValue is 1.
      */
-    private Object windowSizeTX;
+    private int windowSizeTX;
     /**
      * The window size in receive. DefaultValue is 1.
      */
-    private Object windowSizeRX;
+    private int windowSizeRX;
 
     /**
      * Constructor.
@@ -76,7 +76,7 @@ public class GXDLMSLimits {
      * 
      * @return Maximum information field length in transmit.
      */
-    public final Object getMaxInfoTX() {
+    public final int getMaxInfoTX() {
         return maxInfoTX;
     }
 
@@ -86,7 +86,7 @@ public class GXDLMSLimits {
      * @param value
      *            Maximum information field length in transmit.
      */
-    public final void setMaxInfoTX(final Object value) {
+    public final void setMaxInfoTX(final int value) {
         maxInfoTX = value;
     }
 
@@ -95,7 +95,7 @@ public class GXDLMSLimits {
      * 
      * @return The maximum information field length in receive.
      */
-    public final Object getMaxInfoRX() {
+    public final int getMaxInfoRX() {
         return maxInfoRX;
     }
 
@@ -105,7 +105,7 @@ public class GXDLMSLimits {
      * @param value
      *            The maximum information field length in receive.
      */
-    public final void setMaxInfoRX(final Object value) {
+    public final void setMaxInfoRX(final int value) {
         maxInfoRX = value;
     }
 
@@ -114,7 +114,7 @@ public class GXDLMSLimits {
      * 
      * @return The window size in transmit.
      */
-    public final Object getWindowSizeTX() {
+    public final int getWindowSizeTX() {
         return windowSizeTX;
     }
 
@@ -124,7 +124,7 @@ public class GXDLMSLimits {
      * @param value
      *            The window size in transmit.
      */
-    public final void setWindowSizeTX(final Object value) {
+    public final void setWindowSizeTX(final int value) {
         windowSizeTX = value;
     }
 
@@ -133,7 +133,7 @@ public class GXDLMSLimits {
      * 
      * @return The window size in receive..
      */
-    public final Object getWindowSizeRX() {
+    public final int getWindowSizeRX() {
         return windowSizeRX;
     }
 
@@ -143,7 +143,7 @@ public class GXDLMSLimits {
      * @param value
      *            The window size in receive.
      */
-    public final void setWindowSizeRX(final Object value) {
+    public final void setWindowSizeRX(final int value) {
         windowSizeRX = value;
     }
 }

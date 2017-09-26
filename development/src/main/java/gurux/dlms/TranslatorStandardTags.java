@@ -651,7 +651,7 @@ final class TranslatorStandardTags {
         list.put(Initiate.DLMS_VERSION_TOO_LOW, "dlms-version-too-low");
         list.put(Initiate.INCOMPATIBLE_CONFORMANCE, "incompatible-conformance");
         list.put(Initiate.OTHER, "other");
-        list.put(Initiate.PDU_SIZE_TOOSHORT, "pdu-size-too-short");
+        list.put(Initiate.PDU_SIZE_TOO_SHORT, "pdu-size-too-short");
         list.put(Initiate.REFUSED_BY_THE_VDE_HANDLER,
                 "refused-by-the-VDE-Handler");
         return list;

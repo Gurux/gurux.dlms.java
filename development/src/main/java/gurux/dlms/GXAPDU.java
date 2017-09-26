@@ -43,7 +43,6 @@ import gurux.dlms.enums.Authentication;
 import gurux.dlms.enums.BerType;
 import gurux.dlms.enums.Command;
 import gurux.dlms.enums.Conformance;
-import gurux.dlms.enums.Initiate;
 import gurux.dlms.enums.Security;
 import gurux.dlms.enums.SourceDiagnostic;
 import gurux.dlms.internal.GXCommon;
@@ -456,15 +455,13 @@ final class GXAPDU {
         }
         // Get DLMS version number.
         if (!response) {
-            if (data.getUInt8() != 6) {
-                if (settings.isServer()) {
-                    throw new GXDLMSConfirmedServiceError(
-                            ConfirmedServiceError.INITIATE_ERROR,
-                            ServiceError.INITIATE,
-                            Initiate.DLMS_VERSION_TOO_LOW.getValue());
+            int ver = data.getUInt8();
+            settings.setDLMSVersion(ver);
+            if (ver != 6) {
+                if (!settings.isServer()) {
+                    throw new IllegalArgumentException(
+                            "Invalid DLMS version number.");
                 }
-                throw new IllegalArgumentException(
-                        "Invalid DLMS version number.");
             }
             // ProposedDlmsVersionNumber
             if (xml != null && (initiateRequest || xml
@@ -513,11 +510,6 @@ final class GXAPDU {
             if (xml != null) {
                 xml.appendStartTag(TranslatorGeneralTags.PROPOSED_CONFORMANCE);
                 getConformance(v, xml);
-            } else if (settings.getNegotiatedConformance().size() == 0) {
-                throw new GXDLMSConfirmedServiceError(
-                        ConfirmedServiceError.INITIATE_ERROR,
-                        ServiceError.INITIATE,
-                        Initiate.INCOMPATIBLE_CONFORMANCE.getValue());
             }
         } else {
             if (xml != null) {
@@ -545,13 +537,6 @@ final class GXAPDU {
                 // ProposedMaxPduSize
                 xml.appendLine(TranslatorGeneralTags.PROPOSED_MAX_PDU_SIZE,
                         "Value", xml.integerToHex(pdu, 4));
-            }
-            // If PDU is too low.
-            else if (pdu < 64) {
-                throw new GXDLMSConfirmedServiceError(
-                        ConfirmedServiceError.INITIATE_ERROR,
-                        ServiceError.INITIATE,
-                        Initiate.PDU_SIZE_TOOSHORT.getValue());
             }
             // If client asks too high PDU.
             if (pdu > settings.getMaxServerPDUSize()) {
@@ -627,7 +612,7 @@ final class GXAPDU {
         // Tag for xDLMS-Initate.response
         int tag = data.getUInt8();
         int originalPos;
-        byte[] encrypted;
+        byte[] tmp, encrypted;
         AesGcmParameter p;
         if (tag == Command.GLO_INITIATE_RESPONSE) {
             if (xml != null) {
@@ -639,8 +624,13 @@ final class GXAPDU {
                     int pos = xml.getXmlLength();
                     try {
                         data.position(originalPos - 1);
-                        p = cipher.decrypt(settings.getSourceSystemTitle(),
-                                data);
+                        p = new AesGcmParameter(settings.getSourceSystemTitle(),
+                                settings.getCipher().getBlockCipherKey(),
+                                settings.getCipher().getAuthenticationKey());
+                        p.setXml(xml);
+                        tmp = cipher.crypt(p, false, data);
+                        data.clear();
+                        data.set(tmp);
                         cipher.setSecurity(p.getSecurity());
                         tag = data.getUInt8();
                         xml.startComment("Decrypted data:");
@@ -675,8 +665,14 @@ final class GXAPDU {
                     data.position(originalPos - 1);
                     int pos = xml.getXmlLength();
                     try {
-                        p = cipher.decrypt(settings.getSourceSystemTitle(),
-                                data);
+                        p = new AesGcmParameter(settings.getSourceSystemTitle(),
+                                settings.getCipher().getBlockCipherKey(),
+                                settings.getCipher().getAuthenticationKey());
+                        p.setXml(xml);
+
+                        tmp = cipher.crypt(p, false, data);
+                        data.clear();
+                        data.set(tmp);
                         cipher.setSecurity(p.getSecurity());
                         tag = data.getUInt8();
                         xml.startComment("Decrypted data:");
@@ -971,7 +967,15 @@ final class GXAPDU {
                     throw new GXDLMSException(resultComponent,
                             resultDiagnosticValue);
                 }
-                parseUserInformation(settings, cipher, buff, xml);
+                try {
+                    parseUserInformation(settings, cipher, buff, xml);
+                } catch (Exception e) {
+                    if (xml == null) {
+                        throw new GXDLMSException(
+                                AssociationResult.PERMANENT_REJECTED,
+                                SourceDiagnostic.NO_REASON_GIVEN);
+                    }
+                }
                 break;
             default:
                 // Unknown tags.
@@ -1231,8 +1235,8 @@ final class GXAPDU {
             data.set(cipher.getSystemTitle());
         }
 
-        if (result != AssociationResult.PERMANENT_REJECTED
-                && diagnostic == SourceDiagnostic.AUTHENTICATION_REQUIRED) {
+        if (settings.getAuthentication().getValue() > Authentication.LOW
+                .getValue()) {
             // Add server ACSE-requirenents field component.
             data.setUInt8(0x88);
             data.setUInt8(0x02); // Len.
@@ -1254,30 +1258,33 @@ final class GXAPDU {
             data.setUInt8(settings.getStoCChallenge().length);
             data.set(settings.getStoCChallenge());
         }
-        byte[] tmp;
-        // Add User Information
-        // Tag 0xBE
-        data.setUInt8(BerType.CONTEXT | BerType.CONSTRUCTED
-                | PduType.USER_INFORMATION);
-        if (encryptedData != null && encryptedData.size() != 0) {
-            GXByteBuffer tmp2 = new GXByteBuffer(2 + encryptedData.size());
-            tmp2.setUInt8(Command.GLO_INITIATE_RESPONSE);
-            GXCommon.setObjectCount(encryptedData.size(), tmp2);
-            tmp2.set(encryptedData);
-            tmp = tmp2.array();
-        } else {
-            if (errorData != null && errorData.size() != 0) {
-                tmp = errorData.array();
+        if (result == AssociationResult.ACCEPTED || cipher == null
+                || cipher.getSecurity() == Security.NONE) {
+            byte[] tmp;
+            // Add User Information
+            // Tag 0xBE
+            data.setUInt8(BerType.CONTEXT | BerType.CONSTRUCTED
+                    | PduType.USER_INFORMATION);
+            if (encryptedData != null && encryptedData.size() != 0) {
+                GXByteBuffer tmp2 = new GXByteBuffer(2 + encryptedData.size());
+                tmp2.setUInt8(Command.GLO_INITIATE_RESPONSE);
+                GXCommon.setObjectCount(encryptedData.size(), tmp2);
+                tmp2.set(encryptedData);
+                tmp = tmp2.array();
             } else {
-                tmp = getUserInformation(settings, cipher);
+                if (errorData != null && errorData.size() != 0) {
+                    tmp = errorData.array();
+                } else {
+                    tmp = getUserInformation(settings, cipher);
+                }
             }
+            data.setUInt8((2 + tmp.length));
+            // Coding the choice for user-information (Octet STRING, universal)
+            data.setUInt8(BerType.OCTET_STRING);
+            // Length
+            data.setUInt8(tmp.length);
+            data.set(tmp);
         }
-        data.setUInt8((2 + tmp.length));
-        // Coding the choice for user-information (Octet STRING, universal)
-        data.setUInt8(BerType.OCTET_STRING);
-        // Length
-        data.setUInt8(tmp.length);
-        data.set(tmp);
         data.setUInt8((short) (offset + 1), (data.size() - offset - 2));
     }
 }

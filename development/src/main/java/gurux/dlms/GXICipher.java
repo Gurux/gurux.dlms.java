@@ -48,6 +48,19 @@ import gurux.dlms.secure.AesGcmParameter;
 public interface GXICipher {
 
     /**
+     * Decrypt or encrypt data.
+     * 
+     * @param p
+     *            Aes Gcm parameter.
+     * @param encrypt
+     *            Is data encrypt or decrypt.
+     * @param data
+     *            Crypted data.
+     * @return Used security.
+     */
+    byte[] crypt(AesGcmParameter p, boolean encrypt, GXByteBuffer data);
+
+    /**
      * Encrypt PDU.
      * 
      * @param tag

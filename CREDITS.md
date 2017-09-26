@@ -1,5 +1,7 @@
 Credits
 =======
+  - Added readByRange method with GXDateTime parameters.
+    * [Gregor Stamac](https://github.com/gstamac)
   - ParseUA issue found.
     * [tomasfrizu](https://github.com/tomasfrizu)
   - Profile generic scaler issue found.

@@ -34,8 +34,8 @@
 
 package gurux.dlms.server.example;
 
-import gurux.dlms.enums.InterfaceType;
 import gurux.dlms.objects.GXDLMSAssociationLogicalName;
+import gurux.dlms.objects.GXDLMSTcpUdpSetup;
 
 /**
  * DLMS Server that uses Logical Name referencing with IEC 62056-47 COSEM
@@ -44,6 +44,6 @@ import gurux.dlms.objects.GXDLMSAssociationLogicalName;
  */
 public class GXDLMSServerLN_47 extends GXDLMSBase {
     public GXDLMSServerLN_47() {
-        super(new GXDLMSAssociationLogicalName(), InterfaceType.WRAPPER);
+        super(new GXDLMSAssociationLogicalName(), new GXDLMSTcpUdpSetup());
     }
 }

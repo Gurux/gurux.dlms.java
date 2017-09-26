@@ -63,7 +63,6 @@ import gurux.dlms.ValueEventArgs;
 import gurux.dlms.enums.AccessMode;
 import gurux.dlms.enums.Authentication;
 import gurux.dlms.enums.DataType;
-import gurux.dlms.enums.InterfaceType;
 import gurux.dlms.enums.MethodAccessMode;
 import gurux.dlms.enums.ObjectType;
 import gurux.dlms.enums.SourceDiagnostic;
@@ -79,6 +78,7 @@ import gurux.dlms.objects.GXDLMSData;
 import gurux.dlms.objects.GXDLMSDayProfile;
 import gurux.dlms.objects.GXDLMSDayProfileAction;
 import gurux.dlms.objects.GXDLMSDemandRegister;
+import gurux.dlms.objects.GXDLMSHdlcSetup;
 import gurux.dlms.objects.GXDLMSIECOpticalPortSetup;
 import gurux.dlms.objects.GXDLMSImageTransfer;
 import gurux.dlms.objects.GXDLMSIp4Setup;
@@ -131,12 +131,12 @@ public class GXDLMSBase extends GXDLMSSecureServer2
      * 
      * @param ln
      *            Association logical name.
-     * @param type
-     *            Interface type.
+     * @param hdlc
+     *            HDLC settings.
      */
-    public GXDLMSBase(GXDLMSAssociationLogicalName ln,
-            InterfaceType interfaceType) {
-        super(ln, interfaceType);
+    public GXDLMSBase(final GXDLMSAssociationLogicalName ln,
+            final GXDLMSHdlcSetup hdlc) {
+        super(ln, hdlc);
         this.setMaxReceivePDUSize(1024);
         byte[] secret = "Gurux".getBytes();
         ln.setSecret(secret);
@@ -148,11 +148,43 @@ public class GXDLMSBase extends GXDLMSSecureServer2
      * @param sn
      *            Association short name.
      * @param type
-     *            Interface type.
+     *            HDLC settings.
      */
     public GXDLMSBase(GXDLMSAssociationShortName sn,
-            InterfaceType interfaceType) {
-        super(sn, interfaceType);
+            final GXDLMSHdlcSetup hdlc) {
+        super(sn, hdlc);
+        this.setMaxReceivePDUSize(1024);
+        byte[] secret = "Gurux".getBytes();
+        sn.setSecret(secret);
+    }
+
+    /**
+     * Constructor.
+     * 
+     * @param ln
+     *            Association logical name.
+     * @param wrapper
+     *            Wrapper settings.
+     */
+    public GXDLMSBase(final GXDLMSAssociationLogicalName ln,
+            final GXDLMSTcpUdpSetup wrapper) {
+        super(ln, wrapper);
+        this.setMaxReceivePDUSize(1024);
+        byte[] secret = "Gurux".getBytes();
+        ln.setSecret(secret);
+    }
+
+    /**
+     * Constructor.
+     * 
+     * @param sn
+     *            Association short name.
+     * @param wrapper
+     *            Wrapper settings.
+     */
+    public GXDLMSBase(GXDLMSAssociationShortName sn,
+            final GXDLMSTcpUdpSetup wrapper) {
+        super(sn, wrapper);
         this.setMaxReceivePDUSize(1024);
         byte[] secret = "Gurux".getBytes();
         sn.setSecret(secret);
@@ -693,7 +725,7 @@ public class GXDLMSBase extends GXDLMSSecureServer2
             // Framework will handle profile generic automatically.
             if (e.getTarget() instanceof GXDLMSProfileGeneric) {
                 // If buffer is read and we want to save memory.
-                if (e.getIndex() == 6) {
+                if (e.getIndex() == 7) {
                     // If client wants to know EntriesInUse.
                     GXDLMSProfileGeneric p =
                             (GXDLMSProfileGeneric) e.getTarget();

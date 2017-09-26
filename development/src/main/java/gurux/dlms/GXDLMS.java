@@ -898,7 +898,8 @@ abstract class GXDLMS {
                             GXDLMS.getHdlcFrame(p.getSettings(), frame, reply));
                     if (reply.position() != reply.size()) {
                         if (p.getSettings().isServer()
-                                || p.getCommand() == Command.SET_REQUEST) {
+                                || p.getCommand() == Command.SET_REQUEST
+                                || p.getCommand() == Command.METHOD_REQUEST) {
                             frame = 0;
                         } else {
                             frame = p.getSettings().getNextSend(false);
@@ -1235,7 +1236,8 @@ abstract class GXDLMS {
         }
         // Add BOP
         bb.setUInt8(GXCommon.HDLC_FRAME_START_END);
-        frameSize = ((Number) settings.getLimits().getMaxInfoTX()).intValue();
+        frameSize = settings.getLimits().getMaxInfoTX();
+        frameSize -= 11;
         // If no data
         if (data == null || data.size() == 0) {
             bb.setUInt8(0xA0);
@@ -3082,6 +3084,59 @@ abstract class GXDLMS {
             count[0] = 0;
             value[0] = 0;
             break;
+        }
+    }
+
+    /**
+     * Parses UAResponse from byte array.
+     * 
+     * @param data
+     *            Received message from the server.
+     * @see GXDLMSClient#snrmRequest
+     */
+    static void parseSnrmUaResponse(final GXByteBuffer data,
+            final GXDLMSLimits limits) {
+        // If default settings are used.
+        if (data.available() != 0) {
+            data.getUInt8(); // Skip FromatID
+            data.getUInt8(); // Skip Group ID.
+            data.getUInt8(); // Skip Group len
+            int val;
+            while (data.position() < data.size()) {
+                short id = data.getUInt8();
+                short len = data.getUInt8();
+                switch (len) {
+                case 1:
+                    val = data.getUInt8();
+                    break;
+                case 2:
+                    val = data.getUInt16();
+                    break;
+                case 4:
+                    val = (int) data.getUInt32();
+                    break;
+                default:
+                    throw new GXDLMSException("Invalid Exception.");
+                }
+                // RX / TX are delivered from the partner's point of view =>
+                // reversed to ours
+                switch (id) {
+                case HDLCInfo.MAX_INFO_RX:
+                    limits.setMaxInfoTX(val);
+                    break;
+                case HDLCInfo.MAX_INFO_TX:
+                    limits.setMaxInfoRX(val);
+                    break;
+                case HDLCInfo.WINDOW_SIZE_RX:
+                    limits.setWindowSizeTX(val);
+                    break;
+                case HDLCInfo.WINDOW_SIZE_TX:
+                    limits.setWindowSizeRX(val);
+                    break;
+                default:
+                    throw new GXDLMSException("Invalid UA response.");
+                }
+            }
         }
     }
 }

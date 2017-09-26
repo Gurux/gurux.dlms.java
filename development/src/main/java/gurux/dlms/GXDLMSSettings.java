@@ -43,7 +43,9 @@ import gurux.dlms.enums.Conformance;
 import gurux.dlms.enums.InterfaceType;
 import gurux.dlms.enums.Priority;
 import gurux.dlms.enums.ServiceClass;
+import gurux.dlms.objects.GXDLMSHdlcSetup;
 import gurux.dlms.objects.GXDLMSObjectCollection;
+import gurux.dlms.objects.GXDLMSTcpUdpSetup;
 
 /**
  * This class includes DLMS communication settings.
@@ -51,6 +53,16 @@ import gurux.dlms.objects.GXDLMSObjectCollection;
  * @author Gurux Ltd.
  */
 public class GXDLMSSettings {
+
+    /**
+     * HDLC settings.
+     */
+    private GXDLMSHdlcSetup hdlc;
+
+    /**
+     * Wrapper settings.
+     */
+    private GXDLMSTcpUdpSetup wrapper;
 
     /**
      * Frame check is skipped for some unit tests. This is internal use only.
@@ -179,7 +191,7 @@ public class GXDLMSSettings {
     /**
      * DLMS version number.
      */
-    private byte dlmsVersionNumber = DLMS_VERSION;
+    private int dlmsVersionNumber = DLMS_VERSION;
 
     private boolean connected = false;
 
@@ -339,7 +351,7 @@ public class GXDLMSSettings {
     /**
      * @return Used DLMS version number.
      */
-    public final byte getDlmsVersionNumber() {
+    public final int getDlmsVersionNumber() {
         return dlmsVersionNumber;
     }
 
@@ -347,7 +359,7 @@ public class GXDLMSSettings {
      * @param value
      *            Used DLMS version number.
      */
-    public final void setDlmsVersionNumber(final byte value) {
+    public final void setDlmsVersionNumber(final int value) {
         dlmsVersionNumber = value;
     }
 
@@ -627,7 +639,7 @@ public class GXDLMSSettings {
     /**
      * @return DLMS version number.
      */
-    public final byte getDLMSVersion() {
+    public final int getDLMSVersion() {
         return dlmsVersionNumber;
     }
 
@@ -635,7 +647,7 @@ public class GXDLMSSettings {
      * @param value
      *            DLMS version number.
      */
-    public final void setDLMSVersion(final byte value) {
+    public final void setDLMSVersion(final int value) {
         dlmsVersionNumber = value;
     }
 
@@ -928,5 +940,35 @@ public class GXDLMSSettings {
      */
     public void setAllowAnonymousAccess(final boolean value) {
         allowAnonymousAccess = value;
+    }
+
+    /**
+     * @return HDLC settings.
+     */
+    public GXDLMSHdlcSetup getHdlc() {
+        return hdlc;
+    }
+
+    /**
+     * @param value
+     *            HDLC settings.
+     */
+    public void setHdlc(final GXDLMSHdlcSetup value) {
+        hdlc = value;
+    }
+
+    /**
+     * @return Wrapper settings.
+     */
+    public GXDLMSTcpUdpSetup getWrapper() {
+        return wrapper;
+    }
+
+    /**
+     * @param value
+     *            Wrapper settings.
+     */
+    public void setWrapper(final GXDLMSTcpUdpSetup value) {
+        wrapper = value;
     }
 }

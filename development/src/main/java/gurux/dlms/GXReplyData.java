@@ -273,7 +273,7 @@ public class GXReplyData {
     }
 
     /**
-     * Is notify message.
+     * @return Is notify message.
      */
     public boolean isNotify() {
         return command == Command.EVENT_NOTIFICATION

@@ -45,8 +45,10 @@ import gurux.dlms.enums.ServiceClass;
 import gurux.dlms.enums.SourceDiagnostic;
 import gurux.dlms.objects.GXDLMSAssociationLogicalName;
 import gurux.dlms.objects.GXDLMSAssociationShortName;
+import gurux.dlms.objects.GXDLMSHdlcSetup;
 import gurux.dlms.objects.GXDLMSObject;
 import gurux.dlms.objects.GXDLMSObjectCollection;
+import gurux.dlms.objects.GXDLMSTcpUdpSetup;
 
 /**
  * GXDLMSServer implements methods to implement DLMS/COSEM meter/proxy.
@@ -85,10 +87,90 @@ public abstract class GXDLMSServer2 {
     }
 
     /**
+     * Constructor for logical name referencing.
+     * 
+     * @param ln
+     *            Association logical name.
+     * @param hdlc
+     *            HDLC settings.
+     */
+    public GXDLMSServer2(final GXDLMSAssociationLogicalName ln,
+            final GXDLMSHdlcSetup hdlc) {
+        base = new GXDLMSServerBase(this, true, InterfaceType.HDLC);
+        base.setHdlc(hdlc);
+        ln.getXDLMSContextInfo().setSettings(getSettings());
+        base.getItems().add(ln);
+        base.getItems().add(hdlc);
+    }
+
+    /**
+     * Constructor for short name referencing.
+     * 
+     * @param sn
+     *            Association short name.
+     * @param hdlc
+     *            HDLC settings.
+     */
+    public GXDLMSServer2(final GXDLMSAssociationShortName sn,
+            final GXDLMSHdlcSetup hdlc) {
+        base = new GXDLMSServerBase(this, false, InterfaceType.HDLC);
+        getSettings().setHdlc(hdlc);
+        base.getItems().add(sn);
+        base.getItems().add(hdlc);
+    }
+
+    /**
+     * Constructor for logical name referencing.
+     * 
+     * @param ln
+     *            Association logical name.
+     * @param wrapper
+     *            WRAPPER settings.
+     */
+    public GXDLMSServer2(final GXDLMSAssociationLogicalName ln,
+            final GXDLMSTcpUdpSetup wrapper) {
+        base = new GXDLMSServerBase(this, true, InterfaceType.WRAPPER);
+        ln.getXDLMSContextInfo().setSettings(getSettings());
+        getSettings().setWrapper(wrapper);
+        base.getItems().add(ln);
+        base.getItems().add(wrapper);
+    }
+
+    /**
+     * Constructor for short name referencing.
+     * 
+     * @param sn
+     *            Association short name.
+     * @param wrapper
+     *            WRAPPER settings.
+     */
+    public GXDLMSServer2(final GXDLMSAssociationShortName sn,
+            final GXDLMSTcpUdpSetup wrapper) {
+        base = new GXDLMSServerBase(this, false, InterfaceType.WRAPPER);
+        getSettings().setWrapper(wrapper);
+        base.getItems().add(sn);
+        base.getItems().add(wrapper);
+    }
+
+    /**
      * @return List of objects that meter supports.
      */
     public final GXDLMSObjectCollection getItems() {
         return base.getItems();
+    }
+
+    /**
+     * @return HDLC settings.
+     */
+    public final GXDLMSHdlcSetup getHdlc() {
+        return getSettings().getHdlc();
+    }
+
+    /**
+     * @return Wrapper settings.
+     */
+    public final GXDLMSTcpUdpSetup getWrapper() {
+        return getSettings().getWrapper();
     }
 
     /**

@@ -336,7 +336,11 @@ final class GXDLMSChippering {
                 if (transactionId != 0) {
                     p.setInvocationCounter(transactionId);
                 }
-                throw new GXDLMSException("Decrypt failed. Invalid tag.");
+                if (p.getXml() == null) {
+                    throw new GXDLMSException("Decrypt failed. Invalid tag.");
+                } else {
+                    p.getXml().appendComment("Decrypt failed. Invalid tag.");
+                }
             }
             return encryptedData;
         }

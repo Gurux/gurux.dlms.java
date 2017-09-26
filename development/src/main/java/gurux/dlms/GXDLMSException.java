@@ -70,6 +70,8 @@ public class GXDLMSException extends RuntimeException {
             final SourceDiagnostic forDiagnostic) {
         super("Connection is " + getResult(forResult) + "\r\n"
                 + getDiagnostic(forDiagnostic));
+        result = forResult;
+        diagnostic = forDiagnostic;
     }
 
     /**

@@ -231,30 +231,12 @@ public class GXDLMSClient {
     }
 
     /**
-     * DLMS version number. Gurux DLMS component supports DLMS version number 6.
-     * 
-     * @return DLMS version number.
-     */
-    public final byte getDLMSVersion() {
-        return settings.getDLMSVersion();
-    }
-
-    /**
-     * @param value
-     *            DLMS version number.
-     */
-    public final void setDLMSVersion(final byte value) {
-        settings.setDLMSVersion(value);
-    }
-
-    /**
      * Retrieves the maximum size of received PDU. PDU size tells maximum size
      * of PDU packet. Value can be from 0 to 0xFFFF. By default the value is
      * 0xFFFF.
      * 
      * @see GXDLMSClient#getClientAddress
      * @see GXDLMSClient#getServerAddress
-     * @see GXDLMSClient#getDLMSVersion
      * @see GXDLMSClient#getUseLogicalNameReferencing
      * @return Maximum size of received PDU.
      */
@@ -491,29 +473,27 @@ public class GXDLMSClient {
         data.setUInt8(0); // Length.
 
         // If custom HDLC parameters are used.
-        if (!GXDLMSLimits.DEFAULT_MAX_INFO_TX
-                .equals(this.getLimits().getMaxInfoTX())) {
+        if (GXDLMSLimits.DEFAULT_MAX_INFO_TX != getLimits().getMaxInfoTX()) {
             data.setUInt8(HDLCInfo.MAX_INFO_TX);
-            data.setUInt8(GXCommon.getSize(getLimits().getMaxInfoTX()));
-            data.add(getLimits().getMaxInfoTX());
+            data.setUInt8(1);
+            data.setUInt8(getLimits().getMaxInfoTX());
         }
-        if (!GXDLMSLimits.DEFAULT_MAX_INFO_RX
-                .equals(this.getLimits().getMaxInfoRX())) {
+        if (GXDLMSLimits.DEFAULT_MAX_INFO_RX != getLimits().getMaxInfoRX()) {
             data.setUInt8(HDLCInfo.MAX_INFO_RX);
-            data.setUInt8(GXCommon.getSize(getLimits().getMaxInfoRX()));
-            data.add(getLimits().getMaxInfoRX());
+            data.setUInt8(1);
+            data.setUInt8(getLimits().getMaxInfoRX());
         }
-        if (!GXDLMSLimits.DEFAULT_WINDOWS_SIZE_TX
-                .equals(this.getLimits().getWindowSizeTX())) {
+        if (GXDLMSLimits.DEFAULT_WINDOWS_SIZE_TX != getLimits()
+                .getWindowSizeTX()) {
             data.setUInt8(HDLCInfo.WINDOW_SIZE_TX);
-            data.setUInt8(GXCommon.getSize(getLimits().getWindowSizeTX()));
-            data.add(getLimits().getWindowSizeTX());
+            data.setUInt8(4);
+            data.setUInt32(getLimits().getWindowSizeTX());
         }
-        if (!GXDLMSLimits.DEFAULT_WINDOWS_SIZE_TX
-                .equals(this.getLimits().getWindowSizeRX())) {
+        if (GXDLMSLimits.DEFAULT_WINDOWS_SIZE_TX != getLimits()
+                .getWindowSizeRX()) {
             data.setUInt8(HDLCInfo.WINDOW_SIZE_RX);
-            data.setUInt8(GXCommon.getSize(getLimits().getWindowSizeRX()));
-            data.add(getLimits().getWindowSizeRX());
+            data.setUInt8(4);
+            data.setUInt32(getLimits().getWindowSizeRX());
         }
         // If default HDLC parameters are not used.
         if (data.size() != 3) {
@@ -532,7 +512,8 @@ public class GXDLMSClient {
      * @see GXDLMSClient#snrmRequest
      */
     public final void parseUAResponse(final byte[] data) {
-        parseUAResponse(new GXByteBuffer(data));
+        GXDLMS.parseSnrmUaResponse(new GXByteBuffer(data),
+                settings.getLimits());
     }
 
     /**
@@ -543,45 +524,7 @@ public class GXDLMSClient {
      * @see GXDLMSClient#snrmRequest
      */
     public final void parseUAResponse(final GXByteBuffer data) {
-        data.getUInt8(); // Skip FromatID
-        data.getUInt8(); // Skip Group ID.
-        data.getUInt8(); // Skip Group len
-        Object val;
-        while (data.position() < data.size()) {
-            short id = data.getUInt8();
-            short len = data.getUInt8();
-            switch (len) {
-            case 1:
-                val = data.getUInt8();
-                break;
-            case 2:
-                val = data.getUInt16();
-                break;
-            case 4:
-                val = data.getUInt32();
-                break;
-            default:
-                throw new GXDLMSException("Invalid Exception.");
-            }
-            // RX / TX are delivered from the partner's point of view =>
-            // reversed to ours
-            switch (id) {
-            case HDLCInfo.MAX_INFO_RX:
-                getLimits().setMaxInfoTX(val);
-                break;
-            case HDLCInfo.MAX_INFO_TX:
-                getLimits().setMaxInfoRX(val);
-                break;
-            case HDLCInfo.WINDOW_SIZE_RX:
-                getLimits().setWindowSizeTX(val);
-                break;
-            case HDLCInfo.WINDOW_SIZE_TX:
-                getLimits().setWindowSizeRX(val);
-                break;
-            default:
-                throw new GXDLMSException("Invalid UA response.");
-            }
-        }
+        GXDLMS.parseSnrmUaResponse(data, settings.getLimits());
     }
 
     /**
@@ -641,7 +584,7 @@ public class GXDLMSClient {
         isAuthenticationRequired =
                 GXAPDU.parsePDU(settings, settings.getCipher(), reply,
                         null) == SourceDiagnostic.AUTHENTICATION_REQUIRED;
-        if (getDLMSVersion() != 6) {
+        if (settings.getDLMSVersion() != 6) {
             throw new IllegalArgumentException("Invalid DLMS version number.");
         }
     }
@@ -2119,6 +2062,7 @@ public class GXDLMSClient {
      *            Array of objects and called indexes.
      * @return Data notification data.
      * @throws Exception
+     *             Occurred exception
      */
     public Object parseReport(final GXReplyData reply,
             final List<Entry<GXDLMSObject, Integer>> list) throws Exception {

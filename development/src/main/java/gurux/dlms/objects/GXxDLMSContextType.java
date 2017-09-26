@@ -62,7 +62,7 @@ public class GXxDLMSContextType {
     /**
      * DLMS Version Number.
      */
-    private byte dlmsVersionNumber;
+    private int dlmsVersionNumber;
     /**
      * Quality Of Service.
      */
@@ -128,14 +128,14 @@ public class GXxDLMSContextType {
         maxSendPduSize = value;
     }
 
-    public final byte getDlmsVersionNumber() {
+    public final int getDlmsVersionNumber() {
         if (settings != null) {
             return settings.getDlmsVersionNumber();
         }
         return dlmsVersionNumber;
     }
 
-    public final void setDlmsVersionNumber(final byte value) {
+    public final void setDlmsVersionNumber(final int value) {
         if (settings != null) {
             settings.setDlmsVersionNumber(value);
         }

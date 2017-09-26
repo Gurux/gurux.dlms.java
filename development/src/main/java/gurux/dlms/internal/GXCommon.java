@@ -392,22 +392,6 @@ public final class GXCommon {
         return decoded;
     }
 
-    public static byte getSize(final Object value) {
-        if (value instanceof Byte) {
-            return 1;
-        }
-        if (value instanceof Short) {
-            return 2;
-        }
-        if (value instanceof Integer) {
-            return 4;
-        }
-        if (value instanceof Long) {
-            return 8;
-        }
-        throw new RuntimeException("Invalid object type.");
-    }
-
     public static int intValue(final Object value) {
         if (value instanceof Byte) {
             return ((Byte) value).intValue() & 0xFF;
@@ -944,16 +928,27 @@ public final class GXCommon {
                 ms = 0;
             }
             java.util.Calendar tm;
+            int tzOffset = 0;
             if (deviation == 0x8000) {
                 tm = Calendar.getInstance();
             } else {
-                tm = Calendar.getInstance(
-                        GXDateTime.getTimeZone(-deviation, dt.getStatus()
-                                .contains(ClockStatus.DAYLIGHT_SAVE_ACTIVE)));
+                TimeZone tz = GXDateTime.getTimeZone(-deviation, dt.getStatus()
+                        .contains(ClockStatus.DAYLIGHT_SAVE_ACTIVE));
+                if (tz != null) {
+                    tm = Calendar.getInstance(tz);
+                } else {
+                    // Use current time zone if time zone is not found.
+                    tm = Calendar.getInstance();
+                    tzOffset = deviation
+                            + (tm.getTimeZone().getRawOffset() / 60000);
+                }
             }
             tm.set(year, month, day, hour, minute, second);
             if (ms != 0xFF) {
                 tm.set(Calendar.MILLISECOND, ms);
+            }
+            if (tzOffset != 0) {
+                tm.add(Calendar.MINUTE, tzOffset);
             }
             dt.setMeterCalendar(tm);
             dt.setSkip(skip);
@@ -1331,7 +1326,7 @@ public final class GXCommon {
                     }
                     if (isString) {
                         for (byte it : tmp) {
-                            if (!Character.isLetterOrDigit(it)) {
+                            if (it < 32 || it > 126) {
                                 isString = false;
                                 break;
                             }

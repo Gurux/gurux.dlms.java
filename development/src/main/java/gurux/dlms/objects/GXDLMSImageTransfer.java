@@ -66,13 +66,7 @@ public class GXDLMSImageTransfer extends GXDLMSObject implements IGXDLMSBase {
      * Constructor.
      */
     public GXDLMSImageTransfer() {
-        super(ObjectType.IMAGE_TRANSFER, "0.0.44.0.0.255", 0);
-        imageBlockSize = 200;
-        imageFirstNotTransferredBlockNumber = 0;
-        imageTransferEnabled = true;
-        GXDLMSImageActivateInfo info = new GXDLMSImageActivateInfo();
-        imageActivateInfo = new GXDLMSImageActivateInfo[] { info };
-        imageTransferStatus = ImageTransferStatus.IMAGE_TRANSFER_NOT_INITIATED;
+        this("0.0.44.0.0.255", 0);
     }
 
     /**
@@ -82,13 +76,7 @@ public class GXDLMSImageTransfer extends GXDLMSObject implements IGXDLMSBase {
      *            Logical Name of the object.
      */
     public GXDLMSImageTransfer(final String ln) {
-        super(ObjectType.IMAGE_TRANSFER, ln, 0);
-        imageBlockSize = 200;
-        imageFirstNotTransferredBlockNumber = 0;
-        imageTransferEnabled = true;
-        GXDLMSImageActivateInfo info = new GXDLMSImageActivateInfo();
-        imageActivateInfo = new GXDLMSImageActivateInfo[] { info };
-        imageTransferStatus = ImageTransferStatus.IMAGE_TRANSFER_NOT_INITIATED;
+        this(ln, 0);
     }
 
     /**
@@ -104,8 +92,7 @@ public class GXDLMSImageTransfer extends GXDLMSObject implements IGXDLMSBase {
         imageBlockSize = 200;
         imageFirstNotTransferredBlockNumber = 0;
         imageTransferEnabled = true;
-        GXDLMSImageActivateInfo info = new GXDLMSImageActivateInfo();
-        imageActivateInfo = new GXDLMSImageActivateInfo[] { info };
+        imageActivateInfo = new GXDLMSImageActivateInfo[0];
         imageTransferStatus = ImageTransferStatus.IMAGE_TRANSFER_NOT_INITIATED;
     }
 
@@ -277,14 +264,27 @@ public class GXDLMSImageTransfer extends GXDLMSObject implements IGXDLMSBase {
             List<GXDLMSImageActivateInfo> list =
                     new ArrayList<GXDLMSImageActivateInfo>();
             list.addAll(Arrays.asList(imageActivateInfo));
-            GXDLMSImageActivateInfo item = new GXDLMSImageActivateInfo();
+            GXDLMSImageActivateInfo item = null;
+            for (GXDLMSImageActivateInfo it : imageActivateInfo) {
+                if (it.getIdentification().equals(imageIdentifier)) {
+                    item = it;
+                    break;
+                }
+            }
+            if (item == null) {
+                item = new GXDLMSImageActivateInfo();
+                list.add(item);
+            }
             item.setSize(imageSize);
             item.setIdentification(imageIdentifier);
-            list.add(item);
             imageActivateInfo =
                     list.toArray(new GXDLMSImageActivateInfo[list.size()]);
-            StringBuilder sb = new StringBuilder();
-            for (long pos = 0; pos < imageSize; ++pos) {
+            int cnt = (int) (imageSize / imageBlockSize);
+            if (imageSize % imageBlockSize != 0) {
+                ++cnt;
+            }
+            StringBuilder sb = new StringBuilder(cnt);
+            for (long pos = 0; pos < cnt; ++pos) {
                 sb.append('0');
             }
             imageTransferredBlocksStatus = sb.toString();

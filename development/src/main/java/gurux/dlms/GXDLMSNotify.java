@@ -131,7 +131,6 @@ public class GXDLMSNotify {
      * 
      * @see GXDLMSClient#getClientAddress
      * @see GXDLMSClient#getServerAddress
-     * @see GXDLMSClient#getDLMSVersion
      * @see GXDLMSClient#getUseLogicalNameReferencing
      * @return Maximum size of received PDU.
      */

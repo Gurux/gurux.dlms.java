@@ -77,9 +77,9 @@ public class GXDLMSTcpUdpSetup extends GXDLMSObject implements IGXDLMSBase {
      */
     public GXDLMSTcpUdpSetup(final String ln, final int sn) {
         super(ObjectType.TCP_UDP_SETUP, ln, sn);
-        setPort(4059);
-        setInactivityTimeout(180);
-        setMaximumSegmentSize(576);
+        port = 4059;
+        inactivityTimeout = 180;
+        maximumSegmentSize = 576;
     }
 
     public final int getPort() {

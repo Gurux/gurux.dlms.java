@@ -34,6 +34,7 @@
 
 package gurux.dlms.secure;
 
+import gurux.dlms.GXDLMSTranslatorStructure;
 import gurux.dlms.enums.Security;
 import gurux.dlms.internal.GXCommon;
 import gurux.dlms.objects.enums.SecuritySuite;
@@ -42,6 +43,7 @@ public class AesGcmParameter {
 
     private byte tag;
     private Security security;
+
     /**
      * Invocation counter.
      */
@@ -105,6 +107,8 @@ public class AesGcmParameter {
      * Used security suite.
      */
     private SecuritySuite securitySuite = SecuritySuite.AES_GCM_128;
+
+    private GXDLMSTranslatorStructure xml;
 
     /**
      * Constructor.
@@ -397,5 +401,13 @@ public class AesGcmParameter {
      */
     public void setCipheredContent(final byte[] value) {
         cipheredContent = value;
+    }
+
+    public final void setXml(final GXDLMSTranslatorStructure value) {
+        xml = value;
+    }
+
+    public final GXDLMSTranslatorStructure getXml() {
+        return xml;
     }
 }

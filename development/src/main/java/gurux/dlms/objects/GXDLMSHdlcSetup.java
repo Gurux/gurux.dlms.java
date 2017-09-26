@@ -58,12 +58,7 @@ public class GXDLMSHdlcSetup extends GXDLMSObject implements IGXDLMSBase {
      * Constructor.
      */
     public GXDLMSHdlcSetup() {
-        super(ObjectType.IEC_HDLC_SETUP);
-        setCommunicationSpeed(BaudRate.BAUDRATE_9600);
-        setWindowSizeTransmit(1);
-        setWindowSizeReceive(getWindowSizeTransmit());
-        setMaximumInfoLengthReceive(128);
-        setMaximumInfoLengthTransmit(getMaximumInfoLengthReceive());
+        this("0.0.22.0.0.255");
     }
 
     /**
@@ -73,12 +68,7 @@ public class GXDLMSHdlcSetup extends GXDLMSObject implements IGXDLMSBase {
      *            Logical Name of the object.
      */
     public GXDLMSHdlcSetup(final String ln) {
-        super(ObjectType.IEC_HDLC_SETUP, ln, 0);
-        setCommunicationSpeed(BaudRate.BAUDRATE_9600);
-        setWindowSizeTransmit(1);
-        setWindowSizeReceive(getWindowSizeTransmit());
-        setMaximumInfoLengthReceive(128);
-        setMaximumInfoLengthTransmit(getMaximumInfoLengthReceive());
+        this(ln, 0);
     }
 
     /**
@@ -92,10 +82,11 @@ public class GXDLMSHdlcSetup extends GXDLMSObject implements IGXDLMSBase {
     public GXDLMSHdlcSetup(final String ln, final int sn) {
         super(ObjectType.IEC_HDLC_SETUP, ln, 0);
         setCommunicationSpeed(BaudRate.BAUDRATE_9600);
-        setWindowSizeTransmit(1);
-        setWindowSizeReceive(getWindowSizeTransmit());
-        setMaximumInfoLengthReceive(128);
-        setMaximumInfoLengthTransmit(getMaximumInfoLengthReceive());
+        windowSizeTransmit = 1;
+        windowSizeReceive = 1;
+        maximumInfoLengthReceive = 128;
+        maximumInfoLengthTransmit = 128;
+        inactivityTimeout = 120;
     }
 
     public final BaudRate getCommunicationSpeed() {

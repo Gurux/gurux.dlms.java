@@ -128,6 +128,24 @@ public class GXCiphering implements GXICipher {
                 (byte) 0xDD, (byte) 0xDE, (byte) 0xDF });
     }
 
+    @Override
+    public final byte[] crypt(final AesGcmParameter p, final boolean encrypt,
+            final GXByteBuffer data) {
+        byte[] tmp;
+        if (encrypt) {
+            if (p.getSecurity() == Security.NONE) {
+                return data.array();
+            }
+            setInvocationCounter(getInvocationCounter() + 1);
+            tmp = GXDLMSChippering.encryptAesGcm(p, data.array());
+        } else {
+            p.setSharedSecret(getSharedSecret());
+            tmp = GXDLMSChippering.decryptAesGcm(this, p, data);
+            setSharedSecret(p.getSharedSecret());
+        }
+        return tmp;
+    }
+
     /**
      * Cipher PDU.
      * 

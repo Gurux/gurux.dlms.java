@@ -147,6 +147,7 @@ public class GXDateTime {
      *            Used millisecond.
      * @param timeZone
      *            Used time Zone.
+     * @deprecated use {@link #GXDateTime} instead.
      */
     public GXDateTime(final int year, final int month, final int day,
             final int hour, final int minute, final int second,
@@ -769,7 +770,7 @@ public class GXDateTime {
      */
     public static TimeZone getTimeZone(final int deviation, final boolean dst) {
         // Return current time zone if time zone is not used.
-        if (deviation == 0x8000) {
+        if (deviation == 0x8000 || deviation == -32768) {
             return Calendar.getInstance().getTimeZone();
         }
         if (dst) {

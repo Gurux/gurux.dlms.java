@@ -1,5 +1,6 @@
 package gurux.dlms;
 
+import java.util.Calendar;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
@@ -8,6 +9,7 @@ import gurux.dlms.enums.AssociationResult;
 import gurux.dlms.enums.Authentication;
 import gurux.dlms.enums.Command;
 import gurux.dlms.enums.ErrorCode;
+import gurux.dlms.enums.Initiate;
 import gurux.dlms.enums.InterfaceType;
 import gurux.dlms.enums.MethodAccessMode;
 import gurux.dlms.enums.ObjectType;
@@ -20,6 +22,7 @@ import gurux.dlms.manufacturersettings.GXAttributeCollection;
 import gurux.dlms.manufacturersettings.GXDLMSAttributeSettings;
 import gurux.dlms.objects.GXDLMSAssociationLogicalName;
 import gurux.dlms.objects.GXDLMSAssociationShortName;
+import gurux.dlms.objects.GXDLMSHdlcSetup;
 import gurux.dlms.objects.GXDLMSObject;
 import gurux.dlms.objects.GXDLMSObjectCollection;
 import gurux.dlms.objects.IGXDLMSBase;
@@ -55,6 +58,11 @@ public class GXDLMSServerBase {
      * Is server initialized.
      */
     private boolean initialized = false;
+
+    /**
+     * When data was received last time.
+     */
+    private long dataReceived = 0;
 
     /*
      * @param value Cipher interface that is used to cipher PDU.
@@ -306,21 +314,26 @@ public class GXDLMSServerBase {
      *            Force update.
      */
     final void updateShortNames(final boolean force) {
-        short sn = 0xA0;
+        int sn = 0xA0;
         int[] offset = new int[1];
         int[] count = new int[1];
         for (GXDLMSObject it : settings.getObjects()) {
-            // Generate Short Name if not given.
-            if (force || it.getShortName() == 0) {
-                it.setShortName(sn);
-                // Add method index addresses.
-                GXDLMS.getActionInfo(it.getObjectType(), offset, count);
-                if (count[0] != 0) {
-                    sn += offset[0] + (8 * count[0]);
+            if (!(it instanceof GXDLMSAssociationShortName
+                    || it instanceof GXDLMSAssociationLogicalName)) {
+                // Generate Short Name if not given.
+                if (force || it.getShortName() == 0) {
+                    it.setShortName(sn);
+                    // Add method index addresses.
+                    GXDLMS.getActionInfo(it.getObjectType(), offset, count);
+                    if (count[0] != 0) {
+                        sn += offset[0] + (8 * count[0]);
+                    } else {
+                        // If there are no methods.
+                        // Add attribute index addresses.
+                        sn += 8 * it.getAttributeCount();
+                    }
                 } else {
-                    // If there are no methods.
-                    // Add attribute index addresses.
-                    sn += 8 * it.getAttributeCount();
+                    sn = it.getShortName();
                 }
             }
         }
@@ -342,8 +355,33 @@ public class GXDLMSServerBase {
         try {
             diagnostic =
                     GXAPDU.parsePDU(settings, settings.getCipher(), data, null);
-
-            if (diagnostic != SourceDiagnostic.NONE) {
+            if (settings.getNegotiatedConformance().size() == 0) {
+                result = AssociationResult.PERMANENT_REJECTED;
+                diagnostic = SourceDiagnostic.NO_REASON_GIVEN;
+                error = new GXByteBuffer();
+                error.setUInt8(0xE);
+                error.setUInt8(ConfirmedServiceError.INITIATE_ERROR.getValue());
+                error.setUInt8(ServiceError.INITIATE.getValue());
+                error.setUInt8(Initiate.INCOMPATIBLE_CONFORMANCE.getValue());
+            } else if (settings.getMaxPduSize() < 64) {
+                // If PDU is too low.
+                result = AssociationResult.PERMANENT_REJECTED;
+                diagnostic = SourceDiagnostic.NO_REASON_GIVEN;
+                error = new GXByteBuffer();
+                error.setUInt8(0xE);
+                error.setUInt8(ConfirmedServiceError.INITIATE_ERROR.getValue());
+                error.setUInt8(ServiceError.INITIATE.getValue());
+                error.setUInt8(Initiate.PDU_SIZE_TOO_SHORT.getValue());
+            } else if (settings.getDLMSVersion() != 6) {
+                settings.setDLMSVersion(6);
+                result = AssociationResult.PERMANENT_REJECTED;
+                diagnostic = SourceDiagnostic.NO_REASON_GIVEN;
+                error = new GXByteBuffer();
+                error.setUInt8(0xE);
+                error.setUInt8(ConfirmedServiceError.INITIATE_ERROR.getValue());
+                error.setUInt8(ServiceError.INITIATE.getValue());
+                error.setUInt8(Initiate.DLMS_VERSION_TOO_LOW.getValue());
+            } else if (diagnostic != SourceDiagnostic.NONE) {
                 result = AssociationResult.PERMANENT_REJECTED;
                 diagnostic = SourceDiagnostic.NOT_SUPPORTED;
                 notifyInvalidConnection(connectionInfo);
@@ -364,9 +402,6 @@ public class GXDLMSServerBase {
                     result = AssociationResult.PERMANENT_REJECTED;
                 } else if (settings.getAuthentication()
                         .getValue() > Authentication.LOW.getValue()) {
-                    // If High authentication is used.
-                    settings.setStoCChallenge(GXSecure
-                            .generateChallenge(settings.getAuthentication()));
                     result = AssociationResult.ACCEPTED;
                     diagnostic = SourceDiagnostic.AUTHENTICATION_REQUIRED;
                 } else {
@@ -381,10 +416,20 @@ public class GXDLMSServerBase {
             error.setUInt8(e.getConfirmedServiceError().getValue());
             error.setUInt8(e.getServiceError().getValue());
             error.setUInt8(e.getServiceErrorValue());
+        } catch (GXDLMSException e) {
+            result = e.getResult();
+            diagnostic = e.getDiagnostic();
         }
         if (settings.getInterfaceType() == InterfaceType.HDLC) {
             replyData.set(GXCommon.LLC_REPLY_BYTES);
         }
+        // Generate challenge if High authentication is used.
+        if (settings.getAuthentication().getValue() > Authentication.LOW
+                .getValue()) {
+            settings.setStoCChallenge(
+                    GXSecure.generateChallenge(settings.getAuthentication()));
+        }
+
         // Generate AARE packet.
         GXAPDU.generateAARE(settings, replyData, result, diagnostic,
                 settings.getCipher(), error, null);
@@ -416,23 +461,50 @@ public class GXDLMSServerBase {
      * returned.
      * @return Returns returned UA packet.
      */
-    private void handleSnrmRequest() {
+    private void handleSnrmRequest(final GXByteBuffer data) {
+        GXDLMS.parseSnrmUaResponse(data, settings.getLimits());
         reset(true);
         replyData.setUInt8(0x81); // FromatID
         replyData.setUInt8(0x80); // GroupID
         replyData.setUInt8(0); // Length
+        if (getHdlc() != null) {
+            // If client wants send larger HDLC frames what meter accepts.
+            if (settings.getLimits().getMaxInfoTX() > getHdlc()
+                    .getMaximumInfoLengthReceive()) {
+                settings.getLimits()
+                        .setMaxInfoTX(getHdlc().getMaximumInfoLengthReceive());
+            }
+            // If client wants receive larger HDLC frames what meter accepts.
+            if (settings.getLimits().getMaxInfoRX() > getHdlc()
+                    .getMaximumInfoLengthTransmit()) {
+                settings.getLimits()
+                        .setMaxInfoRX(getHdlc().getMaximumInfoLengthTransmit());
+            }
+            // If client asks higher window size what meter accepts.
+            if (settings.getLimits().getMaxInfoRX() > getHdlc()
+                    .getMaximumInfoLengthTransmit()) {
+                settings.getLimits()
+                        .setWindowSizeTX(getHdlc().getWindowSizeReceive());
+            }
+            // If client asks higher window size what meter accepts.
+            if (settings.getLimits().getMaxInfoRX() > getHdlc()
+                    .getMaximumInfoLengthTransmit()) {
+                settings.getLimits()
+                        .setWindowSizeRX(getHdlc().getWindowSizeTransmit());
+            }
+        }
         replyData.setUInt8(HDLCInfo.MAX_INFO_TX);
-        replyData.setUInt8(GXCommon.getSize(getLimits().getMaxInfoTX()));
-        replyData.add(getLimits().getMaxInfoTX());
+        replyData.setUInt8(1);
+        replyData.setUInt8(getLimits().getMaxInfoTX());
         replyData.setUInt8(HDLCInfo.MAX_INFO_RX);
-        replyData.setUInt8(GXCommon.getSize(getLimits().getMaxInfoRX()));
-        replyData.add(getLimits().getMaxInfoRX());
+        replyData.setUInt8(1);
+        replyData.setUInt8(getLimits().getMaxInfoRX());
         replyData.setUInt8(HDLCInfo.WINDOW_SIZE_TX);
-        replyData.setUInt8(GXCommon.getSize(getLimits().getWindowSizeTX()));
-        replyData.add(getLimits().getWindowSizeTX());
+        replyData.setUInt8(4);
+        replyData.setUInt32(getLimits().getWindowSizeTX());
         replyData.setUInt8(HDLCInfo.WINDOW_SIZE_RX);
-        replyData.setUInt8(GXCommon.getSize(getLimits().getWindowSizeRX()));
-        replyData.add(getLimits().getWindowSizeRX());
+        replyData.setUInt8(4);
+        replyData.setUInt32(getLimits().getWindowSizeRX());
         int len = replyData.size() - 3;
         replyData.setUInt8(2, len); // Length
     }
@@ -447,20 +519,20 @@ public class GXDLMSServerBase {
         replyData.setUInt8(0); // Length
 
         replyData.setUInt8(HDLCInfo.MAX_INFO_TX);
-        replyData.setUInt8(GXCommon.getSize(getLimits().getMaxInfoTX()));
-        replyData.add(getLimits().getMaxInfoTX());
+        replyData.setUInt8(1);
+        replyData.setUInt8(getLimits().getMaxInfoTX());
 
         replyData.setUInt8(HDLCInfo.MAX_INFO_RX);
-        replyData.setUInt8(GXCommon.getSize(getLimits().getMaxInfoRX()));
-        replyData.add(getLimits().getMaxInfoRX());
+        replyData.setUInt8(1);
+        replyData.setUInt8(getLimits().getMaxInfoRX());
 
         replyData.setUInt8(HDLCInfo.WINDOW_SIZE_TX);
-        replyData.setUInt8(GXCommon.getSize(getLimits().getWindowSizeTX()));
-        replyData.add(getLimits().getWindowSizeTX());
+        replyData.setUInt8(4);
+        replyData.setUInt32(getLimits().getWindowSizeTX());
 
         replyData.setUInt8(HDLCInfo.WINDOW_SIZE_RX);
-        replyData.setUInt8(GXCommon.getSize(getLimits().getWindowSizeRX()));
-        replyData.add(getLimits().getWindowSizeRX());
+        replyData.setUInt8(4);
+        replyData.setUInt32(getLimits().getWindowSizeRX());
 
         int len = replyData.size() - 3;
         replyData.setUInt8(2, len); // Length.
@@ -558,6 +630,7 @@ public class GXDLMSServerBase {
             if ((info.getMoreData().getValue()
                     & RequestTypes.FRAME.getValue()) == RequestTypes.FRAME
                             .getValue()) {
+                dataReceived = Calendar.getInstance().getTimeInMillis();
                 return GXDLMS.getHdlcFrame(settings,
                         settings.getReceiverReady(), replyData);
             }
@@ -567,8 +640,38 @@ public class GXDLMSServerBase {
                     info.setCommand(transaction.getCommand());
                 }
             }
+            // Check inactivity time out.
+            if (settings.getHdlc() != null
+                    && settings.getHdlc().getInactivityTimeout() != 0) {
+                if (info.getCommand() != Command.SNRM) {
+                    int elapsed =
+                            (int) (Calendar.getInstance().getTimeInMillis()
+                                    - dataReceived) / 1000;
+                    // If inactivity time out is elapsed.
+                    if (elapsed >= settings.getHdlc().getInactivityTimeout()) {
+                        reset();
+                        dataReceived = 0;
+                        return null;
+                    }
+                }
+            } else if (settings.getWrapper() != null
+                    && settings.getWrapper().getInactivityTimeout() != 0) {
+                if (info.getCommand() != Command.AARQ) {
+                    int elapsed =
+                            (int) (Calendar.getInstance().getTimeInMillis()
+                                    - dataReceived) / 1000;
+                    // If inactivity time out is elapsed.
+                    if (elapsed >= settings.getWrapper()
+                            .getInactivityTimeout()) {
+                        reset();
+                        dataReceived = 0;
+                        return null;
+                    }
+                }
+            }
             byte[] reply = handleCommand(info.getCommand(), info.getData(),
                     connectionInfo);
+            dataReceived = Calendar.getInstance().getTimeInMillis();
             info.clear();
             return reply;
         } catch (Exception e) {
@@ -709,15 +812,17 @@ public class GXDLMSServerBase {
                     connectionInfo, replyData, null);
             break;
         case Command.SNRM:
-            handleSnrmRequest();
+            handleSnrmRequest(data);
             frame = (byte) Command.UA;
             break;
         case Command.AARQ:
             handleAarqRequest(data, connectionInfo);
-            if (owner instanceof GXDLMSServer) {
-                ((GXDLMSServer) owner).connected(connectionInfo);
-            } else {
-                ((GXDLMSServer2) owner).onConnected(connectionInfo);
+            if (settings.isConnected()) {
+                if (owner instanceof GXDLMSServer) {
+                    ((GXDLMSServer) owner).connected(connectionInfo);
+                } else {
+                    ((GXDLMSServer2) owner).onConnected(connectionInfo);
+                }
             }
             break;
         case Command.RELEASE_REQUEST:
@@ -900,5 +1005,20 @@ public class GXDLMSServerBase {
         if (owner instanceof GXDLMSServer2) {
             ((GXDLMSServer2) owner).onPostGet(args);
         }
+    }
+
+    /**
+     * @return HDLC settings.
+     */
+    public GXDLMSHdlcSetup getHdlc() {
+        return settings.getHdlc();
+    }
+
+    /**
+     * @param value
+     *            HDLC settings.
+     */
+    public void setHdlc(final GXDLMSHdlcSetup value) {
+        settings.setHdlc(value);
     }
 }

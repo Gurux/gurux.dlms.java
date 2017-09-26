@@ -625,7 +625,7 @@ final class TranslatorSimpleTags {
         list.put(Initiate.DLMS_VERSION_TOO_LOW, "DlmsVersionTooLow");
         list.put(Initiate.INCOMPATIBLE_CONFORMANCE, "IncompatibleConformance");
         list.put(Initiate.OTHER, "Other");
-        list.put(Initiate.PDU_SIZE_TOOSHORT, "PduSizeTooShort");
+        list.put(Initiate.PDU_SIZE_TOO_SHORT, "PduSizeTooShort");
         list.put(Initiate.REFUSED_BY_THE_VDE_HANDLER, "RefusedByTheVDEHandler");
         return list;
     }
