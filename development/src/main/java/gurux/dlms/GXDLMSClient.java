@@ -1022,6 +1022,27 @@ public class GXDLMSClient {
      */
     public final void updateValues(
             final List<Entry<GXDLMSObject, Integer>> list,
+            final Object[] values) {
+        int pos = 0;
+        for (Entry<GXDLMSObject, Integer> it : list) {
+            ValueEventArgs e = new ValueEventArgs(settings, it.getKey(),
+                    it.getValue(), 0, null);
+            e.setValue(values[pos]);
+            it.getKey().setValue(settings, e);
+            ++pos;
+        }
+    }
+
+    /**
+     * Update list of values.
+     * 
+     * @param list
+     *            read objects.
+     * @param values
+     *            Received values.
+     */
+    public final void updateValues(
+            final List<Entry<GXDLMSObject, Integer>> list,
             final List<Object> values) {
         int pos = 0;
         for (Entry<GXDLMSObject, Integer> it : list) {

@@ -437,6 +437,12 @@ abstract class GXDLMS {
         case Command.DATA_NOTIFICATION:
             cmd = Command.GENERAL_GLO_CIPHERING;
             break;
+        case Command.RELEASE_REQUEST:
+            cmd = Command.RELEASE_REQUEST;
+            break;
+        case Command.RELEASE_RESPONSE:
+            cmd = Command.RELEASE_RESPONSE;
+            break;
         default:
             throw new GXDLMSException("Invalid GLO command.");
         }
