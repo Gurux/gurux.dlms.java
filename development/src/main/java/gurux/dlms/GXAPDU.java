@@ -816,7 +816,7 @@ final class GXAPDU {
             final GXDLMSTranslatorStructure xml) {
         // Get AARE tag and length
         validateAare(settings, buff);
-        int len = buff.getUInt8();
+        int len = GXCommon.getObjectCount(buff);
         int size = buff.size() - buff.position();
         if (len > size) {
             if (xml == null) {
