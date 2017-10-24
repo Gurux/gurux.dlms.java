@@ -846,15 +846,22 @@ abstract class GXDLMS {
      */
     private static void cipher0(final GXDLMSLNParameters p,
             final GXByteBuffer reply) {
-        byte[] tmp;
-        tmp = p.getSettings().getCipher().encrypt(
-                (byte) getGloMessage(p.getCommand()),
+        byte cmd;
+        if (!p.getSettings().getNegotiatedConformance()
+                .contains(Conformance.GENERAL_PROTECTION)) {
+            cmd = (byte) getGloMessage(p.getCommand());
+        } else {
+            cmd = (byte) Command.GENERAL_GLO_CIPHERING;
+        }
+        byte[] tmp = p.getSettings().getCipher().encrypt(cmd,
                 p.getSettings().getCipher().getSystemTitle(), reply.array());
         reply.size(0);
         if (p.getSettings().getInterfaceType() == InterfaceType.HDLC) {
             addLLCBytes(p.getSettings(), reply);
         }
-        if (p.getCommand() == Command.DATA_NOTIFICATION) {
+        if (p.getCommand() == Command.DATA_NOTIFICATION
+                || p.getSettings().getNegotiatedConformance()
+                        .contains(Conformance.GENERAL_PROTECTION)) {
             // Add command.
             reply.setUInt8(tmp[0]);
             // Add system title.
@@ -1250,7 +1257,8 @@ abstract class GXDLMS {
         } else if (data.size() - data.position() <= frameSize) {
             len = data.size() - data.position();
             // Is last packet.
-            bb.setUInt8(0xA0 | ((len >> 8) & 0x7));
+            bb.setUInt8(0xA0 | (((7 + primaryAddress.length
+                    + secondaryAddress.length + len) >> 8) & 0x7));
         } else {
             len = frameSize;
             // More data to left.
@@ -1780,6 +1788,7 @@ abstract class GXDLMS {
                 if (cnt != 1) {
                     getDataFromBlock(reply.getData(), 0);
                     reply.setValue(values.toArray());
+                    reply.setReadPosition(reply.getData().position());
                 }
                 return false;
             }
@@ -2408,7 +2417,12 @@ abstract class GXDLMS {
                     }
                     reply.setCommand(Command.NONE);
                 }
-                getDataFromBlock(data, index);
+                if (blockLength == 0) {
+                    // If meter sends empty data block.
+                    data.size(index);
+                } else {
+                    getDataFromBlock(data, index);
+                }
                 // If last packet and data is not try to peek.
                 if (reply.getMoreData() == RequestTypes.NONE) {
                     if (!reply.getPeek()) {
@@ -3103,7 +3117,12 @@ abstract class GXDLMS {
     static void parseSnrmUaResponse(final GXByteBuffer data,
             final GXDLMSLimits limits) {
         // If default settings are used.
-        if (data.available() != 0) {
+        if (data.available() == 0) {
+            limits.setMaxInfoTX(GXDLMSLimits.DEFAULT_MAX_INFO_TX);
+            limits.setMaxInfoRX(GXDLMSLimits.DEFAULT_MAX_INFO_RX);
+            limits.setWindowSizeTX(GXDLMSLimits.DEFAULT_WINDOWS_SIZE_TX);
+            limits.setWindowSizeRX(GXDLMSLimits.DEFAULT_WINDOWS_SIZE_RX);
+        } else {
             data.getUInt8(); // Skip FromatID
             data.getUInt8(); // Skip Group ID.
             data.getUInt8(); // Skip Group len
@@ -3143,6 +3162,16 @@ abstract class GXDLMS {
                     throw new GXDLMSException("Invalid UA response.");
                 }
             }
+        }
+    }
+
+    static void appendHdlcParameter(final GXByteBuffer data, final int value) {
+        if (value < 0x100) {
+            data.setUInt8(1);
+            data.setUInt8(value);
+        } else {
+            data.setUInt8(2);
+            data.setUInt16(value);
         }
     }
 }

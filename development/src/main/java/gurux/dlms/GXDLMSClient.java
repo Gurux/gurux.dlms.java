@@ -475,13 +475,11 @@ public class GXDLMSClient {
         // If custom HDLC parameters are used.
         if (GXDLMSLimits.DEFAULT_MAX_INFO_TX != getLimits().getMaxInfoTX()) {
             data.setUInt8(HDLCInfo.MAX_INFO_TX);
-            data.setUInt8(1);
-            data.setUInt8(getLimits().getMaxInfoTX());
+            GXDLMS.appendHdlcParameter(data, getLimits().getMaxInfoTX());
         }
         if (GXDLMSLimits.DEFAULT_MAX_INFO_RX != getLimits().getMaxInfoRX()) {
             data.setUInt8(HDLCInfo.MAX_INFO_RX);
-            data.setUInt8(1);
-            data.setUInt8(getLimits().getMaxInfoRX());
+            GXDLMS.appendHdlcParameter(data, getLimits().getMaxInfoRX());
         }
         if (GXDLMSLimits.DEFAULT_WINDOWS_SIZE_TX != getLimits()
                 .getWindowSizeTX()) {
@@ -489,7 +487,7 @@ public class GXDLMSClient {
             data.setUInt8(4);
             data.setUInt32(getLimits().getWindowSizeTX());
         }
-        if (GXDLMSLimits.DEFAULT_WINDOWS_SIZE_TX != getLimits()
+        if (GXDLMSLimits.DEFAULT_WINDOWS_SIZE_RX != getLimits()
                 .getWindowSizeRX()) {
             data.setUInt8(HDLCInfo.WINDOW_SIZE_RX);
             data.setUInt8(4);
@@ -1325,14 +1323,8 @@ public class GXDLMSClient {
             for (GXWriteItem it : list) {
                 // CI.
                 bb.setUInt16(it.getTarget().getObjectType().getValue());
-                List<String> items =
-                        GXCommon.split(it.getTarget().getLogicalName(), '.');
-                if (items.size() != 6) {
-                    throw new IllegalArgumentException("Invalid Logical Name.");
-                }
-                for (String it2 : items) {
-                    bb.setUInt8(Integer.valueOf(it2).byteValue());
-                }
+                bb.set(GXCommon
+                        .logicalNameToBytes(it.getTarget().getLogicalName()));
                 // Attribute ID.
                 bb.setUInt8(it.getIndex());
                 // Attribute selector is not used.
@@ -1348,6 +1340,7 @@ public class GXDLMSClient {
             }
         }
         // Write values.
+        GXCommon.setObjectCount(list.size(), bb);
         for (GXWriteItem it : list) {
             ValueEventArgs e = new ValueEventArgs(settings, it.getTarget(),
                     it.getIndex(), it.getSelector(), it.getParameters());
@@ -1356,11 +1349,14 @@ public class GXDLMSClient {
                 data.set((byte[]) value);
             } else {
                 DataType type = it.getDataType();
-                if (type == DataType.NONE && value != null) {
-                    type = GXDLMSConverter.getDLMSDataType(value);
+                if ((type == null || type == DataType.NONE) && value != null) {
+                    type = it.getTarget().getDataType(it.getIndex());
                     if (type == DataType.NONE) {
-                        throw new GXDLMSException("Invalid parameter. "
-                                + " In java value type must give.");
+                        type = GXDLMSConverter.getDLMSDataType(value);
+                        if (type == DataType.NONE) {
+                            throw new GXDLMSException("Invalid parameter. "
+                                    + " In java value type must give.");
+                        }
                     }
                 }
                 GXCommon.setData(data, type, value);
@@ -1368,7 +1364,7 @@ public class GXDLMSClient {
         }
         if (this.getUseLogicalNameReferencing()) {
             GXDLMSLNParameters p =
-                    new GXDLMSLNParameters(settings, Command.SET_REQUEST, 0,
+                    new GXDLMSLNParameters(settings, 0, Command.SET_REQUEST,
                             SetRequestType.WITH_LIST, bb, data, 0xff);
             reply = GXDLMS.getLnMessages(p);
         } else {

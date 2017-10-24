@@ -40,6 +40,27 @@ import gurux.dlms.objects.GXDLMSObject;
 public class GXWriteItem {
 
     /**
+     * Constructor.
+     */
+    public GXWriteItem() {
+        dataType = DataType.NONE;
+    }
+
+    /**
+     * Constructor.
+     * 
+     * @param object
+     *            Object to write.
+     * @param attributeIndex
+     *            Attribute index.
+     */
+    public GXWriteItem(final GXDLMSObject object, final int attributeIndex) {
+        dataType = DataType.NONE;
+        target = object;
+        index = attributeIndex;
+    }
+
+    /**
      * Written object.
      */
     private GXDLMSObject target;
@@ -58,6 +79,10 @@ public class GXWriteItem {
      * Parameter selector.
      */
     private int selector;
+    /**
+     * Optional parameters.
+     */
+    private Object parameters;
 
     /**
      * @return the selector
@@ -73,11 +98,6 @@ public class GXWriteItem {
     public final void setSelector(final int value) {
         selector = value;
     }
-
-    /**
-     * Optional parameters.
-     */
-    private Object parameters;
 
     /**
      * @return the data type
