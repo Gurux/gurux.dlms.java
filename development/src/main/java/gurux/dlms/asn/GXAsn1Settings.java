@@ -40,6 +40,11 @@ import gurux.dlms.enums.BerType;
 
 final class GXAsn1Settings {
     private int count;
+    /**
+     * Are comments used.
+     */
+    private boolean comments;
+
     private final StringBuffer sb = new StringBuffer();
     private HashMap<Short, String> tags = new HashMap<Short, String>();
     private HashMap<String, Short> tagbyName = new HashMap<String, Short>();
@@ -67,6 +72,7 @@ final class GXAsn1Settings {
         addTag(BerType.UTC_TIME, "UtcTime");
         addTag(BerType.GENERALIZED_TIME, "GeneralizedTime");
         addTag(BerType.OCTET_STRING, "OctetString");
+        addTag(BerType.BOOLEAN, "Bool");
         addTag(-1, "Byte");
         addTag(-2, "Short");
         addTag(-4, "Int");
@@ -79,6 +85,42 @@ final class GXAsn1Settings {
 
     public short getTag(final String value) {
         return tagbyName.get(value);
+    }
+
+    /**
+     * @return XML length.
+     */
+    public int getXmlLength() {
+        return sb.length();
+    }
+
+    /**
+     * Add comment.
+     * 
+     * @param offset
+     *            Offset.
+     * @param value
+     *            Comment value.
+     */
+    public void appendComment(final int offset, final String value) {
+        if (comments) {
+            boolean empty = sb.length() == 0;
+            StringBuffer tmp;
+            if (empty) {
+                tmp = sb;
+            } else {
+                tmp = new StringBuffer();
+            }
+            for (int pos = 0; pos < count - 1; ++pos) {
+                tmp.append(' ');
+            }
+            tmp.append("<!--");
+            tmp.append(value);
+            tmp.append("-->\r\n");
+            if (!empty) {
+                sb.insert(offset, tmp);
+            }
+        }
     }
 
     /**
@@ -110,5 +152,20 @@ final class GXAsn1Settings {
     @Override
     public String toString() {
         return sb.toString();
+    }
+
+    /**
+     * @return Are comments used.
+     */
+    public boolean isComments() {
+        return comments;
+    }
+
+    /**
+     * @param comments
+     *            Are comments used.
+     */
+    public void setComments(final boolean value) {
+        comments = value;
     }
 }

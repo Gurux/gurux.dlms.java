@@ -210,6 +210,10 @@ public final class GXAsn1Converter {
         if (len > bb.size() - bb.position()) {
             throw new IllegalArgumentException("Not enought memory.");
         }
+        int connectPos = 0;
+        if (s != null) {
+            connectPos = s.getXmlLength();
+        }
         int start = bb.position();
         String tagString = null;
         if (s != null) {
@@ -250,10 +254,14 @@ public final class GXAsn1Converter {
             }
             tmp = new GXAsn1Sequence();
             objects.add(tmp);
+            int cnt = 0;
             while (bb.position() < start + len) {
+                ++cnt;
                 getValue(bb, tmp, s);
             }
             if (s != null) {
+                // Append comment.
+                s.appendComment(connectPos, String.valueOf(cnt) + " elements.");
                 s.decrease();
             }
             break;
@@ -277,9 +285,14 @@ public final class GXAsn1Converter {
             }
             break;
         case BerType.OBJECT_IDENTIFIER:
-            objects.add(new GXAsn1ObjectIdentifier(bb, len));
+            GXAsn1ObjectIdentifier oi = new GXAsn1ObjectIdentifier(bb, len);
+            objects.add(oi);
             if (s != null) {
-                s.append(String.valueOf(objects.get(objects.size() - 1)));
+                String str = oi.getDescription();
+                if (str != null) {
+                    s.appendComment(connectPos, str);
+                }
+                s.append(oi.toString());
             }
 
             break;
@@ -325,11 +338,14 @@ public final class GXAsn1Converter {
             objects.add(null);
             break;
         case BerType.BIT_STRING:
-            objects.add(new GXAsn1BitString(bb.subArray(bb.position(), len)));
+            GXAsn1BitString tmp3 =
+                    new GXAsn1BitString(bb.subArray(bb.position(), len));
+            objects.add(tmp3);
             bb.position(bb.position() + len);
             if (s != null) {
-                GXAsn1BitString tmp3 =
-                        (GXAsn1BitString) objects.get(objects.size() - 1);
+                // Append comment.
+                s.appendComment(connectPos,
+                        String.valueOf(tmp3.length()) + " bit.");
                 s.append(tmp3.asString());
             }
             break;
@@ -351,7 +367,6 @@ public final class GXAsn1Converter {
             }
             break;
         case BerType.CONTEXT:
-        case BerType.OCTET_STRING:
             tmp2 = new byte[len];
             bb.get(tmp2);
             objects.add(tmp2);
@@ -359,11 +374,37 @@ public final class GXAsn1Converter {
                 s.append(GXCommon.toHex(tmp2));
             }
             break;
+        case BerType.OCTET_STRING:
+            int t = bb.getUInt8(bb.position());
+            switch (t) {
+            case BerType.CONSTRUCTED | BerType.SEQUENCE:
+            case BerType.BIT_STRING:
+                if (s != null) {
+                    s.increase();
+                }
+                getValue(bb, objects, s);
+                if (s != null) {
+                    s.decrease();
+                }
+                break;
+            default:
+                tmp2 = new byte[len];
+                bb.get(tmp2);
+                objects.add(tmp2);
+                if (s != null) {
+                    s.append(GXCommon.toHex(tmp2));
+                }
+            }
+            break;
         case BerType.BOOLEAN:
-            objects.add(bb.getUInt8() != 0);
+            boolean b = bb.getUInt8() != 0;
+            objects.add(b);
+            if (s != null) {
+                s.append(String.valueOf(b));
+            }
             break;
         default:
-            throw new RuntimeException("Invalid type: " + type);
+            throw new IllegalArgumentException("Invalid type: " + type);
         }
         if (s != null) {
             s.append("</" + tagString + ">\r\n");
@@ -636,7 +677,20 @@ public final class GXAsn1Converter {
      * @return Converted XML.
      */
     public static String pduToXml(final byte[] value) {
-        return pduToXml(new GXByteBuffer(value));
+        return pduToXml(new GXByteBuffer(value), false);
+    }
+
+    /**
+     * Convert ASN1 PDU bytes to XML.
+     * 
+     * @param value
+     *            Bytes to convert.
+     * @param comments
+     *            Are comments added to generated XML.
+     * @return Converted XML.
+     */
+    public static String pduToXml(final byte[] value, final boolean comments) {
+        return pduToXml(new GXByteBuffer(value), comments);
     }
 
     /**
@@ -647,7 +701,22 @@ public final class GXAsn1Converter {
      * @return Converted XML.
      */
     public static String pduToXml(final GXByteBuffer value) {
+        return pduToXml(value, false);
+    }
+
+    /**
+     * Convert ASN.1 PDU bytes to XML.
+     * 
+     * @param value
+     *            Bytes to convert.
+     * @param comments
+     *            Are comments added to generated XML.
+     * @return Converted XML.
+     */
+    public static String pduToXml(final GXByteBuffer value,
+            final boolean comments) {
         GXAsn1Settings s = new GXAsn1Settings();
+        s.setComments(comments);
         List<Object> objects = new ArrayList<Object>();
         while (value.position() != value.size()) {
             getValue(value, objects, s);

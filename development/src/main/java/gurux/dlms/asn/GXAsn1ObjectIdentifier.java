@@ -35,6 +35,11 @@
 package gurux.dlms.asn;
 
 import gurux.dlms.GXByteBuffer;
+import gurux.dlms.asn.enums.HashAlgorithm;
+import gurux.dlms.asn.enums.PkcsObjectIdentifier;
+import gurux.dlms.asn.enums.X509Certificate;
+import gurux.dlms.asn.enums.X509Name;
+import gurux.dlms.asn.enums.X9ObjectIdentifier;
 
 public class GXAsn1ObjectIdentifier {
 
@@ -163,5 +168,29 @@ public class GXAsn1ObjectIdentifier {
      */
     public final byte[] getEncoded() {
         return oidStringtoBytes(objectIdentifier);
+    }
+
+    public final String getDescription() {
+        Object tmp = X509Name.forValue(objectIdentifier);
+        if (tmp != null) {
+            return tmp.toString();
+        }
+        tmp = HashAlgorithm.forValue(objectIdentifier);
+        if (tmp != null) {
+            return tmp.toString();
+        }
+        tmp = X9ObjectIdentifier.forValue(objectIdentifier);
+        if (tmp != null) {
+            return tmp.toString();
+        }
+        tmp = PkcsObjectIdentifier.forValue(objectIdentifier);
+        if (tmp != null) {
+            return tmp.toString();
+        }
+        tmp = X509Certificate.forValue(objectIdentifier);
+        if (tmp != null) {
+            return tmp.toString();
+        }
+        return null;
     }
 }

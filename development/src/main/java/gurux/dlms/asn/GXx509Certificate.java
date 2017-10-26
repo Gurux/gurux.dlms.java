@@ -23,6 +23,7 @@ import java.util.Set;
 import gurux.dlms.GXByteBuffer;
 import gurux.dlms.asn.enums.HashAlgorithm;
 import gurux.dlms.asn.enums.KeyUsage;
+import gurux.dlms.asn.enums.X509Certificate;
 import gurux.dlms.enums.BerType;
 import gurux.dlms.internal.GXCommon;
 import gurux.dlms.objects.GXDLMSSecuritySetup;
@@ -31,34 +32,6 @@ import gurux.dlms.objects.GXDLMSSecuritySetup;
  * x509 Certificate.
  */
 public class GXx509Certificate {
-
-    // private static final String OLD_AUTHORITY_KEY_IDENTIFIER = "2.5.29.1";
-    // private static final String OLD_PRIMARY_KEY_ATTRIBUTES = "2.5.29.2";
-    // private static final String CERTIFICATE_POLICIES = "2.5.29.3";
-    // private static final String PRIMARY_KEY_USAGE_RESTRICTION = "2.5.29.4";
-    // private static final String SUBJECT_DIRECTORY_ATTRIBUTES = "2.5.29.9";
-    private static final String SUBJECT_KEY_IDENTIFIER = "2.5.29.14";
-    private static final String KEY_USAGE = "2.5.29.15";
-    // private static final String PRIVATE_KEY_USAGE_PERIOD = "2.5.29.16";
-    // private static final String SUBJECT_ALTERNATIVE_NAME = "2.5.29.17";
-    // private static final String ISSUER_ALTERNATIVE_NAME = "2.5.29.18";
-    private static final String BASIC_CONSTRAINTS = "2.5.29.19";
-    // private static final String CRL_NUMBER = "2.5.29.20";
-    // private static final String REASON_CODE = "2.5.29.21";
-    // private static final String HOLD_INSTRUCTION_CODE = "2.5.29.23";
-    // private static final String INVALIDITY_DATE = "2.5.29.24";
-    // private static final String DELTA_CRL_INDICATOR = "2.5.29.27";
-    // private static final String ISSUING_DISTRIBUTION_POINT = "2.5.29.28";
-    // private static final String CERTIFICATE_ISSUER = "2.5.29.29";
-    // private static final String NAME_CONSTRAINTS = "2.5.29.30";
-    // private static final String CRL_DISTRIBUTION_POINTS = "2.5.29.31";
-    // private static final String CERTIFICATE_POLICIES_2 = "2.5.29.32";
-    // private static final String POLICY_MAPPINGS = "2.5.29.33";
-    private static final String AUTHORITY_KEY_IDENTIFIER = "2.5.29.35";
-    // private static final String POLICY_CONSTRAINTS = "2.5.29.36";
-    // private static final String EXTENDED_KEY_USAGE = "2.5.29.37";
-    // private static final String FRESHEST_CRL = "2.5.29.46";
-
     /**
      * This extension identifies the public key being certified.
      */
@@ -183,7 +156,10 @@ public class GXx509Certificate {
         String tmp = ((GXAsn1Sequence) reqInfo.get(2)).get(0).toString();
         // Signature Algorithm
         algorithm = HashAlgorithm.forValue(tmp);
-        parameters = ((GXAsn1Sequence) reqInfo.get(2)).get(1);
+        // Optional.
+        if (((GXAsn1Sequence) reqInfo.get(2)).size() > 1) {
+            parameters = ((GXAsn1Sequence) reqInfo.get(2)).get(1);
+        }
         // Issuer
         issuer = GXAsn1Converter.getSubject((GXAsn1Sequence) reqInfo.get(3));
         // Validity
@@ -198,20 +174,31 @@ public class GXx509Certificate {
                     .get(0)) {
                 GXAsn1Sequence s = (GXAsn1Sequence) ((GXAsn1Sequence) it);
                 GXAsn1ObjectIdentifier id = (GXAsn1ObjectIdentifier) s.get(0);
-                Object value = GXAsn1Converter.fromByteArray((byte[]) s.get(1));
-                if (SUBJECT_KEY_IDENTIFIER.equals(id.toString())) {
+                Object value = s.get(1);
+                X509Certificate t = X509Certificate.forValue(id.toString());
+                switch (t) {
+                case SUBJECT_KEY_IDENTIFIER:
                     subjectKeyIdentifier = (byte[]) value;
-                } else if (AUTHORITY_KEY_IDENTIFIER.equals(id.toString())) {
+                    break;
+                case AUTHORITY_KEY_IDENTIFIER:
                     authorityKeyIdentifier =
                             (byte[]) ((GXAsn1Sequence) value).get(0);
-                } else if (BASIC_CONSTRAINTS.equals(id.toString())) {
-                    if (((GXAsn1Sequence) value).size() != 0) {
-                        basicConstraints =
-                                (boolean) ((GXAsn1Sequence) value).get(0);
+                    break;
+                case KEY_USAGE:
+                    if (value instanceof GXAsn1BitString) {
+                        // critical is optional. BOOLEAN DEFAULT FALSE,
+                        keyUsage = KeyUsage.forValue(
+                                ((GXAsn1BitString) value).getValue()[0] & 0xFF);
+                    } else if (value instanceof Boolean) {
+                        value = s.get(2);
+                        keyUsage = KeyUsage.forValue(
+                                ((GXAsn1BitString) value).getValue()[0] & 0xFF);
+                    } else {
+                        throw new IllegalStateException("Invalid key usage.");
                     }
-                } else if (KEY_USAGE.equals(id.toString())) {
-                    keyUsage = KeyUsage.forValue(
-                            ((GXAsn1BitString) value).getValue()[0] & 0xFF);
+                    break;
+                default:
+                    System.out.println("Unknown extensions: " + t.toString());
                 }
             }
         }
@@ -233,7 +220,11 @@ public class GXx509Certificate {
         }
         signatureAlgorithm = HashAlgorithm
                 .forValue(((GXAsn1Sequence) seq.get(1)).get(0).toString());
-        signatureParameters = ((GXAsn1Sequence) seq.get(1)).get(1);
+        // Optional.
+        if (((GXAsn1Sequence) seq.get(1)).size() > 1) {
+            signatureParameters = ((GXAsn1Sequence) seq.get(1)).get(1);
+        }
+
         // signature
         signature = ((GXAsn1BitString) seq.get(2)).getValue();
     }
@@ -408,7 +399,8 @@ public class GXx509Certificate {
         GXAsn1Sequence s = new GXAsn1Sequence();
         if (subjectKeyIdentifier != null) {
             GXAsn1Sequence s1 = new GXAsn1Sequence();
-            s1.add(new GXAsn1ObjectIdentifier(SUBJECT_KEY_IDENTIFIER));
+            s1.add(new GXAsn1ObjectIdentifier(
+                    X509Certificate.SUBJECT_KEY_IDENTIFIER.getValue()));
             GXByteBuffer bb = new GXByteBuffer();
             bb.setUInt8(BerType.OCTET_STRING);
             GXCommon.setObjectCount(subjectKeyIdentifier.length, bb);
@@ -418,7 +410,8 @@ public class GXx509Certificate {
         }
         if (authorityKeyIdentifier != null) {
             GXAsn1Sequence s1 = new GXAsn1Sequence();
-            s1.add(new GXAsn1ObjectIdentifier(AUTHORITY_KEY_IDENTIFIER));
+            s1.add(new GXAsn1ObjectIdentifier(
+                    X509Certificate.AUTHORITY_KEY_IDENTIFIER.getValue()));
             GXAsn1Sequence seq = new GXAsn1Sequence();
             seq.add(authorityKeyIdentifier);
             s1.add(GXAsn1Converter.toByteArray(seq));
@@ -426,7 +419,8 @@ public class GXx509Certificate {
         }
         if (basicConstraints) {
             GXAsn1Sequence s1 = new GXAsn1Sequence();
-            s1.add(new GXAsn1ObjectIdentifier(BASIC_CONSTRAINTS));
+            s1.add(new GXAsn1ObjectIdentifier(
+                    X509Certificate.BASIC_CONSTRAINTS.getValue()));
             GXAsn1Sequence seq = new GXAsn1Sequence();
             seq.add(basicConstraints);
             s1.add(GXAsn1Converter.toByteArray(seq));
@@ -434,7 +428,8 @@ public class GXx509Certificate {
         }
         if (keyUsage != null && !keyUsage.isEmpty()) {
             GXAsn1Sequence s1 = new GXAsn1Sequence();
-            s1.add(new GXAsn1ObjectIdentifier(KEY_USAGE));
+            s1.add(new GXAsn1ObjectIdentifier(
+                    X509Certificate.KEY_USAGE.getValue()));
             int value = 0;
             int min = 128;
             for (KeyUsage it : keyUsage) {

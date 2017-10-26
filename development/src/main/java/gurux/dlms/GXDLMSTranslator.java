@@ -844,6 +844,7 @@ public class GXDLMSTranslator {
             case Command.SET_RESPONSE:
             case Command.METHOD_RESPONSE:
             case Command.ACCESS_RESPONSE:
+            case Command.GENERAL_BLOCK_TRANSFER:
                 data.setXml(xml);
                 data.setData(value);
                 value.position(0);

@@ -494,10 +494,10 @@ public class GXDLMSServerBase {
             }
         }
         replyData.setUInt8(HDLCInfo.MAX_INFO_TX);
-        GXDLMS.appendHdlcParameter(data, getLimits().getMaxInfoTX());
+        GXDLMS.appendHdlcParameter(replyData, getLimits().getMaxInfoTX());
 
         replyData.setUInt8(HDLCInfo.MAX_INFO_RX);
-        GXDLMS.appendHdlcParameter(data, getLimits().getMaxInfoRX());
+        GXDLMS.appendHdlcParameter(replyData, getLimits().getMaxInfoRX());
 
         replyData.setUInt8(HDLCInfo.WINDOW_SIZE_TX);
         replyData.setUInt8(4);

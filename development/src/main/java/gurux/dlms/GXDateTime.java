@@ -775,6 +775,11 @@ public class GXDateTime {
         }
         if (dst) {
             TimeZone tz = Calendar.getInstance().getTimeZone();
+            // If meter is in same time zone than meter reading application.
+            if (tz.observesDaylightTime()
+                    && tz.getRawOffset() / 60000 == deviation) {
+                return tz;
+            }
             String[] ids = TimeZone.getAvailableIDs(deviation * 60000);
             tz = null;
             for (int pos = 0; pos != ids.length; ++pos) {

@@ -143,6 +143,16 @@ public class GXAsn1BitString {
         return padBits;
     }
 
+    /**
+     * @return Number of extra bits at the end of the string.
+     */
+    public final int length() {
+        if (value == null) {
+            return 0;
+        }
+        return (8 * value.length) - padBits;
+    }
+
     @Override
     public final String toString() {
         if (value == null) {
