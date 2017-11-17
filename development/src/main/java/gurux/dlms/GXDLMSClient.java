@@ -1345,22 +1345,18 @@ public class GXDLMSClient {
             ValueEventArgs e = new ValueEventArgs(settings, it.getTarget(),
                     it.getIndex(), it.getSelector(), it.getParameters());
             value = it.getTarget().getValue(settings, e);
-            if ((value instanceof byte[])) {
-                data.set((byte[]) value);
-            } else {
-                DataType type = it.getDataType();
-                if ((type == null || type == DataType.NONE) && value != null) {
-                    type = it.getTarget().getDataType(it.getIndex());
+            DataType type = it.getDataType();
+            if ((type == null || type == DataType.NONE) && value != null) {
+                type = it.getTarget().getDataType(it.getIndex());
+                if (type == DataType.NONE) {
+                    type = GXDLMSConverter.getDLMSDataType(value);
                     if (type == DataType.NONE) {
-                        type = GXDLMSConverter.getDLMSDataType(value);
-                        if (type == DataType.NONE) {
-                            throw new GXDLMSException("Invalid parameter. "
-                                    + " In java value type must give.");
-                        }
+                        throw new GXDLMSException("Invalid parameter. "
+                                + " In java value type must give.");
                     }
                 }
-                GXCommon.setData(data, type, value);
             }
+            GXCommon.setData(data, type, value);
         }
         if (this.getUseLogicalNameReferencing()) {
             GXDLMSLNParameters p =

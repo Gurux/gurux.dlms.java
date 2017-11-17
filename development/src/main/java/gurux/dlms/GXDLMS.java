@@ -888,7 +888,8 @@ abstract class GXDLMS {
         byte frame = 0;
         if (p.getCommand() == Command.AARQ) {
             frame = 0x10;
-        } else if (p.getCommand() == Command.EVENT_NOTIFICATION) {
+        } else if (p.getCommand() == Command.DATA_NOTIFICATION
+                || p.getCommand() == Command.EVENT_NOTIFICATION) {
             frame = 0x13;
         }
         do {
@@ -1978,8 +1979,8 @@ abstract class GXDLMS {
                         data.getXml().appendLine(
                                 TranslatorTags.DATA_ACCESS_ERROR, null,
                                 GXDLMSTranslator.errorCodeToString(
-                                        data.getXml().getOutputType(), ErrorCode
-                                                .forValue(data.getError())));
+                                        data.getXml().getOutputType(),
+                                        ErrorCode.forValue(data.getError())));
 
                     } else {
                         if (data.getError() != 0) {
@@ -2238,6 +2239,28 @@ abstract class GXDLMS {
         } else if (type == SetResponseType.DATA_BLOCK
                 || type == SetResponseType.LAST_DATA_BLOCK) {
             data.getData().getUInt32();
+        } else if (type == SetResponseType.WITH_LIST) {
+            int cnt = GXCommon.getObjectCount(data.getData());
+            if (data.getXml() != null) {
+                data.getXml().appendStartTag(TranslatorTags.RESULT, "Qty",
+                        String.valueOf(cnt));
+                for (int pos = 0; pos != cnt; ++pos) {
+                    int err = data.getData().getUInt8();
+                    data.getXml().appendLine(TranslatorTags.DATA_ACCESS_RESULT,
+                            "Value",
+                            GXDLMSTranslator.errorCodeToString(
+                                    data.getXml().getOutputType(),
+                                    ErrorCode.forValue(err)));
+                }
+                data.getXml().appendEndTag(TranslatorTags.RESULT);
+            } else {
+                for (int pos = 0; pos != cnt; ++pos) {
+                    short err = data.getData().getUInt8();
+                    if (data.getError() == 0 && err != 0) {
+                        data.setError(err);
+                    }
+                }
+            }
         } else {
             throw new IllegalArgumentException("Invalid data type.");
         }
@@ -2267,12 +2290,10 @@ abstract class GXDLMS {
             }
             if (data.getXml() != null) {
                 if (ret == 0) {
-                    data.getXml()
-                            .appendLine("<"
-                                    + GXDLMSTranslator.errorCodeToString(
-                                            data.getXml().getOutputType(),
-                                            ErrorCode.forValue(ret))
-                                    + " />");
+                    data.getXml().appendLine("<" + GXDLMSTranslator
+                            .errorCodeToString(data.getXml().getOutputType(),
+                                    ErrorCode.forValue(ret))
+                            + " />");
                 } else {
                     data.getXml().appendLine(TranslatorTags.DATA_ACCESS_ERROR,
                             null,
@@ -2394,15 +2415,17 @@ abstract class GXDLMS {
                         & RequestTypes.FRAME.getValue()) == 0) {
                     // Check Block length.
                     if (blockLength > data.size() - data.position()) {
-                        throw new IllegalArgumentException("blockLength");
+                        reply.getXml().appendComment("Block is not complete."
+                                + String.valueOf(data.size() - data.position())
+                                + "/" + String.valueOf(blockLength) + ".");
                     }
                 }
                 // Result
                 reply.getXml().appendStartTag(TranslatorTags.RESULT);
                 reply.getXml().appendLine(TranslatorTags.RAW_DATA, "Value",
                         GXCommon.toHex(reply.getData().getData(), false,
-                                data.position(), reply.getData().size()
-                                        - data.position()));
+                                data.position(),
+                                reply.getData().size() - data.position()));
                 reply.getXml().appendEndTag(TranslatorTags.RESULT);
             } else if (data.position() != data.size()) {
                 // Get data size.

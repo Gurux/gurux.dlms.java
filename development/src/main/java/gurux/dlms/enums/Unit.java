@@ -77,7 +77,7 @@ public enum Unit {
     /**
      * Phase angle degree.
      */
-    PHASE_ANGLEGEGREE(8),
+    PHASE_ANGLE_DEGREE(8),
     /*
      * Temperature T degree centigrade, rad*180/p.
      */

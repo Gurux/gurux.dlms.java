@@ -502,6 +502,32 @@ public class GXDLMSTranslator {
         return messageToXml(new GXByteBuffer(value));
     }
 
+    private void checkFrame(final short frame,
+            final GXDLMSTranslatorStructure xml) {
+        if (frame == 0x93) {
+            xml.appendComment("SNRM frame.");
+        } else if (frame == 0x73) {
+            xml.appendComment("UA frame.");
+        } else if ((frame
+                & HdlcFrameType.S_FRAME.getValue()) == HdlcFrameType.S_FRAME
+                        .getValue()) {
+            // If S -frame.
+            xml.appendComment("S frame.");
+        } else if ((frame & 1) == HdlcFrameType.U_FRAME.getValue()) {
+            // Handle U-frame.
+            xml.appendComment("U frame.");
+        } else {
+            // I-frame.
+            if (frame == 0x10) {
+                xml.appendComment("AARQ frame.");
+            } else if (frame == 0x30) {
+                xml.appendComment("AARE frame.");
+            } else {
+                xml.appendComment("I frame.");
+            }
+        }
+    }
+
     /**
      * Convert message to XML.
      * 
@@ -541,6 +567,13 @@ public class GXDLMSTranslator {
                                         + xml.integerToHex(
                                                 settings.getClientAddress(), 0)
                                         + "\" />");
+                        // Check frame.
+                        if (comments) {
+                            checkFrame(data.getFrameId(), xml);
+                        }
+                        xml.appendLine("<FrameType Value=\""
+                                + xml.integerToHex(data.getFrameId(), 2, true)
+                                + "\" />");
                     }
                     if (data.getData().size() == 0) {
                         if ((data.getFrameId() & 1) != 0
@@ -977,11 +1010,12 @@ public class GXDLMSTranslator {
                 GXDLMS.handleConfirmedServiceError(data);
                 break;
             default:
-                xml.appendLine("<Data=\""
-                        + GXCommon.toHex(value.getData(), false,
-                                value.position(),
-                                value.size() - value.position())
-                        + "\" />");
+                xml.appendLine(
+                        "<Data=\""
+                                + GXCommon.toHex(value.getData(), false,
+                                        value.position(),
+                                        value.size() - value.position())
+                                + "\" />");
                 break;
             }
             if (outputType == TranslatorOutputType.STANDARD_XML) {
@@ -1093,6 +1127,9 @@ public class GXDLMSTranslator {
             break;
         case Command.GENERAL_CIPHERING:
             s.setCommand(tag);
+            break;
+        case TranslatorTags.FRAME_TYPE:
+            s.setCommand(0);
             break;
         default:
             throw new IllegalArgumentException(
@@ -1903,6 +1940,69 @@ public class GXDLMSTranslator {
                 break;
             case TranslatorTags.ATTRIBUTE_VALUE:
                 break;
+            case TranslatorTags.MAX_INFO_TX:
+                value = Byte.parseByte(getValue(node, s));
+                if ((s.getCommand() == Command.SNRM
+                        && !s.getSettings().isServer())
+                        || (s.getCommand() == Command.UA
+                                && s.getSettings().isServer())) {
+                    s.getSettings().getLimits().setMaxInfoRX((int) value);
+                }
+                s.getData().setUInt8(HDLCInfo.MAX_INFO_RX);
+                s.getData().setUInt8(1);
+                s.getData().setUInt8((byte) value);
+                break;
+            case TranslatorTags.MAX_INFO_RX:
+                value = Byte.parseByte(getValue(node, s));
+                if ((s.getCommand() == Command.SNRM
+                        && !s.getSettings().isServer())
+                        || (s.getCommand() == Command.UA
+                                && s.getSettings().isServer())) {
+                    s.getSettings().getLimits().setMaxInfoTX((int) value);
+                }
+                s.getData().setUInt8(HDLCInfo.MAX_INFO_TX);
+                s.getData().setUInt8(1);
+                s.getData().setUInt8((byte) value);
+                break;
+            case TranslatorTags.WINDOW_SIZE_TX:
+                value = Byte.parseByte(getValue(node, s));
+                if ((s.getCommand() == Command.SNRM
+                        && !s.getSettings().isServer())
+                        || (s.getCommand() == Command.UA
+                                && s.getSettings().isServer())) {
+                    s.getSettings().getLimits().setWindowSizeRX((byte) value);
+                }
+                s.getData().setUInt8((byte) HDLCInfo.WINDOW_SIZE_RX);
+                s.getData().setUInt8(4);
+                s.getData().setUInt32(value);
+                break;
+            case TranslatorTags.WINDOW_SIZE_RX:
+                value = Byte.parseByte(getValue(node, s));
+                if ((s.getCommand() == Command.SNRM
+                        && !s.getSettings().isServer())
+                        || (s.getCommand() == Command.UA
+                                && s.getSettings().isServer())) {
+                    s.getSettings().getLimits().setWindowSizeTX((byte) value);
+                }
+                s.getData().setUInt8(HDLCInfo.WINDOW_SIZE_TX);
+                s.getData().setUInt8(4);
+                s.getData().setUInt32(value);
+                break;
+            case Command.INITIATE_REQUEST:
+                break;
+            case TranslatorTags.VALUE_LIST:
+                GXCommon.setObjectCount(getNodeCount(node), s.getData());
+                break;
+            case TranslatorTags.DATA_ACCESS_RESULT:
+                s.getData().setUInt8(
+                        valueOfErrorCode(s.getOutputType(), getValue(node, s))
+                                .getValue());
+                break;
+            case TranslatorTags.WRITE_DATA_BLOCK_ACCESS:
+                break;
+            case TranslatorTags.FRAME_TYPE:
+                break;
+
             default:
                 throw new IllegalArgumentException(
                         "Invalid node: " + node.getNodeName());

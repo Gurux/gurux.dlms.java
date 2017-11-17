@@ -325,6 +325,7 @@ final class TranslatorStandardTags {
                 "TargetAddress");
         GXDLMSTranslator.addTag(list, TranslatorTags.SOURCE_ADDRESS,
                 "SourceAddress");
+        GXDLMSTranslator.addTag(list, TranslatorTags.FRAME_TYPE, "FrameType");
         GXDLMSTranslator.addTag(list,
                 TranslatorTags.LIST_OF_VARIABLE_ACCESS_SPECIFICATION,
                 "x:variable-access-specification");
@@ -416,6 +417,15 @@ final class TranslatorStandardTags {
                 "x:key-ciphered-data");
         GXDLMSTranslator.addTag(list, TranslatorTags.ATTRIBUTE_VALUE,
                 "x:attribute-value");
+        GXDLMSTranslator.addTag(list, TranslatorTags.MAX_INFO_RX, "MaxInfoRX");
+        GXDLMSTranslator.addTag(list, TranslatorTags.MAX_INFO_TX, "MaxInfoTX");
+        GXDLMSTranslator.addTag(list, TranslatorTags.WINDOW_SIZE_RX,
+                "WindowSizeRX");
+        GXDLMSTranslator.addTag(list, TranslatorTags.WINDOW_SIZE_TX,
+                "WindowSizeTX");
+        GXDLMSTranslator.addTag(list, TranslatorTags.VALUE_LIST, "value-list");
+        GXDLMSTranslator.addTag(list, TranslatorTags.DATA_ACCESS_RESULT,
+                "x:data-access-result");
     }
 
     static void getDataTypeTags(final HashMap<Integer, String> list) {

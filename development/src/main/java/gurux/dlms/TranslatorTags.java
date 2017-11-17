@@ -80,4 +80,12 @@ final class TranslatorTags {
     static final int ATTRIBUTE_VALUE = 0xFF55;
     static final int CURRENT_TIME = 0xFF56;
     static final int TIME = 0xFF57;
+    static final int MAX_INFO_RX = 0xFF58;
+    static final int MAX_INFO_TX = 0xFF59;
+    static final int WINDOW_SIZE_RX = 0xFF60;
+    static final int WINDOW_SIZE_TX = 0xFF61;
+    static final int VALUE_LIST = 0xFF62;
+    static final int DATA_ACCESS_RESULT = 0xFF63;
+    static final int FRAME_TYPE = 0xFF64;
+
 }

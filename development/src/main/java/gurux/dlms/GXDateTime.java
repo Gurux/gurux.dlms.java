@@ -773,8 +773,8 @@ public class GXDateTime {
         if (deviation == 0x8000 || deviation == -32768) {
             return Calendar.getInstance().getTimeZone();
         }
+        TimeZone tz = Calendar.getInstance().getTimeZone();
         if (dst) {
-            TimeZone tz = Calendar.getInstance().getTimeZone();
             // If meter is in same time zone than meter reading application.
             if (tz.observesDaylightTime()
                     && tz.getRawOffset() / 60000 == deviation) {
@@ -789,6 +789,9 @@ public class GXDateTime {
                     break;
                 }
             }
+            return tz;
+        }
+        if (tz.getRawOffset() / 60000 == deviation) {
             return tz;
         }
         String str;

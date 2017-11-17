@@ -313,6 +313,7 @@ final class TranslatorSimpleTags {
                 "TargetAddress");
         GXDLMSTranslator.addTag(list, TranslatorTags.SOURCE_ADDRESS,
                 "SourceAddress");
+        GXDLMSTranslator.addTag(list, TranslatorTags.FRAME_TYPE, "FrameType");
         GXDLMSTranslator.addTag(list,
                 TranslatorTags.LIST_OF_VARIABLE_ACCESS_SPECIFICATION,
                 "ListOfVariableAccessSpecification");
@@ -377,7 +378,6 @@ final class TranslatorSimpleTags {
         GXDLMSTranslator.addTag(list, TranslatorTags.SYSTEM_TITLE,
                 "SystemTitle");
         GXDLMSTranslator.addTag(list, TranslatorTags.DATA_BLOCK, "DataBlock");
-
         GXDLMSTranslator.addTag(list, TranslatorTags.TRANSACTION_ID,
                 "TransactionId");
         GXDLMSTranslator.addTag(list, TranslatorTags.ORIGINATOR_SYSTEM_TITLE,
@@ -396,6 +396,15 @@ final class TranslatorSimpleTags {
                 "KeyCipheredData");
         GXDLMSTranslator.addTag(list, TranslatorTags.ATTRIBUTE_VALUE,
                 "AttributeValue");
+        GXDLMSTranslator.addTag(list, TranslatorTags.MAX_INFO_RX, "MaxInfoRX");
+        GXDLMSTranslator.addTag(list, TranslatorTags.MAX_INFO_TX, "MaxInfoTX");
+        GXDLMSTranslator.addTag(list, TranslatorTags.WINDOW_SIZE_RX,
+                "WindowSizeRX");
+        GXDLMSTranslator.addTag(list, TranslatorTags.WINDOW_SIZE_TX,
+                "WindowSizeTX");
+        GXDLMSTranslator.addTag(list, TranslatorTags.VALUE_LIST, "ValueList");
+        GXDLMSTranslator.addTag(list, TranslatorTags.DATA_ACCESS_RESULT,
+                "DataAccessResult");
     }
 
     static void getDataTypeTags(final HashMap<Integer, String> list) {
