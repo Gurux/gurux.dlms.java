@@ -3058,6 +3058,7 @@ abstract class GXDLMS {
         case UTILITY_TABLES:
             value[0] = 0;
             count[0] = 0;
+            break;
         case IMAGE_TRANSFER:
             value[0] = 0x40;
             count[0] = 4;

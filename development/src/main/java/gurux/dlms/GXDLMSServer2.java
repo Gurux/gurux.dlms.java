@@ -34,20 +34,29 @@
 
 package gurux.dlms;
 
+import java.util.Date;
+import java.util.List;
+import java.util.Map.Entry;
+
 import gurux.dlms.enums.AccessMode;
 import gurux.dlms.enums.Authentication;
+import gurux.dlms.enums.Command;
 import gurux.dlms.enums.Conformance;
+import gurux.dlms.enums.DataType;
 import gurux.dlms.enums.InterfaceType;
 import gurux.dlms.enums.MethodAccessMode;
 import gurux.dlms.enums.ObjectType;
 import gurux.dlms.enums.Priority;
 import gurux.dlms.enums.ServiceClass;
 import gurux.dlms.enums.SourceDiagnostic;
+import gurux.dlms.internal.GXCommon;
 import gurux.dlms.objects.GXDLMSAssociationLogicalName;
 import gurux.dlms.objects.GXDLMSAssociationShortName;
+import gurux.dlms.objects.GXDLMSCaptureObject;
 import gurux.dlms.objects.GXDLMSHdlcSetup;
 import gurux.dlms.objects.GXDLMSObject;
 import gurux.dlms.objects.GXDLMSObjectCollection;
+import gurux.dlms.objects.GXDLMSPushSetup;
 import gurux.dlms.objects.GXDLMSTcpUdpSetup;
 
 /**
@@ -598,4 +607,88 @@ public abstract class GXDLMSServer2 {
      */
     protected abstract void onPostAction(ValueEventArgs[] args)
             throws Exception;
+
+    /**
+     * Add value of COSEM object to byte buffer. AddData method can be used with
+     * GetDataNotificationMessage -method. DLMS specification do not specify the
+     * structure of Data-Notification body. So each manufacture can sent
+     * different data.
+     * 
+     * @param obj
+     *            COSEM object.
+     * @param index
+     *            Attribute index.
+     * @param buff
+     *            Byte buffer.
+     */
+    public final void addData(final GXDLMSObject obj, final int index,
+            final GXByteBuffer buff) {
+        DataType dt;
+        ValueEventArgs e = new ValueEventArgs(obj, index, 0, null);
+        Object value = obj.getValue(getSettings(), e);
+        dt = obj.getDataType(index);
+        if (dt == DataType.NONE && value != null) {
+            dt = GXDLMSConverter.getDLMSDataType(value);
+        }
+        GXCommon.setData(buff, dt, value);
+    }
+
+    /**
+     * Generates data notification message.
+     * 
+     * @param time
+     *            Date time. Set Date(0) if not added.
+     * @param data
+     *            Notification body.
+     * @return Generated data notification message(s).
+     */
+    public final byte[][] generateDataNotificationMessages(final Date time,
+            final GXByteBuffer data) {
+        List<byte[]> reply;
+        if (getUseLogicalNameReferencing()) {
+            GXDLMSLNParameters p = new GXDLMSLNParameters(getSettings(), 0,
+                    Command.DATA_NOTIFICATION, 0, null, data, 0xff);
+            if (time == null) {
+                p.setTime(null);
+            } else {
+                p.setTime(new GXDateTime(time));
+            }
+            reply = GXDLMS.getLnMessages(p);
+        } else {
+            GXDLMSSNParameters p = new GXDLMSSNParameters(getSettings(),
+                    Command.DATA_NOTIFICATION, 1, 0, data, null);
+            reply = GXDLMS.getSnMessages(p);
+        }
+        if (!getSettings().getNegotiatedConformance()
+                .contains(Conformance.GENERAL_BLOCK_TRANSFER)
+                && reply.size() != 1) {
+            throw new IllegalArgumentException(
+                    "Data is not fit to one PDU. Use general block transfer.");
+        }
+        return reply.toArray(new byte[0][0]);
+    }
+
+    /**
+     * Generates push setup message.
+     * 
+     * @param date
+     *            Date time. Set to null or Date(0) if not used.
+     * @param push
+     *            Target Push object.
+     * @return Generated data notification message(s).
+     */
+    public final byte[][] generatePushSetupMessages(final Date date,
+            final GXDLMSPushSetup push) {
+        if (push == null) {
+            throw new IllegalArgumentException("push");
+        }
+        GXByteBuffer buff = new GXByteBuffer();
+        buff.setUInt8((byte) DataType.STRUCTURE.getValue());
+        GXCommon.setObjectCount(push.getPushObjectList().size(), buff);
+        for (Entry<GXDLMSObject, GXDLMSCaptureObject> it : push
+                .getPushObjectList()) {
+            addData(it.getKey(), it.getValue().getAttributeIndex(), buff);
+        }
+        return generateDataNotificationMessages(date, buff);
+    }
 }

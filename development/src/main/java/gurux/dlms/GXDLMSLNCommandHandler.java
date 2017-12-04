@@ -100,7 +100,7 @@ final class GXDLMSLNCommandHandler {
         // Get type.
         byte type = (byte) data.getUInt8();
         // Get invoke ID and priority.
-        short invoke = data.getUInt8();
+        byte invoke = (byte) data.getUInt8();
         // SetRequest normal or Set Request With First Data Block
         GXDLMSLNParameters p = new GXDLMSLNParameters(settings, invoke,
                 Command.SET_RESPONSE, type, null, null, 0);
@@ -120,6 +120,10 @@ final class GXDLMSLNCommandHandler {
         case SetRequestType.WITH_DATA_BLOCK:
             hanleSetRequestWithDataBlock(settings, server, data, p, replyData,
                     xml);
+            break;
+        case SetRequestType.WITH_LIST:
+            hanleSetRequestWithList(settings, invoke, server, data, p,
+                    replyData, xml);
             break;
         default:
             LOGGER.log(Level.INFO, "HandleSetRequest failed. Unknown command.");
@@ -657,6 +661,113 @@ final class GXDLMSLNCommandHandler {
             }
         }
         p.setMultipleBlocks(true);
+    }
+
+    private static void hanleSetRequestWithList(final GXDLMSSettings settings,
+            final byte invokeID, final GXDLMSServerBase server,
+            final GXByteBuffer data, final GXDLMSLNParameters p,
+            final GXByteBuffer replyData, final GXDLMSTranslatorStructure xml)
+            throws Exception {
+        ValueEventArgs e;
+        int cnt = GXCommon.getObjectCount(data);
+        List<ValueEventArgs> list = new ArrayList<ValueEventArgs>();
+        if (xml != null) {
+            xml.appendStartTag(TranslatorTags.ATTRIBUTE_DESCRIPTOR_LIST, "Qty",
+                    xml.integerToHex(cnt, 2));
+        }
+        try {
+            for (int pos = 0; pos != cnt; ++pos) {
+                ObjectType ci = ObjectType.forValue(data.getUInt16());
+                byte[] ln = new byte[6];
+                data.get(ln);
+                short attributeIndex = data.getUInt8();
+                // AccessSelection
+                int selection = data.getUInt8();
+                int selector = 0;
+                Object parameters = null;
+                if (selection != 0) {
+                    selector = data.getUInt8();
+                    GXDataInfo info = new GXDataInfo();
+                    parameters = GXCommon.getData(data, info);
+                }
+                if (xml != null) {
+                    xml.appendStartTag(
+                            TranslatorTags.ATTRIBUTE_DESCRIPTOR_WITH_SELECTION);
+                    xml.appendStartTag(TranslatorTags.ATTRIBUTE_DESCRIPTOR);
+                    xml.appendComment(ci.toString());
+                    xml.appendLine(TranslatorTags.CLASS_ID, "Value",
+                            xml.integerToHex(ci.getValue(), 4));
+                    xml.appendComment(GXCommon.toLogicalName(ln));
+                    xml.appendLine(TranslatorTags.INSTANCE_ID, "Value",
+                            GXCommon.toHex(ln, false));
+                    xml.appendLine(TranslatorTags.ATTRIBUTE_ID, "Value",
+                            xml.integerToHex(attributeIndex, 2));
+                    xml.appendEndTag(TranslatorTags.ATTRIBUTE_DESCRIPTOR);
+                    xml.appendEndTag(
+                            TranslatorTags.ATTRIBUTE_DESCRIPTOR_WITH_SELECTION);
+                } else {
+                    GXDLMSObject obj = settings.getObjects().findByLN(ci,
+                            GXCommon.toLogicalName(ln));
+                    if (obj == null) {
+                        obj = server.notifyFindObject(ci, 0,
+                                GXCommon.toLogicalName(ln));
+                    }
+                    if (obj == null) {
+                        // "Access Error : Device reports a undefined object."
+                        e = new ValueEventArgs(server, obj, attributeIndex, 0,
+                                0);
+                        e.setError(ErrorCode.UNDEFINED_OBJECT);
+                        list.add(e);
+                    } else {
+                        ValueEventArgs arg = new ValueEventArgs(server, obj,
+                                attributeIndex, selector, parameters);
+                        arg.setInvokeId(invokeID);
+                        if (server.notifyGetAttributeAccess(
+                                arg) == AccessMode.NO_ACCESS) {
+                            // Read Write denied.
+                            arg.setError(ErrorCode.READ_WRITE_DENIED);
+                            list.add(arg);
+                        } else {
+                            list.add(arg);
+                        }
+                    }
+                }
+            }
+            cnt = GXCommon.getObjectCount(data);
+            if (xml != null) {
+                xml.appendEndTag(TranslatorTags.ATTRIBUTE_DESCRIPTOR_LIST);
+                xml.appendStartTag(TranslatorTags.VALUE_LIST, "Qty",
+                        xml.integerToHex(cnt, 2));
+            }
+            for (int pos = 0; pos != cnt; ++pos) {
+                GXDataInfo di = new GXDataInfo();
+                di.setXml(xml);
+                if (xml != null && xml
+                        .getOutputType() == TranslatorOutputType.STANDARD_XML) {
+                    xml.appendStartTag(Command.WRITE_REQUEST,
+                            SingleReadResponse.DATA);
+                }
+                Object value = GXCommon.getData(data, di);
+                if (!di.isComplete()) {
+                    value = GXCommon.toHex(data.getData(), false,
+                            data.position(), data.size() - data.position());
+                } else if (value instanceof byte[]) {
+                    value = GXCommon.toHex((byte[]) value, false);
+                }
+                if (xml != null && xml
+                        .getOutputType() == TranslatorOutputType.STANDARD_XML) {
+                    xml.appendEndTag(Command.WRITE_REQUEST,
+                            SingleReadResponse.DATA);
+                }
+            }
+            if (xml != null) {
+                xml.appendEndTag(TranslatorTags.VALUE_LIST);
+            }
+        } catch (Exception ex) {
+            if (xml == null) {
+                throw ex;
+            }
+        }
     }
 
     /**

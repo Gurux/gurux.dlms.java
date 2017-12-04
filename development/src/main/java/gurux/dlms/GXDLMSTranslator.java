@@ -1800,14 +1800,16 @@ public class GXDLMSTranslator {
             case TranslatorTags.ACCESS_PARAMETERS:
                 break;
             case TranslatorTags.ATTRIBUTE_DESCRIPTOR_LIST:
-                GXCommon.setObjectCount(node.getChildNodes().getLength(),
+                GXCommon.setObjectCount(getNodeCount(node),
                         s.getAttributeDescriptor());
                 break;
             case TranslatorTags.ATTRIBUTE_DESCRIPTOR_WITH_SELECTION:
             case Command.ACCESS_REQUEST << 8 | AccessServiceCommandType.GET:
             case Command.ACCESS_REQUEST << 8 | AccessServiceCommandType.SET:
             case Command.ACCESS_REQUEST << 8 | AccessServiceCommandType.ACTION:
-                s.getAttributeDescriptor().setUInt8(tag & 0xFF);
+                if (s.getCommand() != Command.SET_REQUEST) {
+                    s.getAttributeDescriptor().setUInt8(tag & 0xFF);
+                }
                 break;
             case Command.READ_REQUEST << 8
                     | VariableAccessSpecification.VARIABLE_NAME:

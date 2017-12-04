@@ -8,3 +8,5 @@ Credits
     * [angelfmarcos](https://github.com/angelfmarcos)
   - gurux.dlms.client.example.java GXSerial dependency updated to latest version.
     * [Hernán Eche](https://github.com/hernaneche)
+  - Missing "break" statement in GXDLMS.java - method getActionInfo()
+    * [mansour](http://www.gurux.fi/user/109756)

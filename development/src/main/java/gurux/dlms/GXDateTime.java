@@ -632,6 +632,10 @@ public class GXDateTime {
                 } else {
                     tm.add("SSS");
                 }
+                // If 12 hour format. Add AM or PM.
+                if (tmp.size() > 2) {
+                    tm.add(tmp.get(2));
+                }
 
                 String format = "";
                 StringBuilder sb = new StringBuilder();
