@@ -37,7 +37,7 @@ package gurux.dlms;
 /**
  * Long get or set information is saved here.
  */
-public class GXDLMSLongTransaction {
+class GXDLMSLongTransaction {
     /**
      * Executed command.
      */

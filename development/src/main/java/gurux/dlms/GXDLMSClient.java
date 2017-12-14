@@ -231,6 +231,21 @@ public class GXDLMSClient {
     }
 
     /**
+     * @return GBT window size.
+     */
+    public final int getWindowSize() {
+        return settings.getWindowSize();
+    }
+
+    /**
+     * @param value
+     *            GBT window size.
+     */
+    public final void setWindowSize(final int value) {
+        settings.setWindowSize((byte) value);
+    }
+
+    /**
      * Retrieves the maximum size of received PDU. PDU size tells maximum size
      * of PDU packet. Value can be from 0 to 0xFFFF. By default the value is
      * 0xFFFF.
@@ -460,9 +475,7 @@ public class GXDLMSClient {
      */
     public final byte[] snrmRequest() {
         settings.setConnected(false);
-
         isAuthenticationRequired = false;
-        settings.setMaxPduSize(0xFFFF);
         // SNRM request is not used in network connections.
         if (this.getInterfaceType() == InterfaceType.WRAPPER) {
             return new byte[0];
@@ -1284,6 +1297,9 @@ public class GXDLMSClient {
             GXDLMSLNParameters p = new GXDLMSLNParameters(settings, 0,
                     Command.SET_REQUEST, SetRequestType.NORMAL,
                     attributeDescriptor, data, 0xff);
+            p.blockIndex = settings.getBlockIndex();
+            p.blockNumberAck = settings.getBlockNumberAck();
+            p.streaming = false;
             reply = GXDLMS.getLnMessages(p);
         } else {
             // Add name.

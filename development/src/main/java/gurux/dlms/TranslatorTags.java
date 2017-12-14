@@ -87,5 +87,7 @@ final class TranslatorTags {
     static final int VALUE_LIST = 0xFF62;
     static final int DATA_ACCESS_RESULT = 0xFF63;
     static final int FRAME_TYPE = 0xFF64;
-
+    static final int BLOCK_CONTROL = 0xFF65;
+    static final int BLOCK_NUMBER_ACK = 0xFF66;
+    static final int BLOCK_DATA = 0xFF67;
 }

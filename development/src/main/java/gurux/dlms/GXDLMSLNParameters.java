@@ -45,7 +45,7 @@ class GXDLMSLNParameters {
     /**
      * DLMS Command.
      */
-    private int command;
+    int command;
     /**
      * Request type.
      */
@@ -77,12 +77,27 @@ class GXDLMSLNParameters {
     /**
      * Block index.
      */
-    private int blockIndex;
+    int blockIndex;
+
+    /// <summary>
+    /// Block number ack.
+    /// </summary>
+    public int blockNumberAck;
 
     /**
      * Invoke ID.
      */
     private long invokeId;
+
+    /// <summary>
+    /// GBT window size.
+    /// </summary>
+    public byte windowSize;
+
+    /// <summary>
+    /// Is GBT streaming used.
+    /// </summary>
+    public boolean streaming;
 
     /**
      * Constructor.
@@ -107,6 +122,7 @@ class GXDLMSLNParameters {
         settings = forSettings;
         invokeId = forInvokeId;
         setBlockIndex(settings.getBlockIndex());
+        blockNumberAck = settings.getBlockNumberAck();
         command = forCommand;
         setRequestType(forCommandType);
         attributeDescriptor = forAttributeDescriptor;
@@ -115,6 +131,7 @@ class GXDLMSLNParameters {
         setStatus(forStatus);
         setMultipleBlocks(forSettings.getCount() != forSettings.getIndex());
         setLastBlock(forSettings.getCount() == forSettings.getIndex());
+        windowSize = 1;
     }
 
     /**

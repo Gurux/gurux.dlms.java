@@ -259,6 +259,16 @@ public class GXDLMSSettings {
     private GXICipher cipher;
 
     /**
+     * Block number acknowledged in GBT.
+     */
+    private int blockNumberAck;
+
+    /**
+     * GBT window size.
+     */
+    private byte windowSize;
+
+    /**
      * Constructor.
      */
     GXDLMSSettings(final boolean isServer) {
@@ -267,6 +277,7 @@ public class GXDLMSSettings {
         limits = new GXDLMSLimits();
         proposedConformance.addAll(GXDLMSClient.getInitialConformance(false));
         resetFrameSequence();
+        windowSize = 1;
     }
 
     /**
@@ -531,10 +542,26 @@ public class GXDLMSSettings {
     }
 
     /**
+     * @return Block number acknowledged in GBT.
+     */
+    public final int getBlockNumberAck() {
+        return blockNumberAck;
+    }
+
+    /**
+     * @param value
+     *            Block number acknowledged in GBT.
+     */
+    public final void setBlockNumberAck(final int value) {
+        blockNumberAck = value;
+    }
+
+    /**
      * Resets block index to default value.
      */
     final void resetBlockIndex() {
         blockIndex = startingPacketIndex;
+        blockNumberAck = 0;
     }
 
     /**
@@ -970,5 +997,20 @@ public class GXDLMSSettings {
      */
     public void setWrapper(final GXDLMSTcpUdpSetup value) {
         wrapper = value;
+    }
+
+    /**
+     * @return GBT window size.
+     */
+    public final byte getWindowSize() {
+        return windowSize;
+    }
+
+    /**
+     * @param value
+     *            GBT window size.
+     */
+    public final void setWindowSize(final byte value) {
+        windowSize = value;
     }
 }

@@ -56,11 +56,11 @@ public class GXDLMSIp4Setup extends GXDLMSObject implements IGXDLMSBase {
     private String ipAddress;
     private int[] multicastIPAddress;
     private GXDLMSIp4SetupIpOption[] ipOptions;
-    private long subnetMask;
-    private long gatewayIPAddress;
+    private String subnetMask;
+    private String gatewayIPAddress;
     private boolean useDHCP;
-    private long primaryDNSAddress;
-    private long secondaryDNSAddress;
+    private String primaryDNSAddress;
+    private String secondaryDNSAddress;
 
     /**
      * Constructor.
@@ -123,19 +123,19 @@ public class GXDLMSIp4Setup extends GXDLMSObject implements IGXDLMSBase {
         ipOptions = value;
     }
 
-    public final long getSubnetMask() {
+    public final String getSubnetMask() {
         return subnetMask;
     }
 
-    public final void setSubnetMask(final long value) {
+    public final void setSubnetMask(final String value) {
         subnetMask = value;
     }
 
-    public final long getGatewayIPAddress() {
+    public final String getGatewayIPAddress() {
         return gatewayIPAddress;
     }
 
-    public final void setGatewayIPAddress(final long value) {
+    public final void setGatewayIPAddress(final String value) {
         gatewayIPAddress = value;
     }
 
@@ -147,19 +147,19 @@ public class GXDLMSIp4Setup extends GXDLMSObject implements IGXDLMSBase {
         useDHCP = value;
     }
 
-    public final long getPrimaryDNSAddress() {
+    public final String getPrimaryDNSAddress() {
         return primaryDNSAddress;
     }
 
-    public final void setPrimaryDNSAddress(final long value) {
+    public final void setPrimaryDNSAddress(final String value) {
         primaryDNSAddress = value;
     }
 
-    public final long getSecondaryDNSAddress() {
+    public final String getSecondaryDNSAddress() {
         return secondaryDNSAddress;
     }
 
-    public final void setSecondaryDNSAddress(final long value) {
+    public final void setSecondaryDNSAddress(final String value) {
         secondaryDNSAddress = value;
     }
 
@@ -167,9 +167,9 @@ public class GXDLMSIp4Setup extends GXDLMSObject implements IGXDLMSBase {
     public final Object[] getValues() {
         return new Object[] { getLogicalName(), getDataLinkLayerReference(),
                 getIPAddress(), getMulticastIPAddress(), getIPOptions(),
-                new Long(getSubnetMask()), new Long(getGatewayIPAddress()),
-                new Boolean(getUseDHCP()), new Long(getPrimaryDNSAddress()),
-                new Long(getSecondaryDNSAddress()) };
+                getSubnetMask(), getGatewayIPAddress(),
+                new Boolean(getUseDHCP()), getPrimaryDNSAddress(),
+                getSecondaryDNSAddress() };
     }
 
     /*
@@ -281,6 +281,7 @@ public class GXDLMSIp4Setup extends GXDLMSObject implements IGXDLMSBase {
     @Override
     public final Object getValue(final GXDLMSSettings settings,
             final ValueEventArgs e) {
+        GXByteBuffer bb = new GXByteBuffer();
         if (e.getIndex() == 1) {
             return GXCommon.logicalNameToBytes(getLogicalName());
         }
@@ -291,10 +292,8 @@ public class GXDLMSIp4Setup extends GXDLMSObject implements IGXDLMSBase {
             if (getIPAddress() == null || getIPAddress().isEmpty()) {
                 return 0;
             }
-            GXByteBuffer bb = new GXByteBuffer();
             try {
                 bb.set(InetAddress.getByName(getIPAddress()).getAddress());
-                bb.reverse();
                 return new Long(bb.getUInt32());
             } catch (UnknownHostException e1) {
                 throw new RuntimeException("Invalid IP address.");
@@ -332,19 +331,57 @@ public class GXDLMSIp4Setup extends GXDLMSObject implements IGXDLMSBase {
             return data.array();
         }
         if (e.getIndex() == 6) {
-            return new Long(this.getSubnetMask());
+            if (getSubnetMask() == null || getSubnetMask().isEmpty()) {
+                return 0;
+            }
+            try {
+                bb.set(InetAddress.getByName(getSubnetMask()).getAddress());
+                return new Long(bb.getUInt32());
+            } catch (UnknownHostException e1) {
+                throw new RuntimeException("Invalid subnet mask.");
+            }
         }
         if (e.getIndex() == 7) {
-            return new Long(this.getGatewayIPAddress());
+            if (getGatewayIPAddress() == null
+                    || getGatewayIPAddress().isEmpty()) {
+                return 0;
+            }
+            try {
+                bb.set(InetAddress.getByName(getGatewayIPAddress())
+                        .getAddress());
+                return new Long(bb.getUInt32());
+            } catch (UnknownHostException e1) {
+                throw new RuntimeException("Invalid gateway IP address.");
+            }
         }
         if (e.getIndex() == 8) {
             return new Boolean(this.getUseDHCP());
         }
         if (e.getIndex() == 9) {
-            return new Long(this.getPrimaryDNSAddress());
+            if (getPrimaryDNSAddress() == null
+                    || getPrimaryDNSAddress().isEmpty()) {
+                return 0;
+            }
+            try {
+                bb.set(InetAddress.getByName(getPrimaryDNSAddress())
+                        .getAddress());
+                return new Long(bb.getUInt32());
+            } catch (UnknownHostException e1) {
+                throw new RuntimeException("Invalid primary DNS address.");
+            }
         }
         if (e.getIndex() == 10) {
-            return new Long(this.getSecondaryDNSAddress());
+            if (getSecondaryDNSAddress() == null
+                    || getSecondaryDNSAddress().isEmpty()) {
+                return 0;
+            }
+            try {
+                bb.set(InetAddress.getByName(getSecondaryDNSAddress())
+                        .getAddress());
+                return new Long(bb.getUInt32());
+            } catch (UnknownHostException e1) {
+                throw new RuntimeException("Invalid secondary DNS address.");
+            }
         }
         e.setError(ErrorCode.READ_WRITE_DENIED);
         return null;
@@ -356,6 +393,7 @@ public class GXDLMSIp4Setup extends GXDLMSObject implements IGXDLMSBase {
     @Override
     public final void setValue(final GXDLMSSettings settings,
             final ValueEventArgs e) {
+        GXByteBuffer bb = new GXByteBuffer();
         if (e.getIndex() == 1) {
             setLogicalName(GXCommon.toLogicalName(e.getValue()));
         } else if (e.getIndex() == 2) {
@@ -365,9 +403,7 @@ public class GXDLMSIp4Setup extends GXDLMSObject implements IGXDLMSBase {
                 setDataLinkLayerReference(GXCommon.toLogicalName(e.getValue()));
             }
         } else if (e.getIndex() == 3) {
-            GXByteBuffer bb = new GXByteBuffer();
             bb.setUInt32(((Number) e.getValue()).intValue());
-            bb.reverse();
             try {
                 setIPAddress(InetAddress.getByAddress(bb.array())
                         .getCanonicalHostName());
@@ -399,15 +435,39 @@ public class GXDLMSIp4Setup extends GXDLMSObject implements IGXDLMSBase {
             }
             setIPOptions(data.toArray(new GXDLMSIp4SetupIpOption[data.size()]));
         } else if (e.getIndex() == 6) {
-            setSubnetMask(((Number) e.getValue()).intValue());
+            bb.setUInt32(((Number) e.getValue()).intValue());
+            try {
+                setSubnetMask(InetAddress.getByAddress(bb.array())
+                        .getCanonicalHostName());
+            } catch (UnknownHostException e1) {
+                throw new RuntimeException("Invalid IP address.");
+            }
         } else if (e.getIndex() == 7) {
-            setGatewayIPAddress(((Number) e.getValue()).intValue());
+            bb.setUInt32(((Number) e.getValue()).intValue());
+            try {
+                setGatewayIPAddress(InetAddress.getByAddress(bb.array())
+                        .getCanonicalHostName());
+            } catch (UnknownHostException e1) {
+                throw new RuntimeException("Invalid IP address.");
+            }
         } else if (e.getIndex() == 8) {
             setUseDHCP(((Boolean) e.getValue()).booleanValue());
         } else if (e.getIndex() == 9) {
-            setPrimaryDNSAddress(((Number) e.getValue()).intValue());
+            bb.setUInt32(((Number) e.getValue()).intValue());
+            try {
+                setPrimaryDNSAddress(InetAddress.getByAddress(bb.array())
+                        .getCanonicalHostName());
+            } catch (UnknownHostException e1) {
+                throw new RuntimeException("Invalid IP address.");
+            }
         } else if (e.getIndex() == 10) {
-            setSecondaryDNSAddress(((Number) e.getValue()).intValue());
+            bb.setUInt32(((Number) e.getValue()).intValue());
+            try {
+                setSecondaryDNSAddress(InetAddress.getByAddress(bb.array())
+                        .getCanonicalHostName());
+            } catch (UnknownHostException e1) {
+                throw new RuntimeException("Invalid IP address.");
+            }
         } else {
             e.setError(ErrorCode.READ_WRITE_DENIED);
         }
@@ -443,13 +503,14 @@ public class GXDLMSIp4Setup extends GXDLMSObject implements IGXDLMSBase {
         }
         ipOptions = tmp
                 .toArray(list.toArray(new GXDLMSIp4SetupIpOption[list.size()]));
-        subnetMask = reader.readElementContentAsULong("SubnetMask");
-        gatewayIPAddress = reader.readElementContentAsULong("GatewayIPAddress");
+        subnetMask = reader.readElementContentAsString("SubnetMask");
+        gatewayIPAddress =
+                reader.readElementContentAsString("GatewayIPAddress");
         useDHCP = reader.readElementContentAsInt("UseDHCP") != 0;
         primaryDNSAddress =
-                reader.readElementContentAsULong("PrimaryDNSAddress");
+                reader.readElementContentAsString("PrimaryDNSAddress");
         secondaryDNSAddress =
-                reader.readElementContentAsULong("SecondaryDNSAddress");
+                reader.readElementContentAsString("SecondaryDNSAddress");
     }
 
     @Override

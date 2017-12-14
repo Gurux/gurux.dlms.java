@@ -183,6 +183,21 @@ public abstract class GXDLMSServer2 {
     }
 
     /**
+     * @return GBT window size.
+     */
+    public final int getWindowSize() {
+        return getSettings().getWindowSize();
+    }
+
+    /**
+     * @param value
+     *            GBT window size.
+     */
+    public final void setWindowSize(final int value) {
+        getSettings().setWindowSize((byte) value);
+    }
+
+    /**
      * @return Information from the connection size that server can handle.
      */
     public final GXDLMSLimits getLimits() {
@@ -318,7 +333,7 @@ public abstract class GXDLMSServer2 {
      * @return Functionality.
      */
     public final java.util.Set<Conformance> getConformance() {
-        return base.getSettings().getNegotiatedConformance();
+        return base.getSettings().getProposedConformance();
     }
 
     /**
@@ -326,7 +341,7 @@ public abstract class GXDLMSServer2 {
      *            What kind of services server is offering.
      */
     public final void setConformance(final java.util.Set<Conformance> value) {
-        base.getSettings().setNegotiatedConformance(value);
+        base.getSettings().setProposedConformance(value);
     }
 
     /**
@@ -420,7 +435,20 @@ public abstract class GXDLMSServer2 {
      */
     public final byte[] handleRequest(final byte[] buff,
             final GXDLMSConnectionEventArgs connectionInfo) {
-        return base.handleRequest(buff, connectionInfo);
+        GXServerReply sr = new GXServerReply(buff);
+        sr.setConnectionInfo(connectionInfo);
+        base.handleRequest(sr);
+        return sr.getReply();
+    }
+
+    /**
+     * Handles client request.
+     * 
+     * @param sr
+     *            Server reply.
+     */
+    public final void handleRequest(GXServerReply sr) {
+        base.handleRequest(sr);
     }
 
     /**

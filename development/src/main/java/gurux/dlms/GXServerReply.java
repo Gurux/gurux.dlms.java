@@ -34,43 +34,42 @@
 
 package gurux.dlms;
 
-import java.util.List;
-
 public class GXServerReply {
+
+    /**
+     * Connection info.
+     */
+    private GXDLMSConnectionEventArgs connectionInfo;
+
     /**
      * Server received data.
      */
-    private GXByteBuffer data = new GXByteBuffer();
+    private byte[] data;
 
     /**
-     * Server reply messages.
+     * Server reply message.
      */
-    private List<byte[][]> replyMessages;
+    private byte[] reply;
 
     /**
-     * Reply message index.
+     * Message count to send.
      */
-    private int index = 0;
+    private int count;
 
     /**
-     * @return the index
-     */
-    public final int getIndex() {
-        return index;
-    }
-
-    /**
+     * Constructor.
+     * 
      * @param value
-     *            The index to set.
+     *            Received data.
      */
-    public final void setIndex(final int value) {
-        index = value;
+    public GXServerReply(byte[] value) {
+        data = value;
     }
 
     /**
      * @return the data
      */
-    public final GXByteBuffer getData() {
+    public final byte[] getData() {
         return data;
     }
 
@@ -78,22 +77,59 @@ public class GXServerReply {
      * @param value
      *            The data to set.
      */
-    public final void setData(final GXByteBuffer value) {
+    public final void setData(final byte[] value) {
         data = value;
     }
 
     /**
-     * @return the replyMessages
+     * @return The reply message.
      */
-    public final List<byte[][]> getReplyMessages() {
-        return replyMessages;
+    public final byte[] getReply() {
+        return reply;
     }
 
     /**
      * @param value
      *            the replyMessages to set
      */
-    public final void setReplyMessages(final List<byte[][]> value) {
-        replyMessages = value;
+    public final void setReply(final byte[] value) {
+        reply = value;
+    }
+
+    /**
+     * @return Connection info.
+     */
+    public final GXDLMSConnectionEventArgs getConnectionInfo() {
+        return connectionInfo;
+    }
+
+    /**
+     * @param value
+     *            Connection info.
+     */
+    public final void setConnectionInfo(final GXDLMSConnectionEventArgs value) {
+        connectionInfo = value;
+    }
+
+    /**
+     * @return Is GBT streaming in progress.
+     */
+    public final boolean isStreaming() {
+        return getCount() != 0;
+    }
+
+    /**
+     * @return Message count to send.
+     */
+    public final int getCount() {
+        return count;
+    }
+
+    /**
+     * @param value
+     *            Message count to send.
+     */
+    public final void setCount(final int value) {
+        count = value;
     }
 }

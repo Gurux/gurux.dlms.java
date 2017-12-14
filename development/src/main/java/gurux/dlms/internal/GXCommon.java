@@ -2208,7 +2208,7 @@ public final class GXCommon {
     public static String toLogicalName(final Object value) {
         if (value instanceof byte[]) {
             byte[] buff = (byte[]) value;
-            if (buff.length == 0) {
+            if (buff == null || buff.length == 0) {
                 buff = new byte[6];
             }
             if (buff.length == 6) {

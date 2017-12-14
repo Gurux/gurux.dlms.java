@@ -116,11 +116,6 @@ public class GXReplyData {
     private int cipherIndex = 0;
 
     /**
-     * Is received message General Block Transfer message.
-     */
-    private boolean gbt = false;
-
-    /**
      * Data notification date time.
      */
     private GXDateTime time = null;
@@ -134,6 +129,23 @@ public class GXReplyData {
      * Invoke ID.
      */
     private long invokeId;
+
+    /**
+     * GBT block number.
+     */
+    private int blockNumber;
+    /**
+     * GBT block number ACK.
+     */
+    private int blockNumberAck;
+    /**
+     * Is GBT streaming in use.
+     */
+    private boolean streaming;
+    /**
+     * GBT Window size. This is for internal use.
+     */
+    private byte windowSize;
 
     /**
      * Constructor.
@@ -258,7 +270,6 @@ public class GXReplyData {
         totalCount = 0;
         dataValue = null;
         readPosition = 0;
-        gbt = false;
         packetLength = 0;
         dataType = DataType.NONE;
         cipherIndex = 0;
@@ -397,21 +408,6 @@ public class GXReplyData {
     }
 
     /**
-     * @return Is received message General Block Transfer message.
-     */
-    public final boolean getGbt() {
-        return gbt;
-    }
-
-    /**
-     * @param value
-     *            Is received message General Block Transfer message.
-     */
-    public final void setGbt(final boolean value) {
-        gbt = value;
-    }
-
-    /**
      * @return Data notification date time.
      */
     public final GXDateTime getTime() {
@@ -484,6 +480,74 @@ public class GXReplyData {
      */
     public final void setInvokeId(final long value) {
         invokeId = value;
+    }
+
+    /**
+     * @return GBT block number.
+     */
+    public final int getBlockNumber() {
+        return blockNumber;
+    }
+
+    /**
+     * @param value
+     *            GBT block number.
+     */
+    final void setBlockNumber(final int value) {
+        blockNumber = value;
+    }
+
+    /**
+     * @return GBT block number ACK.
+     */
+    public final int getBlockNumberAck() {
+        return blockNumberAck;
+    }
+
+    /**
+     * @param value
+     *            GBT block number ACK.
+     */
+    final void setBlockNumberAck(final int value) {
+        blockNumberAck = value;
+    }
+
+    /**
+     * @return Is GBT streaming in use.
+     */
+    public final boolean getStreaming() {
+        return streaming;
+    }
+
+    /**
+     * @param value
+     *            Is GBT streaming in use.
+     */
+    final void setStreaming(boolean value) {
+        streaming = value;
+    }
+
+    /**
+     * @return GBT Window size. This is for internal use.
+     */
+    public final byte getWindowSize() {
+        return windowSize;
+    }
+
+    /**
+     * @param value
+     *            GBT Window size. This is for internal use.
+     */
+    public final void setWindowSize(byte value) {
+        windowSize = value;
+    }
+
+    /**
+     * @return Is GBT streaming.
+     */
+    public final boolean IsStreaming() {
+        return getStreaming() && (getBlockNumberAck() * getWindowSize())
+                + 1 > getBlockNumber();
     }
 
 }

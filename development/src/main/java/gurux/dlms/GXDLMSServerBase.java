@@ -569,148 +569,140 @@ public class GXDLMSServerBase {
         reset(false);
     }
 
-    /*
+    /**
      * Handles client request.
-     * @param buff Received data from the client.
-     * @return Response to the request. Response is null if request packet is
-     * not complete.
+     * 
+     * @param sr
+     *            Server reply.
      */
-    public final byte[] handleRequest(final byte[] buff) {
-        return handleRequest(buff, new GXDLMSConnectionEventArgs());
-    }
-
-    /*
-     * Handles client request.
-     * @param buff Received data from the client.
-     * @param connectionInfo Connection info.
-     * @return Response to the request. Response is null if request packet is
-     * not complete.
-     */
-    public final byte[] handleRequest(final byte[] buff,
-            final GXDLMSConnectionEventArgs connectionInfo) {
-
-        if (buff == null || buff.length == 0) {
-            return null;
+    public final void handleRequest(GXServerReply sr) {
+        if (!sr.isStreaming()
+                && (sr.getData() == null || sr.getData().length == 0)) {
+            return;
         }
         if (!initialized) {
             throw new RuntimeException("Server not Initialized.");
         }
         try {
-            receivedData.set(buff);
-            boolean first = settings.getServerAddress() == 0
-                    && settings.getClientAddress() == 0;
-            GXDLMS.getData(settings, receivedData, info);
-            // If all data is not received yet.
-            if (!info.isComplete()) {
-                return null;
-            }
-            receivedData.clear();
+            if (!sr.isStreaming()) {
+                receivedData.set(sr.getData());
+                boolean first = settings.getServerAddress() == 0
+                        && settings.getClientAddress() == 0;
+                GXDLMS.getData(settings, receivedData, info);
+                // If all data is not received yet.
+                if (!info.isComplete()) {
+                    return;
+                }
+                receivedData.clear();
 
-            if (first) {
-                if (owner instanceof GXDLMSServer) {
-                    GXDLMSServer b = (GXDLMSServer) owner;
-                    // Check is data send to this server.
-                    if (!b.isTarget(settings.getServerAddress(),
-                            settings.getClientAddress())) {
-                        info.clear();
-                        return null;
-                    }
-                } else {
-                    GXDLMSServer2 b = (GXDLMSServer2) owner;
-                    // Check is data send to this server.
-                    if (!b.isTarget(settings.getServerAddress(),
-                            settings.getClientAddress())) {
-                        info.clear();
-                        return null;
+                if (first) {
+                    if (owner instanceof GXDLMSServer) {
+                        GXDLMSServer b = (GXDLMSServer) owner;
+                        // Check is data send to this server.
+                        if (!b.isTarget(settings.getServerAddress(),
+                                settings.getClientAddress())) {
+                            info.clear();
+                            return;
+                        }
+                    } else {
+                        GXDLMSServer2 b = (GXDLMSServer2) owner;
+                        // Check is data send to this server.
+                        if (!b.isTarget(settings.getServerAddress(),
+                                settings.getClientAddress())) {
+                            info.clear();
+                            return;
+                        }
                     }
                 }
-            }
 
-            // If client want next frame.
-            if ((info.getMoreData().getValue()
-                    & RequestTypes.FRAME.getValue()) == RequestTypes.FRAME
-                            .getValue()) {
-                dataReceived = Calendar.getInstance().getTimeInMillis();
-                return GXDLMS.getHdlcFrame(settings,
-                        settings.getReceiverReady(), replyData);
-            }
-            // Update command if transaction and next frame is asked.
-            if (info.getCommand() == Command.NONE) {
-                if (transaction != null) {
-                    info.setCommand(transaction.getCommand());
+                // If client want next frame.
+                if ((info.getMoreData().getValue()
+                        & RequestTypes.FRAME.getValue()) == RequestTypes.FRAME
+                                .getValue()) {
+                    dataReceived = Calendar.getInstance().getTimeInMillis();
+                    sr.setReply(GXDLMS.getHdlcFrame(settings,
+                            settings.getReceiverReady(), replyData));
+                    return;
                 }
-            }
-            // Check inactivity time out.
-            if (settings.getHdlc() != null
-                    && settings.getHdlc().getInactivityTimeout() != 0) {
-                if (info.getCommand() != Command.SNRM) {
-                    int elapsed =
-                            (int) (Calendar.getInstance().getTimeInMillis()
-                                    - dataReceived) / 1000;
-                    // If inactivity time out is elapsed.
-                    if (elapsed >= settings.getHdlc().getInactivityTimeout()) {
-                        reset();
-                        dataReceived = 0;
-                        return null;
+                // Update command if transaction and next frame is asked.
+                if (info.getCommand() == Command.NONE) {
+                    if (transaction != null) {
+                        info.setCommand(transaction.getCommand());
                     }
                 }
-            } else if (settings.getWrapper() != null
-                    && settings.getWrapper().getInactivityTimeout() != 0) {
-                if (info.getCommand() != Command.AARQ) {
-                    int elapsed =
-                            (int) (Calendar.getInstance().getTimeInMillis()
-                                    - dataReceived) / 1000;
-                    // If inactivity time out is elapsed.
-                    if (elapsed >= settings.getWrapper()
-                            .getInactivityTimeout()) {
-                        reset();
-                        dataReceived = 0;
-                        return null;
+                // Check inactivity time out.
+                if (settings.getHdlc() != null
+                        && settings.getHdlc().getInactivityTimeout() != 0) {
+                    if (info.getCommand() != Command.SNRM) {
+                        int elapsed =
+                                (int) (Calendar.getInstance().getTimeInMillis()
+                                        - dataReceived) / 1000;
+                        // If inactivity time out is elapsed.
+                        if (elapsed >= settings.getHdlc()
+                                .getInactivityTimeout()) {
+                            reset();
+                            dataReceived = 0;
+                            return;
+                        }
+                    }
+                } else if (settings.getWrapper() != null
+                        && settings.getWrapper().getInactivityTimeout() != 0) {
+                    if (info.getCommand() != Command.AARQ) {
+                        int elapsed =
+                                (int) (Calendar.getInstance().getTimeInMillis()
+                                        - dataReceived) / 1000;
+                        // If inactivity time out is elapsed.
+                        if (elapsed >= settings.getWrapper()
+                                .getInactivityTimeout()) {
+                            reset();
+                            dataReceived = 0;
+                            return;
+                        }
                     }
                 }
+            } else {
+                info.setCommand(Command.GENERAL_BLOCK_TRANSFER);
             }
-            byte[] reply = handleCommand(info.getCommand(), info.getData(),
-                    connectionInfo);
+            sr.setReply(handleCommand(info.getCommand(), info.getData(), sr));
             dataReceived = Calendar.getInstance().getTimeInMillis();
             info.clear();
-            return reply;
         } catch (Exception e) {
             LOGGER.log(Level.SEVERE, e.toString());
             if (e instanceof GXDLMSConfirmedServiceError) {
-                byte[] reply = reportConfirmedServiceError(
-                        (GXDLMSConfirmedServiceError) e);
+                sr.setReply(reportConfirmedServiceError(
+                        (GXDLMSConfirmedServiceError) e));
                 transaction = null;
                 settings.setCount(0);
                 settings.setIndex(0);
                 info.clear();
                 receivedData.clear();
-                return reply;
+                return;
             }
             if (info.getCommand() != Command.NONE) {
-                byte[] reply = reportError(info.getCommand(),
-                        ErrorCode.HARDWARE_FAULT);
+                sr.setReply(reportError(info.getCommand(),
+                        ErrorCode.HARDWARE_FAULT));
                 transaction = null;
                 settings.setCount(0);
                 settings.setIndex(0);
                 info.clear();
                 receivedData.clear();
-                return reply;
+                return;
             } else {
                 reset();
                 if (settings.isConnected()) {
                     settings.setConnected(false);
                     if (owner instanceof GXDLMSServer) {
                         GXDLMSServer b = (GXDLMSServer) owner;
-                        b.disconnected(connectionInfo);
+                        b.disconnected(sr.getConnectionInfo());
                     } else {
                         GXDLMSServer2 b = (GXDLMSServer2) owner;
                         try {
-                            b.onDisconnected(connectionInfo);
+                            b.onDisconnected(sr.getConnectionInfo());
                         } catch (Exception ex) {
                         }
                     }
                 }
-                return null;
+                return;
             }
         }
     }
@@ -782,7 +774,7 @@ public class GXDLMSServerBase {
      * @return Response for the client.
      */
     private byte[] handleCommand(final int cmd, final GXByteBuffer data,
-            final GXDLMSConnectionEventArgs connectionInfo) throws Exception {
+            final GXServerReply sr) throws Exception {
         byte frame = 0;
         switch (cmd) {
         case Command.ACCESS_REQUEST:
@@ -809,34 +801,39 @@ public class GXDLMSServerBase {
             break;
         case Command.METHOD_REQUEST:
             GXDLMSLNCommandHandler.handleMethodRequest(settings, this, data,
-                    connectionInfo, replyData, null);
+                    sr.getConnectionInfo(), replyData, null);
             break;
         case Command.SNRM:
             handleSnrmRequest(data);
             frame = (byte) Command.UA;
             break;
         case Command.AARQ:
-            handleAarqRequest(data, connectionInfo);
+            handleAarqRequest(data, sr.getConnectionInfo());
             if (settings.isConnected()) {
                 if (owner instanceof GXDLMSServer) {
-                    ((GXDLMSServer) owner).connected(connectionInfo);
+                    ((GXDLMSServer) owner).connected(sr.getConnectionInfo());
                 } else {
-                    ((GXDLMSServer2) owner).onConnected(connectionInfo);
+                    ((GXDLMSServer2) owner).onConnected(sr.getConnectionInfo());
                 }
             }
             break;
         case Command.RELEASE_REQUEST:
-            handleReleaseRequest(data, connectionInfo);
+            handleReleaseRequest(data, sr.getConnectionInfo());
             break;
         case Command.DISCONNECT_REQUEST:
             generateDisconnectRequest();
             settings.setConnected(false);
             if (owner instanceof GXDLMSServer) {
-                ((GXDLMSServer) owner).disconnected(connectionInfo);
+                ((GXDLMSServer) owner).disconnected(sr.getConnectionInfo());
             } else {
-                ((GXDLMSServer2) owner).onDisconnected(connectionInfo);
+                ((GXDLMSServer2) owner).onDisconnected(sr.getConnectionInfo());
             }
             frame = Command.UA;
+            break;
+        case Command.GENERAL_BLOCK_TRANSFER:
+            if (!handleGeneralBlockTransfer(data, sr)) {
+                return null;
+            }
             break;
         case Command.NONE:
             // Client wants to get next block.
@@ -851,6 +848,89 @@ public class GXDLMSServerBase {
             reply = GXDLMS.getHdlcFrame(settings, frame, replyData);
         }
         return reply;
+    }
+
+    private boolean handleGeneralBlockTransfer(final GXByteBuffer data,
+            final GXServerReply sr) throws Exception {
+        if (transaction != null) {
+            if (transaction.getCommand() == Command.GET_REQUEST) {
+                // Get request for next data block
+                if (sr.getCount() == 0) {
+                    settings.setBlockNumberAck(
+                            settings.getBlockNumberAck() + 1);
+                    sr.setCount(settings.getWindowSize());
+                }
+                GXDLMSLNCommandHandler.getRequestNextDataBlock(settings, 0,
+                        this, data, replyData, null, true);
+                if (sr.getCount() != 0) {
+                    sr.setCount(sr.getCount() - 1);
+                }
+                if (this.transaction == null) {
+                    sr.setCount(0);
+                }
+            } else {
+                // BlockControl
+                short bc = data.getUInt8();
+                // Block number.
+                int blockNumber = data.getUInt16();
+                // Block number acknowledged.
+                int blockNumberAck = data.getUInt16();
+                int len = GXCommon.getObjectCount(data);
+                if (len > data.size() - data.position()) {
+                    replyData.set(generateConfirmedServiceError(
+                            ConfirmedServiceError.INITIATE_ERROR,
+                            ServiceError.SERVICE,
+                            Service.UNSUPPORTED.getValue()));
+                } else {
+                    transaction.getData().set(data);
+                    // Send ACK.
+                    boolean igonoreAck = (bc & 0x40) != 0
+                            && (blockNumberAck * settings.getWindowSize())
+                                    + 1 > blockNumber;
+                    int windowSize = settings.getWindowSize();
+                    int bn = settings.getBlockIndex();
+                    if ((bc & 0x80) != 0) {
+                        handleCommand(transaction.getCommand(),
+                                transaction.getData(), sr);
+                        transaction = null;
+                        igonoreAck = false;
+                        windowSize = 1;
+                    }
+                    if (igonoreAck) {
+                        return false;
+                    }
+                    replyData.setUInt8(Command.GENERAL_BLOCK_TRANSFER);
+                    replyData.setUInt8((byte) (0x80 | windowSize));
+                    settings.setBlockIndex(settings.getBlockIndex() + 1);
+                    replyData.setUInt16(bn);
+                    replyData.setUInt16(blockNumber);
+                    replyData.setUInt8(0);
+                }
+            }
+        } else {
+            // BlockControl
+            short bc = data.getUInt8();
+            // Block number.
+            int blockNumber = data.getUInt16();
+            // Block number acknowledged.
+            int blockNumberAck = data.getUInt16();
+            int len = GXCommon.getObjectCount(data);
+            if (len > data.size() - data.position()) {
+                replyData.set(generateConfirmedServiceError(
+                        ConfirmedServiceError.INITIATE_ERROR,
+                        ServiceError.SERVICE, Service.UNSUPPORTED.getValue()));
+            } else {
+                transaction =
+                        new GXDLMSLongTransaction(null, data.getUInt8(), data);
+                replyData.setUInt8(Command.GENERAL_BLOCK_TRANSFER);
+                replyData.setUInt8((0x80 | settings.getWindowSize()));
+                replyData.setUInt16(blockNumber);
+                ++blockNumberAck;
+                replyData.setUInt16(blockNumberAck);
+                replyData.setUInt8(0);
+            }
+        }
+        return true;
     }
 
     /*

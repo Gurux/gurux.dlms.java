@@ -974,7 +974,9 @@ public class GXDLMSTranslator {
                 }
                 int cnt = GXCommon.getObjectCount(value);
                 if (cnt != value.size() - value.position()) {
-                    throw new IllegalArgumentException();
+                    xml.appendComment("Invalid length: " + String.valueOf(cnt)
+                            + ". It should be: "
+                            + String.valueOf(value.size() - value.position()));
                 }
                 xml.appendLine(cmd, "Value",
                         GXCommon.toHex(value.getData(), false, value.position(),

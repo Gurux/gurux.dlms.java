@@ -63,7 +63,6 @@ import gurux.dlms.enums.DataType;
 import gurux.dlms.enums.ErrorCode;
 import gurux.dlms.enums.InterfaceType;
 import gurux.dlms.enums.ObjectType;
-import gurux.dlms.enums.RequestTypes;
 import gurux.dlms.objects.GXDLMSCaptureObject;
 import gurux.dlms.objects.GXDLMSDemandRegister;
 import gurux.dlms.objects.GXDLMSObject;
@@ -197,7 +196,7 @@ public class GXDLMSReader {
      */
     public void readDLMSPacket(byte[] data, GXReplyData reply)
             throws Exception {
-        if (data == null || data.length == 0) {
+        if (!reply.getStreaming() && (data == null || data.length == 0)) {
             return;
         }
         reply.setError((short) 0);
@@ -216,9 +215,11 @@ public class GXDLMSReader {
         p.setWaitTime(WaitTime);
         synchronized (Media.getSynchronous()) {
             while (!succeeded) {
-                writeTrace("<- " + now() + "\t" + GXCommon.bytesToHex(data),
-                        TraceLevel.VERBOSE);
-                Media.send(data, null);
+                if (!reply.IsStreaming()) {
+                    writeTrace("<- " + now() + "\t" + GXCommon.bytesToHex(data),
+                            TraceLevel.VERBOSE);
+                    Media.send(data, null);
+                }
                 if (p.getEop() == null) {
                     p.setCount(1);
                 }
@@ -293,12 +294,14 @@ public class GXDLMSReader {
      * @throws Exception
      */
     void readDataBlock(byte[] data, GXReplyData reply) throws Exception {
-        RequestTypes rt;
         if (data.length != 0) {
             readDLMSPacket(data, reply);
             while (reply.isMoreData()) {
-                rt = reply.getMoreData();
-                data = dlms.receiverReady(rt);
+                if (reply.IsStreaming()) {
+                    data = null;
+                } else {
+                    data = dlms.receiverReady(reply.getMoreData());
+                }
                 readDLMSPacket(data, reply);
             }
         }

@@ -277,7 +277,10 @@ public abstract class GXDLMSServer {
      */
     public final byte[] handleRequest(final byte[] buff,
             final GXDLMSConnectionEventArgs connectionInfo) {
-        return base.handleRequest(buff, connectionInfo);
+        GXServerReply sr = new GXServerReply(buff);
+        sr.setConnectionInfo(connectionInfo);
+        base.handleRequest(sr);
+        return sr.getReply();
     }
 
     /**

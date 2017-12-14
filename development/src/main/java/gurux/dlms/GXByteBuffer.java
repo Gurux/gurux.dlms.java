@@ -524,7 +524,7 @@ public class GXByteBuffer {
             if (size + count > capacity()) {
                 capacity(size + count + ARRAY_CAPACITY);
             }
-            System.arraycopy(value, index, getData(), size, count);
+            System.arraycopy(value, index, data, size, count);
             size += count;
         }
     }

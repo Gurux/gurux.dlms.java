@@ -57,6 +57,7 @@ import gurux.dlms.GXDLMSClient;
 import gurux.dlms.GXDLMSConnectionEventArgs;
 import gurux.dlms.GXDate;
 import gurux.dlms.GXDateTime;
+import gurux.dlms.GXServerReply;
 import gurux.dlms.GXSimpleEntry;
 import gurux.dlms.GXTime;
 import gurux.dlms.ValueEventArgs;
@@ -715,7 +716,8 @@ public class GXDLMSBase extends GXDLMSSecureServer2
         for (ValueEventArgs e : args) {
             // Framework will handle Association objects automatically.
             if (e.getTarget() instanceof GXDLMSAssociationLogicalName
-                    || e.getTarget() instanceof GXDLMSAssociationShortName) {
+                    || e.getTarget() instanceof GXDLMSAssociationShortName
+                    || e.getTarget() instanceof GXDLMSIp4Setup) {
                 continue;
             }
             if (e.getTarget() instanceof GXDLMSClock && e.getIndex() == 2) {
@@ -922,18 +924,22 @@ public class GXDLMSBase extends GXDLMSSecureServer2
                     System.out.println("<- " + gurux.common.GXCommon
                             .bytesToHex((byte[]) e.getData()));
                 }
-                byte[] reply = handleRequest((byte[]) e.getData());
-                // Reply is null if we do not want to send any data to the
-                // client.
-                // This is done if client try to make connection with wrong
-                // server or client address.
-                if (reply != null) {
-                    if (Trace == TraceLevel.VERBOSE) {
-                        System.out.println("-> "
-                                + gurux.common.GXCommon.bytesToHex(reply));
+                GXServerReply sr = new GXServerReply((byte[]) e.getData());
+                do {
+                    handleRequest(sr);
+                    // Reply is null if we do not want to send any data to the
+                    // client.
+                    // This is done if client try to make connection with wrong
+                    // server or client address.
+                    if (sr.getReply() != null) {
+                        if (Trace == TraceLevel.VERBOSE) {
+                            System.out.println("-> " + gurux.common.GXCommon
+                                    .bytesToHex(sr.getReply()));
+                        }
+                        media.send(sr.getReply(), e.getSenderInfo());
+                        sr.setData(null);
                     }
-                    media.send(reply, e.getSenderInfo());
-                }
+                } while (sr.isStreaming());
             }
         } catch (Exception ex) {
             System.out.println(ex.toString());

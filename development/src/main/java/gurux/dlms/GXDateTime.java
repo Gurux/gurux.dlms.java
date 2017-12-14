@@ -351,8 +351,17 @@ public class GXDateTime {
         long localtime = meterTime + diff;
         local.setTimeInMillis(localtime);
         // If meter is not use daylight saving time.
-        if (!meterCalendar.getTimeZone().useDaylightTime()) {
-            local.add(Calendar.HOUR_OF_DAY, -1);
+        if (!meterCalendar.getTimeZone()
+                .inDaylightTime(meterCalendar.getTime())) {
+            if (meterCalendar.getTimeZone()
+                    .inDaylightTime(meterCalendar.getTime())) {
+                local.add(Calendar.HOUR_OF_DAY, -1);
+            }
+        } else {
+            if (!meterCalendar.getTimeZone()
+                    .inDaylightTime(meterCalendar.getTime())) {
+                local.add(Calendar.HOUR_OF_DAY, 1);
+            }
         }
         return local;
     }

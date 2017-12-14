@@ -59,7 +59,7 @@ final class GXDLMSLNCommandHandler {
         } else if (type == GetCommandType.NEXT_DATA_BLOCK) {
             // Get request for next data block
             getRequestNextDataBlock(settings, invokeID, server, data, replyData,
-                    xml);
+                    xml, false);
         } else if (type == GetCommandType.WITH_LIST) {
             // Get request with a list.
             getRequestWithList(settings, invokeID, server, data, replyData,
@@ -306,72 +306,78 @@ final class GXDLMSLNCommandHandler {
      * @param data
      *            Received data.
      */
-    private static void getRequestNextDataBlock(final GXDLMSSettings settings,
-            final short invokeID, final GXDLMSServerBase server,
+    static void getRequestNextDataBlock(final GXDLMSSettings settings,
+            final int invokeID, final GXDLMSServerBase server,
             final GXByteBuffer data, final GXByteBuffer replyData,
-            final GXDLMSTranslatorStructure xml) throws Exception {
+            final GXDLMSTranslatorStructure xml, boolean streaming)
+            throws Exception {
         GXByteBuffer bb = new GXByteBuffer();
-        int index = (int) data.getUInt32();
-        // Get block index.
-        if (xml != null) {
-            xml.appendLine(TranslatorTags.BLOCK_NUMBER, null,
-                    xml.integerToHex(index, 8));
-            return;
+        if (!streaming) {
+            int index = (int) data.getUInt32();
+            // Get block index.
+            if (xml != null) {
+                xml.appendLine(TranslatorTags.BLOCK_NUMBER, null,
+                        xml.integerToHex(index, 8));
+                return;
+            }
+            if (index != settings.getBlockIndex()) {
+                LOGGER.log(Level.INFO,
+                        "getRequestNextDataBlock failed. Invalid block number. "
+                                + settings.getBlockIndex() + "/" + index);
+                GXDLMS.getLNPdu(
+                        new GXDLMSLNParameters(settings, invokeID,
+                                Command.GET_RESPONSE, 2, null, bb,
+                                ErrorCode.DATA_BLOCK_NUMBER_INVALID.getValue()),
+                        replyData);
+                return;
+            }
         }
-        if (index != settings.getBlockIndex()) {
-            LOGGER.log(Level.INFO,
-                    "getRequestNextDataBlock failed. Invalid block number. "
-                            + settings.getBlockIndex() + "/" + index);
-            GXDLMS.getLNPdu(
-                    new GXDLMSLNParameters(settings, invokeID,
-                            Command.GET_RESPONSE, 2, null, bb,
-                            ErrorCode.DATA_BLOCK_NUMBER_INVALID.getValue()),
-                    replyData);
+        settings.increaseBlockIndex();
+        GXDLMSLNParameters p = new GXDLMSLNParameters(settings, invokeID,
+                streaming ? Command.GENERAL_BLOCK_TRANSFER
+                        : Command.GET_RESPONSE,
+                2, null, bb, ErrorCode.OK.getValue());
+        p.streaming = streaming;
+        p.windowSize = settings.getWindowSize();
+        // If transaction is not in progress.
+        if (server.getTransaction() == null) {
+            p.setStatus(ErrorCode.NO_LONG_GET_OR_READ_IN_PROGRESS.getValue());
         } else {
-            settings.increaseBlockIndex();
-            GXDLMSLNParameters p = new GXDLMSLNParameters(settings, invokeID,
-                    Command.GET_RESPONSE, 2, null, bb, ErrorCode.OK.getValue());
-            // If transaction is not in progress.
-            if (server.getTransaction() == null) {
-                p.setStatus(
-                        ErrorCode.NO_LONG_GET_OR_READ_IN_PROGRESS.getValue());
-            } else {
-                bb.set(server.getTransaction().getData());
-                boolean moreData = settings.getIndex() != settings.getCount();
-                if (moreData) {
-                    // If there is multiple blocks on the buffer.
-                    // This might happen when Max PDU size is very small.
-                    if (bb.size() < settings.getMaxPduSize()) {
-                        Object value;
-                        for (ValueEventArgs arg : server.getTransaction()
-                                .getTargets()) {
-                            arg.setInvokeId(p.getInvokeId());
-                            server.notifyRead(new ValueEventArgs[] { arg });
-                            if (arg.getHandled()) {
-                                value = arg.getValue();
-                            } else {
-                                value = arg.getTarget().getValue(settings, arg);
-                            }
-                            p.setInvokeId(arg.getInvokeId());
-                            // Add data.
-                            if (arg.isByteArray()) {
-                                bb.set((byte[]) value);
-                            } else {
-                                GXDLMS.appendData(arg.getTarget(),
-                                        arg.getIndex(), bb, value);
-                            }
+            bb.set(server.getTransaction().getData());
+            boolean moreData = settings.getIndex() != settings.getCount();
+            if (moreData) {
+                // If there is multiple blocks on the buffer.
+                // This might happen when Max PDU size is very small.
+                if (bb.size() < settings.getMaxPduSize()) {
+                    Object value;
+                    for (ValueEventArgs arg : server.getTransaction()
+                            .getTargets()) {
+                        arg.setInvokeId(p.getInvokeId());
+                        server.notifyRead(new ValueEventArgs[] { arg });
+                        if (arg.getHandled()) {
+                            value = arg.getValue();
+                        } else {
+                            value = arg.getTarget().getValue(settings, arg);
                         }
-                        moreData = settings.getIndex() != settings.getCount();
+                        p.setInvokeId(arg.getInvokeId());
+                        // Add data.
+                        if (arg.isByteArray()) {
+                            bb.set((byte[]) value);
+                        } else {
+                            GXDLMS.appendData(arg.getTarget(), arg.getIndex(),
+                                    bb, value);
+                        }
                     }
+                    moreData = settings.getIndex() != settings.getCount();
                 }
-                p.setMultipleBlocks(true);
-                GXDLMS.getLNPdu(p, replyData);
-                if (moreData || bb.size() - bb.position() != 0) {
-                    server.getTransaction().setData(bb);
-                } else {
-                    server.setTransaction(null);
-                    settings.resetBlockIndex();
-                }
+            }
+            p.setMultipleBlocks(true);
+            GXDLMS.getLNPdu(p, replyData);
+            if (moreData || bb.size() - bb.position() != 0) {
+                server.getTransaction().setData(bb);
+            } else {
+                server.setTransaction(null);
+                settings.resetBlockIndex();
             }
         }
     }
