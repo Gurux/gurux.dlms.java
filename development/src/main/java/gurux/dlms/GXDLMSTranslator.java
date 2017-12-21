@@ -1311,6 +1311,15 @@ public class GXDLMSTranslator {
             s.getSettings()
                     .setCtoSChallenge(GXCommon.hexToBytes(getValue(node, s)));
             break;
+        case (int) TranslatorGeneralTags.CALLING_AE_INVOCATION_ID:
+            s.getSettings().setUserId(s.parseInt(getValue(node, s)));
+            break;
+        case (int) TranslatorGeneralTags.CALLED_AE_INVOCATION_ID:
+            s.getSettings().setUserId(s.parseInt(getValue(node, s)));
+            break;
+        case TranslatorGeneralTags.RESPONDING_AE_INVOCATION_ID:
+            s.getSettings().setUserId(s.parseInt(getValue(node, s)));
+            break;
         case 0xA4:
             // RespondingAPTitle.
             s.getSettings()

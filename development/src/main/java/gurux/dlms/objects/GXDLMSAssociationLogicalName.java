@@ -36,6 +36,9 @@ package gurux.dlms.objects;
 
 import java.lang.reflect.Array;
 import java.security.Signature;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Map.Entry;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
@@ -46,6 +49,7 @@ import gurux.dlms.GXDLMSClient;
 import gurux.dlms.GXDLMSServerBase;
 import gurux.dlms.GXDLMSSettings;
 import gurux.dlms.GXDLMSTranslator;
+import gurux.dlms.GXSimpleEntry;
 import gurux.dlms.ValueEventArgs;
 import gurux.dlms.enums.AccessMode;
 import gurux.dlms.enums.Authentication;
@@ -78,6 +82,16 @@ public class GXDLMSAssociationLogicalName extends GXDLMSObject
     private String securitySetupReference;
 
     /**
+     * User list.
+     */
+    private List<Entry<Byte, String>> userList;
+
+    /**
+     * Current user.
+     */
+    private Entry<Byte, String> currentUser;
+
+    /**
      * Constructor.
      */
     public GXDLMSAssociationLogicalName() {
@@ -97,7 +111,8 @@ public class GXDLMSAssociationLogicalName extends GXDLMSObject
         applicationContextName = new GXApplicationContextName();
         xDLMSContextInfo = new GXxDLMSContextType();
         authenticationMechanismName = new GXAuthenticationMechanismName();
-        setVersion(1);
+        setUserList(new ArrayList<Entry<Byte, String>>());
+        setVersion(2);
     }
 
     public final GXDLMSObjectCollection getObjectList() {
@@ -204,6 +219,50 @@ public class GXDLMSAssociationLogicalName extends GXDLMSObject
         return client.method(this, 2, secret, DataType.OCTET_STRING);
     }
 
+    /**
+     * Add user to user list.
+     * 
+     * @param client
+     *            DLMS client.
+     * @param id
+     *            User ID.
+     * @param name
+     *            User name.
+     * @return
+     */
+    public final byte[][] addUser(final GXDLMSClient client, final byte id,
+            final String name) {
+        GXByteBuffer data = new GXByteBuffer();
+        data.setUInt8(DataType.STRUCTURE.getValue());
+        // Add structure size.
+        data.setUInt8(2);
+        GXCommon.setData(data, DataType.UINT8, id);
+        GXCommon.setData(data, DataType.STRING, name);
+        return client.method(this, 5, data.array(), DataType.STRUCTURE);
+    }
+
+    /**
+     * Remove user fro user list.
+     * 
+     * @param client
+     *            DLMS client.
+     * @param id
+     *            User ID.
+     * @param name
+     *            User name.
+     * @return
+     */
+    public final byte[][] removeUser(final GXDLMSClient client, final byte id,
+            final String name) {
+        GXByteBuffer data = new GXByteBuffer();
+        data.setUInt8(DataType.STRUCTURE.getValue());
+        // Add structure size.
+        data.setUInt8(2);
+        GXCommon.setData(data, DataType.UINT8, id);
+        GXCommon.setData(data, DataType.STRING, name);
+        return client.method(this, 6, data.array(), DataType.STRUCTURE);
+    }
+
     @Override
     public final Object[] getValues() {
         return new Object[] { getLogicalName(), getObjectList(),
@@ -272,12 +331,41 @@ public class GXDLMSAssociationLogicalName extends GXDLMSObject
                         "Invalid CtoS:" + GXCommon.toHex(serverChallenge, false)
                                 + "-" + GXCommon.toHex(clientChallenge, false));
                 settings.setConnected(false);
-                return null;
+            }
+        } else if (e.getIndex() == 2) {
+            byte[] tmp = (byte[]) e.getParameters();
+            if (tmp == null || tmp.length == 0) {
+                e.setError(ErrorCode.READ_WRITE_DENIED);
+            } else {
+                secret = tmp;
+            }
+        } else if (e.getIndex() == 5) {
+            Object[] tmp = (Object[]) e.getParameters();
+            if (tmp == null || tmp.length != 2) {
+                e.setError(ErrorCode.READ_WRITE_DENIED);
+            } else {
+                userList.add(new GXSimpleEntry<Byte, String>(
+                        ((Number) tmp[0]).byteValue(), (String) tmp[1]));
+            }
+        } else if (e.getIndex() == 6) {
+            Object[] tmp = (Object[]) e.getParameters();
+            if (tmp == null || tmp.length != 2) {
+                e.setError(ErrorCode.READ_WRITE_DENIED);
+            } else {
+                byte id = ((Number) tmp[0]).byteValue();
+                String name = (String) tmp[1];
+                for (Entry<Byte, String> it : userList) {
+                    if (it.getKey() == id
+                            && it.getValue().compareTo(name) == 0) {
+                        userList.remove(it);
+                        break;
+                    }
+                }
             }
         } else {
             e.setError(ErrorCode.READ_WRITE_DENIED);
-            return null;
         }
+        return null;
     }
 
     /*
@@ -324,11 +412,23 @@ public class GXDLMSAssociationLogicalName extends GXDLMSObject
         if (getVersion() > 0 && !isRead(9)) {
             attributes.add(new Integer(9));
         }
+        // User list and current user are in version 2.
+        if (getVersion() > 1) {
+            if (!isRead(10)) {
+                attributes.add(10);
+            }
+            if (!isRead(11)) {
+                attributes.add(11);
+            }
+        }
         return GXDLMSObjectHelpers.toIntArray(attributes);
     }
 
     @Override
     public final int getAttributeCount() {
+        if (getVersion() > 1) {
+            return 11;
+        }
         // Security Setup Reference is from version 1.
         if (getVersion() > 0) {
             return 9;
@@ -341,6 +441,8 @@ public class GXDLMSAssociationLogicalName extends GXDLMSObject
      */
     @Override
     public final int getMethodCount() {
+        if (getVersion() > 1)
+            return 6;
         return 4;
     }
 
@@ -468,6 +570,32 @@ public class GXDLMSAssociationLogicalName extends GXDLMSObject
         }
     }
 
+    /*
+     * Returns User list.
+     */
+    private GXByteBuffer getUserList(final GXDLMSSettings settings,
+            final ValueEventArgs e) {
+        GXByteBuffer data = new GXByteBuffer();
+        // Add count only for first time.
+        if (settings.getIndex() == 0) {
+            settings.setCount(userList.size());
+            data.setUInt8(DataType.ARRAY.getValue());
+            GXCommon.setObjectCount(userList.size(), data);
+        }
+        int pos = 0;
+        for (Entry<Byte, String> it : userList) {
+            ++pos;
+            if (!(pos <= settings.getIndex())) {
+                settings.setIndex(settings.getIndex() + 1);
+                data.setUInt8(DataType.STRUCTURE.getValue());
+                data.setUInt8(2); // Count
+                GXCommon.setData(data, DataType.UINT8, it.getKey()); // Id
+                GXCommon.setData(data, DataType.STRING, it.getValue()); // Name
+            }
+        }
+        return data;
+    }
+
     @Override
     public final DataType getDataType(final int index) {
         if (index == 1) {
@@ -494,8 +622,16 @@ public class GXDLMSAssociationLogicalName extends GXDLMSObject
         if (index == 8) {
             return DataType.ENUM;
         }
-        if (index == 9) {
+        if (getVersion() > 0 && index == 9) {
             return DataType.OCTET_STRING;
+        }
+        if (getVersion() > 1) {
+            if (index == 10) {
+                return DataType.ARRAY;
+            }
+            if (index == 11) {
+                return DataType.STRUCTURE;
+            }
         }
         throw new IllegalArgumentException(
                 "getDataType failed. Invalid attribute index.");
@@ -594,6 +730,23 @@ public class GXDLMSAssociationLogicalName extends GXDLMSObject
         }
         if (e.getIndex() == 9) {
             return GXCommon.logicalNameToBytes(getSecuritySetupReference());
+        }
+        if (e.getIndex() == 10) {
+            return getUserList(settings, e).array();
+        }
+        if (e.getIndex() == 11) {
+            GXByteBuffer data = new GXByteBuffer();
+            data.setUInt8(DataType.STRUCTURE.getValue());
+            // Add structure size.
+            data.setUInt8(2);
+            if (currentUser == null) {
+                GXCommon.setData(data, DataType.UINT8, 0);
+                GXCommon.setData(data, DataType.STRING, null);
+            } else {
+                GXCommon.setData(data, DataType.UINT8, currentUser.getKey());
+                GXCommon.setData(data, DataType.STRING, currentUser.getValue());
+            }
+            return data.array();
         }
         e.setError(ErrorCode.READ_WRITE_DENIED);
         return null;
@@ -839,6 +992,25 @@ public class GXDLMSAssociationLogicalName extends GXDLMSObject
             setSecuritySetupReference(
                     GXCommon.toLogicalName((byte[]) e.getValue()));
             break;
+        case 10:
+            userList.clear();
+            if (e.getValue() != null) {
+                for (Object tmp : (Object[]) e.getValue()) {
+                    Object[] item = (Object[]) tmp;
+                    userList.add(new GXSimpleEntry<Byte, String>((Byte) item[0],
+                            (String) item[1]));
+                }
+            }
+            break;
+        case 11:
+            if (e.getValue() != null) {
+                Object[] tmp = (Object[]) e.getValue();
+                currentUser = new GXSimpleEntry<Byte, String>(
+                        ((Number) tmp[0]).byteValue(), (String) tmp[1]);
+            } else {
+                currentUser = null;
+            }
+            break;
         default:
             e.setError(ErrorCode.READ_WRITE_DENIED);
         }
@@ -976,5 +1148,21 @@ public class GXDLMSAssociationLogicalName extends GXDLMSObject
 
     @Override
     public final void postLoad(final GXXmlReader reader) {
+    }
+
+    public List<Entry<Byte, String>> getUserList() {
+        return userList;
+    }
+
+    public void setUserList(List<Entry<Byte, String>> userList) {
+        this.userList = userList;
+    }
+
+    public Entry<Byte, String> getCurrentUser() {
+        return currentUser;
+    }
+
+    public void setCurrentUser(Entry<Byte, String> currentUser) {
+        this.currentUser = currentUser;
     }
 }

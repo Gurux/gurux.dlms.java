@@ -157,13 +157,25 @@ final class GXAPDU {
                 throw new IllegalArgumentException("SystemTitle");
             }
             // Add calling-AP-title
-            data.setUInt8((BerType.CONTEXT | BerType.CONSTRUCTED | 6));
+            data.setUInt8((BerType.CONTEXT | BerType.CONSTRUCTED
+                    | PduType.CALLING_AP_TITLE));
             // LEN
             data.setUInt8((2 + cipher.getSystemTitle().length));
             data.setUInt8(BerType.OCTET_STRING);
             // LEN
             data.setUInt8(cipher.getSystemTitle().length);
             data.set(cipher.getSystemTitle());
+        }
+        // Add CallingAEInvocationId.
+        if (!settings.isServer() && settings.getUserId() != -1) {
+            data.setUInt8(BerType.CONTEXT | BerType.CONSTRUCTED
+                    | PduType.CALLING_AE_INVOCATION_ID);
+            // LEN
+            data.setUInt8(3);
+            data.setUInt8(BerType.INTEGER);
+            // LEN
+            data.setUInt8(1);
+            data.setUInt8(settings.getUserId());
         }
     }
 
@@ -923,6 +935,47 @@ final class GXAPDU {
                 settings.setStoCChallenge(tmp);
                 appendServerSystemTitleToXml(settings, xml, tag);
                 break;
+            // Client AEInvocationId.
+            case BerType.CONTEXT | BerType.CONSTRUCTED
+                    | PduType.CALLING_AE_INVOCATION_ID:// 0xA9
+                len = buff.getUInt8();
+                tag = buff.getUInt8();
+                len = buff.getUInt8();
+                settings.setUserId(buff.getUInt8());
+                if (xml != null) {
+                    // CallingAPTitle
+                    xml.appendLine(
+                            TranslatorGeneralTags.CALLING_AE_INVOCATION_ID,
+                            "Value", xml.integerToHex(settings.getUserId(), 2));
+                }
+                break;
+            // Client CalledAeInvocationId.
+            case BerType.CONTEXT | BerType.CONSTRUCTED
+                    | PduType.CALLED_AE_INVOCATION_ID:// 0xA5
+                len = buff.getUInt8();
+                tag = buff.getUInt8();
+                len = buff.getUInt8();
+                settings.setUserId(buff.getUInt8());
+                if (xml != null) {
+                    // CallingAPTitle
+                    xml.appendLine(
+                            TranslatorGeneralTags.CALLED_AE_INVOCATION_ID,
+                            "Value", xml.integerToHex(settings.getUserId(), 2));
+                }
+                break;
+            // Server RespondingAEInvocationId.
+            case BerType.CONTEXT | BerType.CONSTRUCTED | 7:// 0xA7
+                len = buff.getUInt8();
+                tag = buff.getUInt8();
+                len = buff.getUInt8();
+                settings.setUserId(buff.getUInt8());
+                if (xml != null) {
+                    // CallingAPTitle
+                    xml.appendLine(
+                            TranslatorGeneralTags.RESPONDING_AE_INVOCATION_ID,
+                            "Value", xml.integerToHex(settings.getUserId(), 2));
+                }
+                break;
             case BerType.CONTEXT | PduType.SENDER_ACSE_REQUIREMENTS: // 0x8A
             case BerType.CONTEXT | PduType.CALLING_AP_INVOCATION_ID: // 0x88
                 // Get sender ACSE-requirements field component.
@@ -1233,6 +1286,17 @@ final class GXAPDU {
             data.setUInt8(BerType.OCTET_STRING);
             data.setUInt8(cipher.getSystemTitle().length);
             data.set(cipher.getSystemTitle());
+        }
+        // Add CalledAEInvocationId.
+        if (settings.getUserId() != -1) {
+            data.setUInt8(BerType.CONTEXT | BerType.CONSTRUCTED
+                    | PduType.CALLED_AE_INVOCATION_ID);
+            // LEN
+            data.setUInt8(3);
+            data.setUInt8(BerType.INTEGER);
+            // LEN
+            data.setUInt8(1);
+            data.setUInt8(settings.getUserId());
         }
 
         if (settings.getAuthentication().getValue() > Authentication.LOW

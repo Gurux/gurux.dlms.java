@@ -123,6 +123,15 @@ final class TranslatorStandardTags {
                 "x:informationReportRequest");
         GXDLMSTranslator.addTag(list, Command.EVENT_NOTIFICATION,
                 "x:event-notification-request");
+        GXDLMSTranslator.addTag(list,
+                TranslatorGeneralTags.CALLING_AE_INVOCATION_ID,
+                "x:calling-AE-invocation-id");
+        GXDLMSTranslator.addTag(list,
+                TranslatorGeneralTags.CALLED_AE_INVOCATION_ID,
+                "x:called-AE-invocation-id");
+        GXDLMSTranslator.addTag(list,
+                TranslatorGeneralTags.RESPONDING_AE_INVOCATION_ID,
+                "x:responding-AE-invocation-id");
     }
 
     /**
@@ -269,6 +278,7 @@ final class TranslatorStandardTags {
                 "x:access-response-list-of-data");
         list.put(TranslatorTags.SERVICE, "x:service");
         list.put(TranslatorTags.SERVICE_ERROR, "x:service-error");
+        list.put(Command.GENERAL_BLOCK_TRANSFER, "x:general-block-transfer");
     }
 
     /**
@@ -426,6 +436,12 @@ final class TranslatorStandardTags {
         GXDLMSTranslator.addTag(list, TranslatorTags.VALUE_LIST, "value-list");
         GXDLMSTranslator.addTag(list, TranslatorTags.DATA_ACCESS_RESULT,
                 "x:data-access-result");
+        GXDLMSTranslator.addTag(list, TranslatorTags.BLOCK_CONTROL,
+                "x:block-control");
+        GXDLMSTranslator.addTag(list, TranslatorTags.BLOCK_NUMBER_ACK,
+                "x:block-number-ack");
+        GXDLMSTranslator.addTag(list, TranslatorTags.BLOCK_DATA,
+                "x:block-data");
     }
 
     static void getDataTypeTags(final HashMap<Integer, String> list) {

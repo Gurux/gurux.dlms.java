@@ -184,6 +184,25 @@ public class GXDLMSClient {
     }
 
     /**
+     * User id is the identifier of the user. This value is used if user list on
+     * Association LN is used.
+     */
+    public final int getUserId() {
+        return settings.getUserId();
+    }
+
+    /**
+     * User id is the identifier of the user. This value is used if user list on
+     * Association LN is used.
+     */
+    public final void setUserId(final int value) {
+        if (value < -1 || value > 255) {
+            throw new IllegalArgumentException("Invalid user Id.");
+        }
+        settings.setUserId(value);
+    }
+
+    /**
      * @return Client address.
      */
     public final int getClientAddress() {

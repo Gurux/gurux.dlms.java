@@ -268,6 +268,12 @@ public class GXDLMSSettings {
      */
     private byte windowSize;
 
+    /*
+     * User id is the identifier of the user. This value is used if user list on
+     * Association LN is used.
+     */
+    private int userId;
+
     /**
      * Constructor.
      */
@@ -278,6 +284,7 @@ public class GXDLMSSettings {
         proposedConformance.addAll(GXDLMSClient.getInitialConformance(false));
         resetFrameSequence();
         windowSize = 1;
+        userId = -1;
     }
 
     /**
@@ -1012,5 +1019,20 @@ public class GXDLMSSettings {
      */
     public final void setWindowSize(final byte value) {
         windowSize = value;
+    }
+
+    /**
+     * @return User id is the identifier of the user.
+     */
+    public final int getUserId() {
+        return userId;
+    }
+
+    /**
+     * @param value
+     *            User id is the identifier of the user.
+     */
+    public final void setUserId(final int value) {
+        userId = value;
     }
 }

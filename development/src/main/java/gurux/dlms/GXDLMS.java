@@ -2581,15 +2581,16 @@ abstract class GXDLMS {
             data.setComplete(false);
             return;
         }
-        if ((data.getData().size() - data.getData().position()) != len) {
-            System.out.println("Data length is " + String.valueOf(len)
-                    + "and there are "
-                    + String.valueOf(
-                            data.getData().size() - data.getData().position())
-                    + " bytes.");
-        }
 
         if (data.getXml() != null) {
+            if ((data.getData().size() - data.getData().position()) != len) {
+                data.getXml()
+                        .appendComment("Data length is " + String.valueOf(len)
+                                + "and there are "
+                                + String.valueOf(data.getData().size()
+                                        - data.getData().position())
+                                + " bytes.");
+            }
             data.getXml().appendStartTag(Command.GENERAL_BLOCK_TRANSFER);
             if (data.getXml().isComments()) {
                 data.getXml()

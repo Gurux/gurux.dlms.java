@@ -257,6 +257,16 @@ final class TranslatorSimpleTags {
                 "AccessResponseListOfData");
         list.put(TranslatorTags.SERVICE, "Service");
         list.put(TranslatorTags.SERVICE_ERROR, "ServiceError");
+        list.put(Command.GENERAL_BLOCK_TRANSFER, "GeneralBlockTransfer");
+        GXDLMSTranslator.addTag(list,
+                TranslatorGeneralTags.CALLING_AE_INVOCATION_ID,
+                "CallingAEInvocationId");
+        GXDLMSTranslator.addTag(list,
+                TranslatorGeneralTags.CALLED_AE_INVOCATION_ID,
+                "CalledAEInvocationId");
+        GXDLMSTranslator.addTag(list,
+                TranslatorGeneralTags.RESPONDING_AE_INVOCATION_ID,
+                "RespondingAEInvocationId");
     }
 
     /**
@@ -405,6 +415,11 @@ final class TranslatorSimpleTags {
         GXDLMSTranslator.addTag(list, TranslatorTags.VALUE_LIST, "ValueList");
         GXDLMSTranslator.addTag(list, TranslatorTags.DATA_ACCESS_RESULT,
                 "DataAccessResult");
+        GXDLMSTranslator.addTag(list, TranslatorTags.BLOCK_CONTROL,
+                "BlockControl");
+        GXDLMSTranslator.addTag(list, TranslatorTags.BLOCK_NUMBER_ACK,
+                "BlockNumberAck");
+        GXDLMSTranslator.addTag(list, TranslatorTags.BLOCK_DATA, "BlockData");
     }
 
     static void getDataTypeTags(final HashMap<Integer, String> list) {
