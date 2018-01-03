@@ -373,6 +373,14 @@ public class GXDLMSTranslator {
                     if (found) {
                         break;
                     }
+                } else if (type == InterfaceType.WIRELESS_MBUS) {
+                    pos = data.position();
+                    settings.setInterfaceType(InterfaceType.WIRELESS_MBUS);
+                    found = GXDLMS.getData(settings, data, reply);
+                    data.position(pos);
+                    if (found) {
+                        break;
+                    }
                 }
                 data.position(data.position() + 1);
             }
@@ -453,6 +461,9 @@ public class GXDLMSTranslator {
             }
             if (value.getUInt16(pos) == 1) {
                 return InterfaceType.WRAPPER;
+            }
+            if (GXDLMS.isMBusData(value)) {
+                return InterfaceType.WIRELESS_MBUS;
             }
         }
         throw new IllegalArgumentException("Invalid DLMS framing.");
@@ -672,6 +683,47 @@ public class GXDLMSTranslator {
                 }
                 return xml.toString();
             }
+            // If Wireless M-Bus.
+            else if (GXDLMS.isMBusData(value)) {
+                settings.setInterfaceType(InterfaceType.WIRELESS_MBUS);
+                int len = xml.getXmlLength();
+                GXDLMS.getData(settings, value, data);
+                String tmp = xml.toString().substring(len);
+                xml.setXmlLength(len);
+                if (!getPduOnly()) {
+                    xml.appendLine(
+                            "<WirelessMBus len=\""
+                                    + xml.integerToHex(
+                                            data.getPacketLength() - offset, 0)
+                                    + "\" >");
+                    xml.appendLine("<TargetAddress Value=\""
+                            + xml.integerToHex(settings.getServerAddress(), 0)
+                            + "\" />");
+                    xml.appendLine("<SourceAddress Value=\""
+                            + xml.integerToHex(settings.getClientAddress(), 0)
+                            + "\" />");
+                    xml.append(tmp);
+                }
+                if (data.getData().size() == 0) {
+                    xml.appendLine("<Command Value=\""
+                            + Command.toString(data.getCommand()) + "\" />");
+                } else {
+                    if (!getPduOnly()) {
+                        xml.appendLine("<PDU>");
+                    }
+                    xml.appendLine(pduToXml(data.getData(), true, true));
+                    // Remove \r\n.
+                    xml.trim();
+                    if (!getPduOnly()) {
+                        xml.appendLine("</PDU>");
+                    }
+                }
+                if (!getPduOnly()) {
+                    xml.appendLine("</WRAPPER>");
+                }
+                return xml.toString();
+            }
+
         } catch (RuntimeException ex) {
             System.out.println(ex.getMessage());
         }
@@ -984,14 +1036,21 @@ public class GXDLMSTranslator {
                 break;
             case Command.GENERAL_GLO_CIPHERING:
                 if (settings.getCipher() != null && comments) {
-                    GXByteBuffer tmp = new GXByteBuffer();
-                    tmp.set(value.getData(), value.position() - 1,
-                            value.size() - value.position() + 1);
-                    settings.getCipher().decrypt(
-                            settings.getCipher().getSystemTitle(), tmp);
-                    xml.startComment("Decrypt data:");
-                    pduToXml(xml, tmp, omitDeclaration, omitNameSpace);
-                    xml.endComment();
+                    int len = xml.getXmlLength();
+                    try {
+                        GXByteBuffer tmp = new GXByteBuffer();
+                        tmp.set(value.getData(), value.position() - 1,
+                                value.size() - value.position() + 1);
+                        settings.getCipher().decrypt(
+                                settings.getCipher().getSystemTitle(), tmp);
+                        xml.startComment("Decrypt data:");
+                        pduToXml(xml, tmp, omitDeclaration, omitNameSpace);
+                        xml.endComment();
+                    } catch (Exception e) {
+                        // It's OK if this fails. Ciphering settings are not
+                        // correct.
+                        xml.setXmlLength(len);
+                    }
                 }
                 int len = GXCommon.getObjectCount(value);
                 byte[] tmp = new byte[len];

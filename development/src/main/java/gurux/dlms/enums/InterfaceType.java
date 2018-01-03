@@ -42,16 +42,19 @@ public enum InterfaceType {
      * By default, the interface type is HDLC.
      */
     HDLC,
-    /*
-     * The interface type is Net, can be used with devices that support IEC
-     * 62056-47.
+    /**
+     * The interface type is TCP/IP or UDP wrapper, can be used with devices
+     * that support IEC 62056-47.
      */
     WRAPPER,
     /**
      * Plain PDU is returned.
      */
-    PDU;
-
+    PDU,
+    /**
+     * Wireless M-Bus frame.
+     */
+    WIRELESS_MBUS;
     /**
      * @return Get integer value for enumeration.
      */

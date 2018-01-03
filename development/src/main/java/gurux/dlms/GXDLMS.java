@@ -1674,6 +1674,120 @@ abstract class GXDLMS {
         }
     }
 
+    /**
+     * Encrypt Flag name to two bytes.
+     * 
+     * @param flagName
+     *            3 letter Flag name.
+     * @return Encrypted Flag name.
+     */
+    private static int encryptManufacturer(final String flagName) {
+        if (flagName.length() != 3) {
+            throw new IllegalArgumentException("Invalid Flag name.");
+        }
+        int value = ((flagName.charAt(0) - 0x40) & 0x1f);
+        value <<= 5;
+        value += ((flagName.charAt(0) - 0x40) & 0x1f);
+        value <<= 5;
+        value += ((flagName.charAt(0) - 0x40) & 0x1f);
+        return value;
+    }
+
+    /**
+     * Decrypt two bytes to Flag name.
+     * 
+     * @param value
+     *            Encrypted Flag value.
+     * @return Flag name.
+     */
+    private static String decryptManufacturer(final int value) {
+        int tmp = (value >> 8 | value << 8);
+        char c = (char) ((tmp & 0x1f) + 0x40);
+        tmp = (tmp >> 5);
+        char c1 = (char) ((tmp & 0x1f) + 0x40);
+        tmp = (tmp >> 5);
+        char c2 = (char) ((tmp & 0x1f) + 0x40);
+        return new String(new char[] { c2, c1, c });
+    }
+
+    /**
+     * Get data from Wireless M-Bus frame.
+     * 
+     * @param settings
+     *            DLMS settings.
+     * @param buff
+     *            Received data.
+     * @param data
+     *            Reply information.
+     */
+    static void getMBusData(final GXDLMSSettings settings,
+            final GXByteBuffer buff, final GXReplyData data) {
+        // L-field.
+        int len = buff.getUInt8();
+        // Some meters are counting length to frame size.
+        if (buff.size() < len - 1) {
+            data.setComplete(false);
+            buff.position(buff.position() - 1);
+        } else {
+            // Some meters are counting length to frame size.
+            if (buff.size() < len) {
+                --len;
+            }
+            data.setPacketLength(len);
+            data.setComplete(true);
+            // C-field.
+            MBusCommand cmd = MBusCommand.forValue(buff.getUInt8());
+            // M-Field.
+            int manufacturerID = buff.getUInt16();
+            String man = decryptManufacturer(manufacturerID);
+            // A-Field.
+            long id = buff.getUInt32();
+            short meterVersion = buff.getUInt8();
+            MBusMeterType type = MBusMeterType.forValue(buff.getUInt8());
+            // CI-Field
+            MBusControlInfo ci = MBusControlInfo.forValue(buff.getUInt8());
+            // Access number.
+            short frameId = buff.getUInt8();
+            // State of the meter
+            short state = buff.getUInt8();
+            // Configuration word.
+            int configurationWord = buff.getUInt16();
+            // byte encryptedBlocks = (byte) (configurationWord >> 12);
+            MBusEncryptionMode encryption =
+                    MBusEncryptionMode.forValue(configurationWord & 7);
+            settings.setClientAddress(buff.getUInt8());
+            settings.setServerAddress(buff.getUInt8());
+            if (data.getXml() != null && data.getXml().isComments()) {
+                data.getXml().appendComment("Command: " + cmd);
+                data.getXml().appendComment("Manufacturer: " + man);
+                data.getXml().appendComment("Meter Version: " + meterVersion);
+                data.getXml().appendComment("Meter Type: " + type);
+                data.getXml().appendComment("Control Info: " + ci);
+                data.getXml().appendComment("Encryption: " + encryption);
+            }
+        }
+    }
+
+    /**
+     * Check is this M-Bus message.
+     * 
+     * @param buff
+     *            Received data.
+     * @return True, if this is M-Bus message.
+     */
+    static boolean isMBusData(final GXByteBuffer buff) {
+        if (buff.size() - buff.position() < 2) {
+            return false;
+        }
+        MBusCommand cmd =
+                MBusCommand.forValue(buff.getUInt8(buff.position() + 1));
+        if (!(cmd == MBusCommand.SND_NR || cmd == MBusCommand.SND_UD2
+                || cmd == MBusCommand.RSP_UD)) {
+            return false;
+        }
+        return true;
+    }
+
     private static void checkWrapperAddress(final GXDLMSSettings settings,
             final GXByteBuffer buff, final GXReplyData data) {
         int value;
@@ -3025,6 +3139,8 @@ abstract class GXDLMS {
             data.setFrameId(frame);
         } else if (settings.getInterfaceType() == InterfaceType.WRAPPER) {
             getTcpData(settings, reply, data);
+        } else if (settings.getInterfaceType() == InterfaceType.WIRELESS_MBUS) {
+            getMBusData(settings, reply, data);
         } else if (settings.getInterfaceType() == InterfaceType.PDU) {
             data.setPacketLength(reply.size());
             data.setComplete(true);
@@ -3198,6 +3314,14 @@ abstract class GXDLMS {
         case SECURITY_SETUP:
             value[0] = 0x30;
             count[0] = 8;
+            break;
+        case DISCONNECT_CONTROL:
+            value[0] = 0x20;
+            count[0] = 2;
+            break;
+        case PUSH_SETUP:
+            value[0] = 0x38;
+            count[0] = 1;
             break;
         default:
             count[0] = 0;
