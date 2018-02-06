@@ -35,8 +35,8 @@
 package gurux.dlms.objects.enums;
 
 /**
- * Enumerates account credit status modes.<br/>
- * Online help:<br/>
+ * Enumerates account credit status modes.<br>
+ * Online help:<br>
  * http://www.gurux.fi/Gurux.DLMS.Objects.GXDLMSCharge
  */
 public enum ChargeType {

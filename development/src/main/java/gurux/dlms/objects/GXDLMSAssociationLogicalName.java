@@ -228,7 +228,7 @@ public class GXDLMSAssociationLogicalName extends GXDLMSObject
      *            User ID.
      * @param name
      *            User name.
-     * @return
+     * @return Action bytes.
      */
     public final byte[][] addUser(final GXDLMSClient client, final byte id,
             final String name) {
@@ -242,7 +242,7 @@ public class GXDLMSAssociationLogicalName extends GXDLMSObject
     }
 
     /**
-     * Remove user fro user list.
+     * Remove user from user list.
      * 
      * @param client
      *            DLMS client.
@@ -250,7 +250,7 @@ public class GXDLMSAssociationLogicalName extends GXDLMSObject
      *            User ID.
      * @param name
      *            User name.
-     * @return
+     * @return Action bytes.
      */
     public final byte[][] removeUser(final GXDLMSClient client, final byte id,
             final String name) {

@@ -37,8 +37,8 @@ package gurux.dlms.objects.enums;
 import java.util.HashMap;
 
 /**
- * Enumerates account credit status modes.<br/>
- * Online help:<br/>
+ * Enumerates account credit status modes.<br>
+ * Online help:<br>
  * http://www.gurux.fi/Gurux.DLMS.Objects.GXDLMSAccount
  */
 public enum AccountCreditStatus {

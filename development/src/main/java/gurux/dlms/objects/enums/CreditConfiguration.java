@@ -38,8 +38,8 @@ import java.util.HashMap;
 import java.util.HashSet;
 
 /**
- * Enumerated Credit configuration values.<br/>
- * Online help:<br/>
+ * Enumerated Credit configuration values.<br>
+ * Online help:<br>
  * http://www.gurux.fi/Gurux.DLMS.Objects.GXDLMSAccount
  */
 public enum CreditConfiguration {

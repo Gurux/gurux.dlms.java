@@ -35,8 +35,8 @@
 package gurux.dlms.objects.enums;
 
 /**
- * Enumerates token delivery methods.<br/>
- * Online help:<br/>
+ * Enumerates token delivery methods.<br>
+ * Online help:<br>
  * http://www.gurux.fi/Gurux.DLMS.Objects.GXDLMSTokenGateway
  */
 public enum TokenDelivery {

@@ -52,49 +52,49 @@ import gurux.dlms.objects.enums.TokenDelivery;
 import gurux.dlms.objects.enums.TokenStatusCode;
 
 /**
- * Online help:<br/>
+ * Online help:<br>
  * http://www.gurux.fi/Gurux.DLMS.Objects.GXDLMSTokenGateway
  */
 public class GXDLMSTokenGateway extends GXDLMSObject implements IGXDLMSBase {
 
     /**
-     * Token.<br/>
-     * Online help:<br/>
+     * Token.<br>
+     * Online help:<br>
      * http://www.gurux.fi/Gurux.DLMS.Objects.GXDLMSTokenGateway
      */
     private byte[] token;
 
     /**
-     * Time.<br/>
-     * Online help:<br/>
+     * Time.<br>
+     * Online help:<br>
      * http://www.gurux.fi/Gurux.DLMS.Objects.GXDLMSTokenGateway
      */
     private GXDateTime time;
 
     /**
-     * Descriptions.<br/>
-     * Online help:<br/>
+     * Descriptions.<br>
+     * Online help:<br>
      * http://www.gurux.fi/Gurux.DLMS.Objects.GXDLMSTokenGateway
      */
     private List<String> descriptions;
 
     /**
-     * Token Delivery method.<br/>
-     * Online help:<br/>
+     * Token Delivery method.<br>
+     * Online help:<br>
      * http://www.gurux.fi/Gurux.DLMS.Objects.GXDLMSTokenGateway
      */
     private TokenDelivery deliveryMethod;
 
     /**
-     * Token status code.<br/>
-     * Online help:<br/>
+     * Token status code.<br>
+     * Online help:<br>
      * http://www.gurux.fi/Gurux.DLMS.Objects.GXDLMSTokenGateway
      */
     private TokenStatusCode statusCode;
 
     /**
-     * Token data value.<br/>
-     * Online help:<br/>
+     * Token data value.<br>
+     * Online help:<br>
      * http://www.gurux.fi/Gurux.DLMS.Objects.GXDLMSTokenGateway
      */
     private String dataValue;
@@ -130,7 +130,7 @@ public class GXDLMSTokenGateway extends GXDLMSObject implements IGXDLMSBase {
     }
 
     /**
-     * Online help:<br/>
+     * Online help:<br>
      * http://www.gurux.fi/Gurux.DLMS.Objects.GXDLMSTokenGateway
      * 
      * @return Token.
@@ -140,7 +140,7 @@ public class GXDLMSTokenGateway extends GXDLMSObject implements IGXDLMSBase {
     }
 
     /**
-     * Online help:<br/>
+     * Online help:<br>
      * http://www.gurux.fi/Gurux.DLMS.Objects.GXDLMSTokenGateway
      * 
      * @param value
@@ -151,7 +151,7 @@ public class GXDLMSTokenGateway extends GXDLMSObject implements IGXDLMSBase {
     }
 
     /**
-     * Online help:<br/>
+     * Online help:<br>
      * http://www.gurux.fi/Gurux.DLMS.Objects.GXDLMSTokenGateway
      * 
      * @return Time.
@@ -161,7 +161,7 @@ public class GXDLMSTokenGateway extends GXDLMSObject implements IGXDLMSBase {
     }
 
     /**
-     * Online help:<br/>
+     * Online help:<br>
      * http://www.gurux.fi/Gurux.DLMS.Objects.GXDLMSTokenGateway
      * 
      * @param value
@@ -172,7 +172,7 @@ public class GXDLMSTokenGateway extends GXDLMSObject implements IGXDLMSBase {
     }
 
     /**
-     * Online help:<br/>
+     * Online help:<br>
      * http://www.gurux.fi/Gurux.DLMS.Objects.GXDLMSTokenGateway
      * 
      * @return Descriptions.
@@ -182,7 +182,7 @@ public class GXDLMSTokenGateway extends GXDLMSObject implements IGXDLMSBase {
     }
 
     /**
-     * Online help:<br/>
+     * Online help:<br>
      * http://www.gurux.fi/Gurux.DLMS.Objects.GXDLMSTokenGateway
      * 
      * @param value
@@ -193,7 +193,7 @@ public class GXDLMSTokenGateway extends GXDLMSObject implements IGXDLMSBase {
     }
 
     /**
-     * Online help:<br/>
+     * Online help:<br>
      * http://www.gurux.fi/Gurux.DLMS.Objects.GXDLMSTokenGateway
      * 
      * @return Token Delivery method.
@@ -203,7 +203,7 @@ public class GXDLMSTokenGateway extends GXDLMSObject implements IGXDLMSBase {
     }
 
     /**
-     * Online help:<br/>
+     * Online help:<br>
      * http://www.gurux.fi/Gurux.DLMS.Objects.GXDLMSTokenGateway
      * 
      * @param value
@@ -214,7 +214,7 @@ public class GXDLMSTokenGateway extends GXDLMSObject implements IGXDLMSBase {
     }
 
     /**
-     * Online help:<br/>
+     * Online help:<br>
      * http://www.gurux.fi/Gurux.DLMS.Objects.GXDLMSTokenGateway
      * 
      * @return Token status code.
@@ -224,7 +224,7 @@ public class GXDLMSTokenGateway extends GXDLMSObject implements IGXDLMSBase {
     }
 
     /**
-     * Online help:<br/>
+     * Online help:<br>
      * http://www.gurux.fi/Gurux.DLMS.Objects.GXDLMSTokenGateway
      * 
      * @param value
@@ -235,7 +235,7 @@ public class GXDLMSTokenGateway extends GXDLMSObject implements IGXDLMSBase {
     }
 
     /**
-     * Online help:<br/>
+     * Online help:<br>
      * http://www.gurux.fi/Gurux.DLMS.Objects.GXDLMSTokenGateway
      * 
      * @return Token data value.
@@ -245,7 +245,7 @@ public class GXDLMSTokenGateway extends GXDLMSObject implements IGXDLMSBase {
     }
 
     /**
-     * Online help:<br/>
+     * Online help:<br>
      * http://www.gurux.fi/Gurux.DLMS.Objects.GXDLMSTokenGateway
      * 
      * @param value

@@ -35,8 +35,8 @@
 package gurux.dlms.objects.enums;
 
 /**
- * Enumerates credit types.<br/>
- * Online help:<br/>
+ * Enumerates credit types.<br>
+ * Online help:<br>
  * http://www.gurux.fi/Gurux.DLMS.Objects.GXDLMSCredit
  */
 public enum CreditType {

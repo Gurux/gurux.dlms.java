@@ -35,8 +35,8 @@
 package gurux.dlms.objects.enums;
 
 /**
- * Enumerates token status codes.<br/>
- * Online help:<br/>
+ * Enumerates token status codes.<br>
+ * Online help:<br>
  * http://www.gurux.fi/Gurux.DLMS.Objects.GXDLMSTokenGateway
  */
 public enum TokenStatusCode {

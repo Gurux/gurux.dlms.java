@@ -35,25 +35,25 @@
 package gurux.dlms.objects;
 
 /**
- * Online help:<br/>
+ * Online help:<br>
  * http://www.gurux.fi/Gurux.DLMS.Objects.GXDLMSCharge
  */
 public class GXChargePerUnitScaling {
     /**
-     * Commodity scale.<br/>
-     * Online help:<br/>
+     * Commodity scale.<br>
+     * Online help:<br>
      * http://www.gurux.fi/Gurux.DLMS.Objects.GXDLMSCharge
      */
     private short commodityScale;
     /**
-     * Price scale.<br/>
-     * Online help:<br/>
+     * Price scale.<br>
+     * Online help:<br>
      * http://www.gurux.fi/Gurux.DLMS.Objects.GXDLMSCharge
      */
     private short priceScale;
 
     /**
-     * Online help:<br/>
+     * Online help:<br>
      * http://www.gurux.fi/Gurux.DLMS.Objects.GXDLMSCharge
      * 
      * @return Commodity scale.
@@ -63,7 +63,7 @@ public class GXChargePerUnitScaling {
     }
 
     /**
-     * Online help:<br/>
+     * Online help:<br>
      * http://www.gurux.fi/Gurux.DLMS.Objects.GXDLMSCharge
      * 
      * @param value
@@ -74,7 +74,7 @@ public class GXChargePerUnitScaling {
     }
 
     /**
-     * Online help:<br/>
+     * Online help:<br>
      * http://www.gurux.fi/Gurux.DLMS.Objects.GXDLMSCharge
      * 
      * @return Price scale.
@@ -84,7 +84,7 @@ public class GXChargePerUnitScaling {
     }
 
     /**
-     * Online help:<br/>
+     * Online help:<br>
      * http://www.gurux.fi/Gurux.DLMS.Objects.GXDLMSCharge
      * 
      * @param value

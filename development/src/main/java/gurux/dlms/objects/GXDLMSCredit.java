@@ -52,63 +52,63 @@ import gurux.dlms.objects.enums.CreditStatus;
 import gurux.dlms.objects.enums.CreditType;
 
 /**
- * Online help:<br/>
+ * Online help:<br>
  * http://www.gurux.fi/Gurux.DLMS.Objects.GXDLMSCredit
  */
 public class GXDLMSCredit extends GXDLMSObject implements IGXDLMSBase {
 
     /**
-     * Current credit amount. Online help:<br/>
+     * Current credit amount. Online help:<br>
      * http://www.gurux.fi/Gurux.DLMS.Objects.GXDLMSCredit
      */
     private int currentCreditAmount;
     /**
-     * Type. Online help:<br/>
+     * Type. Online help:<br>
      * http://www.gurux.fi/Gurux.DLMS.Objects.GXDLMSCredit
      */
     private CreditType type;
     /**
-     * Priority. Online help:<br/>
+     * Priority. Online help:<br>
      * http://www.gurux.fi/Gurux.DLMS.Objects.GXDLMSCredit
      */
     private byte priority;
     /**
-     * Warning threshold. Online help:<br/>
+     * Warning threshold. Online help:<br>
      * http://www.gurux.fi/Gurux.DLMS.Objects.GXDLMSCredit
      */
     private int warningThreshold;
 
     /**
-     * Limit. Online help:<br/>
+     * Limit. Online help:<br>
      * http://www.gurux.fi/Gurux.DLMS.Objects.GXDLMSCredit
      */
     private int limit;
     /**
-     * Credit configuration. Online help:<br/>
+     * Credit configuration. Online help:<br>
      * http://www.gurux.fi/Gurux.DLMS.Objects.GXDLMSCredit
      */
     private java.util.Set<CreditConfiguration> creditConfiguration;
     /**
-     * Status. <br/>
-     * Online help:<br/>
+     * Status. <br>
+     * Online help:<br>
      * http://www.gurux.fi/Gurux.DLMS.Objects.GXDLMSCredit
      */
     private CreditStatus status;
     /**
-     * Preset credit amount. <br/>
-     * Online help:<br/>
+     * Preset credit amount. <br>
+     * Online help:<br>
      * http://www.gurux.fi/Gurux.DLMS.Objects.GXDLMSCredit
      */
     private int presetCreditAmount;
     /**
-     * Credit available threshold.<br/>
-     * Online help:<br/>
+     * Credit available threshold.<br>
+     * Online help:<br>
      * http://www.gurux.fi/Gurux.DLMS.Objects.GXDLMSCredit
      */
     private int creditAvailableThreshold;
     /**
-     * Period.<br/>
-     * Online help:<br/>
+     * Period.<br>
+     * Online help:<br>
      * http://www.gurux.fi/Gurux.DLMS.Objects.GXDLMSCredit
      */
     private GXDateTime period;
@@ -280,7 +280,7 @@ public class GXDLMSCredit extends GXDLMSObject implements IGXDLMSBase {
     }
 
     /**
-     * Online help:<br/>
+     * Online help:<br>
      * http://www.gurux.fi/Gurux.DLMS.Objects.GXDLMSCredit
      * 
      * @return Period
@@ -290,7 +290,7 @@ public class GXDLMSCredit extends GXDLMSObject implements IGXDLMSBase {
     }
 
     /**
-     * Online help:<br/>
+     * Online help:<br>
      * http://www.gurux.fi/Gurux.DLMS.Objects.GXDLMSCredit
      * 
      * @param value

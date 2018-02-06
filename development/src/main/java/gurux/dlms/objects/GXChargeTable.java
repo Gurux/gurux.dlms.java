@@ -35,26 +35,26 @@
 package gurux.dlms.objects;
 
 /**
- * Online help:<br/>
+ * Online help:<br>
  * http://www.gurux.fi/Gurux.DLMS.Objects.GXDLMSCharge
  */
 public class GXChargeTable {
     /**
-     * Index.<br/>
-     * Online help:<br/>
+     * Index.<br>
+     * Online help:<br>
      * http://www.gurux.fi/Gurux.DLMS.Objects.GXDLMSCharge
      */
     private String index;
 
     /**
-     * Charge per unit.<br/>
-     * Online help:<br/>
+     * Charge per unit.<br>
+     * Online help:<br>
      * http://www.gurux.fi/Gurux.DLMS.Objects.GXDLMSCharge
      */
     private short chargePerUnit;
 
     /**
-     * Online help:<br/>
+     * Online help:<br>
      * http://www.gurux.fi/Gurux.DLMS.Objects.GXDLMSCharge
      * 
      * @return Index.
@@ -64,7 +64,7 @@ public class GXChargeTable {
     }
 
     /**
-     * Online help:<br/>
+     * Online help:<br>
      * http://www.gurux.fi/Gurux.DLMS.Objects.GXDLMSCharge
      * 
      * @param value
@@ -75,7 +75,7 @@ public class GXChargeTable {
     }
 
     /**
-     * Online help:<br/>
+     * Online help:<br>
      * http://www.gurux.fi/Gurux.DLMS.Objects.GXDLMSCharge
      * 
      * @return Charge per unit.
@@ -85,7 +85,7 @@ public class GXChargeTable {
     }
 
     /**
-     * Online help:<br/>
+     * Online help:<br>
      * http://www.gurux.fi/Gurux.DLMS.Objects.GXDLMSCharge
      * 
      * @param value

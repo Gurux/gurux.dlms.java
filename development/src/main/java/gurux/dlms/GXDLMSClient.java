@@ -186,6 +186,8 @@ public class GXDLMSClient {
     /**
      * User id is the identifier of the user. This value is used if user list on
      * Association LN is used.
+     * 
+     * @return User id.
      */
     public final int getUserId() {
         return settings.getUserId();
@@ -194,6 +196,9 @@ public class GXDLMSClient {
     /**
      * User id is the identifier of the user. This value is used if user list on
      * Association LN is used.
+     * 
+     * @param value
+     *            User id.
      */
     public final void setUserId(final int value) {
         if (value < -1 || value > 255) {

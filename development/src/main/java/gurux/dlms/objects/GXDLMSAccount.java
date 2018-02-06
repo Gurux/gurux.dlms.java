@@ -54,137 +54,137 @@ import gurux.dlms.objects.enums.Currency;
 import gurux.dlms.objects.enums.PaymentMode;
 
 /**
- * Online help:<br/>
+ * Online help:<br>
  * http://www.gurux.fi/Gurux.DLMS.Objects.GXDLMSAccount
  */
 public class GXDLMSAccount extends GXDLMSObject implements IGXDLMSBase {
     /**
-     * Payment mode.<br/>
-     * Online help:<br/>
+     * Payment mode.<br>
+     * Online help:<br>
      * http://www.gurux.fi/Gurux.DLMS.Objects.GXDLMSAccount
      */
 
     private PaymentMode paymentMode;
 
     /**
-     * Account status.<br/>
-     * Online help:<br/>
+     * Account status.<br>
+     * Online help:<br>
      * http://www.gurux.fi/Gurux.DLMS.Objects.GXDLMSAccount
      */
     private AccountStatus accountStatus;
 
     /**
-     * Credit In Use.<br/>
-     * Online help:<br/>
+     * Credit In Use.<br>
+     * Online help:<br>
      * http://www.gurux.fi/Gurux.DLMS.Objects.GXDLMSAccount
      */
     private byte currentCreditInUse;
 
     /**
-     * Credit status.<br/>
-     * Online help:<br/>
+     * Credit status.<br>
+     * Online help:<br>
      * http://www.gurux.fi/Gurux.DLMS.Objects.GXDLMSAccount
      */
     private AccountCreditStatus currentCreditStatus;
 
     /**
      * The available_credit attribute is the sum of the positive current credit
-     * amount values in the instances of the Credit class. <br/>
-     * Online help:<br/>
+     * amount values in the instances of the Credit class. <br>
+     * Online help:<br>
      * http://www.gurux.fi/Gurux.DLMS.Objects.GXDLMSAccount
      */
     private int availableCredit;
 
     /**
-     * Amount to clear.<br/>
-     * Online help:<br/>
+     * Amount to clear.<br>
+     * Online help:<br>
      * http://www.gurux.fi/Gurux.DLMS.Objects.GXDLMSAccount
      */
     private int amountToClear;
 
     /**
      * Conjunction with the amount to clear, and is included in the description
-     * of that attribute.<br/>
-     * Online help:<br/>
+     * of that attribute.<br>
+     * Online help:<br>
      * http://www.gurux.fi/Gurux.DLMS.Objects.GXDLMSAccount
      */
     private int clearanceThreshold;
 
     /**
-     * Aggregated debt.<br/>
-     * Online help:<br/>
+     * Aggregated debt.<br>
+     * Online help:<br>
      * http://www.gurux.fi/Gurux.DLMS.Objects.GXDLMSAccount
      */
     private int aggregatedDebt;
 
     /**
-     * Credit references.<br/>
-     * Online help:<br/>
+     * Credit references.<br>
+     * Online help:<br>
      * http://www.gurux.fi/Gurux.DLMS.Objects.GXDLMSAccount
      */
     private List<String> creditReferences;
 
     /**
-     * Charge references.<br/>
-     * Online help:<br/>
+     * Charge references.<br>
+     * Online help:<br>
      * http://www.gurux.fi/Gurux.DLMS.Objects.GXDLMSAccount
      */
     private List<String> chargeReferences;
     /**
-     * Credit charge configurations.<br/>
-     * Online help:<br/>
+     * Credit charge configurations.<br>
+     * Online help:<br>
      * http://www.gurux.fi/Gurux.DLMS.Objects.GXDLMSAccount
      */
     private List<GXCreditChargeConfiguration> creditChargeConfigurations;
 
     /**
-     * Token gateway configurations.<br/>
-     * Online help:<br/>
+     * Token gateway configurations.<br>
+     * Online help:<br>
      * http://www.gurux.fi/Gurux.DLMS.Objects.GXDLMSAccount
      */
     private List<GXTokenGatewayConfiguration> tokenGatewayConfigurations;
     /**
-     * Account activation time.<br/>
-     * Online help:<br/>
+     * Account activation time.<br>
+     * Online help:<br>
      * http://www.gurux.fi/Gurux.DLMS.Objects.GXDLMSAccount
      */
     private GXDateTime accountActivationTime;
 
     /**
-     * Account closure time.<br/>
-     * Online help:<br/>
+     * Account closure time.<br>
+     * Online help:<br>
      * http://www.gurux.fi/Gurux.DLMS.Objects.GXDLMSAccount
      */
     private GXDateTime accountClosureTime;
 
     /**
-     * Currency.<br/>
-     * Online help:<br/>
+     * Currency.<br>
+     * Online help:<br>
      * http://www.gurux.fi/Gurux.DLMS.Objects.GXDLMSAccount
      */
     private GXCurrency currency;
     /**
-     * Low credit threshold.<br/>
-     * Online help:<br/>
+     * Low credit threshold.<br>
+     * Online help:<br>
      * http://www.gurux.fi/Gurux.DLMS.Objects.GXDLMSAccount
      */
     private int lowCreditThreshold;
     /**
-     * Next credit available threshold.<br/>
-     * Online help:<br/>
+     * Next credit available threshold.<br>
+     * Online help:<br>
      * http://www.gurux.fi/Gurux.DLMS.Objects.GXDLMSAccount
      */
     private int nextCreditAvailableThreshold;
     /**
-     * Max Provision.<br/>
-     * Online help:<br/>
+     * Max Provision.<br>
+     * Online help:<br>
      * http://www.gurux.fi/Gurux.DLMS.Objects.GXDLMSAccount
      */
     private int maxProvision;
 
     /**
-     * Max provision period.<br/>
-     * Online help:<br/>
+     * Max provision period.<br>
+     * Online help:<br>
      * http://www.gurux.fi/Gurux.DLMS.Objects.GXDLMSAccount
      */
     private int maxProvisionPeriod;
@@ -228,7 +228,7 @@ public class GXDLMSAccount extends GXDLMSObject implements IGXDLMSBase {
     }
 
     /**
-     * Online help:<br/>
+     * Online help:<br>
      * http://www.gurux.fi/Gurux.DLMS.Objects.GXDLMSAccount
      * 
      * @return Payment mode.
@@ -238,7 +238,7 @@ public class GXDLMSAccount extends GXDLMSObject implements IGXDLMSBase {
     }
 
     /**
-     * Online help:<br/>
+     * Online help:<br>
      * http://www.gurux.fi/Gurux.DLMS.Objects.GXDLMSAccount
      * 
      * @param value
@@ -249,7 +249,7 @@ public class GXDLMSAccount extends GXDLMSObject implements IGXDLMSBase {
     }
 
     /**
-     * Online help:<br/>
+     * Online help:<br>
      * http://www.gurux.fi/Gurux.DLMS.Objects.GXDLMSAccount
      * 
      * @return Account status.
@@ -259,7 +259,7 @@ public class GXDLMSAccount extends GXDLMSObject implements IGXDLMSBase {
     }
 
     /**
-     * Online help:<br/>
+     * Online help:<br>
      * http://www.gurux.fi/Gurux.DLMS.Objects.GXDLMSAccount
      * 
      * @param value
@@ -270,7 +270,7 @@ public class GXDLMSAccount extends GXDLMSObject implements IGXDLMSBase {
     }
 
     /**
-     * Online help:<br/>
+     * Online help:<br>
      * http://www.gurux.fi/Gurux.DLMS.Objects.GXDLMSAccount
      * 
      * @return Credit In Use.
@@ -280,7 +280,7 @@ public class GXDLMSAccount extends GXDLMSObject implements IGXDLMSBase {
     }
 
     /**
-     * Online help:<br/>
+     * Online help:<br>
      * http://www.gurux.fi/Gurux.DLMS.Objects.GXDLMSAccount
      * 
      * @param value
@@ -291,7 +291,7 @@ public class GXDLMSAccount extends GXDLMSObject implements IGXDLMSBase {
     }
 
     /**
-     * Online help:<br/>
+     * Online help:<br>
      * http://www.gurux.fi/Gurux.DLMS.Objects.GXDLMSAccount
      * 
      * @return Credit status.
@@ -301,7 +301,7 @@ public class GXDLMSAccount extends GXDLMSObject implements IGXDLMSBase {
     }
 
     /**
-     * Online help:<br/>
+     * Online help:<br>
      * http://www.gurux.fi/Gurux.DLMS.Objects.GXDLMSAccount
      * 
      * @param value
@@ -312,7 +312,7 @@ public class GXDLMSAccount extends GXDLMSObject implements IGXDLMSBase {
     }
 
     /**
-     * Online help:<br/>
+     * Online help:<br>
      * http://www.gurux.fi/Gurux.DLMS.Objects.GXDLMSAccount
      * 
      * @return AvailableCredit
@@ -322,7 +322,7 @@ public class GXDLMSAccount extends GXDLMSObject implements IGXDLMSBase {
     }
 
     /**
-     * Online help:<br/>
+     * Online help:<br>
      * http://www.gurux.fi/Gurux.DLMS.Objects.GXDLMSAccount
      * 
      * @param value
@@ -333,7 +333,7 @@ public class GXDLMSAccount extends GXDLMSObject implements IGXDLMSBase {
     }
 
     /**
-     * Online help:<br/>
+     * Online help:<br>
      * http://www.gurux.fi/Gurux.DLMS.Objects.GXDLMSAccount
      * 
      * @return Amount to clear.
@@ -343,7 +343,7 @@ public class GXDLMSAccount extends GXDLMSObject implements IGXDLMSBase {
     }
 
     /**
-     * Online help:<br/>
+     * Online help:<br>
      * http://www.gurux.fi/Gurux.DLMS.Objects.GXDLMSAccount
      * 
      * @param value
@@ -354,7 +354,7 @@ public class GXDLMSAccount extends GXDLMSObject implements IGXDLMSBase {
     }
 
     /**
-     * Online help:<br/>
+     * Online help:<br>
      * http://www.gurux.fi/Gurux.DLMS.Objects.GXDLMSAccount
      * 
      * @return Clearance threshold.
@@ -372,7 +372,7 @@ public class GXDLMSAccount extends GXDLMSObject implements IGXDLMSBase {
     }
 
     /**
-     * Online help:<br/>
+     * Online help:<br>
      * http://www.gurux.fi/Gurux.DLMS.Objects.GXDLMSAccount
      * 
      * @return Aggregated debt.
@@ -382,7 +382,7 @@ public class GXDLMSAccount extends GXDLMSObject implements IGXDLMSBase {
     }
 
     /**
-     * Online help:<br/>
+     * Online help:<br>
      * http://www.gurux.fi/Gurux.DLMS.Objects.GXDLMSAccount
      * 
      * @param value
@@ -393,7 +393,7 @@ public class GXDLMSAccount extends GXDLMSObject implements IGXDLMSBase {
     }
 
     /**
-     * Online help:<br/>
+     * Online help:<br>
      * http://www.gurux.fi/Gurux.DLMS.Objects.GXDLMSAccount
      * 
      * @return Credit references.
@@ -403,7 +403,7 @@ public class GXDLMSAccount extends GXDLMSObject implements IGXDLMSBase {
     }
 
     /**
-     * Online help:<br/>
+     * Online help:<br>
      * http://www.gurux.fi/Gurux.DLMS.Objects.GXDLMSAccount
      * 
      * @param value
@@ -414,7 +414,7 @@ public class GXDLMSAccount extends GXDLMSObject implements IGXDLMSBase {
     }
 
     /**
-     * Online help:<br/>
+     * Online help:<br>
      * http://www.gurux.fi/Gurux.DLMS.Objects.GXDLMSAccount
      * 
      * @return Charge references.
@@ -424,7 +424,7 @@ public class GXDLMSAccount extends GXDLMSObject implements IGXDLMSBase {
     }
 
     /**
-     * Online help:<br/>
+     * Online help:<br>
      * http://www.gurux.fi/Gurux.DLMS.Objects.GXDLMSAccount
      * 
      * @param value
@@ -435,7 +435,7 @@ public class GXDLMSAccount extends GXDLMSObject implements IGXDLMSBase {
     }
 
     /**
-     * Online help:<br/>
+     * Online help:<br>
      * http://www.gurux.fi/Gurux.DLMS.Objects.GXDLMSAccount
      * 
      * @return Credit charge configurations.
@@ -446,7 +446,7 @@ public class GXDLMSAccount extends GXDLMSObject implements IGXDLMSBase {
     }
 
     /**
-     * Online help:<br/>
+     * Online help:<br>
      * http://www.gurux.fi/Gurux.DLMS.Objects.GXDLMSAccount
      * 
      * @param value
@@ -458,7 +458,7 @@ public class GXDLMSAccount extends GXDLMSObject implements IGXDLMSBase {
     }
 
     /**
-     * Online help:<br/>
+     * Online help:<br>
      * http://www.gurux.fi/Gurux.DLMS.Objects.GXDLMSAccount
      * 
      * @return Token gateway configurations.
@@ -469,7 +469,7 @@ public class GXDLMSAccount extends GXDLMSObject implements IGXDLMSBase {
     }
 
     /**
-     * Online help:<br/>
+     * Online help:<br>
      * http://www.gurux.fi/Gurux.DLMS.Objects.GXDLMSAccount
      * 
      * @param value
@@ -481,7 +481,7 @@ public class GXDLMSAccount extends GXDLMSObject implements IGXDLMSBase {
     }
 
     /**
-     * Online help:<br/>
+     * Online help:<br>
      * http://www.gurux.fi/Gurux.DLMS.Objects.GXDLMSAccount
      * 
      * @return Account activation time.
@@ -491,7 +491,7 @@ public class GXDLMSAccount extends GXDLMSObject implements IGXDLMSBase {
     }
 
     /**
-     * Online help:<br/>
+     * Online help:<br>
      * http://www.gurux.fi/Gurux.DLMS.Objects.GXDLMSAccount
      * 
      * @param value
@@ -502,7 +502,7 @@ public class GXDLMSAccount extends GXDLMSObject implements IGXDLMSBase {
     }
 
     /**
-     * Online help:<br/>
+     * Online help:<br>
      * http://www.gurux.fi/Gurux.DLMS.Objects.GXDLMSAccount
      * 
      * @return Account closure time.
@@ -512,7 +512,7 @@ public class GXDLMSAccount extends GXDLMSObject implements IGXDLMSBase {
     }
 
     /**
-     * Online help:<br/>
+     * Online help:<br>
      * http://www.gurux.fi/Gurux.DLMS.Objects.GXDLMSAccount
      * 
      * @param value
@@ -523,7 +523,7 @@ public class GXDLMSAccount extends GXDLMSObject implements IGXDLMSBase {
     }
 
     /**
-     * Online help:<br/>
+     * Online help:<br>
      * http://www.gurux.fi/Gurux.DLMS.Objects.GXDLMSAccount
      * 
      * @return Currency.
@@ -533,7 +533,7 @@ public class GXDLMSAccount extends GXDLMSObject implements IGXDLMSBase {
     }
 
     /**
-     * Online help:<br/>
+     * Online help:<br>
      * http://www.gurux.fi/Gurux.DLMS.Objects.GXDLMSAccount
      * 
      * @param value
@@ -544,7 +544,7 @@ public class GXDLMSAccount extends GXDLMSObject implements IGXDLMSBase {
     }
 
     /**
-     * Online help:<br/>
+     * Online help:<br>
      * http://www.gurux.fi/Gurux.DLMS.Objects.GXDLMSAccount
      * 
      * @return Low credit threshold.
@@ -554,7 +554,7 @@ public class GXDLMSAccount extends GXDLMSObject implements IGXDLMSBase {
     }
 
     /**
-     * Online help:<br/>
+     * Online help:<br>
      * http://www.gurux.fi/Gurux.DLMS.Objects.GXDLMSAccount
      * 
      * @param value
@@ -565,7 +565,7 @@ public class GXDLMSAccount extends GXDLMSObject implements IGXDLMSBase {
     }
 
     /**
-     * Online help:<br/>
+     * Online help:<br>
      * http://www.gurux.fi/Gurux.DLMS.Objects.GXDLMSAccount
      * 
      * @return Next credit available threshold.
@@ -575,7 +575,7 @@ public class GXDLMSAccount extends GXDLMSObject implements IGXDLMSBase {
     }
 
     /**
-     * Online help:<br/>
+     * Online help:<br>
      * http://www.gurux.fi/Gurux.DLMS.Objects.GXDLMSAccount
      * 
      * @param value
@@ -586,7 +586,7 @@ public class GXDLMSAccount extends GXDLMSObject implements IGXDLMSBase {
     }
 
     /**
-     * Online help:<br/>
+     * Online help:<br>
      * http://www.gurux.fi/Gurux.DLMS.Objects.GXDLMSAccount
      * 
      * @return Max Provision.
@@ -596,7 +596,7 @@ public class GXDLMSAccount extends GXDLMSObject implements IGXDLMSBase {
     }
 
     /**
-     * Online help:<br/>
+     * Online help:<br>
      * http://www.gurux.fi/Gurux.DLMS.Objects.GXDLMSAccount
      * 
      * @param value
@@ -607,7 +607,7 @@ public class GXDLMSAccount extends GXDLMSObject implements IGXDLMSBase {
     }
 
     /**
-     * Online help:<br/>
+     * Online help:<br>
      * http://www.gurux.fi/Gurux.DLMS.Objects.GXDLMSAccount
      * 
      * @return Max provision period.
@@ -617,7 +617,7 @@ public class GXDLMSAccount extends GXDLMSObject implements IGXDLMSBase {
     }
 
     /**
-     * Online help:<br/>
+     * Online help:<br>
      * http://www.gurux.fi/Gurux.DLMS.Objects.GXDLMSAccount
      * 
      * @param value

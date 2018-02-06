@@ -35,34 +35,34 @@
 package gurux.dlms.objects;
 
 /**
- * Online help:<br/>
+ * Online help:<br>
  * http://www.gurux.fi/Gurux.DLMS.Objects.GXDLMSAccount
  */
 public class GXCreditChargeConfiguration {
 
     /**
-     * Credit reference.<br/>
-     * Online help:<br/>
+     * Credit reference.<br>
+     * Online help:<br>
      * http://www.gurux.fi/Gurux.DLMS.Objects.GXDLMSAccount
      */
     private String creditReference;
 
     /**
-     * Charge reference.<br/>
-     * Online help:<br/>
+     * Charge reference.<br>
+     * Online help:<br>
      * http://www.gurux.fi/Gurux.DLMS.Objects.GXDLMSAccount
      */
     private String chargeReference;
 
     /**
-     * Collection configuration.<br/>
-     * Online help:<br/>
+     * Collection configuration.<br>
+     * Online help:<br>
      * http://www.gurux.fi/Gurux.DLMS.Objects.GXDLMSAccount
      */
     private String collectionConfiguration;
 
     /**
-     * Online help:<br/>
+     * Online help:<br>
      * http://www.gurux.fi/Gurux.DLMS.Objects.GXDLMSAccount
      * 
      * @return Credit reference.
@@ -72,7 +72,7 @@ public class GXCreditChargeConfiguration {
     }
 
     /**
-     * Online help:<br/>
+     * Online help:<br>
      * http://www.gurux.fi/Gurux.DLMS.Objects.GXDLMSAccount
      * 
      * @param value
@@ -83,7 +83,7 @@ public class GXCreditChargeConfiguration {
     }
 
     /**
-     * Online help:<br/>
+     * Online help:<br>
      * http://www.gurux.fi/Gurux.DLMS.Objects.GXDLMSAccount
      * 
      * @return Charge reference.
@@ -93,7 +93,7 @@ public class GXCreditChargeConfiguration {
     }
 
     /**
-     * Online help:<br/>
+     * Online help:<br>
      * http://www.gurux.fi/Gurux.DLMS.Objects.GXDLMSAccount
      * 
      * @param value
@@ -104,7 +104,7 @@ public class GXCreditChargeConfiguration {
     }
 
     /**
-     * Online help:<br/>
+     * Online help:<br>
      * http://www.gurux.fi/Gurux.DLMS.Objects.GXDLMSAccount
      * 
      * @return Collection configuration.
@@ -114,7 +114,7 @@ public class GXCreditChargeConfiguration {
     }
 
     /**
-     * Online help:<br/>
+     * Online help:<br>
      * http://www.gurux.fi/Gurux.DLMS.Objects.GXDLMSAccount
      * 
      * @param value

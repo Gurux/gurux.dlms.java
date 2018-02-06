@@ -37,8 +37,8 @@ package gurux.dlms.objects;
 import gurux.dlms.objects.enums.Currency;
 
 /**
- * Used currency.<br/>
- * Online help:<br/>
+ * Used currency.<br>
+ * Online help:<br>
  * http://www.gurux.fi/Gurux.DLMS.Objects.GXDLMSAccount
  */
 public class GXCurrency {

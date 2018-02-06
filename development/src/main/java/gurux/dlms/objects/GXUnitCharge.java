@@ -35,27 +35,27 @@
 package gurux.dlms.objects;
 
 /**
- * Online help:<br/>
+ * Online help:<br>
  * http://www.gurux.fi/Gurux.DLMS.Objects.GXDLMSCharge
  */
 public class GXUnitCharge {
     /**
-     * Charge per unit scaling. <br/>
-     * Online help:<br/>
+     * Charge per unit scaling. <br>
+     * Online help:<br>
      * http://www.gurux.fi/Gurux.DLMS.Objects.GXDLMSCharge
      */
     private GXChargePerUnitScaling chargePerUnitScaling;
 
     /**
-     * Commodity.<br/>
-     * Online help:<br/>
+     * Commodity.<br>
+     * Online help:<br>
      * http://www.gurux.fi/Gurux.DLMS.Objects.GXDLMSCharge
      */
     private GXCommodity commodity;
 
     /**
-     * Charge tables.<br/>
-     * Online help:<br/>
+     * Charge tables.<br>
+     * Online help:<br>
      * http://www.gurux.fi/Gurux.DLMS.Objects.GXDLMSCharge
      */
     private GXChargeTable[] chargeTables;
@@ -69,7 +69,7 @@ public class GXUnitCharge {
     }
 
     /**
-     * Online help:<br/>
+     * Online help:<br>
      * http://www.gurux.fi/Gurux.DLMS.Objects.GXDLMSCharge
      * 
      * @return Charge per unit scaling.
@@ -79,7 +79,7 @@ public class GXUnitCharge {
     }
 
     /**
-     * Online help:<br/>
+     * Online help:<br>
      * http://www.gurux.fi/Gurux.DLMS.Objects.GXDLMSCharge
      * 
      * @param value
@@ -91,7 +91,7 @@ public class GXUnitCharge {
     }
 
     /**
-     * Online help:<br/>
+     * Online help:<br>
      * http://www.gurux.fi/Gurux.DLMS.Objects.GXDLMSCharge
      * 
      * @return Commodity
@@ -101,7 +101,7 @@ public class GXUnitCharge {
     }
 
     /**
-     * Online help:<br/>
+     * Online help:<br>
      * http://www.gurux.fi/Gurux.DLMS.Objects.GXDLMSCharge
      * 
      * @param value
@@ -112,7 +112,7 @@ public class GXUnitCharge {
     }
 
     /**
-     * Online help:<br/>
+     * Online help:<br>
      * http://www.gurux.fi/Gurux.DLMS.Objects.GXDLMSCharge
      * 
      * @return Charge tables.
@@ -122,7 +122,7 @@ public class GXUnitCharge {
     }
 
     /**
-     * Online help:<br/>
+     * Online help:<br>
      * http://www.gurux.fi/Gurux.DLMS.Objects.GXDLMSCharge
      * 
      * @param value

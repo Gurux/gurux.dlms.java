@@ -35,26 +35,26 @@
 package gurux.dlms.objects;
 
 /**
- * Online help:<br/>
+ * Online help:<br>
  * http://www.gurux.fi/Gurux.DLMS.Objects.GXDLMSAccount
  */
 public class GXTokenGatewayConfiguration {
     /**
-     * Credit reference.<br/>
-     * Online help:<br/>
+     * Credit reference.<br>
+     * Online help:<br>
      * http://www.gurux.fi/Gurux.DLMS.Objects.GXDLMSAccount
      */
     private String creditReference;
 
     /**
-     * Token proportion.<br/>
-     * Online help:<br/>
+     * Token proportion.<br>
+     * Online help:<br>
      * http://www.gurux.fi/Gurux.DLMS.Objects.GXDLMSAccount
      */
     private byte tokenProportion;
 
     /**
-     * Online help:<br/>
+     * Online help:<br>
      * http://www.gurux.fi/Gurux.DLMS.Objects.GXDLMSAccount
      * 
      * @return Credit reference.
@@ -64,7 +64,7 @@ public class GXTokenGatewayConfiguration {
     }
 
     /**
-     * Online help:<br/>
+     * Online help:<br>
      * http://www.gurux.fi/Gurux.DLMS.Objects.GXDLMSAccount
      * 
      * @param value
@@ -75,7 +75,7 @@ public class GXTokenGatewayConfiguration {
     }
 
     /**
-     * Online help:<br/>
+     * Online help:<br>
      * http://www.gurux.fi/Gurux.DLMS.Objects.GXDLMSAccount
      * 
      * @return Token proportion.
@@ -85,7 +85,7 @@ public class GXTokenGatewayConfiguration {
     }
 
     /**
-     * Online help:<br/>
+     * Online help:<br>
      * http://www.gurux.fi/Gurux.DLMS.Objects.GXDLMSAccount
      * 
      * @param value

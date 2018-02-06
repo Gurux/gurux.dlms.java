@@ -35,8 +35,8 @@
 package gurux.dlms.objects.enums;
 
 /**
- * Enumerates payment Modes.<br/>
- * Online help:<br/>
+ * Enumerates payment Modes.<br>
+ * Online help:<br>
  * http://www.gurux.fi/Gurux.DLMS.Objects.GXDLMSAccount
  */
 public enum Currency {

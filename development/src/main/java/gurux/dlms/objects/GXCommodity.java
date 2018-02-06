@@ -35,13 +35,13 @@
 package gurux.dlms.objects;
 
 /**
- * Online help:<br/>
+ * Online help:<br>
  * http://www.gurux.fi/Gurux.DLMS.Objects.GXDLMSCharge
  */
 public class GXCommodity {
     /**
-     * Executed object.<br/>
-     * Online help:<br/>
+     * Executed object.<br>
+     * Online help:<br>
      * http://www.gurux.fi/Gurux.DLMS.Objects.GXDLMSCharge
      */
     private GXDLMSObject target;
@@ -62,8 +62,8 @@ public class GXCommodity {
     }
 
     /**
-     * Attribute index.<br/>
-     * Online help:<br/>
+     * Attribute index.<br>
+     * Online help:<br>
      * http://www.gurux.fi/Gurux.DLMS.Objects.GXDLMSCharge
      */
     private int index;

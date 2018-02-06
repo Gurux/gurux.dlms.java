@@ -51,81 +51,81 @@ import gurux.dlms.internal.GXCommon;
 import gurux.dlms.objects.enums.ChargeType;
 
 /**
- * Online help:<br/>
+ * Online help:<br>
  * http://www.gurux.fi/Gurux.DLMS.Objects.GXDLMSCharge
  */
 public class GXDLMSCharge extends GXDLMSObject implements IGXDLMSBase {
     /**
-     * Total amount paid.<br/>
-     * Online help:<br/>
+     * Total amount paid.<br>
+     * Online help:<br>
      * http://www.gurux.fi/Gurux.DLMS.Objects.GXDLMSCharge
      */
     private int totalAmountPaid;
 
     /**
-     * Charge type.<br/>
-     * Online help:<br/>
+     * Charge type.<br>
+     * Online help:<br>
      * http://www.gurux.fi/Gurux.DLMS.Objects.GXDLMSCharge
      */
     private ChargeType chargeType;
     /**
-     * Priority.<br/>
-     * Online help:<br/>
+     * Priority.<br>
+     * Online help:<br>
      * http://www.gurux.fi/Gurux.DLMS.Objects.GXDLMSCharge
      */
     private byte priority;
     /**
-     * Unit charge active.<br/>
-     * Online help:<br/>
+     * Unit charge active.<br>
+     * Online help:<br>
      * http://www.gurux.fi/Gurux.DLMS.Objects.GXDLMSCharge
      */
     private GXUnitCharge unitChargeActive;
     /**
-     * Unit charge passive.<br/>
-     * Online help:<br/>
+     * Unit charge passive.<br>
+     * Online help:<br>
      * http://www.gurux.fi/Gurux.DLMS.Objects.GXDLMSCharge
      */
     private GXUnitCharge unitChargePassive;
     /**
-     * Unit charge activation time.<br/>
-     * Online help:<br/>
+     * Unit charge activation time.<br>
+     * Online help:<br>
      * http://www.gurux.fi/Gurux.DLMS.Objects.GXDLMSCharge
      */
     private GXDateTime unitChargeActivationTime;
     /**
-     * Period.<br/>
-     * Online help:<br/>
+     * Period.<br>
+     * Online help:<br>
      * http://www.gurux.fi/Gurux.DLMS.Objects.GXDLMSCharge
      */
     private int period;
     /**
-     * Charge configuration.<br/>
-     * Online help:<br/>
+     * Charge configuration.<br>
+     * Online help:<br>
      * http://www.gurux.fi/Gurux.DLMS.Objects.GXDLMSCharge
      */
     private String chargeConfiguration;
     /**
-     * Last collection time.<br/>
-     * Online help:<br/>
+     * Last collection time.<br>
+     * Online help:<br>
      * http://www.gurux.fi/Gurux.DLMS.Objects.GXDLMSCharge
      */
     private GXDateTime lastCollectionTime;
 
     /**
-     * Last collection amount.<br/>
-     * Online help:<br/>
+     * Last collection amount.<br>
+     * Online help:<br>
      * http://www.gurux.fi/Gurux.DLMS.Objects.GXDLMSCharge
      */
     private int lastCollectionAmount;
     /**
-     * Total amount remaining.<br/>
-     * Online help:<br/>
+     * Total amount remaining.<br>
+     * Online help:<br>
      * http://www.gurux.fi/Gurux.DLMS.Objects.GXDLMSCharge
      */
     private int totalAmountRemaining;
     /**
      * Proportion.<br>
-     * Online help:<br/>
+     * Online help:<br>
      * http://www.gurux.fi/Gurux.DLMS.Objects.GXDLMSCharge
      */
     private int proportion;
@@ -162,7 +162,7 @@ public class GXDLMSCharge extends GXDLMSObject implements IGXDLMSBase {
     }
 
     /**
-     * Online help:<br/>
+     * Online help:<br>
      * http://www.gurux.fi/Gurux.DLMS.Objects.GXDLMSCharge
      * 
      * @return Total amount paid.
@@ -172,7 +172,7 @@ public class GXDLMSCharge extends GXDLMSObject implements IGXDLMSBase {
     }
 
     /**
-     * Online help:<br/>
+     * Online help:<br>
      * http://www.gurux.fi/Gurux.DLMS.Objects.GXDLMSCharge
      * 
      * @param value
@@ -183,7 +183,7 @@ public class GXDLMSCharge extends GXDLMSObject implements IGXDLMSBase {
     }
 
     /**
-     * Online help:<br/>
+     * Online help:<br>
      * http://www.gurux.fi/Gurux.DLMS.Objects.GXDLMSCharge
      * 
      * @return Charge type.
@@ -193,7 +193,7 @@ public class GXDLMSCharge extends GXDLMSObject implements IGXDLMSBase {
     }
 
     /**
-     * Online help:<br/>
+     * Online help:<br>
      * http://www.gurux.fi/Gurux.DLMS.Objects.GXDLMSCharge
      * 
      * @param value
@@ -204,7 +204,7 @@ public class GXDLMSCharge extends GXDLMSObject implements IGXDLMSBase {
     }
 
     /**
-     * Online help:<br/>
+     * Online help:<br>
      * http://www.gurux.fi/Gurux.DLMS.Objects.GXDLMSCharge
      * 
      * @return Priority
@@ -214,7 +214,7 @@ public class GXDLMSCharge extends GXDLMSObject implements IGXDLMSBase {
     }
 
     /**
-     * Online help:<br/>
+     * Online help:<br>
      * http://www.gurux.fi/Gurux.DLMS.Objects.GXDLMSCharge
      * 
      * @param value
@@ -225,7 +225,7 @@ public class GXDLMSCharge extends GXDLMSObject implements IGXDLMSBase {
     }
 
     /**
-     * Online help:<br/>
+     * Online help:<br>
      * http://www.gurux.fi/Gurux.DLMS.Objects.GXDLMSCharge
      * 
      * @return Unit charge active.
@@ -235,7 +235,7 @@ public class GXDLMSCharge extends GXDLMSObject implements IGXDLMSBase {
     }
 
     /**
-     * Online help:<br/>
+     * Online help:<br>
      * http://www.gurux.fi/Gurux.DLMS.Objects.GXDLMSCharge
      * 
      * @param value
@@ -246,7 +246,7 @@ public class GXDLMSCharge extends GXDLMSObject implements IGXDLMSBase {
     }
 
     /**
-     * Online help:<br/>
+     * Online help:<br>
      * http://www.gurux.fi/Gurux.DLMS.Objects.GXDLMSCharge
      * 
      * @return Unit charge passive.
@@ -256,7 +256,7 @@ public class GXDLMSCharge extends GXDLMSObject implements IGXDLMSBase {
     }
 
     /**
-     * Online help:<br/>
+     * Online help:<br>
      * http://www.gurux.fi/Gurux.DLMS.Objects.GXDLMSCharge
      * 
      * @param value
@@ -267,7 +267,7 @@ public class GXDLMSCharge extends GXDLMSObject implements IGXDLMSBase {
     }
 
     /**
-     * Online help:<br/>
+     * Online help:<br>
      * http://www.gurux.fi/Gurux.DLMS.Objects.GXDLMSCharge
      * 
      * @return Unit charge activation time.
@@ -277,7 +277,7 @@ public class GXDLMSCharge extends GXDLMSObject implements IGXDLMSBase {
     }
 
     /**
-     * Online help:<br/>
+     * Online help:<br>
      * http://www.gurux.fi/Gurux.DLMS.Objects.GXDLMSCharge
      * 
      * @param value
@@ -288,7 +288,7 @@ public class GXDLMSCharge extends GXDLMSObject implements IGXDLMSBase {
     }
 
     /**
-     * Online help:<br/>
+     * Online help:<br>
      * http://www.gurux.fi/Gurux.DLMS.Objects.GXDLMSCharge
      * 
      * @return Period.
@@ -298,7 +298,7 @@ public class GXDLMSCharge extends GXDLMSObject implements IGXDLMSBase {
     }
 
     /**
-     * Online help:<br/>
+     * Online help:<br>
      * http://www.gurux.fi/Gurux.DLMS.Objects.GXDLMSCharge
      * 
      * @param value
@@ -309,7 +309,7 @@ public class GXDLMSCharge extends GXDLMSObject implements IGXDLMSBase {
     }
 
     /**
-     * Online help:<br/>
+     * Online help:<br>
      * http://www.gurux.fi/Gurux.DLMS.Objects.GXDLMSCharge
      * 
      * @return Charge configuration.
@@ -319,7 +319,7 @@ public class GXDLMSCharge extends GXDLMSObject implements IGXDLMSBase {
     }
 
     /**
-     * Online help:<br/>
+     * Online help:<br>
      * http://www.gurux.fi/Gurux.DLMS.Objects.GXDLMSCharge
      * 
      * @param value
@@ -330,7 +330,7 @@ public class GXDLMSCharge extends GXDLMSObject implements IGXDLMSBase {
     }
 
     /**
-     * Online help:<br/>
+     * Online help:<br>
      * http://www.gurux.fi/Gurux.DLMS.Objects.GXDLMSCharge
      * 
      * @return Last collection time.
@@ -340,7 +340,7 @@ public class GXDLMSCharge extends GXDLMSObject implements IGXDLMSBase {
     }
 
     /**
-     * Online help:<br/>
+     * Online help:<br>
      * http://www.gurux.fi/Gurux.DLMS.Objects.GXDLMSCharge
      * 
      * @param value
@@ -351,7 +351,7 @@ public class GXDLMSCharge extends GXDLMSObject implements IGXDLMSBase {
     }
 
     /**
-     * Online help:<br/>
+     * Online help:<br>
      * http://www.gurux.fi/Gurux.DLMS.Objects.GXDLMSCharge
      * 
      * @return Last collection amount.
@@ -361,7 +361,7 @@ public class GXDLMSCharge extends GXDLMSObject implements IGXDLMSBase {
     }
 
     /**
-     * Online help:<br/>
+     * Online help:<br>
      * http://www.gurux.fi/Gurux.DLMS.Objects.GXDLMSCharge
      * 
      * @param value
@@ -372,7 +372,7 @@ public class GXDLMSCharge extends GXDLMSObject implements IGXDLMSBase {
     }
 
     /**
-     * Online help:<br/>
+     * Online help:<br>
      * http://www.gurux.fi/Gurux.DLMS.Objects.GXDLMSCharge
      * 
      * @return Total amount remaining
@@ -382,7 +382,7 @@ public class GXDLMSCharge extends GXDLMSObject implements IGXDLMSBase {
     }
 
     /**
-     * Online help:<br/>
+     * Online help:<br>
      * http://www.gurux.fi/Gurux.DLMS.Objects.GXDLMSCharge
      * 
      * @param value
@@ -393,7 +393,7 @@ public class GXDLMSCharge extends GXDLMSObject implements IGXDLMSBase {
     }
 
     /**
-     * Online help:<br/>
+     * Online help:<br>
      * http://www.gurux.fi/Gurux.DLMS.Objects.GXDLMSCharge
      * 
      * @return Proportion
@@ -403,7 +403,7 @@ public class GXDLMSCharge extends GXDLMSObject implements IGXDLMSBase {
     }
 
     /**
-     * Online help:<br/>
+     * Online help:<br>
      * http://www.gurux.fi/Gurux.DLMS.Objects.GXDLMSCharge
      * 
      * @param value
