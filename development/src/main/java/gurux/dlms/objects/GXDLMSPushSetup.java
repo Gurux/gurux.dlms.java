@@ -328,7 +328,7 @@ public class GXDLMSPushSetup extends GXDLMSObject implements IGXDLMSBase {
         if (e.getIndex() == 3) {
             buff.setUInt8(DataType.STRUCTURE.getValue());
             buff.setUInt8(3);
-            GXCommon.setData(buff, DataType.UINT8, new Integer(
+            GXCommon.setData(buff, DataType.ENUM, new Integer(
                     sendDestinationAndMethod.getService().getValue()));
             if (sendDestinationAndMethod.getDestination() != null) {
                 GXCommon.setData(buff, DataType.OCTET_STRING,
@@ -336,7 +336,7 @@ public class GXDLMSPushSetup extends GXDLMSObject implements IGXDLMSBase {
             } else {
                 GXCommon.setData(buff, DataType.OCTET_STRING, null);
             }
-            GXCommon.setData(buff, DataType.UINT8,
+            GXCommon.setData(buff, DataType.ENUM,
                     sendDestinationAndMethod.getMessage().getValue());
             return buff.array();
         }
@@ -442,8 +442,8 @@ public class GXDLMSPushSetup extends GXDLMSObject implements IGXDLMSBase {
                 reader.readEndElement("ObjectList");
                 GXDLMSCaptureObject co = new GXDLMSCaptureObject(ai, di);
                 GXDLMSObject obj = reader.getObjects().findByLN(ot, ln);
-                pushObjectList
-                        .add(new GXSimpleEntry<GXDLMSObject, GXDLMSCaptureObject>(
+                pushObjectList.add(
+                        new GXSimpleEntry<GXDLMSObject, GXDLMSCaptureObject>(
                                 obj, co));
             }
             reader.readEndElement("ObjectList");

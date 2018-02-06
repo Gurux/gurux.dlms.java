@@ -242,8 +242,17 @@ public enum ObjectType {
     /**
      * Configure the fragmentation feature of ZigBee PRO transport layer.
      */
-    ZIG_BEE_SAS_APS_FRAGMENTATION(103),
+    ZIG_BEE_SAS_APS_FRAGMENTATION(103), ZIG_BEE_NETWORK_CONTROL(104),
 
+    DATA_PROTECTION(30),
+
+    ACCOUNT(111),
+
+    CREDIT(112),
+
+    CHARGE(113),
+
+    TOKEN_GATEWAY(115),
     /*
      * SapAssigment stores information of assignment of the logical devices to
      * their SAP = Service Access Points.

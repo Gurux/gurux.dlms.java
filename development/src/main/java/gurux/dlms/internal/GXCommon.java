@@ -2055,7 +2055,7 @@ public final class GXCommon {
      * @param value
      *            Added value.
      */
-    private static void setBitString(final GXByteBuffer buff,
+    public static void setBitString(final GXByteBuffer buff,
             final Object value) {
         if (value instanceof String) {
             byte val = 0;
@@ -2083,6 +2083,9 @@ public final class GXCommon {
             byte[] arr = (byte[]) value;
             setObjectCount(8 * arr.length, buff);
             buff.set(arr);
+        } else if (value instanceof Byte) {
+            setObjectCount(8, buff);
+            buff.setUInt8(((Byte) value).byteValue());
         } else if (value == null) {
             buff.setUInt8(0);
         } else {

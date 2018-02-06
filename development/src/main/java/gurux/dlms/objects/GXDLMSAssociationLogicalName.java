@@ -269,7 +269,7 @@ public class GXDLMSAssociationLogicalName extends GXDLMSObject
                 clientSAP + "/" + serverSAP, getApplicationContextName(),
                 getXDLMSContextInfo(), getAuthenticationMechanismName(),
                 getSecret(), getAssociationStatus(),
-                getSecuritySetupReference() };
+                getSecuritySetupReference(), userList, currentUser };
     }
 
     @Override
@@ -960,8 +960,12 @@ public class GXDLMSAssociationLogicalName extends GXDLMSObject
             break;
         case 5:
             if (e.getValue() != null) {
-                xDLMSContextInfo.setConformance(Conformance.forValue(
-                        ((Number) Array.get(e.getValue(), 1)).intValue()));
+
+                GXByteBuffer bb = new GXByteBuffer();
+                GXCommon.setBitString(bb, Array.get(e.getValue(), 0));
+                bb.setUInt8(0, 0);
+                xDLMSContextInfo
+                        .setConformance(Conformance.forValue(bb.getInt32()));
                 xDLMSContextInfo.setMaxReceivePduSize(
                         ((Number) Array.get(e.getValue(), 1)).intValue());
                 xDLMSContextInfo.setMaxSendPduSize(

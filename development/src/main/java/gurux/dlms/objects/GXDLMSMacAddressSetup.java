@@ -36,7 +36,6 @@ package gurux.dlms.objects;
 
 import javax.xml.stream.XMLStreamException;
 
-import gurux.dlms.GXDLMSClient;
 import gurux.dlms.GXDLMSSettings;
 import gurux.dlms.ValueEventArgs;
 import gurux.dlms.enums.DataType;
@@ -156,7 +155,7 @@ public class GXDLMSMacAddressSetup extends GXDLMSObject implements IGXDLMSBase {
             if (macAddress == null) {
                 return macAddress;
             }
-            return getMacAddress().replaceAll(":", ".");
+            return GXCommon.hexToBytes(getMacAddress().replaceAll(":", " "));
         }
         e.setError(ErrorCode.READ_WRITE_DENIED);
         return null;
@@ -171,10 +170,8 @@ public class GXDLMSMacAddressSetup extends GXDLMSObject implements IGXDLMSBase {
         if (e.getIndex() == 1) {
             setLogicalName(GXCommon.toLogicalName(e.getValue()));
         } else if (e.getIndex() == 2) {
-            String add = GXDLMSClient
-                    .changeType((byte[]) e.getValue(), DataType.OCTET_STRING)
-                    .toString();
-            add = add.replaceAll(".", ":");
+            String add = GXCommon.toHex((byte[]) e.getValue());
+            add = add.replaceAll(" ", ":");
             setMacAddress(add);
         } else {
             e.setError(ErrorCode.READ_WRITE_DENIED);

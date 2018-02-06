@@ -40,6 +40,7 @@ import javax.xml.stream.XMLStreamException;
 
 import gurux.dlms.GXByteBuffer;
 import gurux.dlms.GXDLMSClient;
+import gurux.dlms.GXDLMSConverter;
 import gurux.dlms.GXDLMSSettings;
 import gurux.dlms.ValueEventArgs;
 import gurux.dlms.enums.DataType;
@@ -184,7 +185,6 @@ public class GXDLMSRegister extends GXDLMSObject implements IGXDLMSBase {
      * Returns collection of attributes to read. If attribute is static and
      * already read or device is returned HW error it is not returned.
      */
-    // CHECKSTYLE:OFF
     @Override
     public int[] getAttributeIndexToRead() {
         // CHECKSTYLE:ON
@@ -208,7 +208,6 @@ public class GXDLMSRegister extends GXDLMSObject implements IGXDLMSBase {
     /*
      * Returns amount of attributes.
      */
-    // CHECKSTYLE:OFF
     @Override
     public int getAttributeCount() {
         return 3;
@@ -247,7 +246,6 @@ public class GXDLMSRegister extends GXDLMSObject implements IGXDLMSBase {
     /*
      * Returns value of given attribute.
      */
-    // CHECKSTYLE:OFF
     public Object getValue(final GXDLMSSettings settings,
             final ValueEventArgs e) {
         // CHECKSTYLE:ON
@@ -255,7 +253,22 @@ public class GXDLMSRegister extends GXDLMSObject implements IGXDLMSBase {
             return GXCommon.logicalNameToBytes(getLogicalName());
         }
         if (e.getIndex() == 2) {
-            return getValue();
+            // If client set new value.
+            if (!settings.isServer() && getScaler() != 1
+                    && objectValue != null) {
+                DataType type = DataType.NONE;
+                if (objectValue != null) {
+                    type = GXDLMSConverter.getDLMSDataType(objectValue);
+                }
+                Object tmp;
+                tmp = new Double(
+                        ((Number) objectValue).doubleValue() / getScaler());
+                if (type != DataType.NONE) {
+                    tmp = GXDLMSConverter.changeType(tmp, type);
+                }
+                return tmp;
+            }
+            return objectValue;
         }
         if (e.getIndex() == 3) {
             GXByteBuffer data = new GXByteBuffer();
@@ -272,7 +285,6 @@ public class GXDLMSRegister extends GXDLMSObject implements IGXDLMSBase {
     /*
      * Set value of given attribute.
      */
-    // CHECKSTYLE:OFF
     @Override
     public void setValue(final GXDLMSSettings settings,
             final ValueEventArgs e) {
@@ -281,11 +293,15 @@ public class GXDLMSRegister extends GXDLMSObject implements IGXDLMSBase {
         if (e.getIndex() == 1) {
             setLogicalName(GXCommon.toLogicalName(e.getValue()));
         } else if (e.getIndex() == 2) {
-            if (scaler != 0) {
+            if (scaler != 1 && e.getValue() != null) {
                 try {
-                    objectValue =
-                            new Double(((Number) e.getValue()).doubleValue()
-                                    * getScaler());
+                    if (settings.isServer()) {
+                        setValue(e.getValue());
+                    } else {
+                        objectValue =
+                                new Double(((Number) e.getValue()).doubleValue()
+                                        * getScaler());
+                    }
                 } catch (Exception e1) {
                     // Sometimes scaler is set for wrong Object type.
                     setValue(e.getValue());

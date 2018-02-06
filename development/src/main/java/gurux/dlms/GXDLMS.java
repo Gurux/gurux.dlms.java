@@ -54,17 +54,21 @@ import gurux.dlms.enums.ServiceClass;
 import gurux.dlms.enums.StateError;
 import gurux.dlms.internal.GXCommon;
 import gurux.dlms.internal.GXDataInfo;
+import gurux.dlms.objects.GXDLMSAccount;
 import gurux.dlms.objects.GXDLMSActionSchedule;
 import gurux.dlms.objects.GXDLMSActivityCalendar;
 import gurux.dlms.objects.GXDLMSAssociationLogicalName;
 import gurux.dlms.objects.GXDLMSAssociationShortName;
 import gurux.dlms.objects.GXDLMSAutoAnswer;
 import gurux.dlms.objects.GXDLMSAutoConnect;
+import gurux.dlms.objects.GXDLMSCharge;
 import gurux.dlms.objects.GXDLMSClock;
+import gurux.dlms.objects.GXDLMSCredit;
 import gurux.dlms.objects.GXDLMSData;
 import gurux.dlms.objects.GXDLMSDemandRegister;
 import gurux.dlms.objects.GXDLMSDisconnectControl;
 import gurux.dlms.objects.GXDLMSExtendedRegister;
+import gurux.dlms.objects.GXDLMSGSMDiagnostic;
 import gurux.dlms.objects.GXDLMSGprsSetup;
 import gurux.dlms.objects.GXDLMSHdlcSetup;
 import gurux.dlms.objects.GXDLMSIECOpticalPortSetup;
@@ -90,6 +94,7 @@ import gurux.dlms.objects.GXDLMSScriptTable;
 import gurux.dlms.objects.GXDLMSSecuritySetup;
 import gurux.dlms.objects.GXDLMSSpecialDaysTable;
 import gurux.dlms.objects.GXDLMSTcpUdpSetup;
+import gurux.dlms.objects.GXDLMSTokenGateway;
 import gurux.dlms.objects.enums.CertificateType;
 import gurux.dlms.objects.enums.SecuritySuite;
 import gurux.dlms.secure.AesGcmParameter;
@@ -231,6 +236,16 @@ abstract class GXDLMS {
             return new GXDLMSPushSetup();
         case MBUS_MASTER_PORT_SETUP:
             return new GXDLMSMBusMasterPortSetup();
+        case GSM_DIAGNOSTIC:
+            return new GXDLMSGSMDiagnostic();
+        case ACCOUNT:
+            return new GXDLMSAccount();
+        case CREDIT:
+            return new GXDLMSCredit();
+        case CHARGE:
+            return new GXDLMSCharge();
+        case TOKEN_GATEWAY:
+            return new GXDLMSTokenGateway();
         default:
             return new GXDLMSObject();
         }
@@ -2147,23 +2162,22 @@ abstract class GXDLMS {
                                         ErrorCode.forValue(data.getError())));
 
                     } else {
-                        if (data.getError() != 0) {
-                            data.getXml().appendLine(TranslatorTags.RESULT,
-                                    null,
-                                    GXDLMSTranslator.errorCodeToString(
-                                            data.getXml().getOutputType(),
-                                            ErrorCode.forValue(
-                                                    data.getError())));
+                        data.getXml().appendStartTag(Command.READ_RESPONSE,
+                                SingleReadResponse.DATA);
+                        if (data.getData().size() > 0 && data.getData()
+                                .position() == data.getData().size()) {
+                            int tag = GXDLMS.DATA_TYPE_OFFSET
+                                    | DataType.NONE.getValue();
+                            data.getXml().appendStartTag(tag, null, null);
+                            data.getXml().appendEndTag(tag);
                         } else {
-                            data.getXml().appendStartTag(Command.READ_RESPONSE,
-                                    SingleReadResponse.DATA);
                             GXDataInfo di = new GXDataInfo();
                             di.setXml(data.getXml());
                             GXCommon.getData(data.getData(), di);
-
-                            data.getXml().appendEndTag(Command.READ_RESPONSE,
-                                    SingleReadResponse.DATA);
                         }
+
+                        data.getXml().appendEndTag(Command.READ_RESPONSE,
+                                SingleReadResponse.DATA);
                     }
                     data.getXml()
                             .appendEndTag(TranslatorTags.RETURN_PARAMETERS);

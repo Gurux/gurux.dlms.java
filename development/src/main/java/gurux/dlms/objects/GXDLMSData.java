@@ -43,14 +43,23 @@ import gurux.dlms.enums.ErrorCode;
 import gurux.dlms.enums.ObjectType;
 import gurux.dlms.internal.GXCommon;
 
+/**
+ * Online help:<br/>
+ * http://www.gurux.fi/Gurux.DLMS.Objects.GXDLMSData
+ */
 public class GXDLMSData extends GXDLMSObject implements IGXDLMSBase {
+    /**
+     * Value of data object.<br/>
+     * Online help:<br/>
+     * http://www.gurux.fi/Gurux.DLMS.Objects.GXDLMSData
+     */
     private Object value;
 
     /**
      * Constructor.
      */
     public GXDLMSData() {
-        super(ObjectType.DATA);
+        this(null, 0);
     }
 
     /**
@@ -60,7 +69,7 @@ public class GXDLMSData extends GXDLMSObject implements IGXDLMSBase {
      *            Logical Name of the object.
      */
     public GXDLMSData(final String ln) {
-        super(ObjectType.DATA, ln, 0);
+        this(ln, 0);
     }
 
     /**
@@ -76,7 +85,8 @@ public class GXDLMSData extends GXDLMSObject implements IGXDLMSBase {
     }
 
     /**
-     * Get value of Data object.
+     * Online help:<br/>
+     * http://www.gurux.fi/Gurux.DLMS.Objects.GXDLMSData
      * 
      * @return Value of data object.
      */
@@ -85,7 +95,8 @@ public class GXDLMSData extends GXDLMSObject implements IGXDLMSBase {
     }
 
     /**
-     * Set value of data object.
+     * Online help:<br/>
+     * http://www.gurux.fi/Gurux.DLMS.Objects.GXDLMSData
      * 
      * @param forValue
      *            Value of data object.

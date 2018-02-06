@@ -167,6 +167,44 @@ class GXStandardObisCodeCollection
         return true;
     }
 
+    /*
+     * Get N1C description.
+     */
+    private static String getN1CDescription(final String str) {
+        if (str == null || str == "" || str.charAt(0) != '$') {
+            return "";
+        }
+        int value = Integer.parseInt(str.substring(1));
+        String tmp = "";
+        switch (value) {
+        case 41:
+            tmp = "Absolute temperature";
+            break;
+        case 42:
+            tmp = "Absolute pressure";
+            break;
+        case 44:
+            tmp = "Velocity of sound";
+            break;
+        case 45:
+            tmp = "Density(of gas)";
+            break;
+        case 46:
+            tmp = "Relative density";
+            break;
+        case 47:
+            tmp = "Gauge pressure";
+            break;
+        case 48:
+            tmp = "Differential pressure";
+            break;
+        case 49:
+            tmp = "Density of air";
+            break;
+        }
+        return tmp;
+    }
+
     /**
      * Get description.
      */
@@ -372,8 +410,11 @@ class GXStandardObisCodeCollection
      *            OBIS value.
      * @return OBIS value as integer.
      */
-    private static int getObisValue(final String formula, final int value) {
-        return value + Integer.parseInt(formula.substring(1));
+    private static String getObisValue(final String formula, final int value) {
+        if (formula.length() == 1) {
+            return String.valueOf(value);
+        }
+        return (String.valueOf(value + Integer.parseInt(formula.substring(1))));
     }
 
     /**
@@ -394,7 +435,11 @@ class GXStandardObisCodeCollection
                 if (tmp2.size() > 1) {
                     String desc = "";
                     if (obisCode != null && "$1".equals(tmp2.get(1).trim())) {
-                        desc = getDescription("$" + obisCode[2]);
+                        if (obisCode[0] == 7) {
+                            desc = getN1CDescription("$" + obisCode[2]);
+                        } else {
+                            desc = getDescription("$" + obisCode[2]);
+                        }
                     }
                     if (!desc.equals("")) {
                         tmp2.set(1, desc);
@@ -427,7 +472,7 @@ class GXStandardObisCodeCollection
                     desc = desc.replace("$E", Integer.toString(obisCode[4]));
                     desc = desc.replace("$F", Integer.toString(obisCode[5]));
                     // Increase value
-                    int begin = desc.indexOf("#$(");
+                    int begin = desc.indexOf("$(");
                     if (begin != -1) {
                         List<String> arr =
                                 GXCommon.split(desc.substring(begin + 2),
@@ -436,22 +481,22 @@ class GXStandardObisCodeCollection
                         for (String v : arr) {
                             switch (v.charAt(0)) {
                             case 'A':
-                                desc += "#" + getObisValue(v, obisCode[0]);
+                                desc += getObisValue(v, obisCode[0]);
                                 break;
                             case 'B':
-                                desc += "#" + getObisValue(v, obisCode[1]);
+                                desc += getObisValue(v, obisCode[1]);
                                 break;
                             case 'C':
-                                desc += "#" + getObisValue(v, obisCode[2]);
+                                desc += getObisValue(v, obisCode[2]);
                                 break;
                             case 'D':
-                                desc += "#" + getObisValue(v, obisCode[3]);
+                                desc += getObisValue(v, obisCode[3]);
                                 break;
                             case 'E':
-                                desc += "#" + getObisValue(v, obisCode[4]);
+                                desc += getObisValue(v, obisCode[4]);
                                 break;
                             case 'F':
-                                desc += "#" + getObisValue(v, obisCode[5]);
+                                desc += getObisValue(v, obisCode[5]);
                                 break;
                             default:
                                 desc += v;
