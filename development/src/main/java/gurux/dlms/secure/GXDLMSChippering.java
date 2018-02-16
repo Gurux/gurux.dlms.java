@@ -34,7 +34,6 @@
 
 package gurux.dlms.secure;
 
-import java.util.logging.Level;
 import java.util.logging.Logger;
 
 import gurux.dlms.GXByteBuffer;
@@ -76,7 +75,7 @@ final class GXDLMSChippering {
 
     static byte[] encryptAesGcm(final AesGcmParameter p,
             final byte[] plainText) {
-        LOGGER.log(Level.INFO, "Encrypt settings: " + p.toString());
+        // LOGGER.log(Level.INFO, "Encrypt settings: " + p.toString());
         p.setCountTag(null);
         GXByteBuffer data = new GXByteBuffer();
         if (p.getType() == CountType.PACKET) {
@@ -138,7 +137,7 @@ final class GXDLMSChippering {
             data = tmp2;
         }
         byte[] crypted = data.array();
-        LOGGER.log(Level.INFO, "Crypted: " + GXCommon.toHex(crypted, false));
+        // LOGGER.log(Level.INFO, "Crypted: " + GXCommon.toHex(crypted, false));
         return crypted;
     }
 
@@ -319,9 +318,9 @@ final class GXDLMSChippering {
         p.setSecurity(security);
         long invocationCounter = data.getUInt32();
         p.setInvocationCounter(invocationCounter);
-        LOGGER.log(Level.INFO, "Decrypt settings: " + p.toString());
-        LOGGER.log(Level.INFO, "Encrypted: " + GXCommon.toHex(data.getData(),
-                false, data.position(), data.size() - data.position()));
+        // LOGGER.log(Level.INFO, "Decrypt settings: " + p.toString());
+        // LOGGER.log(Level.INFO, "Encrypted: " + GXCommon.toHex(data.getData(),
+        // false, data.position(), data.size() - data.position()));
         byte[] tag = new byte[12];
         byte[] encryptedData;
         int length;

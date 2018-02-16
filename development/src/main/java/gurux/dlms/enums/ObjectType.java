@@ -335,10 +335,6 @@ public enum ObjectType {
      */
     public static ObjectType forValue(final int value) {
         ObjectType ot = getMappings().get(new Integer(value));
-        if (ot == ObjectType.NONE && value != 0) {
-            throw new IllegalArgumentException(
-                    "Invalid object type: " + String.valueOf(value));
-        }
         return ot;
     }
 }

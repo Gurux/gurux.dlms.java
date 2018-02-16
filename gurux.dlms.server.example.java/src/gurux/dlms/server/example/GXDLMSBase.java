@@ -92,6 +92,9 @@ import gurux.dlms.objects.GXDLMSPushSetup;
 import gurux.dlms.objects.GXDLMSRegister;
 import gurux.dlms.objects.GXDLMSRegisterMonitor;
 import gurux.dlms.objects.GXDLMSSapAssignment;
+import gurux.dlms.objects.GXDLMSScript;
+import gurux.dlms.objects.GXDLMSScriptAction;
+import gurux.dlms.objects.GXDLMSScriptTable;
 import gurux.dlms.objects.GXDLMSSeasonProfile;
 import gurux.dlms.objects.GXDLMSTcpUdpSetup;
 import gurux.dlms.objects.GXDLMSWeekProfile;
@@ -383,7 +386,7 @@ public class GXDLMSBase extends GXDLMSSecureServer2
         java.util.Calendar tm = Calendar.getInstance();
         java.util.Date now = tm.getTime();
         GXDLMSDemandRegister dr = new GXDLMSDemandRegister();
-        dr.setLogicalName("0.0.1.0.0.255");
+        dr.setLogicalName("1.0.31.4.0.255");
         dr.setCurrentAverageValue(10);
         dr.setLastAverageValue(20);
         dr.setStatus((int) 1);
@@ -399,7 +402,7 @@ public class GXDLMSBase extends GXDLMSSecureServer2
      */
     void addRegisterMonitor(GXDLMSRegister register) {
         GXDLMSRegisterMonitor rm = new GXDLMSRegisterMonitor();
-        rm.setLogicalName("0.0.1.0.0.255");
+        rm.setLogicalName("0.0.16.1.0.255");
         rm.setThresholds(null);
         rm.getMonitoredValue().update(register, 2);
         getItems().add(rm);
@@ -409,9 +412,17 @@ public class GXDLMSBase extends GXDLMSSecureServer2
      * Add action schedule object.
      */
     void addActionSchedule() {
+        // Add Activate test mode Script table object.
+        GXDLMSScriptTable st = new GXDLMSScriptTable("0.1.10.1.101.255");
+        GXDLMSScript s = new GXDLMSScript();
+        s.setId(1);
+        GXDLMSScriptAction a = new GXDLMSScriptAction();
+        s.getActions().add(a);
+        st.getScripts().add(s);
+        getItems().add(st);
+
         GXDLMSActionSchedule actionS = new GXDLMSActionSchedule();
-        actionS.setLogicalName("0.0.1.0.0.255");
-        actionS.setExecutedScriptLogicalName("1.2.3.4.5.6");
+        actionS.setTarget(st);
         actionS.setExecutedScriptSelector(1);
         actionS.setType(SingleActionScheduleType.SingleActionScheduleType1);
         actionS.setExecutionTime(new GXDateTime[] {

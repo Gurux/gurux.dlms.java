@@ -651,10 +651,10 @@ public class GXDLMSAssociationLogicalName extends GXDLMSObject
         }
         if (e.getIndex() == 3) {
             GXByteBuffer data = new GXByteBuffer();
-            data.setUInt8(DataType.ARRAY.getValue());
+            data.setUInt8(DataType.STRUCTURE.getValue());
             // Add count
             data.setUInt8(2);
-            data.setUInt8(DataType.UINT8.getValue());
+            data.setUInt8(DataType.INT8.getValue());
             data.setUInt8(clientSAP);
             data.setUInt8(DataType.UINT16.getValue());
             data.setUInt16(serverSAP);

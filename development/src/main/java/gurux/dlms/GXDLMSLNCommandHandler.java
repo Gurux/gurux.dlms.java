@@ -144,7 +144,10 @@ final class GXDLMSLNCommandHandler {
             final short attributeIndex) {
         xml.appendStartTag(TranslatorTags.ATTRIBUTE_DESCRIPTOR);
         if (xml.isComments()) {
-            xml.appendComment(ObjectType.forValue(ci).toString());
+            ObjectType ot = ObjectType.forValue(ci);
+            if (ot != null) {
+                xml.appendComment(ot.toString());
+            }
         }
         xml.appendLine(TranslatorTags.CLASS_ID, "Value",
                 xml.integerToHex(ci, 4));
@@ -161,7 +164,10 @@ final class GXDLMSLNCommandHandler {
             final short attributeIndex) {
         xml.appendStartTag(TranslatorTags.METHOD_DESCRIPTOR);
         if (xml.isComments()) {
-            xml.appendComment(ObjectType.forValue(ci).toString());
+            ObjectType ot = ObjectType.forValue(ci);
+            if (ot != null) {
+                xml.appendComment(ot.toString());
+            }
         }
         xml.appendLine(TranslatorTags.CLASS_ID, "Value",
                 xml.integerToHex(ci, 4));
@@ -190,7 +196,7 @@ final class GXDLMSLNCommandHandler {
         settings.setIndex(0);
         settings.resetBlockIndex();
         // CI
-        ObjectType ci = ObjectType.forValue(data.getUInt16());
+        int ci = data.getUInt16();
         byte[] ln = new byte[6];
         data.get(ln);
         // Attribute Id
@@ -205,7 +211,7 @@ final class GXDLMSLNCommandHandler {
             selector = data.getUInt8();
         }
         if (xml != null) {
-            appendAttributeDescriptor(xml, ci.getValue(), ln, attributeIndex);
+            appendAttributeDescriptor(xml, ci, ln, attributeIndex);
             if (selection != 0) {
                 info.setXml(xml);
                 xml.appendStartTag(TranslatorTags.ACCESS_SELECTION);
@@ -221,10 +227,11 @@ final class GXDLMSLNCommandHandler {
         if (selection != 0) {
             parameters = GXCommon.getData(data, info);
         }
+        ObjectType ot = ObjectType.forValue(ci);
         GXDLMSObject obj =
-                settings.getObjects().findByLN(ci, GXCommon.toLogicalName(ln));
+                settings.getObjects().findByLN(ot, GXCommon.toLogicalName(ln));
         if (obj == null) {
-            obj = server.notifyFindObject(ci, 0, GXCommon.toLogicalName(ln));
+            obj = server.notifyFindObject(ot, 0, GXCommon.toLogicalName(ln));
         }
         e = new ValueEventArgs(server, obj, attributeIndex, selector,
                 parameters);
@@ -963,7 +970,7 @@ final class GXDLMSLNCommandHandler {
                         "Invalid access service command type.");
             }
             // CI
-            ObjectType ci = ObjectType.forValue(data.getUInt16());
+            int ci = data.getUInt16();
             byte[] ln = new byte[6];
             data.get(ln);
             // Attribute Id
@@ -971,8 +978,7 @@ final class GXDLMSLNCommandHandler {
             if (xml != null) {
                 xml.appendStartTag(TranslatorTags.ACCESS_REQUEST_SPECIFICATION);
                 xml.appendStartTag(Command.ACCESS_REQUEST, type);
-                appendAttributeDescriptor(xml, ci.getValue(), ln,
-                        attributeIndex);
+                appendAttributeDescriptor(xml, ci, ln, attributeIndex);
                 xml.appendEndTag(Command.ACCESS_REQUEST, type);
                 xml.appendEndTag(TranslatorTags.ACCESS_REQUEST_SPECIFICATION);
             }

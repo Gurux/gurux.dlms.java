@@ -57,7 +57,7 @@ public class GXDLMSScriptTable extends GXDLMSObject implements IGXDLMSBase {
      * Constructor.
      */
     public GXDLMSScriptTable() {
-        this(null);
+        this(null, 0);
     }
 
     /**

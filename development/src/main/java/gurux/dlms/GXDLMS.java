@@ -2151,7 +2151,8 @@ abstract class GXDLMS {
                             "HandleActionResponseNormal failed. "
                                     + "Invalid tag.");
                 }
-                if (data.getXml() != null) {
+                if (data.getXml() != null && (ret != 0
+                        || data.getData().position() < data.getData().size())) {
                     data.getXml()
                             .appendStartTag(TranslatorTags.RETURN_PARAMETERS);
                     if (ret != 0) {
@@ -2164,18 +2165,9 @@ abstract class GXDLMS {
                     } else {
                         data.getXml().appendStartTag(Command.READ_RESPONSE,
                                 SingleReadResponse.DATA);
-                        if (data.getData().size() > 0 && data.getData()
-                                .position() == data.getData().size()) {
-                            int tag = GXDLMS.DATA_TYPE_OFFSET
-                                    | DataType.NONE.getValue();
-                            data.getXml().appendStartTag(tag, null, null);
-                            data.getXml().appendEndTag(tag);
-                        } else {
-                            GXDataInfo di = new GXDataInfo();
-                            di.setXml(data.getXml());
-                            GXCommon.getData(data.getData(), di);
-                        }
-
+                        GXDataInfo di = new GXDataInfo();
+                        di.setXml(data.getXml());
+                        GXCommon.getData(data.getData(), di);
                         data.getXml().appendEndTag(Command.READ_RESPONSE,
                                 SingleReadResponse.DATA);
                     }

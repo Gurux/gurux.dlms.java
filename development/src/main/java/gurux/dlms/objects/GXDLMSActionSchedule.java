@@ -69,7 +69,7 @@ public class GXDLMSActionSchedule extends GXDLMSObject implements IGXDLMSBase {
      * Constructor.
      */
     public GXDLMSActionSchedule() {
-        this(null, 0);
+        this("0.0.15.0.0.255", 0);
     }
 
     /**

@@ -59,6 +59,15 @@ public class GXDLMSScriptAction {
     private DataType parameterType;
 
     /**
+     * Constructor.
+     */
+    public GXDLMSScriptAction() {
+        type = ScriptActionType.NONE;
+        objectType = ObjectType.NONE;
+        parameterType = DataType.NONE;
+    }
+
+    /**
      * @return Executed object.
      */
     public final GXDLMSObject getTarget() {

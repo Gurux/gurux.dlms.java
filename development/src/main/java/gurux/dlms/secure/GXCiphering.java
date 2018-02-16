@@ -44,7 +44,6 @@ import gurux.dlms.GXByteBuffer;
 import gurux.dlms.GXICipher;
 import gurux.dlms.asn.GXx509Certificate;
 import gurux.dlms.enums.Security;
-import gurux.dlms.internal.GXCommon;
 import gurux.dlms.objects.enums.CertificateType;
 import gurux.dlms.objects.enums.SecuritySuite;
 
@@ -405,7 +404,6 @@ public class GXCiphering implements GXICipher {
      */
     public void setSharedSecret(final byte[] value) {
         sharedSecret = value;
-        System.out.println("SharedSecret: " + GXCommon.toHex(value));
     }
 
     /**
