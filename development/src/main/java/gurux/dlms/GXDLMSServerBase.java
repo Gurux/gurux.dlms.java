@@ -15,6 +15,7 @@ import gurux.dlms.enums.MethodAccessMode;
 import gurux.dlms.enums.ObjectType;
 import gurux.dlms.enums.Priority;
 import gurux.dlms.enums.RequestTypes;
+import gurux.dlms.enums.Security;
 import gurux.dlms.enums.ServiceClass;
 import gurux.dlms.enums.SourceDiagnostic;
 import gurux.dlms.internal.GXCommon;
@@ -26,6 +27,8 @@ import gurux.dlms.objects.GXDLMSHdlcSetup;
 import gurux.dlms.objects.GXDLMSObject;
 import gurux.dlms.objects.GXDLMSObjectCollection;
 import gurux.dlms.objects.IGXDLMSBase;
+import gurux.dlms.objects.enums.ApplicationContextName;
+import gurux.dlms.objects.enums.AssociationStatus;
 import gurux.dlms.secure.GXSecure;
 
 public class GXDLMSServerBase {
@@ -275,12 +278,17 @@ public class GXDLMSServerBase {
                 associationObject = it;
             } else if (it instanceof GXDLMSAssociationLogicalName
                     && this.getUseLogicalNameReferencing()) {
-                if (((GXDLMSAssociationLogicalName) it).getObjectList()
-                        .size() == 0) {
-                    ((GXDLMSAssociationLogicalName) it).getObjectList()
-                            .addAll(getItems());
+                GXDLMSAssociationLogicalName ln =
+                        (GXDLMSAssociationLogicalName) it;
+                if (ln.getObjectList().size() == 0) {
+                    ln.getObjectList().addAll(getItems());
                 }
                 associationObject = it;
+                ln.getXDLMSContextInfo()
+                        .setMaxReceivePduSize(settings.getMaxServerPDUSize());
+                ln.getXDLMSContextInfo()
+                        .setMaxSendPduSize(settings.getMaxServerPDUSize());
+
             } else if (!(it instanceof IGXDLMSBase)) {
                 // Remove unsupported items.
                 LOGGER.log(Level.INFO, it.getLogicalName() + " not supported.");
@@ -292,6 +300,10 @@ public class GXDLMSServerBase {
             if (getUseLogicalNameReferencing()) {
                 GXDLMSAssociationLogicalName it =
                         new GXDLMSAssociationLogicalName();
+                it.getXDLMSContextInfo()
+                        .setMaxReceivePduSize(settings.getMaxServerPDUSize());
+                it.getXDLMSContextInfo()
+                        .setMaxSendPduSize(settings.getMaxServerPDUSize());
                 getItems().add(it);
                 it.getObjectList().addAll(getItems());
             } else {
@@ -404,7 +416,51 @@ public class GXDLMSServerBase {
                         .getValue() > Authentication.LOW.getValue()) {
                     result = AssociationResult.ACCEPTED;
                     diagnostic = SourceDiagnostic.AUTHENTICATION_REQUIRED;
+                    if (getUseLogicalNameReferencing()) {
+                        GXDLMSAssociationLogicalName ln =
+                                (GXDLMSAssociationLogicalName) getItems()
+                                        .findByLN(
+                                                ObjectType.ASSOCIATION_LOGICAL_NAME,
+                                                "0.0.40.0.0.255");
+                        if (ln != null) {
+                            if (settings.getCipher() == null
+                                    || settings.getCipher()
+                                            .getSecurity() == Security.NONE) {
+                                ln.getApplicationContextName().setContextId(
+                                        ApplicationContextName.LOGICAL_NAME);
+                            } else {
+                                ln.getApplicationContextName().setContextId(
+                                        ApplicationContextName.LOGICAL_NAME_WITH_CIPHERING);
+                            }
+                            ln.getAuthenticationMechanismName().setMechanismId(
+                                    settings.getAuthentication());
+                            ln.setAssociationStatus(
+                                    AssociationStatus.ASSOCIATION_PENDING);
+                        }
+                    }
                 } else {
+                    if (getUseLogicalNameReferencing()) {
+                        GXDLMSAssociationLogicalName ln =
+                                (GXDLMSAssociationLogicalName) getItems()
+                                        .findByLN(
+                                                ObjectType.ASSOCIATION_LOGICAL_NAME,
+                                                "0.0.40.0.0.255");
+                        if (ln != null) {
+                            if (settings.getCipher() == null
+                                    || settings.getCipher()
+                                            .getSecurity() == Security.NONE) {
+                                ln.getApplicationContextName().setContextId(
+                                        ApplicationContextName.LOGICAL_NAME);
+                            } else {
+                                ln.getApplicationContextName().setContextId(
+                                        ApplicationContextName.LOGICAL_NAME_WITH_CIPHERING);
+                            }
+                            ln.getAuthenticationMechanismName().setMechanismId(
+                                    settings.getAuthentication());
+                            ln.setAssociationStatus(
+                                    AssociationStatus.ASSOCIATED);
+                        }
+                    }
                     settings.setConnected(true);
                 }
             }

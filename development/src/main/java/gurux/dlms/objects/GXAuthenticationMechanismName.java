@@ -50,6 +50,12 @@ public class GXAuthenticationMechanismName {
      */
     public GXAuthenticationMechanismName() {
         mechanismId = Authentication.NONE;
+        jointIsoCtt = 2;
+        country = 16;
+        countryName = 756;
+        identifiedOrganization = 5;
+        dlmsUA = 8;
+        authenticationMechanismName = 2;
     }
 
     public final int getJointIsoCtt() {

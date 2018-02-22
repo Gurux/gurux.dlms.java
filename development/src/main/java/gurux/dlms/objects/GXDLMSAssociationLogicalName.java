@@ -59,6 +59,7 @@ import gurux.dlms.enums.ErrorCode;
 import gurux.dlms.enums.MethodAccessMode;
 import gurux.dlms.enums.ObjectType;
 import gurux.dlms.internal.GXCommon;
+import gurux.dlms.objects.enums.ApplicationContextName;
 import gurux.dlms.objects.enums.AssociationStatus;
 import gurux.dlms.secure.GXSecure;
 
@@ -78,7 +79,7 @@ public class GXDLMSAssociationLogicalName extends GXDLMSObject
     private byte[] secret;
 
     private AssociationStatus associationStatus =
-            AssociationStatus.NonAssociated;
+            AssociationStatus.NON_ASSOCIATED;
     private String securitySetupReference;
 
     /**
@@ -325,11 +326,13 @@ public class GXDLMSAssociationLogicalName extends GXDLMSObject
                 byte[] tmp = GXSecure.secure(settings, settings.getCipher(), ic,
                         settings.getCtoSChallenge(), readSecret);
                 settings.setConnected(true);
+                associationStatus = AssociationStatus.ASSOCIATED;
                 return tmp;
             } else {
                 LOGGER.log(Level.INFO,
                         "Invalid CtoS:" + GXCommon.toHex(serverChallenge, false)
                                 + "-" + GXCommon.toHex(clientChallenge, false));
+                associationStatus = AssociationStatus.NON_ASSOCIATED;
                 settings.setConnected(false);
             }
         } else if (e.getIndex() == 2) {
@@ -678,7 +681,7 @@ public class GXDLMSAssociationLogicalName extends GXDLMSObject
             GXCommon.setData(data, DataType.UINT8,
                     applicationContextName.getApplicationContext());
             GXCommon.setData(data, DataType.UINT8,
-                    applicationContextName.getContextId());
+                    applicationContextName.getContextId().getValue());
             return data.array();
         }
         if (e.getIndex() == 5) {
@@ -789,7 +792,8 @@ public class GXDLMSAssociationLogicalName extends GXDLMSObject
                         .setIdentifiedOrganization(buff.getUInt8());
                 applicationContextName.setDlmsUA(buff.getUInt8());
                 applicationContextName.setApplicationContext(buff.getUInt8());
-                applicationContextName.setContextId(buff.getUInt8());
+                applicationContextName.setContextId(
+                        ApplicationContextName.forValue(buff.getUInt8()));
             } else {
                 // Get Tag and length.
                 if (buff.getUInt8() != 2 && buff.getUInt8() != 7) {
@@ -830,7 +834,8 @@ public class GXDLMSAssociationLogicalName extends GXDLMSObject
                 if (buff.getUInt8() != 0x11) {
                     throw new IllegalArgumentException();
                 }
-                applicationContextName.setContextId(buff.getUInt8());
+                applicationContextName.setContextId(
+                        ApplicationContextName.forValue(buff.getUInt8()));
             }
         } else {
             if (value != null) {
@@ -846,8 +851,8 @@ public class GXDLMSAssociationLogicalName extends GXDLMSObject
                         .setDlmsUA(((Number) Array.get(value, 4)).intValue());
                 applicationContextName.setApplicationContext(
                         ((Number) Array.get(value, 5)).intValue());
-                applicationContextName.setContextId(
-                        ((Number) Array.get(value, 6)).intValue());
+                applicationContextName.setContextId(ApplicationContextName
+                        .forValue(((Number) Array.get(value, 6)).intValue()));
             }
         }
     }
@@ -986,7 +991,7 @@ public class GXDLMSAssociationLogicalName extends GXDLMSObject
             break;
         case 8:
             if (e.getValue() == null) {
-                setAssociationStatus(AssociationStatus.NonAssociated);
+                setAssociationStatus(AssociationStatus.NON_ASSOCIATED);
             } else {
                 setAssociationStatus(AssociationStatus
                         .values()[((Number) e.getValue()).intValue()]);
@@ -1037,8 +1042,8 @@ public class GXDLMSAssociationLogicalName extends GXDLMSObject
                     .setDlmsUA(reader.readElementContentAsInt("DlmsUA"));
             applicationContextName.setApplicationContext(
                     reader.readElementContentAsInt("ApplicationContext"));
-            applicationContextName
-                    .setContextId(reader.readElementContentAsInt("ContextId"));
+            applicationContextName.setContextId(ApplicationContextName
+                    .forValue(reader.readElementContentAsInt("ContextId")));
             reader.readEndElement("ApplicationContextName");
         }
 
@@ -1105,7 +1110,7 @@ public class GXDLMSAssociationLogicalName extends GXDLMSObject
             writer.writeElementString("ApplicationContext",
                     applicationContextName.getApplicationContext());
             writer.writeElementString("ContextId",
-                    applicationContextName.getContextId());
+                    applicationContextName.getContextId().getValue());
             writer.writeEndElement();
         }
         if (xDLMSContextInfo != null) {

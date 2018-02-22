@@ -34,6 +34,8 @@
 
 package gurux.dlms.objects;
 
+import gurux.dlms.objects.enums.ApplicationContextName;
+
 public class GXApplicationContextName {
     private int jointIsoCtt;
     private int country;
@@ -41,7 +43,20 @@ public class GXApplicationContextName {
     private int identifiedOrganization;
     private int dlmsUA;
     private int applicationContext;
-    private int contextId;
+    private ApplicationContextName contextId;
+
+    /**
+     * Constructor.
+     */
+    public GXApplicationContextName() {
+        jointIsoCtt = 2;
+        country = 16;
+        countryName = 756;
+        identifiedOrganization = 5;
+        dlmsUA = 8;
+        applicationContext = 1;
+        contextId = ApplicationContextName.LOGICAL_NAME;
+    }
 
     public final int getJointIsoCtt() {
         return jointIsoCtt;
@@ -91,11 +106,11 @@ public class GXApplicationContextName {
         applicationContext = value;
     }
 
-    public final int getContextId() {
+    public final ApplicationContextName getContextId() {
         return contextId;
     }
 
-    public final void setContextId(final int value) {
+    public final void setContextId(final ApplicationContextName value) {
         contextId = value;
     }
 

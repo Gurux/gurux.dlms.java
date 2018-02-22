@@ -459,7 +459,7 @@ public class GXDLMSTranslator {
             if (value.getUInt8(pos) == 0x7e) {
                 return InterfaceType.HDLC;
             }
-            if (value.getUInt16(pos) == 1) {
+            if (value.available() > 1 && value.getUInt16(pos) == 1) {
                 return InterfaceType.WRAPPER;
             }
             if (GXDLMS.isMBusData(value)) {
@@ -776,24 +776,22 @@ public class GXDLMSTranslator {
             default:
                 throw new GXDLMSException("Invalid Exception.");
             }
-            // RX / TX are delivered from the partner's point of view =>
-            // reversed to ours
             switch (id) {
             case HDLCInfo.MAX_INFO_TX:
                 xml.appendLine(
-                        "<MaxInfoRX Value=\"" + val.toString() + "\" />");
+                        "<MaxInfoTX Value=\"" + val.toString() + "\" />");
                 break;
             case HDLCInfo.MAX_INFO_RX:
                 xml.appendLine(
-                        "<MaxInfoTX Value=\"" + val.toString() + "\" />");
+                        "<MaxInfoRX Value=\"" + val.toString() + "\" />");
                 break;
             case HDLCInfo.WINDOW_SIZE_TX:
                 xml.appendLine(
-                        "<WindowSizeRX Value=\"" + val.toString() + "\" />");
+                        "<WindowSizeTX Value=\"" + val.toString() + "\" />");
                 break;
             case HDLCInfo.WINDOW_SIZE_RX:
                 xml.appendLine(
-                        "<WindowSizeTX Value=\"" + val.toString() + "\" />");
+                        "<WindowSizeRX Value=\"" + val.toString() + "\" />");
                 break;
             default:
                 throw new GXDLMSException("Invalid UA response.");
