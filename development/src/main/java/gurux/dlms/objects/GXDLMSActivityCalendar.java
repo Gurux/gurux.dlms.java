@@ -51,6 +51,10 @@ import gurux.dlms.enums.ErrorCode;
 import gurux.dlms.enums.ObjectType;
 import gurux.dlms.internal.GXCommon;
 
+/**
+ * Online help: <br>
+ * http://www.gurux.fi/Gurux.DLMS.Objects.GXDLMSActivityCalendar
+ */
 public class GXDLMSActivityCalendar extends GXDLMSObject
         implements IGXDLMSBase {
     private String calendarNameActive;

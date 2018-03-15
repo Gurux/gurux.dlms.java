@@ -55,6 +55,10 @@ import gurux.dlms.enums.ObjectType;
 import gurux.dlms.internal.GXCommon;
 import gurux.dlms.objects.enums.ClockBase;
 
+/**
+ * Online help: <br>
+ * http://www.gurux.fi/Gurux.DLMS.Objects.GXDLMSClock
+ */
 public class GXDLMSClock extends GXDLMSObject implements IGXDLMSBase {
     private ClockBase clockBase;
     private int deviation;

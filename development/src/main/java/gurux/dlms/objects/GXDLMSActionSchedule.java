@@ -54,6 +54,10 @@ import gurux.dlms.enums.ObjectType;
 import gurux.dlms.internal.GXCommon;
 import gurux.dlms.objects.enums.SingleActionScheduleType;
 
+/**
+ * Online help: <br>
+ * http://www.gurux.fi/Gurux.DLMS.Objects.GXDLMSActionSchedule
+ */
 public class GXDLMSActionSchedule extends GXDLMSObject implements IGXDLMSBase {
     /**
      * Script to execute.

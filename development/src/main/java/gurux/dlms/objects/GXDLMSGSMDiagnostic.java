@@ -52,6 +52,10 @@ import gurux.dlms.objects.enums.GsmCircuitSwitchStatus;
 import gurux.dlms.objects.enums.GsmPacketSwitchStatus;
 import gurux.dlms.objects.enums.GsmStatus;
 
+/**
+ * Online help: <br>
+ * http://www.gurux.fi/Gurux.DLMS.Objects.GXDLMSGSMDiagnostic
+ */
 public class GXDLMSGSMDiagnostic extends GXDLMSObject implements IGXDLMSBase {
     /**
      * Name of network operator.

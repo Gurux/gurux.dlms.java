@@ -50,6 +50,10 @@ import gurux.dlms.enums.ObjectType;
 import gurux.dlms.internal.GXCommon;
 import gurux.dlms.objects.enums.ScriptActionType;
 
+/**
+ * Online help: <br>
+ * http://www.gurux.fi/Gurux.DLMS.Objects.GXDLMSScriptTable
+ */
 public class GXDLMSScriptTable extends GXDLMSObject implements IGXDLMSBase {
     private List<GXDLMSScript> scripts;
 

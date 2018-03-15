@@ -51,6 +51,10 @@ import gurux.dlms.enums.ObjectType;
 import gurux.dlms.internal.GXCommon;
 import gurux.dlms.objects.enums.Ip4SetupIpOptionType;
 
+/**
+ * Online help: <br>
+ * http://www.gurux.fi/Gurux.DLMS.Objects.GXDLMSIp4Setup
+ */
 public class GXDLMSIp4Setup extends GXDLMSObject implements IGXDLMSBase {
     private String dataLinkLayerReference;
     private String ipAddress;

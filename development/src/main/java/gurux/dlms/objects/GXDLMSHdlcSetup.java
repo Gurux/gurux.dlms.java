@@ -44,6 +44,10 @@ import gurux.dlms.enums.ObjectType;
 import gurux.dlms.internal.GXCommon;
 import gurux.dlms.objects.enums.BaudRate;
 
+/**
+ * Online help: <br>
+ * http://www.gurux.fi/Gurux.DLMS.Objects.GXDLMSHdlcSetup
+ */
 public class GXDLMSHdlcSetup extends GXDLMSObject implements IGXDLMSBase {
     private int inactivityTimeout;
     private int deviceAddress;

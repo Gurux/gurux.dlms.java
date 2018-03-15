@@ -52,6 +52,10 @@ import gurux.dlms.objects.enums.PppAuthenticationType;
 import gurux.dlms.objects.enums.PppSetupIPCPOptionType;
 import gurux.dlms.objects.enums.PppSetupLcpOptionType;
 
+/**
+ * Online help: <br>
+ * http://www.gurux.fi/Gurux.DLMS.Objects.GXDLMSPppSetup
+ */
 public class GXDLMSPppSetup extends GXDLMSObject implements IGXDLMSBase {
     private GXDLMSPppSetupIPCPOption[] ipcpOptions;
     private String phyReference;

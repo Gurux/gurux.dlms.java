@@ -43,6 +43,10 @@ import gurux.dlms.enums.ErrorCode;
 import gurux.dlms.enums.ObjectType;
 import gurux.dlms.objects.enums.BaudRate;
 
+/**
+ * Online help: <br>
+ * http://www.gurux.fi/Gurux.DLMS.Objects.GXDLMSMBusMasterPortSetup
+ */
 public class GXDLMSMBusMasterPortSetup extends GXDLMSObject
         implements IGXDLMSBase {
     private BaudRate commSpeed;

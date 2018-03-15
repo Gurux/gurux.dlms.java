@@ -55,6 +55,10 @@ import gurux.dlms.internal.GXCommon;
 import gurux.dlms.objects.enums.BaudRate;
 import gurux.dlms.objects.enums.IecTwistedPairSetupMode;
 
+/**
+ * Online help: <br>
+ * http://www.gurux.fi/Gurux.DLMS.Objects.GXDLMSIecTwistedPairSetup
+ */
 public class GXDLMSIecTwistedPairSetup extends GXDLMSObject
         implements IGXDLMSBase {
 

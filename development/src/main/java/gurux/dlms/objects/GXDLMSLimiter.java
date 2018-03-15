@@ -49,6 +49,10 @@ import gurux.dlms.enums.ErrorCode;
 import gurux.dlms.enums.ObjectType;
 import gurux.dlms.internal.GXCommon;
 
+/**
+ * Online help: <br>
+ * http://www.gurux.fi/Gurux.DLMS.Objects.GXDLMSLimiter
+ */
 public class GXDLMSLimiter extends GXDLMSObject implements IGXDLMSBase {
     private GXDLMSObject monitoredValue;
     private int monitoredAttributeIndex;

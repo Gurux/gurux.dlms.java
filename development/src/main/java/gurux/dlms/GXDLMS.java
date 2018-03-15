@@ -82,6 +82,7 @@ import gurux.dlms.objects.GXDLMSMBusSlavePortSetup;
 import gurux.dlms.objects.GXDLMSMacAddressSetup;
 import gurux.dlms.objects.GXDLMSModemConfiguration;
 import gurux.dlms.objects.GXDLMSObject;
+import gurux.dlms.objects.GXDLMSParameterMonitor;
 import gurux.dlms.objects.GXDLMSPppSetup;
 import gurux.dlms.objects.GXDLMSProfileGeneric;
 import gurux.dlms.objects.GXDLMSPushSetup;
@@ -246,6 +247,8 @@ abstract class GXDLMS {
             return new GXDLMSCharge();
         case TOKEN_GATEWAY:
             return new GXDLMSTokenGateway();
+        case PARAMETER_MONITOR:
+            return new GXDLMSParameterMonitor();
         default:
             return new GXDLMSObject();
         }

@@ -48,9 +48,9 @@ import gurux.dlms.enums.ObjectType;
 import gurux.dlms.internal.GXCommon;
 
 /**
- * Base class where class is derived.
+ * Online help: <br>
+ * http://www.gurux.fi/Gurux.DLMS.Objects.GXDLMSSchedule
  */
-
 public class GXDLMSSchedule extends GXDLMSObject implements IGXDLMSBase {
     /**
      * Specifies the scripts to be executed at given times.

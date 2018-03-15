@@ -46,6 +46,10 @@ import gurux.dlms.internal.GXCommon;
 import gurux.dlms.objects.enums.ControlMode;
 import gurux.dlms.objects.enums.ControlState;
 
+/**
+ * Online help: <br>
+ * http://www.gurux.fi/Gurux.DLMS.Objects.GXDLMSDisconnectControl
+ */
 public class GXDLMSDisconnectControl extends GXDLMSObject
         implements IGXDLMSBase {
     private boolean outputState;

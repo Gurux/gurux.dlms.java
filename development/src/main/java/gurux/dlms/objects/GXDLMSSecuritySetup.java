@@ -74,6 +74,10 @@ import gurux.dlms.objects.enums.SecuritySuite;
 import gurux.dlms.secure.GXASymmetric;
 import gurux.dlms.secure.GXDLMSSecureClient;
 
+/**
+ * Online help: <br>
+ * http://www.gurux.fi/Gurux.DLMS.Objects.GXDLMSSecuritySetup
+ */
 public class GXDLMSSecuritySetup extends GXDLMSObject implements IGXDLMSBase {
     /**
      * Security policy version 1.
@@ -1019,17 +1023,20 @@ public class GXDLMSSecuritySetup extends GXDLMSObject implements IGXDLMSBase {
 
     private void updateSertificates(final Object[] list) {
         certificates.clear();
-        for (Object tmp : list) {
-            Object[] it = (Object[]) tmp;
-            GXDLMSCertificateInfo info = new GXDLMSCertificateInfo();
-            info.setEntity(
-                    CertificateEntity.forValue(((Number) it[0]).intValue()));
-            info.setType(CertificateType.forValue(((Number) it[1]).intValue()));
-            info.setSerialNumber(new String((byte[]) it[2]));
-            info.setIssuer(new String((byte[]) it[3]));
-            info.setSubject(new String((byte[]) it[4]));
-            info.setSubjectAltName(new String((byte[]) it[5]));
-            certificates.add(info);
+        if (list != null) {
+            for (Object tmp : list) {
+                Object[] it = (Object[]) tmp;
+                GXDLMSCertificateInfo info = new GXDLMSCertificateInfo();
+                info.setEntity(CertificateEntity
+                        .forValue(((Number) it[0]).intValue()));
+                info.setType(
+                        CertificateType.forValue(((Number) it[1]).intValue()));
+                info.setSerialNumber(new String((byte[]) it[2]));
+                info.setIssuer(new String((byte[]) it[3]));
+                info.setSubject(new String((byte[]) it[4]));
+                info.setSubjectAltName(new String((byte[]) it[5]));
+                certificates.add(info);
+            }
         }
     }
 

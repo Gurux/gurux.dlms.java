@@ -49,6 +49,10 @@ import gurux.dlms.enums.ObjectType;
 import gurux.dlms.internal.GXCommon;
 import gurux.dlms.objects.enums.BaudRate;
 
+/**
+ * Online help: <br>
+ * http://www.gurux.fi/Gurux.DLMS.Objects.GXDLMSModemConfiguration
+ */
 public class GXDLMSModemConfiguration extends GXDLMSObject
         implements IGXDLMSBase {
     private GXDLMSModemInitialisation[] initialisationStrings;

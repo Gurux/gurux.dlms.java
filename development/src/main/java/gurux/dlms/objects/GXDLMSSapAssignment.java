@@ -51,6 +51,10 @@ import gurux.dlms.enums.ErrorCode;
 import gurux.dlms.enums.ObjectType;
 import gurux.dlms.internal.GXCommon;
 
+/**
+ * Online help: <br>
+ * http://www.gurux.fi/Gurux.DLMS.Objects.GXDLMSSapAssignment
+ */
 public class GXDLMSSapAssignment extends GXDLMSObject implements IGXDLMSBase {
     private List<Entry<Integer, String>> sapAssignmentList;
 

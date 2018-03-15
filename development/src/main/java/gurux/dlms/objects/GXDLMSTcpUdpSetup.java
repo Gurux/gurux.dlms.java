@@ -43,6 +43,10 @@ import gurux.dlms.enums.ErrorCode;
 import gurux.dlms.enums.ObjectType;
 import gurux.dlms.internal.GXCommon;
 
+/**
+ * Online help: <br>
+ * http://www.gurux.fi/Gurux.DLMS.Objects.GXDLMSTcpUdpSetup
+ */
 public class GXDLMSTcpUdpSetup extends GXDLMSObject implements IGXDLMSBase {
     private int port;
     private String ipReference;

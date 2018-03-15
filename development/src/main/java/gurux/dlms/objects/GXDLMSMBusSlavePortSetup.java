@@ -46,8 +46,8 @@ import gurux.dlms.objects.enums.AddressState;
 import gurux.dlms.objects.enums.BaudRate;
 
 /**
- * This IC allows modeling and configuring communication channels according to
- * EN 13757-2.Several communication channels can be configured.
+ * Online help: <br>
+ * http://www.gurux.fi/Gurux.DLMS.Objects.GXDLMSMBusSlavePortSetup
  */
 public class GXDLMSMBusSlavePortSetup extends GXDLMSObject
         implements IGXDLMSBase {

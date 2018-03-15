@@ -458,6 +458,25 @@ public class GXByteBuffer {
         return b;
     }
 
+    /**
+     * Check is byte buffer ASCII string.
+     * 
+     * @param value
+     *            Byte array.
+     * @return Is ASCII string.
+     */
+    public static boolean isAsciiString(byte[] value) {
+        if (value != null) {
+            for (byte it : value) {
+                if ((it < 32 || it > 127) && it != '\r' && it != '\n'
+                        && it != 0) {
+                    return false;
+                }
+            }
+        }
+        return true;
+    }
+
     public final String getString(final int count) {
         String str = getString(position, count, "ASCII");
         position += count;

@@ -57,6 +57,10 @@ import gurux.dlms.internal.GXCommon;
 import gurux.dlms.internal.GXDataInfo;
 import gurux.dlms.objects.enums.SortMethod;
 
+/**
+ * Online help: <br>
+ * http://www.gurux.fi/Gurux.DLMS.Objects.GXDLMSProfileGeneric
+ */
 public class GXDLMSProfileGeneric extends GXDLMSObject implements IGXDLMSBase {
     private GXProfileGenericUpdater updater = null;
 

@@ -53,6 +53,10 @@ import gurux.dlms.enums.ObjectType;
 import gurux.dlms.internal.GXCommon;
 import gurux.dlms.objects.enums.AutoConnectMode;
 
+/**
+ * Online help: <br>
+ * http://www.gurux.fi/Gurux.DLMS.Objects.GXDLMSAutoConnect
+ */
 public class GXDLMSAutoConnect extends GXDLMSObject implements IGXDLMSBase {
     private AutoConnectMode mode;
     private List<Entry<GXDateTime, GXDateTime>> callingWindow;

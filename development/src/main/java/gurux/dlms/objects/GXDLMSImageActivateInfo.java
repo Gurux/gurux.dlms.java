@@ -34,10 +34,13 @@
 
 package gurux.dlms.objects;
 
+import gurux.dlms.GXByteBuffer;
+import gurux.dlms.internal.GXCommon;
+
 public class GXDLMSImageActivateInfo {
     private long size;
-    private String identification;
-    private String signature;
+    private byte[] identification;
+    private byte[] signature;
 
     /**
      * @return Image_size is the size of the Image(s) to be activated. Expressed
@@ -61,7 +64,7 @@ public class GXDLMSImageActivateInfo {
      *         activated, and may contain information like manufacturer, device
      *         type, version information, etc.
      */
-    public final String getIdentification() {
+    public final byte[] getIdentification() {
         return identification;
     }
 
@@ -71,14 +74,14 @@ public class GXDLMSImageActivateInfo {
      *            be activated, and may contain information like manufacturer,
      *            device type, version information, etc.
      */
-    public final void setIdentification(final String value) {
+    public final void setIdentification(final byte[] value) {
         identification = value;
     }
 
     /**
      * @return Image signature is the signature of the Image(s) to be activated.
      */
-    public final String getSignature() {
+    public final byte[] getSignature() {
         return signature;
     }
 
@@ -87,7 +90,7 @@ public class GXDLMSImageActivateInfo {
      *            Image signature is the signature of the Image(s) to be
      *            activated.
      */
-    public final void setSignature(final String value) {
+    public final void setSignature(final byte[] value) {
         signature = value;
     }
 
@@ -96,8 +99,8 @@ public class GXDLMSImageActivateInfo {
      */
     public GXDLMSImageActivateInfo() {
         size = 0;
-        identification = "";
-        signature = "";
+        identification = null;
+        signature = null;
     }
 
     /**
@@ -111,7 +114,7 @@ public class GXDLMSImageActivateInfo {
      *            Signature.
      */
     public GXDLMSImageActivateInfo(final long forSize,
-            final String forIdentification, final String forSignature) {
+            final byte[] forIdentification, final byte[] forSignature) {
         size = forSize;
         identification = forIdentification;
         signature = forSignature;
@@ -119,6 +122,20 @@ public class GXDLMSImageActivateInfo {
 
     @Override
     public final String toString() {
-        return identification + " " + signature + " " + String.valueOf(size);
+        StringBuilder sb = new StringBuilder();
+        if (GXByteBuffer.isAsciiString(identification)) {
+            sb.append(new String(identification));
+        } else {
+            sb.append(GXCommon.toHex(identification, true));
+        }
+        sb.append(" ");
+        if (GXByteBuffer.isAsciiString(signature)) {
+            sb.append(new String(signature));
+        } else {
+            sb.append(GXCommon.toHex(signature, true));
+        }
+        sb.append(" ");
+        sb.append(String.valueOf(size));
+        return sb.toString();
     }
 }

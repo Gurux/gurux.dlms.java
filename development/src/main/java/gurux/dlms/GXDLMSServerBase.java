@@ -651,7 +651,9 @@ public class GXDLMSServerBase {
                 }
                 receivedData.clear();
 
-                if (first) {
+                if (first || info.getCommand() == Command.SNRM
+                        || (settings.getInterfaceType() == InterfaceType.WRAPPER
+                                && info.getCommand() == Command.AARQ)) {
                     if (owner instanceof GXDLMSServer) {
                         GXDLMSServer b = (GXDLMSServer) owner;
                         // Check is data send to this server.
@@ -902,6 +904,11 @@ public class GXDLMSServerBase {
             reply = GXDLMS.getWrapperFrame(settings, replyData);
         } else {
             reply = GXDLMS.getHdlcFrame(settings, frame, replyData);
+        }
+        if (cmd == Command.DISCONNECT_REQUEST
+                || (settings.getInterfaceType() == InterfaceType.WRAPPER
+                        && cmd == Command.RELEASE_REQUEST)) {
+            reset();
         }
         return reply;
     }

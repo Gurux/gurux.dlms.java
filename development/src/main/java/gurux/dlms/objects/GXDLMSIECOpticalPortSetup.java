@@ -47,6 +47,10 @@ import gurux.dlms.objects.enums.BaudRate;
 import gurux.dlms.objects.enums.LocalPortResponseTime;
 import gurux.dlms.objects.enums.OpticalProtocolMode;
 
+/**
+ * Online help: <br>
+ * http://www.gurux.fi/Gurux.DLMS.Objects.GXDLMSIECOpticalPortSetup
+ */
 public class GXDLMSIECOpticalPortSetup extends GXDLMSObject
         implements IGXDLMSBase {
     private String password1;

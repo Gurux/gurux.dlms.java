@@ -49,6 +49,10 @@ import gurux.dlms.enums.ObjectType;
 import gurux.dlms.enums.Unit;
 import gurux.dlms.internal.GXCommon;
 
+/**
+ * Online help: <br>
+ * http://www.gurux.fi/Gurux.DLMS.Objects.GXDLMSRegister
+ */
 public class GXDLMSRegister extends GXDLMSObject implements IGXDLMSBase {
     private int scaler;
     private int unit;

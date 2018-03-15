@@ -54,6 +54,10 @@ import gurux.dlms.internal.GXCommon;
 import gurux.dlms.objects.enums.AutoAnswerMode;
 import gurux.dlms.objects.enums.AutoAnswerStatus;
 
+/**
+ * Online help: <br>
+ * http://www.gurux.fi/Gurux.DLMS.Objects.GXDLMSAutoAnswer
+ */
 public class GXDLMSAutoAnswer extends GXDLMSObject implements IGXDLMSBase {
     private AutoAnswerMode mode;
     private List<Entry<GXDateTime, GXDateTime>> listeningWindow;

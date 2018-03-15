@@ -54,6 +54,10 @@ import gurux.dlms.internal.GXCommon;
 import gurux.dlms.objects.enums.MessageType;
 import gurux.dlms.objects.enums.ServiceType;
 
+/**
+ * Online help: <br>
+ * http://www.gurux.fi/Gurux.DLMS.Objects.GXDLMSPushSetup
+ */
 public class GXDLMSPushSetup extends GXDLMSObject implements IGXDLMSBase {
     private ServiceType service;
     private String destination;

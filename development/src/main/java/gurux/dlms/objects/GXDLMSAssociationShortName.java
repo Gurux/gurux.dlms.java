@@ -55,6 +55,10 @@ import gurux.dlms.internal.GXCommon;
 import gurux.dlms.manufacturersettings.GXDLMSAttributeSettings;
 import gurux.dlms.secure.GXSecure;
 
+/**
+ * Online help: <br>
+ * http://www.gurux.fi/Gurux.DLMS.Objects.GXDLMSAssociationShortName
+ */
 public class GXDLMSAssociationShortName extends GXDLMSObject
         implements IGXDLMSBase {
     private static final Logger LOGGER =

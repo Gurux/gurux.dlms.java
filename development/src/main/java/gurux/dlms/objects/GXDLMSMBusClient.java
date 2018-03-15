@@ -50,6 +50,10 @@ import gurux.dlms.enums.ErrorCode;
 import gurux.dlms.enums.ObjectType;
 import gurux.dlms.internal.GXCommon;
 
+/**
+ * Online help: <br>
+ * http://www.gurux.fi/Gurux.DLMS.Objects.GXDLMSMBusClient
+ */
 public class GXDLMSMBusClient extends GXDLMSObject implements IGXDLMSBase {
     private long capturePeriod;
     private int primaryAddress;

@@ -47,6 +47,10 @@ import gurux.dlms.enums.ErrorCode;
 import gurux.dlms.enums.ObjectType;
 import gurux.dlms.internal.GXCommon;
 
+/**
+ * Online help: <br>
+ * http://www.gurux.fi/Gurux.DLMS.Objects.GXDLMSRegisterMonitor
+ */
 public class GXDLMSRegisterMonitor extends GXDLMSObject implements IGXDLMSBase {
     private GXDLMSActionSet[] actions;
     private GXDLMSMonitoredValue monitoredValue;

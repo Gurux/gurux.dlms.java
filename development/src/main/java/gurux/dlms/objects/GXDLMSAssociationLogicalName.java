@@ -63,6 +63,10 @@ import gurux.dlms.objects.enums.ApplicationContextName;
 import gurux.dlms.objects.enums.AssociationStatus;
 import gurux.dlms.secure.GXSecure;
 
+/**
+ * Online help: <br>
+ * http://www.gurux.fi/Gurux.DLMS.Objects.GXDLMSAssociationLogicalName
+ */
 public class GXDLMSAssociationLogicalName extends GXDLMSObject
         implements IGXDLMSBase {
     private static final Logger LOGGER =

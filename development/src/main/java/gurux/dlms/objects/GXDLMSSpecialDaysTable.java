@@ -35,6 +35,7 @@
 package gurux.dlms.objects;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 
 import javax.xml.stream.XMLStreamException;
@@ -50,6 +51,10 @@ import gurux.dlms.enums.ErrorCode;
 import gurux.dlms.enums.ObjectType;
 import gurux.dlms.internal.GXCommon;
 
+/**
+ * Online help: <br>
+ * http://www.gurux.fi/Gurux.DLMS.Objects.GXDLMSSpecialDaysTable
+ */
 public class GXDLMSSpecialDaysTable extends GXDLMSObject
         implements IGXDLMSBase {
     private GXDLMSSpecialDay[] entries;
@@ -58,7 +63,7 @@ public class GXDLMSSpecialDaysTable extends GXDLMSObject
      * Constructor.
      */
     public GXDLMSSpecialDaysTable() {
-        super(ObjectType.SPECIAL_DAYS_TABLE);
+        this("0.0.11.0.0.255", 0);
     }
 
     /**
@@ -68,7 +73,7 @@ public class GXDLMSSpecialDaysTable extends GXDLMSObject
      *            Logical Name of the object.
      */
     public GXDLMSSpecialDaysTable(final String ln) {
-        super(ObjectType.SPECIAL_DAYS_TABLE, ln, 0);
+        this(ln, 0);
     }
 
     /**
@@ -212,19 +217,23 @@ public class GXDLMSSpecialDaysTable extends GXDLMSObject
             return GXCommon.logicalNameToBytes(getLogicalName());
         }
         if (e.getIndex() == 2) {
-            int cnt = entries.length;
             GXByteBuffer data = new GXByteBuffer();
             data.setUInt8(DataType.ARRAY.getValue());
-            // Add count
-            GXCommon.setObjectCount(cnt, data);
-            for (GXDLMSSpecialDay it : entries) {
-                data.setUInt8(DataType.STRUCTURE.getValue());
-                data.setUInt8(3); // Count
-                GXCommon.setData(data, DataType.UINT16,
-                        new Integer(it.getIndex()));
-                GXCommon.setData(data, DataType.OCTET_STRING, it.getDate());
-                GXCommon.setData(data, DataType.UINT8,
-                        new Integer(it.getDayId()));
+            if (entries == null) {
+                GXCommon.setObjectCount(0, data);
+            } else {
+                int cnt = entries.length;
+                // Add count
+                GXCommon.setObjectCount(cnt, data);
+                for (GXDLMSSpecialDay it : entries) {
+                    data.setUInt8(DataType.STRUCTURE.getValue());
+                    data.setUInt8(3); // Count
+                    GXCommon.setData(data, DataType.UINT16,
+                            new Integer(it.getIndex()));
+                    GXCommon.setData(data, DataType.OCTET_STRING, it.getDate());
+                    GXCommon.setData(data, DataType.UINT8,
+                            new Integer(it.getDayId()));
+                }
             }
             return data.array();
         }
@@ -259,6 +268,44 @@ public class GXDLMSSpecialDaysTable extends GXDLMSObject
         } else {
             e.setError(ErrorCode.READ_WRITE_DENIED);
         }
+    }
+
+    @Override
+    public final byte[] invoke(final GXDLMSSettings settings,
+            final ValueEventArgs e) {
+        if (e.getIndex() != 1 && e.getIndex() != 2) {
+            e.setError(ErrorCode.READ_WRITE_DENIED);
+        } else {
+            List<GXDLMSSpecialDay> items = new ArrayList<GXDLMSSpecialDay>();
+            if (entries != null) {
+                items.addAll(Arrays.asList(entries));
+            }
+            if (e.getIndex() == 1) {
+                Object[] item = (Object[]) e.getParameters();
+                GXDLMSSpecialDay it = new GXDLMSSpecialDay();
+                it.setIndex(((Number) item[0]).intValue());
+                it.setDate((GXDate) GXDLMSClient.changeType((byte[]) item[1],
+                        DataType.DATE));
+                it.setDayId(((Number) item[2]).intValue());
+                for (GXDLMSSpecialDay item2 : items) {
+                    if (item2.getIndex() == it.getIndex()) {
+                        items.remove(item2);
+                        break;
+                    }
+                }
+                items.add(it);
+            } else if (e.getIndex() == 2) {
+                int index = ((Number) e.getParameters()).intValue();
+                for (GXDLMSSpecialDay item : items) {
+                    if (item.getIndex() == index) {
+                        items.remove(item);
+                        break;
+                    }
+                }
+            }
+            entries = items.toArray(new GXDLMSSpecialDay[0]);
+        }
+        return null;
     }
 
     @Override

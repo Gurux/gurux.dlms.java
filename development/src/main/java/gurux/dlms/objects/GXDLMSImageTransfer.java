@@ -36,7 +36,6 @@ package gurux.dlms.objects;
 
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.Enumeration;
 import java.util.Hashtable;
 import java.util.List;
 
@@ -52,6 +51,10 @@ import gurux.dlms.enums.ObjectType;
 import gurux.dlms.internal.GXCommon;
 import gurux.dlms.objects.enums.ImageTransferStatus;
 
+/**
+ * Online help: <br>
+ * http://www.gurux.fi/Gurux.DLMS.Objects.GXDLMSImageTransfer
+ */
 public class GXDLMSImageTransfer extends GXDLMSObject implements IGXDLMSBase {
     private long imageSize;
     private Hashtable<Long, Object> imageData = new Hashtable<Long, Object>();
@@ -252,13 +255,12 @@ public class GXDLMSImageTransfer extends GXDLMSObject implements IGXDLMSBase {
     @Override
     public final byte[] invoke(final GXDLMSSettings settings,
             final ValueEventArgs e) {
-        imageTransferStatus = ImageTransferStatus.IMAGE_TRANSFER_NOT_INITIATED;
         // Image transfer initiate
         if (e.getIndex() == 1) {
             imageFirstNotTransferredBlockNumber = 0;
             imageTransferredBlocksStatus = "";
             Object[] value = (Object[]) e.getParameters();
-            String imageIdentifier = new String((byte[]) value[0]);
+            byte[] imageIdentifier = (byte[]) value[0];
             imageSize = ((Number) value[1]).longValue();
             imageTransferStatus = ImageTransferStatus.IMAGE_TRANSFER_INITIATED;
             List<GXDLMSImageActivateInfo> list =
@@ -301,30 +303,9 @@ public class GXDLMSImageTransfer extends GXDLMSObject implements IGXDLMSBase {
             imageTransferStatus = ImageTransferStatus.IMAGE_TRANSFER_INITIATED;
             return null;
         } else if (e.getIndex() == 3) {
-            // Image verify
-            imageTransferStatus =
-                    ImageTransferStatus.IMAGE_VERIFICATION_INITIATED;
-            // Check that size match.
-            int size = 0;
-            Enumeration<Object> keys = imageData.elements();
-            byte[] value;
-            while (keys.hasMoreElements()) {
-                value = (byte[]) keys.nextElement();
-                size += value.length;
-            }
-            if (size != imageSize) {
-                // Return HW error.
-                imageTransferStatus =
-                        ImageTransferStatus.IMAGE_VERIFICATION_FAILED;
-                throw new RuntimeException("Invalid image size.");
-            }
-            imageTransferStatus =
-                    ImageTransferStatus.IMAGE_VERIFICATION_SUCCESSFUL;
+            // Image verify.
             return null;
         } else if (e.getIndex() == 4) {
-            // Image activate.
-            imageTransferStatus =
-                    ImageTransferStatus.IMAGE_ACTIVATION_SUCCESSFUL;
             return null;
         } else {
             e.setError(ErrorCode.READ_WRITE_DENIED);
@@ -393,14 +374,9 @@ public class GXDLMSImageTransfer extends GXDLMSObject implements IGXDLMSBase {
                 data.setUInt8((byte) 3);
                 GXCommon.setData(data, DataType.UINT32, new Long(it.getSize()));
                 GXCommon.setData(data, DataType.OCTET_STRING,
-                        GXCommon.getBytes(it.getIdentification()));
-                String tmp = it.getSignature();
-                if (tmp != null) {
-                    GXCommon.setData(data, DataType.OCTET_STRING,
-                            GXCommon.getBytes(it.getSignature()));
-                } else {
-                    GXCommon.setData(data, DataType.OCTET_STRING, null);
-                }
+                        it.getIdentification());
+                GXCommon.setData(data, DataType.OCTET_STRING,
+                        it.getSignature());
             }
             return data.array();
         }
@@ -459,9 +435,8 @@ public class GXDLMSImageTransfer extends GXDLMSObject implements IGXDLMSBase {
                     GXDLMSImageActivateInfo item =
                             new GXDLMSImageActivateInfo();
                     item.setSize(((Number) ((Object[]) it)[0]).longValue());
-                    item.setIdentification(
-                            new String((byte[]) ((Object[]) it)[1]));
-                    item.setSignature(new String((byte[]) ((Object[]) it)[2]));
+                    item.setIdentification((byte[]) ((Object[]) it)[1]);
+                    item.setSignature((byte[]) ((Object[]) it)[2]);
                     list.add(item);
                 }
                 imageActivateInfo =
@@ -556,9 +531,10 @@ public class GXDLMSImageTransfer extends GXDLMSObject implements IGXDLMSBase {
             while (reader.isStartElement("Item", true)) {
                 GXDLMSImageActivateInfo it = new GXDLMSImageActivateInfo();
                 it.setSize(reader.readElementContentAsULong("Size"));
-                it.setIdentification(
-                        reader.readElementContentAsString("Identification"));
-                it.setSignature(reader.readElementContentAsString("Signature"));
+                it.setIdentification(GXCommon.hexToBytes(
+                        reader.readElementContentAsString("Identification")));
+                it.setSignature(GXCommon.hexToBytes(
+                        reader.readElementContentAsString("Signature")));
                 list.add(it);
             }
             reader.readEndElement("ImageActivateInfo");
@@ -583,8 +559,9 @@ public class GXDLMSImageTransfer extends GXDLMSObject implements IGXDLMSBase {
                 writer.writeStartElement("Item");
                 writer.writeElementString("Size", it.getSize());
                 writer.writeElementString("Identification",
-                        it.getIdentification());
-                writer.writeElementString("Signature", it.getSignature());
+                        GXCommon.toHex(it.getIdentification(), false));
+                writer.writeElementString("Signature",
+                        GXCommon.toHex(it.getSignature(), false));
                 writer.writeEndElement();
             }
             writer.writeEndElement();
