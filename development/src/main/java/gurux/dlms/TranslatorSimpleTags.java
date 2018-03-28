@@ -420,6 +420,11 @@ final class TranslatorSimpleTags {
         GXDLMSTranslator.addTag(list, TranslatorTags.BLOCK_NUMBER_ACK,
                 "BlockNumberAck");
         GXDLMSTranslator.addTag(list, TranslatorTags.BLOCK_DATA, "BlockData");
+        GXDLMSTranslator.addTag(list, TranslatorTags.CONTENTS_DESCRIPTION,
+                "ContentsDescription");
+
+        GXDLMSTranslator.addTag(list, TranslatorTags.ARRAY_CONTENTS,
+                "ArrayContents");
     }
 
     static void getDataTypeTags(final HashMap<Integer, String> list) {

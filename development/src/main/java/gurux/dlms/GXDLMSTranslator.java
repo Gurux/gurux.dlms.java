@@ -2072,7 +2072,29 @@ public class GXDLMSTranslator {
                 break;
             case TranslatorTags.FRAME_TYPE:
                 break;
-
+            case TranslatorTags.BLOCK_CONTROL:
+                s.getAttributeDescriptor()
+                        .setUInt8(s.parseShort(getValue(node, s)));
+                break;
+            case TranslatorTags.BLOCK_NUMBER_ACK:
+                s.getAttributeDescriptor()
+                        .setUInt16(s.parseShort(getValue(node, s)));
+                break;
+            case TranslatorTags.BLOCK_DATA:
+                s.getData().set(GXCommon.hexToBytes(getValue(node, s)));
+                break;
+            case TranslatorTags.CONTENTS_DESCRIPTION:
+                getNodeTypes(s, node);
+                return;
+            case TranslatorTags.ARRAY_CONTENTS:
+                if (s.getOutputType() == TranslatorOutputType.SIMPLE_XML) {
+                    getNodeValues(s, node);
+                } else {
+                    tmp = GXCommon.hexToBytes(getValue(node, s));
+                    GXCommon.setObjectCount(tmp.length, s.getData());
+                    s.getData().set(tmp);
+                }
+                break;
             default:
                 throw new IllegalArgumentException(
                         "Invalid node: " + node.getNodeName());
@@ -2092,6 +2114,67 @@ public class GXDLMSTranslator {
             preData.set(s.getData());
             s.getData().size(0);
             s.getData().set(preData);
+        }
+    }
+
+    private static void getNodeValues(final GXDLMSXmlSettings s,
+            final Node node) {
+        int cnt = 1;
+        int offset = 2;
+        if (DataType.forValue(s.getData().getUInt8(2)) == DataType.STRUCTURE) {
+            cnt = s.getData().getUInt8(3);
+            offset = 4;
+        }
+        DataType types[] = new DataType[cnt];
+        for (int pos = 0; pos != cnt; ++pos) {
+            types[pos] = DataType.forValue(s.getData().getUInt8(offset + pos));
+        }
+        GXByteBuffer tmp = new GXByteBuffer();
+        GXByteBuffer tmp2 = new GXByteBuffer();
+        for (int row = 0; row != node.getChildNodes().getLength(); ++row) {
+            String str = node.getChildNodes().item(row).getNodeValue();
+            for (String r : str.split("[\n]")) {
+                if (!"".equals(r.trim()) && !"\r".equals(r)) {
+                    int col = 0;
+                    for (String it : r.trim().split("[;]")) {
+                        tmp.clear();
+                        GXCommon.setData(tmp, types[col % types.length],
+                                GXDLMSConverter.changeType(it,
+                                        types[col % types.length]));
+                        if (tmp.size() == 1) {
+                            // If value is null.
+                            s.getData().setUInt8(0);
+                        } else {
+                            tmp2.set(tmp.subArray(1, tmp.size() - 1));
+                        }
+                        ++col;
+                    }
+                }
+            }
+        }
+        GXCommon.setObjectCount(tmp2.size(), s.getData());
+        s.getData().set(tmp2);
+    }
+
+    private static void getNodeTypes(final GXDLMSXmlSettings s,
+            final Node node) {
+        int len = getNodeCount(node);
+        if (len > 1) {
+            s.getData().setUInt8(DataType.STRUCTURE.getValue());
+            GXCommon.setObjectCount(len, s.getData());
+        }
+        for (int pos = 0; pos != node.getChildNodes().getLength(); ++pos) {
+            Node node2 = node.getChildNodes().item(pos);
+            if (node2.getNodeType() == Node.ELEMENT_NODE) {
+                String str;
+                if (s.getOutputType() == TranslatorOutputType.SIMPLE_XML) {
+                    str = node2.getNodeName().toLowerCase();
+                } else {
+                    str = node2.getNodeName();
+                }
+                int tag = s.getTags().get(str);
+                s.getData().setUInt8(tag - GXDLMS.DATA_TYPE_OFFSET);
+            }
         }
     }
 
@@ -2217,7 +2300,7 @@ public class GXDLMSTranslator {
             break;
         case UINT16:
             GXCommon.setData(s.getData(), DataType.UINT16,
-                    Short.parseShort(getValue(node, s), 16));
+                    s.parseShort(getValue(node, s)));
             break;
         case UINT32:
             GXCommon.setData(s.getData(), DataType.UINT32,
@@ -2230,6 +2313,9 @@ public class GXDLMSTranslator {
         case UINT8:
             GXCommon.setData(s.getData(), DataType.UINT8,
                     s.parseShort(getValue(node, s)));
+            break;
+        case COMPACT_ARRAY:
+            s.getData().setUInt8(dt.getValue());
             break;
         default:
             throw new IllegalArgumentException(

@@ -442,6 +442,10 @@ final class TranslatorStandardTags {
                 "x:block-number-ack");
         GXDLMSTranslator.addTag(list, TranslatorTags.BLOCK_DATA,
                 "x:block-data");
+        GXDLMSTranslator.addTag(list, TranslatorTags.CONTENTS_DESCRIPTION,
+                "x:contents-description");
+        GXDLMSTranslator.addTag(list, TranslatorTags.ARRAY_CONTENTS,
+                "x:array-contents");
     }
 
     static void getDataTypeTags(final HashMap<Integer, String> list) {

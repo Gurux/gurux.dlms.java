@@ -57,6 +57,7 @@ import gurux.dlms.GXDate;
 import gurux.dlms.GXDateTime;
 import gurux.dlms.GXICipher;
 import gurux.dlms.GXTime;
+import gurux.dlms.TranslatorOutputType;
 import gurux.dlms.enums.ClockStatus;
 import gurux.dlms.enums.DataType;
 import gurux.dlms.enums.DateTimeSkips;
@@ -541,10 +542,10 @@ public final class GXCommon {
         Object value = null;
         int startIndex = data.position();
         if (data.position() == data.size()) {
-            info.setCompleate(false);
+            info.setComplete(false);
             return null;
         }
-        info.setCompleate(true);
+        info.setComplete(true);
         boolean knownType = info.getType() != DataType.NONE;
         // Get data type if it is unknown.
         if (!knownType) {
@@ -558,7 +559,7 @@ public final class GXCommon {
             return value;
         }
         if (data.position() == data.size()) {
-            info.setCompleate(false);
+            info.setComplete(false);
             return null;
         }
         switch (info.getType()) {
@@ -603,7 +604,8 @@ public final class GXCommon {
             value = getUInt16(data, info);
             break;
         case COMPACT_ARRAY:
-            throw new RuntimeException("Invalid data type.");
+            value = getCompactArray(data, info);
+            break;
         case INT64:
             value = getInt64(data, info);
             break;
@@ -696,7 +698,7 @@ public final class GXCommon {
         }
         int size = buff.size() - buff.position();
         if (info.getCount() != 0 && size < 1) {
-            info.setCompleate(false);
+            info.setComplete(false);
             return null;
         }
         int startIndex = index;
@@ -709,7 +711,7 @@ public final class GXCommon {
             Object tmp = getData(buff, info2);
             if (!info2.isComplete()) {
                 buff.position(startIndex);
-                info.setCompleate(false);
+                info.setComplete(false);
                 break;
             } else {
                 if (info2.getCount() == info2.getIndex()) {
@@ -741,7 +743,7 @@ public final class GXCommon {
         Object value = null;
         if (buff.size() - buff.position() < 4) {
             // If there is not enough data available.
-            info.setCompleate(false);
+            info.setComplete(false);
             return null;
         }
         String str = null;
@@ -788,7 +790,7 @@ public final class GXCommon {
         Object value = null;
         if (buff.size() - buff.position() < 5) {
             // If there is not enough data available.
-            info.setCompleate(false);
+            info.setComplete(false);
             return null;
         }
         String str = null;
@@ -854,7 +856,7 @@ public final class GXCommon {
 
         // If there is not enough data available.
         if (buff.size() - buff.position() < 12) {
-            info.setCompleate(false);
+            info.setComplete(false);
             return null;
         }
         String str = null;
@@ -982,7 +984,7 @@ public final class GXCommon {
         Object value;
         // If there is not enough data available.
         if (buff.size() - buff.position() < 8) {
-            info.setCompleate(false);
+            info.setComplete(false);
             return null;
         }
         value = new Double(buff.getDouble());
@@ -1010,7 +1012,7 @@ public final class GXCommon {
         Object value;
         // If there is not enough data available.
         if (buff.size() - buff.position() < 4) {
-            info.setCompleate(false);
+            info.setComplete(false);
             return null;
         }
         value = new Float(buff.getFloat());
@@ -1038,7 +1040,7 @@ public final class GXCommon {
         Object value;
         // If there is not enough data available.
         if (buff.size() - buff.position() < 1) {
-            info.setCompleate(false);
+            info.setComplete(false);
             return null;
         }
         value = new Short(buff.getUInt8());
@@ -1063,7 +1065,7 @@ public final class GXCommon {
         Object value;
         // If there is not enough data available.
         if (buff.size() - buff.position() < 8) {
-            info.setCompleate(false);
+            info.setComplete(false);
             return null;
         }
         value = buff.getUInt64();
@@ -1088,7 +1090,7 @@ public final class GXCommon {
         Object value;
         // If there is not enough data available.
         if (buff.size() - buff.position() < 8) {
-            info.setCompleate(false);
+            info.setComplete(false);
             return null;
         }
         value = new Long(buff.getInt64());
@@ -1113,7 +1115,7 @@ public final class GXCommon {
         Object value;
         // If there is not enough data available.
         if (buff.size() - buff.position() < 2) {
-            info.setCompleate(false);
+            info.setComplete(false);
             return null;
         }
         value = new Integer(buff.getUInt16());
@@ -1123,6 +1125,165 @@ public final class GXCommon {
 
         }
         return value;
+    }
+
+    private static void getCompactArrayItem(final GXByteBuffer buff,
+            final DataType dt, final List<Object> list, final int len) {
+        GXDataInfo tmp = new GXDataInfo();
+        tmp.setType(dt);
+        int start = buff.position();
+        if (dt == DataType.STRING) {
+            while (buff.position() - start < len) {
+                list.add(getString(buff, tmp, false));
+            }
+        } else if (dt == DataType.OCTET_STRING) {
+            while (buff.position() - start < len) {
+                list.add(getOctetString(buff, tmp, false));
+            }
+        } else {
+            while (buff.position() - start < len) {
+                list.add(getData(buff, tmp));
+            }
+        }
+
+    }
+
+    //
+    static final int CONTENTS_DESCRIPTION = 0xFF68;
+    static final int ARRAY_CONTENTS = 0xFF69;
+
+    /**
+     * Get compact array value from DLMS data.
+     * 
+     * @param buff
+     *            Received DLMS data.
+     * @param info
+     *            Data info.
+     * @return parsed UInt16 value.
+     */
+    private static Object getCompactArray(final GXByteBuffer buff,
+            final GXDataInfo info) {
+        // If there is not enough data available.
+        if (buff.size() - buff.position() < 2) {
+            info.setComplete(false);
+            return null;
+        }
+        DataType dt = DataType.forValue(buff.getUInt8());
+        if (dt == DataType.ARRAY) {
+            throw new IllegalArgumentException("Invalid compact array data.");
+        }
+        int len = GXCommon.getObjectCount(buff);
+        List<Object> list = new ArrayList<Object>();
+
+        if (dt == DataType.STRUCTURE) {
+            // Get data types.
+            DataType[] cols = new DataType[len];
+            for (int pos = 0; pos != len; ++pos) {
+                cols[pos] = DataType.forValue(buff.getUInt8());
+            }
+            len = GXCommon.getObjectCount(buff);
+            if (info.getXml() != null) {
+                info.getXml().appendStartTag(
+                        info.getXml().getDataType(DataType.COMPACT_ARRAY), null,
+                        null);
+                info.getXml().appendStartTag(CONTENTS_DESCRIPTION);
+                for (DataType it : cols) {
+                    info.getXml().appendEmptyTag(info.getXml().getDataType(it));
+                }
+                info.getXml().appendEndTag(CONTENTS_DESCRIPTION);
+                if (info.getXml()
+                        .getOutputType() == TranslatorOutputType.STANDARD_XML) {
+                    info.getXml().appendStartTag(ARRAY_CONTENTS, true);
+                    info.getXml().append(buff.remainingHexString(true));
+                    info.getXml().appendEndTag(ARRAY_CONTENTS, true);
+                    info.getXml().appendEndTag(
+                            info.getXml().getDataType(DataType.COMPACT_ARRAY));
+                } else {
+                    info.getXml().appendStartTag(ARRAY_CONTENTS);
+                }
+            }
+            int start = buff.position();
+            while (buff.position() - start < len) {
+                List<Object> row = new ArrayList<Object>();
+                for (int pos = 0; pos != cols.length; ++pos) {
+                    getCompactArrayItem(buff, cols[pos], row, 1);
+                }
+                list.add(row.toArray(new Object[cols.length]));
+            }
+            Object tmp[][] = new Object[list.size()][cols.length];
+            int r = 0;
+            for (Object row : list) {
+                int c = 0;
+                for (Object it : (Object[]) row) {
+                    tmp[r][c] = it;
+                    ++c;
+                }
+                ++r;
+            }
+            if (info.getXml() != null && info.getXml()
+                    .getOutputType() == TranslatorOutputType.SIMPLE_XML) {
+                StringBuilder sb = new StringBuilder();
+                for (Object row : tmp) {
+                    for (Object it : (Object[]) row) {
+                        if (it instanceof byte[]) {
+                            sb.append(GXCommon.toHex((byte[]) it));
+                        } else {
+                            sb.append(String.valueOf(it));
+                        }
+                        sb.append(";");
+                    }
+                    if (sb.length() != 0) {
+                        sb.setLength(sb.length() - 1);
+                    }
+                    info.getXml().appendLine(sb.toString());
+                    sb.setLength(0);
+                }
+            }
+            if (info.getXml() != null && info.getXml()
+                    .getOutputType() == TranslatorOutputType.SIMPLE_XML) {
+                info.getXml().appendEndTag(ARRAY_CONTENTS);
+                info.getXml().appendEndTag(
+                        info.getXml().getDataType(DataType.COMPACT_ARRAY));
+            }
+            return tmp;
+        } else {
+            if (info.getXml() != null) {
+                info.getXml().appendStartTag(
+                        info.getXml().getDataType(DataType.COMPACT_ARRAY), null,
+                        null);
+                info.getXml().appendStartTag(CONTENTS_DESCRIPTION);
+                info.getXml().appendEmptyTag(info.getXml().getDataType(dt));
+                info.getXml().appendEndTag(CONTENTS_DESCRIPTION);
+                info.getXml().appendStartTag(ARRAY_CONTENTS, true);
+                if (info.getXml()
+                        .getOutputType() == TranslatorOutputType.STANDARD_XML) {
+                    info.getXml().append(buff.remainingHexString(true));
+                    info.getXml().appendEndTag(ARRAY_CONTENTS, true);
+                    info.getXml().appendEndTag(
+                            info.getXml().getDataType(DataType.COMPACT_ARRAY));
+                }
+            }
+            getCompactArrayItem(buff, dt, list, len);
+            if (info.getXml() != null && info.getXml()
+                    .getOutputType() == TranslatorOutputType.SIMPLE_XML) {
+                for (Object it : list) {
+                    if (it instanceof byte[]) {
+                        info.getXml().append(GXCommon.toHex((byte[]) it));
+                    } else {
+                        info.getXml().append(String.valueOf(it));
+                    }
+                    info.getXml().append(";");
+                }
+                if (list.size() != 0) {
+                    info.getXml()
+                            .setXmlLength(info.getXml().getXmlLength() - 1);
+                }
+                info.getXml().appendEndTag(ARRAY_CONTENTS, true);
+                info.getXml().appendEndTag(
+                        info.getXml().getDataType(DataType.COMPACT_ARRAY));
+            }
+        }
+        return list.toArray(new Object[list.size()]);
     }
 
     /**
@@ -1139,7 +1300,7 @@ public final class GXCommon {
         Object value;
         // If there is not enough data available.
         if (buff.size() - buff.position() < 1) {
-            info.setCompleate(false);
+            info.setComplete(false);
             return null;
         }
         value = new Integer(buff.getUInt8() & 0xFF);
@@ -1165,7 +1326,7 @@ public final class GXCommon {
         Object value;
         // If there is not enough data available.
         if (buff.size() - buff.position() < 2) {
-            info.setCompleate(false);
+            info.setComplete(false);
             return null;
         }
         value = new Short(buff.getInt16());
@@ -1190,7 +1351,7 @@ public final class GXCommon {
         Object value;
         // If there is not enough data available.
         if (buff.size() - buff.position() < 1) {
-            info.setCompleate(false);
+            info.setComplete(false);
             return null;
         }
         value = new Byte(buff.getInt8());
@@ -1214,7 +1375,7 @@ public final class GXCommon {
             final boolean knownType) {
         // If there is not enough data available.
         if (buff.size() - buff.position() < 1) {
-            info.setCompleate(false);
+            info.setComplete(false);
             return null;
         }
         short value = buff.getUInt8();
@@ -1244,7 +1405,7 @@ public final class GXCommon {
             len = GXCommon.getObjectCount(buff);
             // If there is not enough data available.
             if (buff.size() - buff.position() < len) {
-                info.setCompleate(false);
+                info.setComplete(false);
                 return null;
             }
         }
@@ -1287,7 +1448,7 @@ public final class GXCommon {
             len = GXCommon.getObjectCount(buff);
             // If there is not enough data available.
             if (buff.size() - buff.position() < len) {
-                info.setCompleate(false);
+                info.setComplete(false);
                 return null;
             }
         }
@@ -1352,9 +1513,9 @@ public final class GXCommon {
      *            Data info.
      * @return parsed string value.
      */
-    private static Object getString(final GXByteBuffer buff,
+    private static String getString(final GXByteBuffer buff,
             final GXDataInfo info, final boolean knownType) {
-        Object value;
+        String value;
         int len;
         if (knownType) {
             len = buff.size();
@@ -1362,7 +1523,7 @@ public final class GXCommon {
             len = GXCommon.getObjectCount(buff);
             // If there is not enough data available.
             if (buff.size() - buff.position() < len) {
-                info.setCompleate(false);
+                info.setComplete(false);
                 return null;
             }
         }
@@ -1399,7 +1560,7 @@ public final class GXCommon {
             final GXDataInfo info) {
         // If there is not enough data available.
         if (buff.size() - buff.position() < 4) {
-            info.setCompleate(false);
+            info.setComplete(false);
             return null;
         }
         Long value = new Long(buff.getUInt32());
@@ -1423,7 +1584,7 @@ public final class GXCommon {
             final GXDataInfo info) {
         // If there is not enough data available.
         if (buff.size() - buff.position() < 4) {
-            info.setCompleate(false);
+            info.setComplete(false);
             return null;
         }
         Integer value = new Integer(buff.getInt32());
@@ -1454,7 +1615,7 @@ public final class GXCommon {
         int byteCnt = (int) Math.floor(t);
         // If there is not enough data available.
         if (buff.size() - buff.position() < byteCnt) {
-            info.setCompleate(false);
+            info.setComplete(false);
             return null;
         }
         StringBuilder sb = new StringBuilder();
@@ -1482,7 +1643,7 @@ public final class GXCommon {
             final GXDataInfo info) {
         // If there is not enough data available.
         if (buff.size() - buff.position() < 1) {
-            info.setCompleate(false);
+            info.setComplete(false);
             return null;
         }
         Boolean value = new Boolean(buff.getUInt8() != 0);
@@ -1617,6 +1778,8 @@ public final class GXCommon {
             setBcd(buff, value);
             break;
         case COMPACT_ARRAY:
+            // Compact array is not work with java because we don't know data
+            // types of each element. Java is not support unsigned values.
             throw new RuntimeException("Invalid data type.");
         case DATETIME:
             setDateTime(buff, value);

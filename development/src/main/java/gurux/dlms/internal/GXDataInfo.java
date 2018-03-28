@@ -58,7 +58,7 @@ public class GXDataInfo {
     /**
      * Is data parsed to the end.
      */
-    private boolean compleate = true;
+    private boolean complete = true;
 
     private GXDLMSTranslatorStructure xml;
 
@@ -111,15 +111,15 @@ public class GXDataInfo {
      * @return Is data parsed to the end.
      */
     public final boolean isComplete() {
-        return compleate;
+        return complete;
     }
 
     /**
      * @param value
      *            Is data parsed to the end.
      */
-    public final void setCompleate(final boolean value) {
-        compleate = value;
+    public final void setComplete(final boolean value) {
+        complete = value;
     }
 
     public final void setXml(final GXDLMSTranslatorStructure value) {
@@ -134,6 +134,6 @@ public class GXDataInfo {
         index = 0;
         count = 0;
         type = DataType.NONE;
-        compleate = true;
+        complete = true;
     }
 }

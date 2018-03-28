@@ -90,4 +90,7 @@ final class TranslatorTags {
     static final int BLOCK_CONTROL = 0xFF65;
     static final int BLOCK_NUMBER_ACK = 0xFF66;
     static final int BLOCK_DATA = 0xFF67;
+    static final int CONTENTS_DESCRIPTION = 0xFF68;
+    static final int ARRAY_CONTENTS = 0xFF69;
+
 }

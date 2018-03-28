@@ -219,6 +219,9 @@ class GXDLMSXmlSettings {
     }
 
     public final int parseInt(final String value) {
+        if (value == null || "".equals(value)) {
+            return 0;
+        }
         if (showNumericsAsHex) {
             return Integer.parseInt(value, 16);
         }
@@ -226,6 +229,9 @@ class GXDLMSXmlSettings {
     }
 
     public final short parseShort(final String value) {
+        if (value == null || "".equals(value)) {
+            return 0;
+        }
         if (showNumericsAsHex) {
             return Short.parseShort(value, 16);
         }
@@ -233,6 +239,9 @@ class GXDLMSXmlSettings {
     }
 
     public final long parseLong(final String value) {
+        if (value == null || "".equals(value)) {
+            return 0;
+        }
         if (showNumericsAsHex) {
             return Long.parseLong(value, 16);
         }

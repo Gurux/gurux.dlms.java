@@ -1619,6 +1619,12 @@ public class GXDLMSClient {
     public final byte[][] readRowsByEntry(final GXDLMSProfileGeneric pg,
             final int index, final int count,
             final List<Entry<GXDLMSObject, GXDLMSCaptureObject>> columns) {
+        if (index < 0) {
+            throw new IllegalArgumentException("index");
+        }
+        if (count < 0) {
+            throw new IllegalArgumentException("count");
+        }
         GXByteBuffer buff = new GXByteBuffer(19);
         // Add AccessSelector value
         buff.setUInt8(0x02);
@@ -1629,7 +1635,11 @@ public class GXDLMSClient {
         // Add start index
         GXCommon.setData(buff, DataType.UINT32, index);
         // Add Count
-        GXCommon.setData(buff, DataType.UINT32, count);
+        if (count == 0) {
+            GXCommon.setData(buff, DataType.UINT32, count);
+        } else {
+            GXCommon.setData(buff, DataType.UINT32, index + count);
+        }
 
         int columnIndex = 1;
         int columnCount = 0;

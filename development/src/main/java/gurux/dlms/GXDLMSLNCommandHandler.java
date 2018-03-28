@@ -100,7 +100,7 @@ final class GXDLMSLNCommandHandler {
         // Get type.
         byte type = (byte) data.getUInt8();
         // Get invoke ID and priority.
-        byte invoke = (byte) data.getUInt8();
+        short invoke = data.getUInt8();
         // SetRequest normal or Set Request With First Data Block
         GXDLMSLNParameters p = new GXDLMSLNParameters(settings, invoke,
                 Command.SET_RESPONSE, type, null, null, 0);
@@ -518,23 +518,9 @@ final class GXDLMSLNCommandHandler {
         short index = data.getUInt8();
         // Get Access Selection.
         data.getUInt8();
-        if (xml != null) {
-            appendAttributeDescriptor(xml, ci, ln, index);
-            xml.appendStartTag(TranslatorTags.VALUE);
-            GXDataInfo di = new GXDataInfo();
-            di.setXml(xml);
-            value = GXCommon.getData(data, di);
-            if (!di.isComplete()) {
-                value = GXCommon.toHex(data.getData(), false, data.position(),
-                        data.size() - data.position());
-            } else if (value instanceof byte[]) {
-                value = GXCommon.toHex((byte[]) value, false);
-            }
-            xml.appendEndTag(TranslatorTags.VALUE);
-            return;
-        }
         if (type == 2) {
-            p.setMultipleBlocks(data.getUInt8() == 0);
+            short lastBlock = data.getUInt8();
+            p.setMultipleBlocks(lastBlock == 0);
             long blockNumber = data.getUInt32();
             if (blockNumber != settings.getBlockIndex()) {
                 LOGGER.log(Level.INFO,
@@ -552,6 +538,33 @@ final class GXDLMSLNCommandHandler {
                 p.setStatus(ErrorCode.DATA_BLOCK_UNAVAILABLE.getValue());
                 return;
             }
+            if (xml != null) {
+                appendAttributeDescriptor(xml, ci, ln, index);
+                xml.appendStartTag(TranslatorTags.DATA_BLOCK);
+                xml.appendLine(TranslatorTags.LAST_BLOCK, "Value",
+                        xml.integerToHex(lastBlock, 2));
+                xml.appendLine(TranslatorTags.BLOCK_NUMBER, "Value",
+                        xml.integerToHex(blockNumber, 8));
+                xml.appendLine(TranslatorTags.RAW_DATA, "Value",
+                        data.remainingHexString(true));
+                xml.appendEndTag(TranslatorTags.DATA_BLOCK);
+            }
+            return;
+        }
+        if (xml != null) {
+            appendAttributeDescriptor(xml, ci, ln, index);
+            xml.appendStartTag(TranslatorTags.VALUE);
+            GXDataInfo di = new GXDataInfo();
+            di.setXml(xml);
+            value = GXCommon.getData(data, di);
+            if (!di.isComplete()) {
+                value = GXCommon.toHex(data.getData(), false, data.position(),
+                        data.size() - data.position());
+            } else if (value instanceof byte[]) {
+                value = GXCommon.toHex((byte[]) value, false);
+            }
+            xml.appendEndTag(TranslatorTags.VALUE);
+            return;
         }
         if (!p.isMultipleBlocks()) {
             settings.resetBlockIndex();
@@ -677,7 +690,7 @@ final class GXDLMSLNCommandHandler {
     }
 
     private static void hanleSetRequestWithList(final GXDLMSSettings settings,
-            final byte invokeID, final GXDLMSServerBase server,
+            final int invokeID, final GXDLMSServerBase server,
             final GXByteBuffer data, final GXDLMSLNParameters p,
             final GXByteBuffer replyData, final GXDLMSTranslatorStructure xml)
             throws Exception {

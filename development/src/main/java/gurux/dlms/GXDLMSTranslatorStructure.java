@@ -267,6 +267,10 @@ public class GXDLMSTranslatorStructure {
     }
 
     public final void appendStartTag(final int tag) {
+        appendStartTag(tag, false);
+    }
+
+    public final void appendStartTag(final int tag, final boolean plain) {
         String tmp = tags.get(tag);
         if (tmp == null) {
             throw new IllegalArgumentException("appendStartTag");
@@ -275,8 +279,10 @@ public class GXDLMSTranslatorStructure {
         sb.append("<");
         sb.append(tmp);
         sb.append('>');
-        sb.append('\r');
-        sb.append('\n');
+        if (!plain) {
+            sb.append('\r');
+            sb.append('\n');
+        }
         ++offset;
     }
 
@@ -288,15 +294,39 @@ public class GXDLMSTranslatorStructure {
         appendEndTag(cmd << 8 | type);
     }
 
+    public final void appendEndTag(final int tag, final boolean plain) {
+        appendEndTag(tags.get(tag), plain);
+    }
+
     public final void appendEndTag(final int tag) {
         appendEndTag(tags.get(tag));
     }
 
     public final void appendEndTag(final String tag) {
+        appendEndTag(tag, false);
+    }
+
+    public final void appendEndTag(final String tag, final boolean plain) {
         setOffset(getOffset() - 1);
-        appendSpaces(sb, 2 * offset);
+        if (!plain) {
+            appendSpaces(sb, 2 * offset);
+        }
         sb.append("</");
         sb.append(tag);
+        sb.append('>');
+        sb.append('\r');
+        sb.append('\n');
+    }
+
+    public final void appendEmptyTag(final int tag) {
+        appendEmptyTag(tags.get(tag));
+    }
+
+    public final void appendEmptyTag(final String tag) {
+        appendSpaces(sb, 2 * offset);
+        sb.append("<");
+        sb.append(tag);
+        sb.append('/');
         sb.append('>');
         sb.append('\r');
         sb.append('\n');

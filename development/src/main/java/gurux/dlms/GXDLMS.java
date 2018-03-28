@@ -2581,24 +2581,35 @@ abstract class GXDLMS {
                 reply.setError(data.getUInt8());
             }
             if (reply.getXml() != null) {
-                // Get data size.
-                int blockLength = GXCommon.getObjectCount(data);
-                // if whole block is read.
-                if ((reply.getMoreData().getValue()
-                        & RequestTypes.FRAME.getValue()) == 0) {
-                    // Check Block length.
-                    if (blockLength > data.size() - data.position()) {
-                        reply.getXml().appendComment("Block is not complete."
-                                + String.valueOf(data.size() - data.position())
-                                + "/" + String.valueOf(blockLength) + ".");
-                    }
-                }
                 // Result
                 reply.getXml().appendStartTag(TranslatorTags.RESULT);
-                reply.getXml().appendLine(TranslatorTags.RAW_DATA, "Value",
-                        GXCommon.toHex(reply.getData().getData(), false,
-                                data.position(),
-                                reply.getData().size() - data.position()));
+                if (reply.getError() != 0) {
+                    reply.getXml().appendLine(TranslatorTags.DATA_ACCESS_RESULT,
+                            "Value",
+                            GXDLMSTranslator.errorCodeToString(
+                                    reply.getXml().getOutputType(),
+                                    ErrorCode.forValue(reply.getError())));
+                } else if (reply.getData().available() != 0) {
+                    // Get data size.
+                    int blockLength = GXCommon.getObjectCount(data);
+                    // if whole block is read.
+                    if ((reply.getMoreData().getValue()
+                            & RequestTypes.FRAME.getValue()) == 0) {
+                        // Check Block length.
+                        if (blockLength > data.size() - data.position()) {
+                            reply.getXml()
+                                    .appendComment("Block is not complete."
+                                            + String.valueOf(data.size()
+                                                    - data.position())
+                                            + "/" + String.valueOf(blockLength)
+                                            + ".");
+                        }
+                    }
+                    reply.getXml().appendLine(TranslatorTags.RAW_DATA, "Value",
+                            GXCommon.toHex(reply.getData().getData(), false,
+                                    data.position(),
+                                    reply.getData().available()));
+                }
                 reply.getXml().appendEndTag(TranslatorTags.RESULT);
             } else if (data.position() != data.size()) {
                 // Get data size.
@@ -2728,6 +2739,25 @@ abstract class GXDLMS {
                     data.getXml().integerToHex(data.getBlockNumber(), 4));
             data.getXml().appendLine(TranslatorTags.BLOCK_NUMBER_ACK, null,
                     data.getXml().integerToHex(data.getBlockNumberAck(), 4));
+
+            // If last block and comments.
+            if ((bc & 0x80) != 0 && data.getXml().isComments()) {
+                int pos = data.getData().position();
+                int len2 = data.getXml().getXmlLength();
+                try {
+                    GXReplyData reply = new GXReplyData();
+                    reply.setData(data.getData());
+                    reply.setXml(data.getXml());
+                    reply.getXml().startComment("");
+                    getPdu(settings, reply);
+                    reply.getXml().endComment();
+                } catch (Exception ex) {
+                    data.getXml().setXmlLength(len2);
+                    // It's ok if this fails.
+                }
+                data.getData().position(pos);
+            }
+
             data.getXml().appendLine(TranslatorTags.BLOCK_DATA, null,
                     GXCommon.toHex(data.getData().getData(), true,
                             data.getData().position(), len));
