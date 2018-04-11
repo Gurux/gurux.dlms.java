@@ -693,6 +693,21 @@ abstract class GXDLMS {
                             len = p.getSettings().getMaxPduSize() - reply.size()
                                     - 7;
                         }
+                        // Cipher data only once.
+                        if (ciphering
+                                && p.command != Command.GENERAL_BLOCK_TRANSFER) {
+                            reply.set(p.getData());
+                            byte[] tmp;
+                            if (p.getSettings().getCipher()
+                                    .getSecuritySuite() == SecuritySuite.AES_GCM_128) {
+                                tmp = cipher0(p, reply.array());
+                            } else {
+                                tmp = cipher1(p, reply.array());
+                            }
+                            p.getData().size(0);
+                            p.getData().set(tmp);
+                            reply.size(0);
+                        }
                     } else if (p.getCommand() != Command.GET_REQUEST && len
                             + reply.size() > p.getSettings().getMaxPduSize()) {
                         len = p.getSettings().getMaxPduSize() - reply.size();
@@ -700,13 +715,18 @@ abstract class GXDLMS {
                     reply.set(p.getData(), len);
                 }
             }
-            if (ciphering) {
+            if (ciphering && !p.getSettings().getNegotiatedConformance()
+                    .contains(Conformance.GENERAL_BLOCK_TRANSFER)) {
+                // GBT ciphering is done for all the data, not just block.
+                byte[] tmp;
                 if (p.getSettings().getCipher()
                         .getSecuritySuite() == SecuritySuite.AES_GCM_128) {
-                    cipher0(p, reply);
+                    tmp = cipher0(p, reply.array());
                 } else {
-                    cipher1(p, reply);
+                    tmp = cipher1(p, reply.array());
                 }
+                reply.size(0);
+                reply.set(tmp);
             }
         }
         if (p.getCommand() == Command.GENERAL_BLOCK_TRANSFER
@@ -759,8 +779,8 @@ abstract class GXDLMS {
      * @param reply
      *            Data to encrypt.
      */
-    private static void cipher1(final GXDLMSLNParameters p,
-            final GXByteBuffer reply) {
+    private static byte[] cipher1(final GXDLMSLNParameters p,
+            final byte[] data) {
         byte keyid = 0;
         if (p.getSettings().getTargetEphemeralKey() != null) {
             keyid = 1;
@@ -770,9 +790,8 @@ abstract class GXDLMS {
         }
         // If connection is not establish yet.
         if (keyid == 0) {
-            return;
+            return data;
         }
-        byte[] tmp;
         byte sc = 0;
         GXICipher c = p.getSettings().getCipher();
         if (c.getRecipientSystemTitle() == null) {
@@ -832,8 +851,6 @@ abstract class GXDLMS {
             }
         }
         tmp2.set(c.getRecipientSystemTitle());
-        tmp = reply.array();
-        reply.clear();
         byte[] kdf = GXASymmetric.generateKDF(alg, z, keyDataLen,
                 GXCommon.hexToBytes(algID), c.getSystemTitle(), tmp2.array(),
                 null, null, c.getSecuritySuite());
@@ -853,6 +870,7 @@ abstract class GXDLMS {
                 // Other information.
                 null);
 
+        GXByteBuffer reply = new GXByteBuffer();
         reply.setUInt8(Command.GENERAL_CIPHERING);
         GXCommon.setObjectCount(transactionId.size(), reply);
         reply.set(transactionId);
@@ -891,7 +909,7 @@ abstract class GXDLMS {
         }
         // ciphered-content
         s.setType(CountType.DATA | CountType.TAG);
-        tmp = GXCiphering.encrypt(s, tmp);
+        byte[] tmp = GXCiphering.encrypt(s, data);
         // Len
         GXCommon.setObjectCount(5 + tmp.length, reply);
         // Add SC
@@ -899,6 +917,7 @@ abstract class GXDLMS {
         // Add IC.
         reply.setUInt32(0);
         reply.set(tmp);
+        return reply.array();
     }
 
     /**
@@ -909,8 +928,8 @@ abstract class GXDLMS {
      * @param reply
      *            Data to encrypt.
      */
-    private static void cipher0(final GXDLMSLNParameters p,
-            final GXByteBuffer reply) {
+    private static byte[] cipher0(final GXDLMSLNParameters p,
+            final byte[] data) {
         byte cmd;
         if (!p.getSettings().getNegotiatedConformance()
                 .contains(Conformance.GENERAL_PROTECTION)) {
@@ -919,11 +938,11 @@ abstract class GXDLMS {
             cmd = (byte) Command.GENERAL_GLO_CIPHERING;
         }
         byte[] tmp = p.getSettings().getCipher().encrypt(cmd,
-                p.getSettings().getCipher().getSystemTitle(), reply.array());
-        reply.size(0);
+                p.getSettings().getCipher().getSystemTitle(), data);
         if (p.getCommand() == Command.DATA_NOTIFICATION
                 || p.getSettings().getNegotiatedConformance()
                         .contains(Conformance.GENERAL_PROTECTION)) {
+            GXByteBuffer reply = new GXByteBuffer();
             // Add command.
             reply.setUInt8(tmp[0]);
             // Add system title.
@@ -932,9 +951,9 @@ abstract class GXDLMS {
             reply.set(p.getSettings().getCipher().getSystemTitle());
             // Add data.
             reply.set(tmp, 1, tmp.length - 1);
-        } else {
-            reply.set(tmp);
+            return reply.array();
         }
+        return tmp;
     }
 
     /**
@@ -1313,7 +1332,7 @@ abstract class GXDLMS {
         // Add BOP
         bb.setUInt8(GXCommon.HDLC_FRAME_START_END);
         frameSize = settings.getLimits().getMaxInfoTX();
-        frameSize -= 11;
+        frameSize -= (10 + secondaryAddress.length);
         // If no data
         if (data == null || data.size() == 0) {
             bb.setUInt8(0xA0);
@@ -1420,7 +1439,7 @@ abstract class GXDLMS {
         }
         short frame = reply.getUInt8();
         if ((frame & 0xF0) != 0xA0) {
-            // If same data.
+            reply.position(reply.position() - 1);
             return getHdlcData(server, settings, reply, data);
         }
         // Check frame length.
@@ -1439,13 +1458,25 @@ abstract class GXDLMS {
         int eopPos = frameLen + packetStartID + 1;
         ch = reply.getUInt8(eopPos);
         if (ch != GXCommon.HDLC_FRAME_START_END) {
-            throw new GXDLMSException("Invalid data format.");
+            reply.position(reply.position() - 2);
+            return getHdlcData(server, settings, reply, data);
         }
 
         // Check addresses.
-        if (!checkHdlcAddress(server, settings, reply, eopPos)) {
-            // If echo,
-            return getHdlcData(server, settings, reply, data);
+        boolean ret;
+        try {
+            ret = checkHdlcAddress(server, settings, reply, eopPos);
+        } catch (Exception ex) {
+            ret = false;
+        }
+        if (!ret) {
+            // If not notify.
+            if (!(reply.position() < reply.size()
+                    && reply.getUInt8(reply.position()) == 0x13)) {
+                // If echo.
+                reply.position(1 + eopPos);
+                return getHdlcData(server, settings, reply, data);
+            }
         }
 
         // Is there more data available.
@@ -1467,6 +1498,9 @@ abstract class GXDLMS {
                 reply.position() - packetStartID - 1);
         crcRead = reply.getUInt16();
         if (crc != crcRead) {
+            if (reply.size() - reply.position() > 8) {
+                return getHdlcData(server, settings, reply, data);
+            }
             throw new GXDLMSException("Wrong CRC.");
         }
         // Check that packet CRC match only if there is a data part.

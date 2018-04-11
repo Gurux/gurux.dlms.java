@@ -91,6 +91,7 @@ public class GXDLMSHdlcSetup extends GXDLMSObject implements IGXDLMSBase {
         maximumInfoLengthReceive = 128;
         maximumInfoLengthTransmit = 128;
         inactivityTimeout = 120;
+        setVersion(1);
     }
 
     public final BaudRate getCommunicationSpeed() {
@@ -247,9 +248,15 @@ public class GXDLMSHdlcSetup extends GXDLMSObject implements IGXDLMSBase {
             return DataType.UINT8;
         }
         if (index == 5) {
+            if (getVersion() == 0) {
+                return DataType.UINT8;
+            }
             return DataType.UINT16;
         }
         if (index == 6) {
+            if (getVersion() == 0) {
+                return DataType.UINT8;
+            }
             return DataType.UINT16;
         }
         if (index == 7) {

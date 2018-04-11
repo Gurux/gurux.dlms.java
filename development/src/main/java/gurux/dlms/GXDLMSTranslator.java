@@ -602,6 +602,11 @@ public class GXDLMSTranslator {
                         if (multipleFrames || data.isMoreData()) {
                             if (getCompletePdu()) {
                                 pduFrames.set(data.getData().getData());
+                                if (data.getMoreData() == RequestTypes.NONE) {
+                                    xml.appendLine(
+                                            pduToXml(pduFrames, true, true));
+                                    pduFrames.clear();
+                                }
                             } else {
                                 xml.appendLine("<NextFrame Value=\""
                                         + GXCommon.toHex(

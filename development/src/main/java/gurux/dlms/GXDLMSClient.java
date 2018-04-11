@@ -1638,7 +1638,7 @@ public class GXDLMSClient {
         if (count == 0) {
             GXCommon.setData(buff, DataType.UINT32, count);
         } else {
-            GXCommon.setData(buff, DataType.UINT32, index + count);
+            GXCommon.setData(buff, DataType.UINT32, index + count - 1);
         }
 
         int columnIndex = 1;

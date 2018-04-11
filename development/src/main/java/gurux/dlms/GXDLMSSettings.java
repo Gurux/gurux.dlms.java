@@ -834,7 +834,7 @@ public class GXDLMSSettings {
      * @param value
      *            Source system title.
      */
-    final void setSourceSystemTitle(final byte[] value) {
+    public final void setSourceSystemTitle(final byte[] value) {
         if (value != null && value.length != 0 && value.length != 8) {
             throw new IllegalArgumentException("Invalid client system title.");
         }

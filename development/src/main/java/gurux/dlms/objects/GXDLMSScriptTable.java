@@ -285,12 +285,18 @@ public class GXDLMSScriptTable extends GXDLMSObject implements IGXDLMSBase {
         }
     }
 
-    /*
+    /**
      * Executes the script specified in parameter data.
+     * 
+     * @param client
+     *            DLMS client.
+     * @param script
+     *            Executed script.
+     * @return Action bytes.
      */
-    public final byte[][] execute(final GXDLMSClient client, final Object data,
-            final DataType type) {
-        return client.method(this, 1, data, type);
+    public final byte[][] execute(final GXDLMSClient client,
+            final GXDLMSScript script) {
+        return client.method(this, 1, script.getId(), DataType.UINT16);
     }
 
     @Override

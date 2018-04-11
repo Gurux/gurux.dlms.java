@@ -182,6 +182,21 @@ public class GXDLMSSecureClient extends GXDLMSClient {
     }
 
     /**
+     * @return Server system title.
+     */
+    public byte[] getServerSystemTitle() {
+        return getSettings().getSourceSystemTitle();
+    }
+
+    /**
+     * @param value
+     *            Server system title.
+     */
+    public void setServerSystemTitle(final byte[] value) {
+        getSettings().setSourceSystemTitle(value);
+    }
+
+    /**
      * Exports an X.509 v3 certificate from the server using entity information.
      * 
      * @param ss

@@ -333,14 +333,12 @@ public class GXDLMSClock extends GXDLMSObject implements IGXDLMSBase {
             GXDateTime presetTime = (GXDateTime) GXDLMSClient.changeType(
                     (byte[]) ((Object[]) e.getParameters())[0],
                     DataType.DATETIME);
-            // TODO:
-            /*
-             * GXDateTime validityIntervalStart = (GXDateTime) GXDLMSClient
-             * .changeType((byte[]) Array.get(parameters, 1),
-             * DataType.DATETIME); GXDateTime validityIntervalEnd = (GXDateTime)
-             * GXDLMSClient .changeType((byte[]) Array.get(parameters, 2),
-             * DataType.DATETIME);
-             */
+            GXDateTime validityIntervalStart = (GXDateTime) GXDLMSClient
+                    .changeType((byte[]) ((Object[]) e.getParameters())[1],
+                            DataType.DATETIME);
+            GXDateTime validityIntervalEnd = (GXDateTime) GXDLMSClient
+                    .changeType((byte[]) ((Object[]) e.getParameters())[2],
+                            DataType.DATETIME);
             setTime(presetTime);
         } else if (e.getIndex() == 6) {
             // Shifts the time.
@@ -405,7 +403,7 @@ public class GXDLMSClock extends GXDLMSObject implements IGXDLMSBase {
         GXCommon.setData(buff, DataType.OCTET_STRING, presetTime);
         GXCommon.setData(buff, DataType.OCTET_STRING, validityIntervalStart);
         GXCommon.setData(buff, DataType.OCTET_STRING, validityIntervalEnd);
-        return client.method(this, 5, buff.array(), DataType.OCTET_STRING);
+        return client.method(this, 5, buff.array(), DataType.ARRAY);
     }
 
     /*

@@ -644,12 +644,27 @@ public class GXDLMSServerBase {
                 receivedData.set(sr.getData());
                 boolean first = settings.getServerAddress() == 0
                         && settings.getClientAddress() == 0;
-                GXDLMS.getData(settings, receivedData, info);
+                try {
+                    GXDLMS.getData(settings, receivedData, info);
+                } catch (Exception ex) {
+                    dataReceived = Calendar.getInstance().getTimeInMillis();
+                    receivedData.size(0);
+                    sr.setReply(GXDLMS.getHdlcFrame(settings,
+                            Command.UNACCEPTABLE_FRAME, replyData));
+                    return;
+                }
                 // If all data is not received yet.
                 if (!info.isComplete()) {
                     return;
                 }
                 receivedData.clear();
+                if (info.getCommand() == Command.DISCONNECT_REQUEST
+                        && !settings.isConnected()) {
+                    sr.setReply(GXDLMS.getHdlcFrame(settings,
+                            Command.DISCONNECT_MODE, replyData));
+                    info.clear();
+                    return;
+                }
 
                 if (first || info.getCommand() == Command.SNRM
                         || (settings.getInterfaceType() == InterfaceType.WRAPPER
@@ -686,6 +701,10 @@ public class GXDLMSServerBase {
                 if (info.getCommand() == Command.NONE) {
                     if (transaction != null) {
                         info.setCommand(transaction.getCommand());
+                    } else if (replyData.size() == 0) {
+                        sr.setReply(GXDLMS.getHdlcFrame(settings,
+                                settings.getReceiverReady(), replyData));
+                        return;
                     }
                 }
                 // Check inactivity time out.
@@ -721,7 +740,14 @@ public class GXDLMSServerBase {
             } else {
                 info.setCommand(Command.GENERAL_BLOCK_TRANSFER);
             }
-            sr.setReply(handleCommand(info.getCommand(), info.getData(), sr));
+            try {
+                sr.setReply(
+                        handleCommand(info.getCommand(), info.getData(), sr));
+            } catch (Exception ex) {
+                receivedData.size(0);
+                sr.setReply(GXDLMS.getHdlcFrame(settings,
+                        Command.UNACCEPTABLE_FRAME, replyData));
+            }
             dataReceived = Calendar.getInstance().getTimeInMillis();
             info.clear();
         } catch (Exception e) {
@@ -897,7 +923,7 @@ public class GXDLMSServerBase {
             // Client wants to get next block.
             break;
         default:
-            LOGGER.log(Level.SEVERE, "Invalid command: " + cmd);
+            throw new Exception("Invalid command: " + String.valueOf(cmd));
         }
         byte[] reply;
         if (settings.getInterfaceType() == InterfaceType.WRAPPER) {
