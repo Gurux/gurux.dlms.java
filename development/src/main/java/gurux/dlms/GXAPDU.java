@@ -243,8 +243,10 @@ final class GXAPDU {
             // Coding the choice for user-information (Octet STRING, universal)
             data.setUInt8(BerType.OCTET_STRING);
             // Length
-            data.setUInt8(0x0E);
+            data.setUInt8(0);
+            int offset = data.size();
             getInitiateRequest(settings, cipher, data);
+            data.setUInt8(offset - 1, data.size() - offset);
         } else {
             if (encryptedData != null && encryptedData.size() != 0) {
                 // Length for AARQ user field
@@ -390,15 +392,10 @@ final class GXAPDU {
                 len = data.getUInt8();
                 byte[] tmp = new byte[len];
                 data.get(tmp);
-                if (initiateRequest) {
-                    settings.setDedicatedKey(tmp);
-                    if (xml != null) {
-                        xml.appendLine(TranslatorGeneralTags.DEDICATED_KEY,
-                                null, GXCommon.toHex(tmp, false));
-                    }
-                } else {
-                    // CtoS.
-                    settings.setCtoSChallenge(tmp);
+                settings.setDedicatedKey(tmp);
+                if (xml != null) {
+                    xml.appendLine(TranslatorGeneralTags.DEDICATED_KEY, null,
+                            GXCommon.toHex(tmp, false));
                 }
             }
             // Optional usage field of the negotiated quality of service

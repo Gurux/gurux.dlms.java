@@ -461,7 +461,8 @@ public class GXDLMSServerBase {
                                     AssociationStatus.ASSOCIATED);
                         }
                     }
-                    settings.setConnected(true);
+                    settings.setConnected(
+                            settings.getConnected() | ConnectionState.DLMS);
                 }
             }
         } catch (GXDLMSConfirmedServiceError e) {
@@ -563,6 +564,7 @@ public class GXDLMSServerBase {
         replyData.setUInt32(getLimits().getWindowSizeRX());
         int len = replyData.size() - 3;
         replyData.setUInt8(2, len); // Length
+        settings.setConnected(ConnectionState.HDLC);
     }
 
     /*
@@ -610,7 +612,7 @@ public class GXDLMSServerBase {
         transaction = null;
         settings.setCount(0);
         settings.setIndex(0);
-        settings.setConnected(false);
+        settings.setConnected(ConnectionState.NONE);
         replyData.clear();
         settings.setAuthentication(Authentication.NONE);
         if (settings.getCipher() != null) {
@@ -659,7 +661,8 @@ public class GXDLMSServerBase {
                 }
                 receivedData.clear();
                 if (info.getCommand() == Command.DISCONNECT_REQUEST
-                        && !settings.isConnected()) {
+                        && (settings.getConnected()
+                                & ConnectionState.DLMS) == 0) {
                     sr.setReply(GXDLMS.getHdlcFrame(settings,
                             Command.DISCONNECT_MODE, replyData));
                     info.clear();
@@ -773,8 +776,9 @@ public class GXDLMSServerBase {
                 return;
             } else {
                 reset();
-                if (settings.isConnected()) {
-                    settings.setConnected(false);
+                if ((settings.getConnected() & ConnectionState.DLMS) != 0) {
+                    settings.setConnected(
+                            settings.getConnected() & ~ConnectionState.DLMS);
                     if (owner instanceof GXDLMSServer) {
                         GXDLMSServer b = (GXDLMSServer) owner;
                         b.disconnected(sr.getConnectionInfo());
@@ -860,6 +864,10 @@ public class GXDLMSServerBase {
     private byte[] handleCommand(final int cmd, final GXByteBuffer data,
             final GXServerReply sr) throws Exception {
         byte frame = 0;
+        if (replyData.size() != 0) {
+            // Get next frame.
+            frame = settings.getNextSend(false);
+        }
         switch (cmd) {
         case Command.ACCESS_REQUEST:
             GXDLMSLNCommandHandler.handleAccessRequest(settings, this, data,
@@ -893,7 +901,7 @@ public class GXDLMSServerBase {
             break;
         case Command.AARQ:
             handleAarqRequest(data, sr.getConnectionInfo());
-            if (settings.isConnected()) {
+            if ((settings.getConnected() & ConnectionState.DLMS) != 0) {
                 if (owner instanceof GXDLMSServer) {
                     ((GXDLMSServer) owner).connected(sr.getConnectionInfo());
                 } else {
@@ -903,15 +911,28 @@ public class GXDLMSServerBase {
             break;
         case Command.RELEASE_REQUEST:
             handleReleaseRequest(data, sr.getConnectionInfo());
+            if ((settings.getConnected() & ConnectionState.DLMS) != 0) {
+                settings.setConnected(
+                        settings.getConnected() & ~ConnectionState.DLMS);
+                if (owner instanceof GXDLMSServer) {
+                    ((GXDLMSServer) owner).disconnected(sr.getConnectionInfo());
+                } else {
+                    ((GXDLMSServer2) owner)
+                            .onDisconnected(sr.getConnectionInfo());
+                }
+            }
             break;
         case Command.DISCONNECT_REQUEST:
             generateDisconnectRequest();
-            settings.setConnected(false);
-            if (owner instanceof GXDLMSServer) {
-                ((GXDLMSServer) owner).disconnected(sr.getConnectionInfo());
-            } else {
-                ((GXDLMSServer2) owner).onDisconnected(sr.getConnectionInfo());
+            if ((settings.getConnected() & ConnectionState.DLMS) != 0) {
+                if (owner instanceof GXDLMSServer) {
+                    ((GXDLMSServer) owner).disconnected(sr.getConnectionInfo());
+                } else {
+                    ((GXDLMSServer2) owner)
+                            .onDisconnected(sr.getConnectionInfo());
+                }
             }
+            settings.setConnected(ConnectionState.HDLC);
             frame = Command.UA;
             break;
         case Command.GENERAL_BLOCK_TRANSFER:

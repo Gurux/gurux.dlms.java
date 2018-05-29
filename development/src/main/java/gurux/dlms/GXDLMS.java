@@ -707,6 +707,10 @@ abstract class GXDLMS {
                             p.getData().size(0);
                             p.getData().set(tmp);
                             reply.size(0);
+                            len = p.getData().size();
+                            if (7 + len > p.getSettings().getMaxPduSize()) {
+                                len = p.getSettings().getMaxPduSize() - 7;
+                            }
                         }
                     } else if (p.getCommand() != Command.GET_REQUEST && len
                             + reply.size() > p.getSettings().getMaxPduSize()) {
@@ -2793,7 +2797,7 @@ abstract class GXDLMS {
             }
 
             data.getXml().appendLine(TranslatorTags.BLOCK_DATA, null,
-                    GXCommon.toHex(data.getData().getData(), true,
+                    GXCommon.toHex(data.getData().getData(), false,
                             data.getData().position(), len));
             data.getXml().appendEndTag(Command.GENERAL_BLOCK_TRANSFER);
             return;

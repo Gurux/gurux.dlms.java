@@ -136,12 +136,33 @@ public class GXDLMSAutoConnect extends GXDLMSObject implements IGXDLMSBase {
         destinations = value;
     }
 
+    /**
+     * Initiates the connection process.
+     * 
+     * @param client
+     *            DLMS client.
+     * @return Action bytes.
+     */
+    public final byte[][] connect(final GXDLMSClient client) {
+        return client.method(getName(), getObjectType(), 1, new Integer(0),
+                DataType.INT8);
+    }
+
     @Override
     public final Object[] getValues() {
         return new Object[] { getLogicalName(), getMode(),
                 new Integer(getRepetitions()),
                 new Integer(getRepetitionDelay()), getCallingWindow(),
                 getDestinations() };
+    }
+
+    @Override
+    public final byte[] invoke(final GXDLMSSettings settings,
+            final ValueEventArgs e) {
+        if (e.getIndex() != 1) {
+            e.setError(ErrorCode.READ_WRITE_DENIED);
+        }
+        return null;
     }
 
     /*
@@ -192,7 +213,7 @@ public class GXDLMSAutoConnect extends GXDLMSObject implements IGXDLMSBase {
      */
     @Override
     public final int getMethodCount() {
-        return 0;
+        return 1;
     }
 
     @Override

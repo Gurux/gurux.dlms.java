@@ -208,9 +208,7 @@ public class GXDLMSPushSetup extends GXDLMSObject implements IGXDLMSBase {
     @Override
     public final byte[] invoke(final GXDLMSSettings settings,
             final ValueEventArgs e) {
-        if (e.getIndex() == 1) {
-            e.setError(ErrorCode.READ_WRITE_DENIED);
-        } else {
+        if (e.getIndex() != 1) {
             e.setError(ErrorCode.READ_WRITE_DENIED);
         }
         return null;

@@ -299,6 +299,20 @@ public class GXDLMSScriptTable extends GXDLMSObject implements IGXDLMSBase {
         return client.method(this, 1, script.getId(), DataType.UINT16);
     }
 
+    /**
+     * Executes the script specified in parameter data.
+     * 
+     * @param client
+     *            DLMS client.
+     * @param scriptId
+     *            Executed script ID.
+     * @return Action bytes.
+     */
+    public final byte[][] execute(final GXDLMSClient client,
+            final int scriptId) {
+        return client.method(this, 1, scriptId, DataType.UINT16);
+    }
+
     @Override
     public final void load(final GXXmlReader reader) throws XMLStreamException {
         scripts.clear();

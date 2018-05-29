@@ -51,6 +51,38 @@ public enum SourceDiagnostic {
      * The application context name is not supported.
      */
     NOT_SUPPORTED(2),
+    /**
+     * Calling AP title not recognized.
+     */
+    CALLING_AP_TITLE_NOT_RECOGNIZED(3),
+    /**
+     * Calling AP invocation identifier not recognized.
+     */
+    CALLING_AP_INVOCATION_IDENTIFIER_NOT_RECOGNIZED(4),
+    /**
+     * Calling AE qualifier not recognized
+     */
+    CALLING_AE_QUALIFIER_NOT_RECOGNIZED(5),
+    /**
+     * Calling AE invocation identifier not recognized
+     */
+    CALLING_AE_INVOCATION_IDENTIFIER_NOT_RECOGNIZED(6),
+    /**
+     * Called AP title not recognized
+     */
+    CALLED_AP_TITLE_NOT_RECOGNIZED(7),
+    /**
+     * Called AP invocation identifier not recognized
+     */
+    CALLED_AP_INVOCATION_IDENTIFIER_NOT_RECOGNIZED(8),
+    /**
+     * Called AE qualifier not recognized
+     */
+    CALLED_AE_QUALIFIER_NOT_RECOGNIZED(9),
+    /**
+     * Called AE invocation identifier not recognized
+     */
+    CALLED_AE_INVOCATION_IDENTIFIER_NOT_RECOGNIZED(10),
     /*
      * The authentication mechanism name is not recognized.
      */

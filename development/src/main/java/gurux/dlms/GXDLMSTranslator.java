@@ -61,6 +61,7 @@ import gurux.dlms.enums.Security;
 import gurux.dlms.enums.ServiceClass;
 import gurux.dlms.enums.SourceDiagnostic;
 import gurux.dlms.internal.GXCommon;
+import gurux.dlms.internal.GXDataInfo;
 import gurux.dlms.secure.GXCiphering;
 
 /**
@@ -2591,5 +2592,21 @@ public class GXDLMSTranslator {
      */
     public final void setOmitXmlNameSpace(final boolean value) {
         omitXmlNameSpace = value;
+    }
+
+    /**
+     * Convert data bytes to XML.
+     * 
+     * @param data
+     *            Data to parse.
+     * @return Generated xml
+     */
+    public final String dataToXml(final GXByteBuffer data) {
+        GXDataInfo di = new GXDataInfo();
+        GXDLMSTranslatorStructure xml = new GXDLMSTranslatorStructure(
+                outputType, hex, getShowStringAsHex(), comments, tags);
+        di.setXml(xml);
+        GXCommon.getData(data, di);
+        return di.getXml().toString();
     }
 }

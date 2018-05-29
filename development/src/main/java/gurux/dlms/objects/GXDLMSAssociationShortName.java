@@ -41,6 +41,7 @@ import java.util.logging.Logger;
 
 import javax.xml.stream.XMLStreamException;
 
+import gurux.dlms.ConnectionState;
 import gurux.dlms.GXByteBuffer;
 import gurux.dlms.GXDLMSSettings;
 import gurux.dlms.GXDLMSTranslator;
@@ -179,7 +180,8 @@ public class GXDLMSAssociationShortName extends GXDLMSObject
                 } else {
                     readSecret = secret;
                 }
-                settings.setConnected(true);
+                settings.setConnected(
+                        settings.getConnected() | ConnectionState.DLMS);
                 return GXSecure.secure(settings, settings.getCipher(), ic,
                         settings.getCtoSChallenge(), readSecret);
             } else {
@@ -189,7 +191,8 @@ public class GXDLMSAssociationShortName extends GXDLMSObject
                 return null;
             }
         } else {
-            settings.setConnected(false);
+            settings.setConnected(
+                    settings.getConnected() & ~ConnectionState.DLMS);
             e.setError(ErrorCode.READ_WRITE_DENIED);
             return null;
         }

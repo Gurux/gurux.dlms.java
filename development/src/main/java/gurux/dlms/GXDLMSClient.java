@@ -498,7 +498,7 @@ public class GXDLMSClient {
      * @return SNRM request as byte array.
      */
     public final byte[] snrmRequest() {
-        settings.setConnected(false);
+        settings.setConnected(ConnectionState.NONE);
         isAuthenticationRequired = false;
         // SNRM request is not used in network connections.
         if (this.getInterfaceType() == InterfaceType.WRAPPER) {
@@ -549,6 +549,7 @@ public class GXDLMSClient {
     public final void parseUAResponse(final byte[] data) {
         GXDLMS.parseSnrmUaResponse(new GXByteBuffer(data),
                 settings.getLimits());
+        settings.setConnected(ConnectionState.HDLC);
     }
 
     /**
@@ -571,6 +572,7 @@ public class GXDLMSClient {
      * @see GXDLMSClient#parseAareResponse
      */
     public final byte[][] aarqRequest() {
+        settings.setConnected(settings.getConnected() & ~ConnectionState.DLMS);
         GXByteBuffer buff = new GXByteBuffer(20);
         settings.resetBlockIndex();
         GXDLMS.checkInit(settings);
@@ -615,12 +617,15 @@ public class GXDLMSClient {
      * @see GXDLMSClient#getProposedConformance
      */
     public final void parseAareResponse(final GXByteBuffer reply) {
-        settings.setConnected(true);
         isAuthenticationRequired =
                 GXAPDU.parsePDU(settings, settings.getCipher(), reply,
                         null) == SourceDiagnostic.AUTHENTICATION_REQUIRED;
         if (settings.getDLMSVersion() != 6) {
             throw new IllegalArgumentException("Invalid DLMS version number.");
+        }
+        if (!isAuthenticationRequired) {
+            settings.setConnected(
+                    settings.getConnected() | ConnectionState.DLMS);
         }
     }
 
@@ -719,6 +724,9 @@ public class GXDLMSClient {
             throw new GXDLMSException(
                     "parseApplicationAssociationResponse failed. "
                             + " Server to Client do not match.");
+        } else {
+            settings.setConnected(
+                    settings.getConnected() | ConnectionState.DLMS);
         }
     }
 
@@ -730,7 +738,7 @@ public class GXDLMSClient {
     public byte[][] releaseRequest() {
         // If connection is not established, there is no need to send
         // DisconnectRequest.
-        if (!settings.isConnected()) {
+        if ((settings.getConnected() & ConnectionState.DLMS) == 0) {
             return null;
         }
         GXByteBuffer buff = new GXByteBuffer();
@@ -752,7 +760,8 @@ public class GXDLMSClient {
                     Command.RELEASE_REQUEST, 0xFF, 0xFF, null, buff));
         }
         if (settings.getInterfaceType() == InterfaceType.WRAPPER) {
-            settings.setConnected(false);
+            settings.setConnected(
+                    settings.getConnected() & ~ConnectionState.DLMS);
         }
         return reply.toArray(new byte[][] {});
     }
@@ -763,20 +772,33 @@ public class GXDLMSClient {
      * @return Disconnected request, as byte array.
      */
     public final byte[] disconnectRequest() {
+        return disconnectRequest(false);
+    }
+
+    /**
+     * Generates a disconnect request.
+     * 
+     * @param force
+     *            Is disconnect method called always.
+     * @return Disconnected request, as byte array.
+     */
+    public final byte[] disconnectRequest(final boolean force) {
         settings.setMaxPduSize(0xFFFF);
         // If connection is not established, there is no need to send
         // DisconnectRequest.
-        if (!settings.isConnected()) {
-            return new byte[0];
+        if (!force && settings.getConnected() == ConnectionState.NONE) {
+            return null;
         }
         if (this.getInterfaceType() == InterfaceType.HDLC) {
+            settings.setConnected(ConnectionState.NONE);
             return GXDLMS.getHdlcFrame(settings, Command.DISCONNECT_REQUEST,
                     null);
         }
-        GXByteBuffer bb = new GXByteBuffer(2);
-        bb.setUInt8(Command.RELEASE_REQUEST);
-        bb.setUInt8(0x0);
-        return GXDLMS.getWrapperFrame(settings, bb);
+        byte[][] reply = releaseRequest();
+        if (reply == null) {
+            return null;
+        }
+        return reply[0];
     }
 
     /**

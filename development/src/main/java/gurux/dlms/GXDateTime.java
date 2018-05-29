@@ -67,6 +67,11 @@ public class GXDateTime {
     private boolean daylightSavingsEnd;
 
     /**
+     * Day of week.
+     */
+    private int dayOfWeek;
+
+    /**
      * Constructor.
      */
     public GXDateTime() {
@@ -74,6 +79,7 @@ public class GXDateTime {
         meterCalendar = Calendar.getInstance();
         status = new HashSet<ClockStatus>();
         status.add(ClockStatus.OK);
+        dayOfWeek = 0;
     }
 
     /**
@@ -350,16 +356,14 @@ public class GXDateTime {
                 - local.getTimeZone().getRawOffset();
         long localtime = meterTime + diff;
         local.setTimeInMillis(localtime);
-        // If meter is not use daylight saving time.
+        // If meter is not use daylight saving time and client is.
         if (!meterCalendar.getTimeZone()
                 .inDaylightTime(meterCalendar.getTime())) {
-            if (meterCalendar.getTimeZone()
-                    .inDaylightTime(meterCalendar.getTime())) {
+            if (local.getTimeZone().inDaylightTime(local.getTime())) {
                 local.add(Calendar.HOUR_OF_DAY, -1);
             }
         } else {
-            if (!meterCalendar.getTimeZone()
-                    .inDaylightTime(meterCalendar.getTime())) {
+            if (!local.getTimeZone().inDaylightTime(local.getTime())) {
                 local.add(Calendar.HOUR_OF_DAY, 1);
             }
         }
@@ -443,6 +447,21 @@ public class GXDateTime {
     }
 
     /**
+     * @return Day of week.
+     */
+    public final int getDayOfWeek() {
+        return dayOfWeek;
+    }
+
+    /**
+     * @param forValue
+     *            Day of week.
+     */
+    public final void setDayOfWeek(final int forValue) {
+        dayOfWeek = forValue;
+    }
+
+    /**
      * @return Daylight savings begin.
      */
     public final boolean getDaylightSavingsBegin() {
@@ -476,7 +495,9 @@ public class GXDateTime {
      * @return Deviation is time from current time zone to UTC time.
      */
     public final int getDeviation() {
-        return -meterCalendar.getTimeZone().getRawOffset() / 60000;
+        int value = -((meterCalendar.get(Calendar.ZONE_OFFSET)
+                + meterCalendar.get(Calendar.DST_OFFSET)) / 60000);
+        return value;
     }
 
     /**
@@ -790,21 +811,25 @@ public class GXDateTime {
         if (dst) {
             // If meter is in same time zone than meter reading application.
             if (tz.observesDaylightTime()
-                    && tz.getRawOffset() / 60000 == deviation) {
+                    && tz.getRawOffset() / 60000 == deviation - 60) {
                 return tz;
             }
-            String[] ids = TimeZone.getAvailableIDs(deviation * 60000);
+            String[] ids = TimeZone.getAvailableIDs((deviation - 60) * 60000);
             tz = null;
             for (int pos = 0; pos != ids.length; ++pos) {
                 tz = TimeZone.getTimeZone(ids[pos]);
                 if (tz.observesDaylightTime()
-                        && tz.getRawOffset() / 60000 == deviation) {
+                        && tz.getRawOffset() / 60000 == deviation - 60) {
                     break;
                 }
+                tz = null;
             }
-            return tz;
+            if (tz != null) {
+                return tz;
+            }
         }
-        if (tz.getRawOffset() / 60000 == deviation) {
+        if (!tz.observesDaylightTime()
+                && tz.getRawOffset() / 60000 == deviation) {
             return tz;
         }
         String str;

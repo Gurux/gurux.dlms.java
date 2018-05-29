@@ -193,7 +193,7 @@ public class GXDLMSSettings {
      */
     private int dlmsVersionNumber = DLMS_VERSION;
 
-    private boolean connected = false;
+    private byte connected = ConnectionState.NONE;
 
     /**
      * Can user access meter data anonymously (Without AARQ/AARE messages). In
@@ -384,7 +384,7 @@ public class GXDLMSSettings {
     /**
      * @return Is connected to the meter.
      */
-    public final boolean isConnected() {
+    public final byte getConnected() {
         return connected;
     }
 
@@ -392,7 +392,7 @@ public class GXDLMSSettings {
      * @return Is connection accepted.
      */
     public final boolean acceptConnection() {
-        return connected || allowAnonymousAccess
+        return connected != ConnectionState.NONE || allowAnonymousAccess
                 || (cipher != null && cipher.getSharedSecret() != null);
     }
 
@@ -400,8 +400,8 @@ public class GXDLMSSettings {
      * @param value
      *            Is connected to the meter.
      */
-    public final void setConnected(final boolean value) {
-        connected = value;
+    public final void setConnected(final int value) {
+        connected = (byte) value;
     }
 
     /**
@@ -418,6 +418,10 @@ public class GXDLMSSettings {
     }
 
     final boolean checkFrame(final short frame) {
+        // If notify
+        if (frame == 0x13) {
+            return true;
+        }
         // If U frame.
         if ((frame & HdlcFrameType.U_FRAME.getValue()) == HdlcFrameType.U_FRAME
                 .getValue()) {
@@ -433,22 +437,29 @@ public class GXDLMSSettings {
             return true;
         }
         // Handle I-frame.
-        if (frame == (increaseReceiverSequence(
-                increaseSendSequence(receiverFrame)) & 0xFF)) {
-            receiverFrame = frame;
-            return true;
-        }
-        // If answer for RR.
-        if (frame == increaseSendSequence(receiverFrame)) {
-            receiverFrame = frame;
-            return true;
+        short expected;
+        if ((senderFrame & 0x1) == 0) {
+            expected = (short) (increaseReceiverSequence(
+                    increaseSendSequence(receiverFrame)) & 0xFF);
+            if (frame == expected) {
+                receiverFrame = frame;
+                return true;
+            }
+        } else {
+            expected = (short) (increaseSendSequence(receiverFrame) & 0xFF);
+            // If answer for RR.
+            if (frame == expected) {
+                receiverFrame = frame;
+                return true;
+            }
         }
         // This is for unit tests.
         if (skipFrameCheck) {
             receiverFrame = frame;
             return true;
         }
-        System.out.println("Invalid HDLC Frame ID.");
+        System.out.println("Invalid HDLC Frame: " + Long.toString(frame, 16)
+                + " Expected: " + Long.toString(expected, 16));
         return true;
         // TODO: unit test must fix first. return false;
     }

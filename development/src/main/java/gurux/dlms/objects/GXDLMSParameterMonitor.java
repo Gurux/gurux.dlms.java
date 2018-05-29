@@ -156,6 +156,10 @@ public class GXDLMSParameterMonitor extends GXDLMSObject
     /**
      * Inserts a new entry in the table.
      * 
+     * @param client
+     *            DLMS Client.
+     * @param entry
+     *            Removed entry.
      * @return If a special day with the same index or with the same date as an
      *         already defined day is inserted, the old entry will be
      *         overwritten.
@@ -174,8 +178,15 @@ public class GXDLMSParameterMonitor extends GXDLMSObject
 
     /**
      * Deletes an entry from the table.
+     * 
+     * @param client
+     *            DLMS Client.
+     * @param entry
+     *            Removed entry.
+     * @return Action bytes.
      */
     public final byte[][] delete(GXDLMSClient client, GXDLMSTarget entry) {
+
         GXByteBuffer bb = new GXByteBuffer();
         bb.setUInt8(DataType.STRUCTURE.getValue());
         bb.setUInt8(3);

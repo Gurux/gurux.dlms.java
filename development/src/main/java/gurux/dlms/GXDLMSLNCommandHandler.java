@@ -546,7 +546,7 @@ final class GXDLMSLNCommandHandler {
                 xml.appendLine(TranslatorTags.BLOCK_NUMBER, "Value",
                         xml.integerToHex(blockNumber, 8));
                 xml.appendLine(TranslatorTags.RAW_DATA, "Value",
-                        data.remainingHexString(true));
+                        data.remainingHexString(false));
                 xml.appendEndTag(TranslatorTags.DATA_BLOCK);
             }
             return;
@@ -909,7 +909,7 @@ final class GXDLMSLNCommandHandler {
                 Command.METHOD_RESPONSE, 1, null, bb, error.getValue());
         GXDLMS.getLNPdu(p, replyData);
         // If High level authentication fails.
-        if (!settings.isConnected()
+        if ((settings.getConnected() & ConnectionState.DLMS) == 0
                 && obj instanceof GXDLMSAssociationLogicalName && id == 1) {
             server.notifyInvalidConnection(connectionInfo);
         }
