@@ -220,6 +220,13 @@ final class GXDLMSChippering {
         case Command.GLO_METHOD_REQUEST:
         case Command.GLO_METHOD_RESPONSE:
         case Command.GLO_EVENT_NOTIFICATION_REQUEST:
+        case Command.DED_GET_REQUEST:
+        case Command.DED_GET_RESPONSE:
+        case Command.DED_SET_REQUEST:
+        case Command.DED_SET_RESPONSE:
+        case Command.DED_METHOD_REQUEST:
+        case Command.DED_METHOD_RESPONSE:
+        case Command.DED_EVENT_NOTIFICATION:
             break;
         default:
             throw new IllegalArgumentException("cryptedData");

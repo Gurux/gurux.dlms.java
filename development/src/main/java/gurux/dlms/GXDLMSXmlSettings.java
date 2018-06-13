@@ -46,6 +46,12 @@ class GXDLMSXmlSettings {
     private SourceDiagnostic diagnostic = SourceDiagnostic.NONE;
     private byte reason = 0;
     private int command;
+
+    private int gwCommand;
+    // GW newtork ID.
+    private int networkId;
+    private byte[] physicalDeviceAddress;
+
     private int count = 0;
     private int requestType = 0xFF;
     private GXByteBuffer attributeDescriptor = new GXByteBuffer();
@@ -253,5 +259,29 @@ class GXDLMSXmlSettings {
      */
     public TranslatorOutputType getOutputType() {
         return outputType;
+    }
+
+    public int getGwCommand() {
+        return gwCommand;
+    }
+
+    public void setGwCommand(final int value) {
+        gwCommand = value;
+    }
+
+    public int getNetworkId() {
+        return networkId;
+    }
+
+    public void setNetworkId(final int value) {
+        networkId = value;
+    }
+
+    public byte[] getPhysicalDeviceAddress() {
+        return physicalDeviceAddress;
+    }
+
+    public void setPhysicalDeviceAddress(final byte[] value) {
+        physicalDeviceAddress = value;
     }
 }

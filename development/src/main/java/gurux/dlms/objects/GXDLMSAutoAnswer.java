@@ -61,7 +61,7 @@ import gurux.dlms.objects.enums.AutoAnswerStatus;
 public class GXDLMSAutoAnswer extends GXDLMSObject implements IGXDLMSBase {
     private AutoAnswerMode mode;
     private List<Entry<GXDateTime, GXDateTime>> listeningWindow;
-    private AutoAnswerStatus status = AutoAnswerStatus.INACTIVE;
+    private AutoAnswerStatus status;
     private int numberOfCalls;
     private int numberOfRingsInListeningWindow, numberOfRingsOutListeningWindow;
 
@@ -69,8 +69,7 @@ public class GXDLMSAutoAnswer extends GXDLMSObject implements IGXDLMSBase {
      * Constructor.
      */
     public GXDLMSAutoAnswer() {
-        super(ObjectType.AUTO_ANSWER, "0.0.2.2.0.255", 0);
-        listeningWindow = new ArrayList<Entry<GXDateTime, GXDateTime>>();
+        this("0.0.2.2.0.255", 0);
     }
 
     /**
@@ -80,8 +79,7 @@ public class GXDLMSAutoAnswer extends GXDLMSObject implements IGXDLMSBase {
      *            Logical Name of the object.
      */
     public GXDLMSAutoAnswer(final String ln) {
-        super(ObjectType.AUTO_ANSWER, ln, 0);
-        listeningWindow = new ArrayList<Entry<GXDateTime, GXDateTime>>();
+        this(ln, 0);
     }
 
     /**
@@ -95,6 +93,8 @@ public class GXDLMSAutoAnswer extends GXDLMSObject implements IGXDLMSBase {
     public GXDLMSAutoAnswer(final String ln, final int sn) {
         super(ObjectType.AUTO_ANSWER, ln, sn);
         listeningWindow = new ArrayList<Entry<GXDateTime, GXDateTime>>();
+        mode = AutoAnswerMode.NONE;
+        status = AutoAnswerStatus.INACTIVE;
     }
 
     public final AutoAnswerMode getMode() {
@@ -357,7 +357,9 @@ public class GXDLMSAutoAnswer extends GXDLMSObject implements IGXDLMSBase {
 
     @Override
     public final void save(final GXXmlWriter writer) throws XMLStreamException {
-        writer.writeElementString("Mode", mode.ordinal());
+        if (mode != null) {
+            writer.writeElementString("Mode", mode.ordinal());
+        }
         if (listeningWindow != null) {
             writer.writeStartElement("ListeningWindow");
             for (Entry<GXDateTime, GXDateTime> it : listeningWindow) {
@@ -370,7 +372,9 @@ public class GXDLMSAutoAnswer extends GXDLMSObject implements IGXDLMSBase {
             }
             writer.writeEndElement();
         }
-        writer.writeElementString("Status", status.getValue());
+        if (status != null) {
+            writer.writeElementString("Status", status.getValue());
+        }
         writer.writeElementString("NumberOfCalls", numberOfCalls);
         writer.writeElementString("NumberOfRingsInListeningWindow",
                 numberOfRingsInListeningWindow);

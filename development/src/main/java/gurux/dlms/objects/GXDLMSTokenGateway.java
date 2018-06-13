@@ -127,6 +127,8 @@ public class GXDLMSTokenGateway extends GXDLMSObject implements IGXDLMSBase {
     public GXDLMSTokenGateway(final String ln, final int sn) {
         super(ObjectType.TOKEN_GATEWAY, ln, sn);
         descriptions = new ArrayList<String>();
+        deliveryMethod = TokenDelivery.LOCAL;
+        statusCode = TokenStatusCode.FORMAT_OK;
     }
 
     /**

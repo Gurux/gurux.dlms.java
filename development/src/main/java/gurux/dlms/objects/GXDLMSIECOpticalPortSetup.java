@@ -89,6 +89,10 @@ public class GXDLMSIECOpticalPortSetup extends GXDLMSObject
      */
     public GXDLMSIECOpticalPortSetup(final String ln, final int sn) {
         super(ObjectType.IEC_LOCAL_PORT_SETUP, ln, sn);
+        defaultMode = OpticalProtocolMode.DEFAULT;
+        defaultBaudrate = BaudRate.BAUDRATE_300;
+        proposedBaudrate = BaudRate.BAUDRATE_300;
+        responseTime = LocalPortResponseTime.ms20;
     }
 
     public final OpticalProtocolMode getDefaultMode() {

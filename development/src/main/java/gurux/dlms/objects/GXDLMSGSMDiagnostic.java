@@ -121,6 +121,9 @@ public class GXDLMSGSMDiagnostic extends GXDLMSObject implements IGXDLMSBase {
         super(ObjectType.GSM_DIAGNOSTIC, ln, sn);
         cellInfo = new GXDLMSGSMCellInfo();
         adjacentCells = new ArrayList<GXAdjacentCell>();
+        status = GsmStatus.NONE;
+        circuitSwitchStatus = GsmCircuitSwitchStatus.INACTIVE;
+        packetSwitchStatus = GsmPacketSwitchStatus.INACTIVE;
     }
 
     /**

@@ -37,6 +37,8 @@ package gurux.dlms.objects;
 import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.OutputStream;
+import java.text.SimpleDateFormat;
+import java.util.Date;
 
 import javax.xml.stream.XMLOutputFactory;
 import javax.xml.stream.XMLStreamException;
@@ -144,10 +146,18 @@ public class GXXmlWriter implements AutoCloseable {
         ++indenting;
     }
 
+    public final void writeElementString(final String name, final Date value)
+            throws XMLStreamException {
+        if (value != null && value.compareTo(new Date(0)) != 0) {
+            SimpleDateFormat sd = new SimpleDateFormat();
+            writeElementString(name, sd.format(value));
+        }
+    }
+
     public final void writeElementString(final String name, final long value)
             throws XMLStreamException {
         if (value != 0) {
-            writeElementString(name, value, 0);
+            writeElementString(name, String.valueOf(value));
         }
     }
 
@@ -258,7 +268,8 @@ public class GXXmlWriter implements AutoCloseable {
             final boolean skipDefaultValue) throws XMLStreamException {
         if (value != null) {
             if (skipDefaultValue && value instanceof java.util.Date
-                    && ((java.util.Date) value == new java.util.Date(0))) {
+                    && (((java.util.Date) value)
+                            .compareTo(new java.util.Date(0))) == 0) {
                 return;
             }
             DataType dt = GXDLMSConverter.getDLMSDataType(value);

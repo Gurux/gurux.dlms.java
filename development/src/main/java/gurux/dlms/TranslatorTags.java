@@ -92,5 +92,6 @@ final class TranslatorTags {
     static final int BLOCK_DATA = 0xFF67;
     static final int CONTENTS_DESCRIPTION = 0xFF68;
     static final int ARRAY_CONTENTS = 0xFF69;
-
+    static final int NETWORK_ID = 0xFF7A;
+    static final int PHYSICAL_DEVICE_ADDRESS = 0xFF7B;
 }

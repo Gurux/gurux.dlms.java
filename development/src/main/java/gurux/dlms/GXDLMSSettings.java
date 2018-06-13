@@ -111,11 +111,6 @@ public class GXDLMSSettings {
     private byte[] stoCChallenge;
 
     /**
-     * Dedicated key.
-     */
-    private byte[] dedicatedKey;
-
-    /**
      * Source system title.
      */
     private byte[] sourceSystemTitle;
@@ -242,6 +237,11 @@ public class GXDLMSSettings {
      */
     private GXDLMSLimits limits;
 
+    /**
+     * Gateway settings.
+     */
+    private GXDLMSGateway gateway;
+
     private int startingPacketIndex = 1;
 
     /**
@@ -275,12 +275,20 @@ public class GXDLMSSettings {
     private int userId;
 
     /**
+     * Standard says that Time zone is from normal time to UTC in minutes. If
+     * meter is configured to use UTC time (UTC to normal time) set this to
+     * true.
+     */
+    private boolean useUtc2NormalTime;
+
+    /**
      * Constructor.
      */
     GXDLMSSettings(final boolean isServer) {
         server = isServer;
         objects = new GXDLMSObjectCollection();
         limits = new GXDLMSLimits();
+        gateway = null;
         proposedConformance.addAll(GXDLMSClient.getInitialConformance(false));
         resetFrameSequence();
         windowSize = 1;
@@ -612,6 +620,21 @@ public class GXDLMSSettings {
     }
 
     /**
+     * @return Gateway settings.
+     */
+    public final GXDLMSGateway getGateway() {
+        return gateway;
+    }
+
+    /**
+     * @param value
+     *            Gateway settings.
+     */
+    public final void setGateway(final GXDLMSGateway value) {
+        gateway = value;
+    }
+
+    /**
      * @param value
      *            Information from the frame size that server can handle.
      */
@@ -904,21 +927,6 @@ public class GXDLMSSettings {
     }
 
     /**
-     * @return Dedicated key.
-     */
-    public final byte[] getDedicatedKey() {
-        return dedicatedKey;
-    }
-
-    /**
-     * @param value
-     *            Dedicated key.
-     */
-    public final void setDedicatedKey(final byte[] value) {
-        dedicatedKey = value;
-    }
-
-    /**
      * @return Target ephemeral public key.
      */
     public PublicKey getTargetEphemeralKey() {
@@ -1045,5 +1053,28 @@ public class GXDLMSSettings {
      */
     public final void setUserId(final int value) {
         userId = value;
+    }
+
+    /**
+     * Standard says that Time zone is from normal time to UTC in minutes. If
+     * meter is configured to use UTC time (UTC to normal time) set this to
+     * true.
+     * 
+     * @return True, if UTC time is used.
+     */
+    public boolean getUseUtc2NormalTime() {
+        return useUtc2NormalTime;
+    }
+
+    /**
+     * * Standard says that Time zone is from normal time to UTC in minutes. If
+     * meter is configured to use UTC time (UTC to normal time) set this to
+     * true.
+     * 
+     * @param value
+     *            True, if UTC time is used.
+     */
+    public void setUseUtc2NormalTime(final boolean value) {
+        useUtc2NormalTime = value;
     }
 }

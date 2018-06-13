@@ -37,22 +37,26 @@ package gurux.dlms.objects;
 import gurux.dlms.enums.ObjectType;
 
 public class GXDLMSMonitoredValue {
-    private ObjectType abjectType;
+    private ObjectType objectType;
     private String logicalName;
     private int attributeIndex;
 
+    public GXDLMSMonitoredValue() {
+        objectType = ObjectType.NONE;
+    }
+
     public final void update(final GXDLMSObject value, final int index) {
-        abjectType = value.getObjectType();
+        objectType = value.getObjectType();
         logicalName = value.getLogicalName();
         attributeIndex = index;
     }
 
     public final ObjectType getObjectType() {
-        return abjectType;
+        return objectType;
     }
 
     public final void setObjectType(final ObjectType value) {
-        abjectType = value;
+        objectType = value;
     }
 
     public final String getLogicalName() {
@@ -73,7 +77,7 @@ public class GXDLMSMonitoredValue {
 
     @Override
     public final String toString() {
-        return String.valueOf(abjectType) + " " + logicalName + " "
+        return String.valueOf(objectType) + " " + logicalName + " "
                 + String.valueOf(attributeIndex);
     }
 }

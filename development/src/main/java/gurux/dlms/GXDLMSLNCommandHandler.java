@@ -19,6 +19,7 @@ import gurux.dlms.objects.GXDLMSAssociationLogicalName;
 import gurux.dlms.objects.GXDLMSCaptureObject;
 import gurux.dlms.objects.GXDLMSObject;
 import gurux.dlms.objects.GXDLMSProfileGeneric;
+import gurux.dlms.objects.enums.AssociationStatus;
 
 final class GXDLMSLNCommandHandler {
     private static final Logger LOGGER =
@@ -909,9 +910,17 @@ final class GXDLMSLNCommandHandler {
                 Command.METHOD_RESPONSE, 1, null, bb, error.getValue());
         GXDLMS.getLNPdu(p, replyData);
         // If High level authentication fails.
-        if ((settings.getConnected() & ConnectionState.DLMS) == 0
-                && obj instanceof GXDLMSAssociationLogicalName && id == 1) {
-            server.notifyInvalidConnection(connectionInfo);
+        if (obj instanceof GXDLMSAssociationLogicalName && id == 1) {
+            if (((GXDLMSAssociationLogicalName) obj)
+                    .getAssociationStatus() == AssociationStatus.ASSOCIATED) {
+                server.notifyConnected(connectionInfo);
+                settings.setConnected(
+                        settings.getConnected() | ConnectionState.DLMS);
+            } else {
+                server.notifyInvalidConnection(connectionInfo);
+                settings.setConnected(
+                        settings.getConnected() & ~ConnectionState.DLMS);
+            }
         }
     }
 

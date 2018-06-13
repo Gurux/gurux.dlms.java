@@ -60,7 +60,7 @@ public class GXDLMSDisconnectControl extends GXDLMSObject
      * Constructor.
      */
     public GXDLMSDisconnectControl() {
-        super(ObjectType.DISCONNECT_CONTROL);
+        this(null);
     }
 
     /**
@@ -70,7 +70,7 @@ public class GXDLMSDisconnectControl extends GXDLMSObject
      *            Logical Name of the object.
      */
     public GXDLMSDisconnectControl(final String ln) {
-        super(ObjectType.DISCONNECT_CONTROL, ln, 0);
+        this(ln, 0);
     }
 
     /**
@@ -83,6 +83,8 @@ public class GXDLMSDisconnectControl extends GXDLMSObject
      */
     public GXDLMSDisconnectControl(final String ln, final int sn) {
         super(ObjectType.DISCONNECT_CONTROL, ln, sn);
+        controlState = ControlState.DISCONNECTED;
+        controlMode = ControlMode.NONE;
     }
 
     /**
@@ -265,8 +267,12 @@ public class GXDLMSDisconnectControl extends GXDLMSObject
     @Override
     public final void save(final GXXmlWriter writer) throws XMLStreamException {
         writer.writeElementString("OutputState", outputState);
-        writer.writeElementString("ControlState", controlState.ordinal());
-        writer.writeElementString("ControlMode", controlMode.ordinal());
+        if (controlState != null) {
+            writer.writeElementString("ControlState", controlState.ordinal());
+        }
+        if (controlMode != null) {
+            writer.writeElementString("ControlMode", controlMode.ordinal());
+        }
     }
 
     @Override

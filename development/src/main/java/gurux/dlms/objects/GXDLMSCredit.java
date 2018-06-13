@@ -141,6 +141,8 @@ public class GXDLMSCredit extends GXDLMSObject implements IGXDLMSBase {
     public GXDLMSCredit(final String ln, final int sn) {
         super(ObjectType.CREDIT, ln, sn);
         creditConfiguration = new HashSet<CreditConfiguration>();
+        type = CreditType.TOKEN;
+        status = CreditStatus.ENABLED;
     }
 
     /**
@@ -529,13 +531,17 @@ public class GXDLMSCredit extends GXDLMSObject implements IGXDLMSBase {
     @Override
     public final void save(final GXXmlWriter writer) throws XMLStreamException {
         writer.writeElementString("CurrentCreditAmount", currentCreditAmount);
-        writer.writeElementString("Type", type.getValue());
+        if (type != null) {
+            writer.writeElementString("Type", type.getValue());
+        }
         writer.writeElementString("Priority", priority);
         writer.writeElementString("WarningThreshold", warningThreshold);
         writer.writeElementString("Limit", limit);
         writer.writeElementString("CreditConfiguration",
                 CreditConfiguration.toInteger(creditConfiguration));
-        writer.writeElementString("Status", status.getValue());
+        if (status != null) {
+            writer.writeElementString("Status", status.getValue());
+        }
         writer.writeElementString("PresetCreditAmount", presetCreditAmount);
         writer.writeElementString("CreditAvailableThreshold",
                 creditAvailableThreshold);

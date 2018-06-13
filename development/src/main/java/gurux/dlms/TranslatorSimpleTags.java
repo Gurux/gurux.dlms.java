@@ -267,6 +267,10 @@ final class TranslatorSimpleTags {
         GXDLMSTranslator.addTag(list,
                 TranslatorGeneralTags.RESPONDING_AE_INVOCATION_ID,
                 "RespondingAEInvocationId");
+        GXDLMSTranslator.addTag(list, Command.GATEWAY_REQUEST,
+                "GatewayRequest");
+        GXDLMSTranslator.addTag(list, Command.GATEWAY_RESPONSE,
+                "GatewayResponse");
     }
 
     /**
@@ -306,6 +310,30 @@ final class TranslatorSimpleTags {
 
         GXDLMSTranslator.addTag(list, Command.GENERAL_CIPHERING,
                 "GeneralCiphering");
+    }
+
+    /**
+     * Get ded tags.
+     * 
+     * @param type
+     * @param list
+     */
+    static void getDedTags(final TranslatorOutputType type,
+            final HashMap<Integer, String> list) {
+        GXDLMSTranslator.addTag(list, Command.DED_GET_REQUEST,
+                "ded_GetRequest");
+        GXDLMSTranslator.addTag(list, Command.DED_GET_RESPONSE,
+                "ded_GetResponse");
+        GXDLMSTranslator.addTag(list, Command.DED_SET_REQUEST,
+                "ded_SetRequest");
+        GXDLMSTranslator.addTag(list, Command.DED_SET_RESPONSE,
+                "ded_SetResponse");
+        GXDLMSTranslator.addTag(list, Command.DED_METHOD_REQUEST,
+                "ded_ActionRequest");
+        GXDLMSTranslator.addTag(list, Command.DED_METHOD_RESPONSE,
+                "ded_ActionResponse");
+        GXDLMSTranslator.addTag(list, Command.GENERAL_DED_CIPHERING,
+                "GeneralDedCiphering");
     }
 
     /**
@@ -422,9 +450,11 @@ final class TranslatorSimpleTags {
         GXDLMSTranslator.addTag(list, TranslatorTags.BLOCK_DATA, "BlockData");
         GXDLMSTranslator.addTag(list, TranslatorTags.CONTENTS_DESCRIPTION,
                 "ContentsDescription");
-
         GXDLMSTranslator.addTag(list, TranslatorTags.ARRAY_CONTENTS,
                 "ArrayContents");
+        GXDLMSTranslator.addTag(list, TranslatorTags.NETWORK_ID, "NetworkId");
+        GXDLMSTranslator.addTag(list, TranslatorTags.PHYSICAL_DEVICE_ADDRESS,
+                "PhysicalDeviceAddress");
     }
 
     static void getDataTypeTags(final HashMap<Integer, String> list) {

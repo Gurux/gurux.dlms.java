@@ -43,46 +43,8 @@ import gurux.dlms.asn.GXx509Certificate;
 import gurux.dlms.enums.Security;
 import gurux.dlms.objects.enums.CertificateType;
 import gurux.dlms.objects.enums.SecuritySuite;
-import gurux.dlms.secure.AesGcmParameter;
 
 public interface GXICipher {
-
-    /**
-     * Decrypt or encrypt data.
-     * 
-     * @param p
-     *            Aes Gcm parameter.
-     * @param encrypt
-     *            Is data encrypt or decrypt.
-     * @param data
-     *            Crypted data.
-     * @return Used security.
-     */
-    byte[] crypt(AesGcmParameter p, boolean encrypt, GXByteBuffer data);
-
-    /**
-     * Encrypt PDU.
-     * 
-     * @param tag
-     *            Tag.
-     * @param systemTitle
-     *            System Title.
-     * @param data
-     *            Data to encrypt.
-     * @return Encrypted data.
-     */
-    byte[] encrypt(int tag, byte[] systemTitle, byte[] data);
-
-    /**
-     * Decrypt data.
-     * 
-     * @param systemTitle
-     *            System Title.
-     * @param data
-     *            Decrypted data.
-     * @return Used security.
-     */
-    AesGcmParameter decrypt(byte[] systemTitle, GXByteBuffer data);
 
     /**
      * Reset encrypt settings.
@@ -194,4 +156,15 @@ public interface GXICipher {
      *            Shared secret is generated when connection is made.
      */
     void setSharedSecret(byte[] value);
+
+    /**
+     * @return Dedicated key.
+     */
+    byte[] getDedicatedKey();
+
+    /**
+     * @param value
+     *            Dedicated key.
+     */
+    void setDedicatedKey(byte[] value);
 }

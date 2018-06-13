@@ -53,6 +53,10 @@ import gurux.dlms.objects.enums.SecuritySuite;
 public class GXCiphering implements GXICipher {
     private Security security = Security.NONE;
     private byte[] authenticationKey;
+    /**
+     * Dedicated key.
+     */
+    private byte[] dedicatedKey;
 
     /**
      * Certificates.
@@ -127,62 +131,13 @@ public class GXCiphering implements GXICipher {
                 (byte) 0xDD, (byte) 0xDE, (byte) 0xDF });
     }
 
-    @Override
-    public final byte[] crypt(final AesGcmParameter p, final boolean encrypt,
+    public static byte[] decrypt(final GXICipher c, final AesGcmParameter p,
             final GXByteBuffer data) {
         byte[] tmp;
-        if (encrypt) {
-            if (p.getSecurity() == Security.NONE) {
-                return data.array();
-            }
-            setInvocationCounter(getInvocationCounter() + 1);
-            tmp = GXDLMSChippering.encryptAesGcm(p, data.array());
-        } else {
-            p.setSharedSecret(getSharedSecret());
-            tmp = GXDLMSChippering.decryptAesGcm(this, p, data);
-            setSharedSecret(p.getSharedSecret());
-        }
+        p.setSharedSecret(c.getSharedSecret());
+        tmp = GXDLMSChippering.decryptAesGcm(c, p, data);
+        c.setSharedSecret(p.getSharedSecret());
         return tmp;
-    }
-
-    /**
-     * Cipher PDU.
-     * 
-     * @param tag
-     *            Tag.
-     * @param title
-     *            System title.
-     * @param data
-     *            Plain text.
-     * @return Secured data.
-     */
-    @Override
-    public final byte[] encrypt(final int tag, final byte[] title,
-            final byte[] data) {
-        if (getSecurity() != Security.NONE) {
-            AesGcmParameter p = new AesGcmParameter(tag, getSecurity(),
-                    getInvocationCounter(), title, getBlockCipherKey(),
-                    getAuthenticationKey());
-            byte[] tmp = GXDLMSChippering.encryptAesGcm(p, data);
-            setInvocationCounter(getInvocationCounter() + 1);
-            return tmp;
-        }
-        return data;
-    }
-
-    @Override
-    public final AesGcmParameter decrypt(final byte[] title,
-            final GXByteBuffer data) {
-        AesGcmParameter p =
-                new AesGcmParameter(title, blockCipherKey, authenticationKey);
-        p.setSharedSecret(getSharedSecret());
-        byte[] tmp = GXDLMSChippering.decryptAesGcm(this, p, data);
-        setSharedSecret(p.getSharedSecret());
-        if (tmp != null) {
-            data.clear();
-            data.set(tmp);
-        }
-        return p;
     }
 
     /**
@@ -423,5 +378,15 @@ public class GXCiphering implements GXICipher {
         bb.setUInt32(invocationCounter);
         bb.set(p.getCountTag());
         return bb.array();
+    }
+
+    @Override
+    public byte[] getDedicatedKey() {
+        return dedicatedKey;
+    }
+
+    @Override
+    public void setDedicatedKey(final byte[] value) {
+        dedicatedKey = value;
     }
 }

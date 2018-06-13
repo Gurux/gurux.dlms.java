@@ -133,7 +133,7 @@ public class GXDate extends GXDateTime {
                     ignore = true;
                 }
                 String val = shortDatePattern.get(pos);
-                if ("yyyy".compareToIgnoreCase(val) == 0) {
+                if (val.startsWith("yy")) {
                     if (ignore) {
                         year = -1;
                     } else {

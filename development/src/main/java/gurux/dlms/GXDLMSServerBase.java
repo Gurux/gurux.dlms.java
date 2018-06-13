@@ -359,6 +359,10 @@ public class GXDLMSServerBase {
             final GXDLMSConnectionEventArgs connectionInfo) throws Exception {
         AssociationResult result = AssociationResult.ACCEPTED;
         GXByteBuffer error = null;
+        settings.setCtoSChallenge(null);
+        if (settings.getCipher() != null) {
+            settings.getCipher().setDedicatedKey(null);
+        }
         // Reset settings for wrapper.
         if (settings.getInterfaceType() == InterfaceType.WRAPPER) {
             reset(true);
@@ -902,11 +906,7 @@ public class GXDLMSServerBase {
         case Command.AARQ:
             handleAarqRequest(data, sr.getConnectionInfo());
             if ((settings.getConnected() & ConnectionState.DLMS) != 0) {
-                if (owner instanceof GXDLMSServer) {
-                    ((GXDLMSServer) owner).connected(sr.getConnectionInfo());
-                } else {
-                    ((GXDLMSServer2) owner).onConnected(sr.getConnectionInfo());
-                }
+                notifyConnected(sr.getConnectionInfo());
             }
             break;
         case Command.RELEASE_REQUEST:
@@ -1113,6 +1113,21 @@ public class GXDLMSServerBase {
             ((GXDLMSServer) owner).invalidConnection(connectionInfo);
         } else {
             ((GXDLMSServer2) owner).onInvalidConnection(connectionInfo);
+        }
+    }
+
+    /*
+     * Client has connected.
+     * @param connectionInfo Connection info.
+     */
+    final void notifyConnected(final GXDLMSConnectionEventArgs connectionInfo)
+            throws Exception {
+        if ((settings.getConnected() & ConnectionState.DLMS) != 0) {
+            if (owner instanceof GXDLMSServer) {
+                ((GXDLMSServer) owner).connected(connectionInfo);
+            } else {
+                ((GXDLMSServer2) owner).onConnected(connectionInfo);
+            }
         }
     }
 

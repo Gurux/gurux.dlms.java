@@ -225,6 +225,7 @@ public class GXDLMSAccount extends GXDLMSObject implements IGXDLMSBase {
         tokenGatewayConfigurations =
                 new ArrayList<GXTokenGatewayConfiguration>();
         currency = new GXCurrency();
+        currentCreditStatus = AccountCreditStatus.IN_CREDIT;
     }
 
     /**
@@ -1108,6 +1109,8 @@ public class GXDLMSAccount extends GXDLMSObject implements IGXDLMSBase {
                 reader.readElementContentAsInt("CurrentCreditStatus"));
         availableCredit = reader.readElementContentAsInt("AvailableCredit");
         amountToClear = reader.readElementContentAsInt("AmountToClear");
+        clearanceThreshold =
+                reader.readElementContentAsInt("ClearanceThreshold");
         aggregatedDebt = reader.readElementContentAsInt("AggregatedDebt");
         loadReferences(reader, "CreditReferences", creditReferences);
         loadReferences(reader, "ChargeReferences", chargeReferences);
@@ -1184,8 +1187,10 @@ public class GXDLMSAccount extends GXDLMSObject implements IGXDLMSBase {
         writer.writeElementString("PaymentMode", paymentMode.getValue());
         writer.writeElementString("AccountStatus", accountStatus.getValue());
         writer.writeElementString("CurrentCreditInUse", currentCreditInUse);
-        writer.writeElementString("CurrentCreditStatus",
-                currentCreditStatus.getValue());
+        if (currentCreditStatus != null) {
+            writer.writeElementString("CurrentCreditStatus",
+                    currentCreditStatus.getValue());
+        }
         writer.writeElementString("AvailableCredit", availableCredit);
         writer.writeElementString("AmountToClear", amountToClear);
         writer.writeElementString("ClearanceThreshold", clearanceThreshold);

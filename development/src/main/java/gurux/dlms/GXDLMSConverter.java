@@ -255,7 +255,8 @@ public class GXDLMSConverter {
             throw new RuntimeException(e.getMessage());
         }
         String str = buffer.toString();
-        List<String> rows = GXCommon.split(str, "\r\n");
+        str = str.replace("\r", " ");
+        List<String> rows = GXCommon.split(str, '\n');
         for (String it : rows) {
             if (!it.isEmpty()) {
                 List<String> items = GXCommon.split(it, ';');

@@ -270,6 +270,51 @@ public final class Command {
      */
     public static final int EVENT_NOTIFICATION = 0xC2;
 
+    /**
+     * Ded get request.
+     */
+    public static final int DED_GET_REQUEST = 0xD0;
+
+    /**
+     * Ded get response.
+     */
+    public static final int DED_GET_RESPONSE = 0xD4;
+
+    /**
+     * Ded set request.
+     */
+    public static final int DED_SET_REQUEST = 0xD1;
+
+    /**
+     * Ded set response.
+     */
+    public static final int DED_SET_RESPONSE = 0xD5;
+
+    /**
+     * Ded event notification request.
+     */
+    public static final int DED_EVENT_NOTIFICATION = 0xD2;
+
+    /**
+     * Ded method request.
+     */
+    public static final int DED_METHOD_REQUEST = 0xD3;
+
+    /**
+     * Ded method response.
+     */
+    public static final int DED_METHOD_RESPONSE = 0xD6;
+
+    /**
+     * Request message from client to gateway.
+     */
+    public static final int GATEWAY_REQUEST = 0xE6;
+
+    /**
+     * Response message from gateway to client.
+     */
+    public static final int GATEWAY_RESPONSE = 0xE7;
+
     public static String toString(final int value) {
         String str;
         switch (value) {
@@ -408,6 +453,30 @@ public final class Command {
         case Command.EVENT_NOTIFICATION:
             str = "EventNotification";
             break;
+        case Command.DED_GET_REQUEST:
+            str = "DedGetRequest";
+            break;
+        case DED_GET_RESPONSE:
+            str = "DedGetResponse";
+            break;
+        case DED_SET_REQUEST:
+            str = "DedSetRequest";
+            break;
+        case DED_SET_RESPONSE:
+            str = "DedSetResponse";
+            break;
+        case DED_EVENT_NOTIFICATION:
+            str = "DedEventNotification";
+            break;
+        case DED_METHOD_REQUEST:
+            str = "DedMethodRequest";
+            break;
+        case GATEWAY_REQUEST:
+            str = "GatewayRequest ";
+            break;
+        case GATEWAY_RESPONSE:
+            str = "GatewayResponse ";
+            break;
         default:
             throw new IllegalArgumentException(String.valueOf(value));
         }
@@ -508,6 +577,10 @@ public final class Command {
             ret = Command.INFORMATION_REPORT;
         } else if ("EventNotification".equalsIgnoreCase(value)) {
             ret = Command.EVENT_NOTIFICATION;
+        } else if ("GatewayRequest".equalsIgnoreCase(value)) {
+            ret = Command.GATEWAY_REQUEST;
+        } else if ("GatewayResponse".equalsIgnoreCase(value)) {
+            ret = Command.GATEWAY_RESPONSE;
         } else {
             throw new IllegalArgumentException(value);
         }

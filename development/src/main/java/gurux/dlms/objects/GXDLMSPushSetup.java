@@ -102,6 +102,8 @@ public class GXDLMSPushSetup extends GXDLMSObject implements IGXDLMSBase {
         sendDestinationAndMethod = new GXSendDestinationAndMethod();
         communicationWindow =
                 new ArrayList<Map.Entry<GXDateTime, GXDateTime>>();
+        service = ServiceType.TCP;
+        message = MessageType.COSEM_APDU;
     }
 
     public final ServiceType getService() {
@@ -490,9 +492,13 @@ public class GXDLMSPushSetup extends GXDLMSObject implements IGXDLMSBase {
             }
             writer.writeEndElement();
         }
-        writer.writeElementString("Service", service.getValue());
+        if (service != null) {
+            writer.writeElementString("Service", service.getValue());
+        }
         writer.writeElementString("Destination", destination);
-        writer.writeElementString("Message", message.getValue());
+        if (message != null) {
+            writer.writeElementString("Message", message.getValue());
+        }
         if (communicationWindow != null) {
             writer.writeStartElement("CommunicationWindow");
             for (Entry<GXDateTime, GXDateTime> it : communicationWindow) {

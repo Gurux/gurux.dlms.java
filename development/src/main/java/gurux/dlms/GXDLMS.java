@@ -290,17 +290,15 @@ abstract class GXDLMS {
         // Get next block.
         List<byte[]> reply;
         GXByteBuffer bb = new GXByteBuffer(6);
-        if (settings.getNegotiatedConformance()
-                .contains(Conformance.GENERAL_BLOCK_TRANSFER)) {
-            GXDLMSLNParameters p = new GXDLMSLNParameters(settings, 0,
-                    Command.GENERAL_BLOCK_TRANSFER, 0, bb, null, 0xff);
-            p.windowSize = settings.getWindowSize();
-            p.blockNumberAck = settings.getBlockNumberAck();
-            p.setBlockIndex(settings.getBlockIndex());
-            p.streaming = false;
-            reply = GXDLMS.getLnMessages(p);
-            settings.increaseBlockIndex();
-        } else {
+        /*
+         * if (settings.getNegotiatedConformance()
+         * .contains(Conformance.GENERAL_BLOCK_TRANSFER)) { GXDLMSLNParameters p
+         * = new GXDLMSLNParameters(settings, 0, Command.GENERAL_BLOCK_TRANSFER,
+         * 0, bb, null, 0xff); p.windowSize = settings.getWindowSize();
+         * p.blockNumberAck = settings.getBlockNumberAck();
+         * p.setBlockIndex(settings.getBlockIndex()); p.streaming = false; reply
+         * = GXDLMS.getLnMessages(p); settings.increaseBlockIndex(); } else
+         */ {
             if (settings.getUseLogicalNameReferencing()) {
                 bb.setUInt32(settings.getBlockIndex());
             } else {
@@ -481,6 +479,49 @@ abstract class GXDLMS {
     }
 
     /**
+     * Get used ded message.
+     * 
+     * @param cmd
+     *            Executed command.
+     * @return Integer value of ded message.
+     */
+    private static int getDedMessage(final int command) {
+        int cmd;
+        switch (command) {
+        case Command.GET_REQUEST:
+            cmd = Command.DED_GET_REQUEST;
+            break;
+        case Command.SET_REQUEST:
+            cmd = Command.DED_SET_REQUEST;
+            break;
+        case Command.METHOD_REQUEST:
+            cmd = Command.DED_METHOD_REQUEST;
+            break;
+        case Command.GET_RESPONSE:
+            cmd = Command.DED_GET_RESPONSE;
+            break;
+        case Command.SET_RESPONSE:
+            cmd = Command.DED_SET_RESPONSE;
+            break;
+        case Command.METHOD_RESPONSE:
+            cmd = Command.DED_METHOD_RESPONSE;
+            break;
+        case Command.DATA_NOTIFICATION:
+            cmd = Command.GENERAL_DED_CIPHERING;
+            break;
+        case Command.RELEASE_REQUEST:
+            cmd = Command.RELEASE_REQUEST;
+            break;
+        case Command.RELEASE_RESPONSE:
+            cmd = Command.RELEASE_RESPONSE;
+            break;
+        default:
+            throw new GXDLMSException("Invalid DED command.");
+        }
+        return cmd;
+    }
+
+    /**
      * Add LLC bytes to generated message.
      * 
      * @param settings
@@ -557,6 +598,15 @@ abstract class GXDLMS {
                 && p.getSettings().getCipher().getSecurity() != Security.NONE;
         int len = 0;
         if (p.getCommand() == Command.AARQ) {
+            if (p.getSettings().getGateway() != null && p.getSettings()
+                    .getGateway().getPhysicalDeviceAddress() != null) {
+                reply.setUInt8(Command.GATEWAY_REQUEST);
+                reply.setUInt8(p.getSettings().getGateway().getNetworkId());
+                reply.setUInt8(p.getSettings().getGateway()
+                        .getPhysicalDeviceAddress().length);
+                reply.set(p.getSettings().getGateway()
+                        .getPhysicalDeviceAddress());
+            }
             reply.set(p.getAttributeDescriptor());
         } else {
             // Add command.
@@ -685,6 +735,28 @@ abstract class GXDLMS {
                 }
                 if (p.getData() != null && p.getData().size() != 0) {
                     len = p.getData().size() - p.getData().position();
+                    if (p.getSettings().getGateway() != null && p.getSettings()
+                            .getGateway().getPhysicalDeviceAddress() != null) {
+
+                        if (3 + len
+                                + p.getSettings().getGateway()
+                                        .getPhysicalDeviceAddress().length > p
+                                                .getSettings()
+                                                .getMaxPduSize()) {
+                            len -= (3 + p.getSettings().getGateway()
+                                    .getPhysicalDeviceAddress().length);
+                        }
+                        GXByteBuffer tmp = new GXByteBuffer(reply);
+                        reply.size(0);
+                        reply.setUInt8(Command.GATEWAY_REQUEST);
+                        reply.setUInt8(
+                                p.getSettings().getGateway().getNetworkId());
+                        reply.setUInt8(p.getSettings().getGateway()
+                                .getPhysicalDeviceAddress().length);
+                        reply.set(p.getSettings().getGateway()
+                                .getPhysicalDeviceAddress());
+                        reply.set(tmp);
+                    }
                     // Get request size can be bigger than PDU size.
                     if (p.getSettings().getNegotiatedConformance()
                             .contains(Conformance.GENERAL_BLOCK_TRANSFER)) {
@@ -717,6 +789,29 @@ abstract class GXDLMS {
                         len = p.getSettings().getMaxPduSize() - reply.size();
                     }
                     reply.set(p.getData(), len);
+                } else if ((p.getSettings().getGateway() != null
+                        && p.getSettings().getGateway()
+                                .getPhysicalDeviceAddress() != null)
+                        && !(p.getCommand() == Command.GENERAL_BLOCK_TRANSFER
+                                || (p.isMultipleBlocks() && (p.getSettings()
+                                        .getNegotiatedConformance().contains(
+                                                Conformance.GENERAL_BLOCK_TRANSFER))))) {
+                    if (3 + len
+                            + p.getSettings().getGateway()
+                                    .getPhysicalDeviceAddress().length > p
+                                            .getSettings().getMaxPduSize()) {
+                        len -= (3 + p.getSettings().getGateway()
+                                .getPhysicalDeviceAddress().length);
+                    }
+                    GXByteBuffer tmp = new GXByteBuffer(reply);
+                    reply.size(0);
+                    reply.setUInt8(Command.GATEWAY_REQUEST);
+                    reply.setUInt8(p.getSettings().getGateway().getNetworkId());
+                    reply.setUInt8(p.getSettings().getGateway()
+                            .getPhysicalDeviceAddress().length);
+                    reply.set(p.getSettings().getGateway()
+                            .getPhysicalDeviceAddress());
+                    reply.set(tmp);
                 }
             }
             if (ciphering && !p.getSettings().getNegotiatedConformance()
@@ -768,6 +863,26 @@ abstract class GXDLMS {
             if (p.getCommand() != Command.GENERAL_BLOCK_TRANSFER) {
                 p.command = Command.GENERAL_BLOCK_TRANSFER;
                 ++p.blockNumberAck;
+            }
+
+            if (p.getSettings().getGateway() != null && p.getSettings()
+                    .getGateway().getPhysicalDeviceAddress() != null) {
+                if (3 + len
+                        + p.getSettings().getGateway()
+                                .getPhysicalDeviceAddress().length > p
+                                        .getSettings().getMaxPduSize()) {
+                    len -= (3 + p.getSettings().getGateway()
+                            .getPhysicalDeviceAddress().length);
+                }
+                GXByteBuffer tmp = new GXByteBuffer(reply);
+                reply.size(0);
+                reply.setUInt8(Command.GATEWAY_REQUEST);
+                reply.setUInt8(p.getSettings().getGateway().getNetworkId());
+                reply.setUInt8(p.getSettings().getGateway()
+                        .getPhysicalDeviceAddress().length);
+                reply.set(p.getSettings().getGateway()
+                        .getPhysicalDeviceAddress());
+                reply.set(tmp);
             }
         }
         if (p.getSettings().getInterfaceType() == InterfaceType.HDLC) {
@@ -934,18 +1049,35 @@ abstract class GXDLMS {
      */
     private static byte[] cipher0(final GXDLMSLNParameters p,
             final byte[] data) {
-        byte cmd;
+        int cmd;
+        byte[] key;
+        GXICipher cipher = p.getSettings().getCipher();
         if (!p.getSettings().getNegotiatedConformance()
                 .contains(Conformance.GENERAL_PROTECTION)) {
-            cmd = (byte) getGloMessage(p.getCommand());
+            if ((p.getSettings().getConnected() & ConnectionState.DLMS) != 0
+                    && cipher.getDedicatedKey() != null) {
+                cmd = getDedMessage(p.command);
+                key = cipher.getDedicatedKey();
+            } else {
+                cmd = getGloMessage(p.getCommand());
+                key = cipher.getBlockCipherKey();
+            }
         } else {
-            cmd = (byte) Command.GENERAL_GLO_CIPHERING;
+            if (cipher.getDedicatedKey() != null) {
+                cmd = Command.GENERAL_DED_CIPHERING;
+                key = cipher.getDedicatedKey();
+            } else {
+                cmd = Command.GENERAL_GLO_CIPHERING;
+                key = cipher.getBlockCipherKey();
+            }
         }
-        byte[] tmp = p.getSettings().getCipher().encrypt(cmd,
-                p.getSettings().getCipher().getSystemTitle(), data);
+        AesGcmParameter s = new AesGcmParameter(cmd, cipher.getSecurity(),
+                cipher.getInvocationCounter(), cipher.getSystemTitle(), key,
+                cipher.getAuthenticationKey());
+        byte[] tmp = GXCiphering.encrypt(s, data);
         if (p.getCommand() == Command.DATA_NOTIFICATION
-                || p.getSettings().getNegotiatedConformance()
-                        .contains(Conformance.GENERAL_PROTECTION)) {
+                || p.getCommand() == Command.GENERAL_GLO_CIPHERING
+                || p.getCommand() == Command.GENERAL_DED_CIPHERING) {
             GXByteBuffer reply = new GXByteBuffer();
             // Add command.
             reply.setUInt8(tmp[0]);
@@ -1213,11 +1345,12 @@ abstract class GXDLMS {
         // If Ciphering is used.
         if (ciphering && p.getCommand() != Command.AARQ
                 && p.getCommand() != Command.AARE) {
-            byte[] tmp =
-                    p.getSettings().getCipher()
-                            .encrypt((byte) getGloMessage(p.getCommand()), p
-                                    .getSettings().getCipher().getSystemTitle(),
-                                    reply.array());
+            GXICipher cipher = p.getSettings().getCipher();
+            AesGcmParameter s = new AesGcmParameter(
+                    getGloMessage(p.getCommand()), cipher.getSecurity(),
+                    cipher.getInvocationCounter(), cipher.getSystemTitle(),
+                    cipher.getBlockCipherKey(), cipher.getAuthenticationKey());
+            byte[] tmp = GXCiphering.encrypt(s, reply.array());
             assert !(p.getSettings().getMaxPduSize() < tmp.length);
             reply.size(0);
             if (p.getSettings().getInterfaceType() == InterfaceType.HDLC) {
@@ -2907,7 +3040,10 @@ abstract class GXDLMS {
             case Command.GLO_GET_REQUEST:
             case Command.GLO_SET_REQUEST:
             case Command.GLO_METHOD_REQUEST:
-                cmd = handleGloRequest(settings, data, cmd);
+            case Command.DED_GET_REQUEST:
+            case Command.DED_SET_REQUEST:
+            case Command.DED_METHOD_REQUEST:
+                cmd = handleGloDedRequest(settings, data, cmd);
                 // Server handles this.
                 break;
             case Command.GLO_READ_RESPONSE:
@@ -2917,7 +3053,12 @@ abstract class GXDLMS {
             case Command.GLO_METHOD_RESPONSE:
             case Command.GENERAL_GLO_CIPHERING:
             case Command.GLO_EVENT_NOTIFICATION_REQUEST:
-                handleGloResponse(settings, data, index);
+            case Command.DED_GET_RESPONSE:
+            case Command.DED_SET_RESPONSE:
+            case Command.DED_METHOD_RESPONSE:
+            case Command.GENERAL_DED_CIPHERING:
+            case Command.DED_EVENT_NOTIFICATION:
+                handleGloDedResponse(settings, data, index);
                 break;
             case Command.DATA_NOTIFICATION:
                 handleDataNotification(settings, data);
@@ -2930,6 +3071,16 @@ abstract class GXDLMS {
                 break;
             case Command.GENERAL_CIPHERING:
                 handleGeneralCiphering(settings, data);
+                break;
+            case Command.GATEWAY_REQUEST:
+            case Command.GATEWAY_RESPONSE:
+                data.getData().getUInt8();
+                int len = GXCommon.getObjectCount(data.getData());
+                byte[] pda = new byte[len];
+                data.getData().get(pda);
+                getDataFromBlock(data.getData(), index);
+                data.setCommand(Command.NONE);
+                getPdu(settings, data);
                 break;
             default:
                 throw new IllegalArgumentException("Invalid Command.");
@@ -2961,6 +3112,10 @@ abstract class GXDLMS {
                 case Command.GLO_SET_REQUEST:
                 case Command.GLO_METHOD_REQUEST:
                 case Command.GLO_EVENT_NOTIFICATION_REQUEST:
+                case Command.DED_GET_REQUEST:
+                case Command.DED_SET_REQUEST:
+                case Command.DED_METHOD_REQUEST:
+                case Command.DED_EVENT_NOTIFICATION:
                     data.setCommand(Command.NONE);
                     data.getData().position(data.getCipherIndex());
                     getPdu(settings, data);
@@ -2978,6 +3133,9 @@ abstract class GXDLMS {
                 case Command.GLO_GET_RESPONSE:
                 case Command.GLO_SET_RESPONSE:
                 case Command.GLO_METHOD_RESPONSE:
+                case Command.DED_GET_RESPONSE:
+                case Command.DED_SET_RESPONSE:
+                case Command.DED_METHOD_RESPONSE:
                     data.getData().position(data.getCipherIndex());
                     getPdu(settings, data);
                     break;
@@ -3050,7 +3208,7 @@ abstract class GXDLMS {
         }
     }
 
-    private static int handleGloRequest(final GXDLMSSettings settings,
+    private static int handleGloDedRequest(final GXDLMSSettings settings,
             final GXReplyData data, final int cmd) {
         int cmd2 = cmd;
         if (settings.getCipher() == null) {
@@ -3060,8 +3218,21 @@ abstract class GXDLMS {
         if ((data.getMoreData().getValue()
                 & RequestTypes.FRAME.getValue()) == 0) {
             data.getData().position(data.getData().position() - 1);
-            settings.getCipher().decrypt(settings.getSourceSystemTitle(),
+            AesGcmParameter p;
+            if (settings.getCipher().getDedicatedKey() != null
+                    && (settings.getConnected() & ConnectionState.DLMS) != 0) {
+                p = new AesGcmParameter(settings.getSourceSystemTitle(),
+                        settings.getCipher().getDedicatedKey(),
+                        settings.getCipher().getAuthenticationKey());
+            } else {
+                p = new AesGcmParameter(settings.getSourceSystemTitle(),
+                        settings.getCipher().getBlockCipherKey(),
+                        settings.getCipher().getAuthenticationKey());
+            }
+            byte[] tmp = GXCiphering.decrypt(settings.getCipher(), p,
                     data.getData());
+            data.getData().clear();
+            data.getData().set(tmp);
             // Get command.
             cmd2 = data.getData().getUInt8();
             data.setCommand(cmd2);
@@ -3071,7 +3242,7 @@ abstract class GXDLMS {
         return cmd2;
     }
 
-    private static void handleGloResponse(final GXDLMSSettings settings,
+    private static void handleGloDedResponse(final GXDLMSSettings settings,
             final GXReplyData data, final int index) {
         if (settings.getCipher() == null) {
             throw new RuntimeException("Secure connection is not supported.");
@@ -3083,9 +3254,20 @@ abstract class GXDLMS {
             GXByteBuffer bb = new GXByteBuffer(data.getData());
             data.getData().position(index);
             data.getData().size(index);
-            byte[] systemTitle = settings.getSourceSystemTitle();
-            settings.getCipher().decrypt(systemTitle, bb);
-            data.getData().set(bb);
+
+            AesGcmParameter p;
+            if (settings.getCipher().getDedicatedKey() != null
+                    && settings.getConnected() == ConnectionState.DLMS) {
+                p = new AesGcmParameter(settings.getSourceSystemTitle(),
+                        settings.getCipher().getDedicatedKey(),
+                        settings.getCipher().getAuthenticationKey());
+            } else {
+                p = new AesGcmParameter(settings.getSourceSystemTitle(),
+                        settings.getCipher().getBlockCipherKey(),
+                        settings.getCipher().getAuthenticationKey());
+            }
+            data.getData()
+                    .set(GXCiphering.decrypt(settings.getCipher(), p, bb));
             data.setCommand(Command.NONE);
             getPdu(settings, data);
             data.setCipherIndex(data.getData().size());
@@ -3101,8 +3283,15 @@ abstract class GXDLMS {
         if ((data.getMoreData().getValue()
                 & RequestTypes.FRAME.getValue()) == 0) {
             data.getData().position(data.getData().position() - 1);
+
             AesGcmParameter p =
-                    settings.getCipher().decrypt(null, data.getData());
+                    new AesGcmParameter(settings.getSourceSystemTitle(),
+                            settings.getCipher().getBlockCipherKey(),
+                            settings.getCipher().getAuthenticationKey());
+            byte[] tmp = GXCiphering.decrypt(settings.getCipher(), p,
+                    data.getData());
+            data.getData().clear();
+            data.getData().set(tmp);
             data.setCommand(Command.NONE);
             if (p.getSecurity() != null) {
                 try {

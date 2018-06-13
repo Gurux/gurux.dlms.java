@@ -279,6 +279,10 @@ final class TranslatorStandardTags {
         list.put(TranslatorTags.SERVICE, "x:service");
         list.put(TranslatorTags.SERVICE_ERROR, "x:service-error");
         list.put(Command.GENERAL_BLOCK_TRANSFER, "x:general-block-transfer");
+        GXDLMSTranslator.addTag(list, Command.GATEWAY_REQUEST,
+                "x:gateway-request");
+        GXDLMSTranslator.addTag(list, Command.GATEWAY_RESPONSE,
+                "x:gateway-response");
     }
 
     /**
@@ -317,6 +321,30 @@ final class TranslatorStandardTags {
                 "x:general-glo-ciphering");
         GXDLMSTranslator.addTag(list, Command.GENERAL_CIPHERING,
                 "x:general-ciphering");
+    }
+
+    /**
+     * Get ded tags.
+     * 
+     * @param type
+     * @param list
+     */
+    static void getDedTags(final TranslatorOutputType type,
+            final HashMap<Integer, String> list) {
+        GXDLMSTranslator.addTag(list, Command.DED_GET_REQUEST,
+                "x:ded-get-request");
+        GXDLMSTranslator.addTag(list, Command.DED_GET_RESPONSE,
+                "x:ded-get-response");
+        GXDLMSTranslator.addTag(list, Command.DED_SET_REQUEST,
+                "x:ded-set-request");
+        GXDLMSTranslator.addTag(list, Command.DED_SET_RESPONSE,
+                "x:ded-set-response");
+        GXDLMSTranslator.addTag(list, Command.DED_METHOD_REQUEST,
+                "x:ded-action-request");
+        GXDLMSTranslator.addTag(list, Command.DED_METHOD_RESPONSE,
+                "x:ded-action-response");
+        GXDLMSTranslator.addTag(list, Command.GENERAL_DED_CIPHERING,
+                "x:general-ded-ciphering");
     }
 
     /**
@@ -446,6 +474,10 @@ final class TranslatorStandardTags {
                 "x:contents-description");
         GXDLMSTranslator.addTag(list, TranslatorTags.ARRAY_CONTENTS,
                 "x:array-contents");
+        GXDLMSTranslator.addTag(list, TranslatorTags.NETWORK_ID,
+                "x:network-id");
+        GXDLMSTranslator.addTag(list, TranslatorTags.PHYSICAL_DEVICE_ADDRESS,
+                "x:physical-device-address");
     }
 
     static void getDataTypeTags(final HashMap<Integer, String> list) {

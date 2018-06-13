@@ -32,46 +32,56 @@
 // Full text may be retrieved at http://www.gnu.org/licenses/gpl-2.0.txt
 //---------------------------------------------------------------------------
 
-package gurux.dlms.objects.enums;
+package gurux.dlms;
 
 /**
- * Defines the minimum time between the reception of a request (end of request
- * telegram) and the transmission of the response (begin of response telegram).
+ * GXDLMSGateway contains information that is needed if gateway is used between
+ * the client and the meter.
  */
-public enum LocalPortResponseTime {
+public class GXDLMSGateway {
     /**
-     * Minimum time is 20 ms.
+     * Gateway network ID.
      */
-    ms20(0),
+    private short networkId;
+
     /**
-     * Minimum time is 200 ms.
+     * Physical device address.
      */
-    ms200(1);
+    private byte[] physicalDeviceAddress;
 
-    private int intValue;
-    private static java.util.HashMap<Integer, LocalPortResponseTime> mappings;
-
-    private static java.util.HashMap<Integer, LocalPortResponseTime>
-            getMappings() {
-        synchronized (LocalPortResponseTime.class) {
-            if (mappings == null) {
-                mappings =
-                        new java.util.HashMap<Integer, LocalPortResponseTime>();
-            }
-        }
-        return mappings;
+    /**
+     * Constructor.
+     */
+    public GXDLMSGateway() {
     }
 
-    LocalPortResponseTime(final int value) {
-        intValue = value;
-        getMappings().put(new Integer(value), this);
+    /**
+     * @return Gateway network ID.
+     */
+    public final short getNetworkId() {
+        return networkId;
     }
 
-    public int getValue() {
-        return intValue;
+    /**
+     * @param value
+     *            Gateway network ID.
+     */
+    public final void setNetworkId(final short value) {
+        networkId = value;
     }
 
-    public static LocalPortResponseTime forValue(final int value) {
-        return getMappings().get(new Integer(value));
+    /**
+     * @return Physical device address.
+     */
+    public final byte[] getPhysicalDeviceAddress() {
+        return physicalDeviceAddress;
+    }
+
+    /**
+     * @param value
+     *            Physical device address.
+     */
+    public final void setPhysicalDeviceAddress(final byte[] value) {
+        physicalDeviceAddress = value;
     }
 }

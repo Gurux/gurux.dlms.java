@@ -504,8 +504,8 @@ public class GXDLMSParameterMonitor extends GXDLMSObject
             writer.writeElementObject("Value", changedParameter.getValue());
             writer.writeEndElement();
         }
-        if (captureTime != null && captureTime != new Date(0)) {
-            writer.writeElementString("Time", captureTime.toString());
+        if (captureTime != null && captureTime.compareTo(new Date(0)) != 0) {
+            writer.writeElementString("Time", captureTime);
         }
         if (parameters != null && parameters.size() != 0) {
             writer.writeStartElement("Parameters");

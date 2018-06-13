@@ -60,7 +60,7 @@ public class GXDLMSMBusSlavePortSetup extends GXDLMSObject
      * Constructor.
      */
     public GXDLMSMBusSlavePortSetup() {
-        super(ObjectType.MBUS_SLAVE_PORT_SETUP);
+        this(null);
     }
 
     /**
@@ -70,7 +70,7 @@ public class GXDLMSMBusSlavePortSetup extends GXDLMSObject
      *            Logical Name of the object.
      */
     public GXDLMSMBusSlavePortSetup(final String ln) {
-        super(ObjectType.MBUS_SLAVE_PORT_SETUP, ln, 0);
+        this(ln, 0);
     }
 
     /**
@@ -83,6 +83,9 @@ public class GXDLMSMBusSlavePortSetup extends GXDLMSObject
      */
     public GXDLMSMBusSlavePortSetup(final String ln, final int sn) {
         super(ObjectType.MBUS_SLAVE_PORT_SETUP, ln, sn);
+        defaultBaud = BaudRate.BAUDRATE_300;
+        availableBaud = BaudRate.BAUDRATE_300;
+        addressState = AddressState.NONE;
     }
 
     /**

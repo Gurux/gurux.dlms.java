@@ -47,6 +47,7 @@ import gurux.dlms.enums.Security;
 import gurux.dlms.enums.SourceDiagnostic;
 import gurux.dlms.internal.GXCommon;
 import gurux.dlms.secure.AesGcmParameter;
+import gurux.dlms.secure.GXCiphering;
 
 /**
  * The services to access the attributes and methods of COSEM objects are
@@ -194,13 +195,15 @@ final class GXAPDU {
         // Usage field for the response allowed component.
 
         // Usage field for dedicated-key component.
-        if (settings.getDedicatedKey() == null) {
+        if (settings.getCipher() == null
+                || settings.getCipher().getDedicatedKey() == null) {
             // Not used
             data.setUInt8(0x00);
         } else {
             data.setUInt8(1);
-            data.setUInt8(settings.getDedicatedKey().length);
-            data.set(settings.getDedicatedKey());
+            GXCommon.setObjectCount(
+                    settings.getCipher().getDedicatedKey().length, data);
+            data.set(settings.getCipher().getDedicatedKey());
         }
 
         // encoding of the response-allowed component (BOOLEAN DEFAULT TRUE)
@@ -262,8 +265,12 @@ final class GXAPDU {
             } else {
                 GXByteBuffer tmp = new GXByteBuffer();
                 getInitiateRequest(settings, cipher, tmp);
-                byte[] crypted = cipher.encrypt(Command.GLO_INITIATE_REQUEST,
-                        cipher.getSystemTitle(), tmp.array());
+                AesGcmParameter p = new AesGcmParameter(
+                        Command.GLO_INITIATE_REQUEST, cipher.getSecurity(),
+                        cipher.getInvocationCounter(), cipher.getSystemTitle(),
+                        cipher.getBlockCipherKey(),
+                        cipher.getAuthenticationKey());
+                byte[] crypted = GXCiphering.encrypt(p, tmp.array());
                 // Length for AARQ user field
                 data.setUInt8((2 + crypted.length));
                 // Coding the choice for user-information (Octet string,
@@ -392,11 +399,13 @@ final class GXAPDU {
                 len = data.getUInt8();
                 byte[] tmp = new byte[len];
                 data.get(tmp);
-                settings.setDedicatedKey(tmp);
+                settings.getCipher().setDedicatedKey(tmp);
                 if (xml != null) {
                     xml.appendLine(TranslatorGeneralTags.DEDICATED_KEY, null,
                             GXCommon.toHex(tmp, false));
                 }
+            } else if (settings.getCipher() != null) {
+                settings.getCipher().setDedicatedKey(null);
             }
             // Optional usage field of the negotiated quality of service
             // component
@@ -637,7 +646,8 @@ final class GXAPDU {
                                 settings.getCipher().getBlockCipherKey(),
                                 settings.getCipher().getAuthenticationKey());
                         p.setXml(xml);
-                        tmp = cipher.crypt(p, false, data);
+                        tmp = GXCiphering.decrypt(settings.getCipher(), p,
+                                data);
                         data.clear();
                         data.set(tmp);
                         cipher.setSecurity(p.getSecurity());
@@ -660,9 +670,13 @@ final class GXAPDU {
                 return;
             }
             data.position(data.position() - 1);
-            cipher.setSecurity(
-                    cipher.decrypt(settings.getSourceSystemTitle(), data)
-                            .getSecurity());
+            p = new AesGcmParameter(settings.getSourceSystemTitle(),
+                    settings.getCipher().getBlockCipherKey(),
+                    settings.getCipher().getAuthenticationKey());
+            tmp = GXCiphering.decrypt(settings.getCipher(), p, data);
+            data.size(0);
+            data.set(tmp);
+            cipher.setSecurity(p.getSecurity());
             tag = data.getUInt8();
         } else if (tag == Command.GLO_INITIATE_REQUEST) {
             if (xml != null) {
@@ -678,8 +692,8 @@ final class GXAPDU {
                                 settings.getCipher().getBlockCipherKey(),
                                 settings.getCipher().getAuthenticationKey());
                         p.setXml(xml);
-
-                        tmp = cipher.crypt(p, false, data);
+                        tmp = GXCiphering.decrypt(settings.getCipher(), p,
+                                data);
                         data.clear();
                         data.set(tmp);
                         cipher.setSecurity(p.getSecurity());
@@ -703,9 +717,14 @@ final class GXAPDU {
             }
             data.position(data.position() - 1);
             // InitiateRequest
-            cipher.setSecurity(
-                    cipher.decrypt(settings.getSourceSystemTitle(), data)
-                            .getSecurity());
+            p = new AesGcmParameter(settings.getSourceSystemTitle(),
+                    settings.getCipher().getBlockCipherKey(),
+                    settings.getCipher().getAuthenticationKey());
+            p.setXml(xml);
+            tmp = GXCiphering.decrypt(settings.getCipher(), p, data);
+            data.clear();
+            data.set(tmp);
+            cipher.setSecurity(p.getSecurity());
             tag = data.getUInt8();
         }
         parse(initiateRequest, settings, cipher, data, xml, tag);
@@ -1236,8 +1255,11 @@ final class GXAPDU {
             data.setUInt16(0xFA00);
         }
         if (cipher != null && cipher.isCiphered()) {
-            return cipher.encrypt(Command.GLO_INITIATE_RESPONSE,
-                    cipher.getSystemTitle(), data.array());
+            AesGcmParameter p = new AesGcmParameter(
+                    Command.GLO_INITIATE_RESPONSE, cipher.getSecurity(),
+                    cipher.getInvocationCounter(), cipher.getSystemTitle(),
+                    cipher.getBlockCipherKey(), cipher.getAuthenticationKey());
+            return GXCiphering.encrypt(p, data.array());
         }
         return data.array();
     }

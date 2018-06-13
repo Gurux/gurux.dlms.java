@@ -342,6 +342,29 @@ public class GXDLMSClient {
     }
 
     /**
+     * Standard says that Time zone is from normal time to UTC in minutes. If
+     * meter is configured to use UTC time (UTC to normal time) set this to
+     * true.
+     * 
+     * @return True, if UTC time is used.
+     */
+    public boolean getUseUtc2NormalTime() {
+        return settings.getUseUtc2NormalTime();
+    }
+
+    /**
+     * * Standard says that Time zone is from normal time to UTC in minutes. If
+     * meter is configured to use UTC time (UTC to normal time) set this to
+     * true.
+     * 
+     * @param value
+     *            True, if UTC time is used.
+     */
+    public void setUseUtc2NormalTime(final boolean value) {
+        settings.setUseUtc2NormalTime(value);
+    }
+
+    /**
      * Retrieves the password that is used in communication. If authentication
      * is set to none, password is not used.
      * 
@@ -479,6 +502,21 @@ public class GXDLMSClient {
      */
     public final GXDLMSLimits getLimits() {
         return settings.getLimits();
+    }
+
+    /**
+     * @return Gateway settings.
+     */
+    public final GXDLMSGateway getGateway() {
+        return settings.getGateway();
+    }
+
+    /**
+     * @param value
+     *            Gateway settings.
+     */
+    public final void setGateway(final GXDLMSGateway value) {
+        settings.setGateway(value);
     }
 
     /**

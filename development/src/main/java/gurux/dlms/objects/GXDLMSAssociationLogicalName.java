@@ -44,7 +44,6 @@ import java.util.logging.Logger;
 
 import javax.xml.stream.XMLStreamException;
 
-import gurux.dlms.ConnectionState;
 import gurux.dlms.GXByteBuffer;
 import gurux.dlms.GXDLMSClient;
 import gurux.dlms.GXDLMSServerBase;
@@ -330,8 +329,6 @@ public class GXDLMSAssociationLogicalName extends GXDLMSObject
                 }
                 byte[] tmp = GXSecure.secure(settings, settings.getCipher(), ic,
                         settings.getCtoSChallenge(), readSecret);
-                settings.setConnected(
-                        settings.getConnected() | ConnectionState.DLMS);
                 associationStatus = AssociationStatus.ASSOCIATED;
                 return tmp;
             } else {
@@ -339,8 +336,6 @@ public class GXDLMSAssociationLogicalName extends GXDLMSObject
                         "Invalid CtoS:" + GXCommon.toHex(serverChallenge, false)
                                 + "-" + GXCommon.toHex(clientChallenge, false));
                 associationStatus = AssociationStatus.NON_ASSOCIATED;
-                settings.setConnected(
-                        settings.getConnected() & ~ConnectionState.DLMS);
             }
         } else if (e.getIndex() == 2) {
             byte[] tmp = (byte[]) e.getParameters();

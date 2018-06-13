@@ -60,10 +60,7 @@ public class GXDLMSRegisterMonitor extends GXDLMSObject implements IGXDLMSBase {
      * Constructor.
      */
     public GXDLMSRegisterMonitor() {
-        super(ObjectType.REGISTER_MONITOR);
-        this.setThresholds(new Object[0]);
-        this.setMonitoredValue(new GXDLMSMonitoredValue());
-        this.setActions(new GXDLMSActionSet[0]);
+        this(null, 0);
     }
 
     /**
@@ -73,10 +70,7 @@ public class GXDLMSRegisterMonitor extends GXDLMSObject implements IGXDLMSBase {
      *            Logical Name of the object.
      */
     public GXDLMSRegisterMonitor(final String ln) {
-        super(ObjectType.REGISTER_MONITOR, ln, 0);
-        this.setThresholds(new Object[0]);
-        this.setMonitoredValue(new GXDLMSMonitoredValue());
-        this.setActions(new GXDLMSActionSet[0]);
+        this(ln, 0);
     }
 
     /**

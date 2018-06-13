@@ -159,6 +159,7 @@ public class GXDLMSCharge extends GXDLMSObject implements IGXDLMSBase {
         super(ObjectType.CHARGE, ln, sn);
         unitChargeActive = new GXUnitCharge();
         unitChargePassive = new GXUnitCharge();
+        chargeType = ChargeType.CONSUMPTION_BASED_COLLECTION;
     }
 
     /**
@@ -743,7 +744,9 @@ public class GXDLMSCharge extends GXDLMSObject implements IGXDLMSBase {
     @Override
     public final void save(final GXXmlWriter writer) throws XMLStreamException {
         writer.writeElementString("TotalAmountPaid", totalAmountPaid);
-        writer.writeElementString("ChargeType", chargeType.getValue());
+        if (chargeType != null) {
+            writer.writeElementString("ChargeType", chargeType.getValue());
+        }
         writer.writeElementString("Priority", priority);
         saveUnitChargeActive(writer, "UnitChargeActive", unitChargeActive);
         saveUnitChargeActive(writer, "UnitChargePassive", unitChargePassive);

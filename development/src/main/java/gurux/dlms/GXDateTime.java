@@ -268,22 +268,21 @@ public class GXDateTime {
             }
             List<String> values = GXCommon.split(value.trim(),
                     new char[] { separator, ':', ' ' });
-            if (shortDatePattern.size() != values.size()
-                    && shortDatePattern.size()
-                            + shortTimePattern.size() != values.size()) {
-                throw new IllegalArgumentException("Invalid DateTime");
-            }
+
             for (int pos = 0; pos != shortDatePattern.size(); ++pos) {
                 boolean ignore = false;
                 if ("*".equals(values.get(pos))) {
                     ignore = true;
                 }
                 String val = shortDatePattern.get(pos);
-                if ("yyyy".compareToIgnoreCase(val) == 0) {
+                if (val.startsWith("yy")) {
                     if (ignore) {
                         year = -1;
                     } else {
                         year = Integer.parseInt(values.get(pos));
+                        if (val.compareToIgnoreCase("yy") == 0) {
+                            year += 2000;
+                        }
                     }
                 } else if ("M".compareToIgnoreCase(val) == 0) {
                     if (ignore) {
@@ -322,10 +321,21 @@ public class GXDateTime {
                             min = Integer.parseInt(values.get(3 + pos));
                         }
                     } else if ("ss".compareToIgnoreCase(val) == 0) {
-                        if (ignore) {
-                            sec = -1;
+                        val = values.get(3 + pos);
+                        if ("AM".compareToIgnoreCase(val) == 0) {
+                            if (hour == 12) {
+                                hour = 0;
+                            }
+                        } else if ("PM".compareToIgnoreCase(val) == 0) {
+                            if (hour != 12) {
+                                hour += 12;
+                            }
                         } else {
-                            sec = Integer.parseInt(values.get(3 + pos));
+                            if (ignore) {
+                                sec = -1;
+                            } else {
+                                sec = Integer.parseInt(val);
+                            }
                         }
                     } else {
                         throw new IllegalArgumentException(
@@ -538,7 +548,7 @@ public class GXDateTime {
             // Find date time separator.
             char separator = 0;
             for (char it : tmp.get(0).toCharArray()) {
-                if (dateSeparator == null && !Character.isDigit(it)) {
+                if (dateSeparator == null && !Character.isLetter(it)) {
                     dateSeparator = String.valueOf(it);
                 } else if (!Character.isLetter(it)) {
                     separator = it;
@@ -556,6 +566,9 @@ public class GXDateTime {
             } else {
                 if (skip.contains(DateTimeSkips.YEAR)) {
                     pos = shortDatePattern.indexOf("yyyy");
+                    if (pos == -1) {
+                        pos = shortDatePattern.indexOf("yy");
+                    }
                     shortDatePattern.set(pos, "*");
                 }
                 if (skip.contains(DateTimeSkips.MONTH)) {

@@ -62,6 +62,7 @@ import gurux.dlms.enums.ServiceClass;
 import gurux.dlms.enums.SourceDiagnostic;
 import gurux.dlms.internal.GXCommon;
 import gurux.dlms.internal.GXDataInfo;
+import gurux.dlms.secure.AesGcmParameter;
 import gurux.dlms.secure.GXCiphering;
 
 /**
@@ -418,6 +419,7 @@ public class GXDLMSTranslator {
             TranslatorSimpleTags.getSnTags(type, list);
             TranslatorSimpleTags.getLnTags(type, list);
             TranslatorSimpleTags.getGloTags(type, list);
+            TranslatorSimpleTags.getDedTags(type, list);
             TranslatorSimpleTags.getTranslatorTags(type, list);
             TranslatorSimpleTags.getDataTypeTags(list);
         } else {
@@ -425,6 +427,7 @@ public class GXDLMSTranslator {
             TranslatorStandardTags.getSnTags(type, list);
             TranslatorStandardTags.getLnTags(type, list);
             TranslatorStandardTags.getGloTags(type, list);
+            TranslatorStandardTags.getDedTags(type, list);
             TranslatorStandardTags.getTranslatorTags(type, list);
             TranslatorStandardTags.getDataTypeTags(list);
 
@@ -1011,17 +1014,57 @@ public class GXDLMSTranslator {
             case Command.GLO_SET_RESPONSE:
             case Command.GLO_METHOD_REQUEST:
             case Command.GLO_METHOD_RESPONSE:
+            case Command.DED_GET_REQUEST:
+            case Command.DED_SET_REQUEST:
+            case Command.DED_GET_RESPONSE:
+            case Command.DED_SET_RESPONSE:
+            case Command.DED_METHOD_REQUEST:
+            case Command.DED_METHOD_RESPONSE:
                 if (settings.getCipher() != null && comments) {
-                    GXByteBuffer tmp = new GXByteBuffer();
-                    tmp.set(value.getData(), value.position() - 1,
-                            value.size() - value.position() + 1);
+                    value.position(value.position() - 1);
                     int len = xml.getXmlLength();
                     try {
-                        settings.getCipher().decrypt(
-                                settings.getCipher().getSystemTitle(), tmp);
-                        xml.startComment("Decrypt data:");
-                        pduToXml(xml, tmp, omitDeclaration, omitNameSpace);
-                        xml.endComment();
+                        int c = cmd;
+                        byte[] st;
+                        if (c == Command.GLO_READ_REQUEST
+                                || c == Command.GLO_WRITE_REQUEST
+                                || c == Command.GLO_GET_REQUEST
+                                || c == Command.GLO_SET_REQUEST
+                                || c == Command.GLO_METHOD_REQUEST
+                                || c == Command.DED_GET_REQUEST
+                                || c == Command.DED_SET_REQUEST
+                                || c == Command.DED_METHOD_REQUEST) {
+                            st = settings.getCipher().getSystemTitle();
+                        } else {
+                            st = settings.getSourceSystemTitle();
+                        }
+                        if (st != null) {
+                            AesGcmParameter p;
+                            if (c == Command.DED_GET_REQUEST
+                                    || c == Command.DED_SET_REQUEST
+                                    || c == Command.DED_METHOD_REQUEST) {
+                                p = new AesGcmParameter(st,
+                                        settings.getCipher().getDedicatedKey(),
+                                        settings.getCipher()
+                                                .getAuthenticationKey());
+                            } else {
+                                p = new AesGcmParameter(st,
+                                        settings.getCipher()
+                                                .getBlockCipherKey(),
+                                        settings.getCipher()
+                                                .getAuthenticationKey());
+                            }
+                            if (p.getBlockCipherKey() != null) {
+                                GXByteBuffer data2 =
+                                        new GXByteBuffer(GXCiphering.decrypt(
+                                                settings.getCipher(), p,
+                                                value));
+                                xml.startComment("Decrypt data:");
+                                pduToXml(xml, data2, omitDeclaration,
+                                        omitNameSpace);
+                                xml.endComment();
+                            }
+                        }
                     } catch (Exception e) {
                         // It's OK if this fails. Ciphering settings are not
                         // correct.
@@ -1045,8 +1088,13 @@ public class GXDLMSTranslator {
                         GXByteBuffer tmp = new GXByteBuffer();
                         tmp.set(value.getData(), value.position() - 1,
                                 value.size() - value.position() + 1);
-                        settings.getCipher().decrypt(
-                                settings.getCipher().getSystemTitle(), tmp);
+                        AesGcmParameter p;
+                        p = new AesGcmParameter(
+                                settings.getCipher().getSystemTitle(),
+                                settings.getCipher().getBlockCipherKey(),
+                                settings.getCipher().getAuthenticationKey());
+                        tmp = new GXByteBuffer(GXCiphering
+                                .decrypt(settings.getCipher(), p, tmp));
                         xml.startComment("Decrypt data:");
                         pduToXml(xml, tmp, omitDeclaration, omitNameSpace);
                         xml.endComment();
@@ -1073,6 +1121,25 @@ public class GXDLMSTranslator {
                 data.setXml(xml);
                 data.setData(value);
                 GXDLMS.handleConfirmedServiceError(data);
+                break;
+            case Command.GATEWAY_REQUEST:
+            case Command.GATEWAY_RESPONSE:
+                data.setXml(xml);
+                data.setData(value);
+                // Get Network ID.
+                short id = value.getUInt8();
+                // Get Physical device address.
+                len = GXCommon.getObjectCount(value);
+                tmp = new byte[len];
+                value.get(tmp);
+                xml.appendStartTag(cmd);
+                xml.appendLine(TranslatorTags.NETWORK_ID, null,
+                        String.valueOf(id));
+                xml.appendLine(TranslatorTags.PHYSICAL_DEVICE_ADDRESS, null,
+                        GXCommon.toHex(tmp, false, 0, len));
+                pduToXml(xml, new GXByteBuffer(value.remaining()),
+                        omitDeclaration, omitNameSpace);
+                xml.appendEndTag(cmd);
                 break;
             default:
                 xml.appendLine(
@@ -1153,6 +1220,9 @@ public class GXDLMSTranslator {
         case Command.GLO_METHOD_REQUEST:
         case Command.GLO_READ_REQUEST:
         case Command.GLO_WRITE_REQUEST:
+        case Command.DED_GET_REQUEST:
+        case Command.DED_SET_REQUEST:
+        case Command.DED_METHOD_REQUEST:
             s.getSettings().setServer(false);
             s.setCommand(tag);
             tmp = GXCommon.hexToBytes(getValue(node, s));
@@ -1181,6 +1251,10 @@ public class GXDLMSTranslator {
         case Command.GLO_READ_RESPONSE:
         case Command.GLO_WRITE_RESPONSE:
         case Command.GLO_EVENT_NOTIFICATION_REQUEST:
+        case Command.DED_GET_RESPONSE:
+        case Command.DED_SET_RESPONSE:
+        case Command.DED_METHOD_RESPONSE:
+        case Command.DED_EVENT_NOTIFICATION:
             s.setCommand(tag);
             tmp = GXCommon.hexToBytes(getValue(node, s));
             s.getSettings().getCipher()
@@ -1195,6 +1269,13 @@ public class GXDLMSTranslator {
             break;
         case TranslatorTags.FRAME_TYPE:
             s.setCommand(0);
+            break;
+        case Command.GATEWAY_REQUEST:
+            s.setGwCommand(Command.GATEWAY_REQUEST);
+            s.getSettings().setServer(false);
+            break;
+        case Command.GATEWAY_RESPONSE:
+            s.setGwCommand(Command.GATEWAY_RESPONSE);
             break;
         default:
             throw new IllegalArgumentException(
@@ -1368,7 +1449,7 @@ public class GXDLMSTranslator {
             break;
         case TranslatorGeneralTags.DEDICATED_KEY:
             tmp = GXCommon.hexToBytes(getValue(node, s));
-            s.getSettings().setDedicatedKey(tmp);
+            s.getSettings().getCipher().setDedicatedKey(tmp);
             break;
         case TranslatorGeneralTags.CALLING_AP_TITLE:
             s.getSettings()
@@ -2101,6 +2182,14 @@ public class GXDLMSTranslator {
                     s.getData().set(tmp);
                 }
                 break;
+            case TranslatorTags.NETWORK_ID:
+                s.setNetworkId(s.parseShort(getValue(node, s)));
+                break;
+            case TranslatorTags.PHYSICAL_DEVICE_ADDRESS:
+                s.setPhysicalDeviceAddress(
+                        GXCommon.hexToBytes(getValue(node, s)));
+                s.setCommand(Command.NONE);
+                break;
             default:
                 throw new IllegalArgumentException(
                         "Invalid node: " + node.getNodeName());
@@ -2436,6 +2525,12 @@ public class GXDLMSTranslator {
         case Command.GLO_WRITE_REQUEST:
         case Command.GLO_READ_RESPONSE:
         case Command.GLO_WRITE_RESPONSE:
+        case Command.DED_GET_REQUEST:
+        case Command.DED_GET_RESPONSE:
+        case Command.DED_SET_REQUEST:
+        case Command.DED_SET_RESPONSE:
+        case Command.DED_METHOD_REQUEST:
+        case Command.DED_METHOD_RESPONSE:
             bb.setUInt8(s.getCommand());
             GXCommon.setObjectCount(s.getData().size(), bb);
             bb.set(s.getData());
@@ -2545,6 +2640,15 @@ public class GXDLMSTranslator {
         default:
         case Command.NONE:
             throw new IllegalArgumentException("Invalid command.");
+        }
+        if (s.getPhysicalDeviceAddress() != null) {
+            GXByteBuffer bb2 = new GXByteBuffer();
+            bb2.setUInt8(s.getGwCommand());
+            bb2.setUInt8(s.getNetworkId());
+            GXCommon.setObjectCount(s.getPhysicalDeviceAddress().length, bb2);
+            bb2.set(s.getPhysicalDeviceAddress());
+            bb2.set(bb);
+            return bb2.array();
         }
         return bb.array();
     }
