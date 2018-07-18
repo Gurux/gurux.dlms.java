@@ -474,7 +474,7 @@ public class GXDLMSCredit extends GXDLMSObject implements IGXDLMSBase {
             break;
         case 7:
             GXByteBuffer bb = new GXByteBuffer();
-            GXCommon.setBitString(bb, e.getValue());
+            GXCommon.setBitString(bb, e.getValue(), true);
             creditConfiguration = CreditConfiguration.forValue(bb.getUInt8(1));
             break;
         case 8:

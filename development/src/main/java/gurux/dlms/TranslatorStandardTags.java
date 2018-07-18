@@ -478,6 +478,8 @@ final class TranslatorStandardTags {
                 "x:network-id");
         GXDLMSTranslator.addTag(list, TranslatorTags.PHYSICAL_DEVICE_ADDRESS,
                 "x:physical-device-address");
+        GXDLMSTranslator.addTag(list, TranslatorTags.PROTOCOL_VERSION,
+                "x:protocol-version");
     }
 
     static void getDataTypeTags(final HashMap<Integer, String> list) {

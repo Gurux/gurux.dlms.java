@@ -8,7 +8,9 @@ import java.util.List;
 
 import gurux.dlms.enums.DataType;
 import gurux.dlms.enums.ObjectType;
+import gurux.dlms.enums.Standard;
 import gurux.dlms.internal.GXCommon;
+import gurux.dlms.manufacturersettings.GXObisCode;
 import gurux.dlms.objects.GXDLMSObject;
 import gurux.dlms.objects.GXDLMSObjectCollection;
 
@@ -18,6 +20,25 @@ public class GXDLMSConverter {
      */
     private GXStandardObisCodeCollection codes =
             new GXStandardObisCodeCollection();
+
+    private Standard standard;
+
+    /**
+     * Constructor.
+     */
+    public GXDLMSConverter() {
+
+    }
+
+    /**
+     * Constructor.
+     * 
+     * @param value
+     *            Used standard.
+     */
+    public GXDLMSConverter(Standard value) {
+        standard = value;
+    }
 
     /**
      * Get OBIS code description.
@@ -72,7 +93,7 @@ public class GXDLMSConverter {
     public final String[] getDescription(final String logicalName,
             final ObjectType type, final String description) {
         if (codes.size() == 0) {
-            readStandardObisInfo(codes);
+            readStandardObisInfo(standard, codes);
         }
         List<String> list = new ArrayList<String>();
         boolean all = logicalName == null || logicalName.isEmpty();
@@ -205,7 +226,7 @@ public class GXDLMSConverter {
     public final void updateOBISCodeInformation(final GXDLMSObject object) {
         synchronized (codes) {
             if (codes.size() == 0) {
-                readStandardObisInfo(codes);
+                readStandardObisInfo(standard, codes);
             }
             updateOBISCodeInfo(codes, object);
         }
@@ -221,7 +242,7 @@ public class GXDLMSConverter {
             updateOBISCodeInformation(final GXDLMSObjectCollection objects) {
         synchronized (codes) {
             if (codes.size() == 0) {
-                readStandardObisInfo(codes);
+                readStandardObisInfo(standard, codes);
             }
             for (GXDLMSObject it : objects) {
                 updateOBISCodeInfo(codes, it);
@@ -230,13 +251,77 @@ public class GXDLMSConverter {
     }
 
     /**
+     * Get country spesific OBIS codes.
+     * 
+     * @param standard
+     *            Used standard.
+     * @return Collection for special OBIC codes.
+     */
+    static GXObisCode[] getObjects(Standard standard) {
+        List<GXObisCode> codes = new ArrayList<GXObisCode>();
+        InputStream stream = null;
+        if (standard == Standard.ITALY) {
+            stream = GXDLMSClient.class.getResourceAsStream("/Italy.txt");
+        } else if (standard == Standard.INDIA) {
+            stream = GXDLMSClient.class.getResourceAsStream("/India.txt");
+        } else if (standard == Standard.SAUDI_ARABIA) {
+            stream = GXDLMSClient.class.getResourceAsStream("/SaudiArabia.txt");
+        }
+        if (stream == null) {
+            return new GXObisCode[0];
+        }
+        int nRead;
+        ByteArrayOutputStream buffer = new ByteArrayOutputStream();
+        byte[] data = new byte[1000];
+        try {
+            while ((nRead = stream.read(data, 0, data.length)) != -1) {
+                buffer.write(data, 0, nRead);
+            }
+            buffer.flush();
+        } catch (IOException e) {
+            throw new RuntimeException(e.getMessage());
+        }
+        String str = buffer.toString();
+        str = str.replace("\r", " ");
+        List<String> rows = GXCommon.split(str, '\n');
+        for (String it : rows) {
+            List<String> items = GXCommon.split(it, ';');
+            // Skip empty lines.
+            if (items.size() > 1) {
+                ObjectType ot =
+                        ObjectType.forValue(Integer.parseInt(items.get(0)));
+                String ln = GXCommon.toLogicalName(
+                        GXCommon.logicalNameToBytes(items.get(1)));
+                int version = Integer.parseInt(items.get(2));
+                String desc = items.get(3);
+                GXObisCode code = new GXObisCode(ln, ot, desc);
+                code.setVersion(version);
+                codes.add(code);
+            }
+        }
+        return codes.toArray(new GXObisCode[0]);
+    }
+
+    /**
      * Read standard OBIS code information from the file.
      * 
      * @param codes
      *            Collection of standard OBIS codes.
      */
-    private static void
-            readStandardObisInfo(final GXStandardObisCodeCollection codes) {
+    private static void readStandardObisInfo(final Standard standard,
+            final GXStandardObisCodeCollection codes) {
+
+        if (standard != Standard.DLMS) {
+            for (GXObisCode it : getObjects(standard)) {
+                GXStandardObisCode tmp = new GXStandardObisCode();
+                tmp.setInterfaces(
+                        String.valueOf(it.getObjectType().getValue()));
+                tmp.setOBIS(GXCommon.split(it.getLogicalName(), '.')
+                        .toArray(new String[0]));
+                tmp.setDescription(it.getDescription());
+                codes.add(tmp);
+            }
+        }
         InputStream stream =
                 GXDLMSClient.class.getResourceAsStream("/OBISCodes.txt");
         if (stream == null) {

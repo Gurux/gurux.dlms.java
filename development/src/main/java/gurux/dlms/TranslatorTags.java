@@ -94,4 +94,6 @@ final class TranslatorTags {
     static final int ARRAY_CONTENTS = 0xFF69;
     static final int NETWORK_ID = 0xFF7A;
     static final int PHYSICAL_DEVICE_ADDRESS = 0xFF7B;
+    static final int PROTOCOL_VERSION = 0xFF7C;
+
 }

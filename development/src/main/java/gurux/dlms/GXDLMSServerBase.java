@@ -610,6 +610,7 @@ public class GXDLMSServerBase {
             settings.setServerAddress(0);
             settings.setClientAddress(0);
         }
+        settings.setProtocolVersion(null);
         settings.setCtoSChallenge(null);
         settings.setStoCChallenge(null);
         receivedData.clear();

@@ -62,10 +62,12 @@ import gurux.dlms.enums.Priority;
 import gurux.dlms.enums.RequestTypes;
 import gurux.dlms.enums.ServiceClass;
 import gurux.dlms.enums.SourceDiagnostic;
+import gurux.dlms.enums.Standard;
 import gurux.dlms.internal.GXCommon;
 import gurux.dlms.internal.GXDataInfo;
 import gurux.dlms.manufacturersettings.GXObisCodeCollection;
 import gurux.dlms.objects.GXDLMSCaptureObject;
+import gurux.dlms.objects.GXDLMSData;
 import gurux.dlms.objects.GXDLMSObject;
 import gurux.dlms.objects.GXDLMSObjectCollection;
 import gurux.dlms.objects.GXDLMSProfileGeneric;
@@ -353,7 +355,7 @@ public class GXDLMSClient {
     }
 
     /**
-     * * Standard says that Time zone is from normal time to UTC in minutes. If
+     * Standard says that Time zone is from normal time to UTC in minutes. If
      * meter is configured to use UTC time (UTC to normal time) set this to
      * true.
      * 
@@ -362,6 +364,25 @@ public class GXDLMSClient {
      */
     public void setUseUtc2NormalTime(final boolean value) {
         settings.setUseUtc2NormalTime(value);
+    }
+
+    /**
+     * Used standard.
+     * 
+     * @return True, if UTC time is used.
+     */
+    public Standard getStandard() {
+        return settings.getStandard();
+    }
+
+    /**
+     * Used standard.
+     * 
+     * @param value
+     *            True, if UTC time is used.
+     */
+    public void setStandard(final Standard value) {
+        settings.setStandard(value);
     }
 
     /**
@@ -517,6 +538,21 @@ public class GXDLMSClient {
      */
     public final void setGateway(final GXDLMSGateway value) {
         settings.setGateway(value);
+    }
+
+    /**
+     * @return Protocol version.
+     */
+    public final String getProtocolVersion() {
+        return settings.getProtocolVersion();
+    }
+
+    /**
+     * @param value
+     *            Protocol version.
+     */
+    public final void setProtocolVersion(final String value) {
+        settings.setProtocolVersion(value);
     }
 
     /**
@@ -1887,10 +1923,22 @@ public class GXDLMSClient {
         GXCommon.setData(buff, DataType.INT8, 2);
         // Add version
         GXCommon.setData(buff, DataType.UINT16, sort.getVersion());
-        // Add start time
-        GXCommon.setData(buff, DataType.OCTET_STRING, s);
-        // Add end time
-        GXCommon.setData(buff, DataType.OCTET_STRING, e);
+        // If Unix time is used.
+        if (pg.getCaptureObjects().size() != 0
+                && pg.getCaptureObjects().get(0).getKey() instanceof GXDLMSData
+                && pg.getCaptureObjects().get(0).getKey().getLogicalName()
+                        .equals("0.0.1.1.0.255")) {
+            // Add start time
+            GXCommon.setData(buff, DataType.UINT32, GXDateTime.toUnixTime(s));
+            // Add end time
+            GXCommon.setData(buff, DataType.UINT32, GXDateTime.toUnixTime(e));
+        } else {
+            // Add start time
+            GXCommon.setData(buff, DataType.OCTET_STRING, s);
+            // Add end time
+            GXCommon.setData(buff, DataType.OCTET_STRING, e);
+        }
+
         // Add array of read columns.
         buff.setUInt8(DataType.ARRAY.getValue());
         if (columns == null) {

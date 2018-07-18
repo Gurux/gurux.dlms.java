@@ -895,7 +895,12 @@ public class GXDLMSProfileGeneric extends GXDLMSObject implements IGXDLMSBase {
                                     capturePeriod);
                             row[colIndex] = new GXDateTime(lastDate.getTime());
                         }
+                    } else if (type == DataType.DATETIME
+                            && row[colIndex] instanceof Number) {
+                        row[colIndex] = GXDateTime.fromUnixTime(
+                                ((Number) row[colIndex]).longValue());
                     }
+
                     Entry<GXDLMSObject, GXDLMSCaptureObject> item =
                             cols.get(colIndex);
                     if (item.getKey() instanceof GXDLMSRegister

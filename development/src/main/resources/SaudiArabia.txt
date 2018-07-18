@@ -1,0 +1,29 @@
+1;0.1.94.96.2.255;0;Storage Device Failure Date/Time
+1;0.1.94.96.22.255;0;LCD time-to-return to default screen
+1;0.1.94.96.23.255;0;LCD auto scroll time
+1;0.1.94.96.24.255;0;LCD night off option
+1;0.1.94.96.25.255;0;Start-stop time setting of LCD night off
+9;0.1.94.96.10.255;0;Meter Program Configuration
+9;0.1.94.96.11.255;0;Meter Program Configuration Status
+1;0.96.94.96.8.255;0;Remote output relay control Selection of the input control signals
+1;0.96.94.96.9.255;0;Auto recovery operation times of current over limit
+1;0.96.94.96.10.255;0;Auto recovery times setting of current over limit
+1;0.96.94.96.11.255;0;Release times of current over limit setting
+1;0.96.94.96.12.255;0;Data Transport Security Mode
+1;0.96.94.96.15.255;0;Number of Global Meter Reset
+1;0.96.94.96.16.255;0;Number of wrong cable connection
+1;1.96.12.33.0.255;0;Sag setting value
+
+1;0.1.94.96.3.255;0;Number of power restore (in all three phases)
+1;0.1.94.96.4.255;0;Number of power restore (phases L1)
+1;0.1.94.96.5.255;0;Number of power restore (phases L2)
+1;0.1.94.96.6.255;0;Number of power restore (phases L3)
+
+3;1.0.32.128.0.255;0;R-Y Phase average voltage
+3;1.0.52.128.0.255;0;Y-B Phase average voltage
+3;1.0.72.128.0.255;0;B-R Phase average voltage
+
+3;1.0.130.7.0.255;0;L1-L2 Instantaneous voltage
+3;1.0.131.7.0.255;0;L2-L3 Instantaneous voltage
+3;1.0.132.7.0.255;0;L3-L1 Instantaneous voltage
+

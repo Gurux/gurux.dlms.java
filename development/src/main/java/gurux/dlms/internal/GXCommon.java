@@ -1832,7 +1832,7 @@ public final class GXCommon {
             buff.setDouble(((Number) value).doubleValue());
             break;
         case BITSTRING:
-            setBitString(buff, value);
+            setBitString(buff, value, true);
             break;
         case STRING:
             setString(buff, value);
@@ -2310,13 +2310,17 @@ public final class GXCommon {
      *            Byte buffer where data is write.
      * @param value
      *            Added value.
+     * @param addCount
+     *            Is bit count added.
      */
-    public static void setBitString(final GXByteBuffer buff,
-            final Object value) {
+    public static void setBitString(final GXByteBuffer buff, final Object value,
+            final boolean addCount) {
         if (value instanceof String) {
             byte val = 0;
             String str = (String) value;
-            setObjectCount(str.length(), buff);
+            if (addCount) {
+                setObjectCount(str.length(), buff);
+            }
             int index = 7;
             for (int pos = 0; pos != str.length(); ++pos) {
                 char it = str.charAt(pos);

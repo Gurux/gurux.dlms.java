@@ -127,6 +127,13 @@ final class GXAPDU {
     private static void generateApplicationContextName(
             final GXDLMSSettings settings, final GXByteBuffer data,
             final GXICipher cipher) {
+        // ProtocolVersion
+        if (settings.getProtocolVersion() != null) {
+            data.setUInt8(BerType.CONTEXT | PduType.PROTOCOL_VERSION);
+            data.setUInt8(2);
+            data.setUInt8((byte) (8 - settings.getProtocolVersion().length()));
+            GXCommon.setBitString(data, settings.getProtocolVersion(), false);
+        }
         // Application context name tag
         data.setUInt8((BerType.CONTEXT | BerType.CONSTRUCTED
                 | PduType.APPLICATION_CONTEXT_NAME));
@@ -872,6 +879,21 @@ final class GXAPDU {
         return ret;
     }
 
+    private static void parseProtocolVersion(GXDLMSSettings settings,
+            GXByteBuffer buff, GXDLMSTranslatorStructure xml) {
+        // Get count.
+        buff.getUInt8();
+        byte unusedBits = (byte) buff.getUInt8();
+        byte value = (byte) buff.getUInt8();
+        StringBuilder sb = new StringBuilder();
+        GXCommon.toBitString(sb, value, 8 - unusedBits);
+        settings.setProtocolVersion(sb.toString());
+        if (xml != null) {
+            xml.appendLine(TranslatorTags.PROTOCOL_VERSION, "Value",
+                    settings.getProtocolVersion());
+        }
+    }
+
     /**
      * Parse APDU.
      */
@@ -1045,6 +1067,9 @@ final class GXAPDU {
                                 SourceDiagnostic.NO_REASON_GIVEN);
                     }
                 }
+                break;
+            case BerType.CONTEXT: // 0x80
+                parseProtocolVersion(settings, buff, xml);
                 break;
             default:
                 // Unknown tags.

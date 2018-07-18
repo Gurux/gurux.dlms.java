@@ -43,6 +43,7 @@ import gurux.dlms.enums.Conformance;
 import gurux.dlms.enums.InterfaceType;
 import gurux.dlms.enums.Priority;
 import gurux.dlms.enums.ServiceClass;
+import gurux.dlms.enums.Standard;
 import gurux.dlms.objects.GXDLMSHdlcSetup;
 import gurux.dlms.objects.GXDLMSObjectCollection;
 import gurux.dlms.objects.GXDLMSTcpUdpSetup;
@@ -281,6 +282,13 @@ public class GXDLMSSettings {
      */
     private boolean useUtc2NormalTime;
 
+    private Standard standard;
+
+    /**
+     * Protocol version.
+     */
+    private String protocolVersion = null;
+
     /**
      * Constructor.
      */
@@ -293,6 +301,7 @@ public class GXDLMSSettings {
         resetFrameSequence();
         windowSize = 1;
         userId = -1;
+        standard = Standard.DLMS;
     }
 
     /**
@@ -1076,5 +1085,39 @@ public class GXDLMSSettings {
      */
     public void setUseUtc2NormalTime(final boolean value) {
         useUtc2NormalTime = value;
+    }
+
+    /**
+     * Used standard.
+     * 
+     * @return True, if UTC time is used.
+     */
+    public Standard getStandard() {
+        return standard;
+    }
+
+    /**
+     * Used standard.
+     * 
+     * @param value
+     *            True, if UTC time is used.
+     */
+    public void setStandard(final Standard value) {
+        standard = value;
+    }
+
+    /**
+     * @return Protocol version.
+     */
+    public String getProtocolVersion() {
+        return protocolVersion;
+    }
+
+    /**
+     * @param value
+     *            Protocol version.
+     */
+    public void setProtocolVersion(final String value) {
+        protocolVersion = value;
     }
 }

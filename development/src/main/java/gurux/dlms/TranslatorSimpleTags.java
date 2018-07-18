@@ -455,6 +455,8 @@ final class TranslatorSimpleTags {
         GXDLMSTranslator.addTag(list, TranslatorTags.NETWORK_ID, "NetworkId");
         GXDLMSTranslator.addTag(list, TranslatorTags.PHYSICAL_DEVICE_ADDRESS,
                 "PhysicalDeviceAddress");
+        GXDLMSTranslator.addTag(list, TranslatorTags.PROTOCOL_VERSION,
+                "ProtocolVersion");
     }
 
     static void getDataTypeTags(final HashMap<Integer, String> list) {

@@ -1021,9 +1021,10 @@ public class GXDLMSTranslator {
             case Command.DED_METHOD_REQUEST:
             case Command.DED_METHOD_RESPONSE:
                 if (settings.getCipher() != null && comments) {
-                    value.position(value.position() - 1);
+                    int originalPosition = value.position();
                     int len = xml.getXmlLength();
                     try {
+                        value.position(value.position() - 1);
                         int c = cmd;
                         byte[] st;
                         if (c == Command.GLO_READ_REQUEST
@@ -1070,6 +1071,7 @@ public class GXDLMSTranslator {
                         // correct.
                         xml.setXmlLength(len);
                     }
+                    value.position(originalPosition);
                 }
                 int cnt = GXCommon.getObjectCount(value);
                 if (cnt != value.size() - value.position()) {
@@ -1551,6 +1553,13 @@ public class GXDLMSTranslator {
                 s.getSettings().setServer(false);
                 s.setCommand(tag);
             }
+            break;
+        case TranslatorTags.PROTOCOL_VERSION:
+            str = getValue(node, s);
+            GXByteBuffer pv = new GXByteBuffer();
+            pv.setUInt8((byte) (8 - str.length()));
+            GXCommon.setBitString(pv, str, false);
+            s.getSettings().setProtocolVersion(str);
             break;
         default:
             throw new IllegalArgumentException(

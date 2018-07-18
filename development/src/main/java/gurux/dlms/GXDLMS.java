@@ -1461,17 +1461,20 @@ abstract class GXDLMS {
             primaryAddress = getAddressBytes(settings.getClientAddress(), 0);
             secondaryAddress = getAddressBytes(settings.getServerAddress(),
                     settings.getServerAddressSize());
+            len = secondaryAddress.length;
         } else {
             primaryAddress = getAddressBytes(settings.getServerAddress(),
                     settings.getServerAddressSize());
             secondaryAddress = getAddressBytes(settings.getClientAddress(), 0);
+            len = primaryAddress.length;
         }
         // Add BOP
         bb.setUInt8(GXCommon.HDLC_FRAME_START_END);
         frameSize = settings.getLimits().getMaxInfoTX();
-        frameSize -= (10 + secondaryAddress.length);
+        frameSize -= (10 + len);
         // If no data
         if (data == null || data.size() == 0) {
+            len = 0;
             bb.setUInt8(0xA0);
         } else if (data.size() - data.position() <= frameSize) {
             len = data.size() - data.position();

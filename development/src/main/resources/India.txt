@@ -1,0 +1,17 @@
+1;0.0.94.91.9.255;0;Meter type
+1;0.0.94.91.11.255;0;Category
+1;0.0.94.91.12.255;0;Current rating 
+1;0.0.96.1.4.255;0;0;Meter year of manufacture
+1;0.0.94.91.18.255;0;Event Status word 1 (ESW 1)
+1;0.0.94.91.0.255;0;Cumulative tamper count
+3;0.0.94.91.13.255;0;Cumulative power ON duration in minutes
+3;1.0.94.91.14.255;0;Current
+3;0.0.94.91.8.255;0;Cumulative power — OFF duration in min
+7;1.0.94.91.0.255;0;Snapshot of Instantaneous Parameters
+7;1.0.94.91.7.255;0;Scaler Profile
+7;1.0.94.91.3.255;0;Scaler Profile of Instantaneous Parameters
+7;1.0.94.91.4.255;0;Scaler Profile of Block Load Profile parameters
+7;1.0.94.91.5.255;0;Scaler Profile of Daily Load Profile parameters 
+7;1.0.94.91.6.255;0;Scaler Profile of Billing Profile parameters
+7;1.0.94.91.6.255;0;Scaler Profile of Indian Event Reference Tables
+7;1.0.94.91.10.255;0;Name plate details

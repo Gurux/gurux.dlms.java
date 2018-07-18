@@ -858,4 +858,37 @@ public class GXDateTime {
         }
         return TimeZone.getTimeZone(str);
     }
+
+    /**
+     * Get date time from Epoch time.
+     * 
+     * @param unixTime
+     *            Unix time.
+     * @return Date and time.
+     */
+    public static GXDateTime fromUnixTime(final long unixTime) {
+        return new GXDateTime(new Date(unixTime * 1000));
+    }
+
+    /**
+     * Convert date time to Epoch time.
+     * 
+     * @param date
+     *            Date and time.
+     * @return Unix time.
+     */
+    public static long toUnixTime(final java.util.Date date) {
+        return date.getTime() / 1000;
+    }
+
+    /**
+     * Convert date time to Epoch time.
+     * 
+     * @param date
+     *            Date and time.
+     * @return Unix time.
+     */
+    public static long toUnixTime(final GXDateTime date) {
+        return date.getLocalCalendar().getTime().getTime() / 1000;
+    }
 }

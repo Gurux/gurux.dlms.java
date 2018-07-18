@@ -321,7 +321,9 @@ public class GXDLMSAssociationLogicalName extends GXDLMSObject
                 accept = GXCommon.compare(serverChallenge, clientChallenge);
             }
             if (accept) {
-                if (settings.getAuthentication() == Authentication.HIGH_GMAC) {
+                if (settings.getAuthentication() == Authentication.HIGH_GMAC
+                        || settings
+                                .getAuthentication() == Authentication.HIGH_ECDSA) {
                     readSecret = settings.getCipher().getSystemTitle();
                     ic = settings.getCipher().getInvocationCounter();
                 } else {
@@ -969,7 +971,7 @@ public class GXDLMSAssociationLogicalName extends GXDLMSObject
             if (e.getValue() != null) {
 
                 GXByteBuffer bb = new GXByteBuffer();
-                GXCommon.setBitString(bb, Array.get(e.getValue(), 0));
+                GXCommon.setBitString(bb, Array.get(e.getValue(), 0), true);
                 bb.setUInt8(0, 0);
                 xDLMSContextInfo
                         .setConformance(Conformance.forValue(bb.getInt32()));

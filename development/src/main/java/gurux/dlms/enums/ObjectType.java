@@ -214,6 +214,8 @@ public enum ObjectType {
 
     PUSH_SETUP(40),
 
+    COMPACT_DATA(62),
+
     PARAMETER_MONITOR(65), WIRELESS_MODE_Q_CHANNEL(73),
     MBUS_MASTER_PORT_SETUP(74),
     /*
@@ -304,7 +306,49 @@ public enum ObjectType {
      * In an object of type UtilityTables each "Table" = ANSI C12.19:1997 table
      * data is represented as an instance, and identified by its logical name.
      */
-    UTILITY_TABLES(26);
+    UTILITY_TABLES(26),
+
+    TOKEN(115),
+
+    /**
+     * S-FSK Phy MAC Setup
+     */
+    SFSK_PHY_MAC_SETUP(50),
+
+    /*
+     * S-FSK Active initiator.
+     */
+    SFSK_ACTIVE_INITIATOR(51),
+    /*
+     * S-FSK MAC synchronization timeouts
+     */
+    SFSK_MAC_SYNCHRONIZATION_TIMEOUTS(52),
+
+    /*
+     * S-FSK MAC Counters.
+     */
+    SFSK_MAC_COUNTERS(53),
+
+    /*
+     * G3-PLC MAC layer counters
+     */
+    G3_PLC_MAC_LAYER_COUNTERS(90),
+
+    /*
+     * G3-PLC MAC setup.
+     */
+    G3_PLC_MAC_SETUP(91),
+
+    /*
+     * G3-PLC 6LoWPAN.
+     */
+    G3_PLC6_LO_WPAN(92),
+
+    /**
+     * Tariff Plan (Piano Tariffario) is used in Italian standard UNI/TS
+     * 11291-11.
+     */
+    TARIFF_PLAN(8192);
 
     private int intValue;
     private static java.util.HashMap<Integer, ObjectType> mappings;
