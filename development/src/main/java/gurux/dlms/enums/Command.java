@@ -303,7 +303,7 @@ public final class Command {
     /**
      * Ded method response.
      */
-    public static final int DED_METHOD_RESPONSE = 0xD6;
+    public static final int DED_METHOD_RESPONSE = 0xD7;
 
     /**
      * Request message from client to gateway.

@@ -666,8 +666,7 @@ public class GXDLMSServerBase {
                 }
                 receivedData.clear();
                 if (info.getCommand() == Command.DISCONNECT_REQUEST
-                        && (settings.getConnected()
-                                & ConnectionState.DLMS) == 0) {
+                        && (settings.getConnected() == ConnectionState.NONE)) {
                     sr.setReply(GXDLMS.getHdlcFrame(settings,
                             Command.DISCONNECT_MODE, replyData));
                     info.clear();
