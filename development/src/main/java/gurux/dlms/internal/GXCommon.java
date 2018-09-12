@@ -35,6 +35,7 @@
 package gurux.dlms.internal;
 
 import java.io.UnsupportedEncodingException;
+import java.nio.charset.Charset;
 import java.security.PrivateKey;
 import java.security.PublicKey;
 import java.text.DateFormat;
@@ -2583,5 +2584,16 @@ public final class GXCommon {
         // UTC time.
         sb.append("Z");
         return sb.toString();
+    }
+
+    /**
+     * Check is string ASCII string.
+     * 
+     * @param value
+     *            Is ASCII string.
+     * @return
+     */
+    public static boolean isAscii(final String value) {
+        return Charset.forName("US-ASCII").newEncoder().canEncode(value);
     }
 }

@@ -146,31 +146,32 @@ public class GXDLMSTcpUdpSetup extends GXDLMSObject implements IGXDLMSBase {
      * already read or device is returned HW error it is not returned.
      */
     @Override
-    public final int[] getAttributeIndexToRead() {
+    public final int[] getAttributeIndexToRead(final boolean all) {
         java.util.ArrayList<Integer> attributes =
                 new java.util.ArrayList<Integer>();
         // LN is static and read only once.
-        if (getLogicalName() == null || getLogicalName().compareTo("") == 0) {
+        if (all || getLogicalName() == null
+                || getLogicalName().compareTo("") == 0) {
             attributes.add(new Integer(1));
         }
         // Port
-        if (!isRead(2)) {
+        if (all || !isRead(2)) {
             attributes.add(new Integer(2));
         }
         // IPReference
-        if (!isRead(3)) {
+        if (all || !isRead(3)) {
             attributes.add(new Integer(3));
         }
         // MaximumSegmentSize
-        if (!isRead(4)) {
+        if (all || !isRead(4)) {
             attributes.add(new Integer(4));
         }
         // MaximumSimultaneousConnections
-        if (!isRead(5)) {
+        if (all || !isRead(5)) {
             attributes.add(new Integer(5));
         }
         // InactivityTimeout
-        if (!isRead(6)) {
+        if (all || !isRead(6)) {
             attributes.add(new Integer(6));
         }
         return GXDLMSObjectHelpers.toIntArray(attributes);

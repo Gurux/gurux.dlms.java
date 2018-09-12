@@ -173,7 +173,17 @@ public class GXDLMSObjectCollection extends ArrayList<GXDLMSObject>
                 if ("Objects".equalsIgnoreCase(target)) {
                     // Skip.
                     reader.read();
+                } else if (target.startsWith("GXDLMS")) {
+                    type = ObjectType.getEnum(target.substring(6));
+                    if (type == null) {
+                        throw new RuntimeException(
+                                "Invalid object type: " + target + ".");
+                    }
+                    reader.read();
+                    obj = GXDLMSClient.createObject(type);
+                    reader.getObjects().add(obj);
                 } else if ("Object".equalsIgnoreCase(target)) {
+                    // Old format.
                     type = ObjectType
                             .forValue(Integer.parseInt(reader.getAttribute(0)));
                     reader.read();
@@ -195,6 +205,7 @@ public class GXDLMSObjectCollection extends ArrayList<GXDLMSObject>
             }
         }
         return reader.getObjects();
+
     }
 
     /**
@@ -223,6 +234,18 @@ public class GXDLMSObjectCollection extends ArrayList<GXDLMSObject>
         }
     }
 
+    private String getObjectName(final ObjectType ot) {
+        String name = String.valueOf(ot).toLowerCase();
+        String tmp[] = name.split("_");
+        for (int pos = 0; pos != tmp.length; ++pos) {
+            char[] array = tmp[pos].toCharArray();
+            array[0] = Character.toUpperCase(array[0]);
+            tmp[pos] = new String(array);
+        }
+        name = String.join("", tmp);
+        return name;
+    }
+
     /**
      * Save COSEM objects to the file.
      * 
@@ -240,8 +263,14 @@ public class GXDLMSObjectCollection extends ArrayList<GXDLMSObject>
             writer.writeStartDocument();
             writer.writeStartElement("Objects");
             for (GXDLMSObject it : this) {
-                writer.writeStartElement("Object", "Type",
-                        String.valueOf(it.getObjectType().getValue()), true);
+                if (settings == null || !settings.getOld()) {
+                    writer.writeStartElement(
+                            "GXDLMS" + getObjectName(it.getObjectType()));
+                } else {
+                    writer.writeStartElement("Object", "Type",
+                            String.valueOf(it.getObjectType().getValue()),
+                            true);
+                }
                 // Add SN
                 if (it.getShortName() != 0) {
                     writer.writeElementString("SN", it.getShortName());

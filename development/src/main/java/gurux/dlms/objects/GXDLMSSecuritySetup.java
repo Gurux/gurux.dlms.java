@@ -882,32 +882,33 @@ public class GXDLMSSecuritySetup extends GXDLMSObject implements IGXDLMSBase {
     }
 
     @Override
-    public final int[] getAttributeIndexToRead() {
+    public final int[] getAttributeIndexToRead(final boolean all) {
         java.util.ArrayList<Integer> attributes =
                 new java.util.ArrayList<Integer>();
         // LN is static and read only once.
-        if (getLogicalName() == null || getLogicalName().compareTo("") == 0) {
+        if (all || getLogicalName() == null
+                || getLogicalName().compareTo("") == 0) {
             attributes.add(new Integer(1));
         }
         // SecurityPolicy
-        if (canRead(2)) {
+        if (all || canRead(2)) {
             attributes.add(new Integer(2));
         }
         // SecuritySuite
-        if (canRead(3)) {
+        if (all || canRead(3)) {
             attributes.add(new Integer(3));
         }
-        if (getVersion() > 0) {
-            // ClientSystemTitle
-            if (canRead(4)) {
-                attributes.add(new Integer(4));
-            }
-            // ServerSystemTitle
-            if (canRead(5)) {
-                attributes.add(new Integer(5));
-            }
+        // ClientSystemTitle
+        if (all || canRead(4)) {
+            attributes.add(new Integer(4));
+        }
+        // ServerSystemTitle
+        if (all || canRead(5)) {
+            attributes.add(new Integer(5));
+        }
+        if (getVersion() != 0) {
             // Certificates
-            if (canRead(6)) {
+            if (all || canRead(6)) {
                 attributes.add(new Integer(6));
             }
         }

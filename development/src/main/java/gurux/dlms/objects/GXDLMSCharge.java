@@ -428,59 +428,60 @@ public class GXDLMSCharge extends GXDLMSObject implements IGXDLMSBase {
      * already read or device is returned HW error it is not returned.
      */
     @Override
-    public final int[] getAttributeIndexToRead() {
+    public final int[] getAttributeIndexToRead(final boolean all) {
         java.util.ArrayList<Integer> attributes =
                 new java.util.ArrayList<Integer>();
         // LN is static and read only once.
-        if (getLogicalName() == null || getLogicalName().compareTo("") == 0) {
+        if (all || getLogicalName() == null
+                || getLogicalName().compareTo("") == 0) {
             attributes.add(new Integer(1));
         }
         // TotalAmountPaid
-        if (canRead(2)) {
+        if (all || canRead(2)) {
             attributes.add(2);
         }
         // ChargeType
-        if (canRead(3)) {
+        if (all || canRead(3)) {
             attributes.add(3);
         }
         // Priority
-        if (canRead(4)) {
+        if (all || canRead(4)) {
             attributes.add(4);
         }
         // UnitChargeActive
-        if (canRead(5)) {
+        if (all || canRead(5)) {
             attributes.add(5);
         }
         // UnitChargePassive
-        if (canRead(6)) {
+        if (all || canRead(6)) {
             attributes.add(6);
         }
         // UnitChargeActivationTime
-        if (canRead(7)) {
+        if (all || canRead(7)) {
             attributes.add(7);
         }
         // Period
-        if (canRead(8)) {
+        if (all || canRead(8)) {
             attributes.add(8);
         }
         // ChargeConfiguration
-        if (canRead(9)) {
+        if (all || canRead(9)) {
             attributes.add(9);
         }
         // LastCollectionTime
-        if (canRead(10)) {
+        if (all || canRead(10)) {
             attributes.add(10);
         }
         // LastCollectionAmount
-        if (canRead(11)) {
+        if (all || canRead(11)) {
             attributes.add(11);
         }
         // TotalAmountRemaining
-        if (canRead(12)) {
+        if (all || canRead(12)) {
             attributes.add(12);
         }
         // Proportion
-        if (canRead(13)) {
+        if (all || canRead(13)) {
             attributes.add(13);
         }
         return GXDLMSObjectHelpers.toIntArray(attributes);

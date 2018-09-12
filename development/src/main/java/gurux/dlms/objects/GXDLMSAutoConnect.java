@@ -170,31 +170,32 @@ public class GXDLMSAutoConnect extends GXDLMSObject implements IGXDLMSBase {
      * already read or device is returned HW error it is not returned.
      */
     @Override
-    public final int[] getAttributeIndexToRead() {
+    public final int[] getAttributeIndexToRead(final boolean all) {
         java.util.ArrayList<Integer> attributes =
                 new java.util.ArrayList<Integer>();
         // LN is static and read only once.
-        if (getLogicalName() == null || getLogicalName().compareTo("") == 0) {
+        if (all || getLogicalName() == null
+                || getLogicalName().compareTo("") == 0) {
             attributes.add(new Integer(1));
         }
         // Mode
-        if (canRead(2)) {
+        if (all || canRead(2)) {
             attributes.add(new Integer(2));
         }
         // Repetitions
-        if (canRead(3)) {
+        if (all || canRead(3)) {
             attributes.add(new Integer(3));
         }
         // RepetitionDelay
-        if (canRead(4)) {
+        if (all || canRead(4)) {
             attributes.add(new Integer(4));
         }
         // CallingWindow
-        if (canRead(5)) {
+        if (all || canRead(5)) {
             attributes.add(new Integer(5));
         }
         // Destinations
-        if (canRead(6)) {
+        if (all || canRead(6)) {
             attributes.add(new Integer(6));
         }
         return GXDLMSObjectHelpers.toIntArray(attributes);

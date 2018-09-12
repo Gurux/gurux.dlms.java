@@ -3,6 +3,7 @@ package gurux.dlms;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
+import java.math.BigInteger;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -453,6 +454,9 @@ public class GXDLMSConverter {
         if (value instanceof Double) {
             return DataType.FLOAT64;
         }
+        if (value instanceof BigInteger) {
+            return DataType.UINT64;
+        }
         throw new IllegalArgumentException("Invalid value.");
     }
 
@@ -464,8 +468,6 @@ public class GXDLMSConverter {
         case ARRAY:
             throw new IllegalArgumentException("Can't change array types.");
         case BCD:
-            break;
-        case BITSTRING:
             break;
         case BOOLEAN:
             if (value instanceof String) {
@@ -521,6 +523,7 @@ public class GXDLMSConverter {
             throw new IllegalArgumentException(
                     "Can't change octect string type.");
         case STRING:
+        case BITSTRING:
             return String.valueOf(value);
         case STRING_UTF8:
             return String.valueOf(value);

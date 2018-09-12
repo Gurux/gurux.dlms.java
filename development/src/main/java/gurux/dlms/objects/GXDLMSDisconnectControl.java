@@ -155,23 +155,24 @@ public class GXDLMSDisconnectControl extends GXDLMSObject
     }
 
     @Override
-    public final int[] getAttributeIndexToRead() {
+    public final int[] getAttributeIndexToRead(final boolean all) {
         java.util.ArrayList<Integer> attributes =
                 new java.util.ArrayList<Integer>();
         // LN is static and read only once.
-        if (getLogicalName() == null || getLogicalName().compareTo("") == 0) {
+        if (all || getLogicalName() == null
+                || getLogicalName().compareTo("") == 0) {
             attributes.add(new Integer(1));
         }
         // OutputState
-        if (canRead(2)) {
+        if (all || canRead(2)) {
             attributes.add(new Integer(2));
         }
         // ControlState
-        if (canRead(3)) {
+        if (all || canRead(3)) {
             attributes.add(new Integer(3));
         }
         // ControlMode
-        if (canRead(4)) {
+        if (all || canRead(4)) {
             attributes.add(new Integer(4));
         }
         return GXDLMSObjectHelpers.toIntArray(attributes);

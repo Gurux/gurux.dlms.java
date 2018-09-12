@@ -115,15 +115,16 @@ public class GXDLMSSchedule extends GXDLMSObject implements IGXDLMSBase {
      * already read or device is returned HW error it is not returned.
      */
     @Override
-    public final int[] getAttributeIndexToRead() {
+    public final int[] getAttributeIndexToRead(final boolean all) {
         java.util.ArrayList<Integer> attributes =
                 new java.util.ArrayList<Integer>();
         // LN is static and read only once.
-        if (getLogicalName() == null || getLogicalName().compareTo("") == 0) {
+        if (all || getLogicalName() == null
+                || getLogicalName().compareTo("") == 0) {
             attributes.add(new Integer(1));
         }
         // Entries
-        if (!isRead(2)) {
+        if (all || !isRead(2)) {
             attributes.add(new Integer(2));
         }
         return GXDLMSObjectHelpers.toIntArray(attributes);

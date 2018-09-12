@@ -33,8 +33,12 @@
 //---------------------------------------------------------------------------
 package gurux.dlms.client;
 
+import java.io.IOException;
 import java.util.ArrayList;
+import java.util.List;
 import java.util.Map;
+
+import javax.xml.stream.XMLStreamException;
 
 import gurux.common.GXCmdParameter;
 import gurux.common.GXCommon;
@@ -50,9 +54,65 @@ import gurux.net.GXNet;
 import gurux.serial.GXSerial;
 
 public class sampleclient {
+
+    static ObjectType[] getObjects() {
+        List<ObjectType> list = new ArrayList<ObjectType>();
+        list.add(ObjectType.ACTION_SCHEDULE);
+        list.add(ObjectType.ACTIVITY_CALENDAR);
+        list.add(ObjectType.ASSOCIATION_LOGICAL_NAME);
+        list.add(ObjectType.ASSOCIATION_SHORT_NAME);
+        list.add(ObjectType.AUTO_ANSWER);
+        list.add(ObjectType.AUTO_CONNECT);
+        list.add(ObjectType.CLOCK);
+        list.add(ObjectType.DATA);
+        list.add(ObjectType.DEMAND_REGISTER);
+        list.add(ObjectType.MAC_ADDRESS_SETUP);
+        list.add(ObjectType.EXTENDED_REGISTER);
+        list.add(ObjectType.GPRS_SETUP);
+        list.add(ObjectType.IEC_HDLC_SETUP);
+        list.add(ObjectType.IEC_LOCAL_PORT_SETUP);
+        list.add(ObjectType.IEC_TWISTED_PAIR_SETUP);
+        list.add(ObjectType.IP4_SETUP);
+        list.add(ObjectType.MBUS_SLAVE_PORT_SETUP);
+        list.add(ObjectType.IMAGE_TRANSFER);
+        list.add(ObjectType.SECURITY_SETUP);
+        list.add(ObjectType.DISCONNECT_CONTROL);
+        list.add(ObjectType.LIMITER);
+        list.add(ObjectType.MBUS_CLIENT);
+        list.add(ObjectType.MODEM_CONFIGURATION);
+        list.add(ObjectType.PPP_SETUP);
+        list.add(ObjectType.PROFILE_GENERIC);
+        list.add(ObjectType.REGISTER);
+        list.add(ObjectType.REGISTER_ACTIVATION);
+        list.add(ObjectType.REGISTER_MONITOR);
+        // list.add(ObjectType.REGISTER_TABLE);
+        // list.add(ObjectType.ZIG_BEE_SAS_STARTUP);
+        // list.add(ObjectType.ZIG_BEE_SAS_JOIN);
+        list.add(ObjectType.SAP_ASSIGNMENT);
+        list.add(ObjectType.SCHEDULE);
+        list.add(ObjectType.SCRIPT_TABLE);
+        list.add(ObjectType.SPECIAL_DAYS_TABLE);
+        // list.add(ObjectType.STATUS_MAPPING);
+        list.add(ObjectType.TCP_UDP_SETUP);
+        // list.add(ObjectType.ZIG_BEE_SAS_APS_FRAGMENTATION);
+        // list.add(ObjectType.UTILITY_TABLES);
+        list.add(ObjectType.PUSH_SETUP);
+        list.add(ObjectType.MBUS_MASTER_PORT_SETUP);
+        list.add(ObjectType.GSM_DIAGNOSTIC);
+        list.add(ObjectType.ACCOUNT);
+        list.add(ObjectType.CREDIT);
+        list.add(ObjectType.CHARGE);
+        // list.add(ObjectType.TOKEN_GATEWAY);
+        list.add(ObjectType.PARAMETER_MONITOR);
+        list.add(ObjectType.IP6_SETUP);
+        return list.toArray(new ObjectType[0]);
+    }
+
     /**
      * @param args
      *            the command line arguments
+     * @throws IOException
+     * @throws XMLStreamException
      */
     public static void main(String[] args) {
         Settings settings = new Settings();

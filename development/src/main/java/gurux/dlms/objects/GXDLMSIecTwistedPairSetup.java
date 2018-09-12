@@ -87,7 +87,7 @@ public class GXDLMSIecTwistedPairSetup extends GXDLMSObject
      * Constructor.
      */
     public GXDLMSIecTwistedPairSetup() {
-        super(ObjectType.IEC_TWISTED_PAIR_SETUP);
+        this(null, 0);
     }
 
     /**
@@ -97,7 +97,7 @@ public class GXDLMSIecTwistedPairSetup extends GXDLMSObject
      *            Logical Name of the object.
      */
     public GXDLMSIecTwistedPairSetup(final String ln) {
-        super(ObjectType.IEC_TWISTED_PAIR_SETUP, ln, 0);
+        this(ln, 0);
     }
 
     /**
@@ -110,6 +110,8 @@ public class GXDLMSIecTwistedPairSetup extends GXDLMSObject
      */
     public GXDLMSIecTwistedPairSetup(final String ln, final int sn) {
         super(ObjectType.IEC_TWISTED_PAIR_SETUP, ln, sn);
+        mode = IecTwistedPairSetupMode.INACTIVE;
+        speed = BaudRate.BAUDRATE_9600;
     }
 
     /**
@@ -199,27 +201,28 @@ public class GXDLMSIecTwistedPairSetup extends GXDLMSObject
      * already read or device is returned HW error it is not returned.
      */
     @Override
-    public final int[] getAttributeIndexToRead() {
+    public final int[] getAttributeIndexToRead(final boolean all) {
         java.util.ArrayList<Integer> attributes =
                 new java.util.ArrayList<Integer>();
         // LN is static and read only once.
-        if (getLogicalName() == null || getLogicalName().compareTo("") == 0) {
+        if (all || getLogicalName() == null
+                || getLogicalName().compareTo("") == 0) {
             attributes.add(new Integer(1));
         }
         // Mode
-        if (canRead(2)) {
+        if (all || canRead(2)) {
             attributes.add(new Integer(2));
         }
         // Speed
-        if (canRead(3)) {
+        if (all || canRead(3)) {
             attributes.add(new Integer(3));
         }
         // PrimaryAddresses
-        if (canRead(4)) {
+        if (all || canRead(4)) {
             attributes.add(new Integer(4));
         }
         // Tabis
-        if (canRead(5)) {
+        if (all || canRead(5)) {
             attributes.add(new Integer(5));
         }
         return GXDLMSObjectHelpers.toIntArray(attributes);

@@ -222,39 +222,40 @@ public class GXDLMSGSMDiagnostic extends GXDLMSObject implements IGXDLMSBase {
      * already read or device is returned HW error it is not returned.
      */
     @Override
-    public final int[] getAttributeIndexToRead() {
+    public final int[] getAttributeIndexToRead(final boolean all) {
         java.util.ArrayList<Integer> attributes =
                 new java.util.ArrayList<Integer>();
         // LN is static and read only once.
-        if (getLogicalName() == null || getLogicalName().compareTo("") == 0) {
+        if (all || getLogicalName() == null
+                || getLogicalName().compareTo("") == 0) {
             attributes.add(new Integer(1));
         }
         // Operator
-        if (canRead(2)) {
+        if (all || canRead(2)) {
             attributes.add(2);
         }
         // Status
-        if (canRead(3)) {
+        if (all || canRead(3)) {
             attributes.add(3);
         }
         // CircuitSwitchStatus
-        if (canRead(4)) {
+        if (all || canRead(4)) {
             attributes.add(4);
         }
         // PacketSwitchStatus
-        if (canRead(5)) {
+        if (all || canRead(5)) {
             attributes.add(5);
         }
         // CellInfo
-        if (canRead(6)) {
+        if (all || canRead(6)) {
             attributes.add(6);
         }
         // AdjacentCells
-        if (canRead(7)) {
+        if (all || canRead(7)) {
             attributes.add(7);
         }
         // CaptureTime
-        if (canRead(8)) {
+        if (all || canRead(8)) {
             attributes.add(8);
         }
         return GXDLMSObjectHelpers.toIntArray(attributes);

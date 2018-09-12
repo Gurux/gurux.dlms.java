@@ -126,23 +126,24 @@ public class GXDLMSGprsSetup extends GXDLMSObject implements IGXDLMSBase {
      * already read or device is returned HW error it is not returned.
      */
     @Override
-    public final int[] getAttributeIndexToRead() {
+    public final int[] getAttributeIndexToRead(final boolean all) {
         java.util.ArrayList<Integer> attributes =
                 new java.util.ArrayList<Integer>();
         // LN is static and read only once.
-        if (getLogicalName() == null || getLogicalName().compareTo("") == 0) {
+        if (all || getLogicalName() == null
+                || getLogicalName().compareTo("") == 0) {
             attributes.add(new Integer(1));
         }
         // APN
-        if (!isRead(2)) {
+        if (all || !isRead(2)) {
             attributes.add(new Integer(2));
         }
         // PINCode
-        if (!isRead(3)) {
+        if (all || !isRead(3)) {
             attributes.add(new Integer(3));
         }
         // DefaultQualityOfService + RequestedQualityOfService
-        if (!isRead(4)) {
+        if (all || !isRead(4)) {
             attributes.add(new Integer(4));
         }
         return GXDLMSObjectHelpers.toIntArray(attributes);

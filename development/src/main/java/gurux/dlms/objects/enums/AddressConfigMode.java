@@ -32,39 +32,26 @@
 // Full text may be retrieved at http://www.gnu.org/licenses/gpl-2.0.txt
 //---------------------------------------------------------------------------
 
-package gurux.dlms.objects;
+package gurux.dlms.objects.enums;
 
-import gurux.dlms.objects.enums.Ip4SetupIpOptionType;
-
-public class GXDLMSIp4SetupIpOption {
-    private Ip4SetupIpOptionType type;
-    private short length;
-    private byte[] data;
-
-    public final Ip4SetupIpOptionType getType() {
-        return type;
-    }
-
-    public final void setType(final Ip4SetupIpOptionType value) {
-        if (value == null) {
-            throw new IllegalArgumentException("Invalid Ip4SetupIpOptionType.");
-        }
-        type = value;
-    }
-
-    public final short getLength() {
-        return length;
-    }
-
-    public final void setLength(final short value) {
-        length = value;
-    }
-
-    public final byte[] getData() {
-        return data;
-    }
-
-    public final void setData(final byte[] value) {
-        data = value;
-    }
+/**
+ * Enumerated Address config modes.
+ */
+public enum AddressConfigMode {
+    /**
+     * Auto Configuration.
+     */
+    AUTO,
+    /**
+     * DHCP v6.
+     */
+    DHCP_V6,
+    /**
+     * Manual
+     */
+    MANUAL,
+    /**
+     * Neighbour Discovery.
+     */
+    NEIGHBOUR_DISCOVERY
 }

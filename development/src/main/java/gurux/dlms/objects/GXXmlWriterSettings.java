@@ -44,6 +44,11 @@ public class GXXmlWriterSettings {
     private boolean values;
 
     /**
+     * Are values saved in old way.
+     */
+    private boolean old;
+
+    /**
      * Constructor.
      */
     public GXXmlWriterSettings() {
@@ -63,5 +68,20 @@ public class GXXmlWriterSettings {
      */
     public final void setValues(final boolean value) {
         values = value;
+    }
+
+    /**
+     * @return Are values saved in old way.
+     */
+    public final boolean getOld() {
+        return old;
+    }
+
+    /**
+     * @param value
+     *            Are Are values saved in old way.
+     */
+    public final void setOld(final boolean value) {
+        old = value;
     }
 }

@@ -75,6 +75,7 @@ import gurux.dlms.objects.GXDLMSIECOpticalPortSetup;
 import gurux.dlms.objects.GXDLMSIecTwistedPairSetup;
 import gurux.dlms.objects.GXDLMSImageTransfer;
 import gurux.dlms.objects.GXDLMSIp4Setup;
+import gurux.dlms.objects.GXDLMSIp6Setup;
 import gurux.dlms.objects.GXDLMSLimiter;
 import gurux.dlms.objects.GXDLMSMBusClient;
 import gurux.dlms.objects.GXDLMSMBusMasterPortSetup;
@@ -187,6 +188,8 @@ abstract class GXDLMS {
             return new GXDLMSIecTwistedPairSetup();
         case IP4_SETUP:
             return new GXDLMSIp4Setup();
+        case IP6_SETUP:
+            return new GXDLMSIp6Setup();
         case MBUS_SLAVE_PORT_SETUP:
             return new GXDLMSMBusSlavePortSetup();
         case IMAGE_TRANSFER:
@@ -1469,9 +1472,8 @@ abstract class GXDLMS {
         // Add BOP
         bb.setUInt8(GXCommon.HDLC_FRAME_START_END);
         frameSize = settings.getLimits().getMaxInfoTX();
-        if (data != null && data.position() == 0)
-        {
-            frameSize -= 3;        
+        if (data != null && data.position() == 0) {
+            frameSize -= 3;
         }
         // If no data
         if (data == null || data.size() == 0) {
@@ -2584,9 +2586,24 @@ abstract class GXDLMS {
                                 data.getXml().getOutputType(),
                                 ErrorCode.forValue(data.getError())));
             }
-        } else if (type == SetResponseType.DATA_BLOCK
-                || type == SetResponseType.LAST_DATA_BLOCK) {
-            data.getData().getUInt32();
+        } else if (type == SetResponseType.DATA_BLOCK) {
+            long number = data.getData().getUInt32();
+            if (data.getXml() != null) {
+                data.getXml().appendLine(TranslatorTags.BLOCK_NUMBER, "Value",
+                        data.getXml().integerToHex(number, 8));
+            }
+        } else if (type == SetResponseType.LAST_DATA_BLOCK) {
+            data.setError(data.getData().getUInt8());
+            long number = data.getData().getUInt32();
+            if (data.getXml() != null) {
+                // Result start tag.
+                data.getXml().appendLine(TranslatorTags.RESULT, "Value",
+                        GXDLMSTranslator.errorCodeToString(
+                                data.getXml().getOutputType(),
+                                ErrorCode.forValue(data.getError())));
+                data.getXml().appendLine(TranslatorTags.BLOCK_NUMBER, "Value",
+                        data.getXml().integerToHex(number, 8));
+            }
         } else if (type == SetResponseType.WITH_LIST) {
             int cnt = GXCommon.getObjectCount(data.getData());
             if (data.getXml() != null) {

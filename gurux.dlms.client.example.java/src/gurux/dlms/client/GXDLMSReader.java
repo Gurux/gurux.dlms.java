@@ -69,6 +69,7 @@ import gurux.dlms.objects.GXDLMSObject;
 import gurux.dlms.objects.GXDLMSObjectCollection;
 import gurux.dlms.objects.GXDLMSProfileGeneric;
 import gurux.dlms.objects.GXDLMSRegister;
+import gurux.dlms.objects.GXXmlWriterSettings;
 import gurux.dlms.objects.IGXDLMSBase;
 import gurux.io.BaudRate;
 import gurux.io.Parity;
@@ -668,7 +669,7 @@ public class GXDLMSReader {
             writeTrace("-------- Reading " + it.getClass().getSimpleName() + " "
                     + it.getName().toString() + " " + it.getDescription(),
                     TraceLevel.INFO);
-            for (int pos : ((IGXDLMSBase) it).getAttributeIndexToRead()) {
+            for (int pos : ((IGXDLMSBase) it).getAttributeIndexToRead(true)) {
                 try {
                     Object val = read(it, pos);
                     showValue(pos, val);
@@ -824,6 +825,12 @@ public class GXDLMSReader {
             getReadOut();
             // Read historical data.
             getProfileGenerics();
+
+            dlms.getObjects().save("C:\\temp\\koe.xml",
+                    new GXXmlWriterSettings());
+            GXDLMSObjectCollection c2 =
+                    GXDLMSObjectCollection.load("C:\\temp\\koe.xml");
+
         } finally {
             close();
         }

@@ -477,8 +477,7 @@ public class GXDLMSSettings {
         }
         System.out.println("Invalid HDLC Frame: " + Long.toString(frame, 16)
                 + " Expected: " + Long.toString(expected, 16));
-        return true;
-        // TODO: unit test must fix first. return false;
+        return false;
     }
 
     /**

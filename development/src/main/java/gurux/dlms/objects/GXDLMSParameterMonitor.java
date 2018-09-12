@@ -250,23 +250,24 @@ public class GXDLMSParameterMonitor extends GXDLMSObject
      * already read or device is returned HW error it is not returned.
      */
     @Override
-    public final int[] getAttributeIndexToRead() {
+    public final int[] getAttributeIndexToRead(final boolean all) {
         java.util.ArrayList<Integer> attributes =
                 new java.util.ArrayList<Integer>();
         // LN is static and read only once.
-        if (getLogicalName() == null || getLogicalName().compareTo("") == 0) {
+        if (all || getLogicalName() == null
+                || getLogicalName().compareTo("") == 0) {
             attributes.add(new Integer(1));
         }
         // ChangedParameter
-        if (canRead(2)) {
+        if (all || canRead(2)) {
             attributes.add(2);
         }
         // CaptureTime
-        if (canRead(3)) {
+        if (all || canRead(3)) {
             attributes.add(3);
         }
         // Parameters
-        if (canRead(4)) {
+        if (all || canRead(4)) {
             attributes.add(4);
         }
         return GXDLMSObjectHelpers.toIntArray(attributes);

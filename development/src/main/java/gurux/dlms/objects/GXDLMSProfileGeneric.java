@@ -346,39 +346,40 @@ public class GXDLMSProfileGeneric extends GXDLMSObject implements IGXDLMSBase {
      * already read or device is returned HW error it is not returned.
      */
     @Override
-    public final int[] getAttributeIndexToRead() {
+    public final int[] getAttributeIndexToRead(final boolean all) {
         java.util.ArrayList<Integer> attributes =
                 new java.util.ArrayList<Integer>();
         // LN is static and read only once.
-        if (getLogicalName() == null || getLogicalName().compareTo("") == 0) {
+        if (all || getLogicalName() == null
+                || getLogicalName().compareTo("") == 0) {
             attributes.add(new Integer(1));
         }
         // Buffer
-        if (!isRead(2)) {
+        if (all || !isRead(2)) {
             attributes.add(new Integer(2));
         }
         // CaptureObjects
-        if (!isRead(3)) {
+        if (all || !isRead(3)) {
             attributes.add(new Integer(3));
         }
         // CapturePeriod
-        if (!isRead(4)) {
+        if (all || !isRead(4)) {
             attributes.add(new Integer(4));
         }
         // SortMethod
-        if (!isRead(5)) {
+        if (all || !isRead(5)) {
             attributes.add(new Integer(5));
         }
         // SortObject
-        if (!isRead(6)) {
+        if (all || !isRead(6)) {
             attributes.add(new Integer(6));
         }
         // EntriesInUse
-        if (!isRead(7)) {
+        if (all || !isRead(7)) {
             attributes.add(new Integer(7));
         }
         // ProfileEntries
-        if (!isRead(8)) {
+        if (all || !isRead(8)) {
             attributes.add(new Integer(8));
         }
         return GXDLMSObjectHelpers.toIntArray(attributes);

@@ -47,7 +47,7 @@ public interface IGXDLMSBase {
      * 
      * @return Collection of attributes to read.
      */
-    int[] getAttributeIndexToRead();
+    int[] getAttributeIndexToRead(boolean all);
 
     /**
      * @return Amount of attributes.

@@ -34,6 +34,10 @@
 
 package gurux.dlms.enums;
 
+import java.util.Iterator;
+import java.util.Map;
+import java.util.Map.Entry;
+
 /**
  * ObjectType enumerates the usable types of DLMS objects in GuruxDLMS.
  */
@@ -380,5 +384,20 @@ public enum ObjectType {
     public static ObjectType forValue(final int value) {
         ObjectType ot = getMappings().get(new Integer(value));
         return ot;
+    }
+
+    public static ObjectType getEnum(final String value) {
+        String tmp = value.toUpperCase();
+        Iterator<Entry<Integer, ObjectType>> it =
+                mappings.entrySet().iterator();
+        while (it.hasNext()) {
+            Map.Entry<Integer, ObjectType> pair =
+                    (Map.Entry<Integer, ObjectType>) it.next();
+            if (tmp.compareTo(pair.getValue().toString()) == 0 || tmp.compareTo(
+                    pair.getValue().toString().replaceAll("_", "")) == 0) {
+                return pair.getValue();
+            }
+        }
+        return null;
     }
 }
