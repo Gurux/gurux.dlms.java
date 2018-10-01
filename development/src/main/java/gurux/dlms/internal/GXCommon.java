@@ -2590,8 +2590,8 @@ public final class GXCommon {
      * Check is string ASCII string.
      * 
      * @param value
-     *            Is ASCII string.
-     * @return
+     *            ASCII string.
+     * @return Is ASCII string
      */
     public static boolean isAscii(final String value) {
         return Charset.forName("US-ASCII").newEncoder().canEncode(value);

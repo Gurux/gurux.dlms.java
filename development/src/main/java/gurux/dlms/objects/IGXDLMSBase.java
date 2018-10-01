@@ -45,6 +45,8 @@ public interface IGXDLMSBase {
      * Returns collection of attributes to read. If attribute is static and
      * already read or device is returned HW error it is not returned.
      * 
+     * @param all
+     *            All are attributes get.
      * @return Collection of attributes to read.
      */
     int[] getAttributeIndexToRead(boolean all);

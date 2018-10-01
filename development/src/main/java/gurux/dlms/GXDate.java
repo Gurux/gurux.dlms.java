@@ -120,9 +120,12 @@ public class GXDate extends GXDateTime {
             }
             String sep = String.valueOf(separator);
             shortDatePattern.addAll(GXCommon.split(tmp.get(0), sep));
-
             List<String> values = GXCommon.split(value.trim(),
                     new char[] { separator, ':', ' ' });
+
+            if (shortDatePattern.get(shortDatePattern.size() - 1).isEmpty()) {
+                shortDatePattern.remove(shortDatePattern.size() - 1);
+            }
             if (shortDatePattern.size() != values.size()
                     && shortDatePattern.size() != values.size()) {
                 throw new IllegalArgumentException("Invalid Date.");
@@ -139,13 +142,15 @@ public class GXDate extends GXDateTime {
                     } else {
                         year = Integer.parseInt(values.get(pos));
                     }
-                } else if ("M".compareToIgnoreCase(val) == 0) {
+                } else if ("M".compareToIgnoreCase(val) == 0
+                        || "MM".compareToIgnoreCase(val) == 0) {
                     if (ignore) {
                         month = -1;
                     } else {
                         month = Integer.parseInt(values.get(pos));
                     }
-                } else if ("d".compareToIgnoreCase(val) == 0) {
+                } else if ("d".compareToIgnoreCase(val) == 0
+                        || "dd".compareToIgnoreCase(val) == 0) {
                     if (ignore) {
                         day = -1;
                     } else {
