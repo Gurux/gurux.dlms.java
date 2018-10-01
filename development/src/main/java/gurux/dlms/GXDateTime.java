@@ -1022,7 +1022,8 @@ public class GXDateTime {
     /**
      * Convert date time to Epoch time.
      * 
-     * @par date Date and time.
+     * @param date
+     *            Date and time.
      * @return Unix time.
      */
     public static long toUnixTime(final GXDateTime date) {
