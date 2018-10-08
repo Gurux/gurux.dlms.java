@@ -35,7 +35,6 @@
 package gurux.dlms;
 
 import java.text.DecimalFormat;
-import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.Calendar;
 import java.util.Date;
@@ -245,7 +244,6 @@ public class GXDateTime {
      * 
      * @param value
      *            Date time value as a string.
-     * @throws ParseException
      */
     public GXDateTime(final String value) {
         if (skip == null) {

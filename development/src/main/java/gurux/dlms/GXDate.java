@@ -34,13 +34,9 @@
 
 package gurux.dlms;
 
-import java.text.SimpleDateFormat;
-import java.util.ArrayList;
 import java.util.Date;
-import java.util.List;
 
 import gurux.dlms.enums.DateTimeSkips;
-import gurux.dlms.internal.GXCommon;
 
 public class GXDate extends GXDateTime {
     /**
