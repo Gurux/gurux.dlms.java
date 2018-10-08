@@ -35,13 +35,11 @@
 package gurux.dlms;
 
 import java.text.DecimalFormat;
+import java.text.ParseException;
 import java.text.SimpleDateFormat;
-import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.Date;
 import java.util.HashSet;
-import java.util.List;
-import java.util.Locale;
 import java.util.TimeZone;
 
 import gurux.dlms.enums.ClockStatus;
@@ -238,198 +236,121 @@ public class GXDateTime {
         }
     }
 
+    private static boolean isNumeric(char value) {
+        return value >= '0' && value <= '9';
+    }
+
     /**
      * Constructor
      * 
      * @param value
      *            Date time value as a string.
+     * @throws ParseException
      */
     public GXDateTime(final String value) {
+        if (skip == null) {
+            skip = new HashSet<DateTimeSkips>();
+        }
+        if (status == null) {
+            status = new HashSet<ClockStatus>();
+            status.add(ClockStatus.OK);
+        }
+
         if (value != null) {
-            int year = 2000, month = 1, day = 1, hour = 0, min = 0, sec = 0;
             SimpleDateFormat sd = new SimpleDateFormat();
-            // Separate date and time parts.
-            List<String> tmp = GXCommon.split(sd.toPattern(), " ");
-            List<String> shortDatePattern = new ArrayList<String>();
-            List<String> shortTimePattern = new ArrayList<String>();
-            char dateSeparator = 0;
-            char timeSeparator = 0;
-            int dateIndex = 0;
-            int timeIndex = 1;
-
-            if (tmp.get(0).indexOf('H') != -1) {
-                timeIndex = 0;
-                dateIndex = 1;
-            } else if (tmp.get(1).indexOf('a') != -1) {
-                timeIndex = 2;
-                if (tmp.size() == 2) {
-                    String str = tmp.get(1);
-                    tmp.remove(1);
-                    int pos = str.indexOf('a');
-                    if (pos == 0) {
-                        tmp.add("a");
-                        tmp.add(str.substring(1));
-                    } else {
-                        timeIndex = 1;
-                        tmp.add(str.substring(0, pos));
-                        tmp.add("a");
-                    }
-                }
-            }
-
-            if (Locale.getDefault() == Locale.KOREAN
-                    || Locale.getDefault() == Locale.KOREA) {
-                dateSeparator = ' ';
-                timeSeparator = ':';
-                tmp.clear();
-                tmp.add("yy. M. d");
-                tmp.add("a");
-                tmp.add("h:mm");
-            } else {
-                // Find date separator.
-                for (char it : tmp.get(dateIndex).toCharArray()) {
-                    if (!Character.isLetter(it)) {
-                        dateSeparator = it;
-                        break;
-                    }
-                }
-                // Find time separator.
-                for (char it : tmp.get(timeIndex).toCharArray()) {
-                    if (!Character.isLetter(it)) {
-                        timeSeparator = it;
-                        break;
-                    }
-                }
-                shortDatePattern.addAll(
-                        GXCommon.split(tmp.get(dateIndex), dateSeparator));
-            }
-            int offset = 3;
-            if ("a".compareToIgnoreCase(tmp.get(1)) == 0) {
-                shortTimePattern
-                        .addAll(GXCommon.split(tmp.get(2), timeSeparator));
-                offset = 4;
-            } else {
-                if (timeIndex == 0) {
-                    shortTimePattern
-                            .addAll(GXCommon.split(tmp.get(0), timeSeparator));
-                } else {
-                    shortTimePattern
-                            .addAll(GXCommon.split(tmp.get(1), timeSeparator));
-                }
-            }
-            // Add seconds if not used.
-            if (!shortTimePattern.contains("ss")) {
-                if (shortTimePattern.get(shortTimePattern.size() - 1)
-                        .equals("a")) {
-                    shortTimePattern.remove("a");
-                    shortTimePattern.add("ss");
-                    shortTimePattern.add("a");
-                } else {
-                    shortTimePattern.add("ss");
-                }
-            }
-            List<String> values = GXCommon.split(value.trim(),
-                    new char[] { dateSeparator, timeSeparator, ' ' });
-
-            for (int pos = 0; pos != shortDatePattern.size(); ++pos) {
-                boolean ignore = false;
-                if ("*".equals(values.get(pos))) {
-                    ignore = true;
-                }
-                String val = shortDatePattern.get(pos);
-                if (val.startsWith("y")) {
-                    if (ignore) {
-                        year = -1;
-                    } else {
-                        year = Integer.parseInt(values.get(pos));
-                        if (val.compareToIgnoreCase("yy") == 0) {
-                            year += 2000;
-                        }
-                    }
-                } else if ("M".compareToIgnoreCase(val) == 0
-                        || "MM".compareToIgnoreCase(val) == 0
-                        || "M.".compareToIgnoreCase(val) == 0) {
-                    if (ignore) {
-                        month = -1;
-                    } else {
-                        month = Integer.parseInt(values.get(pos));
-                    }
-                } else if ("d".compareToIgnoreCase(val) == 0
-                        || "dd".compareToIgnoreCase(val) == 0) {
-                    if (ignore) {
-                        day = -1;
-                    } else {
-                        day = Integer.parseInt(values.get(pos));
-                    }
-                } else if ("".compareToIgnoreCase(val) == 0) {
-                    // Skip this.
-                } else if ("Gy".compareToIgnoreCase(val) == 0) {
-                    // Skip this.
-                } else {
-                    throw new IllegalArgumentException(
-                            "Invalid Date time pattern.");
-                }
-            }
-            if (values.size() > 3) {
-                SimpleDateFormat s = new SimpleDateFormat("a");
-                Calendar cal = Calendar.getInstance();
-                cal.setTime(new Date(0));
-                String am = s.format(new Date(0));
-                cal.add(Calendar.HOUR_OF_DAY, 12);
-                String pm = s.format(cal.getTime());
-
-                for (int pos = 0; pos != values.size() - offset; ++pos) {
-                    boolean ignore = false;
-                    if ("*".equals(values.get(offset + pos))) {
-                        ignore = true;
-                    }
-                    String val = shortTimePattern.get(pos);
-                    if ("h".compareToIgnoreCase(val) == 0
-                            || "hh".compareToIgnoreCase(val) == 0) {
-                        if (ignore) {
-                            hour = -1;
-                        } else {
-                            hour = Integer.parseInt(values.get(offset + pos));
-                            // If AM/PM is before time.
-                            if (offset == 4) {
-                                if (pm.compareToIgnoreCase(
-                                        values.get(3)) == 0) {
-                                    hour += 12;
+            StringBuilder format = new StringBuilder();
+            format.append(sd.toPattern());
+            remove(format);
+            String v = value;
+            if (value.indexOf('*') != -1) {
+                int lastFormatIndex = -1;
+                for (int pos = 0; pos < value.length(); ++pos) {
+                    char c = value.charAt(pos);
+                    if (!isNumeric(c)) {
+                        if (c == '*') {
+                            int end = lastFormatIndex + 1;
+                            c = format.charAt(end);
+                            while (end + 1 < format.length()
+                                    && format.charAt(end) == c) {
+                                ++end;
+                            }
+                            v = value.substring(0, pos) + "1"
+                                    + value.substring(pos + 1);
+                            String tmp = format
+                                    .substring(lastFormatIndex + 1, end).trim();
+                            if (tmp.startsWith("y")) {
+                                skip.add(DateTimeSkips.YEAR);
+                            } else if (tmp.equals("M") || tmp.equals("MM")) {
+                                skip.add(DateTimeSkips.MONTH);
+                            } else if (tmp.equals("dd") || tmp.equals("d")) {
+                                skip.add(DateTimeSkips.DAY);
+                            } else if (tmp.equals("h") || tmp.equals("hh")
+                                    || tmp.equals("HH") || tmp.equals("H")) {
+                                skip.add(DateTimeSkips.HOUR);
+                                int pos2 = format.indexOf("a");
+                                if (pos2 != -1) {
+                                    format.replace(pos2, pos2 + 1, "");
                                 }
-                            }
-                        }
-                    } else if ("mm".compareToIgnoreCase(val) == 0
-                            || "M".compareToIgnoreCase(val) == 0) {
-                        if (ignore) {
-                            min = -1;
-                        } else {
-                            min = Integer.parseInt(values.get(offset + pos));
-                        }
-                    } else if ("ss".compareToIgnoreCase(val) == 0) {
-                        val = values.get(offset + pos);
-                        if (am.compareToIgnoreCase(val) == 0) {
-                            if (hour == 12) {
-                                hour = 0;
-                            }
-                        } else if (pm.compareToIgnoreCase(val) == 0) {
-                            if (hour != 12) {
-                                hour += 12;
+                            } else if (tmp.equals("mm") || tmp.equals("m")) {
+                                skip.add(DateTimeSkips.MINUTE);
+                            } else if (tmp.equals("a")) {
+                                skip.add(DateTimeSkips.HOUR);
+                                int pos2 = format.indexOf("a");
+                                if (pos2 != -1) {
+                                    format.replace(pos2, pos2 + 1, "");
+                                }
+                            } else if (!tmp.isEmpty() && !tmp.equals("G")) {
+                                throw new RuntimeException(
+                                        "Invalid date time format.");
                             }
                         } else {
-                            if (ignore) {
-                                sec = -1;
-                            } else {
-                                sec = Integer.parseInt(val);
-                            }
+                            lastFormatIndex = format.indexOf(String.valueOf(c),
+                                    lastFormatIndex + 1);
                         }
-                    } else {
-                        throw new IllegalArgumentException(
-                                "Invalid Date time pattern.");
                     }
                 }
             }
             meterCalendar = Calendar.getInstance();
-            init(year, month, day, hour, min, sec, 0);
+            try {
+                sd = new SimpleDateFormat(format.toString().trim());
+                meterCalendar.setTime(sd.parse(v));
+                getSkip().add(DateTimeSkips.SECOND);
+                getSkip().add(DateTimeSkips.MILLISECOND);
+            } catch (java.text.ParseException e) {
+                try {
+                    if (!getSkip().contains(DateTimeSkips.SECOND)) {
+                        int index = format.indexOf("mm");
+                        if (index != -1) {
+                            String sep = format.substring(index - 1, index);
+                            format.replace(index, index + 2, "mm" + sep + "ss");
+                        }
+                    }
+                    sd = new SimpleDateFormat(format.toString().trim());
+                    meterCalendar.setTime(sd.parse(v));
+                    getSkip().add(DateTimeSkips.MILLISECOND);
+                } catch (java.text.ParseException e1) {
+                    try {
+                        if (!getSkip().contains(DateTimeSkips.MILLISECOND)) {
+                            int index = format.indexOf("ss");
+                            if (index != -1) {
+                                String sep = format.substring(index - 1, index);
+                                format.replace(index, index + 2,
+                                        "ss" + sep + "SSS");
+                            }
+                        }
+                        sd = new SimpleDateFormat(format.toString().trim());
+                        meterCalendar.setTime(sd.parse(v));
+                    } catch (java.text.ParseException e2) {
+                        throw new RuntimeException(e2);
+                    } catch (Exception e2) {
+                        throw new RuntimeException(e);
+                    }
+                } catch (Exception e1) {
+                    throw new RuntimeException(e1);
+                }
+            } catch (Exception e) {
+                throw new RuntimeException(e);
+            }
         }
 
     }
@@ -621,230 +542,148 @@ public class GXDateTime {
         status = forValue;
     }
 
+    private void remove(final StringBuilder format) {
+        if (this instanceof GXDate) {
+            remove(format, "HH", true);
+            remove(format, "H", true);
+            remove(format, "hh", true);
+            remove(format, "h", true);
+            remove(format, "mm", true);
+            remove(format, "m", true);
+            remove(format, "a", true);
+        } else if (this instanceof GXTime) {
+            remove(format, "yyyy", true);
+            remove(format, "yy", true);
+            remove(format, "MM", true);
+            remove(format, "M", true);
+            remove(format, "dd", true);
+            remove(format, "d", true);
+        }
+        // Trim
+        String tmp = format.toString();
+        format.setLength(0);
+        format.append(tmp.trim());
+    }
+
     public String toFormatString() {
+        StringBuilder format = new StringBuilder();
         SimpleDateFormat sd = new SimpleDateFormat();
-        int pos;
-        if (skip.size() != 0) {
-            String dateSeparator = null;
-            String timeSeparator = ":";
+        if (!getSkip().isEmpty()) {
             // Separate date and time parts.
-            List<String> tmp = GXCommon.split(sd.toPattern(), " ");
-            List<String> shortDatePattern = new ArrayList<String>();
-            List<String> shortTimePattern = new ArrayList<String>();
-            // Find date time separator.
-            char separator = 0;
-            int dateIndex = 0;
-            int timeIndex = 1;
-
-            if (Locale.getDefault() == Locale.KOREAN) {
-                separator = ' ';
-                dateSeparator = String.valueOf(separator);
-                tmp.clear();
-                tmp.add("yy. M. d");
-                tmp.add("a");
-                tmp.add("h:mm");
+            format.append(sd.toPattern());
+            remove(format);
+            if (getSkip().contains(DateTimeSkips.YEAR)) {
+                replace(format, "yyyy");
+                replace(format, "yy");
+            }
+            if (getSkip().contains(DateTimeSkips.MONTH)) {
+                replace(format, "M");
+            }
+            if (getSkip().contains(DateTimeSkips.DAY)) {
+                replace(format, "d");
+            }
+            if (getSkip().contains(DateTimeSkips.HOUR)) {
+                replace(format, "HH");
+                replace(format, "H");
+                replace(format, "h");
+                remove(format, "a", false);
+            }
+            if (getSkip().contains(DateTimeSkips.MILLISECOND)) {
+                replace(format, "SSS");
             } else {
-                if (tmp.get(0).contains("H")) {
-                    dateIndex = 1;
-                    timeIndex = 0;
+                int index = format.indexOf("ss");
+                if (index != -1) {
+                    String sep = format.substring(index - 1, index);
+                    format.replace(index, index + 2, "ss" + sep + "SSS");
                 }
-                for (char it : tmp.get(dateIndex).toCharArray()) {
-                    if (dateSeparator == null && !Character.isLetter(it)) {
-                        dateSeparator = String.valueOf(it);
-                    } else if (!Character.isLetter(it)) {
-                        separator = it;
-                        break;
-                    }
-                }
-
             }
-            String sep = String.valueOf(separator);
-            shortDatePattern.addAll(GXCommon.split(tmp.get(dateIndex), sep));
-            boolean amPmFirst = false;
-            if ("a".compareToIgnoreCase(tmp.get(1)) == 0) {
-                amPmFirst = true;
-                shortTimePattern
-                        .addAll(GXCommon.split(tmp.get(1 + timeIndex), ":"));
+            if (getSkip().contains(DateTimeSkips.SECOND)) {
+                replace(format, "ss");
             } else {
-                shortTimePattern
-                        .addAll(GXCommon.split(tmp.get(timeIndex), ":"));
-            }
-            if (!shortTimePattern.contains("ss")) {
-                shortTimePattern.add("ss");
-            }
-            if (this instanceof GXTime) {
-                shortDatePattern.clear();
-            } else {
-                if (skip.contains(DateTimeSkips.YEAR)) {
-                    pos = shortDatePattern.indexOf("yyyy");
-                    if (pos == -1) {
-                        pos = shortDatePattern.indexOf("yy");
-                    }
-                    shortDatePattern.set(pos, "*");
-                }
-                if (skip.contains(DateTimeSkips.MONTH)) {
-                    pos = shortDatePattern.indexOf("M");
-                    if (pos == -1) {
-                        pos = shortDatePattern.indexOf("MM");
-                    }
-                    shortDatePattern.set(pos, "*");
-                }
-                if (skip.contains(DateTimeSkips.DAY)) {
-                    pos = shortDatePattern.indexOf("d");
-                    shortDatePattern.set(pos, "*");
+                int index = format.indexOf("mm");
+                if (index != -1) {
+                    String sep = format.substring(index - 1, index);
+                    format.replace(index, index + 2, "mm" + sep + "ss");
                 }
             }
-            if (this instanceof GXDate) {
-                shortTimePattern.clear();
-            } else {
-                if (skip.contains(DateTimeSkips.HOUR)) {
-                    pos = shortTimePattern.indexOf("h");
-                    if (pos == -1) {
-                        pos = shortTimePattern.indexOf("H");
-                    }
-                    shortTimePattern.set(pos, "*");
-                }
-                if (skip.contains(DateTimeSkips.MINUTE)) {
-                    pos = shortTimePattern.indexOf("mm");
-                    shortTimePattern.set(pos, "*");
-                }
-                if (skip.contains(DateTimeSkips.SECOND)
-                        || (shortTimePattern.size() == 1 && getLocalCalendar()
-                                .get(Calendar.SECOND) == 0)) {
-                    pos = shortTimePattern.indexOf("ss");
-                    shortTimePattern.set(pos, "*");
-                }
+            if (getSkip().contains(DateTimeSkips.MINUTE)) {
+                replace(format, "mm");
+                replace(format, "m");
             }
-            String format = null;
-            if (!shortDatePattern.isEmpty()) {
-                format = String.join(dateSeparator,
-                        shortDatePattern.toArray(new String[0]));
-            }
-            if (!shortTimePattern.isEmpty()) {
-                if (format != null) {
-                    format += " ";
-                } else {
-                    format = "";
-                }
-                if (amPmFirst) {
-                    format += "a ";
-                }
-                format += String.join(timeSeparator,
-                        shortTimePattern.toArray(new String[0]));
-            }
-            if (format == "H") {
-                return String
-                        .valueOf(getLocalCalendar().get(Calendar.HOUR_OF_DAY));
-            }
-            if (format == null) {
-                return "";
-            }
-            // If AM/PM is used.
-            if (!amPmFirst && shortTimePattern.size() > 0 && tmp.size() > 2) {
-                format += " a";
-            }
-            sd = new SimpleDateFormat(format);
+            sd = new SimpleDateFormat(format.toString().trim());
             return sd.format(getLocalCalendar().getTime());
         }
         return sd.format(getLocalCalendar().getTime());
     }
 
+    private void remove(final StringBuilder value, final String tag,
+            final boolean removeSeparator) {
+        int pos = value.indexOf(tag);
+        if (pos != -1) {
+            int len = pos + tag.length();
+            if (pos != 0 && removeSeparator) {
+                --pos;
+            }
+            value.replace(pos, len, "");
+        }
+    }
+
+    private void replace(final StringBuilder value, final String tag) {
+        int pos = value.indexOf(tag);
+        if (pos != -1) {
+            int len = pos + tag.length();
+            value.replace(pos, len, "*");
+        }
+    }
+
     @Override
     public final String toString() {
+        StringBuilder format = new StringBuilder();
         SimpleDateFormat sd = new SimpleDateFormat();
         if (!getSkip().isEmpty()) {
             // Separate date and time parts.
-            List<String> tmp = GXCommon.split(sd.toPattern(), " ");
-            List<String> date = new ArrayList<String>();
-            List<String> tm = new ArrayList<String>();
-            // Find date time separator.
-            char separator = 0;
-            if (Locale.getDefault() == Locale.KOREAN) {
-                separator = ' ';
-                tmp.clear();
-                tmp.add("yy. M. d");
-                tmp.add("a");
-                tmp.add("h:mm");
+            format.append(sd.toPattern());
+            remove(format);
+            if (getSkip().contains(DateTimeSkips.YEAR)) {
+                remove(format, "yyyy", true);
+                remove(format, "yy", true);
+            }
+            if (getSkip().contains(DateTimeSkips.MONTH)) {
+                remove(format, "M", true);
+            }
+            if (getSkip().contains(DateTimeSkips.DAY)) {
+                remove(format, "d", true);
+            }
+            if (getSkip().contains(DateTimeSkips.HOUR)) {
+                remove(format, "HH", true);
+                remove(format, "H", true);
+                remove(format, "h", true);
+                remove(format, "a", true);
+            }
+            if (getSkip().contains(DateTimeSkips.MILLISECOND)) {
+                remove(format, "SSS", true);
             } else {
-                for (char it : tmp.get(0).toCharArray()) {
-                    if (!Character.isLetter(it)) {
-                        separator = it;
-                        break;
-                    }
+                int index = format.indexOf("ss");
+                if (index != -1) {
+                    String sep = format.substring(index - 1, index);
+                    format.replace(index, index + 2, "ss" + sep + "SSS");
                 }
             }
-            boolean amPmFirst = false;
-            if (separator != 0) {
-                String sep = String.valueOf(separator);
-                date.addAll(GXCommon.split(tmp.get(0), sep));
-                if ("a".compareToIgnoreCase(tmp.get(1)) == 0) {
-                    amPmFirst = true;
-                    tm.addAll(GXCommon.split(tmp.get(2), ":"));
-                } else {
-                    tm.addAll(GXCommon.split(tmp.get(1), ":"));
+            if (getSkip().contains(DateTimeSkips.SECOND)) {
+                remove(format, "ss", true);
+            } else {
+                int index = format.indexOf("mm");
+                if (index != -1) {
+                    String sep = format.substring(index - 1, index);
+                    format.replace(index, index + 2, "mm" + sep + "ss");
                 }
-                if (getSkip().contains(DateTimeSkips.YEAR)) {
-                    date.remove("yyyy");
-                }
-                if (getSkip().contains(DateTimeSkips.MONTH)) {
-                    date.remove("M");
-                }
-                if (getSkip().contains(DateTimeSkips.DAY)) {
-                    date.remove("d");
-                }
-                if (getSkip().contains(DateTimeSkips.HOUR)) {
-                    tm.remove("H");
-                    tm.remove("HH");
-                }
-                if (getSkip().contains(DateTimeSkips.MINUTE)) {
-                    tm.remove("m");
-                    tm.remove("mm");
-                }
-                if (getSkip().contains(DateTimeSkips.SECOND)) {
-                    tm.remove("ss");
-                } else {
-                    tm.add("ss");
-                }
-                if (getSkip().contains(DateTimeSkips.MILLISECOND)) {
-                    tm.remove("SSS");
-                } else {
-                    tm.add("SSS");
-                }
-                String format = "";
-                StringBuilder sb = new StringBuilder();
-                if (!date.isEmpty()) {
-                    for (String it : date) {
-                        if (sb.length() != 0) {
-                            sb.append(separator);
-                        }
-                        sb.append(it);
-                    }
-                    format = sb.toString();
-                }
-                if (!tm.isEmpty()) {
-                    sb.setLength(0);
-                    for (String it : tm) {
-                        if (sb.length() != 0) {
-                            sb.append(':');
-                        }
-                        sb.append(it);
-                    }
-                    if (format.length() != 0) {
-                        format += " ";
-                    }
-                    if (amPmFirst && tmp.size() > 2) {
-                        format += tmp.get(1) + " ";
-                    }
-                    format += sb.toString();
-                }
-                // If 12 hour format. Add AM or PM.
-                if (!amPmFirst && tmp.size() > 2) {
-                    format += " " + tmp.get(2);
-                }
-
-                sd = new SimpleDateFormat(format);
-                return sd.format(getLocalCalendar().getTime());
             }
+            if (getSkip().contains(DateTimeSkips.MINUTE)) {
+                remove(format, "mm", true);
+                remove(format, "m", true);
+            }
+            sd = new SimpleDateFormat(format.toString().trim());
+            return sd.format(getLocalCalendar().getTime());
         }
         return sd.format(getLocalCalendar().getTime());
     }

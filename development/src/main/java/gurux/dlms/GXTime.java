@@ -108,98 +108,10 @@ public class GXTime extends GXDateTime {
      *            Date time value as a string.
      */
     public GXTime(final String value) {
-        if (value != null) {
-            int hour = 0, min = 0, sec = 0;
-            SimpleDateFormat sd = new SimpleDateFormat();
-            // Separate date and time parts.
-            List<String> tmp = GXCommon.split(sd.toPattern(), " ");
-            List<String> shortTimePattern = new ArrayList<String>();
-            // Find date time separator.
-            char separator = 0;
-            for (char it : tmp.get(0).toCharArray()) {
-                if (!Character.isLetter(it)) {
-                    separator = it;
-                    break;
-                }
-            }
-            SimpleDateFormat s = new SimpleDateFormat("a");
-            Calendar cal = Calendar.getInstance();
-            cal.setTime(new Date(0));
-            String am = s.format(new Date(0));
-            cal.add(Calendar.HOUR_OF_DAY, 12);
-            String pm = s.format(cal.getTime());
-
-            boolean addamPm = false;
-            boolean amPmFist = false;
-            if ("a".compareToIgnoreCase(tmp.get(1)) == 0) {
-                shortTimePattern.addAll(
-                        GXCommon.split(tmp.get(2), new char[] { ':', '.' }));
-                amPmFist = true;
-            } else {
-                shortTimePattern.addAll(
-                        GXCommon.split(tmp.get(1), new char[] { ':', '.' }));
-            }
-            if (!shortTimePattern.contains("ss")) {
-                shortTimePattern.add("ss");
-            }
-            List<String> values = GXCommon.split(value.trim(),
-                    new char[] { separator, ':', ' ', '.' });
-
-            if (amPmFist) {
-                if (values.get(0).compareToIgnoreCase(am) == 0) {
-                    values.remove(0);
-                } else if (values.get(0).compareToIgnoreCase(pm) == 0) {
-                    values.remove(0);
-                    addamPm = true;
-                }
-            } else {
-                if (values.get(values.size() - 1)
-                        .compareToIgnoreCase(am) == 0) {
-                    values.remove(values.size() - 1);
-                } else if (values.get(values.size() - 1)
-                        .compareToIgnoreCase(pm) == 0) {
-                    values.remove(values.size() - 1);
-                    addamPm = true;
-                }
-            }
-
-            if (shortTimePattern.size() != values.size()) {
-                throw new IllegalArgumentException("Invalid Time");
-            }
-
-            for (int pos = 0; pos != shortTimePattern.size(); ++pos) {
-                boolean ignore = false;
-                if ("*".compareTo(values.get(pos)) == 0) {
-                    ignore = true;
-                }
-                String val = shortTimePattern.get(pos);
-                if ("h".compareToIgnoreCase(val) == 0
-                        || "hh".compareToIgnoreCase(val) == 0) {
-                    if (ignore) {
-                        hour = -1;
-                    } else {
-                        hour = Integer.parseInt(values.get(pos));
-                        if (addamPm) {
-                            hour += 12;
-                        }
-                    }
-                } else if ("mm".compareToIgnoreCase(val) == 0) {
-                    if (ignore) {
-                        min = -1;
-                    } else {
-                        min = Integer.parseInt(values.get(pos));
-                    }
-                } else if ("ss".compareToIgnoreCase(val) == 0) {
-                    if (ignore) {
-                        sec = -1;
-                    } else {
-                        sec = Integer.parseInt(values.get(pos));
-                    }
-                } else {
-                    throw new IllegalArgumentException("Invalid time pattern.");
-                }
-            }
-            init(-1, -1, -1, hour, min, sec, -1);
-        }
-    }
+        super(value);
+        getSkip().add(DateTimeSkips.YEAR);
+        getSkip().add(DateTimeSkips.MONTH);
+        getSkip().add(DateTimeSkips.DAY);
+        getSkip().add(DateTimeSkips.DAY_OF_WEEK);
+   }
 }
