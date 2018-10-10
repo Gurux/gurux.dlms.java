@@ -272,8 +272,8 @@ public class GXDateTime {
                                     && format.charAt(end) == c) {
                                 ++end;
                             }
-                            v = value.substring(0, pos) + "1"
-                                    + value.substring(pos + 1);
+                            v = v.substring(0, pos) + "1"
+                                    + v.substring(pos + 1);
                             String tmp = format
                                     .substring(lastFormatIndex + 1, end).trim();
                             if (tmp.startsWith("y")) {

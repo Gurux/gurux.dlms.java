@@ -825,12 +825,6 @@ public class GXDLMSReader {
             getReadOut();
             // Read historical data.
             getProfileGenerics();
-
-            dlms.getObjects().save("C:\\temp\\koe.xml",
-                    new GXXmlWriterSettings());
-            GXDLMSObjectCollection c2 =
-                    GXDLMSObjectCollection.load("C:\\temp\\koe.xml");
-
         } finally {
             close();
         }
