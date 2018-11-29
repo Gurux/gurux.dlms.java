@@ -69,7 +69,6 @@ import gurux.dlms.objects.GXDLMSObject;
 import gurux.dlms.objects.GXDLMSObjectCollection;
 import gurux.dlms.objects.GXDLMSProfileGeneric;
 import gurux.dlms.objects.GXDLMSRegister;
-import gurux.dlms.objects.GXXmlWriterSettings;
 import gurux.dlms.objects.IGXDLMSBase;
 import gurux.io.BaudRate;
 import gurux.io.Parity;

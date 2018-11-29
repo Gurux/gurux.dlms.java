@@ -55,7 +55,6 @@ import gurux.common.TraceEventArgs;
 import gurux.common.enums.TraceLevel;
 import gurux.dlms.GXDLMSClient;
 import gurux.dlms.GXDLMSConnectionEventArgs;
-import gurux.dlms.GXDate;
 import gurux.dlms.GXDateTime;
 import gurux.dlms.GXServerReply;
 import gurux.dlms.GXSimpleEntry;
@@ -79,6 +78,7 @@ import gurux.dlms.objects.GXDLMSData;
 import gurux.dlms.objects.GXDLMSDayProfile;
 import gurux.dlms.objects.GXDLMSDayProfileAction;
 import gurux.dlms.objects.GXDLMSDemandRegister;
+import gurux.dlms.objects.GXDLMSGSMDiagnostic;
 import gurux.dlms.objects.GXDLMSHdlcSetup;
 import gurux.dlms.objects.GXDLMSIECOpticalPortSetup;
 import gurux.dlms.objects.GXDLMSImageTransfer;
@@ -309,7 +309,8 @@ public class GXDLMSBase extends GXDLMSSecureServer2
         // Calling is allowed between 1am to 6am.
         ac.getCallingWindow()
                 .add(new AbstractMap.SimpleEntry<GXDateTime, GXDateTime>(
-                        new GXTime(1, 0, 0, -1), new GXTime(6, 0, 0, -1)));
+                        new GXDateTime(-1, -1, -1, 1, 0, 0, -1),
+                        new GXDateTime(-1, -1, -1, 6, 0, 0, -1)));
         ac.setDestinations(new String[] { "www.gurux.org" });
         getItems().add(ac);
     }
@@ -322,9 +323,9 @@ public class GXDLMSBase extends GXDLMSSecureServer2
         java.util.Date now = tm.getTime();
         GXDLMSActivityCalendar activity = new GXDLMSActivityCalendar();
         activity.setCalendarNameActive("Active");
-        activity.setSeasonProfileActive(
-                new GXDLMSSeasonProfile[] { new GXDLMSSeasonProfile(
-                        "Summer time", new GXDate(-1, 3, 31), "") });
+        activity.setSeasonProfileActive(new GXDLMSSeasonProfile[] {
+                new GXDLMSSeasonProfile("Summer time",
+                        new GXDateTime(-1, -1, -1, -1, -1, 3, 31), "") });
         GXDLMSWeekProfile wp = new GXDLMSWeekProfile();
         wp.setName("Monday");
         wp.setMonday(1);
@@ -341,9 +342,9 @@ public class GXDLMSBase extends GXDLMSSecureServer2
                                 new GXDLMSDayProfileAction(new GXTime(now),
                                         "0.1.10.1.101.255", 1) }) });
         activity.setCalendarNamePassive("Passive");
-        activity.setSeasonProfilePassive(
-                new GXDLMSSeasonProfile[] { new GXDLMSSeasonProfile(
-                        "Winter time", new GXDate(-1, 10, 30), "") });
+        activity.setSeasonProfilePassive(new GXDLMSSeasonProfile[] {
+                new GXDLMSSeasonProfile("Winter time",
+                        new GXDateTime(-1, -1, -1, -1, -1, 10, 30), "") });
         wp = new GXDLMSWeekProfile();
         wp.setName("Tuesday");
         wp.setMonday(1);
@@ -509,7 +510,7 @@ public class GXDLMSBase extends GXDLMSSecureServer2
      * Add Push Setup. (On Connectivity object).
      */
     void addPushSetup() {
-        GXDLMSPushSetup push = new GXDLMSPushSetup("0.0.25.9.0.255");
+        GXDLMSPushSetup push = new GXDLMSPushSetup();
         getItems().add(push);
         // Add push object itself. This is needed to tell structure of data to
         // the Push listener.
@@ -528,6 +529,14 @@ public class GXDLMSBase extends GXDLMSSecureServer2
         push.getPushObjectList()
                 .add(new GXSimpleEntry<GXDLMSObject, GXDLMSCaptureObject>(ip4,
                         new GXDLMSCaptureObject(3, 0)));
+    }
+
+    /**
+     * Add GSM Diagnostic.
+     */
+    void addGSMDiagnostic() {
+        GXDLMSGSMDiagnostic gsm = new GXDLMSGSMDiagnostic();
+        getItems().add(gsm);
     }
 
     /**
@@ -588,6 +597,9 @@ public class GXDLMSBase extends GXDLMSSecureServer2
 
         // Add Push Setup. (On Connectivity object)
         addPushSetup();
+
+        // Add GSM Diagnostic.
+        addGSMDiagnostic();
         ///////////////////////////////////////////////////////////////////////
         // Server must initialize after all objects are added.
         super.initialize();

@@ -96,7 +96,7 @@ public class GXDLMSGSMDiagnostic extends GXDLMSObject implements IGXDLMSBase {
      * Constructor.
      */
     public GXDLMSGSMDiagnostic() {
-        this(null, 0);
+        this("0.0.25.6.0.255", 0);
     }
 
     /**
@@ -119,6 +119,7 @@ public class GXDLMSGSMDiagnostic extends GXDLMSObject implements IGXDLMSBase {
      */
     public GXDLMSGSMDiagnostic(final String ln, final int sn) {
         super(ObjectType.GSM_DIAGNOSTIC, ln, sn);
+        setVersion(1);
         cellInfo = new GXDLMSGSMCellInfo();
         adjacentCells = new ArrayList<GXAdjacentCell>();
         status = GsmStatus.NONE;
@@ -191,7 +192,7 @@ public class GXDLMSGSMDiagnostic extends GXDLMSObject implements IGXDLMSBase {
         return cellInfo;
     }
 
-    public final void setCellInfo(GXDLMSGSMCellInfo value) {
+    public final void setCellInfo(final GXDLMSGSMCellInfo value) {
         cellInfo = value;
     }
 
@@ -335,11 +336,24 @@ public class GXDLMSGSMDiagnostic extends GXDLMSObject implements IGXDLMSBase {
         case 6:
             bb = new GXByteBuffer();
             bb.setUInt8(DataType.STRUCTURE.getValue());
-            bb.setUInt8(4);
-            GXCommon.setData(bb, DataType.UINT16, cellInfo.getCellId());
+            if (getVersion() == 0) {
+                bb.setUInt8(4);
+                GXCommon.setData(bb, DataType.UINT16, cellInfo.getCellId());
+            } else {
+                bb.setUInt8(7);
+                GXCommon.setData(bb, DataType.UINT32, cellInfo.getCellId());
+            }
             GXCommon.setData(bb, DataType.UINT16, cellInfo.getLocationId());
             GXCommon.setData(bb, DataType.UINT8, cellInfo.getSignalQuality());
             GXCommon.setData(bb, DataType.UINT8, cellInfo.getBer());
+            if (getVersion() > 0) {
+                GXCommon.setData(bb, DataType.UINT16,
+                        cellInfo.getMobileCountryCode());
+                GXCommon.setData(bb, DataType.UINT16,
+                        cellInfo.getMobileNetworkCode());
+                GXCommon.setData(bb, DataType.UINT32,
+                        cellInfo.getChannelNumber());
+            }
             return bb.array();
         case 7:
             bb = new GXByteBuffer();
@@ -352,7 +366,9 @@ public class GXDLMSGSMDiagnostic extends GXDLMSObject implements IGXDLMSBase {
             for (GXAdjacentCell it : adjacentCells) {
                 bb.setUInt8(DataType.STRUCTURE.getValue());
                 bb.setUInt8(2);
-                GXCommon.setData(bb, DataType.UINT16, it.getCellId());
+                GXCommon.setData(bb,
+                        getVersion() == 0 ? DataType.UINT16 : DataType.UINT32,
+                        it.getCellId());
                 GXCommon.setData(bb, DataType.UINT8, it.getSignalQuality());
             }
             return bb.array();
@@ -402,6 +418,11 @@ public class GXDLMSGSMDiagnostic extends GXDLMSObject implements IGXDLMSBase {
                 cellInfo.setLocationId(((Number) tmp[1]).intValue());
                 cellInfo.setSignalQuality(((Number) tmp[2]).intValue());
                 cellInfo.setBer(((Number) tmp[3]).intValue());
+                if (getVersion() > 0) {
+                    cellInfo.setMobileCountryCode(((Number) tmp[4]).intValue());
+                    cellInfo.setMobileNetworkCode(((Number) tmp[5]).intValue());
+                    cellInfo.setChannelNumber(((Number) tmp[6]).intValue());
+                }
             }
             break;
         case 7:

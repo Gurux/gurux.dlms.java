@@ -57,5 +57,13 @@ public enum GsmPacketSwitchStatus {
     /**
      * HSDPA
      */
-    HSDPA;
+    HSDPA,
+    /**
+     * LTE
+     */
+    LTE,
+    /**
+     * CDMA
+     */
+    CDMA
 }

@@ -55,6 +55,21 @@ public class GXDLMSGSMCellInfo {
     private int signalQuality;
 
     /**
+     * Mobile Country Code.
+     */
+    private int mobileCountryCode;
+
+    /**
+     * Mobile Network Code.
+     */
+    private int mobileNetworkCode;
+
+    /**
+     * Absolute radio frequency channel number.
+     */
+    private long channelNumber;
+
+    /**
      * @return Four-byte cell ID.
      */
     public final long getCellId() {
@@ -112,6 +127,51 @@ public class GXDLMSGSMCellInfo {
      */
     public final void setBer(final int value) {
         ber = value;
+    }
+
+    /**
+     * @return Mobile Country Code.
+     */
+    public int getMobileCountryCode() {
+        return mobileCountryCode;
+    }
+
+    /**
+     * @param value
+     *            Mobile Country Code.
+     */
+    public void setMobileCountryCode(final int value) {
+        mobileCountryCode = value;
+    }
+
+    /**
+     * @return Absolute radio frequency channel number.
+     */
+    public long getChannelNumber() {
+        return channelNumber;
+    }
+
+    /**
+     * @param value
+     *            Absolute radio frequency channel number.
+     */
+    public void setChannelNumber(final long value) {
+        channelNumber = value;
+    }
+
+    /**
+     * @return Mobile Network Code.
+     */
+    public int getMobileNetworkCode() {
+        return mobileNetworkCode;
+    }
+
+    /**
+     * @param value
+     *            Mobile Network Code.
+     */
+    public void setMobileNetworkCode(final int value) {
+        mobileNetworkCode = value;
     }
 
 }

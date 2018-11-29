@@ -984,6 +984,10 @@ public final class GXCommon {
         }
         value = new Double(buff.getDouble());
         if (info.getXml() != null) {
+            if (info.getXml().isComments()) {
+                info.getXml().appendComment(String.format("%.2f", value));
+            }
+
             GXByteBuffer tmp = new GXByteBuffer();
             setData(tmp, DataType.FLOAT64, value);
             info.getXml().appendLine(info.getXml().getDataType(info.getType()),
@@ -1012,6 +1016,11 @@ public final class GXCommon {
         }
         value = new Float(buff.getFloat());
         if (info.getXml() != null) {
+
+            if (info.getXml().isComments()) {
+                info.getXml().appendComment(String.format("%.2f", value));
+            }
+
             GXByteBuffer tmp = new GXByteBuffer();
             setData(tmp, DataType.FLOAT32, value);
             info.getXml().appendLine(info.getXml().getDataType(info.getType()),

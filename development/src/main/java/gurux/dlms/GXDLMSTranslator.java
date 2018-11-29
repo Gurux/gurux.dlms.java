@@ -1798,17 +1798,7 @@ public class GXDLMSTranslator {
             case TranslatorTags.INVOKE_ID:
                 // InvokeIdAndPriority.
                 value = s.parseShort(getValue(node, s));
-                if ((value & 0x80) != 0) {
-                    s.getSettings().setPriority(Priority.HIGH);
-                } else {
-                    s.getSettings().setPriority(Priority.NORMAL);
-                }
-                if ((value & 0x40) != 0) {
-                    s.getSettings().setServiceClass(ServiceClass.CONFIRMED);
-                } else {
-                    s.getSettings().setServiceClass(ServiceClass.UN_CONFIRMED);
-                }
-                s.getSettings().setInvokeID((int) (value & 0xF));
+                s.getSettings().updateInvokeId((short) value);
                 break;
             case TranslatorTags.LONG_INVOKE_ID:
                 value = s.parseLong(getValue(node, s));

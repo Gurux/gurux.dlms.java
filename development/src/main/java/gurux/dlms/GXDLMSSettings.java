@@ -816,6 +816,24 @@ public class GXDLMSSettings {
 
     /**
      * @param value
+     *            update invoke ID.
+     */
+    final void updateInvokeId(final short value) {
+        if ((value & 0x80) != 0) {
+            setPriority(Priority.HIGH);
+        } else {
+            setPriority(Priority.NORMAL);
+        }
+        if ((value & 0x40) != 0) {
+            setServiceClass(ServiceClass.CONFIRMED);
+        } else {
+            setServiceClass(ServiceClass.UN_CONFIRMED);
+        }
+        invokeID = (byte) (value & 0xF);
+    }
+
+    /**
+     * @param value
      *            Invoke ID.
      */
     public final void setInvokeID(final int value) {

@@ -47,6 +47,7 @@ final class GXDLMSLNCommandHandler {
         byte type = (byte) data.getUInt8();
         // Get invoke ID and priority.
         short invokeID = data.getUInt8();
+        settings.updateInvokeId(invokeID);
         if (xml != null) {
             xml.appendStartTag(Command.GET_REQUEST);
             xml.appendStartTag(Command.GET_REQUEST, type);
@@ -102,6 +103,7 @@ final class GXDLMSLNCommandHandler {
         byte type = (byte) data.getUInt8();
         // Get invoke ID and priority.
         short invoke = data.getUInt8();
+        settings.updateInvokeId(invoke);
         // SetRequest normal or Set Request With First Data Block
         GXDLMSLNParameters p = new GXDLMSLNParameters(settings, invoke,
                 Command.SET_RESPONSE, type, null, null, 0);
@@ -815,6 +817,7 @@ final class GXDLMSLNCommandHandler {
         short type = data.getUInt8();
         // Get invoke ID and priority.
         short invokeId = data.getUInt8();
+        settings.updateInvokeId(invokeId);
         // CI
         int ci = data.getUInt16();
         ObjectType ot = ObjectType.forValue(ci);
@@ -950,6 +953,7 @@ final class GXDLMSLNCommandHandler {
         }
         // Get long invoke id and priority.
         long invokeId = data.getUInt32();
+        settings.setLongInvokeID(invokeId);
         int len = GXCommon.getObjectCount(data);
         byte[] tmp = null;
         // If date time is given.
