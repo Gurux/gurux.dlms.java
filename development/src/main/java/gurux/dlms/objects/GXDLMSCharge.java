@@ -684,7 +684,7 @@ public class GXDLMSCharge extends GXDLMSObject implements IGXDLMSBase {
             period = ((Number) e.getValue()).intValue();
             break;
         case 9:
-            chargeConfiguration = (String) e.getValue();
+            chargeConfiguration = String.valueOf(e.getValue());
             break;
         case 10:
             lastCollectionTime = (GXDateTime) GXDLMSClient

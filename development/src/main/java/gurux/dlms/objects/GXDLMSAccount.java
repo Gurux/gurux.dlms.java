@@ -981,7 +981,7 @@ public class GXDLMSAccount extends GXDLMSObject implements IGXDLMSBase {
                             new GXCreditChargeConfiguration();
                     item.setCreditReference(GXCommon.toLogicalName(it[0]));
                     item.setChargeReference(GXCommon.toLogicalName(it[1]));
-                    item.setCollectionConfiguration((String) it[2]);
+                    item.setCollectionConfiguration(String.valueOf(it[2]));
                     creditChargeConfigurations.add(item);
                 }
             }

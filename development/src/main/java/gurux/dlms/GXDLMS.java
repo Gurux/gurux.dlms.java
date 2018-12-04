@@ -1131,13 +1131,7 @@ abstract class GXDLMS {
                     messages.add(
                             GXDLMS.getHdlcFrame(p.getSettings(), frame, reply));
                     if (reply.position() != reply.size()) {
-                        if (p.getSettings().isServer()
-                                || p.getCommand() == Command.SET_REQUEST
-                                || p.getCommand() == Command.METHOD_REQUEST) {
-                            frame = 0;
-                        } else {
-                            frame = p.getSettings().getNextSend(false);
-                        }
+                        frame = p.getSettings().getNextSend(false);
                     }
                 } else if (p.getSettings()
                         .getInterfaceType() == InterfaceType.PDU) {

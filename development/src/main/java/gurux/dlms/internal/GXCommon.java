@@ -52,6 +52,7 @@ import java.util.TimeZone;
 
 import javax.crypto.KeyAgreement;
 
+import gurux.dlms.GXBitString;
 import gurux.dlms.GXByteBuffer;
 import gurux.dlms.GXDLMSClient;
 import gurux.dlms.GXDLMSConverter;
@@ -760,6 +761,8 @@ public final class GXCommon {
             int ms = buff.getUInt8();
             if (ms != 0xFF) {
                 ms *= 10;
+            } else {
+                ms = -1;
             }
             GXTime dt = new GXTime(hour, minute, second, ms);
             value = dt;
@@ -1703,7 +1706,7 @@ public final class GXCommon {
      *            Data info.
      * @return parsed bit string value.
      */
-    private static String getBitString(final GXByteBuffer buff,
+    private static GXBitString getBitString(final GXByteBuffer buff,
             final GXDataInfo info) {
         int cnt = getObjectCount(buff);
         double t = cnt;
@@ -1726,7 +1729,7 @@ public final class GXCommon {
             info.getXml().appendLine(info.getXml().getDataType(info.getType()),
                     null, sb.toString());
         }
-        return sb.toString();
+        return new GXBitString(sb.toString());
     }
 
     /**
@@ -2318,13 +2321,18 @@ public final class GXCommon {
      * 
      * @param buff
      *            Byte buffer where data is write.
-     * @param value
+     * @param val1
      *            Added value.
      * @param addCount
      *            Is bit count added.
      */
-    public static void setBitString(final GXByteBuffer buff, final Object value,
+    public static void setBitString(final GXByteBuffer buff, final Object val1,
             final boolean addCount) {
+        Object value = val1;
+        if (value instanceof GXBitString) {
+            value = ((GXBitString) value).getValue();
+        }
+
         if (value instanceof String) {
             byte val = 0;
             String str = (String) value;

@@ -479,24 +479,26 @@ public class GXDLMSReader {
      */
     public void readList(List<Entry<GXDLMSObject, Integer>> list)
             throws Exception {
-        byte[][] data = dlms.readList(list);
-        GXReplyData reply = new GXReplyData();
-        List<Object> values = new ArrayList<Object>(list.size());
-        for (byte[] it : data) {
-            readDataBlock(it, reply);
-            if (list.size() != 1 && reply.getValue() instanceof Object[]) {
-                values.addAll(Arrays.asList((Object[]) reply.getValue()));
-            } else if (reply.getValue() != null) {
-                // Value is null if data is send multiple frames.
-                values.add(reply.getValue());
+        if (list.size() != 0) {
+            byte[][] data = dlms.readList(list);
+            GXReplyData reply = new GXReplyData();
+            List<Object> values = new ArrayList<Object>(list.size());
+            for (byte[] it : data) {
+                readDataBlock(it, reply);
+                if (list.size() != 1 && reply.getValue() instanceof Object[]) {
+                    values.addAll(Arrays.asList((Object[]) reply.getValue()));
+                } else if (reply.getValue() != null) {
+                    // Value is null if data is send multiple frames.
+                    values.add(reply.getValue());
+                }
+                reply.clear();
             }
-            reply.clear();
+            if (values.size() != list.size()) {
+                throw new Exception(
+                        "Invalid reply. Read items count do not match.");
+            }
+            dlms.updateValues(list, values);
         }
-        if (values.size() != list.size()) {
-            throw new Exception(
-                    "Invalid reply. Read items count do not match.");
-        }
-        dlms.updateValues(list, values);
     }
 
     /**

@@ -441,8 +441,6 @@ public class GXDLMSTranslator {
             }
             if (!tagsByName.containsKey(str)) {
                 tagsByName.put(str, it.getKey());
-            } else {
-                System.out.println("Tag exists: " + str);
             }
         }
     }
@@ -1560,6 +1558,41 @@ public class GXDLMSTranslator {
             pv.setUInt8((byte) (8 - str.length()));
             GXCommon.setBitString(pv, str, false);
             s.getSettings().setProtocolVersion(str);
+            break;
+        case TranslatorTags.CALLED_AP_TITLE:
+        case TranslatorTags.CALLED_AE_QUALIFIER:
+            tmp = GXCommon.hexToBytes(getValue(node, s));
+            s.getAttributeDescriptor().setUInt8(
+                    (byte) (tag == (int) TranslatorTags.CALLED_AP_TITLE ? 0xA2
+                            : 0xA3));
+            s.getAttributeDescriptor().setUInt8(03);
+            s.getAttributeDescriptor().setUInt8(BerType.OCTET_STRING);
+            s.getAttributeDescriptor().setUInt8((byte) tmp.length);
+            s.getAttributeDescriptor().set(tmp);
+            break;
+        case (int) TranslatorTags.CALLED_AP_INVOCATION_ID:
+            s.getAttributeDescriptor().setUInt8(0xA6);
+            s.getAttributeDescriptor().setUInt8(03);
+            s.getAttributeDescriptor().setUInt8(BerType.INTEGER);
+            s.getAttributeDescriptor().setUInt8(1);
+            s.getAttributeDescriptor()
+                    .setUInt8((byte) s.parseInt(getValue(node, s)));
+            break;
+        case (int) TranslatorTags.CALLED_AE_INVOCATION_ID:
+            s.getAttributeDescriptor().setUInt8(0xA5);
+            s.getAttributeDescriptor().setUInt8(03);
+            s.getAttributeDescriptor().setUInt8(BerType.INTEGER);
+            s.getAttributeDescriptor().setUInt8(1);
+            s.getAttributeDescriptor()
+                    .setUInt8((byte) s.parseInt(getValue(node, s)));
+            break;
+        case (int) TranslatorTags.CALLING_AP_INVOCATION_ID:
+            s.getAttributeDescriptor().setUInt8(0xA4);
+            s.getAttributeDescriptor().setUInt8(03);
+            s.getAttributeDescriptor().setUInt8(BerType.INTEGER);
+            s.getAttributeDescriptor().setUInt8(1);
+            s.getAttributeDescriptor()
+                    .setUInt8((byte) s.parseInt(getValue(node, s)));
             break;
         default:
             throw new IllegalArgumentException(

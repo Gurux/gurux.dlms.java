@@ -480,6 +480,16 @@ final class TranslatorStandardTags {
                 "x:physical-device-address");
         GXDLMSTranslator.addTag(list, TranslatorTags.PROTOCOL_VERSION,
                 "x:protocol-version");
+        GXDLMSTranslator.addTag(list, TranslatorTags.CALLED_AP_TITLE,
+                "called-ap-title");
+        GXDLMSTranslator.addTag(list, TranslatorTags.CALLED_AP_INVOCATION_ID,
+                "called-ap-invocation-id");
+        GXDLMSTranslator.addTag(list, TranslatorTags.CALLED_AE_INVOCATION_ID,
+                "called-ae-invocation-id");
+        GXDLMSTranslator.addTag(list, TranslatorTags.CALLING_AP_INVOCATION_ID,
+                "calling-ap-invocation-id");
+        GXDLMSTranslator.addTag(list, TranslatorTags.CALLED_AE_QUALIFIER,
+                "called-ae-qualifier");
     }
 
     static void getDataTypeTags(final HashMap<Integer, String> list) {

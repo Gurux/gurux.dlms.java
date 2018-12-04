@@ -921,24 +921,41 @@ final class GXAPDU {
                 if (buff.getUInt8() != 3) {
                     throw new RuntimeException("Invalid tag.");
                 }
-                // Choice for result (INTEGER, universal)
-                if (buff.getUInt8() != BerType.INTEGER) {
-                    throw new RuntimeException("Invalid tag.");
-                }
-                // Get length.
-                if (buff.getUInt8() != 1) {
-                    throw new RuntimeException("Invalid tag.");
-                }
-                resultComponent = AssociationResult.forValue(buff.getUInt8());
-                if (xml != null) {
-                    if (resultComponent != AssociationResult.ACCEPTED) {
-                        xml.appendComment(resultComponent.toString());
+                if (settings.isServer()) {
+                    // Choice for result (INTEGER, universal)
+                    if (buff.getUInt8() != BerType.OCTET_STRING) {
+                        throw new RuntimeException("Invalid tag.");
                     }
-                    xml.appendLine(TranslatorGeneralTags.ASSOCIATION_RESULT,
-                            "Value",
-                            xml.integerToHex(resultComponent.getValue(), 2));
-                    xml.appendStartTag(
-                            TranslatorGeneralTags.RESULT_SOURCE_DIAGNOSTIC);
+                    len = buff.getUInt8();
+                    tmp = new byte[len];
+                    buff.get(tmp);
+                    settings.setSourceSystemTitle(tmp);
+                    if (xml != null) {
+                        // RespondingAPTitle
+                        xml.appendLine(TranslatorTags.CALLED_AP_TITLE, "Value",
+                                GXCommon.toHex(tmp, false));
+                    }
+                } else {
+                    // Choice for result (INTEGER, universal)
+                    if (buff.getUInt8() != BerType.INTEGER) {
+                        throw new RuntimeException("Invalid tag.");
+                    }
+                    // Get length.
+                    if (buff.getUInt8() != 1) {
+                        throw new RuntimeException("Invalid tag.");
+                    }
+                    resultComponent =
+                            AssociationResult.forValue(buff.getUInt8());
+                    if (xml != null) {
+                        if (resultComponent != AssociationResult.ACCEPTED) {
+                            xml.appendComment(resultComponent.toString());
+                        }
+                        xml.appendLine(TranslatorGeneralTags.ASSOCIATION_RESULT,
+                                "Value", xml.integerToHex(
+                                        resultComponent.getValue(), 2));
+                        xml.appendStartTag(
+                                TranslatorGeneralTags.RESULT_SOURCE_DIAGNOSTIC);
+                    }
                 }
                 break;
             // SourceDiagnostic

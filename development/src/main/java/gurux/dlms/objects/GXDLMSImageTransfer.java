@@ -400,11 +400,7 @@ public class GXDLMSImageTransfer extends GXDLMSObject implements IGXDLMSBase {
                 setImageBlockSize(((Number) e.getValue()).intValue());
             }
         } else if (e.getIndex() == 3) {
-            if (e.getValue() == null) {
-                imageTransferredBlocksStatus = "";
-            } else {
-                imageTransferredBlocksStatus = e.getValue().toString();
-            }
+            imageTransferredBlocksStatus = String.valueOf(e.getValue());
         } else if (e.getIndex() == 4) {
             if (e.getValue() == null) {
                 setImageFirstNotTransferredBlockNumber(0);

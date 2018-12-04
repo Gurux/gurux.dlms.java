@@ -95,5 +95,10 @@ final class TranslatorTags {
     static final int NETWORK_ID = 0xFF7A;
     static final int PHYSICAL_DEVICE_ADDRESS = 0xFF7B;
     static final int PROTOCOL_VERSION = 0xFF7C;
+    static final int CALLED_AP_TITLE = 0xFF7D;
+    static final int CALLED_AP_INVOCATION_ID = 0xFF7E;
+    static final int CALLED_AE_INVOCATION_ID = 0xFF7F;
+    static final int CALLING_AP_INVOCATION_ID = 0xFF80;
+    static final int CALLED_AE_QUALIFIER = 0xFF81;
 
 }
