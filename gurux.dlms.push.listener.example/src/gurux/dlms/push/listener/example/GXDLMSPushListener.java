@@ -34,9 +34,7 @@
 
 package gurux.dlms.push.listener.example;
 
-import java.util.List;
-import java.util.Map.Entry;
-
+import gurux.common.GXCommon;
 import gurux.common.IGXMediaListener;
 import gurux.common.MediaStateEventArgs;
 import gurux.common.PropertyChangedEventArgs;
@@ -44,17 +42,19 @@ import gurux.common.ReceiveEventArgs;
 import gurux.common.TraceEventArgs;
 import gurux.common.enums.TraceLevel;
 import gurux.dlms.GXByteBuffer;
+import gurux.dlms.GXDLMSClient;
+import gurux.dlms.GXDLMSTranslator;
 import gurux.dlms.GXReplyData;
+import gurux.dlms.TranslatorOutputType;
+import gurux.dlms.enums.Authentication;
 import gurux.dlms.enums.InterfaceType;
-import gurux.dlms.objects.GXDLMSObject;
-import gurux.dlms.secure.GXDLMSSecureNotify;
 import gurux.net.GXNet;
 import gurux.net.enums.NetworkType;
 
 /**
  * All example servers are using same objects.
  */
-public class GXDLMSPushListener extends GXDLMSSecureNotify
+public class GXDLMSPushListener
         implements IGXMediaListener, gurux.net.IGXNetListener, AutoCloseable {
 
     /**
@@ -77,13 +77,18 @@ public class GXDLMSPushListener extends GXDLMSSecureNotify
     private GXReplyData data = new GXReplyData();
 
     /**
+     * Client used to parse received data.
+     */
+    private GXDLMSClient client = new GXDLMSClient(true, 1, 1,
+            Authentication.NONE, null, InterfaceType.WRAPPER);
+
+    /**
      * Constructor.
      * 
      * @param port
      *            Listener port.
      */
     public GXDLMSPushListener(int port) throws Exception {
-        super(true, 1, 1, InterfaceType.WRAPPER);
         media = new gurux.net.GXNet(NetworkType.TCP, port);
         media.setTrace(TraceLevel.VERBOSE);
         media.addListener(this);
@@ -103,6 +108,23 @@ public class GXDLMSPushListener extends GXDLMSSecureNotify
         System.out.println("Error has occurred:" + ex.getMessage());
     }
 
+    private static void printData(final Object value) {
+        if (value instanceof Object[]) {
+            System.out.println("+++++++++++++++++++++++++++++++++++++++++");
+            // Print received data.
+            for (Object it : (Object[]) value) {
+                printData(it);
+            }
+            System.out.println("+++++++++++++++++++++++++++++++++++++++++");
+        } else if (value instanceof byte[]) {
+            // Print value.
+            System.out.println(GXCommon.bytesToHex((byte[]) value));
+        } else {
+            // Print value.
+            System.out.println(String.valueOf(value));
+        }
+    }
+
     /*
      * Client has send data.
      */
@@ -115,20 +137,16 @@ public class GXDLMSPushListener extends GXDLMSSecureNotify
                             .bytesToHex((byte[]) e.getData()));
                 }
                 reply.set((byte[]) e.getData());
-                getData(reply, data);
+                client.getData(reply, data);
                 // If all data is received.
                 if (data.isComplete() && !data.isMoreData()) {
                     try {
-                        List<Entry<GXDLMSObject, Integer>> list;
-                        list = parsePush((Object[]) data.getValue());
-                        // Print received data.
-                        for (Entry<GXDLMSObject, Integer> it : list) {
-                            // Print LN.
-                            System.out.println(it.getKey().toString());
-                            // Print Value.
-                            System.out.println(String.valueOf(it.getKey()
-                                    .getValues()[it.getValue() - 1]));
-                        }
+                        // Show data as XML.
+                        GXDLMSTranslator t = new GXDLMSTranslator(
+                                TranslatorOutputType.SIMPLE_XML);
+                        String xml = t.dataToXml(data.getData());
+                        System.out.println(xml);
+                        printData(data.getValue());
                     } catch (Exception ex) {
                         System.out.println(ex.getMessage());
                     } finally {
