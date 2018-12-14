@@ -817,8 +817,10 @@ abstract class GXDLMS {
                     reply.set(tmp);
                 }
             }
-            if (ciphering && !p.getSettings().getNegotiatedConformance()
-                    .contains(Conformance.GENERAL_BLOCK_TRANSFER)) {
+            if (ciphering
+                    && !p.getSettings().getNegotiatedConformance()
+                            .contains(Conformance.GENERAL_BLOCK_TRANSFER)
+                    && p.getCommand() != Command.RELEASE_REQUEST) {
                 // GBT ciphering is done for all the data, not just block.
                 byte[] tmp;
                 if (p.getSettings().getCipher()

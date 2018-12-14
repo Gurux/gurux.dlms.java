@@ -605,7 +605,8 @@ final class GXAPDU {
                     settings.setUseLogicalNameReferencing(true);
                 } else {
                     // If LN
-                    if (!settings.getUseLogicalNameReferencing()) {
+                    if (!settings.getUseLogicalNameReferencing()
+                            && xml == null) {
                         throw new IllegalArgumentException("Invalid VAA.");
                     }
                 }
@@ -929,7 +930,13 @@ final class GXAPDU {
                     len = buff.getUInt8();
                     tmp = new byte[len];
                     buff.get(tmp);
-                    settings.setSourceSystemTitle(tmp);
+                    try {
+                        settings.setSourceSystemTitle(tmp);
+                    } catch (Exception ex) {
+                        if (xml == null) {
+                            throw ex;
+                        }
+                    }
                     if (xml != null) {
                         // RespondingAPTitle
                         xml.appendLine(TranslatorTags.CALLED_AP_TITLE, "Value",
@@ -961,7 +968,8 @@ final class GXAPDU {
             // SourceDiagnostic
             case BerType.CONTEXT | BerType.CONSTRUCTED
                     | PduType.CALLED_AE_QUALIFIER: // 0xA3
-                resultDiagnosticValue = parseSourceDiagnostic(buff, xml);
+                resultDiagnosticValue =
+                        parseSourceDiagnostic(settings, buff, xml);
                 break;
             // Result
             case BerType.CONTEXT | BerType.CONSTRUCTED
@@ -1029,6 +1037,25 @@ final class GXAPDU {
                     xml.appendLine(
                             TranslatorGeneralTags.RESPONDING_AE_INVOCATION_ID,
                             "Value", xml.integerToHex(settings.getUserId(), 2));
+                }
+                break;
+            case BerType.CONTEXT | BerType.CONSTRUCTED
+                    | PduType.CALLING_AP_INVOCATION_ID:// 0xA8
+                if (buff.getUInt8() != 3) {
+                    throw new RuntimeException("Invalid tag.");
+                }
+                if (buff.getUInt8() != 2) {
+                    throw new RuntimeException("Invalid length.");
+                }
+                if (buff.getUInt8() != 1) {
+                    throw new RuntimeException("Invalid tag length.");
+                }
+                // Get value.
+                len = buff.getUInt8();
+                if (xml != null) {
+                    // CallingApInvocationId
+                    xml.appendLine(TranslatorTags.CALLING_AP_INVOCATION_ID,
+                            "Value", xml.integerToHex(len, 2));
                 }
                 break;
             case BerType.CONTEXT | PduType.SENDER_ACSE_REQUIREMENTS: // 0x8A
@@ -1111,49 +1138,81 @@ final class GXAPDU {
             final GXByteBuffer buff, final GXDLMSTranslatorStructure xml) {
         byte[] tmp;
         int len;
-        // Get length.
-        if (buff.getUInt8() != 0xA) {
-            throw new RuntimeException("Invalid tag.");
+        if (settings.isServer()) {
+            // Get len.
+            if (buff.getUInt8() != 3) {
+                throw new RuntimeException("Invalid tag.");
+            }
+            // Choice for result (Universal, Octetstring type)
+            if (buff.getUInt8() != BerType.INTEGER) {
+                throw new RuntimeException("Invalid tag.");
+            }
+            if (buff.getUInt8() != 1) {
+                throw new RuntimeException("Invalid tag length.");
+            }
+            // Get value.
+            len = buff.getUInt8();
+            if (xml != null) {
+                // RespondingAPTitle
+                xml.appendLine(TranslatorTags.CALLED_AP_INVOCATION_ID, "Value",
+                        xml.integerToHex(len, 2));
+            }
+        } else {
+            // Get length.
+            if (buff.getUInt8() != 0xA) {
+                throw new RuntimeException("Invalid tag.");
+            }
+            // Choice for result (Universal, Octet string type)
+            if (buff.getUInt8() != BerType.OCTET_STRING) {
+                throw new RuntimeException("Invalid tag.");
+            }
+            // responding-AP-title-field
+            // Get length.
+            len = buff.getUInt8();
+            tmp = new byte[len];
+            buff.get(tmp);
+            settings.setSourceSystemTitle(tmp);
+            appendResultToXml(settings, xml);
         }
-        // Choice for result (Universal, Octet string type)
-        if (buff.getUInt8() != BerType.OCTET_STRING) {
-            throw new RuntimeException("Invalid tag.");
-        }
-        // responding-AP-title-field
-        // Get length.
-        len = buff.getUInt8();
-        tmp = new byte[len];
-        buff.get(tmp);
-        settings.setSourceSystemTitle(tmp);
-        appendResultToXml(settings, xml);
     }
 
     private static SourceDiagnostic parseSourceDiagnostic(
-            final GXByteBuffer buff, final GXDLMSTranslatorStructure xml) {
+            final GXDLMSSettings settings, final GXByteBuffer buff,
+            final GXDLMSTranslatorStructure xml) {
         int tag;
         int len;
-        SourceDiagnostic resultDiagnosticValue;
+        SourceDiagnostic resultDiagnosticValue = SourceDiagnostic.NONE;
         len = buff.getUInt8();
         // ACSE service user tag.
         tag = buff.getUInt8();
         len = buff.getUInt8();
-        // Result source diagnostic component.
-        tag = buff.getUInt8();
-        if (tag != BerType.INTEGER) {
-            throw new RuntimeException("Invalid tag.");
-        }
-        len = buff.getUInt8();
-        if (len != 1) {
-            throw new RuntimeException("Invalid tag.");
-        }
-        resultDiagnosticValue = SourceDiagnostic.forValue(buff.getUInt8());
-        if (xml != null) {
-            if (resultDiagnosticValue != SourceDiagnostic.NONE) {
-                xml.appendComment(resultDiagnosticValue.toString());
+        if (settings.isServer()) {
+            byte[] calledAEQualifier = new byte[len];
+            buff.get(calledAEQualifier);
+            if (xml != null) {
+                xml.appendLine(TranslatorTags.CALLED_AE_QUALIFIER, "Value",
+                        GXCommon.toHex(calledAEQualifier, false));
             }
-            xml.appendLine(TranslatorGeneralTags.ACSE_SERVICE_USER, "Value",
-                    xml.integerToHex(resultDiagnosticValue.getValue(), 2));
-            xml.appendEndTag(TranslatorGeneralTags.RESULT_SOURCE_DIAGNOSTIC);
+        } else {
+            // Result source diagnostic component.
+            tag = buff.getUInt8();
+            if (tag != BerType.INTEGER) {
+                throw new RuntimeException("Invalid tag.");
+            }
+            len = buff.getUInt8();
+            if (len != 1) {
+                throw new RuntimeException("Invalid tag.");
+            }
+            resultDiagnosticValue = SourceDiagnostic.forValue(buff.getUInt8());
+            if (xml != null) {
+                if (resultDiagnosticValue != SourceDiagnostic.NONE) {
+                    xml.appendComment(resultDiagnosticValue.toString());
+                }
+                xml.appendLine(TranslatorGeneralTags.ACSE_SERVICE_USER, "Value",
+                        xml.integerToHex(resultDiagnosticValue.getValue(), 2));
+                xml.appendEndTag(
+                        TranslatorGeneralTags.RESULT_SOURCE_DIAGNOSTIC);
+            }
         }
         return resultDiagnosticValue;
     }

@@ -509,12 +509,18 @@ public class GXDLMSServerBase {
         if (getSettings().getInterfaceType() == InterfaceType.HDLC) {
             replyData.set(0, GXCommon.LLC_REPLY_BYTES);
         }
+        byte[] tmp = GXAPDU.getUserInformation(settings, settings.getCipher());
         replyData.setUInt8(0x63);
-        // LEN.
-        replyData.setUInt8(0x03);
+        // Len.
+        replyData.setUInt8((byte) (tmp.length + 3));
         replyData.setUInt8(0x80);
         replyData.setUInt8(0x01);
         replyData.setUInt8(0x00);
+        replyData.setUInt8(0xBE);
+        replyData.setUInt8((byte) (tmp.length + 1));
+        replyData.setUInt8(4);
+        replyData.setUInt8((byte) (tmp.length));
+        replyData.set(tmp);
     }
 
     /*
