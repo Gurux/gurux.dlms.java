@@ -44,6 +44,7 @@ import javax.xml.parsers.DocumentBuilderFactory;
 
 import org.w3c.dom.Document;
 import org.w3c.dom.Node;
+import org.w3c.dom.NodeList;
 import org.xml.sax.InputSource;
 
 import gurux.dlms.enums.AccessServiceCommandType;
@@ -313,7 +314,7 @@ public class GXDLMSTranslator {
             if (data.getUInt8(data.position()) == 0x7e) {
                 pos = data.position();
                 settings.setInterfaceType(InterfaceType.HDLC);
-                found = GXDLMS.getData(settings, data, reply);
+                found = GXDLMS.getData(settings, data, reply, null);
                 data.position(pos);
                 if (found) {
                     break;
@@ -321,7 +322,7 @@ public class GXDLMSTranslator {
             } else if (data.getUInt16(data.position()) == 0x1) {
                 pos = data.position();
                 settings.setInterfaceType(InterfaceType.WRAPPER);
-                found = GXDLMS.getData(settings, data, reply);
+                found = GXDLMS.getData(settings, data, reply, null);
                 data.position(pos);
                 if (found) {
                     break;
@@ -362,7 +363,7 @@ public class GXDLMSTranslator {
                 if (type == InterfaceType.HDLC
                         && data.getUInt8(data.position()) == 0x7e) {
                     pos = data.position();
-                    found = GXDLMS.getData(settings, data, reply);
+                    found = GXDLMS.getData(settings, data, reply, null);
                     data.position(pos);
                     if (found) {
                         break;
@@ -370,7 +371,7 @@ public class GXDLMSTranslator {
                 } else if (data.available() > 1 && type == InterfaceType.WRAPPER
                         && data.getUInt16(data.position()) == 0x1) {
                     pos = data.position();
-                    found = GXDLMS.getData(settings, data, reply);
+                    found = GXDLMS.getData(settings, data, reply, null);
                     data.position(pos);
                     if (found) {
                         break;
@@ -378,7 +379,7 @@ public class GXDLMSTranslator {
                 } else if (type == InterfaceType.WIRELESS_MBUS) {
                     pos = data.position();
                     settings.setInterfaceType(InterfaceType.WIRELESS_MBUS);
-                    found = GXDLMS.getData(settings, data, reply);
+                    found = GXDLMS.getData(settings, data, reply, null);
                     data.position(pos);
                     if (found) {
                         break;
@@ -479,7 +480,7 @@ public class GXDLMSTranslator {
                 getShowStringAsHex(), comments, tags));
         GXDLMSSettings settings = new GXDLMSSettings(true);
         settings.setInterfaceType(framing);
-        GXDLMS.getData(settings, value, data);
+        GXDLMS.getData(settings, value, data, null);
         return data.getData().array();
     }
 
@@ -564,7 +565,7 @@ public class GXDLMSTranslator {
             // If HDLC framing.
             if (value.getUInt8(value.position()) == 0x7e) {
                 settings.setInterfaceType(InterfaceType.HDLC);
-                if (GXDLMS.getData(settings, value, data)) {
+                if (GXDLMS.getData(settings, value, data, null)) {
                     if (!getPduOnly()) {
                         xml.appendLine("<HDLC len=\""
                                 + xml.integerToHex(
@@ -657,7 +658,7 @@ public class GXDLMSTranslator {
             // If wrapper.
             if (value.getUInt16(value.position()) == 1) {
                 settings.setInterfaceType(InterfaceType.WRAPPER);
-                GXDLMS.getData(settings, value, data);
+                GXDLMS.getData(settings, value, data, null);
                 if (!getPduOnly()) {
                     xml.appendLine(
                             "<WRAPPER len=\""
@@ -694,7 +695,7 @@ public class GXDLMSTranslator {
             else if (GXDLMS.isMBusData(value)) {
                 settings.setInterfaceType(InterfaceType.WIRELESS_MBUS);
                 int len = xml.getXmlLength();
-                GXDLMS.getData(settings, value, data);
+                GXDLMS.getData(settings, value, data, null);
                 String tmp = xml.toString().substring(len);
                 xml.setXmlLength(len);
                 if (!getPduOnly()) {
@@ -2744,5 +2745,58 @@ public class GXDLMSTranslator {
         di.setXml(xml);
         GXCommon.getData(data, di);
         return di.getXml().toString();
+    }
+
+    private void getAllDataNodes(final NodeList nodes, GXDLMSXmlSettings s) {
+        GXByteBuffer preData;
+        int tag;
+        for (int pos = 0; pos != nodes.getLength(); ++pos) {
+            Node it = nodes.item(pos);
+            if (it.getNodeType() == Node.ELEMENT_NODE) {
+                if (s.getOutputType() == TranslatorOutputType.SIMPLE_XML) {
+                    tag = s.getTags().get(it.getNodeName().toLowerCase());
+                } else {
+                    tag = s.getTags().get(it.getNodeName());
+                }
+                if (tag == TranslatorTags.RAW_DATA) {
+                    s.getData().setHexString(it.getNodeValue());
+                } else {
+                    preData = updateDataType(it, s, tag);
+                    if (preData != null) {
+                        GXCommon.setObjectCount(it.getChildNodes().getLength(),
+                                preData);
+                        preData.set(s.getData());
+                        s.getData().size(0);
+                        s.getData().set(preData);
+                        getAllDataNodes(it.getChildNodes(), s);
+                    }
+                }
+            }
+        }
+    }
+
+    /**
+     * Convert XML data to PDU bytes.
+     * 
+     * @param xml
+     *            XML data.
+     * @return Data in bytes.
+     */
+    public final byte[] XmlToData(final String xml) {
+        DocumentBuilder docBuilder;
+        Document doc;
+        DocumentBuilderFactory docBuilderFactory =
+                DocumentBuilderFactory.newInstance();
+        try {
+            docBuilder = docBuilderFactory.newDocumentBuilder();
+            doc = docBuilder.parse(new InputSource(new StringReader(xml)));
+        } catch (Exception e) {
+            throw new RuntimeException(e.getMessage());
+        }
+        GXDLMSXmlSettings s = new GXDLMSXmlSettings(outputType, hex,
+                getShowStringAsHex(), tagsByName);
+
+        getAllDataNodes(doc.getDocumentElement().getChildNodes(), s);
+        return s.getData().array();
     }
 }

@@ -100,5 +100,6 @@ final class TranslatorTags {
     static final int CALLED_AE_INVOCATION_ID = 0xFF7F;
     static final int CALLING_AP_INVOCATION_ID = 0xFF80;
     static final int CALLED_AE_QUALIFIER = 0xFF81;
+    static final int RESPONSE_ALLOWED = 0xFF82;
 
 }

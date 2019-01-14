@@ -92,6 +92,11 @@ public class GXDLMSClient {
     private boolean isAuthenticationRequired = false;
 
     /**
+     * Auto increase Invoke ID.
+     */
+    private boolean autoIncreaseInvokeID = false;
+
+    /**
      * Constructor.
      */
     public GXDLMSClient() {
@@ -504,6 +509,21 @@ public class GXDLMSClient {
     }
 
     /**
+     * @return Auto increase Invoke ID.
+     */
+    public final boolean getAutoIncreaseInvokeID() {
+        return autoIncreaseInvokeID;
+    }
+
+    /**
+     * @param value
+     *            Auto increase Invoke ID.
+     */
+    public final void setAutoIncreaseInvokeID(final boolean value) {
+        autoIncreaseInvokeID = value;
+    }
+
+    /**
      * @return Interface type.
      */
     public final InterfaceType getInterfaceType() {
@@ -651,6 +671,11 @@ public class GXDLMSClient {
         settings.resetBlockIndex();
         GXDLMS.checkInit(settings);
         settings.setStoCChallenge(null);
+        if (autoIncreaseInvokeID) {
+            settings.setInvokeID(0);
+        } else {
+            settings.setInvokeID(1);
+        }
         // If authentication or ciphering is used.
         if (getAuthentication().ordinal() > Authentication.LOW.ordinal()) {
             settings.setCtoSChallenge(
@@ -811,7 +836,7 @@ public class GXDLMSClient {
      */
     public byte[][] releaseRequest() {
         // If connection is not established, there is no need to send
-        // DisconnectRequest.
+        // release request.
         if ((settings.getConnected() & ConnectionState.DLMS) == 0) {
             return null;
         }
@@ -833,10 +858,7 @@ public class GXDLMSClient {
             reply = GXDLMS.getSnMessages(new GXDLMSSNParameters(settings,
                     Command.RELEASE_REQUEST, 0xFF, 0xFF, null, buff));
         }
-        if (settings.getInterfaceType() == InterfaceType.WRAPPER) {
-            settings.setConnected(
-                    settings.getConnected() & ~ConnectionState.DLMS);
-        }
+        settings.setConnected(settings.getConnected() & ~ConnectionState.DLMS);
         return reply.toArray(new byte[][] {});
     }
 
@@ -1285,6 +1307,9 @@ public class GXDLMSClient {
             throw new IllegalArgumentException("Invalid parameter");
         }
         settings.resetBlockIndex();
+        if (autoIncreaseInvokeID) {
+            settings.setInvokeID((byte) ((settings.getInvokeID() + 1) & 0xF));
+        }
         int index = methodIndex;
         DataType type = dataType;
         if (type == DataType.NONE && value != null) {
@@ -1393,6 +1418,9 @@ public class GXDLMSClient {
             throw new GXDLMSException("Invalid parameter");
         }
         settings.resetBlockIndex();
+        if (autoIncreaseInvokeID) {
+            settings.setInvokeID((byte) ((settings.getInvokeID() + 1) & 0xF));
+        }
         DataType type = dataType;
         if (type == DataType.NONE && value != null) {
             type = GXDLMSConverter.getDLMSDataType(value);
@@ -1544,6 +1572,9 @@ public class GXDLMSClient {
         GXByteBuffer attributeDescriptor = new GXByteBuffer();
         List<byte[]> reply;
         settings.resetBlockIndex();
+        if (autoIncreaseInvokeID) {
+            settings.setInvokeID((byte) ((settings.getInvokeID() + 1) & 0xF));
+        }
         if (this.getUseLogicalNameReferencing()) {
             // CI
             attributeDescriptor.setUInt16(objectType.getValue());
@@ -2000,7 +2031,23 @@ public class GXDLMSClient {
      * @return Is frame complete.
      */
     public final boolean getData(final byte[] reply, final GXReplyData data) {
-        return GXDLMS.getData(settings, new GXByteBuffer(reply), data);
+        return getData(new GXByteBuffer(reply), data, null);
+    }
+
+    /**
+     * Removes the HDLC frame from the packet, and returns COSEM data only.
+     * 
+     * @param reply
+     *            The received data from the device.
+     * @param data
+     *            Information from the received data.
+     * @param notify
+     *            Information from the notify message.
+     * @return Is frame complete.
+     */
+    public final boolean getData(final byte[] reply, final GXReplyData data,
+            final GXReplyData notify) {
+        return getData(new GXByteBuffer(reply), data, notify);
     }
 
     /**
@@ -2010,10 +2057,27 @@ public class GXDLMSClient {
      *            The received data from the device.
      * @param data
      *            The exported reply information.
+     * @return Is frame complete.
      */
-    public final void getData(final GXByteBuffer reply,
+    public final boolean getData(final GXByteBuffer reply,
             final GXReplyData data) {
-        GXDLMS.getData(settings, reply, data);
+        return getData(reply, data, null);
+    }
+
+    /**
+     * Removes the HDLC frame from the packet, and returns COSEM data only.
+     * 
+     * @param reply
+     *            The received data from the device.
+     * @param data
+     *            The exported reply information.
+     * @param notify
+     *            Information from the notify message.
+     * @return Is frame complete.
+     */
+    public final boolean getData(final GXByteBuffer reply,
+            final GXReplyData data, final GXReplyData notify) {
+        return GXDLMS.getData(settings, reply, data, notify);
     }
 
     /**
@@ -2252,5 +2316,65 @@ public class GXDLMSClient {
             throw new IllegalArgumentException(
                     "Invalid command. " + reply.getCommand());
         }
+    }
+
+    /**
+     * Returns collection of push objects.
+     * 
+     * @param data
+     *            Received value.
+     * @return Array of objects and called indexes.
+     */
+    public final List<Entry<GXDLMSObject, Integer>>
+            ParsePushObjects(final Object[] data) {
+        List<Entry<GXDLMSObject, Integer>> objects =
+                new ArrayList<Entry<GXDLMSObject, Integer>>();
+        if (data != null) {
+            GXDLMSConverter c = new GXDLMSConverter(getStandard());
+            for (Object it : data) {
+                Object[] tmp = (Object[]) it;
+                int classID = ((Number) (tmp[0])).intValue() & 0xFFFF;
+                if (classID > 0) {
+                    GXDLMSObject comp;
+                    comp = getObjects().findByLN(ObjectType.forValue(classID),
+                            GXCommon.toLogicalName((byte[]) tmp[1]));
+                    if (comp == null) {
+                        comp = GXDLMSClient.createDLMSObject(classID, 0, 0,
+                                tmp[1], null);
+                        settings.getObjects().add(comp);
+                        c.updateOBISCodeInformation(comp);
+                    }
+                    if (comp.getClass() != GXDLMSObject.class) {
+                        objects.add(new GXSimpleEntry<GXDLMSObject, Integer>(
+                                comp, ((Number) tmp[2]).intValue()));
+                    } else {
+                        System.out.println("Unknown object: "
+                                + String.valueOf(classID) + " "
+                                + GXCommon.toLogicalName((byte[]) tmp[1]));
+                    }
+                }
+            }
+        }
+        return objects;
+    }
+
+    /**
+     * Get size of the frame.
+     * <p>
+     * When WRAPPER is used this method can be used to check how many bytes we
+     * need to read.
+     * 
+     * @param data
+     *            Received data.
+     * @return Size of received bytes on the frame.
+     */
+    public final int getFrameSize(final GXByteBuffer data) {
+        if (getInterfaceType() == InterfaceType.WRAPPER) {
+            if (data.available() < 8 || data.getUInt16(data.position()) != 1) {
+                return 8 - data.available();
+            }
+            return data.getUInt16(data.position() + 6);
+        }
+        return 1;
     }
 }

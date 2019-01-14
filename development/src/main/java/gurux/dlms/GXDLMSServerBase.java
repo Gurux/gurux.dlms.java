@@ -658,7 +658,7 @@ public class GXDLMSServerBase {
                 boolean first = settings.getServerAddress() == 0
                         && settings.getClientAddress() == 0;
                 try {
-                    GXDLMS.getData(settings, receivedData, info);
+                    GXDLMS.getData(settings, receivedData, info, null);
                 } catch (Exception ex) {
                     dataReceived = Calendar.getInstance().getTimeInMillis();
                     receivedData.size(0);

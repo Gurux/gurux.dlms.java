@@ -223,7 +223,7 @@ public class GXDLMSNotify {
      */
     public final boolean getData(final GXByteBuffer reply,
             final GXReplyData data) {
-        return GXDLMS.getData(settings, reply, data);
+        return GXDLMS.getData(settings, reply, data, null);
     }
 
     /**

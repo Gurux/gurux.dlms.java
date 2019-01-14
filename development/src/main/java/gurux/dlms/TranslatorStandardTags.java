@@ -113,7 +113,7 @@ final class TranslatorStandardTags {
                 "x:charstring");
         GXDLMSTranslator.addTag(list, TranslatorGeneralTags.DEDICATED_KEY,
                 "x:dedicated-key");
-        GXDLMSTranslator.addTag(list, TranslatorGeneralTags.RESPONSE_ALLOWED,
+        GXDLMSTranslator.addTag(list, TranslatorTags.RESPONSE_ALLOWED,
                 "x:response-allowed");
         GXDLMSTranslator.addTag(list, TranslatorGeneralTags.USER_INFORMATION,
                 "x:user-information");
@@ -403,10 +403,10 @@ final class TranslatorStandardTags {
         GXDLMSTranslator.addTag(list, TranslatorTags.ACCESS_PARAMETERS,
                 "x:access-parameters");
         GXDLMSTranslator.addTag(list, TranslatorTags.ATTRIBUTE_DESCRIPTOR_LIST,
-                "AttributeDescriptorList");
+                "x:attribute-descriptor-list");
         GXDLMSTranslator.addTag(list,
                 TranslatorTags.ATTRIBUTE_DESCRIPTOR_WITH_SELECTION,
-                "AttributeDescriptorWithSelection");
+                "x:Cosem-Attribute-Descriptor-With-Selection");
         GXDLMSTranslator.addTag(list, TranslatorTags.READ_DATA_BLOCK_ACCESS,
                 "ReadDataBlockAccess");
         GXDLMSTranslator.addTag(list, TranslatorTags.WRITE_DATA_BLOCK_ACCESS,
@@ -461,7 +461,8 @@ final class TranslatorStandardTags {
                 "WindowSizeRX");
         GXDLMSTranslator.addTag(list, TranslatorTags.WINDOW_SIZE_TX,
                 "WindowSizeTX");
-        GXDLMSTranslator.addTag(list, TranslatorTags.VALUE_LIST, "value-list");
+        GXDLMSTranslator.addTag(list, TranslatorTags.VALUE_LIST,
+                "x:value-list");
         GXDLMSTranslator.addTag(list, TranslatorTags.DATA_ACCESS_RESULT,
                 "x:data-access-result");
         GXDLMSTranslator.addTag(list, TranslatorTags.BLOCK_CONTROL,

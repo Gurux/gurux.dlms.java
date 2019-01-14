@@ -1551,7 +1551,7 @@ abstract class GXDLMS {
 
     static short getHdlcData(final boolean server,
             final GXDLMSSettings settings, final GXByteBuffer reply,
-            final GXReplyData data) {
+            final GXReplyData data, final GXReplyData notify) {
         short ch;
         int pos, packetStartID = reply.position(), frameLen = 0;
         int crc, crcRead;
@@ -1561,6 +1561,10 @@ abstract class GXDLMS {
             return 0;
         }
         data.setComplete(true);
+        if (notify != null) {
+            notify.setComplete(true);
+        }
+        boolean isNotify = false;
         // Find start of HDLC frame.
         for (pos = reply.position(); pos < reply.size(); ++pos) {
             ch = reply.getUInt8();
@@ -1579,7 +1583,7 @@ abstract class GXDLMS {
         short frame = reply.getUInt8();
         if ((frame & 0xF0) != 0xA0) {
             reply.position(reply.position() - 1);
-            return getHdlcData(server, settings, reply, data);
+            return getHdlcData(server, settings, reply, data, notify);
         }
         // Check frame length.
         if ((frame & 0x7) != 0) {
@@ -1598,13 +1602,14 @@ abstract class GXDLMS {
         ch = reply.getUInt8(eopPos);
         if (ch != GXCommon.HDLC_FRAME_START_END) {
             reply.position(reply.position() - 2);
-            return getHdlcData(server, settings, reply, data);
+            return getHdlcData(server, settings, reply, data, notify);
         }
 
         // Check addresses.
+        int[] addresses = new int[2];
         boolean ret;
         try {
-            ret = checkHdlcAddress(server, settings, reply, eopPos);
+            ret = checkHdlcAddress(server, settings, reply, eopPos, addresses);
         } catch (Exception ex) {
             ret = false;
         }
@@ -1614,23 +1619,41 @@ abstract class GXDLMS {
                     && reply.getUInt8(reply.position()) == 0x13)) {
                 // If echo.
                 reply.position(1 + eopPos);
-                return getHdlcData(server, settings, reply, data);
+                return getHdlcData(server, settings, reply, data, notify);
+            } else if (notify != null) {
+                isNotify = true;
+                notify.setClientAddress(addresses[1]);
+                notify.setServerAddress(addresses[0]);
             }
         }
 
         // Is there more data available.
         if ((frame & 0x8) != 0) {
-            data.setMoreData(RequestTypes.forValue(data.getMoreData().getValue()
-                    | RequestTypes.FRAME.getValue()));
+            if (isNotify) {
+                notify.setMoreData(
+                        RequestTypes.forValue(notify.getMoreData().getValue()
+                                | RequestTypes.FRAME.getValue()));
+            } else {
+                data.setMoreData(
+                        RequestTypes.forValue(data.getMoreData().getValue()
+                                | RequestTypes.FRAME.getValue()));
+            }
         } else {
-            data.setMoreData(RequestTypes.forValue(data.getMoreData().getValue()
-                    & ~RequestTypes.FRAME.getValue()));
+            if (isNotify) {
+                notify.setMoreData(
+                        RequestTypes.forValue(notify.getMoreData().getValue()
+                                & ~RequestTypes.FRAME.getValue()));
+            } else {
+                data.setMoreData(
+                        RequestTypes.forValue(data.getMoreData().getValue()
+                                & ~RequestTypes.FRAME.getValue()));
+            }
         }
         // Get frame type.
         frame = reply.getUInt8();
         if (data.getXml() == null && !settings.checkFrame(frame)) {
             reply.position(eopPos + 1);
-            return getHdlcData(server, settings, reply, data);
+            return getHdlcData(server, settings, reply, data, notify);
         }
         // Check that header CRC is correct.
         crc = GXFCS16.countFCS16(reply.getData(), packetStartID + 1,
@@ -1638,7 +1661,7 @@ abstract class GXDLMS {
         crcRead = reply.getUInt16();
         if (crc != crcRead) {
             if (reply.size() - reply.position() > 8) {
-                return getHdlcData(server, settings, reply, data);
+                return getHdlcData(server, settings, reply, data, notify);
             }
             throw new GXDLMSException("Wrong CRC.");
         }
@@ -1651,9 +1674,17 @@ abstract class GXDLMS {
                 throw new GXDLMSException("Wrong CRC.");
             }
             // Remove CRC and EOP from packet length.
-            data.setPacketLength(eopPos - 2);
+            if (isNotify) {
+                notify.setPacketLength(eopPos - 2);
+            } else {
+                data.setPacketLength(eopPos - 2);
+            }
         } else {
-            data.setPacketLength(reply.position() + 1);
+            if (isNotify) {
+                notify.setPacketLength(reply.position() + 1);
+            } else {
+                data.setPacketLength(reply.position() + 1);
+            }
         }
 
         if (frame != 0x13 && (frame
@@ -1743,11 +1774,13 @@ abstract class GXDLMS {
      */
     private static boolean checkHdlcAddress(final boolean server,
             final GXDLMSSettings settings, final GXByteBuffer reply,
-            final int index) {
+            final int index, final int addresses[]) {
         int source, target;
         // Get destination and source addresses.
         target = GXCommon.getHDLCAddress(reply);
         source = GXCommon.getHDLCAddress(reply);
+        addresses[0] = source;
+        addresses[1] = target;
         if (server) {
             // Check that server addresses match.
             if (settings.getServerAddress() != 0
@@ -1828,41 +1861,51 @@ abstract class GXDLMS {
      *            DLMS settigns.
      * @param buff
      *            Received data.
-     * @param data
+     * @param target
      *            Reply information.
      */
-    static void getTcpData(final GXDLMSSettings settings,
-            final GXByteBuffer buff, final GXReplyData data) {
+    static boolean getTcpData(final GXDLMSSettings settings,
+            final GXByteBuffer buff, final GXReplyData data,
+            final GXReplyData notify) {
+        GXReplyData target = data;
         // If whole frame is not received yet.
         if (buff.size() - buff.position() < 8) {
-            data.setComplete(false);
-            return;
+            target.setComplete(false);
+            return true;
         }
+        boolean isData = true;
         int pos = buff.position();
         int value;
-        // Get version
-        value = buff.getUInt16();
-        if (value != 1) {
-            throw new GXDLMSException("Unknown version.");
-        }
-
-        // Check TCP/IP addresses.
-        checkWrapperAddress(settings, buff, data);
-        // Get length.
-        value = buff.getUInt16();
-        boolean compleate = !((buff.size() - buff.position()) < value);
-        if (compleate && (buff.size() - buff.position()) != value) {
-            System.out.println(
-                    "Data length is " + String.valueOf(value) + "and there are "
+        while (buff.position() < buff.size() - 1) {
+            // Get version
+            value = buff.getUInt16();
+            if (value == 1) {
+                // Check TCP/IP addresses.
+                if (!checkWrapperAddress(settings, buff, target)) {
+                    target = notify;
+                    isData = false;
+                }
+                // Get length.
+                value = buff.getUInt16();
+                boolean compleate = !((buff.size() - buff.position()) < value);
+                if (compleate && (buff.size() - buff.position()) != value) {
+                    System.out.println("Data length is " + String.valueOf(value)
+                            + "and there are "
                             + String.valueOf(buff.size() - buff.position())
                             + " bytes.");
+                }
+                target.setComplete(compleate);
+                if (!compleate) {
+                    buff.position(pos);
+                } else {
+                    target.setPacketLength(buff.position() + value);
+                }
+            } else {
+                buff.position(buff.position() - 1);
+            }
+            break;
         }
-        data.setComplete(compleate);
-        if (!compleate) {
-            buff.position(pos);
-        } else {
-            data.setPacketLength(buff.position() + value);
-        }
+        return isData;
     }
 
     /**
@@ -1979,8 +2022,9 @@ abstract class GXDLMS {
         return true;
     }
 
-    private static void checkWrapperAddress(final GXDLMSSettings settings,
-            final GXByteBuffer buff, final GXReplyData data) {
+    private static boolean checkWrapperAddress(final GXDLMSSettings settings,
+            final GXByteBuffer buff, final GXReplyData notify) {
+        boolean ret = true;
         int value;
         if (settings.isServer()) {
             value = buff.getUInt16();
@@ -2013,12 +2057,16 @@ abstract class GXDLMS {
             // Check that server addresses match.
             if (settings.getClientAddress() != 0
                     && settings.getServerAddress() != value) {
-                throw new GXDLMSException(
-                        "Source addresses do not match. It is "
-                                + String.valueOf(value) + ". It should be "
-                                + String.valueOf(settings.getServerAddress())
-                                + ".");
-
+                if (notify == null) {
+                    throw new GXDLMSException(
+                            "Source addresses do not match. It is "
+                                    + String.valueOf(value) + ". It should be "
+                                    + String.valueOf(
+                                            settings.getServerAddress())
+                                    + ".");
+                }
+                notify.setServerAddress(value);
+                ret = false;
             } else {
                 settings.setServerAddress(value);
             }
@@ -2027,15 +2075,21 @@ abstract class GXDLMS {
             // Check that client addresses match.
             if (settings.getClientAddress() != 0
                     && settings.getClientAddress() != value) {
-                throw new GXDLMSException(
-                        "Destination addresses do not match. It is "
-                                + String.valueOf(value) + ". It should be "
-                                + String.valueOf(settings.getClientAddress())
-                                + ".");
+                if (notify == null) {
+                    throw new GXDLMSException(
+                            "Destination addresses do not match. It is "
+                                    + String.valueOf(value) + ". It should be "
+                                    + String.valueOf(
+                                            settings.getClientAddress())
+                                    + ".");
+                }
+                ret = false;
+                notify.setClientAddress(value);
             } else {
                 settings.setClientAddress(value);
             }
         }
+        return ret;
     }
 
     /**
@@ -3414,41 +3468,55 @@ abstract class GXDLMS {
     }
 
     public static boolean getData(final GXDLMSSettings settings,
-            final GXByteBuffer reply, final GXReplyData data) {
+            final GXByteBuffer reply, final GXReplyData data,
+            final GXReplyData notify) {
         short frame = 0;
+        boolean isNotify = false;
+        GXReplyData target = data;
         // If DLMS frame is generated.
         if (settings.getInterfaceType() == InterfaceType.HDLC) {
-            frame = getHdlcData(settings.isServer(), settings, reply, data);
-            data.setFrameId(frame);
+            frame = getHdlcData(settings.isServer(), settings, reply, target,
+                    notify);
+            if (notify != null && frame == 0x13) {
+                target = notify;
+                isNotify = true;
+            }
+            target.setFrameId(frame);
         } else if (settings.getInterfaceType() == InterfaceType.WRAPPER) {
-            getTcpData(settings, reply, data);
+            if (!getTcpData(settings, reply, target, notify)) {
+                target = notify;
+                isNotify = true;
+            }
         } else if (settings.getInterfaceType() == InterfaceType.WIRELESS_MBUS) {
-            getMBusData(settings, reply, data);
+            getMBusData(settings, reply, target);
         } else if (settings.getInterfaceType() == InterfaceType.PDU) {
-            data.setPacketLength(reply.size());
-            data.setComplete(true);
+            target.setPacketLength(reply.size());
+            target.setComplete(true);
         } else {
             throw new IllegalArgumentException("Invalid Interface type.");
         }
         // If all data is not read yet.
-        if (!data.isComplete()) {
+        if (!target.isComplete()) {
             return false;
         }
 
-        getDataFromFrame(reply, data);
+        getDataFromFrame(reply, target);
 
         // If keepalive or get next frame request.
-        if (data.getXml() != null || (frame != 0x13 && (frame & 0x1) != 0)) {
+        if (target.getXml() != null || (frame != 0x13 && (frame & 0x1) != 0)) {
             if (settings.getInterfaceType() == InterfaceType.HDLC
-                    && (data.getError() == ErrorCode.REJECTED.getValue()
-                            || data.getData().size() != 0)) {
+                    && (target.getError() == ErrorCode.REJECTED.getValue()
+                            || target.getData().size() != 0)) {
                 if (reply.position() != reply.size()) {
                     reply.position(reply.position() + 3);
                 }
             }
             return true;
         }
-        getPdu(settings, data);
+        getPdu(settings, target);
+        if (isNotify) {
+            return false;
+        }
         return true;
     }
 

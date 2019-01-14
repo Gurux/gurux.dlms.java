@@ -52,11 +52,14 @@ import gurux.common.GXCommon;
 import gurux.common.IGXMedia;
 import gurux.common.ReceiveParameters;
 import gurux.common.enums.TraceLevel;
+import gurux.dlms.GXByteBuffer;
 import gurux.dlms.GXDLMSClient;
 import gurux.dlms.GXDLMSConverter;
 import gurux.dlms.GXDLMSException;
+import gurux.dlms.GXDLMSTranslator;
 import gurux.dlms.GXReplyData;
 import gurux.dlms.GXSimpleEntry;
+import gurux.dlms.TranslatorOutputType;
 import gurux.dlms.enums.Authentication;
 import gurux.dlms.enums.Conformance;
 import gurux.dlms.enums.DataType;
@@ -118,7 +121,7 @@ public class GXDLMSReader {
             System.out.println("DisconnectRequest");
             GXReplyData reply = new GXReplyData();
             try {
-                readDLMSPacket(dlms.releaseRequest()[0], reply);
+                readDataBlock(dlms.releaseRequest(), reply);
             } catch (Exception e) {
                 // All meters don't support release.
             }
@@ -199,6 +202,7 @@ public class GXDLMSReader {
         if (!reply.getStreaming() && (data == null || data.length == 0)) {
             return;
         }
+        GXReplyData notify = new GXReplyData();
         reply.setError((short) 0);
         Object eop = (byte) 0x7E;
         // In network connection terminator is not used.
@@ -211,12 +215,18 @@ public class GXDLMSReader {
         ReceiveParameters<byte[]> p =
                 new ReceiveParameters<byte[]>(byte[].class);
         p.setEop(eop);
-        p.setCount(5);
+        if (dlms.getInterfaceType() == InterfaceType.WRAPPER) {
+            p.setCount(8);
+        } else {
+            p.setCount(5);
+        }
         p.setWaitTime(WaitTime);
+        GXByteBuffer rd = new GXByteBuffer();
         synchronized (Media.getSynchronous()) {
             while (!succeeded) {
-                if (!reply.IsStreaming()) {
-                    writeTrace("<- " + now() + "\t" + GXCommon.bytesToHex(data),
+                if (!reply.isStreaming()) {
+                    writeTrace(
+                            "TX: " + now() + "\t" + GXCommon.bytesToHex(data),
                             TraceLevel.VERBOSE);
                     Media.send(data, null);
                 }
@@ -234,18 +244,30 @@ public class GXDLMSReader {
                             + pos.toString() + "/3");
                 }
             }
+            rd = new GXByteBuffer(p.getReply());
+            int msgPos = 0;
             // Loop until whole DLMS packet is received.
             try {
-                while (!dlms.getData(p.getReply(), reply) || reply.isNotify()) {
-                    if (p.getEop() == null) {
-                        p.setCount(1);
-                    }
-                    // Handle notify
-                    if (reply.isNotify()) {
-                        handleNotifyMessages(reply);
+                while (!dlms.getData(rd, reply, notify)) {
+                    p.setReply(null);
+                    if (notify.getData().getData() != null) {
+                        // Handle notify.
+                        if (!notify.isMoreData()) {
+                            // Show received push message as XML.
+                            GXDLMSTranslator t = new GXDLMSTranslator(
+                                    TranslatorOutputType.SIMPLE_XML);
+                            String xml = t.dataToXml(notify.getData());
+                            // Mikko System.out.println(xml);
+                            notify.clear();
+                            msgPos = rd.position();
+                        }
                         continue;
                     }
-                    if (!Media.receive(p)) {
+
+                    if (p.getEop() == null) {
+                        p.setCount(dlms.getFrameSize(rd));
+                    }
+                    while (!Media.receive(p)) {
                         // If echo.
                         if (reply.isEcho()) {
                             Media.send(data, null);
@@ -258,17 +280,16 @@ public class GXDLMSReader {
                         System.out.println("Data send failed. Try to resend "
                                 + pos.toString() + "/3");
                     }
+                    rd.position(msgPos);
+                    rd.set(p.getReply());
                 }
             } catch (Exception e) {
-                writeTrace(
-                        "-> " + now() + "\t"
-                                + GXCommon.bytesToHex(p.getReply()),
+                writeTrace("RX: " + now() + "\t" + rd.toString(),
                         TraceLevel.ERROR);
                 throw e;
             }
         }
-        writeTrace("-> " + now() + "\t" + GXCommon.bytesToHex(p.getReply()),
-                TraceLevel.VERBOSE);
+        writeTrace("RX: " + now() + "\t" + rd.toString(), TraceLevel.VERBOSE);
         if (reply.getError() != 0) {
             if (reply.getError() == ErrorCode.REJECTED.getValue()) {
                 Thread.sleep(1000);
@@ -280,9 +301,11 @@ public class GXDLMSReader {
     }
 
     void readDataBlock(byte[][] data, GXReplyData reply) throws Exception {
-        for (byte[] it : data) {
-            reply.clear();
-            readDataBlock(it, reply);
+        if (data != null) {
+            for (byte[] it : data) {
+                reply.clear();
+                readDataBlock(it, reply);
+            }
         }
     }
 
@@ -294,10 +317,10 @@ public class GXDLMSReader {
      * @throws Exception
      */
     void readDataBlock(byte[] data, GXReplyData reply) throws Exception {
-        if (data.length != 0) {
+        if (data != null && data.length != 0) {
             readDLMSPacket(data, reply);
             while (reply.isMoreData()) {
-                if (reply.IsStreaming()) {
+                if (reply.isStreaming()) {
                     data = null;
                 } else {
                     data = dlms.receiverReady(reply.getMoreData());
@@ -330,7 +353,7 @@ public class GXDLMSReader {
                 synchronized (Media.getSynchronous()) {
                     data = "/?!\r\n";
                     writeTrace(
-                            "<- " + now() + "\t"
+                            "RX: " + now() + "\t"
                                     + GXCommon
                                             .bytesToHex(data.getBytes("ASCII")),
                             TraceLevel.VERBOSE);
@@ -339,7 +362,7 @@ public class GXDLMSReader {
                         throw new Exception("Invalid meter type.");
                     }
                     writeTrace(
-                            "->" + now() + "\t"
+                            "TX: " + now() + "\t"
                                     + GXCommon.bytesToHex(p.getReply()),
                             TraceLevel.VERBOSE);
                     // If echo is used.
@@ -350,7 +373,7 @@ public class GXDLMSReader {
                             throw new Exception("Invalid meter type.");
                         }
                         writeTrace(
-                                "-> " + now() + "\t"
+                                "TX: " + now() + "\t"
                                         + GXCommon.bytesToHex(p.getReply()),
                                 TraceLevel.VERBOSE);
                         replyStr = new String(p.getReply());
@@ -402,12 +425,12 @@ public class GXDLMSReader {
                 p.setReply(null);
                 synchronized (Media.getSynchronous()) {
                     Media.send(tmp, null);
-                    writeTrace("<- " + now() + "\t" + GXCommon.bytesToHex(tmp),
+                    writeTrace("RX: " + now() + "\t" + GXCommon.bytesToHex(tmp),
                             TraceLevel.VERBOSE);
                     p.setWaitTime(100);
                     if (Media.receive(p)) {
                         writeTrace(
-                                "-> " + now() + "\t"
+                                "RX: " + now() + "\t"
                                         + GXCommon.bytesToHex(p.getReply()),
                                 TraceLevel.VERBOSE);
                     }

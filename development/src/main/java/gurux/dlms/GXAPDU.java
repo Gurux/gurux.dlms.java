@@ -406,7 +406,9 @@ final class GXAPDU {
                 len = data.getUInt8();
                 byte[] tmp = new byte[len];
                 data.get(tmp);
-                settings.getCipher().setDedicatedKey(tmp);
+                if (settings.getCipher() != null) {
+                    settings.getCipher().setDedicatedKey(tmp);
+                }
                 if (xml != null) {
                     xml.appendLine(TranslatorGeneralTags.DEDICATED_KEY, null,
                             GXCommon.toHex(tmp, false));
@@ -428,7 +430,7 @@ final class GXAPDU {
             } else {
                 if (xml != null && xml
                         .getOutputType() == TranslatorOutputType.STANDARD_XML) {
-                    xml.appendLine(TranslatorGeneralTags.RESPONSE_ALLOWED, null,
+                    xml.appendLine(TranslatorTags.RESPONSE_ALLOWED, null,
                             "true");
                 }
             }

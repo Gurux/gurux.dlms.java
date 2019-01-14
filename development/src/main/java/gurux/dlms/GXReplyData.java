@@ -148,6 +148,23 @@ public class GXReplyData {
     private byte windowSize;
 
     /**
+     * Client address of the notification message. Notification message sets
+     * this.
+     */
+    private int clientAddress;
+
+    /**
+     * Server address of the notification message. Notification message sets
+     * this.
+     */
+    private int serverAddress;
+
+    /**
+     * Gateway information.
+     */
+    private GXDLMSGateway gateway;
+
+    /**
      * Constructor.
      * 
      * @param more
@@ -544,10 +561,67 @@ public class GXReplyData {
 
     /**
      * @return Is GBT streaming.
+     * @deprecated use {@link #isStreaming} instead.
      */
+    @Deprecated
     public final boolean IsStreaming() {
+        return isStreaming();
+    }
+
+    /**
+     * @return Is GBT streaming.
+     */
+    public final boolean isStreaming() {
         return getStreaming() && (getBlockNumberAck() * getWindowSize())
                 + 1 > getBlockNumber();
     }
 
+    /**
+     * @return Client address of the notification message. Notification message
+     *         sets this.
+     */
+    public final int getClientAddress() {
+        return clientAddress;
+    }
+
+    /**
+     * @param value
+     *            Client address of the notification message. Notification
+     *            message sets this.
+     */
+    public final void setClientAddress(final int value) {
+        clientAddress = value;
+    }
+
+    /**
+     * @return Server address of the notification message. Notification message
+     *         sets this.
+     */
+    public final int getServerAddress() {
+        return serverAddress;
+    }
+
+    /**
+     * @param value
+     *            Server address of the notification message. Notification
+     *            message sets this.
+     */
+    public final void setServerAddress(int value) {
+        serverAddress = value;
+    }
+
+    /**
+     * @return Gateway information.
+     */
+    public final GXDLMSGateway getGateway() {
+        return gateway;
+    }
+
+    /**
+     * @param value
+     *            Gateway information.
+     */
+    public final void setGateway(final GXDLMSGateway value) {
+        gateway = value;
+    }
 }
