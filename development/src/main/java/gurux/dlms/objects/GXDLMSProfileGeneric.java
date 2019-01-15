@@ -752,8 +752,13 @@ public class GXDLMSProfileGeneric extends GXDLMSObject implements IGXDLMSBase {
                         obj = gurux.dlms.GXDLMSClient.createObject(type);
                         obj.setLogicalName(ln);
                     }
-                    addCaptureObject(obj, ((Number) tmp[2]).intValue(),
-                            ((Number) tmp[3]).intValue());
+                    int index;
+                    try {
+                        index = ((Byte) tmp[2]) & 0xFF;
+                    } catch (Exception ex) {
+                        index = ((Number) tmp[2]).intValue();
+                    }
+                    addCaptureObject(obj, index, ((Number) tmp[3]).intValue());
                 }
             }
         } else if (e.getIndex() == 4) {

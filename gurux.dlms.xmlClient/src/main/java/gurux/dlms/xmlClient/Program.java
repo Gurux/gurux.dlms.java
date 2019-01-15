@@ -31,25 +31,61 @@
 // This code is licensed under the GNU General Public License v2. 
 // Full text may be retrieved at http://www.gnu.org/licenses/gpl-2.0.txt
 //---------------------------------------------------------------------------
-package gurux.dlms.client;
+package gurux.dlms.xmlClient;
 
+import java.io.File;
 import java.util.ArrayList;
-import java.util.Map;
+import java.util.List;
 
 import gurux.common.GXCmdParameter;
 import gurux.common.GXCommon;
 import gurux.common.enums.TraceLevel;
-import gurux.dlms.GXSimpleEntry;
+import gurux.dlms.GXDLMSXmlPdu;
+import gurux.dlms.GXReplyData;
 import gurux.dlms.enums.Authentication;
+import gurux.dlms.enums.Command;
 import gurux.dlms.enums.InterfaceType;
-import gurux.dlms.enums.ObjectType;
 import gurux.io.BaudRate;
 import gurux.io.Parity;
 import gurux.io.StopBits;
 import gurux.net.GXNet;
 import gurux.serial.GXSerial;
 
-public class sampleclient {
+public class Program {
+
+    /**
+     * Handle meter reply.
+     * 
+     * @param item
+     *            Command to sent.
+     * @param reply
+     *            Received reply.
+     */
+    private static void handleReply(final GXDLMSXmlPdu item,
+            final GXReplyData reply) {
+        if (reply.getValue() instanceof byte[]) {
+            System.out.println(GXCommon.bytesToHex((byte[]) reply.getValue()));
+            System.out.println(reply.toString());
+        } else {
+            System.out.println(String.valueOf(reply));
+        }
+    }
+
+    static File[] listFiles(final File folder) {
+        List<File> list = new ArrayList<File>();
+        if (folder.isDirectory()) {
+            for (final File it : folder.listFiles()) {
+                if (it.isDirectory()) {
+                    listFiles(it);
+                } else {
+                    list.add(it);
+                }
+            }
+        } else {
+            list.add(folder);
+        }
+        return list.toArray(new File[list.size()]);
+    }
 
     /**
      * @param args
@@ -87,37 +123,102 @@ public class sampleclient {
             } else {
                 throw new Exception("Unknown media type.");
             }
-            ////////////////////////////////////////
-            reader = new GXDLMSReader(settings.client, settings.media,
-                    settings.trace);
-            settings.media.open();
-            if (settings.readObjects.size() != 0) {
-                reader.initializeConnection();
-                reader.getAssociationView();
-                for (Map.Entry<String, Integer> it : settings.readObjects) {
-                    Object val = reader.read(
-                            settings.client.getObjects()
-                                    .findByLN(ObjectType.NONE, it.getKey()),
-                            it.getValue());
-                    reader.showValue(it.getValue(), val);
+
+            if (settings.path == null || settings.path == "") {
+                throw new Exception("Unknown xml path.");
+            }
+            // Execute messages.
+            for (File file : listFiles(new File(settings.path))) {
+                String name = file.getName();
+                if (settings.trace.ordinal() > TraceLevel.WARNING.ordinal()) {
+                    System.out.println(
+                            "------------------------------------------------------------");
+                    System.out.println(name);
                 }
-            } else {
-                reader.readAll();
+                List<GXDLMSXmlPdu> actions = settings.client.load(file);
+                if (actions.size() == 0) {
+                    continue;
+                }
+                try {
+                    settings.media.open();
+                    reader = new GXDLMSReader(settings.client, settings.media,
+                            settings.trace);
+
+                    GXReplyData reply = new GXReplyData();
+                    // Send SNRM if not in xml.
+                    if (settings.client
+                            .getInterfaceType() == InterfaceType.HDLC) {
+                        if (!containsCommand(actions, Command.SNRM)) {
+                            reader.snrmRequest();
+                        }
+                    }
+
+                    // Send AARQ if not in xml.
+                    if (!containsCommand(actions, Command.AARQ)) {
+                        if (!containsCommand(actions, Command.SNRM)) {
+                            reader.aarqRequest();
+                        }
+                    }
+
+                    for (GXDLMSXmlPdu it : actions) {
+                        if (it.getCommand() == Command.SNRM && settings.client
+                                .getInterfaceType() == InterfaceType.WRAPPER) {
+                            continue;
+                        }
+                        if (it.getCommand() == Command.DISCONNECT_REQUEST
+                                && settings.client
+                                        .getInterfaceType() == InterfaceType.WRAPPER) {
+                            break;
+                        }
+                        // Send
+                        reply.clear();
+                        if (settings.trace.ordinal() > TraceLevel.WARNING
+                                .ordinal()) {
+                            System.out.println(
+                                    "------------------------------------------------------------");
+                            System.out.println(it.toString());
+                        }
+                        if (it.isRequest()) {
+                            reader.readDataBlock(
+                                    settings.client.pduToMessages(it), reply);
+                            handleReply(it, reply);
+                        }
+                    }
+                } catch (Exception ex) {
+                    System.out.println(
+                            "------------------------------------------------------------");
+                    System.out.println(ex.getMessage());
+                } finally {
+                    // Send Disconnect if not in xml.
+                    if (!containsCommand(actions, Command.DISCONNECT_REQUEST)) {
+                        reader.disconnect();
+                    } else {
+                        settings.media.close();
+                    }
+                }
             }
         } catch (Exception ex) {
+            System.out.println(
+                    "------------------------------------------------------------");
             System.out.println(ex.getMessage());
-            System.exit(1);
-        } finally {
-            if (reader != null) {
-                try {
-                    reader.close();
-                } catch (Exception e) {
-                    System.out.println(e.getMessage());
-                    System.exit(1);
-                }
-            }
-            System.out.println("Ended. Press any key to continue.");
         }
+    }
+
+    /**
+     * Is command in XML file.
+     * 
+     * @param actions
+     * @param command
+     * @return
+     */
+    private static boolean containsCommand(final List<GXDLMSXmlPdu> actions,
+            final int command) {
+        for (GXDLMSXmlPdu it : actions) {
+            if (it.getCommand() == command) {
+                return true;
+            }
+        }
+        return false;
     }
 
     /**
@@ -142,8 +243,7 @@ public class sampleclient {
         System.out.println(" -w WRAPPER profile is used. HDLC is default.");
         System.out
                 .println(" -t [Error, Warning, Info, Verbose] Trace messages.");
-        System.out.println(
-                " -g \"0.0.1.0.0.255:1; 0.0.1.0.0.255:2\" Get selected object(s) with given attribute index.");
+        System.out.println("  -x input XML file.");
         System.out.println("Example:");
         System.out.println("Read LG device using TCP/IP connection.");
         System.out.println(
@@ -158,7 +258,7 @@ public class sampleclient {
 
     static int getParameters(String[] args, Settings settings) {
         ArrayList<GXCmdParameter> parameters =
-                GXCommon.getParameters(args, "h:p:c:s:r:it:a:p:wP:g:");
+                GXCommon.getParameters(args, "h:p:c:s:r:it:a:p:wP:x:");
         GXNet net = null;
         for (GXCmdParameter it : parameters) {
             switch (it.getTag()) {
@@ -214,18 +314,6 @@ public class sampleclient {
                 // IEC.
                 settings.iec = true;
                 break;
-            case 'g':
-                // Get (read) selected objects.
-                for (String o : it.getValue().split("[;,]")) {
-                    String[] tmp = o.split("[:]");
-                    if (tmp.length != 2) {
-                        throw new IllegalArgumentException(
-                                "Invalid Logical name or attribute index.");
-                    }
-                    settings.readObjects.add(new GXSimpleEntry<String, Integer>(
-                            tmp[0].trim(), Integer.parseInt(tmp[1].trim())));
-                }
-                break;
             case 'S':// Serial Port
                 settings.media = new GXSerial();
                 GXSerial serial = (GXSerial) settings.media;
@@ -250,6 +338,9 @@ public class sampleclient {
             case 's':
                 settings.client
                         .setServerAddress(Integer.parseInt(it.getValue()));
+                break;
+            case 'x':
+                settings.path = it.getValue();
                 break;
             case '?':
                 switch (it.getTag()) {

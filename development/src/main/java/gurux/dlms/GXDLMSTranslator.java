@@ -70,9 +70,8 @@ import gurux.dlms.secure.GXCiphering;
  * This class is used to translate DLMS frame or PDU to xml.
  */
 public class GXDLMSTranslator {
-    private HashMap<Integer, String> tags = new HashMap<Integer, String>();
-    private HashMap<String, Integer> tagsByName =
-            new HashMap<String, Integer>();
+    HashMap<Integer, String> tags = new HashMap<Integer, String>();
+    HashMap<String, Integer> tagsByName = new HashMap<String, Integer>();
 
     /**
      * Are numeric values shows as hex.
@@ -149,6 +148,13 @@ public class GXDLMSTranslator {
     public GXDLMSTranslator(final TranslatorOutputType type) {
         outputType = type;
         getTags(outputType, tags, tagsByName);
+    }
+
+    /**
+     * @return Output type.
+     */
+    public final TranslatorOutputType getOutputType() {
+        return outputType;
     }
 
     /**
@@ -306,8 +312,8 @@ public class GXDLMSTranslator {
             final GXByteBuffer pdu) {
         GXDLMSSettings settings = new GXDLMSSettings(true);
         GXReplyData reply = new GXReplyData();
-        reply.setXml(new GXDLMSTranslatorStructure(outputType, hex,
-                getShowStringAsHex(), comments, tags));
+        reply.setXml(new GXDLMSTranslatorStructure(outputType, omitXmlNameSpace,
+                hex, getShowStringAsHex(), comments, tags));
         int pos;
         boolean found;
         while (data.position() < data.size()) {
@@ -354,8 +360,8 @@ public class GXDLMSTranslator {
         GXDLMSSettings settings = new GXDLMSSettings(true);
         settings.setInterfaceType(type);
         GXReplyData reply = new GXReplyData();
-        reply.setXml(new GXDLMSTranslatorStructure(outputType, hex,
-                getShowStringAsHex(), comments, tags));
+        reply.setXml(new GXDLMSTranslatorStructure(outputType, omitXmlNameSpace,
+                hex, getShowStringAsHex(), comments, tags));
         int pos;
         boolean found;
         try {
@@ -476,8 +482,8 @@ public class GXDLMSTranslator {
         InterfaceType framing = getDlmsFraming(value);
 
         GXReplyData data = new GXReplyData();
-        data.setXml(new GXDLMSTranslatorStructure(outputType, hex,
-                getShowStringAsHex(), comments, tags));
+        data.setXml(new GXDLMSTranslatorStructure(outputType, omitXmlNameSpace,
+                hex, getShowStringAsHex(), comments, tags));
         GXDLMSSettings settings = new GXDLMSSettings(true);
         settings.setInterfaceType(framing);
         GXDLMS.getData(settings, value, data, null);
@@ -555,8 +561,9 @@ public class GXDLMSTranslator {
             throw new IllegalArgumentException("value");
         }
         try {
-            GXDLMSTranslatorStructure xml = new GXDLMSTranslatorStructure(
-                    outputType, hex, getShowStringAsHex(), comments, tags);
+            GXDLMSTranslatorStructure xml =
+                    new GXDLMSTranslatorStructure(outputType, omitXmlNameSpace,
+                            hex, getShowStringAsHex(), comments, tags);
             GXReplyData data = new GXReplyData();
             data.setXml(xml);
             int offset = value.position();
@@ -634,7 +641,8 @@ public class GXDLMSTranslator {
                                 if (data.getCommand() == Command.SNRM
                                         || data.getCommand() == Command.UA) {
                                     xml.appendStartTag(data.getCommand());
-                                    pduToXml(xml, data.getData(), true, true);
+                                    pduToXml(xml, data.getData(), true, true,
+                                            true);
                                     xml.appendEndTag(data.getCommand());
                                     xml.setXmlLength(xml.getXmlLength() + 2);
                                 } else {
@@ -835,9 +843,10 @@ public class GXDLMSTranslator {
      */
     private String pduToXml(final GXByteBuffer value,
             final boolean omitDeclaration, final boolean omitNameSpace) {
-        GXDLMSTranslatorStructure xml = new GXDLMSTranslatorStructure(
-                outputType, hex, getShowStringAsHex(), comments, tags);
-        return pduToXml(xml, value, omitDeclaration, omitNameSpace);
+        GXDLMSTranslatorStructure xml =
+                new GXDLMSTranslatorStructure(outputType, omitXmlNameSpace, hex,
+                        getShowStringAsHex(), comments, tags);
+        return pduToXml(xml, value, omitDeclaration, omitNameSpace, true);
     }
 
     /**
@@ -847,9 +856,9 @@ public class GXDLMSTranslator {
      *            Bytes to convert.
      * @return Converted XML.
      */
-    private String pduToXml(final GXDLMSTranslatorStructure xml,
+    String pduToXml(final GXDLMSTranslatorStructure xml,
             final GXByteBuffer value, final boolean omitDeclaration,
-            final boolean omitNameSpace) {
+            final boolean omitNameSpace, final boolean allowUnknownCommand) {
         if (value == null || value.size() == 0) {
             throw new IllegalArgumentException("value");
         }
@@ -1061,7 +1070,7 @@ public class GXDLMSTranslator {
                                                 value));
                                 xml.startComment("Decrypt data:");
                                 pduToXml(xml, data2, omitDeclaration,
-                                        omitNameSpace);
+                                        omitNameSpace, false);
                                 xml.endComment();
                             }
                         }
@@ -1097,7 +1106,8 @@ public class GXDLMSTranslator {
                         tmp = new GXByteBuffer(GXCiphering
                                 .decrypt(settings.getCipher(), p, tmp));
                         xml.startComment("Decrypt data:");
-                        pduToXml(xml, tmp, omitDeclaration, omitNameSpace);
+                        pduToXml(xml, tmp, omitDeclaration, omitNameSpace,
+                                false);
                         xml.endComment();
                     } catch (Exception e) {
                         // It's OK if this fails. Ciphering settings are not
@@ -1139,10 +1149,13 @@ public class GXDLMSTranslator {
                 xml.appendLine(TranslatorTags.PHYSICAL_DEVICE_ADDRESS, null,
                         GXCommon.toHex(tmp, false, 0, len));
                 pduToXml(xml, new GXByteBuffer(value.remaining()),
-                        omitDeclaration, omitNameSpace);
+                        omitDeclaration, omitNameSpace, allowUnknownCommand);
                 xml.appendEndTag(cmd);
                 break;
             default:
+                if (!allowUnknownCommand) {
+                    throw new Exception("Invalid command.");
+                }
                 xml.appendLine(
                         "<Data=\""
                                 + GXCommon.toHex(value.getData(), false,
@@ -2331,6 +2344,11 @@ public class GXDLMSTranslator {
     private static GXByteBuffer updateDataType(final Node node,
             final GXDLMSXmlSettings s, final int tag) {
         GXByteBuffer preData = null;
+        String v = getValue(node, s);
+        if (s.isTemplate() || v == "*") {
+            s.setTemplate(true);
+            return preData;
+        }
         DataType dt = DataType.forValue(tag - GXDLMS.DATA_TYPE_OFFSET);
         switch (dt) {
         case ARRAY:
@@ -2479,7 +2497,7 @@ public class GXDLMSTranslator {
      * @return Converted PDU in hex string.
      */
     public final String xmlToHexPdu(final String xml) {
-        return GXCommon.toHex(xmlToPdu(xml), false);
+        return GXCommon.toHex(xmlToPdu(xml, null), false);
     }
 
     /**
@@ -2492,7 +2510,7 @@ public class GXDLMSTranslator {
      * @return Converted PDU in hex string.
      */
     public final String xmlToHexPdu(final String xml, final boolean addSpace) {
-        return GXCommon.toHex(xmlToPdu(xml), addSpace);
+        return GXCommon.toHex(xmlToPdu(xml, null), addSpace);
     }
 
     /**
@@ -2503,6 +2521,20 @@ public class GXDLMSTranslator {
      * @return Converted PDU in bytes.
      */
     public final byte[] xmlToPdu(final String xml) {
+        return xmlToPdu(xml, null);
+    }
+
+    /**
+     * Convert XML to byte array.
+     * 
+     * @param xml
+     *            Converted XML.
+     * @param settings
+     *            XML settings.
+     * @return Converted PDU in bytes.
+     */
+    public final byte[] xmlToPdu(final String xml,
+            final GXDLMSXmlSettings settings) {
         DocumentBuilder docBuilder;
         Document doc;
         DocumentBuilderFactory docBuilderFactory =
@@ -2513,8 +2545,11 @@ public class GXDLMSTranslator {
         } catch (Exception e) {
             throw new RuntimeException(e.getMessage());
         }
-        GXDLMSXmlSettings s = new GXDLMSXmlSettings(outputType, hex,
-                getShowStringAsHex(), tagsByName);
+        GXDLMSXmlSettings s = settings;
+        if (s == null) {
+            s = new GXDLMSXmlSettings(outputType, hex, getShowStringAsHex(),
+                    tagsByName);
+        }
         readNode(doc.getDocumentElement(), s);
         GXByteBuffer bb = new GXByteBuffer();
         GXDLMSLNParameters ln;
@@ -2740,8 +2775,9 @@ public class GXDLMSTranslator {
      */
     public final String dataToXml(final GXByteBuffer data) {
         GXDataInfo di = new GXDataInfo();
-        GXDLMSTranslatorStructure xml = new GXDLMSTranslatorStructure(
-                outputType, hex, getShowStringAsHex(), comments, tags);
+        GXDLMSTranslatorStructure xml =
+                new GXDLMSTranslatorStructure(outputType, omitXmlNameSpace, hex,
+                        getShowStringAsHex(), comments, tags);
         di.setXml(xml);
         GXCommon.getData(data, di);
         return di.getXml().toString();

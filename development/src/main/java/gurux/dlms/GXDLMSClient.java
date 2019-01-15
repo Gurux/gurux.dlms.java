@@ -78,10 +78,19 @@ import gurux.dlms.secure.GXSecure;
  * GXDLMS implements methods to communicate with DLMS/COSEM metering devices.
  */
 public class GXDLMSClient {
+
+    protected GXDLMSTranslator translator;
+
+    /**
+     * XML client don't throw exceptions. It serializes them as a default. Set
+     * value to true, if exceptions are thrown.
+     */
+    private boolean throwExceptions;
+
     /**
      * DLMS settings.
      */
-    private final GXDLMSSettings settings = new GXDLMSSettings(false);
+    protected final GXDLMSSettings settings = new GXDLMSSettings(false);
     private GXObisCodeCollection obisCodes;
     private static final Logger LOGGER =
             Logger.getLogger(GXDLMSClient.class.getName());
@@ -2077,7 +2086,82 @@ public class GXDLMSClient {
      */
     public final boolean getData(final GXByteBuffer reply,
             final GXReplyData data, final GXReplyData notify) {
-        return GXDLMS.getData(settings, reply, data, notify);
+        data.setXml(null);
+        boolean ret = false;
+        int cmd = data.getCommand();
+        try {
+            ret = GXDLMS.getData(settings, reply, data, notify);
+        } catch (Exception ex) {
+            if (translator == null || throwExceptions) {
+                throw ex;
+            }
+            ret = true;
+        }
+        if (ret && translator != null
+                && data.getMoreData() == RequestTypes.NONE) {
+            if (data.getXml() == null) {
+                data.setXml(new GXDLMSTranslatorStructure(
+                        translator.getOutputType(),
+                        translator.isOmitXmlNameSpace(), translator.isHex(),
+                        translator.getShowStringAsHex(),
+                        translator.isComments(), translator.tags));
+            }
+            int pos = data.getData().position();
+            try {
+                GXByteBuffer data2 = data.getData();
+                if (data.getCommand() == Command.GET_RESPONSE) {
+                    GXByteBuffer tmp =
+                            new GXByteBuffer((4 + data.getData().size()));
+                    tmp.setUInt8(data.getCommand());
+                    tmp.setUInt8(GetCommandType.NORMAL);
+                    tmp.setUInt8((byte) data.getInvokeId());
+                    tmp.setUInt8(0);
+                    tmp.set(data.getData());
+                    data.setData(tmp);
+                } else if (data.getCommand() == Command.METHOD_RESPONSE) {
+                    GXByteBuffer tmp =
+                            new GXByteBuffer((6 + data.getData().size()));
+                    tmp.setUInt8(data.getCommand());
+                    tmp.setUInt8(GetCommandType.NORMAL);
+                    tmp.setUInt8((byte) data.getInvokeId());
+                    tmp.setUInt8(0);
+                    tmp.setUInt8(1);
+                    tmp.setUInt8(0);
+                    tmp.set(data.getData());
+                    data.setData(tmp);
+                } else if (data.getCommand() == Command.READ_RESPONSE) {
+                    GXByteBuffer tmp =
+                            new GXByteBuffer(3 + data.getData().size());
+                    tmp.setUInt8(data.getCommand());
+                    tmp.setUInt8(VariableAccessSpecification.VARIABLE_NAME);
+                    tmp.setUInt8((byte) data.getInvokeId());
+                    tmp.setUInt8(0);
+                    tmp.set(data.getData());
+                    data.setData(tmp);
+                }
+                data.getData().position(0);
+                if (data.getCommand() == Command.SNRM
+                        || data.getCommand() == Command.UA) {
+                    data.getXml().appendStartTag(data.getCommand());
+                    if (data.getData().size() != 0) {
+                        translator.pduToXml(data.getXml(), data.getData(),
+                                translator.isOmitXmlDeclaration(),
+                                translator.isOmitXmlNameSpace(), true);
+                    }
+                    data.getXml().appendEndTag(data.getCommand());
+                } else {
+                    if (data.getData().size() != 0) {
+                        translator.pduToXml(data.getXml(), data.getData(),
+                                translator.isOmitXmlDeclaration(),
+                                translator.isOmitXmlNameSpace(), true);
+                    }
+                    data.setData(data2);
+                }
+            } finally {
+                data.getData().position(pos);
+            }
+        }
+        return ret;
     }
 
     /**
@@ -2376,5 +2460,22 @@ public class GXDLMSClient {
             return data.getUInt16(data.position() + 6);
         }
         return 1;
+    }
+
+    /**
+     * @return XML client don't throw exceptions. It serializes them as a
+     *         default. Set value to true, if exceptions are thrown.
+     */
+    public boolean isThrowExceptions() {
+        return throwExceptions;
+    }
+
+    /**
+     * @param value
+     *            XML client don't throw exceptions. It serializes them as a
+     *            default. Set value to true, if exceptions are thrown.
+     */
+    public void setThrowExceptions(final boolean value) {
+        throwExceptions = value;
     }
 }

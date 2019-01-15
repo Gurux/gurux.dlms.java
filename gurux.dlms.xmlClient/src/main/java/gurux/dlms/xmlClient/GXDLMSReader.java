@@ -31,7 +31,7 @@
 // This code is licensed under the GNU General Public License v2. 
 // Full text may be retrieved at http://www.gnu.org/licenses/gpl-2.0.txt
 //---------------------------------------------------------------------------
-package gurux.dlms.client;
+package gurux.dlms.xmlClient;
 
 import java.io.BufferedWriter;
 import java.io.FileWriter;
@@ -113,6 +113,25 @@ public class GXDLMSReader {
             replyBuff = java.nio.ByteBuffer.allocate(8 + 1024);
         } else {
             replyBuff = java.nio.ByteBuffer.allocate(100);
+        }
+    }
+
+    /**
+     * Disconnect.
+     */
+    public final void disconnect() {
+        if (Media != null && dlms != null) {
+            try {
+                if (Trace.ordinal() > TraceLevel.INFO.ordinal()) {
+                    System.out.println("Disconnecting from the meter.");
+                }
+                GXReplyData reply = new GXReplyData();
+                readDLMSPacket(dlms.disconnectRequest(), reply);
+                Media.close();
+            } catch (java.lang.Exception e) {
+            }
+            Media = null;
+            dlms = null;
         }
     }
 
@@ -852,6 +871,65 @@ public class GXDLMSReader {
         } finally {
             close();
         }
+    }
 
+    /**
+     * Send SNRM Request to the meter.
+     * 
+     * @throws Exception
+     */
+    public final void snrmRequest() throws Exception {
+        GXReplyData reply = new GXReplyData();
+        byte[] data;
+        data = dlms.snrmRequest();
+        if (data != null) {
+            if (Trace.ordinal() > TraceLevel.INFO.ordinal()) {
+                System.out.println(
+                        "Send SNRM request." + GXCommon.bytesToHex(data));
+            }
+            readDataBlock(data, reply);
+            if (Trace == TraceLevel.VERBOSE) {
+                System.out.println("Parsing UA reply." + reply.toString());
+            }
+            // Has server accepted client.
+            dlms.parseUAResponse(reply.getData());
+            if (Trace.ordinal() > TraceLevel.INFO.ordinal()) {
+                System.out.println("Parsing UA reply succeeded.");
+            }
+        }
+    }
+
+    /**
+     * Send AARQ Request to the meter.
+     * 
+     * @throws Exception
+     */
+    public final void aarqRequest() throws Exception {
+        GXReplyData reply = new GXReplyData();
+        for (byte[] it : dlms.aarqRequest()) {
+            if (Trace.ordinal() > TraceLevel.INFO.ordinal()) {
+                System.out.println(
+                        "Send AARQ request: " + GXCommon.bytesToHex(it));
+            }
+            reply.clear();
+            readDataBlock(it, reply);
+        }
+        if (Trace.ordinal() > TraceLevel.INFO.ordinal()) {
+            System.out.println("Parsing AARE reply: " + reply.toString());
+        }
+        // Parse reply.
+        dlms.parseAareResponse(reply.getData());
+        reply.clear();
+        // Get challenge Is HLS authentication is used.
+        if (dlms.getIsAuthenticationRequired()) {
+            for (byte[] it : dlms.getApplicationAssociationRequest()) {
+                reply.clear();
+                readDataBlock(it, reply);
+            }
+            dlms.parseApplicationAssociationResponse(reply.getData());
+        }
+        if (Trace.ordinal() > TraceLevel.INFO.ordinal()) {
+            System.out.println("Parsing AARE reply succeeded.");
+        }
     }
 }

@@ -106,9 +106,10 @@ public class GXDLMSTranslatorStructure {
      *            List of tags.
      */
     GXDLMSTranslatorStructure(final TranslatorOutputType type,
-            final boolean numericsAshex, final boolean hex,
+            boolean numericsAshex, final boolean numericshex, final boolean hex,
             final boolean addComments, final HashMap<Integer, String> list) {
         outputType = type;
+        numericsAshex = numericshex;
         showNumericsAsHex = numericsAshex;
         setShowStringAsHex(hex);
         tags = list;

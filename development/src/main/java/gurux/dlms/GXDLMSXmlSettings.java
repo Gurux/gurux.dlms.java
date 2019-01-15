@@ -59,6 +59,12 @@ class GXDLMSXmlSettings {
     private GXDLMSSettings settings = new GXDLMSSettings(true);
     private HashMap<String, Integer> tags = new HashMap<String, Integer>();
     private GXDateTime time = null;
+
+    /**
+     * Is xml used as a reply template.
+     */
+    private boolean template;
+
     /**
      * Are numeric values shows as hex.
      */
@@ -283,5 +289,20 @@ class GXDLMSXmlSettings {
 
     public void setPhysicalDeviceAddress(final byte[] value) {
         physicalDeviceAddress = value;
+    }
+
+    /**
+     * @return Is xml used as a reply template.
+     */
+    public boolean isTemplate() {
+        return template;
+    }
+
+    /**
+     * @param template
+     *            Is xml used as a reply template.
+     */
+    public void setTemplate(final boolean template) {
+        this.template = template;
     }
 }

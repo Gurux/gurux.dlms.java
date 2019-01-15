@@ -1052,8 +1052,7 @@ abstract class GXDLMS {
      * @param reply
      *            Data to encrypt.
      */
-    private static byte[] cipher0(final GXDLMSLNParameters p,
-            final byte[] data) {
+    static byte[] cipher0(final GXDLMSLNParameters p, final byte[] data) {
         int cmd;
         byte[] key;
         GXICipher cipher = p.getSettings().getCipher();

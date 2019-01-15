@@ -291,6 +291,10 @@ public class GXReplyData {
         dataType = DataType.NONE;
         cipherIndex = 0;
         time = null;
+        if (xml != null) {
+            xml.setXmlLength(0);
+        }
+        invokeId = 0;
     }
 
     /**
@@ -457,7 +461,7 @@ public class GXReplyData {
     /**
      * @return XML settings.
      */
-    public final GXDLMSTranslatorStructure getXml() {
+    final GXDLMSTranslatorStructure getXml() {
         return xml;
     }
 
@@ -465,7 +469,7 @@ public class GXReplyData {
      * @param value
      *            XML settings.
      */
-    public final void setXml(final GXDLMSTranslatorStructure value) {
+    public void setXml(final GXDLMSTranslatorStructure value) {
         xml = value;
     }
 
@@ -623,5 +627,16 @@ public class GXReplyData {
      */
     public final void setGateway(final GXDLMSGateway value) {
         gateway = value;
+    }
+
+    @Override
+    public String toString() {
+        if (xml != null) {
+            return xml.toString();
+        }
+        if (data == null) {
+            return "";
+        }
+        return data.toString();
     }
 }
