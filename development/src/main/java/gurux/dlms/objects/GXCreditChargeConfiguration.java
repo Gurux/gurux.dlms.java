@@ -34,6 +34,8 @@
 
 package gurux.dlms.objects;
 
+import gurux.dlms.objects.enums.CreditCollectionConfiguration;
+
 /**
  * Online help:<br>
  * http://www.gurux.fi/Gurux.DLMS.Objects.GXDLMSAccount
@@ -59,7 +61,14 @@ public class GXCreditChargeConfiguration {
      * Online help:<br>
      * http://www.gurux.fi/Gurux.DLMS.Objects.GXDLMSAccount
      */
-    private String collectionConfiguration;
+    private CreditCollectionConfiguration collectionConfiguration;
+
+    /**
+     * Constructor.
+     */
+    public GXCreditChargeConfiguration() {
+        collectionConfiguration = CreditCollectionConfiguration.NONE;
+    }
 
     /**
      * Online help:<br>
@@ -109,7 +118,7 @@ public class GXCreditChargeConfiguration {
      * 
      * @return Collection configuration.
      */
-    public final String getCollectionConfiguration() {
+    public final CreditCollectionConfiguration getCollectionConfiguration() {
         return collectionConfiguration;
     }
 
@@ -120,7 +129,8 @@ public class GXCreditChargeConfiguration {
      * @param value
      *            Collection configuration.
      */
-    public final void setCollectionConfiguration(final String value) {
+    public final void setCollectionConfiguration(
+            final CreditCollectionConfiguration value) {
         collectionConfiguration = value;
     }
 }

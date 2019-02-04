@@ -188,7 +188,7 @@ public class GXDLMSXmlPdu {
     }
 
     /**
-     * Return PDU as XML string.
+     * @return PDU as XML string.
      */
     public final String getPduAsXml() {
         if (getXmlNode() == null) {

@@ -47,6 +47,13 @@ public class GXCommodity {
     private GXDLMSObject target;
 
     /**
+     * Attribute index.<br>
+     * Online help:<br>
+     * http://www.gurux.fi/Gurux.DLMS.Objects.GXDLMSCharge
+     */
+    private int index;
+
+    /**
      * @return Executed object.
      */
     public final GXDLMSObject getTarget() {
@@ -60,13 +67,6 @@ public class GXCommodity {
     public final void setTarget(GXDLMSObject value) {
         target = value;
     }
-
-    /**
-     * Attribute index.<br>
-     * Online help:<br>
-     * http://www.gurux.fi/Gurux.DLMS.Objects.GXDLMSCharge
-     */
-    private int index;
 
     /**
      * @return Attribute index.

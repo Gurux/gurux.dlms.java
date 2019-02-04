@@ -637,7 +637,7 @@ public class GXDLMSCharge extends GXDLMSObject implements IGXDLMSBase {
         ObjectType ot = ObjectType.forValue(((Number) tmp2[0]).intValue());
         String ln = GXCommon.toLogicalName(tmp2[1]);
         charge.getCommodity().setTarget(settings.getObjects().findByLN(ot, ln));
-        charge.getCommodity().setIndex(((Number) tmp2[0]).intValue());
+        charge.getCommodity().setIndex(((Number) tmp2[2]).intValue());
         List<GXChargeTable> list = new ArrayList<GXChargeTable>();
         tmp2 = (Object[]) tmp[2];
         for (Object tmp3 : tmp2) {

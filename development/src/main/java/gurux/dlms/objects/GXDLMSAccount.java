@@ -50,6 +50,7 @@ import gurux.dlms.enums.ObjectType;
 import gurux.dlms.internal.GXCommon;
 import gurux.dlms.objects.enums.AccountCreditStatus;
 import gurux.dlms.objects.enums.AccountStatus;
+import gurux.dlms.objects.enums.CreditCollectionConfiguration;
 import gurux.dlms.objects.enums.Currency;
 import gurux.dlms.objects.enums.PaymentMode;
 
@@ -941,8 +942,8 @@ public class GXDLMSAccount extends GXDLMSObject implements IGXDLMSBase {
             break;
         case 4:
             GXByteBuffer bb = new GXByteBuffer();
-            GXCommon.setBitString(bb, e.getValue(), true);
-            currentCreditStatus = AccountCreditStatus.forValue(bb.getUInt8(1));
+            GXCommon.setBitString(bb, e.getValue(), false);
+            currentCreditStatus = AccountCreditStatus.forValue(bb.getUInt8(0));
             break;
         case 5:
             availableCredit = ((Number) e.getValue()).intValue();
@@ -981,7 +982,11 @@ public class GXDLMSAccount extends GXDLMSObject implements IGXDLMSBase {
                             new GXCreditChargeConfiguration();
                     item.setCreditReference(GXCommon.toLogicalName(it[0]));
                     item.setChargeReference(GXCommon.toLogicalName(it[1]));
-                    item.setCollectionConfiguration(String.valueOf(it[2]));
+                    GXByteBuffer bs = new GXByteBuffer();
+                    GXCommon.setBitString(bs, String.valueOf(it[2]), false);
+                    item.setCollectionConfiguration(
+                            CreditCollectionConfiguration
+                                    .forValue(bs.getUInt8(0)));
                     creditChargeConfigurations.add(item);
                 }
             }
@@ -1074,7 +1079,8 @@ public class GXDLMSAccount extends GXDLMSObject implements IGXDLMSBase {
                 it.setChargeReference(
                         reader.readElementContentAsString("Charge"));
                 it.setCollectionConfiguration(
-                        reader.readElementContentAsString("Configuration"));
+                        CreditCollectionConfiguration.forValue(reader
+                                .readElementContentAsInt("Configuration")));
                 list.add(it);
             }
             reader.readEndElement("CreditChargeConfigurations");
@@ -1162,7 +1168,7 @@ public class GXDLMSAccount extends GXDLMSObject implements IGXDLMSBase {
                 writer.writeElementString("Credit", it.getCreditReference());
                 writer.writeElementString("Charge", it.getChargeReference());
                 writer.writeElementString("Configuration",
-                        it.getCollectionConfiguration());
+                        it.getCollectionConfiguration().getValue());
                 writer.writeEndElement();
             }
             writer.writeEndElement();

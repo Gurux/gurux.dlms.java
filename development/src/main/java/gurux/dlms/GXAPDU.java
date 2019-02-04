@@ -986,7 +986,13 @@ final class GXAPDU {
                 len = buff.getUInt8();
                 tmp = new byte[len];
                 buff.get(tmp);
-                settings.setSourceSystemTitle(tmp);
+                try {
+                    settings.setSourceSystemTitle(tmp);
+                } catch (Exception ex) {
+                    if (xml == null) {
+                        throw ex;
+                    }
+                }
                 appendClientSystemTitleToXml(settings, xml);
                 break;
             // Server system title.

@@ -61,10 +61,13 @@ public class GXDLMSLimits {
      */
     private int windowSizeRX;
 
+    private GXDLMSSettings settings;
+
     /**
      * Constructor.
      */
-    GXDLMSLimits() {
+    GXDLMSLimits(GXDLMSSettings parent) {
+        settings = parent;
         setMaxInfoTX(DEFAULT_MAX_INFO_TX);
         setMaxInfoRX(DEFAULT_MAX_INFO_RX);
         setWindowSizeTX(DEFAULT_WINDOWS_SIZE_TX);
@@ -131,7 +134,7 @@ public class GXDLMSLimits {
     /**
      * Get the window size in receive. DefaultValue is 1.
      * 
-     * @return The window size in receive..
+     * @return The window size in receive.
      */
     public final int getWindowSizeRX() {
         return windowSizeRX;
@@ -145,5 +148,43 @@ public class GXDLMSLimits {
      */
     public final void setWindowSizeRX(final int value) {
         windowSizeRX = value;
+    }
+
+    /**
+     * Get the HDLC sender frame sequence number.
+     * 
+     * @return sender frame.
+     */
+    public final short getSenderFrame() {
+        return settings.senderFrame;
+    }
+
+    /**
+     * Set the HDLC sender frame sequence number.
+     * 
+     * @param value
+     *            sender frame.
+     */
+    public final void setSenderFrame(final short value) {
+        settings.senderFrame = value;
+    }
+
+    /**
+     * Get the HDLC receiver frame sequence number.
+     * 
+     * @return receiver frame.
+     */
+    public final short getReceiverFrame() {
+        return settings.receiverFrame;
+    }
+
+    /**
+     * Set HDLC receiver frame sequence number.
+     * 
+     * @param value
+     *            receiver frame.
+     */
+    public final void setReceiverFrame(final short value) {
+        settings.receiverFrame = value;
     }
 }

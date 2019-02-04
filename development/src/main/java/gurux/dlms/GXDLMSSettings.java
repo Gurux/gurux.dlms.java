@@ -221,12 +221,12 @@ public class GXDLMSSettings {
     /**
      * HDLC sender frame sequence number.
      */
-    private short senderFrame;
+    short senderFrame;
 
     /**
-     * HDLC receiver block sequence number.
+     * HDLC receiver frame sequence number.
      */
-    private short receiverFrame;
+    short receiverFrame;
 
     /**
      * Is this server or client.
@@ -295,7 +295,7 @@ public class GXDLMSSettings {
     GXDLMSSettings(final boolean isServer) {
         server = isServer;
         objects = new GXDLMSObjectCollection();
-        limits = new GXDLMSLimits();
+        limits = new GXDLMSLimits(this);
         gateway = null;
         proposedConformance.addAll(GXDLMSClient.getInitialConformance(false));
         resetFrameSequence();

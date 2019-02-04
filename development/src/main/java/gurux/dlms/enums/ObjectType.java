@@ -312,8 +312,6 @@ public enum ObjectType {
      */
     UTILITY_TABLES(26),
 
-    TOKEN(115),
-
     /**
      * S-FSK Phy MAC Setup
      */

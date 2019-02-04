@@ -51,6 +51,7 @@ import gurux.dlms.enums.Priority;
 import gurux.dlms.enums.RequestTypes;
 import gurux.dlms.enums.Security;
 import gurux.dlms.enums.ServiceClass;
+import gurux.dlms.enums.Standard;
 import gurux.dlms.enums.StateError;
 import gurux.dlms.internal.GXCommon;
 import gurux.dlms.internal.GXDataInfo;
@@ -1085,10 +1086,15 @@ abstract class GXDLMS {
             GXByteBuffer reply = new GXByteBuffer();
             // Add command.
             reply.setUInt8(tmp[0]);
-            // Add system title.
-            GXCommon.setObjectCount(
-                    p.getSettings().getCipher().getSystemTitle().length, reply);
-            reply.set(p.getSettings().getCipher().getSystemTitle());
+            // Add system title. Italy standard don't use system title.
+            if (p.getSettings().getStandard() == Standard.ITALY) {
+                reply.setUInt8(0);
+            } else {
+                GXCommon.setObjectCount(
+                        p.getSettings().getCipher().getSystemTitle().length,
+                        reply);
+                reply.set(p.getSettings().getCipher().getSystemTitle());
+            }
             // Add data.
             reply.set(tmp, 1, tmp.length - 1);
             return reply.array();
@@ -3499,17 +3505,11 @@ abstract class GXDLMS {
             return false;
         }
 
-        getDataFromFrame(reply, target);
+        getDataFromFrame(reply, target,
+                settings.getInterfaceType() == InterfaceType.HDLC);
 
         // If keepalive or get next frame request.
         if (target.getXml() != null || (frame != 0x13 && (frame & 0x1) != 0)) {
-            if (settings.getInterfaceType() == InterfaceType.HDLC
-                    && (target.getError() == ErrorCode.REJECTED.getValue()
-                            || target.getData().size() != 0)) {
-                if (reply.position() != reply.size()) {
-                    reply.position(reply.position() + 3);
-                }
-            }
             return true;
         }
         getPdu(settings, target);
@@ -3526,9 +3526,11 @@ abstract class GXDLMS {
      *            Received data that includes HDLC frame.
      * @param info
      *            Reply data.
+     * @param hdlc
+     *            Is HDLC framing used.
      */
     private static void getDataFromFrame(final GXByteBuffer reply,
-            final GXReplyData info) {
+            final GXReplyData info, final boolean hdlc) {
         GXByteBuffer data = info.getData();
         int offset = data.size();
         int cnt = info.getPacketLength() - reply.position();
@@ -3536,6 +3538,9 @@ abstract class GXDLMS {
             data.capacity(offset + cnt);
             data.set(reply.getData(), reply.position(), cnt);
             reply.position(reply.position() + cnt);
+            if (hdlc) {
+                reply.position(reply.position() + 3);
+            }
         }
         // Set position to begin of new data.
         data.position(offset);

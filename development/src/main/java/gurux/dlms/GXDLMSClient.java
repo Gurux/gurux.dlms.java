@@ -613,29 +613,28 @@ public class GXDLMSClient {
         data.setUInt8(0); // Length.
 
         // If custom HDLC parameters are used.
-        if (GXDLMSLimits.DEFAULT_MAX_INFO_TX != getLimits().getMaxInfoTX()) {
+        if (GXDLMSLimits.DEFAULT_MAX_INFO_TX != getLimits().getMaxInfoTX()
+                || GXDLMSLimits.DEFAULT_MAX_INFO_RX != getLimits()
+                        .getMaxInfoRX()
+                || GXDLMSLimits.DEFAULT_WINDOWS_SIZE_TX != getLimits()
+                        .getWindowSizeTX()
+                || GXDLMSLimits.DEFAULT_WINDOWS_SIZE_RX != getLimits()
+                        .getWindowSizeRX()) {
             data.setUInt8(HDLCInfo.MAX_INFO_TX);
             GXDLMS.appendHdlcParameter(data, getLimits().getMaxInfoTX());
-        }
-        if (GXDLMSLimits.DEFAULT_MAX_INFO_RX != getLimits().getMaxInfoRX()) {
             data.setUInt8(HDLCInfo.MAX_INFO_RX);
             GXDLMS.appendHdlcParameter(data, getLimits().getMaxInfoRX());
-        }
-        if (GXDLMSLimits.DEFAULT_WINDOWS_SIZE_TX != getLimits()
-                .getWindowSizeTX()) {
             data.setUInt8(HDLCInfo.WINDOW_SIZE_TX);
             data.setUInt8(4);
             data.setUInt32(getLimits().getWindowSizeTX());
-        }
-        if (GXDLMSLimits.DEFAULT_WINDOWS_SIZE_RX != getLimits()
-                .getWindowSizeRX()) {
             data.setUInt8(HDLCInfo.WINDOW_SIZE_RX);
             data.setUInt8(4);
             data.setUInt32(getLimits().getWindowSizeRX());
         }
         // If default HDLC parameters are not used.
         if (data.size() != 3) {
-            data.setUInt8(2, data.size() - 3); // Length.
+            // Length.
+            data.setUInt8(2, data.size() - 3);
         } else {
             data = null;
         }
