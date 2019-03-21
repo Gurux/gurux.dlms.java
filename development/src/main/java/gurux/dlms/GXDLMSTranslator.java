@@ -898,27 +898,27 @@ public class GXDLMSTranslator {
                 break;
             case Command.GET_REQUEST:
                 GXDLMSLNCommandHandler.handleGetRequest(settings, null, value,
-                        null, xml);
+                        null, xml, Command.NONE);
                 break;
             case Command.SET_REQUEST:
                 GXDLMSLNCommandHandler.handleSetRequest(settings, null, value,
-                        null, xml);
+                        null, xml, Command.NONE);
                 break;
             case Command.READ_REQUEST:
                 GXDLMSSNCommandHandler.handleReadRequest(settings, null, value,
-                        null, xml);
+                        null, xml, Command.NONE);
                 break;
             case Command.METHOD_REQUEST:
                 GXDLMSLNCommandHandler.handleMethodRequest(settings, null,
-                        value, null, null, xml);
+                        value, null, null, xml, Command.NONE);
                 break;
             case Command.WRITE_REQUEST:
                 GXDLMSSNCommandHandler.handleWriteRequest(settings, null, value,
-                        null, xml);
+                        null, xml, Command.NONE);
                 break;
             case Command.ACCESS_REQUEST:
                 GXDLMSLNCommandHandler.handleAccessRequest(settings, null,
-                        value, null, xml);
+                        value, null, xml, Command.NONE);
                 break;
             case Command.DATA_NOTIFICATION:
                 data.setXml(xml);
@@ -2580,7 +2580,7 @@ public class GXDLMSTranslator {
         case Command.METHOD_RESPONSE:
             ln = new GXDLMSLNParameters(s.getSettings(), 0, s.getCommand(),
                     s.getRequestType(), s.getAttributeDescriptor(), s.getData(),
-                    0xff);
+                    0xff, Command.NONE);
             GXDLMS.getLNPdu(ln, bb);
             break;
         case Command.GLO_GET_REQUEST:
@@ -2661,19 +2661,19 @@ public class GXDLMSTranslator {
         case Command.ACCESS_REQUEST:
             ln = new GXDLMSLNParameters(s.getSettings(), 0, s.getCommand(),
                     s.getRequestType(), s.getAttributeDescriptor(), s.getData(),
-                    0xff);
+                    0xff, Command.NONE);
             GXDLMS.getLNPdu(ln, bb);
             break;
         case Command.ACCESS_RESPONSE:
             ln = new GXDLMSLNParameters(s.getSettings(), 0, s.getCommand(),
                     s.getRequestType(), s.getAttributeDescriptor(), s.getData(),
-                    0xff);
+                    0xff, Command.NONE);
             GXDLMS.getLNPdu(ln, bb);
             break;
         case Command.DATA_NOTIFICATION:
             ln = new GXDLMSLNParameters(s.getSettings(), 0, s.getCommand(),
                     s.getRequestType(), s.getAttributeDescriptor(), s.getData(),
-                    0xff);
+                    0xff, Command.NONE);
             ln.setTime(s.getTime());
             GXDLMS.getLNPdu(ln, bb);
             break;
@@ -2687,7 +2687,7 @@ public class GXDLMSTranslator {
         case Command.EVENT_NOTIFICATION:
             ln = new GXDLMSLNParameters(s.getSettings(), 0, s.getCommand(),
                     s.getRequestType(), s.getAttributeDescriptor(), s.getData(),
-                    0xff);
+                    0xff, Command.NONE);
             ln.setTime(s.getTime());
             GXDLMS.getLNPdu(ln, bb);
             break;

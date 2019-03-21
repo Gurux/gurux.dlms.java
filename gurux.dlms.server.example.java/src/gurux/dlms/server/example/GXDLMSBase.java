@@ -65,6 +65,7 @@ import gurux.dlms.enums.Authentication;
 import gurux.dlms.enums.DataType;
 import gurux.dlms.enums.MethodAccessMode;
 import gurux.dlms.enums.ObjectType;
+import gurux.dlms.enums.Security;
 import gurux.dlms.enums.SourceDiagnostic;
 import gurux.dlms.objects.GXDLMSActionSchedule;
 import gurux.dlms.objects.GXDLMSActivityCalendar;
@@ -545,6 +546,10 @@ public class GXDLMSBase extends GXDLMSSecureServer2
      * @param server
      */
     public void initialize(int port, TraceLevel trace) throws Exception {
+        // If pre-established connections are used.
+        setClientSystemTitle("ABCDEFGH".getBytes());
+        getCiphering().setSecurity(Security.AUTHENTICATION_ENCRYPTION);
+
         media = new gurux.net.GXNet(NetworkType.TCP, port);
         media.setTrace(TraceLevel.VERBOSE);
         Trace = trace;

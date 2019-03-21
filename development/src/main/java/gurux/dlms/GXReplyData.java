@@ -56,6 +56,11 @@ public class GXReplyData {
     private int command;
 
     /**
+     * Received ciphered command.
+     */
+    private int cipheredCommand;
+
+    /**
      * Received command type.
      */
     private int commandType;
@@ -279,7 +284,7 @@ public class GXReplyData {
      */
     public final void clear() {
         moreData = RequestTypes.NONE;
-        command = Command.NONE;
+        cipheredCommand = command = Command.NONE;
         commandType = 0;
         data.capacity(0);
         complete = false;
@@ -638,5 +643,20 @@ public class GXReplyData {
             return "";
         }
         return data.toString();
+    }
+
+    /**
+     * @return Received ciphered command.
+     */
+    public int getCipheredCommand() {
+        return cipheredCommand;
+    }
+
+    /**
+     * @param value
+     *            Received ciphered command.
+     */
+    public void setCipheredCommand(final int value) {
+        cipheredCommand = value;
     }
 }

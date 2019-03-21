@@ -51,7 +51,6 @@ import gurux.dlms.enums.Priority;
 import gurux.dlms.enums.RequestTypes;
 import gurux.dlms.enums.Security;
 import gurux.dlms.enums.ServiceClass;
-import gurux.dlms.enums.Standard;
 import gurux.dlms.enums.StateError;
 import gurux.dlms.internal.GXCommon;
 import gurux.dlms.internal.GXDataInfo;
@@ -64,6 +63,7 @@ import gurux.dlms.objects.GXDLMSAutoAnswer;
 import gurux.dlms.objects.GXDLMSAutoConnect;
 import gurux.dlms.objects.GXDLMSCharge;
 import gurux.dlms.objects.GXDLMSClock;
+import gurux.dlms.objects.GXDLMSCompactData;
 import gurux.dlms.objects.GXDLMSCredit;
 import gurux.dlms.objects.GXDLMSData;
 import gurux.dlms.objects.GXDLMSDemandRegister;
@@ -253,6 +253,8 @@ abstract class GXDLMS {
             return new GXDLMSTokenGateway();
         case PARAMETER_MONITOR:
             return new GXDLMSParameterMonitor();
+        case COMPACT_DATA:
+            return new GXDLMSCompactData();
         default:
             return new GXDLMSObject();
         }
@@ -294,31 +296,22 @@ abstract class GXDLMS {
         // Get next block.
         List<byte[]> reply;
         GXByteBuffer bb = new GXByteBuffer(6);
-        /*
-         * if (settings.getNegotiatedConformance()
-         * .contains(Conformance.GENERAL_BLOCK_TRANSFER)) { GXDLMSLNParameters p
-         * = new GXDLMSLNParameters(settings, 0, Command.GENERAL_BLOCK_TRANSFER,
-         * 0, bb, null, 0xff); p.windowSize = settings.getWindowSize();
-         * p.blockNumberAck = settings.getBlockNumberAck();
-         * p.setBlockIndex(settings.getBlockIndex()); p.streaming = false; reply
-         * = GXDLMS.getLnMessages(p); settings.increaseBlockIndex(); } else
-         */ {
-            if (settings.getUseLogicalNameReferencing()) {
-                bb.setUInt32(settings.getBlockIndex());
-            } else {
-                bb.setUInt16(settings.getBlockIndex());
-            }
-            settings.increaseBlockIndex();
-            if (settings.getUseLogicalNameReferencing()) {
-                GXDLMSLNParameters p = new GXDLMSLNParameters(settings, 0, cmd,
-                        GetCommandType.NEXT_DATA_BLOCK, bb, null, 0xff);
-                reply = getLnMessages(p);
-            } else {
-                GXDLMSSNParameters p = new GXDLMSSNParameters(settings, cmd, 1,
-                        VariableAccessSpecification.BLOCK_NUMBER_ACCESS, bb,
-                        null);
-                reply = getSnMessages(p);
-            }
+
+        if (settings.getUseLogicalNameReferencing()) {
+            bb.setUInt32(settings.getBlockIndex());
+        } else {
+            bb.setUInt16(settings.getBlockIndex());
+        }
+        settings.increaseBlockIndex();
+        if (settings.getUseLogicalNameReferencing()) {
+            GXDLMSLNParameters p = new GXDLMSLNParameters(settings, 0, cmd,
+                    GetCommandType.NEXT_DATA_BLOCK, bb, null, 0xff,
+                    Command.NONE);
+            reply = getLnMessages(p);
+        } else {
+            GXDLMSSNParameters p = new GXDLMSSNParameters(settings, cmd, 1,
+                    VariableAccessSpecification.BLOCK_NUMBER_ACCESS, bb, null);
+            reply = getSnMessages(p);
         }
         return reply.get(0);
     }
@@ -1045,6 +1038,11 @@ abstract class GXDLMS {
         return reply.array();
     }
 
+    static boolean isGloMessage(int cmd) {
+        return cmd == Command.GLO_GET_REQUEST || cmd == Command.GLO_SET_REQUEST
+                || cmd == Command.GLO_METHOD_REQUEST;
+    }
+
     /**
      * Cipher using security suite 0.
      * 
@@ -1057,49 +1055,50 @@ abstract class GXDLMS {
         int cmd;
         byte[] key;
         GXICipher cipher = p.getSettings().getCipher();
-        if (!p.getSettings().getNegotiatedConformance()
-                .contains(Conformance.GENERAL_PROTECTION)) {
-            if ((p.getSettings().getConnected() & ConnectionState.DLMS) != 0
-                    && cipher.getDedicatedKey() != null) {
-                cmd = getDedMessage(p.command);
-                key = cipher.getDedicatedKey();
+        // If client.
+        if (p.getCipheredCommand() == Command.NONE) {
+            if (!p.getSettings().getProposedConformance()
+                    .contains(Conformance.GENERAL_PROTECTION)
+                    && !p.getSettings().getNegotiatedConformance()
+                            .contains(Conformance.GENERAL_PROTECTION)) {
+                if ((p.getSettings().getConnected() & ConnectionState.DLMS) != 0
+                        && cipher.getDedicatedKey() != null) {
+                    cmd = getDedMessage(p.command);
+                    key = cipher.getDedicatedKey();
+                } else {
+                    cmd = getGloMessage(p.getCommand());
+                    key = cipher.getBlockCipherKey();
+                }
             } else {
-                cmd = getGloMessage(p.getCommand());
-                key = cipher.getBlockCipherKey();
+                if (cipher.getDedicatedKey() != null) {
+                    cmd = Command.GENERAL_DED_CIPHERING;
+                    key = cipher.getDedicatedKey();
+                } else {
+                    cmd = Command.GENERAL_GLO_CIPHERING;
+                    key = cipher.getBlockCipherKey();
+                }
             }
-        } else {
-            if (cipher.getDedicatedKey() != null) {
+        } else // If server.
+        {
+            if (p.getCipheredCommand() == Command.GENERAL_DED_CIPHERING) {
                 cmd = Command.GENERAL_DED_CIPHERING;
                 key = cipher.getDedicatedKey();
-            } else {
+            } else if (p
+                    .getCipheredCommand() == Command.GENERAL_GLO_CIPHERING) {
                 cmd = Command.GENERAL_GLO_CIPHERING;
                 key = cipher.getBlockCipherKey();
+            } else if (isGloMessage(p.getCipheredCommand())) {
+                cmd = getGloMessage(p.command);
+                key = cipher.getBlockCipherKey();
+            } else {
+                cmd = getDedMessage(p.command);
+                key = cipher.getDedicatedKey();
             }
         }
         AesGcmParameter s = new AesGcmParameter(cmd, cipher.getSecurity(),
                 cipher.getInvocationCounter(), cipher.getSystemTitle(), key,
                 cipher.getAuthenticationKey());
-        byte[] tmp = GXCiphering.encrypt(s, data);
-        if (p.getCommand() == Command.DATA_NOTIFICATION
-                || p.getCommand() == Command.GENERAL_GLO_CIPHERING
-                || p.getCommand() == Command.GENERAL_DED_CIPHERING) {
-            GXByteBuffer reply = new GXByteBuffer();
-            // Add command.
-            reply.setUInt8(tmp[0]);
-            // Add system title. Italy standard don't use system title.
-            if (p.getSettings().getStandard() == Standard.ITALY) {
-                reply.setUInt8(0);
-            } else {
-                GXCommon.setObjectCount(
-                        p.getSettings().getCipher().getSystemTitle().length,
-                        reply);
-                reply.set(p.getSettings().getCipher().getSystemTitle());
-            }
-            // Add data.
-            reply.set(tmp, 1, tmp.length - 1);
-            return reply.array();
-        }
-        return tmp;
+        return GXCiphering.encrypt(s, data);
     }
 
     /**
@@ -1465,17 +1464,27 @@ abstract class GXDLMS {
             primaryAddress = getAddressBytes(settings.getClientAddress(), 0);
             secondaryAddress = getAddressBytes(settings.getServerAddress(),
                     settings.getServerAddressSize());
+            len = secondaryAddress.length;
         } else {
             primaryAddress = getAddressBytes(settings.getServerAddress(),
                     settings.getServerAddressSize());
             secondaryAddress = getAddressBytes(settings.getClientAddress(), 0);
+            len = primaryAddress.length;
         }
         // Add BOP
         bb.setUInt8(GXCommon.HDLC_FRAME_START_END);
         frameSize = settings.getLimits().getMaxInfoTX();
-        if (data != null && data.position() == 0) {
-            frameSize -= 3;
+
+        // Remove BOP, type, len, primaryAddress, secondaryAddress, frame,
+        // header CRC, data CRC and EOP from data length.
+        if (settings.getLimits().isUseFrameSize()) {
+            frameSize -= (10 + len);
+        } else {
+            if (data != null && data.position() == 0) {
+                frameSize -= 3;
+            }
         }
+
         // If no data
         if (data == null || data.size() == 0) {
             len = 0;
@@ -1551,6 +1560,71 @@ abstract class GXDLMS {
             return data.compare(GXCommon.LLC_SEND_BYTES);
         } else {
             return data.compare(GXCommon.LLC_REPLY_BYTES);
+        }
+    }
+
+    /**
+     * Get HDLC sender and receiver address information.
+     * 
+     * @param reply
+     *            Received data.
+     * @param target
+     *            target (primary) address
+     * @param source
+     *            Source (secondary) address.
+     * @param type
+     *            DLMS frame type.
+     */
+    public static void getHdlcAddressInfo(final GXByteBuffer reply,
+            final int[] target, final int[] source, final short[] type) {
+        int position = reply.position();
+        target[0] = source[0] = 0;
+        type[0] = 0;
+        try {
+            short ch;
+            int pos, packetStartID = reply.position(), frameLen = 0;
+            // If whole frame is not received yet.
+            if (reply.size() - reply.position() < 9) {
+                return;
+            }
+            // Find start of HDLC frame.
+            for (pos = reply.position(); pos < reply.size(); ++pos) {
+                ch = reply.getUInt8();
+                if (ch == GXCommon.HDLC_FRAME_START_END) {
+                    packetStartID = pos;
+                    break;
+                }
+            }
+            // Not a HDLC frame.
+            // Sometimes meters can send some strange data between DLMS frames.
+            if (reply.position() == reply.size()) {
+                // Not enough data to parse;
+                return;
+            }
+            short frame = reply.getUInt8();
+            // Check frame length.
+            if ((frame & 0x7) != 0) {
+                frameLen = ((frame & 0x7) << 8);
+            }
+            ch = reply.getUInt8();
+            // If not enough data.
+            frameLen += ch;
+            if (reply.size() - reply.position() + 1 < frameLen) {
+                reply.position(packetStartID);
+                // Not enough data to parse;
+                return;
+            }
+            int eopPos = frameLen + packetStartID + 1;
+            ch = reply.getUInt8(eopPos);
+            if (ch != GXCommon.HDLC_FRAME_START_END) {
+                throw new RuntimeException("Invalid data format.");
+            }
+            // Get address.
+            target[0] = GXCommon.getHDLCAddress(reply);
+            source[0] = GXCommon.getHDLCAddress(reply);
+            type[0] = reply.getUInt8();
+        } finally {
+            reply.position(position);
         }
     }
 
@@ -1762,6 +1836,52 @@ abstract class GXDLMS {
             logical[0] = address >>> 14;
             physical[0] = address & 0x3FFF;
         }
+    }
+
+    /**
+     * Get HDLC address.
+     * 
+     * @param value
+     *            HDLC address.
+     * @param size
+     *            HDLC address size. This is optional.
+     * @return HDLC address.
+     */
+    public static Object getHdlcAddress(int value, int size) {
+        if (size < 2 && value < 0x80) {
+            return (byte) (value << 1 | 1);
+        }
+        if (size < 4 && value < 0x4000) {
+            return (short) ((value & 0x3F80) << 2 | (value & 0x7F) << 1 | 1);
+        }
+        if (value < 0x10000000) {
+            return (int) ((value & 0xFE00000) << 4 | (value & 0x1FC000) << 3
+                    | (value & 0x3F80) << 2 | (value & 0x7F) << 1 | 1);
+        }
+        throw new IllegalArgumentException("Invalid address.");
+    }
+
+    /**
+     * Convert HDLC address to bytes.
+     * 
+     * @param value
+     * @param size
+     *            Address size in bytes.
+     * @return
+     */
+    public static byte[] getHdlcAddressBytes(int value, int size) {
+        Object tmp = getHdlcAddress(value, size);
+        GXByteBuffer bb = new GXByteBuffer();
+        if (tmp instanceof Byte && size < 2) {
+            bb.setUInt8((Byte) tmp);
+        } else if (tmp instanceof Short && size < 4) {
+            bb.setUInt16((short) tmp);
+        } else if (tmp instanceof Integer) {
+            bb.setUInt32((int) tmp);
+        } else {
+            throw new IllegalArgumentException("Invalid address type.");
+        }
+        return bb.array();
     }
 
     /**
@@ -2381,7 +2501,7 @@ abstract class GXDLMS {
                     } else {
                         getDataFromBlock(data.getData(), 0);
                     }
-                } else {
+                } else if (ret == 0) {
                     throw new GXDLMSException(
                             "HandleActionResponseNormal failed. "
                                     + "Invalid tag.");
@@ -3119,7 +3239,7 @@ abstract class GXDLMS {
             case Command.DED_GET_REQUEST:
             case Command.DED_SET_REQUEST:
             case Command.DED_METHOD_REQUEST:
-                cmd = handleGloDedRequest(settings, data, cmd);
+                handleGloDedRequest(settings, data);
                 // Server handles this.
                 break;
             case Command.GLO_READ_RESPONSE:
@@ -3127,14 +3247,20 @@ abstract class GXDLMS {
             case Command.GLO_GET_RESPONSE:
             case Command.GLO_SET_RESPONSE:
             case Command.GLO_METHOD_RESPONSE:
-            case Command.GENERAL_GLO_CIPHERING:
             case Command.GLO_EVENT_NOTIFICATION_REQUEST:
             case Command.DED_GET_RESPONSE:
             case Command.DED_SET_RESPONSE:
             case Command.DED_METHOD_RESPONSE:
-            case Command.GENERAL_DED_CIPHERING:
             case Command.DED_EVENT_NOTIFICATION:
                 handleGloDedResponse(settings, data, index);
+                break;
+            case Command.GENERAL_GLO_CIPHERING:
+            case Command.GENERAL_DED_CIPHERING:
+                if (settings.isServer()) {
+                    handleGloDedRequest(settings, data);
+                } else {
+                    handleGloDedResponse(settings, data, index);
+                }
                 break;
             case Command.DATA_NOTIFICATION:
                 handleDataNotification(settings, data);
@@ -3212,6 +3338,8 @@ abstract class GXDLMS {
                 case Command.DED_GET_RESPONSE:
                 case Command.DED_SET_RESPONSE:
                 case Command.DED_METHOD_RESPONSE:
+                case Command.GENERAL_GLO_CIPHERING:
+                case Command.GENERAL_DED_CIPHERING:
                     data.getData().position(data.getCipherIndex());
                     getPdu(settings, data);
                     break;
@@ -3284,69 +3412,105 @@ abstract class GXDLMS {
         }
     }
 
-    private static int handleGloDedRequest(final GXDLMSSettings settings,
-            final GXReplyData data, final int cmd) {
-        int cmd2 = cmd;
-        if (settings.getCipher() == null) {
-            throw new RuntimeException("Secure connection is not supported.");
-        }
-        // If all frames are read.
-        if ((data.getMoreData().getValue()
-                & RequestTypes.FRAME.getValue()) == 0) {
+    private static void handleGloDedRequest(final GXDLMSSettings settings,
+            final GXReplyData data) {
+        if (data.getXml() != null) {
             data.getData().position(data.getData().position() - 1);
-            AesGcmParameter p;
-            if (settings.getCipher().getDedicatedKey() != null
-                    && (settings.getConnected() & ConnectionState.DLMS) != 0) {
-                p = new AesGcmParameter(settings.getSourceSystemTitle(),
-                        settings.getCipher().getDedicatedKey(),
-                        settings.getCipher().getAuthenticationKey());
-            } else {
-                p = new AesGcmParameter(settings.getSourceSystemTitle(),
-                        settings.getCipher().getBlockCipherKey(),
-                        settings.getCipher().getAuthenticationKey());
-            }
-            byte[] tmp = GXCiphering.decrypt(settings.getCipher(), p,
-                    data.getData());
-            data.getData().clear();
-            data.getData().set(tmp);
-            // Get command.
-            cmd2 = data.getData().getUInt8();
-            data.setCommand(cmd2);
         } else {
-            data.getData().position(data.getData().position() - 1);
+            if (settings.getCipher() == null) {
+                throw new RuntimeException(
+                        "Secure connection is not supported.");
+            }
+            // If all frames are read.
+            if ((data.getMoreData().getValue()
+                    & RequestTypes.FRAME.getValue()) == 0) {
+                data.getData().position(data.getData().position() - 1);
+                AesGcmParameter p;
+                GXICipher cipher = settings.getCipher();
+                if (data.getCommand() == Command.GENERAL_DED_CIPHERING) {
+                    p = new AesGcmParameter(settings.getSourceSystemTitle(),
+                            cipher.getDedicatedKey(),
+                            cipher.getAuthenticationKey());
+                } else if (data.getCommand() == Command.GENERAL_GLO_CIPHERING) {
+                    p = new AesGcmParameter(settings.getSourceSystemTitle(),
+                            cipher.getBlockCipherKey(),
+                            cipher.getAuthenticationKey());
+                } else if (isGloMessage(data.getCommand())) {
+                    p = new AesGcmParameter(settings.getSourceSystemTitle(),
+                            cipher.getBlockCipherKey(),
+                            cipher.getAuthenticationKey());
+                } else {
+                    p = new AesGcmParameter(settings.getSourceSystemTitle(),
+                            cipher.getDedicatedKey(),
+                            cipher.getAuthenticationKey());
+                }
+                byte[] tmp = GXCiphering.decrypt(settings.getCipher(), p,
+                        data.getData());
+                cipher.setSecuritySuite(p.getSecuritySuite());
+                cipher.setSecurity(p.getSecurity());
+                data.getData().clear();
+                data.getData().set(tmp);
+                // Get command.
+                data.setCipheredCommand(data.getCommand());
+                data.setCommand(data.getData().getUInt8());
+                if (data.getCommand() == Command.DATA_NOTIFICATION
+                        || data.getCommand() == Command.INFORMATION_REPORT) {
+                    data.setCommand(Command.NONE);
+                    data.getData().position(data.getData().position() - 1);
+                    getPdu(settings, data);
+                }
+            } else {
+                data.getData().position(data.getData().position() - 1);
+            }
         }
-        return cmd2;
     }
 
     private static void handleGloDedResponse(final GXDLMSSettings settings,
             final GXReplyData data, final int index) {
-        if (settings.getCipher() == null) {
-            throw new RuntimeException("Secure connection is not supported.");
-        }
-        // If all frames are read.
-        if ((data.getMoreData().getValue()
-                & RequestTypes.FRAME.getValue()) == 0) {
+        if (data.getXml() != null) {
             data.getData().position(data.getData().position() - 1);
-            GXByteBuffer bb = new GXByteBuffer(data.getData());
-            data.getData().position(index);
-            data.getData().size(index);
-
-            AesGcmParameter p;
-            if (settings.getCipher().getDedicatedKey() != null
-                    && settings.getConnected() == ConnectionState.DLMS) {
-                p = new AesGcmParameter(settings.getSourceSystemTitle(),
-                        settings.getCipher().getDedicatedKey(),
-                        settings.getCipher().getAuthenticationKey());
-            } else {
-                p = new AesGcmParameter(settings.getSourceSystemTitle(),
-                        settings.getCipher().getBlockCipherKey(),
-                        settings.getCipher().getAuthenticationKey());
+        } else {
+            if (settings.getCipher() == null) {
+                throw new RuntimeException(
+                        "Secure connection is not supported.");
             }
-            data.getData()
-                    .set(GXCiphering.decrypt(settings.getCipher(), p, bb));
-            data.setCommand(Command.NONE);
-            getPdu(settings, data);
-            data.setCipherIndex(data.getData().size());
+            // If all frames are read.
+            if ((data.getMoreData().getValue()
+                    & RequestTypes.FRAME.getValue()) == 0) {
+                data.getData().position(data.getData().position() - 1);
+                GXByteBuffer bb = new GXByteBuffer(data.getData());
+                data.getData().position(index);
+                data.getData().size(index);
+
+                AesGcmParameter p;
+                if (settings.getCipher().getDedicatedKey() != null
+                        && settings.getConnected() == ConnectionState.DLMS) {
+                    p = new AesGcmParameter(settings.getSourceSystemTitle(),
+                            settings.getCipher().getDedicatedKey(),
+                            settings.getCipher().getAuthenticationKey());
+                } else {
+                    if (settings.getPreEstablishedSystemTitle() != null
+                            && (settings.getConnected()
+                                    & ConnectionState.DLMS) == 0) {
+                        p = new AesGcmParameter(
+                                settings.getPreEstablishedSystemTitle(),
+                                settings.getCipher().getBlockCipherKey(),
+                                settings.getCipher().getAuthenticationKey());
+                    } else {
+                        p = new AesGcmParameter(settings.getSourceSystemTitle(),
+                                settings.getCipher().getBlockCipherKey(),
+                                settings.getCipher().getAuthenticationKey());
+                    }
+
+                }
+                data.getData()
+                        .set(GXCiphering.decrypt(settings.getCipher(), p, bb));
+                // Get command.
+                data.setCipheredCommand(data.getCommand());
+                data.setCommand(Command.NONE);
+                getPdu(settings, data);
+                data.setCipherIndex(data.getData().size());
+            }
         }
     }
 
@@ -3368,6 +3532,7 @@ abstract class GXDLMS {
                     data.getData());
             data.getData().clear();
             data.getData().set(tmp);
+            data.setCipheredCommand(Command.GENERAL_CIPHERING);
             data.setCommand(Command.NONE);
             if (p.getSecurity() != null) {
                 try {
@@ -3690,10 +3855,13 @@ abstract class GXDLMS {
      * 
      * @param data
      *            Received message from the server.
+     * @param settings
+     *            DLMS settings.
      * @see GXDLMSClient#snrmRequest
      */
     static void parseSnrmUaResponse(final GXByteBuffer data,
-            final GXDLMSLimits limits) {
+            final GXDLMSSettings settings) {
+        GXDLMSLimits limits = settings.getLimits();
         // If default settings are used.
         if (data.available() == 0) {
             limits.setMaxInfoTX(GXDLMSLimits.DEFAULT_MAX_INFO_TX);
@@ -3726,6 +3894,12 @@ abstract class GXDLMS {
                 switch (id) {
                 case HDLCInfo.MAX_INFO_RX:
                     limits.setMaxInfoTX(val);
+                    if (limits.isUseFrameSize()) {
+                        byte[] secondaryAddress = GXDLMS.getHdlcAddressBytes(
+                                settings.getClientAddress(), 0);
+                        limits.setMaxInfoTX(limits.getMaxInfoTX() + 10
+                                + secondaryAddress.length);
+                    }
                     break;
                 case HDLCInfo.MAX_INFO_TX:
                     limits.setMaxInfoRX(val);

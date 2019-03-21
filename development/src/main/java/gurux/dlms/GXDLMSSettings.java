@@ -117,6 +117,11 @@ public class GXDLMSSettings {
     private byte[] sourceSystemTitle;
 
     /**
+     * Pre-established system title.
+     */
+    private byte[] preEstablishedSystemTitle;
+
+    /**
      * Invoke ID.
      */
     private byte invokeID = 0x1;
@@ -190,12 +195,6 @@ public class GXDLMSSettings {
     private int dlmsVersionNumber = DLMS_VERSION;
 
     private byte connected = ConnectionState.NONE;
-
-    /**
-     * Can user access meter data anonymously (Without AARQ/AARE messages). In
-     * DLMS standard this is known as Pre-established application associations.
-     */
-    private boolean allowAnonymousAccess = false;
 
     /**
      * Maximum receivers PDU size.
@@ -298,6 +297,9 @@ public class GXDLMSSettings {
         limits = new GXDLMSLimits(this);
         gateway = null;
         proposedConformance.addAll(GXDLMSClient.getInitialConformance(false));
+        if (isServer) {
+            proposedConformance.add(Conformance.GENERAL_PROTECTION);
+        }
         resetFrameSequence();
         windowSize = 1;
         userId = -1;
@@ -403,14 +405,6 @@ public class GXDLMSSettings {
      */
     public final byte getConnected() {
         return connected;
-    }
-
-    /**
-     * @return Is connection accepted.
-     */
-    public final boolean acceptConnection() {
-        return connected != ConnectionState.NONE || allowAnonymousAccess
-                || (cipher != null && cipher.getSharedSecret() != null);
     }
 
     /**
@@ -774,6 +768,9 @@ public class GXDLMSSettings {
             proposedConformance.clear();
             proposedConformance.addAll(GXDLMSClient
                     .getInitialConformance(getUseLogicalNameReferencing()));
+            if (isServer()) {
+                proposedConformance.add(Conformance.GENERAL_PROTECTION);
+            }
         }
     }
 
@@ -1007,21 +1004,6 @@ public class GXDLMSSettings {
     }
 
     /**
-     * @return Can user access meter data anonymously.
-     */
-    public boolean isAllowAnonymousAccess() {
-        return allowAnonymousAccess;
-    }
-
-    /**
-     * @param value
-     *            Can user access meter data anonymously.
-     */
-    public void setAllowAnonymousAccess(final boolean value) {
-        allowAnonymousAccess = value;
-    }
-
-    /**
      * @return HDLC settings.
      */
     public GXDLMSHdlcSetup getHdlc() {
@@ -1136,5 +1118,20 @@ public class GXDLMSSettings {
      */
     public void setProtocolVersion(final String value) {
         protocolVersion = value;
+    }
+
+    /**
+     * @return Pre-established system title.
+     */
+    public byte[] getPreEstablishedSystemTitle() {
+        return preEstablishedSystemTitle;
+    }
+
+    /**
+     * @param value
+     *            Pre-established system title.
+     */
+    public void setPreEstablishedSystemTitle(final byte[] value) {
+        preEstablishedSystemTitle = value;
     }
 }

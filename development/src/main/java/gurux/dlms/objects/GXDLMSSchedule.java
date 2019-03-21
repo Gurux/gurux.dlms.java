@@ -186,15 +186,15 @@ public class GXDLMSSchedule extends GXDLMSObject implements IGXDLMSBase {
             for (Object it : arr) {
                 GXDLMSScheduleEntry item = new GXDLMSScheduleEntry();
                 Object[] tmp = (Object[]) it;
-                item.setIndex(((Number) tmp[0]).byteValue());
+                item.setIndex(((Number) tmp[0]).intValue());
                 item.setEnable(((Boolean) tmp[1]).booleanValue());
                 item.setLogicalName(GXDLMSClient
                         .changeType((byte[]) tmp[2], DataType.OCTET_STRING)
                         .toString());
-                item.setScriptSelector(((Number) tmp[3]).byteValue());
+                item.setScriptSelector(((Number) tmp[3]).intValue());
                 item.setSwitchTime((GXDateTime) GXDLMSClient
                         .changeType((byte[]) tmp[4], DataType.DATETIME));
-                item.setValidityWindow(((Number) tmp[5]).byteValue());
+                item.setValidityWindow(((Number) tmp[5]).intValue());
                 item.setExecWeekdays((String) tmp[6]);
                 item.setExecSpecDays((String) tmp[7]);
                 item.setBeginDate((GXDateTime) GXDLMSClient

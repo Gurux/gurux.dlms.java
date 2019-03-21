@@ -203,7 +203,8 @@ final class GXAPDU {
 
         // Usage field for dedicated-key component.
         if (settings.getCipher() == null
-                || settings.getCipher().getDedicatedKey() == null) {
+                || settings.getCipher().getDedicatedKey() == null
+                || settings.getCipher().getSecurity() == Security.NONE) {
             // Not used
             data.setUInt8(0x00);
         } else {
@@ -474,7 +475,7 @@ final class GXAPDU {
                     ServiceError.forValue(data.getUInt8()), data.getUInt8());
         } else {
             if (xml != null) {
-                xml.appendComment("Error: Failed to descypt data.");
+                xml.appendComment("Error: Failed to decrypt data.");
                 data.position(data.size());
                 return;
             }
@@ -642,17 +643,32 @@ final class GXAPDU {
         int originalPos;
         byte[] tmp, encrypted;
         AesGcmParameter p;
-        if (tag == Command.GLO_INITIATE_RESPONSE) {
+        if (tag == Command.GLO_INITIATE_RESPONSE
+                || tag == Command.GLO_INITIATE_REQUEST
+                || tag == Command.DED_INITIATE_RESPONSE
+                || tag == Command.DED_INITIATE_REQUEST
+                || tag == Command.GENERAL_GLO_CIPHERING
+                || tag == Command.GENERAL_DED_CIPHERING) {
             if (xml != null) {
                 originalPos = data.position();
-                int cnt = GXCommon.getObjectCount(data);
+                byte[] st;
+                int cnt;
+                if (tag == Command.GENERAL_GLO_CIPHERING
+                        || tag == Command.GENERAL_DED_CIPHERING) {
+                    cnt = GXCommon.getObjectCount(data);
+                    st = new byte[cnt];
+                    data.get(st);
+                } else {
+                    st = settings.getSourceSystemTitle();
+                }
+                cnt = GXCommon.getObjectCount(data);
                 encrypted = new byte[cnt];
                 data.get(encrypted);
                 if (cipher != null && xml.isComments()) {
                     int pos = xml.getXmlLength();
                     try {
                         data.position(originalPos - 1);
-                        p = new AesGcmParameter(settings.getSourceSystemTitle(),
+                        p = new AesGcmParameter(st,
                                 settings.getCipher().getBlockCipherKey(),
                                 settings.getCipher().getAuthenticationKey());
                         p.setXml(xml);
@@ -661,22 +677,20 @@ final class GXAPDU {
                         data.clear();
                         data.set(tmp);
                         cipher.setSecurity(p.getSecurity());
-                        tag = data.getUInt8();
+                        short tag1 = data.getUInt8();
                         xml.startComment("Decrypted data:");
                         xml.appendLine("Security: " + p.getSecurity());
                         xml.appendLine("Invocation Counter: "
                                 + p.getInvocationCounter());
                         parse(initiateRequest, settings, cipher, data, xml,
-                                tag);
+                                tag1);
                         xml.endComment();
                     } catch (Exception ex) {
                         // It's OK if this fails.
                         xml.setXmlLength(pos);
                     }
                 }
-                // <glo_InitiateResponse>
-                xml.appendLine(Command.GLO_INITIATE_RESPONSE, "Value",
-                        GXCommon.toHex(encrypted, false));
+                xml.appendLine(tag, "Value", GXCommon.toHex(encrypted, false));
                 return;
             }
             data.position(data.position() - 1);
@@ -685,54 +699,6 @@ final class GXAPDU {
                     settings.getCipher().getAuthenticationKey());
             tmp = GXCiphering.decrypt(settings.getCipher(), p, data);
             data.size(0);
-            data.set(tmp);
-            cipher.setSecurity(p.getSecurity());
-            tag = data.getUInt8();
-        } else if (tag == Command.GLO_INITIATE_REQUEST) {
-            if (xml != null) {
-                originalPos = data.position();
-                int cnt = GXCommon.getObjectCount(data);
-                encrypted = new byte[cnt];
-                data.get(encrypted);
-                if (cipher != null && xml.isComments()) {
-                    data.position(originalPos - 1);
-                    int pos = xml.getXmlLength();
-                    try {
-                        p = new AesGcmParameter(settings.getSourceSystemTitle(),
-                                settings.getCipher().getBlockCipherKey(),
-                                settings.getCipher().getAuthenticationKey());
-                        p.setXml(xml);
-                        tmp = GXCiphering.decrypt(settings.getCipher(), p,
-                                data);
-                        data.clear();
-                        data.set(tmp);
-                        cipher.setSecurity(p.getSecurity());
-                        tag = data.getUInt8();
-                        xml.startComment("Decrypted data:");
-                        xml.appendLine("Security: " + p.getSecurity());
-                        xml.appendLine("Invocation Counter: "
-                                + p.getInvocationCounter());
-                        parse(initiateRequest, settings, cipher, data, xml,
-                                tag);
-                        xml.endComment();
-                    } catch (Exception ex) {
-                        // It's OK if this fails.
-                        xml.setXmlLength(pos);
-                    }
-                }
-                // <glo_InitiateRequest>
-                xml.appendLine(Command.GLO_INITIATE_REQUEST, "Value",
-                        GXCommon.toHex(encrypted, false));
-                return;
-            }
-            data.position(data.position() - 1);
-            // InitiateRequest
-            p = new AesGcmParameter(settings.getSourceSystemTitle(),
-                    settings.getCipher().getBlockCipherKey(),
-                    settings.getCipher().getAuthenticationKey());
-            p.setXml(xml);
-            tmp = GXCiphering.decrypt(settings.getCipher(), p, data);
-            data.clear();
             data.set(tmp);
             cipher.setSecurity(p.getSecurity());
             tag = data.getUInt8();

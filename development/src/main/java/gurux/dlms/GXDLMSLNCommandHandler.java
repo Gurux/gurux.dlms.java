@@ -34,10 +34,11 @@ final class GXDLMSLNCommandHandler {
 
     static void handleGetRequest(final GXDLMSSettings settings,
             final GXDLMSServerBase server, final GXByteBuffer data,
-            final GXByteBuffer replyData, final GXDLMSTranslatorStructure xml)
-            throws Exception {
+            final GXByteBuffer replyData, final GXDLMSTranslatorStructure xml,
+            final int cipheredCommand) throws Exception {
         // Return error if connection is not established.
-        if (xml == null && !settings.acceptConnection()) {
+        if (xml == null && (settings.getConnected() & ConnectionState.DLMS) == 0
+                && cipheredCommand == Command.NONE) {
             replyData.set(GXDLMSServerBase.generateConfirmedServiceError(
                     ConfirmedServiceError.INITIATE_ERROR, ServiceError.SERVICE,
                     Service.UNSUPPORTED.getValue()));
@@ -57,15 +58,16 @@ final class GXDLMSLNCommandHandler {
 
         // GetRequest normal
         if (type == GetCommandType.NORMAL) {
-            getRequestNormal(settings, invokeID, server, data, replyData, xml);
+            getRequestNormal(settings, invokeID, server, data, replyData, xml,
+                    cipheredCommand);
         } else if (type == GetCommandType.NEXT_DATA_BLOCK) {
             // Get request for next data block
             getRequestNextDataBlock(settings, invokeID, server, data, replyData,
-                    xml, false);
+                    xml, false, cipheredCommand);
         } else if (type == GetCommandType.WITH_LIST) {
             // Get request with a list.
-            getRequestWithList(settings, invokeID, server, data, replyData,
-                    xml);
+            getRequestWithList(settings, invokeID, server, data, replyData, xml,
+                    cipheredCommand);
         } else {
             LOGGER.log(Level.INFO,
                     "HandleGetRequest failed. Invalid command type.");
@@ -73,9 +75,11 @@ final class GXDLMSLNCommandHandler {
             settings.resetBlockIndex();
             // Access Error : Device reports a hardware fault.
             bb.setUInt8(ErrorCode.HARDWARE_FAULT.getValue());
-            GXDLMS.getLNPdu(new GXDLMSLNParameters(settings, invokeID,
-                    Command.GET_RESPONSE, type, null, bb,
-                    ErrorCode.OK.getValue()), replyData);
+            GXDLMS.getLNPdu(
+                    new GXDLMSLNParameters(settings, invokeID,
+                            Command.GET_RESPONSE, type, null, bb,
+                            ErrorCode.OK.getValue(), cipheredCommand),
+                    replyData);
         }
         if (xml != null) {
             xml.appendEndTag(Command.GET_REQUEST, type);
@@ -90,10 +94,11 @@ final class GXDLMSLNCommandHandler {
      */
     public static void handleSetRequest(final GXDLMSSettings settings,
             final GXDLMSServerBase server, final GXByteBuffer data,
-            final GXByteBuffer replyData, final GXDLMSTranslatorStructure xml)
-            throws Exception {
+            final GXByteBuffer replyData, final GXDLMSTranslatorStructure xml,
+            final int cipheredCommand) throws Exception {
         // Return error if connection is not established.
-        if (xml == null && !settings.acceptConnection()) {
+        if (xml == null && (settings.getConnected() & ConnectionState.DLMS) == 0
+                && cipheredCommand == Command.NONE) {
             replyData.set(GXDLMSServerBase.generateConfirmedServiceError(
                     ConfirmedServiceError.INITIATE_ERROR, ServiceError.SERVICE,
                     Service.UNSUPPORTED.getValue()));
@@ -106,7 +111,7 @@ final class GXDLMSLNCommandHandler {
         settings.updateInvokeId(invoke);
         // SetRequest normal or Set Request With First Data Block
         GXDLMSLNParameters p = new GXDLMSLNParameters(settings, invoke,
-                Command.SET_RESPONSE, type, null, null, 0);
+                Command.SET_RESPONSE, type, null, null, 0, cipheredCommand);
         if (xml != null) {
             xml.appendStartTag(Command.SET_REQUEST);
             xml.appendStartTag(Command.SET_REQUEST, type);
@@ -191,7 +196,8 @@ final class GXDLMSLNCommandHandler {
     private static void getRequestNormal(final GXDLMSSettings settings,
             final short invokeID, final GXDLMSServerBase server,
             final GXByteBuffer data, final GXByteBuffer replyData,
-            final GXDLMSTranslatorStructure xml) throws Exception {
+            final GXDLMSTranslatorStructure xml, final int cipheredCommand)
+            throws Exception {
         GXByteBuffer bb = new GXByteBuffer();
         ValueEventArgs e = null;
         ErrorCode status = ErrorCode.OK;
@@ -299,10 +305,9 @@ final class GXDLMSLNCommandHandler {
                 status = e.getError();
             }
         }
-        GXDLMS.getLNPdu(
-                new GXDLMSLNParameters(settings, e.getInvokeId(),
-                        Command.GET_RESPONSE, 1, null, bb, status.getValue()),
-                replyData);
+        GXDLMS.getLNPdu(new GXDLMSLNParameters(settings, e.getInvokeId(),
+                Command.GET_RESPONSE, 1, null, bb, status.getValue(),
+                cipheredCommand), replyData);
         if (settings.getCount() != settings.getIndex()
                 || bb.size() != bb.position()) {
             server.setTransaction(new GXDLMSLongTransaction(
@@ -319,8 +324,8 @@ final class GXDLMSLNCommandHandler {
     static void getRequestNextDataBlock(final GXDLMSSettings settings,
             final int invokeID, final GXDLMSServerBase server,
             final GXByteBuffer data, final GXByteBuffer replyData,
-            final GXDLMSTranslatorStructure xml, boolean streaming)
-            throws Exception {
+            final GXDLMSTranslatorStructure xml, final boolean streaming,
+            final int cipheredCommand) throws Exception {
         GXByteBuffer bb = new GXByteBuffer();
         if (!streaming) {
             int index = (int) data.getUInt32();
@@ -334,11 +339,10 @@ final class GXDLMSLNCommandHandler {
                 LOGGER.log(Level.INFO,
                         "getRequestNextDataBlock failed. Invalid block number. "
                                 + settings.getBlockIndex() + "/" + index);
-                GXDLMS.getLNPdu(
-                        new GXDLMSLNParameters(settings, invokeID,
-                                Command.GET_RESPONSE, 2, null, bb,
-                                ErrorCode.DATA_BLOCK_NUMBER_INVALID.getValue()),
-                        replyData);
+                GXDLMS.getLNPdu(new GXDLMSLNParameters(settings, invokeID,
+                        Command.GET_RESPONSE, 2, null, bb,
+                        ErrorCode.DATA_BLOCK_NUMBER_INVALID.getValue(),
+                        cipheredCommand), replyData);
                 return;
             }
         }
@@ -346,7 +350,7 @@ final class GXDLMSLNCommandHandler {
         GXDLMSLNParameters p = new GXDLMSLNParameters(settings, invokeID,
                 streaming ? Command.GENERAL_BLOCK_TRANSFER
                         : Command.GET_RESPONSE,
-                2, null, bb, ErrorCode.OK.getValue());
+                2, null, bb, ErrorCode.OK.getValue(), cipheredCommand);
         p.streaming = streaming;
         p.windowSize = settings.getWindowSize();
         // If transaction is not in progress.
@@ -401,7 +405,8 @@ final class GXDLMSLNCommandHandler {
     private static void getRequestWithList(final GXDLMSSettings settings,
             final short invokeID, final GXDLMSServerBase server,
             final GXByteBuffer data, final GXByteBuffer replyData,
-            final GXDLMSTranslatorStructure xml) throws Exception {
+            final GXDLMSTranslatorStructure xml, final int cipheredCommand)
+            throws Exception {
         GXByteBuffer bb = new GXByteBuffer();
         int pos;
         int cnt = GXCommon.getObjectCount(data);
@@ -476,7 +481,7 @@ final class GXDLMSLNCommandHandler {
         Object value;
         pos = 0;
         GXDLMSLNParameters p = new GXDLMSLNParameters(settings, invokeID,
-                Command.GET_RESPONSE, 3, null, bb, 0xFF);
+                Command.GET_RESPONSE, 3, null, bb, 0xFF, cipheredCommand);
         for (ValueEventArgs it : list) {
             try {
                 if (it.getHandled()) {
@@ -809,8 +814,8 @@ final class GXDLMSLNCommandHandler {
     static void handleMethodRequest(final GXDLMSSettings settings,
             final GXDLMSServerBase server, final GXByteBuffer data,
             final GXDLMSConnectionEventArgs connectionInfo,
-            final GXByteBuffer replyData, final GXDLMSTranslatorStructure xml)
-            throws Exception {
+            final GXByteBuffer replyData, final GXDLMSTranslatorStructure xml,
+            final int cipheredCommand) throws Exception {
         ErrorCode error = ErrorCode.OK;
         GXByteBuffer bb = new GXByteBuffer();
         // Get type.
@@ -858,7 +863,8 @@ final class GXDLMSLNCommandHandler {
         }
         GXDLMSObject obj =
                 settings.getObjects().findByLN(ot, GXCommon.toLogicalName(ln));
-        if (!settings.acceptConnection()
+        if ((settings.getConnected() & ConnectionState.DLMS) == 0
+                && cipheredCommand == Command.NONE
                 && (ci != ObjectType.ASSOCIATION_LOGICAL_NAME.getValue()
                         || id != 1)) {
             replyData.set(GXDLMSServerBase.generateConfirmedServiceError(
@@ -910,7 +916,8 @@ final class GXDLMSLNCommandHandler {
             }
         }
         GXDLMSLNParameters p = new GXDLMSLNParameters(settings, invokeId,
-                Command.METHOD_RESPONSE, 1, null, bb, error.getValue());
+                Command.METHOD_RESPONSE, 1, null, bb, error.getValue(),
+                cipheredCommand);
         GXDLMS.getLNPdu(p, replyData);
         // If High level authentication fails.
         if (obj instanceof GXDLMSAssociationLogicalName && id == 1) {
@@ -943,9 +950,11 @@ final class GXDLMSLNCommandHandler {
      */
     public static void handleAccessRequest(final GXDLMSSettings settings,
             final GXDLMSServerBase server, final GXByteBuffer data,
-            final GXByteBuffer reply, final GXDLMSTranslatorStructure xml) {
+            final GXByteBuffer reply, final GXDLMSTranslatorStructure xml,
+            final int cipheredCommand) {
         // Return error if connection is not established.
-        if (xml == null && !settings.acceptConnection()) {
+        if (xml == null && (settings.getConnected() & ConnectionState.DLMS) == 0
+                && cipheredCommand == Command.NONE) {
             reply.set(GXDLMSServerBase.generateConfirmedServiceError(
                     ConfirmedServiceError.INITIATE_ERROR, ServiceError.SERVICE,
                     Service.UNSUPPORTED.getValue()));

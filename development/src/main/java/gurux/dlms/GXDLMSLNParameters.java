@@ -47,6 +47,10 @@ class GXDLMSLNParameters {
      */
     int command;
     /**
+     * DLMS ciphered Command.
+     */
+    int cipheredCommand;
+    /**
      * Request type.
      */
     private int requestType;
@@ -118,12 +122,14 @@ class GXDLMSLNParameters {
     GXDLMSLNParameters(final GXDLMSSettings forSettings, final long forInvokeId,
             final int forCommand, final int forCommandType,
             final GXByteBuffer forAttributeDescriptor,
-            final GXByteBuffer forData, final int forStatus) {
+            final GXByteBuffer forData, final int forStatus,
+            int forCipheredCommand) {
         settings = forSettings;
         invokeId = forInvokeId;
         setBlockIndex(settings.getBlockIndex());
         blockNumberAck = settings.getBlockNumberAck();
         command = forCommand;
+        cipheredCommand = forCipheredCommand;
         setRequestType(forCommandType);
         attributeDescriptor = forAttributeDescriptor;
         data = forData;
@@ -146,6 +152,13 @@ class GXDLMSLNParameters {
      */
     public int getCommand() {
         return command;
+    }
+
+    /**
+     * @return Ciphered DLMS Command.
+     */
+    public int getCipheredCommand() {
+        return cipheredCommand;
     }
 
     /**

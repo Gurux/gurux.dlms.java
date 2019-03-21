@@ -46,7 +46,7 @@ public class GXDLMSScheduleEntry {
     /**
      * Schedule entry index.
      */
-    private byte index;
+    private int index;
 
     /**
      * Is Schedule entry enabled.
@@ -61,7 +61,7 @@ public class GXDLMSScheduleEntry {
     /**
      * Script identifier of the script to be executed.
      */
-    private byte scriptSelector;
+    private int scriptSelector;
 
     /**
     *
@@ -72,7 +72,7 @@ public class GXDLMSScheduleEntry {
      * Defines a period in minutes, in which an entry shall be processed after
      * power fail.
      */
-    private byte validityWindow;
+    private int validityWindow;
 
     /**
      * Days of the week on which the entry is valid.
@@ -99,7 +99,7 @@ public class GXDLMSScheduleEntry {
      * 
      * @return Entry index.
      */
-    public final byte getIndex() {
+    public final int getIndex() {
         return index;
     }
 
@@ -109,7 +109,7 @@ public class GXDLMSScheduleEntry {
      * @param value
      *            Entry index.
      */
-    public final void setIndex(final byte value) {
+    public final void setIndex(final int value) {
         index = value;
     }
 
@@ -150,7 +150,7 @@ public class GXDLMSScheduleEntry {
      * 
      * @return Script identifier.
      */
-    public final byte getScriptSelector() {
+    public final int getScriptSelector() {
         return scriptSelector;
     }
 
@@ -160,7 +160,7 @@ public class GXDLMSScheduleEntry {
      * @param value
      *            Script identifier.
      */
-    public final void setScriptSelector(final byte value) {
+    public final void setScriptSelector(final int value) {
         scriptSelector = value;
     }
 
@@ -185,7 +185,7 @@ public class GXDLMSScheduleEntry {
      * 
      * @return Validity period in minutes.
      */
-    public final byte getValidityWindow() {
+    public final int getValidityWindow() {
         return validityWindow;
     }
 
@@ -196,7 +196,7 @@ public class GXDLMSScheduleEntry {
      * @param value
      *            Validity period in minutes.
      */
-    public final void setValidityWindow(final byte value) {
+    public final void setValidityWindow(final int value) {
         validityWindow = value;
     }
 

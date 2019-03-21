@@ -158,7 +158,7 @@ public class sampleclient {
 
     static int getParameters(String[] args, Settings settings) {
         ArrayList<GXCmdParameter> parameters =
-                GXCommon.getParameters(args, "h:p:c:s:r:it:a:p:wP:g:");
+                GXCommon.getParameters(args, "h:p:c:s:r:it:a:p:wP:g:S:");
         GXNet net = null;
         for (GXCmdParameter it : parameters) {
             switch (it.getTag()) {

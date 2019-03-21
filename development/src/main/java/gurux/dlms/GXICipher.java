@@ -68,6 +68,17 @@ public interface GXICipher {
     void setSecurity(Security value);
 
     /**
+     * @return Used security suite.
+     */
+    SecuritySuite getSecuritySuite();
+
+    /**
+     * @param value
+     *            Used security suite.
+     */
+    void setSecuritySuite(final SecuritySuite value);
+
+    /**
      * @return System title.
      */
     byte[] getSystemTitle();
@@ -97,11 +108,6 @@ public interface GXICipher {
      * @return Invocation counter.
      */
     long getInvocationCounter();
-
-    /**
-     * @return Used security suite.
-     */
-    SecuritySuite getSecuritySuite();
 
     /**
      * @return Ephemeral key pair.

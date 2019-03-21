@@ -271,6 +271,51 @@ public final class Command {
     public static final int EVENT_NOTIFICATION = 0xC2;
 
     /**
+     * Ded initiate request.
+     */
+    public static final int DED_INITIATE_REQUEST = 65;
+
+    /**
+     * Ded read request.
+     */
+    public static final int DED_READ_REQUEST = 69;
+
+    /**
+     * Ded write request.
+     */
+    public static final int DED_WRITE_REQUEST = 70;
+
+    /**
+     * Ded initiate response.
+     */
+    public static final int DED_INITIATE_RESPONSE = 72;
+
+    /**
+     * Ded read response.
+     */
+    public static final int DED_READ_RESPONSE = 76;
+
+    /**
+     * Ded write response.
+     */
+    public static final int DED_WRITE_RESPONSE = 77;
+
+    /**
+     * Ded confirmed service error.
+     */
+    public static final int DED_CONFIRMED_SERVICE_ERROR = 78;
+
+    /**
+     * Ded confirmed write request.
+     */
+    public static final int DED_UNCONFIRMED_WRITE_REQUEST = 86;
+
+    /**
+     * Ded information report request.
+     */
+    public static final int DED_INFORMATION_REPORT_REQUEST = 88;
+
+    /**
      * Ded get request.
      */
     public static final int DED_GET_REQUEST = 0xD0;

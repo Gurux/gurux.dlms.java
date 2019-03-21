@@ -611,6 +611,18 @@ public class GXDLMSClient {
         data.setUInt8(0x81); // FromatID
         data.setUInt8(0x80); // GroupID
         data.setUInt8(0); // Length.
+        int maxInfoTX = getLimits().getMaxInfoTX(),
+                maxInfoRX = getLimits().getMaxInfoRX();
+        if (getLimits().isUseFrameSize()) {
+            byte[] primaryAddress, secondaryAddress;
+            primaryAddress =
+                    GXDLMS.getHdlcAddressBytes(settings.getServerAddress(),
+                            settings.getServerAddressSize());
+            secondaryAddress =
+                    GXDLMS.getHdlcAddressBytes(settings.getClientAddress(), 0);
+            maxInfoTX -= (10 + secondaryAddress.length);
+            maxInfoRX -= (10 + primaryAddress.length);
+        }
 
         // If custom HDLC parameters are used.
         if (GXDLMSLimits.DEFAULT_MAX_INFO_TX != getLimits().getMaxInfoTX()
@@ -621,9 +633,9 @@ public class GXDLMSClient {
                 || GXDLMSLimits.DEFAULT_WINDOWS_SIZE_RX != getLimits()
                         .getWindowSizeRX()) {
             data.setUInt8(HDLCInfo.MAX_INFO_TX);
-            GXDLMS.appendHdlcParameter(data, getLimits().getMaxInfoTX());
+            GXDLMS.appendHdlcParameter(data, maxInfoTX);
             data.setUInt8(HDLCInfo.MAX_INFO_RX);
-            GXDLMS.appendHdlcParameter(data, getLimits().getMaxInfoRX());
+            GXDLMS.appendHdlcParameter(data, maxInfoRX);
             data.setUInt8(HDLCInfo.WINDOW_SIZE_TX);
             data.setUInt8(4);
             data.setUInt32(getLimits().getWindowSizeTX());
@@ -638,6 +650,7 @@ public class GXDLMSClient {
         } else {
             data = null;
         }
+        settings.resetFrameSequence();
         return GXDLMS.getHdlcFrame(settings, (byte) Command.SNRM, data);
     }
 
@@ -649,8 +662,7 @@ public class GXDLMSClient {
      * @see GXDLMSClient#snrmRequest
      */
     public final void parseUAResponse(final byte[] data) {
-        GXDLMS.parseSnrmUaResponse(new GXByteBuffer(data),
-                settings.getLimits());
+        GXDLMS.parseSnrmUaResponse(new GXByteBuffer(data), settings);
         settings.setConnected(ConnectionState.HDLC);
     }
 
@@ -662,7 +674,7 @@ public class GXDLMSClient {
      * @see GXDLMSClient#snrmRequest
      */
     public final void parseUAResponse(final GXByteBuffer data) {
-        GXDLMS.parseSnrmUaResponse(data, settings.getLimits());
+        GXDLMS.parseSnrmUaResponse(data, settings);
     }
 
     /**
@@ -695,7 +707,7 @@ public class GXDLMSClient {
         List<byte[]> reply;
         if (settings.getUseLogicalNameReferencing()) {
             GXDLMSLNParameters p = new GXDLMSLNParameters(settings, 0,
-                    Command.AARQ, 0, buff, null, 0xff);
+                    Command.AARQ, 0, buff, null, 0xff, Command.NONE);
             reply = GXDLMS.getLnMessages(p);
         } else {
             GXDLMSSNParameters p = new GXDLMSSNParameters(settings,
@@ -860,7 +872,7 @@ public class GXDLMSClient {
         List<byte[]> reply;
         if (getUseLogicalNameReferencing()) {
             GXDLMSLNParameters p = new GXDLMSLNParameters(settings, 0,
-                    Command.RELEASE_REQUEST, 0, buff, null, 0xff);
+                    Command.RELEASE_REQUEST, 0, buff, null, 0xff, Command.NONE);
             reply = GXDLMS.getLnMessages(p);
         } else {
             reply = GXDLMS.getSnMessages(new GXDLMSSNParameters(settings,
@@ -1347,7 +1359,7 @@ public class GXDLMSClient {
             }
             GXDLMSLNParameters p = new GXDLMSLNParameters(settings, 0,
                     Command.METHOD_REQUEST, ActionRequestType.NORMAL,
-                    attributeDescriptor, data, 0xff);
+                    attributeDescriptor, data, 0xff, Command.NONE);
             reply = GXDLMS.getLnMessages(p);
         } else {
             int requestType;
@@ -1452,7 +1464,7 @@ public class GXDLMSClient {
             attributeDescriptor.setUInt8(0);
             GXDLMSLNParameters p = new GXDLMSLNParameters(settings, 0,
                     Command.SET_REQUEST, SetRequestType.NORMAL,
-                    attributeDescriptor, data, 0xff);
+                    attributeDescriptor, data, 0xff, Command.NONE);
             p.blockIndex = settings.getBlockIndex();
             p.blockNumberAck = settings.getBlockNumberAck();
             p.streaming = false;
@@ -1531,9 +1543,9 @@ public class GXDLMSClient {
             GXCommon.setData(data, type, value);
         }
         if (this.getUseLogicalNameReferencing()) {
-            GXDLMSLNParameters p =
-                    new GXDLMSLNParameters(settings, 0, Command.SET_REQUEST,
-                            SetRequestType.WITH_LIST, bb, data, 0xff);
+            GXDLMSLNParameters p = new GXDLMSLNParameters(settings, 0,
+                    Command.SET_REQUEST, SetRequestType.WITH_LIST, bb, data,
+                    0xff, Command.NONE);
             reply = GXDLMS.getLnMessages(p);
         } else {
             GXDLMSSNParameters p = new GXDLMSSNParameters(settings,
@@ -1599,7 +1611,7 @@ public class GXDLMSClient {
             }
             GXDLMSLNParameters p = new GXDLMSLNParameters(settings, 0,
                     Command.GET_REQUEST, GetCommandType.NORMAL,
-                    attributeDescriptor, data, 0xFF);
+                    attributeDescriptor, data, 0xFF, Command.NONE);
             reply = GXDLMS.getLnMessages(p);
         } else {
             int requestType;
@@ -1651,9 +1663,9 @@ public class GXDLMSClient {
         GXByteBuffer data = new GXByteBuffer();
         settings.resetBlockIndex();
         if (this.getUseLogicalNameReferencing()) {
-            GXDLMSLNParameters p =
-                    new GXDLMSLNParameters(settings, 0, Command.GET_REQUEST,
-                            GetCommandType.WITH_LIST, data, null, 0xff);
+            GXDLMSLNParameters p = new GXDLMSLNParameters(settings, 0,
+                    Command.GET_REQUEST, GetCommandType.WITH_LIST, data, null,
+                    0xff, Command.NONE);
             // Request service primitive shall always fit in a single APDU.
             int pos = 0, count = (settings.getMaxPduSize() - 12) / 10;
             if (list.size() < count) {
@@ -1754,11 +1766,76 @@ public class GXDLMSClient {
     public final byte[][] readRowsByEntry(final GXDLMSProfileGeneric pg,
             final int index, final int count,
             final List<Entry<GXDLMSObject, GXDLMSCaptureObject>> columns) {
+        int pos = 0;
+        int columnStart = 1, columnEnd = 0;
+        // If columns are given find indexes.
+        if (columns != null && columns.size() != 0) {
+            if (pg.getCaptureObjects() == null
+                    || pg.getCaptureObjects().size() == 0) {
+                throw new RuntimeException("Read capture objects first.");
+            }
+            columnStart = pg.getCaptureObjects().size();
+            columnEnd = 1;
+            for (Entry<GXDLMSObject, GXDLMSCaptureObject> c : columns) {
+                pos = 0;
+                boolean found = false;
+                for (Entry<GXDLMSObject, GXDLMSCaptureObject> it : pg
+                        .getCaptureObjects()) {
+                    ++pos;
+                    if (it.getKey().getObjectType() == c.getKey()
+                            .getObjectType()
+                            && it.getKey().getLogicalName()
+                                    .compareTo(c.getKey().getLogicalName()) == 0
+                            && it.getValue().getAttributeIndex() == c.getValue()
+                                    .getAttributeIndex()
+                            && it.getValue().getDataIndex() == c.getValue()
+                                    .getDataIndex()) {
+                        found = true;
+                        if (pos < columnStart) {
+                            columnStart = pos;
+                        }
+                        columnEnd = pos;
+                        break;
+                    }
+                }
+                if (!found) {
+                    throw new RuntimeException(
+                            "Invalid column: " + c.getKey().getLogicalName());
+                }
+            }
+        }
+        return readRowsByEntry(pg, index, count, columnStart, columnEnd);
+    }
+
+    /**
+     * Read rows by entry.
+     * 
+     * @param pg
+     *            Profile generic object to read.
+     * @param index
+     *            One based start index.
+     * @param count
+     *            Rows count to read.
+     * @param columnStart
+     *            One based column start index.
+     * @param columnEnd
+     *            Column end index.
+     * @return Read message as byte array.
+     */
+    public final byte[][] readRowsByEntry(final GXDLMSProfileGeneric pg,
+            final int index, final int count, final int columnStart,
+            final int columnEnd) {
         if (index < 0) {
             throw new IllegalArgumentException("index");
         }
         if (count < 0) {
             throw new IllegalArgumentException("count");
+        }
+        if (columnStart < 1) {
+            throw new IllegalArgumentException("columnStart");
+        }
+        if (columnEnd < 0) {
+            throw new IllegalArgumentException("columnEnd");
         }
         GXByteBuffer buff = new GXByteBuffer(19);
         // Add AccessSelector value
@@ -1775,50 +1852,9 @@ public class GXDLMSClient {
         } else {
             GXCommon.setData(buff, DataType.UINT32, index + count - 1);
         }
-
-        int columnIndex = 1;
-        int columnCount = 0;
-        int pos = 0;
-        // If columns are given find indexes.
-        if (columns != null && columns.size() != 0) {
-            if (pg.getCaptureObjects() == null
-                    || pg.getCaptureObjects().size() == 0) {
-                throw new RuntimeException("Read capture objects first.");
-            }
-            columnIndex = pg.getCaptureObjects().size();
-            columnCount = 1;
-            for (Entry<GXDLMSObject, GXDLMSCaptureObject> c : columns) {
-                pos = 0;
-                boolean found = false;
-                for (Entry<GXDLMSObject, GXDLMSCaptureObject> it : pg
-                        .getCaptureObjects()) {
-                    ++pos;
-                    if (it.getKey().getObjectType() == c.getKey()
-                            .getObjectType()
-                            && it.getKey().getLogicalName()
-                                    .compareTo(c.getKey().getLogicalName()) == 0
-                            && it.getValue().getAttributeIndex() == c.getValue()
-                                    .getAttributeIndex()
-                            && it.getValue().getDataIndex() == c.getValue()
-                                    .getDataIndex()) {
-                        found = true;
-                        if (pos < columnIndex) {
-                            columnIndex = pos;
-                        }
-                        columnCount = pos - columnIndex + 1;
-                        break;
-                    }
-                }
-                if (!found) {
-                    throw new RuntimeException(
-                            "Invalid column: " + c.getKey().getLogicalName());
-                }
-            }
-        }
-
         // Select columns to read.
-        GXCommon.setData(buff, DataType.UINT16, columnIndex);
-        GXCommon.setData(buff, DataType.UINT16, columnCount);
+        GXCommon.setData(buff, DataType.UINT16, columnStart);
+        GXCommon.setData(buff, DataType.UINT16, columnEnd);
         return read(pg.getName(), ObjectType.PROFILE_GENERIC, 2, buff);
     }
 
@@ -2087,7 +2123,6 @@ public class GXDLMSClient {
             final GXReplyData data, final GXReplyData notify) {
         data.setXml(null);
         boolean ret = false;
-        int cmd = data.getCommand();
         try {
             ret = GXDLMS.getData(settings, reply, data, notify);
         } catch (Exception ex) {
@@ -2281,7 +2316,7 @@ public class GXDLMSClient {
             }
         }
         GXDLMSLNParameters p = new GXDLMSLNParameters(settings, 0,
-                Command.ACCESS_REQUEST, 0xFF, null, bb, 0xff);
+                Command.ACCESS_REQUEST, 0xFF, null, bb, 0xff, Command.NONE);
         if (time != null && time != new Date(0)) {
             p.setTime(new GXDateTime(time));
         }
@@ -2465,7 +2500,7 @@ public class GXDLMSClient {
      * @return XML client don't throw exceptions. It serializes them as a
      *         default. Set value to true, if exceptions are thrown.
      */
-    public boolean isThrowExceptions() {
+    boolean isThrowExceptions() {
         return throwExceptions;
     }
 
@@ -2474,7 +2509,24 @@ public class GXDLMSClient {
      *            XML client don't throw exceptions. It serializes them as a
      *            default. Set value to true, if exceptions are thrown.
      */
-    public void setThrowExceptions(final boolean value) {
+    void setThrowExceptions(final boolean value) {
         throwExceptions = value;
+    }
+
+    /**
+     * Get HDLC sender and receiver address information.
+     * 
+     * @param reply
+     *            Received data.
+     * @param target
+     *            target (primary) address
+     * @param source
+     *            Source (secondary) address.
+     * @param type
+     *            DLMS frame type.
+     */
+    public static void getHdlcAddressInfo(final GXByteBuffer reply,
+            final int[] target, final int[] source, final short[] type) {
+        GXDLMS.getHdlcAddressInfo(reply, target, source, type);
     }
 }

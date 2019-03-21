@@ -391,7 +391,8 @@ public class GXDLMSXmlClient extends GXDLMSSecureClient {
             if (settings.getInterfaceType() == InterfaceType.WRAPPER) {
                 if (getCiphering().getSecurity() != Security.NONE) {
                     GXDLMSLNParameters p = new GXDLMSLNParameters(settings, 0,
-                            pdu.getCommand(), 0x0, null, null, 0xff);
+                            pdu.getCommand(), 0x0, null, null, 0xff,
+                            Command.NONE);
                     reply = new GXByteBuffer(GXDLMS.cipher0(p, pdu.getData()));
                 } else {
                     reply = new GXByteBuffer(pdu.getData());
@@ -399,7 +400,8 @@ public class GXDLMSXmlClient extends GXDLMSSecureClient {
             } else {
                 if (getCiphering().getSecurity() != Security.NONE) {
                     GXDLMSLNParameters p = new GXDLMSLNParameters(settings, 0,
-                            pdu.getCommand(), 0x0, null, null, 0xff);
+                            pdu.getCommand(), 0x0, null, null, 0xff,
+                            Command.NONE);
                     byte[] tmp = GXDLMS.cipher0(p, pdu.getData());
                     reply = new GXByteBuffer((short) (3 + tmp.length));
                     reply.set(GXCommon.LLC_SEND_BYTES);

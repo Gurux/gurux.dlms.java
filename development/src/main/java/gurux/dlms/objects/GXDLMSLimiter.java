@@ -414,13 +414,13 @@ public class GXDLMSLimiter extends GXDLMSObject implements IGXDLMSBase {
                 GXCommon.setData(data, DataType.INT16, new Integer(0));
                 GXCommon.setData(data, DataType.OCTET_STRING,
                         GXCommon.logicalNameToBytes(null));
-                GXCommon.setData(data, DataType.UINT8, 0);
+                GXCommon.setData(data, DataType.INT8, 0);
             } else {
                 GXCommon.setData(data, DataType.INT16,
                         new Integer(monitoredValue.getObjectType().getValue()));
                 GXCommon.setData(data, DataType.OCTET_STRING, GXCommon
                         .logicalNameToBytes(monitoredValue.getLogicalName()));
-                GXCommon.setData(data, DataType.UINT8, monitoredAttributeIndex);
+                GXCommon.setData(data, DataType.INT8, monitoredAttributeIndex);
             }
             return data.array();
         } else if (e.getIndex() == 3) {

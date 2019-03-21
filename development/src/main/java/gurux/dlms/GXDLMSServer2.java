@@ -246,21 +246,6 @@ public abstract class GXDLMSServer2 {
     }
 
     /**
-     * @return Can user access meter data anonymously.
-     */
-    public boolean isAllowAnonymousAccess() {
-        return getSettings().isAllowAnonymousAccess();
-    }
-
-    /**
-     * @param value
-     *            Can user access meter data anonymously.
-     */
-    public void setAllowAnonymousAccess(final boolean value) {
-        getSettings().setAllowAnonymousAccess(value);
-    }
-
-    /**
      * @return Get settings.
      */
     public final GXDLMSSettings getSettings() {
@@ -675,7 +660,8 @@ public abstract class GXDLMSServer2 {
         List<byte[]> reply;
         if (getUseLogicalNameReferencing()) {
             GXDLMSLNParameters p = new GXDLMSLNParameters(getSettings(), 0,
-                    Command.DATA_NOTIFICATION, 0, null, data, 0xff);
+                    Command.DATA_NOTIFICATION, 0, null, data, 0xff,
+                    Command.NONE);
             if (time == null) {
                 p.setTime(null);
             } else {
@@ -718,5 +704,23 @@ public abstract class GXDLMSServer2 {
             addData(it.getKey(), it.getValue().getAttributeIndex(), buff);
         }
         return generateDataNotificationMessages(date, buff);
+    }
+
+    /**
+     * @return Client system title.
+     *         <p>
+     *         Client system title is optional and it's used when
+     *         Pre-established Application Associations is used.
+     */
+    public byte[] getClientSystemTitle() {
+        return getSettings().getPreEstablishedSystemTitle();
+    }
+
+    /**
+     * @param value
+     *            Client system title.
+     */
+    public void setClientSystemTitle(final byte[] value) {
+        getSettings().setPreEstablishedSystemTitle(value);
     }
 }

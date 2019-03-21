@@ -331,6 +331,10 @@ final class TranslatorStandardTags {
      */
     static void getDedTags(final TranslatorOutputType type,
             final HashMap<Integer, String> list) {
+        GXDLMSTranslator.addTag(list, Command.DED_INITIATE_REQUEST,
+                "x:ded-initiate-request");
+        GXDLMSTranslator.addTag(list, Command.DED_INITIATE_RESPONSE,
+                "x:ded-initiate-response");
         GXDLMSTranslator.addTag(list, Command.DED_GET_REQUEST,
                 "x:ded-get-request");
         GXDLMSTranslator.addTag(list, Command.DED_GET_RESPONSE,

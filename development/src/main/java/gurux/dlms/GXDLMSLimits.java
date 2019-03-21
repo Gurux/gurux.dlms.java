@@ -64,6 +64,11 @@ public class GXDLMSLimits {
     private GXDLMSSettings settings;
 
     /**
+     * Is Max Info TX and RX count for frame size or PDU size.
+     */
+    private boolean useFrameSize = false;
+
+    /**
      * Constructor.
      */
     GXDLMSLimits(GXDLMSSettings parent) {
@@ -186,5 +191,20 @@ public class GXDLMSLimits {
      */
     public final void setReceiverFrame(final short value) {
         settings.receiverFrame = value;
+    }
+
+    /**
+     * @return Is Max Info TX and RX count for frame size or PDU size.
+     */
+    public boolean isUseFrameSize() {
+        return useFrameSize;
+    }
+
+    /**
+     * @param value
+     *            Is Max Info TX and RX count for frame size or PDU size.
+     */
+    public void setUseFrameSize(final boolean value) {
+        useFrameSize = value;
     }
 }

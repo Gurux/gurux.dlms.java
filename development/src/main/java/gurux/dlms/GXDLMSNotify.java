@@ -297,7 +297,8 @@ public class GXDLMSNotify {
         List<byte[]> reply;
         if (getUseLogicalNameReferencing()) {
             GXDLMSLNParameters p = new GXDLMSLNParameters(settings, 0,
-                    Command.DATA_NOTIFICATION, 0, null, data, 0xff);
+                    Command.DATA_NOTIFICATION, 0, null, data, 0xff,
+                    Command.NONE);
             if (time == null) {
                 p.setTime(null);
             } else {
@@ -500,7 +501,8 @@ public class GXDLMSNotify {
                 addData(it.getKey(), it.getValue(), buff);
             }
             GXDLMSLNParameters p = new GXDLMSLNParameters(settings, 0,
-                    Command.EVENT_NOTIFICATION, 0, null, buff, 0xff);
+                    Command.EVENT_NOTIFICATION, 0, null, buff, 0xff,
+                    Command.NONE);
             p.setTime(time);
             reply = GXDLMS.getLnMessages(p);
         } else {
