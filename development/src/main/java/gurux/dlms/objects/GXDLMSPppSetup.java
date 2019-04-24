@@ -26,7 +26,7 @@
 // MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. 
 // See the GNU General Public License for more details.
 //
-// More information of Gurux products: http://www.gurux.org
+// More information of Gurux products: https://www.gurux.org
 //
 // This code is licensed under the GNU General Public License v2. 
 // Full text may be retrieved at http://www.gnu.org/licenses/gpl-2.0.txt
@@ -54,7 +54,7 @@ import gurux.dlms.objects.enums.PppSetupLcpOptionType;
 
 /**
  * Online help: <br>
- * http://www.gurux.fi/Gurux.DLMS.Objects.GXDLMSPppSetup
+ * https://www.gurux.fi/Gurux.DLMS.Objects.GXDLMSPppSetup
  */
 public class GXDLMSPppSetup extends GXDLMSObject implements IGXDLMSBase {
     private GXDLMSPppSetupIPCPOption[] ipcpOptions;
@@ -259,11 +259,11 @@ public class GXDLMSPppSetup extends GXDLMSObject implements IGXDLMSBase {
                 for (GXDLMSPppSetupLcpOption it : lcpOptions) {
                     data.setUInt8((byte) DataType.STRUCTURE.getValue());
                     data.setUInt8((byte) 3);
-                    GXCommon.setData(data, DataType.UINT8,
+                    GXCommon.setData(settings, data, DataType.UINT8,
                             it.getType().getValue());
-                    GXCommon.setData(data, DataType.UINT8,
+                    GXCommon.setData(settings, data, DataType.UINT8,
                             new Integer(it.getLength()));
-                    GXCommon.setData(data,
+                    GXCommon.setData(settings, data,
                             GXDLMSConverter.getDLMSDataType(it.getData()),
                             it.getData());
                 }
@@ -280,11 +280,11 @@ public class GXDLMSPppSetup extends GXDLMSObject implements IGXDLMSBase {
                 for (GXDLMSPppSetupIPCPOption it : ipcpOptions) {
                     data.setUInt8((byte) DataType.STRUCTURE.getValue());
                     data.setUInt8((byte) 3);
-                    GXCommon.setData(data, DataType.UINT8,
+                    GXCommon.setData(settings, data, DataType.UINT8,
                             it.getType().getValue());
-                    GXCommon.setData(data, DataType.UINT8,
+                    GXCommon.setData(settings, data, DataType.UINT8,
                             new Integer(it.getLength()));
-                    GXCommon.setData(data,
+                    GXCommon.setData(settings, data,
                             GXDLMSConverter.getDLMSDataType(it.getData()),
                             it.getData());
                 }
@@ -294,8 +294,8 @@ public class GXDLMSPppSetup extends GXDLMSObject implements IGXDLMSBase {
             GXByteBuffer data = new GXByteBuffer();
             data.setUInt8((byte) DataType.STRUCTURE.getValue());
             data.setUInt8(2);
-            GXCommon.setData(data, DataType.OCTET_STRING, userName);
-            GXCommon.setData(data, DataType.OCTET_STRING, password);
+            GXCommon.setData(settings, data, DataType.OCTET_STRING, userName);
+            GXCommon.setData(settings, data, DataType.OCTET_STRING, password);
             return data.array();
         }
         e.setError(ErrorCode.READ_WRITE_DENIED);

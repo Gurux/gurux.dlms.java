@@ -26,7 +26,7 @@
 // MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. 
 // See the GNU General Public License for more details.
 //
-// More information of Gurux products: http://www.gurux.org
+// More information of Gurux products: https://www.gurux.org
 //
 // This code is licensed under the GNU General Public License v2. 
 // Full text may be retrieved at http://www.gnu.org/licenses/gpl-2.0.txt
@@ -52,7 +52,7 @@ import gurux.dlms.objects.enums.ScriptActionType;
 
 /**
  * Online help: <br>
- * http://www.gurux.fi/Gurux.DLMS.Objects.GXDLMSScriptTable
+ * https://www.gurux.fi/Gurux.DLMS.Objects.GXDLMSScriptTable
  */
 public class GXDLMSScriptTable extends GXDLMSObject implements IGXDLMSBase {
     private List<GXDLMSScript> scripts;
@@ -164,7 +164,7 @@ public class GXDLMSScriptTable extends GXDLMSObject implements IGXDLMSBase {
                 // Count
                 data.setUInt8(2);
                 // Script_identifier:
-                GXCommon.setData(data, DataType.UINT16, it.getId());
+                GXCommon.setData(settings, data, DataType.UINT16, it.getId());
                 data.setUInt8(DataType.ARRAY.getValue());
                 // Count
                 data.setUInt8(it.getActions().size());
@@ -172,29 +172,31 @@ public class GXDLMSScriptTable extends GXDLMSObject implements IGXDLMSBase {
                     data.setUInt8(DataType.STRUCTURE.getValue());
                     data.setUInt8(5);
                     // service_id
-                    GXCommon.setData(data, DataType.ENUM,
+                    GXCommon.setData(settings, data, DataType.ENUM,
                             new Integer(a.getType().ordinal()));
                     if (a.getTarget() == null) {
                         // class_id
-                        GXCommon.setData(data, DataType.UINT16,
+                        GXCommon.setData(settings, data, DataType.UINT16,
                                 new Integer(a.getObjectType().getValue()));
                         // logical_name
-                        GXCommon.setData(data, DataType.OCTET_STRING, GXCommon
-                                .logicalNameToBytes(a.getLogicalName()));
+                        GXCommon.setData(settings, data, DataType.OCTET_STRING,
+                                GXCommon.logicalNameToBytes(
+                                        a.getLogicalName()));
                     } else {
                         // class_id
-                        GXCommon.setData(data, DataType.UINT16, new Integer(
-                                a.getTarget().getObjectType().getValue()));
+                        GXCommon.setData(settings, data, DataType.UINT16,
+                                new Integer(a.getTarget().getObjectType()
+                                        .getValue()));
                         // logical_name
-                        GXCommon.setData(data, DataType.OCTET_STRING,
+                        GXCommon.setData(settings, data, DataType.OCTET_STRING,
                                 GXCommon.logicalNameToBytes(
                                         a.getTarget().getLogicalName()));
                     }
                     // index
-                    GXCommon.setData(data, DataType.INT8,
+                    GXCommon.setData(settings, data, DataType.INT8,
                             new Integer(a.getIndex()));
                     // parameter
-                    GXCommon.setData(data, a.getParameterType(),
+                    GXCommon.setData(settings, data, a.getParameterType(),
                             a.getParameter());
                 }
             }

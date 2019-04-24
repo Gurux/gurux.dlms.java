@@ -26,7 +26,7 @@
 // MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. 
 // See the GNU General Public License for more details.
 //
-// More information of Gurux DLMS/COSEM Director: http://www.gurux.org/GXDLMSDirector
+// More information of Gurux DLMS/COSEM Director: https://www.gurux.org/GXDLMSDirector
 //
 // This code is licensed under the GNU General Public License v2. 
 // Full text may be retrieved at http://www.gnu.org/licenses/gpl-2.0.txt
@@ -75,10 +75,12 @@ import gurux.dlms.objects.GXDLMSAutoAnswer;
 import gurux.dlms.objects.GXDLMSAutoConnect;
 import gurux.dlms.objects.GXDLMSCaptureObject;
 import gurux.dlms.objects.GXDLMSClock;
+import gurux.dlms.objects.GXDLMSCompactData;
 import gurux.dlms.objects.GXDLMSData;
 import gurux.dlms.objects.GXDLMSDayProfile;
 import gurux.dlms.objects.GXDLMSDayProfileAction;
 import gurux.dlms.objects.GXDLMSDemandRegister;
+import gurux.dlms.objects.GXDLMSDisconnectControl;
 import gurux.dlms.objects.GXDLMSGSMDiagnostic;
 import gurux.dlms.objects.GXDLMSHdlcSetup;
 import gurux.dlms.objects.GXDLMSIECOpticalPortSetup;
@@ -605,6 +607,9 @@ public class GXDLMSBase extends GXDLMSSecureServer2
 
         // Add GSM Diagnostic.
         addGSMDiagnostic();
+
+        getItems().add(new GXDLMSCompactData());
+        getItems().add(new GXDLMSDisconnectControl());
         ///////////////////////////////////////////////////////////////////////
         // Server must initialize after all objects are added.
         super.initialize();

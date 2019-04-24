@@ -57,7 +57,7 @@ final class GXDLMSSNCommandHandler {
                 GXDataInfo di = new GXDataInfo();
                 di.setXml(xml);
                 xml.appendStartTag(TranslatorTags.PARAMETER);
-                GXCommon.getData(data, di);
+                GXCommon.getData(settings, data, di);
                 xml.appendEndTag(TranslatorTags.PARAMETER);
                 xml.appendEndTag(Command.READ_REQUEST,
                         VariableAccessSpecification.PARAMETERISED_ACCESS);
@@ -80,7 +80,7 @@ final class GXDLMSSNCommandHandler {
         if (type == VariableAccessSpecification.PARAMETERISED_ACCESS) {
             e.setSelector(data.getUInt8());
             GXDataInfo di = new GXDataInfo();
-            e.setParameters(GXCommon.getData(data, di));
+            e.setParameters(GXCommon.getData(settings, data, di));
         }
         // Return error if connection is not established.
         if ((settings.getConnected() & ConnectionState.DLMS) == 0
@@ -221,7 +221,7 @@ final class GXDLMSSNCommandHandler {
                 }
                 // If action.
                 if (e.isAction()) {
-                    GXCommon.setData(data,
+                    GXCommon.setData(settings, data,
                             GXDLMSConverter.getDLMSDataType(value), value);
                 } else {
                     GXDLMS.appendData(e.getTarget(), e.getIndex(), data, value);
@@ -565,7 +565,7 @@ final class GXDLMSSNCommandHandler {
                     xml.appendStartTag(Command.WRITE_REQUEST << 8
                             | SingleReadResponse.DATA);
                 }
-                value = GXCommon.getData(data, di);
+                value = GXCommon.getData(settings, data, di);
                 if (!di.isComplete()) {
                     value = GXCommon.toHex(data.getData(), false,
                             data.position(), data.size() - data.position());
@@ -580,7 +580,7 @@ final class GXDLMSSNCommandHandler {
             } else if (results.getUInt8(pos) == 0) {
                 // If object has found.
                 GXSNInfo target = targets.get(pos);
-                value = GXCommon.getData(data, di);
+                value = GXCommon.getData(settings, data, di);
                 if (value instanceof byte[]) {
                     DataType dt =
                             target.getItem().getDataType(target.getIndex());
@@ -719,7 +719,7 @@ final class GXDLMSSNCommandHandler {
                     reply.getXml().appendStartTag(Command.WRITE_REQUEST << 8
                             | SingleReadResponse.DATA);
                 }
-                GXCommon.getData(reply.getData(), di);
+                GXCommon.getData(settings, reply.getData(), di);
                 if (ot == TranslatorOutputType.STANDARD_XML) {
                     reply.getXml().appendEndTag(Command.WRITE_REQUEST << 8
                             | SingleReadResponse.DATA);
@@ -727,7 +727,7 @@ final class GXDLMSSNCommandHandler {
             } else {
                 ValueEventArgs v = new ValueEventArgs(list.get(pos).getKey(),
                         list.get(pos).getValue(), 0, null);
-                v.setValue(GXCommon.getData(reply.getData(), di));
+                v.setValue(GXCommon.getData(settings, reply.getData(), di));
                 list.get(pos).getKey().setValue(settings, v);
             }
         }

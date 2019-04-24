@@ -26,7 +26,7 @@
 // MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. 
 // See the GNU General Public License for more details.
 //
-// More information of Gurux products: http://www.gurux.org
+// More information of Gurux products: https://www.gurux.org
 //
 // This code is licensed under the GNU General Public License v2. 
 // Full text may be retrieved at http://www.gnu.org/licenses/gpl-2.0.txt
@@ -52,7 +52,7 @@ import gurux.dlms.internal.GXCommon;
 
 /**
  * Online help: <br>
- * http://www.gurux.fi/Gurux.DLMS.Objects.GXDLMSMBusClient
+ * https://www.gurux.fi/Gurux.DLMS.Objects.GXDLMSMBusClient
  */
 public class GXDLMSMBusClient extends GXDLMSObject implements IGXDLMSBase {
     private long capturePeriod;
@@ -349,11 +349,12 @@ public class GXDLMSMBusClient extends GXDLMSObject implements IGXDLMSBase {
             for (Map.Entry<String, String> it : captureDefinition) {
                 buff.setUInt8(DataType.STRUCTURE.getValue());
                 buff.setUInt8(2);
-                GXCommon.setData(buff, DataType.UINT8, it.getKey());
+                GXCommon.setData(settings, buff, DataType.UINT8, it.getKey());
                 if (it.getValue() == null) {
-                    GXCommon.setData(buff, DataType.OCTET_STRING, null);
+                    GXCommon.setData(settings, buff, DataType.OCTET_STRING,
+                            null);
                 } else {
-                    GXCommon.setData(buff, DataType.OCTET_STRING,
+                    GXCommon.setData(settings, buff, DataType.OCTET_STRING,
                             it.getValue().getBytes());
                 }
             }

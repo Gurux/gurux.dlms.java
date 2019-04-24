@@ -26,7 +26,7 @@
 // MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. 
 // See the GNU General Public License for more details.
 //
-// More information of Gurux products: http://www.gurux.org
+// More information of Gurux products: https://www.gurux.org
 //
 // This code is licensed under the GNU General Public License v2. 
 // Full text may be retrieved at http://www.gnu.org/licenses/gpl-2.0.txt
@@ -54,7 +54,7 @@ import gurux.dlms.objects.enums.GsmStatus;
 
 /**
  * Online help: <br>
- * http://www.gurux.fi/Gurux.DLMS.Objects.GXDLMSGSMDiagnostic
+ * https://www.gurux.fi/Gurux.DLMS.Objects.GXDLMSGSMDiagnostic
  */
 public class GXDLMSGSMDiagnostic extends GXDLMSObject implements IGXDLMSBase {
     /**
@@ -338,20 +338,24 @@ public class GXDLMSGSMDiagnostic extends GXDLMSObject implements IGXDLMSBase {
             bb.setUInt8(DataType.STRUCTURE.getValue());
             if (getVersion() == 0) {
                 bb.setUInt8(4);
-                GXCommon.setData(bb, DataType.UINT16, cellInfo.getCellId());
+                GXCommon.setData(settings, bb, DataType.UINT16,
+                        cellInfo.getCellId());
             } else {
                 bb.setUInt8(7);
-                GXCommon.setData(bb, DataType.UINT32, cellInfo.getCellId());
+                GXCommon.setData(settings, bb, DataType.UINT32,
+                        cellInfo.getCellId());
             }
-            GXCommon.setData(bb, DataType.UINT16, cellInfo.getLocationId());
-            GXCommon.setData(bb, DataType.UINT8, cellInfo.getSignalQuality());
-            GXCommon.setData(bb, DataType.UINT8, cellInfo.getBer());
+            GXCommon.setData(settings, bb, DataType.UINT16,
+                    cellInfo.getLocationId());
+            GXCommon.setData(settings, bb, DataType.UINT8,
+                    cellInfo.getSignalQuality());
+            GXCommon.setData(settings, bb, DataType.UINT8, cellInfo.getBer());
             if (getVersion() > 0) {
-                GXCommon.setData(bb, DataType.UINT16,
+                GXCommon.setData(settings, bb, DataType.UINT16,
                         cellInfo.getMobileCountryCode());
-                GXCommon.setData(bb, DataType.UINT16,
+                GXCommon.setData(settings, bb, DataType.UINT16,
                         cellInfo.getMobileNetworkCode());
-                GXCommon.setData(bb, DataType.UINT32,
+                GXCommon.setData(settings, bb, DataType.UINT32,
                         cellInfo.getChannelNumber());
             }
             return bb.array();
@@ -366,10 +370,11 @@ public class GXDLMSGSMDiagnostic extends GXDLMSObject implements IGXDLMSBase {
             for (GXAdjacentCell it : adjacentCells) {
                 bb.setUInt8(DataType.STRUCTURE.getValue());
                 bb.setUInt8(2);
-                GXCommon.setData(bb,
+                GXCommon.setData(settings, bb,
                         getVersion() == 0 ? DataType.UINT16 : DataType.UINT32,
                         it.getCellId());
-                GXCommon.setData(bb, DataType.UINT8, it.getSignalQuality());
+                GXCommon.setData(settings, bb, DataType.UINT8,
+                        it.getSignalQuality());
             }
             return bb.array();
         case 8:

@@ -26,7 +26,7 @@
 // MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. 
 // See the GNU General Public License for more details.
 //
-// More information of Gurux products: http://www.gurux.org
+// More information of Gurux products: https://www.gurux.org
 //
 // This code is licensed under the GNU General Public License v2. 
 // Full text may be retrieved at http://www.gnu.org/licenses/gpl-2.0.txt
@@ -53,49 +53,49 @@ import gurux.dlms.objects.enums.TokenStatusCode;
 
 /**
  * Online help:<br>
- * http://www.gurux.fi/Gurux.DLMS.Objects.GXDLMSTokenGateway
+ * https://www.gurux.fi/Gurux.DLMS.Objects.GXDLMSTokenGateway
  */
 public class GXDLMSTokenGateway extends GXDLMSObject implements IGXDLMSBase {
 
     /**
      * Token.<br>
      * Online help:<br>
-     * http://www.gurux.fi/Gurux.DLMS.Objects.GXDLMSTokenGateway
+     * https://www.gurux.fi/Gurux.DLMS.Objects.GXDLMSTokenGateway
      */
     private byte[] token;
 
     /**
      * Time.<br>
      * Online help:<br>
-     * http://www.gurux.fi/Gurux.DLMS.Objects.GXDLMSTokenGateway
+     * https://www.gurux.fi/Gurux.DLMS.Objects.GXDLMSTokenGateway
      */
     private GXDateTime time;
 
     /**
      * Descriptions.<br>
      * Online help:<br>
-     * http://www.gurux.fi/Gurux.DLMS.Objects.GXDLMSTokenGateway
+     * https://www.gurux.fi/Gurux.DLMS.Objects.GXDLMSTokenGateway
      */
     private List<String> descriptions;
 
     /**
      * Token Delivery method.<br>
      * Online help:<br>
-     * http://www.gurux.fi/Gurux.DLMS.Objects.GXDLMSTokenGateway
+     * https://www.gurux.fi/Gurux.DLMS.Objects.GXDLMSTokenGateway
      */
     private TokenDelivery deliveryMethod;
 
     /**
      * Token status code.<br>
      * Online help:<br>
-     * http://www.gurux.fi/Gurux.DLMS.Objects.GXDLMSTokenGateway
+     * https://www.gurux.fi/Gurux.DLMS.Objects.GXDLMSTokenGateway
      */
     private TokenStatusCode statusCode;
 
     /**
      * Token data value.<br>
      * Online help:<br>
-     * http://www.gurux.fi/Gurux.DLMS.Objects.GXDLMSTokenGateway
+     * https://www.gurux.fi/Gurux.DLMS.Objects.GXDLMSTokenGateway
      */
     private String dataValue;
 
@@ -133,7 +133,7 @@ public class GXDLMSTokenGateway extends GXDLMSObject implements IGXDLMSBase {
 
     /**
      * Online help:<br>
-     * http://www.gurux.fi/Gurux.DLMS.Objects.GXDLMSTokenGateway
+     * https://www.gurux.fi/Gurux.DLMS.Objects.GXDLMSTokenGateway
      * 
      * @return Token.
      */
@@ -143,7 +143,7 @@ public class GXDLMSTokenGateway extends GXDLMSObject implements IGXDLMSBase {
 
     /**
      * Online help:<br>
-     * http://www.gurux.fi/Gurux.DLMS.Objects.GXDLMSTokenGateway
+     * https://www.gurux.fi/Gurux.DLMS.Objects.GXDLMSTokenGateway
      * 
      * @param value
      *            Token.
@@ -154,7 +154,7 @@ public class GXDLMSTokenGateway extends GXDLMSObject implements IGXDLMSBase {
 
     /**
      * Online help:<br>
-     * http://www.gurux.fi/Gurux.DLMS.Objects.GXDLMSTokenGateway
+     * https://www.gurux.fi/Gurux.DLMS.Objects.GXDLMSTokenGateway
      * 
      * @return Time.
      */
@@ -164,7 +164,7 @@ public class GXDLMSTokenGateway extends GXDLMSObject implements IGXDLMSBase {
 
     /**
      * Online help:<br>
-     * http://www.gurux.fi/Gurux.DLMS.Objects.GXDLMSTokenGateway
+     * https://www.gurux.fi/Gurux.DLMS.Objects.GXDLMSTokenGateway
      * 
      * @param value
      *            Time.
@@ -175,7 +175,7 @@ public class GXDLMSTokenGateway extends GXDLMSObject implements IGXDLMSBase {
 
     /**
      * Online help:<br>
-     * http://www.gurux.fi/Gurux.DLMS.Objects.GXDLMSTokenGateway
+     * https://www.gurux.fi/Gurux.DLMS.Objects.GXDLMSTokenGateway
      * 
      * @return Descriptions.
      */
@@ -185,7 +185,7 @@ public class GXDLMSTokenGateway extends GXDLMSObject implements IGXDLMSBase {
 
     /**
      * Online help:<br>
-     * http://www.gurux.fi/Gurux.DLMS.Objects.GXDLMSTokenGateway
+     * https://www.gurux.fi/Gurux.DLMS.Objects.GXDLMSTokenGateway
      * 
      * @param value
      *            Descriptions.
@@ -196,7 +196,7 @@ public class GXDLMSTokenGateway extends GXDLMSObject implements IGXDLMSBase {
 
     /**
      * Online help:<br>
-     * http://www.gurux.fi/Gurux.DLMS.Objects.GXDLMSTokenGateway
+     * https://www.gurux.fi/Gurux.DLMS.Objects.GXDLMSTokenGateway
      * 
      * @return Token Delivery method.
      */
@@ -206,7 +206,7 @@ public class GXDLMSTokenGateway extends GXDLMSObject implements IGXDLMSBase {
 
     /**
      * Online help:<br>
-     * http://www.gurux.fi/Gurux.DLMS.Objects.GXDLMSTokenGateway
+     * https://www.gurux.fi/Gurux.DLMS.Objects.GXDLMSTokenGateway
      * 
      * @param value
      *            Token Delivery method.
@@ -217,7 +217,7 @@ public class GXDLMSTokenGateway extends GXDLMSObject implements IGXDLMSBase {
 
     /**
      * Online help:<br>
-     * http://www.gurux.fi/Gurux.DLMS.Objects.GXDLMSTokenGateway
+     * https://www.gurux.fi/Gurux.DLMS.Objects.GXDLMSTokenGateway
      * 
      * @return Token status code.
      */
@@ -227,7 +227,7 @@ public class GXDLMSTokenGateway extends GXDLMSObject implements IGXDLMSBase {
 
     /**
      * Online help:<br>
-     * http://www.gurux.fi/Gurux.DLMS.Objects.GXDLMSTokenGateway
+     * https://www.gurux.fi/Gurux.DLMS.Objects.GXDLMSTokenGateway
      * 
      * @param value
      *            Token status code.
@@ -238,7 +238,7 @@ public class GXDLMSTokenGateway extends GXDLMSObject implements IGXDLMSBase {
 
     /**
      * Online help:<br>
-     * http://www.gurux.fi/Gurux.DLMS.Objects.GXDLMSTokenGateway
+     * https://www.gurux.fi/Gurux.DLMS.Objects.GXDLMSTokenGateway
      * 
      * @return Token data value.
      */
@@ -248,7 +248,7 @@ public class GXDLMSTokenGateway extends GXDLMSObject implements IGXDLMSBase {
 
     /**
      * Online help:<br>
-     * http://www.gurux.fi/Gurux.DLMS.Objects.GXDLMSTokenGateway
+     * https://www.gurux.fi/Gurux.DLMS.Objects.GXDLMSTokenGateway
      * 
      * @param value
      *            Token data value.
@@ -370,8 +370,8 @@ public class GXDLMSTokenGateway extends GXDLMSObject implements IGXDLMSBase {
             bb = new GXByteBuffer();
             bb.setUInt8(DataType.STRUCTURE.getValue());
             bb.setUInt8(2);
-            GXCommon.setData(bb, DataType.ENUM, statusCode.getValue());
-            GXCommon.setData(bb, DataType.BITSTRING, dataValue);
+            GXCommon.setData(null, bb, DataType.ENUM, statusCode.getValue());
+            GXCommon.setData(null, bb, DataType.BITSTRING, dataValue);
             return bb.array();
         default:
             e.setError(ErrorCode.READ_WRITE_DENIED);

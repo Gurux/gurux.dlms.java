@@ -26,7 +26,7 @@
 // MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. 
 // See the GNU General Public License for more details.
 //
-// More information of Gurux products: http://www.gurux.org
+// More information of Gurux products: https://www.gurux.org
 //
 // This code is licensed under the GNU General Public License v2. 
 // Full text may be retrieved at http://www.gnu.org/licenses/gpl-2.0.txt
@@ -53,7 +53,7 @@ import gurux.dlms.objects.enums.Ip4SetupIpOptionType;
 
 /**
  * Online help: <br>
- * http://www.gurux.fi/Gurux.DLMS.Objects.GXDLMSIp4Setup
+ * https://www.gurux.fi/Gurux.DLMS.Objects.GXDLMSIp4Setup
  */
 public class GXDLMSIp4Setup extends GXDLMSObject implements IGXDLMSBase {
     private String dataLinkLayerReference;
@@ -312,7 +312,7 @@ public class GXDLMSIp4Setup extends GXDLMSObject implements IGXDLMSBase {
             } else {
                 GXCommon.setObjectCount(getMulticastIPAddress().length, data);
                 for (long it : getMulticastIPAddress()) {
-                    GXCommon.setData(data, DataType.UINT16, it);
+                    GXCommon.setData(settings, data, DataType.UINT16, it);
                 }
             }
             return data.array();
@@ -327,10 +327,12 @@ public class GXDLMSIp4Setup extends GXDLMSObject implements IGXDLMSBase {
                 for (GXDLMSIp4SetupIpOption it : ipOptions) {
                     data.setUInt8(DataType.STRUCTURE.getValue());
                     data.setUInt8(3);
-                    GXCommon.setData(data, DataType.UINT8, it.getType());
-                    GXCommon.setData(data, DataType.UINT8,
+                    GXCommon.setData(settings, data, DataType.UINT8,
+                            it.getType());
+                    GXCommon.setData(settings, data, DataType.UINT8,
                             new Integer(it.getLength()));
-                    GXCommon.setData(data, DataType.OCTET_STRING, it.getData());
+                    GXCommon.setData(settings, data, DataType.OCTET_STRING,
+                            it.getData());
                 }
             }
             return data.array();

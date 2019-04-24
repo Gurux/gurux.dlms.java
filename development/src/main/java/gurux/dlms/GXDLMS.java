@@ -26,7 +26,7 @@
 // MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. 
 // See the GNU General Public License for more details.
 //
-// More information of Gurux products: http://www.gurux.org
+// More information of Gurux products: https://www.gurux.org
 //
 // This code is licensed under the GNU General Public License v2. 
 // Full text may be retrieved at http://www.gnu.org/licenses/gpl-2.0.txt
@@ -412,12 +412,12 @@ abstract class GXDLMS {
             } else if (value instanceof String && tp == DataType.OCTET_STRING) {
                 DataType ui = obj.getUIDataType(index);
                 if (ui == DataType.STRING) {
-                    GXCommon.setData(bb, tp, ((String) value).getBytes());
+                    GXCommon.setData(null, bb, tp, ((String) value).getBytes());
                     return;
                 }
             }
         }
-        GXCommon.setData(bb, tp, value);
+        GXCommon.setData(null, bb, tp, value);
     }
 
     /**
@@ -630,7 +630,8 @@ abstract class GXDLMS {
                 } else {
                     // Data is send in octet string. Remove data type.
                     int pos = reply.size();
-                    GXCommon.setData(reply, DataType.OCTET_STRING, p.getTime());
+                    GXCommon.setData(null, reply, DataType.OCTET_STRING,
+                            p.getTime());
                     reply.move(pos + 1, pos, reply.size() - pos - 1);
                 }
                 multipleBlocks(p, reply, ciphering);
@@ -1282,7 +1283,8 @@ abstract class GXDLMS {
             } else {
                 // Data is send in octet string. Remove data type.
                 int pos = reply.size();
-                GXCommon.setData(reply, DataType.OCTET_STRING, p.getTime());
+                GXCommon.setData(null, reply, DataType.OCTET_STRING,
+                        p.getTime());
                 reply.move(pos + 1, pos, reply.size() - pos - 1);
             }
             GXCommon.setObjectCount(p.getCount(), reply);
@@ -2348,7 +2350,7 @@ abstract class GXDLMS {
                             SingleReadResponse.DATA);
                     GXDataInfo di = new GXDataInfo();
                     di.setXml(reply.getXml());
-                    GXCommon.getData(reply.getData(), di);
+                    GXCommon.getData(settings, reply.getData(), di);
                     reply.getXml().appendEndTag(Command.READ_RESPONSE,
                             SingleReadResponse.DATA);
                     if (standardXml) {
@@ -2456,8 +2458,7 @@ abstract class GXDLMS {
             data.getXml().appendStartTag(Command.METHOD_RESPONSE);
             data.getXml().appendStartTag(Command.METHOD_RESPONSE, type);
             // InvokeIdAndPriority
-            data.getXml().appendLine(TranslatorTags.INVOKE_ID, "Value",
-                    data.getXml().integerToHex(invoke, 2));
+            data.getXml().appendInvokeId(invoke);
         }
         boolean standardXml = data.getXml() != null && data.getXml()
                 .getOutputType() == TranslatorOutputType.STANDARD_XML;
@@ -2522,7 +2523,7 @@ abstract class GXDLMS {
                                 SingleReadResponse.DATA);
                         GXDataInfo di = new GXDataInfo();
                         di.setXml(data.getXml());
-                        GXCommon.getData(data.getData(), di);
+                        GXCommon.getData(settings, data.getData(), di);
                         data.getXml().appendEndTag(Command.READ_RESPONSE,
                                 SingleReadResponse.DATA);
                     }
@@ -2633,7 +2634,7 @@ abstract class GXDLMS {
                 }
                 GXDataInfo di = new GXDataInfo();
                 di.setXml(reply.getXml());
-                GXCommon.getData(reply.getData(), di);
+                GXCommon.getData(settings, reply.getData(), di);
                 if (reply.getXml()
                         .getOutputType() == TranslatorOutputType.STANDARD_XML) {
                     reply.getXml().appendEndTag(Command.WRITE_REQUEST,
@@ -2706,7 +2707,8 @@ abstract class GXDLMS {
             }
             GXDataInfo info = new GXDataInfo();
             info.setType(dt);
-            Object ret = GXCommon.getData(new GXByteBuffer(tmp), info);
+            Object ret =
+                    GXCommon.getData(settings, new GXByteBuffer(tmp), info);
             reply.setTime(((GXDateTime) ret));
         }
         if (reply.getXml() != null) {
@@ -2722,7 +2724,7 @@ abstract class GXDLMS {
             reply.getXml().appendStartTag(TranslatorTags.DATA_VALUE);
             GXDataInfo di = new GXDataInfo();
             di.setXml(reply.getXml());
-            GXCommon.getData(reply.getData(), di);
+            GXCommon.getData(settings, reply.getData(), di);
             reply.getXml().appendEndTag(TranslatorTags.DATA_VALUE);
             reply.getXml().appendEndTag(TranslatorTags.NOTIFICATION_BODY);
             reply.getXml().appendEndTag(Command.DATA_NOTIFICATION);
@@ -2747,8 +2749,7 @@ abstract class GXDLMS {
             data.getXml().appendStartTag(Command.SET_RESPONSE);
             data.getXml().appendStartTag(Command.SET_RESPONSE, type);
             // InvokeIdAndPriority
-            data.getXml().appendLine(TranslatorTags.INVOKE_ID, "Value",
-                    data.getXml().integerToHex(invokeId, 2));
+            data.getXml().appendInvokeId(invokeId);
         }
 
         // SetResponseNormal
@@ -2874,8 +2875,7 @@ abstract class GXDLMS {
             reply.getXml().appendStartTag(Command.GET_RESPONSE);
             reply.getXml().appendStartTag(Command.GET_RESPONSE, type);
             // InvokeIdAndPriority
-            reply.getXml().appendLine(TranslatorTags.INVOKE_ID, "Value",
-                    reply.getXml().integerToHex(ch, 2));
+            reply.getXml().appendInvokeId(ch);
         }
         // Response normal
         if (type == GetCommandType.NORMAL) {
@@ -2897,7 +2897,7 @@ abstract class GXDLMS {
                     reply.getXml().appendStartTag(TranslatorTags.DATA);
                     GXDataInfo di = new GXDataInfo();
                     di.setXml(reply.getXml());
-                    GXCommon.getData(reply.getData(), di);
+                    GXCommon.getData(settings, reply.getData(), di);
                     reply.getXml().appendEndTag(TranslatorTags.DATA);
                 }
             } else {
@@ -3026,7 +3026,7 @@ abstract class GXDLMS {
                         // Data.
                         reply.getXml().appendStartTag(Command.READ_RESPONSE,
                                 SingleReadResponse.DATA);
-                        GXCommon.getData(reply.getData(), di);
+                        GXCommon.getData(settings, reply.getData(), di);
                         reply.getXml().appendEndTag(Command.READ_RESPONSE,
                                 SingleReadResponse.DATA);
                     } else {
@@ -3594,7 +3594,7 @@ abstract class GXDLMS {
         int index = data.position();
         data.position(reply.getReadPosition());
         try {
-            Object value = GXCommon.getData(data, info);
+            Object value = GXCommon.getData(settings, data, info);
             if (value != null) { // If new data.
                 if (!(value instanceof Object[])) {
                     reply.setValueType(info.getType());

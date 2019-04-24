@@ -26,7 +26,7 @@
 // MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. 
 // See the GNU General Public License for more details.
 //
-// More information of Gurux products: http://www.gurux.org
+// More information of Gurux products: https://www.gurux.org
 //
 // This code is licensed under the GNU General Public License v2. 
 // Full text may be retrieved at http://www.gnu.org/licenses/gpl-2.0.txt
@@ -53,7 +53,7 @@ import gurux.dlms.internal.GXCommon;
 
 /**
  * Online help: <br>
- * http://www.gurux.fi/Gurux.DLMS.Objects.GXDLMSActivityCalendar
+ * https://www.gurux.fi/Gurux.DLMS.Objects.GXDLMSActivityCalendar
  */
 public class GXDLMSActivityCalendar extends GXDLMSObject
         implements IGXDLMSBase {
@@ -291,7 +291,8 @@ public class GXDLMSActivityCalendar extends GXDLMSObject
                 "getDataType failed. Invalid attribute index.");
     }
 
-    static Object getSeasonProfile(final GXDLMSSeasonProfile[] target) {
+    static Object getSeasonProfile(final GXDLMSSettings settings,
+            final GXDLMSSeasonProfile[] target) {
         GXByteBuffer data = new GXByteBuffer();
         data.setUInt8(DataType.ARRAY.getValue());
         if (target == null) {
@@ -304,15 +305,19 @@ public class GXDLMSActivityCalendar extends GXDLMSObject
             for (final GXDLMSSeasonProfile it : target) {
                 data.setUInt8(DataType.STRUCTURE.getValue());
                 data.setUInt8(3);
-                GXCommon.setData(data, DataType.OCTET_STRING, it.getName());
-                GXCommon.setData(data, DataType.OCTET_STRING, it.getStart());
-                GXCommon.setData(data, DataType.OCTET_STRING, it.getWeekName());
+                GXCommon.setData(settings, data, DataType.OCTET_STRING,
+                        it.getName());
+                GXCommon.setData(settings, data, DataType.OCTET_STRING,
+                        it.getStart());
+                GXCommon.setData(settings, data, DataType.OCTET_STRING,
+                        it.getWeekName());
             }
         }
         return data.array();
     }
 
-    static Object getWeekProfileTable(final GXDLMSWeekProfile[] target) {
+    static Object getWeekProfileTable(final GXDLMSSettings settings,
+            final GXDLMSWeekProfile[] target) {
         GXByteBuffer data = new GXByteBuffer();
         data.setUInt8(DataType.ARRAY.getValue());
         if (target == null) {
@@ -324,27 +329,29 @@ public class GXDLMSActivityCalendar extends GXDLMSObject
             for (final GXDLMSWeekProfile it : target) {
                 data.setUInt8(DataType.STRUCTURE.getValue());
                 data.setUInt8(8);
-                GXCommon.setData(data, DataType.OCTET_STRING, it.getName());
-                GXCommon.setData(data, DataType.UINT8,
+                GXCommon.setData(settings, data, DataType.OCTET_STRING,
+                        it.getName());
+                GXCommon.setData(settings, data, DataType.UINT8,
                         new Integer(it.getMonday()));
-                GXCommon.setData(data, DataType.UINT8,
+                GXCommon.setData(settings, data, DataType.UINT8,
                         new Integer(it.getTuesday()));
-                GXCommon.setData(data, DataType.UINT8,
+                GXCommon.setData(settings, data, DataType.UINT8,
                         new Integer(it.getWednesday()));
-                GXCommon.setData(data, DataType.UINT8,
+                GXCommon.setData(settings, data, DataType.UINT8,
                         new Integer(it.getThursday()));
-                GXCommon.setData(data, DataType.UINT8,
+                GXCommon.setData(settings, data, DataType.UINT8,
                         new Integer(it.getFriday()));
-                GXCommon.setData(data, DataType.UINT8,
+                GXCommon.setData(settings, data, DataType.UINT8,
                         new Integer(it.getSaturday()));
-                GXCommon.setData(data, DataType.UINT8,
+                GXCommon.setData(settings, data, DataType.UINT8,
                         new Integer(it.getSunday()));
             }
         }
         return data.array();
     }
 
-    static Object getDayProfileTable(final GXDLMSDayProfile[] target) {
+    static Object getDayProfileTable(final GXDLMSSettings settings,
+            final GXDLMSDayProfile[] target) {
         GXByteBuffer data = new GXByteBuffer();
         data.setUInt8(DataType.ARRAY.getValue());
         if (target == null) {
@@ -356,7 +363,7 @@ public class GXDLMSActivityCalendar extends GXDLMSObject
             for (final GXDLMSDayProfile it : target) {
                 data.setUInt8(DataType.STRUCTURE.getValue());
                 data.setUInt8(2);
-                GXCommon.setData(data, DataType.UINT8,
+                GXCommon.setData(settings, data, DataType.UINT8,
                         new Integer(it.getDayId()));
                 data.setUInt8(DataType.ARRAY.getValue());
                 // Add count
@@ -365,11 +372,12 @@ public class GXDLMSActivityCalendar extends GXDLMSObject
                         .getDaySchedules()) {
                     data.setUInt8(DataType.STRUCTURE.getValue());
                     data.setUInt8(3);
-                    GXCommon.setData(data, DataType.OCTET_STRING,
+                    GXCommon.setData(settings, data, DataType.OCTET_STRING,
                             action.getStartTime());
-                    GXCommon.setData(data, DataType.OCTET_STRING, GXCommon
-                            .logicalNameToBytes(action.getScriptLogicalName()));
-                    GXCommon.setData(data, DataType.UINT16,
+                    GXCommon.setData(settings, data, DataType.OCTET_STRING,
+                            GXCommon.logicalNameToBytes(
+                                    action.getScriptLogicalName()));
+                    GXCommon.setData(settings, data, DataType.UINT16,
                             new Integer(action.getScriptSelector()));
                 }
             }
@@ -395,11 +403,11 @@ public class GXDLMSActivityCalendar extends GXDLMSObject
             }
             return calendarNameActive.getBytes();
         case 3:
-            return getSeasonProfile(seasonProfileActive);
+            return getSeasonProfile(settings, seasonProfileActive);
         case 4:
-            return getWeekProfileTable(weekProfileTableActive);
+            return getWeekProfileTable(settings, weekProfileTableActive);
         case 5:
-            return getDayProfileTable(dayProfileTableActive);
+            return getDayProfileTable(settings, dayProfileTableActive);
         case 6:
             if (calendarNamePassive == null) {
                 return null;
@@ -409,11 +417,11 @@ public class GXDLMSActivityCalendar extends GXDLMSObject
             }
             return calendarNamePassive.getBytes();
         case 7:
-            return getSeasonProfile(seasonProfilePassive);
+            return getSeasonProfile(settings, seasonProfilePassive);
         case 8:
-            return getWeekProfileTable(weekProfileTablePassive);
+            return getWeekProfileTable(settings, weekProfileTablePassive);
         case 9:
-            return getDayProfileTable(dayProfileTablePassive);
+            return getDayProfileTable(settings, dayProfileTablePassive);
         case 10:
             return getTime();
         default:

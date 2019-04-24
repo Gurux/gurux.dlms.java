@@ -26,7 +26,7 @@
 // MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. 
 // See the GNU General Public License for more details.
 //
-// More information of Gurux products: http://www.gurux.org
+// More information of Gurux products: https://www.gurux.org
 //
 // This code is licensed under the GNU General Public License v2. 
 // Full text may be retrieved at http://www.gnu.org/licenses/gpl-2.0.txt
@@ -2279,7 +2279,7 @@ public class GXDLMSTranslator {
                     int col = 0;
                     for (String it : r.trim().split("[;]")) {
                         tmp.clear();
-                        GXCommon.setData(tmp, types[col % types.length],
+                        GXCommon.setData(null, tmp, types[col % types.length],
                                 GXDLMSConverter.changeType(it,
                                         types[col % types.length]));
                         if (tmp.size() == 1) {
@@ -2357,19 +2357,19 @@ public class GXDLMSTranslator {
             s.getData().size(0);
             break;
         case BCD:
-            GXCommon.setData(s.getData(), DataType.BCD,
+            GXCommon.setData(null, s.getData(), DataType.BCD,
                     s.parseShort(getValue(node, s)));
             break;
         case BITSTRING:
-            GXCommon.setData(s.getData(), DataType.BITSTRING,
+            GXCommon.setData(null, s.getData(), DataType.BITSTRING,
                     getValue(node, s));
             break;
         case BOOLEAN:
-            GXCommon.setData(s.getData(), DataType.BOOLEAN,
+            GXCommon.setData(null, s.getData(), DataType.BOOLEAN,
                     s.parseShort(getValue(node, s)));
             break;
         case DATE:
-            GXCommon.setData(s.getData(), DataType.DATE,
+            GXCommon.setData(null, s.getData(), DataType.DATE,
                     GXDLMSClient.changeType(
                             GXCommon.hexToBytes(getValue(node, s)),
                             DataType.DATE));
@@ -2381,10 +2381,11 @@ public class GXDLMSTranslator {
             } else if (tmp.length == 4) {
                 dt = DataType.TIME;
             }
-            GXCommon.setData(s.getData(), dt, GXDLMSClient.changeType(tmp, dt));
+            GXCommon.setData(null, s.getData(), dt,
+                    GXDLMSClient.changeType(tmp, dt));
             break;
         case ENUM:
-            GXCommon.setData(s.getData(), DataType.ENUM,
+            GXCommon.setData(null, s.getData(), DataType.ENUM,
                     s.parseShort(getValue(node, s)));
             break;
         case FLOAT32:
@@ -2394,42 +2395,42 @@ public class GXDLMSTranslator {
             getFloat64(node, s);
             break;
         case INT16:
-            GXCommon.setData(s.getData(), DataType.INT16,
+            GXCommon.setData(null, s.getData(), DataType.INT16,
                     s.parseShort(getValue(node, s)));
             break;
         case INT32:
-            GXCommon.setData(s.getData(), DataType.INT32,
+            GXCommon.setData(null, s.getData(), DataType.INT32,
                     s.parseInt(getValue(node, s)));
             break;
         case INT64:
-            GXCommon.setData(s.getData(), DataType.INT64,
+            GXCommon.setData(null, s.getData(), DataType.INT64,
                     s.parseLong(getValue(node, s)));
             break;
         case INT8:
-            GXCommon.setData(s.getData(), DataType.INT8,
+            GXCommon.setData(null, s.getData(), DataType.INT8,
                     s.parseShort(getValue(node, s)));
             break;
         case NONE:
-            GXCommon.setData(s.getData(), DataType.NONE, null);
+            GXCommon.setData(null, s.getData(), DataType.NONE, null);
             break;
         case OCTET_STRING:
             getOctetString(node, s);
             break;
         case STRING:
             if (s.isShowStringAsHex()) {
-                GXCommon.setData(s.getData(), DataType.STRING,
+                GXCommon.setData(null, s.getData(), DataType.STRING,
                         GXCommon.hexToBytes(getValue(node, s)));
             } else {
-                GXCommon.setData(s.getData(), DataType.STRING,
+                GXCommon.setData(null, s.getData(), DataType.STRING,
                         getValue(node, s));
             }
             break;
         case STRING_UTF8:
             if (s.isShowStringAsHex()) {
-                GXCommon.setData(s.getData(), DataType.STRING_UTF8,
+                GXCommon.setData(null, s.getData(), DataType.STRING_UTF8,
                         GXCommon.hexToBytes(getValue(node, s)));
             } else {
-                GXCommon.setData(s.getData(), DataType.STRING_UTF8,
+                GXCommon.setData(null, s.getData(), DataType.STRING_UTF8,
                         getValue(node, s));
             }
             break;
@@ -2439,25 +2440,25 @@ public class GXDLMSTranslator {
             s.getData().size(0);
             break;
         case TIME:
-            GXCommon.setData(s.getData(), DataType.TIME,
+            GXCommon.setData(null, s.getData(), DataType.TIME,
                     GXDLMSClient.changeType(
                             GXCommon.hexToBytes(getValue(node, s)),
                             DataType.TIME));
             break;
         case UINT16:
-            GXCommon.setData(s.getData(), DataType.UINT16,
+            GXCommon.setData(null, s.getData(), DataType.UINT16,
                     s.parseShort(getValue(node, s)));
             break;
         case UINT32:
-            GXCommon.setData(s.getData(), DataType.UINT32,
+            GXCommon.setData(null, s.getData(), DataType.UINT32,
                     s.parseLong(getValue(node, s)));
             break;
         case UINT64:
-            GXCommon.setData(s.getData(), DataType.UINT64,
+            GXCommon.setData(null, s.getData(), DataType.UINT64,
                     s.parseLong(getValue(node, s)));
             break;
         case UINT8:
-            GXCommon.setData(s.getData(), DataType.UINT8,
+            GXCommon.setData(null, s.getData(), DataType.UINT8,
                     s.parseShort(getValue(node, s)));
             break;
         case COMPACT_ARRAY:
@@ -2474,19 +2475,19 @@ public class GXDLMSTranslator {
             final GXDLMSXmlSettings s) {
         GXByteBuffer bb = new GXByteBuffer();
         bb.setHexString(getValue(node, s));
-        GXCommon.setData(s.getData(), DataType.OCTET_STRING, bb.array());
+        GXCommon.setData(null, s.getData(), DataType.OCTET_STRING, bb.array());
     }
 
     private static void getFloat32(final Node node, final GXDLMSXmlSettings s) {
         GXByteBuffer bb = new GXByteBuffer();
         bb.setHexString(getValue(node, s));
-        GXCommon.setData(s.getData(), DataType.FLOAT32, bb.getFloat());
+        GXCommon.setData(null, s.getData(), DataType.FLOAT32, bb.getFloat());
     }
 
     private static void getFloat64(final Node node, final GXDLMSXmlSettings s) {
         GXByteBuffer bb = new GXByteBuffer();
         bb.setHexString(getValue(node, s));
-        GXCommon.setData(s.getData(), DataType.FLOAT64, bb.getDouble());
+        GXCommon.setData(null, s.getData(), DataType.FLOAT64, bb.getDouble());
     }
 
     /**
@@ -2779,11 +2780,12 @@ public class GXDLMSTranslator {
                 new GXDLMSTranslatorStructure(outputType, omitXmlNameSpace, hex,
                         getShowStringAsHex(), comments, tags);
         di.setXml(xml);
-        GXCommon.getData(data, di);
+        GXCommon.getData(null, data, di);
         return di.getXml().toString();
     }
 
-    private void getAllDataNodes(final NodeList nodes, GXDLMSXmlSettings s) {
+    private void getAllDataNodes(final NodeList nodes,
+            final GXDLMSXmlSettings s) {
         GXByteBuffer preData;
         int tag;
         for (int pos = 0; pos != nodes.getLength(); ++pos) {
@@ -2818,7 +2820,7 @@ public class GXDLMSTranslator {
      *            XML data.
      * @return Data in bytes.
      */
-    public final byte[] XmlToData(final String xml) {
+    public final byte[] xmlToData(final String xml) {
         DocumentBuilder docBuilder;
         Document doc;
         DocumentBuilderFactory docBuilderFactory =

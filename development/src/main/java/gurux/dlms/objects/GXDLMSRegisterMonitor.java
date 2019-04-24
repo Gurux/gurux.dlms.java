@@ -26,7 +26,7 @@
 // MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. 
 // See the GNU General Public License for more details.
 //
-// More information of Gurux products: http://www.gurux.org
+// More information of Gurux products: https://www.gurux.org
 //
 // This code is licensed under the GNU General Public License v2. 
 // Full text may be retrieved at http://www.gnu.org/licenses/gpl-2.0.txt
@@ -49,7 +49,7 @@ import gurux.dlms.internal.GXCommon;
 
 /**
  * Online help: <br>
- * http://www.gurux.fi/Gurux.DLMS.Objects.GXDLMSRegisterMonitor
+ * https://www.gurux.fi/Gurux.DLMS.Objects.GXDLMSRegisterMonitor
  */
 public class GXDLMSRegisterMonitor extends GXDLMSObject implements IGXDLMSBase {
     private GXDLMSActionSet[] actions;
@@ -193,19 +193,19 @@ public class GXDLMSRegisterMonitor extends GXDLMSObject implements IGXDLMSBase {
             return getThresholds();
         }
         if (e.getIndex() == 3) {
-            GXByteBuffer stream = new GXByteBuffer();
-            stream.setUInt8(DataType.STRUCTURE.getValue());
-            stream.setUInt8(3);
+            GXByteBuffer bb = new GXByteBuffer();
+            bb.setUInt8(DataType.STRUCTURE.getValue());
+            bb.setUInt8(3);
             // ClassID
-            GXCommon.setData(stream, DataType.UINT16,
+            GXCommon.setData(settings, bb, DataType.UINT16,
                     new Integer(monitoredValue.getObjectType().getValue()));
             // LN.
-            GXCommon.setData(stream, DataType.OCTET_STRING, GXCommon
+            GXCommon.setData(settings, bb, DataType.OCTET_STRING, GXCommon
                     .logicalNameToBytes(monitoredValue.getLogicalName()));
             // Attribute index.
-            GXCommon.setData(stream, DataType.INT8,
+            GXCommon.setData(settings, bb, DataType.INT8,
                     new Integer(monitoredValue.getAttributeIndex()));
-            return stream.array();
+            return bb.array();
         }
         if (e.getIndex() == 4) {
             GXByteBuffer bb = new GXByteBuffer();
@@ -220,20 +220,20 @@ public class GXDLMSRegisterMonitor extends GXDLMSObject implements IGXDLMSBase {
                     bb.setUInt8((byte) DataType.STRUCTURE.getValue());
                     bb.setUInt8(2);
                     // LN
-                    GXCommon.setData(bb, DataType.OCTET_STRING,
+                    GXCommon.setData(settings, bb, DataType.OCTET_STRING,
                             GXCommon.logicalNameToBytes(
                                     it.getActionUp().getLogicalName()));
                     // ScriptSelector
-                    GXCommon.setData(bb, DataType.UINT16,
+                    GXCommon.setData(settings, bb, DataType.UINT16,
                             new Integer(it.getActionUp().getScriptSelector()));
                     bb.setUInt8((byte) DataType.STRUCTURE.getValue());
                     bb.setUInt8(2);
                     // LN
-                    GXCommon.setData(bb, DataType.OCTET_STRING,
+                    GXCommon.setData(settings, bb, DataType.OCTET_STRING,
                             GXCommon.logicalNameToBytes(
                                     it.getActionDown().getLogicalName()));
                     // ScriptSelector
-                    GXCommon.setData(bb, DataType.UINT16, new Integer(
+                    GXCommon.setData(settings, bb, DataType.UINT16, new Integer(
                             it.getActionDown().getScriptSelector()));
                 }
             }

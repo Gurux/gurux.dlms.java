@@ -52,8 +52,7 @@ final class GXDLMSLNCommandHandler {
         if (xml != null) {
             xml.appendStartTag(Command.GET_REQUEST);
             xml.appendStartTag(Command.GET_REQUEST, type);
-            xml.appendLine(TranslatorTags.INVOKE_ID, "Value",
-                    xml.integerToHex(invokeID, 2));
+            xml.appendInvokeId(invokeID);
         }
 
         // GetRequest normal
@@ -116,8 +115,7 @@ final class GXDLMSLNCommandHandler {
             xml.appendStartTag(Command.SET_REQUEST);
             xml.appendStartTag(Command.SET_REQUEST, type);
             // InvokeIdAndPriority
-            xml.appendLine(TranslatorTags.INVOKE_ID, "Value",
-                    xml.integerToHex(invoke, 2));
+            xml.appendInvokeId(invoke);
         }
         switch (type) {
         case SetRequestType.NORMAL:
@@ -227,14 +225,14 @@ final class GXDLMSLNCommandHandler {
                 xml.appendLine(TranslatorTags.ACCESS_SELECTOR, "Value",
                         xml.integerToHex(selector, 2));
                 xml.appendStartTag(TranslatorTags.ACCESS_PARAMETERS);
-                GXCommon.getData(data, info);
+                GXCommon.getData(settings, data, info);
                 xml.appendEndTag(TranslatorTags.ACCESS_PARAMETERS);
                 xml.appendEndTag(TranslatorTags.ACCESS_SELECTION);
             }
             return;
         }
         if (selection != 0) {
-            parameters = GXCommon.getData(data, info);
+            parameters = GXCommon.getData(settings, data, info);
         }
         ObjectType ot = ObjectType.forValue(ci);
         GXDLMSObject obj =
@@ -429,7 +427,7 @@ final class GXDLMSLNCommandHandler {
             if (selection != 0) {
                 selector = data.getUInt8();
                 GXDataInfo i = new GXDataInfo();
-                parameters = GXCommon.getData(data, i);
+                parameters = GXCommon.getData(settings, data, i);
             }
             if (xml != null) {
                 xml.appendStartTag(
@@ -564,7 +562,7 @@ final class GXDLMSLNCommandHandler {
             xml.appendStartTag(TranslatorTags.VALUE);
             GXDataInfo di = new GXDataInfo();
             di.setXml(xml);
-            value = GXCommon.getData(data, di);
+            value = GXCommon.getData(settings, data, di);
             if (!di.isComplete()) {
                 value = GXCommon.toHex(data.getData(), false, data.position(),
                         data.size() - data.position());
@@ -576,7 +574,7 @@ final class GXDLMSLNCommandHandler {
         }
         if (!p.isMultipleBlocks()) {
             settings.resetBlockIndex();
-            value = GXCommon.getData(data, reply);
+            value = GXCommon.getData(settings, data, reply);
         }
 
         GXDLMSObject obj =
@@ -664,8 +662,8 @@ final class GXDLMSLNCommandHandler {
             // If all data is received.
             if (!p.isMultipleBlocks()) {
                 try {
-                    Object value = GXCommon
-                            .getData(server.getTransaction().getData(), reply);
+                    Object value = GXCommon.getData(settings,
+                            server.getTransaction().getData(), reply);
                     if (value instanceof byte[]) {
                         DataType dt = server.getTransaction().getTargets()[0]
                                 .getTarget().getDataType(
@@ -722,7 +720,7 @@ final class GXDLMSLNCommandHandler {
                 if (selection != 0) {
                     selector = data.getUInt8();
                     GXDataInfo info = new GXDataInfo();
-                    parameters = GXCommon.getData(data, info);
+                    parameters = GXCommon.getData(settings, data, info);
                 }
                 if (xml != null) {
                     xml.appendStartTag(
@@ -781,7 +779,7 @@ final class GXDLMSLNCommandHandler {
                     xml.appendStartTag(Command.WRITE_REQUEST,
                             SingleReadResponse.DATA);
                 }
-                Object value = GXCommon.getData(data, di);
+                Object value = GXCommon.getData(settings, data, di);
                 if (!di.isComplete()) {
                     value = GXCommon.toHex(data.getData(), false,
                             data.position(), data.size() - data.position());
@@ -838,8 +836,7 @@ final class GXDLMSLNCommandHandler {
             if (type == ActionRequestType.NORMAL) {
                 xml.appendStartTag(Command.METHOD_REQUEST,
                         ActionRequestType.NORMAL);
-                xml.appendLine(TranslatorTags.INVOKE_ID, "Value",
-                        xml.integerToHex(invokeId, 2));
+                xml.appendInvokeId(invokeId);
                 appendMethodDescriptor(xml, ci, ln, id);
                 if (selection != 0) {
                     // MethodInvocationParameters
@@ -847,7 +844,7 @@ final class GXDLMSLNCommandHandler {
                             TranslatorTags.METHOD_INVOCATION_PARAMETERS);
                     GXDataInfo di = new GXDataInfo();
                     di.setXml(xml);
-                    GXCommon.getData(data, di);
+                    GXCommon.getData(settings, data, di);
                     xml.appendEndTag(
                             TranslatorTags.METHOD_INVOCATION_PARAMETERS);
                 }
@@ -859,7 +856,7 @@ final class GXDLMSLNCommandHandler {
         }
         if (selection != 0) {
             GXDataInfo info = new GXDataInfo();
-            parameters = GXCommon.getData(data, info);
+            parameters = GXCommon.getData(settings, data, info);
         }
         GXDLMSObject obj =
                 settings.getObjects().findByLN(ot, GXCommon.toLogicalName(ln));
@@ -902,7 +899,7 @@ final class GXDLMSLNCommandHandler {
                     if (e.isByteArray()) {
                         bb.set(actionReply);
                     } else {
-                        GXCommon.setData(bb,
+                        GXCommon.setData(settings, bb,
                                 GXDLMSConverter.getDLMSDataType(actionReply),
                                 actionReply);
                     }
@@ -979,7 +976,7 @@ final class GXDLMSLNCommandHandler {
                 }
                 GXDataInfo info = new GXDataInfo();
                 info.setType(dt);
-                GXCommon.getData(new GXByteBuffer(tmp), info);
+                GXCommon.getData(settings, new GXByteBuffer(tmp), info);
             }
         }
         // Get object count.
@@ -1034,7 +1031,7 @@ final class GXDLMSLNCommandHandler {
                 xml.appendStartTag(Command.WRITE_REQUEST,
                         SingleReadResponse.DATA);
             }
-            Object value = GXCommon.getData(data, di);
+            Object value = GXCommon.getData(settings, data, di);
             if (!di.isComplete()) {
                 value = GXCommon.toHex(data.getData(), false, data.position(),
                         data.size() - data.position());
@@ -1093,7 +1090,7 @@ final class GXDLMSLNCommandHandler {
         }
         GXDataInfo di = new GXDataInfo();
         di.setXml(reply.getXml());
-        Object value = GXCommon.getData(reply.getData(), di);
+        Object value = GXCommon.getData(settings, reply.getData(), di);
 
         if (reply.getXml() != null) {
             reply.getXml().appendEndTag(TranslatorTags.ATTRIBUTE_VALUE);

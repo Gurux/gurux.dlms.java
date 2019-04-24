@@ -26,7 +26,7 @@
 // MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. 
 // See the GNU General Public License for more details.
 //
-// More information of Gurux products: http://www.gurux.org
+// More information of Gurux products: https://www.gurux.org
 //
 // This code is licensed under the GNU General Public License v2. 
 // Full text may be retrieved at http://www.gnu.org/licenses/gpl-2.0.txt
@@ -38,28 +38,28 @@ import gurux.dlms.objects.enums.CreditCollectionConfiguration;
 
 /**
  * Online help:<br>
- * http://www.gurux.fi/Gurux.DLMS.Objects.GXDLMSAccount
+ * https://www.gurux.fi/Gurux.DLMS.Objects.GXDLMSAccount
  */
 public class GXCreditChargeConfiguration {
 
     /**
      * Credit reference.<br>
      * Online help:<br>
-     * http://www.gurux.fi/Gurux.DLMS.Objects.GXDLMSAccount
+     * https://www.gurux.fi/Gurux.DLMS.Objects.GXDLMSAccount
      */
     private String creditReference;
 
     /**
      * Charge reference.<br>
      * Online help:<br>
-     * http://www.gurux.fi/Gurux.DLMS.Objects.GXDLMSAccount
+     * https://www.gurux.fi/Gurux.DLMS.Objects.GXDLMSAccount
      */
     private String chargeReference;
 
     /**
      * Collection configuration.<br>
      * Online help:<br>
-     * http://www.gurux.fi/Gurux.DLMS.Objects.GXDLMSAccount
+     * https://www.gurux.fi/Gurux.DLMS.Objects.GXDLMSAccount
      */
     private CreditCollectionConfiguration collectionConfiguration;
 
@@ -72,7 +72,7 @@ public class GXCreditChargeConfiguration {
 
     /**
      * Online help:<br>
-     * http://www.gurux.fi/Gurux.DLMS.Objects.GXDLMSAccount
+     * https://www.gurux.fi/Gurux.DLMS.Objects.GXDLMSAccount
      * 
      * @return Credit reference.
      */
@@ -82,7 +82,7 @@ public class GXCreditChargeConfiguration {
 
     /**
      * Online help:<br>
-     * http://www.gurux.fi/Gurux.DLMS.Objects.GXDLMSAccount
+     * https://www.gurux.fi/Gurux.DLMS.Objects.GXDLMSAccount
      * 
      * @param value
      *            Credit reference.
@@ -93,7 +93,7 @@ public class GXCreditChargeConfiguration {
 
     /**
      * Online help:<br>
-     * http://www.gurux.fi/Gurux.DLMS.Objects.GXDLMSAccount
+     * https://www.gurux.fi/Gurux.DLMS.Objects.GXDLMSAccount
      * 
      * @return Charge reference.
      */
@@ -103,7 +103,7 @@ public class GXCreditChargeConfiguration {
 
     /**
      * Online help:<br>
-     * http://www.gurux.fi/Gurux.DLMS.Objects.GXDLMSAccount
+     * https://www.gurux.fi/Gurux.DLMS.Objects.GXDLMSAccount
      * 
      * @param value
      *            Charge reference.
@@ -114,7 +114,7 @@ public class GXCreditChargeConfiguration {
 
     /**
      * Online help:<br>
-     * http://www.gurux.fi/Gurux.DLMS.Objects.GXDLMSAccount
+     * https://www.gurux.fi/Gurux.DLMS.Objects.GXDLMSAccount
      * 
      * @return Collection configuration.
      */
@@ -124,7 +124,7 @@ public class GXCreditChargeConfiguration {
 
     /**
      * Online help:<br>
-     * http://www.gurux.fi/Gurux.DLMS.Objects.GXDLMSAccount
+     * https://www.gurux.fi/Gurux.DLMS.Objects.GXDLMSAccount
      * 
      * @param value
      *            Collection configuration.

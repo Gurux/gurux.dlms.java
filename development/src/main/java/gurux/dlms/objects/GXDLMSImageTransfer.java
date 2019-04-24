@@ -26,7 +26,7 @@
 // MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. 
 // See the GNU General Public License for more details.
 //
-// More information of Gurux products: http://www.gurux.org
+// More information of Gurux products: https://www.gurux.org
 //
 // This code is licensed under the GNU General Public License v2. 
 // Full text may be retrieved at http://www.gnu.org/licenses/gpl-2.0.txt
@@ -53,7 +53,7 @@ import gurux.dlms.objects.enums.ImageTransferStatus;
 
 /**
  * Online help: <br>
- * http://www.gurux.fi/Gurux.DLMS.Objects.GXDLMSImageTransfer
+ * https://www.gurux.fi/Gurux.DLMS.Objects.GXDLMSImageTransfer
  */
 public class GXDLMSImageTransfer extends GXDLMSObject implements IGXDLMSBase {
     private long imageSize;
@@ -373,10 +373,11 @@ public class GXDLMSImageTransfer extends GXDLMSObject implements IGXDLMSBase {
                 data.setUInt8((byte) DataType.STRUCTURE.getValue());
                 // Item count.
                 data.setUInt8((byte) 3);
-                GXCommon.setData(data, DataType.UINT32, new Long(it.getSize()));
-                GXCommon.setData(data, DataType.OCTET_STRING,
+                GXCommon.setData(settings, data, DataType.UINT32,
+                        new Long(it.getSize()));
+                GXCommon.setData(settings, data, DataType.OCTET_STRING,
                         it.getIdentification());
-                GXCommon.setData(data, DataType.OCTET_STRING,
+                GXCommon.setData(settings, data, DataType.OCTET_STRING,
                         it.getSignature());
             }
             return data.array();
@@ -452,9 +453,9 @@ public class GXDLMSImageTransfer extends GXDLMSObject implements IGXDLMSBase {
         GXByteBuffer data = new GXByteBuffer();
         data.setUInt8(DataType.STRUCTURE.getValue());
         data.setUInt8(2);
-        GXCommon.setData(data, DataType.OCTET_STRING,
+        GXCommon.setData(null, data, DataType.OCTET_STRING,
                 GXCommon.getBytes(imageIdentifier));
-        GXCommon.setData(data, DataType.UINT32, new Long(forImageSize));
+        GXCommon.setData(null, data, DataType.UINT32, new Long(forImageSize));
         return client.method(this, 1, data.array(), DataType.ARRAY);
     }
 
@@ -472,7 +473,7 @@ public class GXDLMSImageTransfer extends GXDLMSObject implements IGXDLMSBase {
             GXByteBuffer data = new GXByteBuffer();
             data.setUInt8(DataType.STRUCTURE.getValue());
             data.setUInt8(2);
-            GXCommon.setData(data, DataType.UINT32, new Integer(pos));
+            GXCommon.setData(null, data, DataType.UINT32, new Integer(pos));
             byte[] tmp;
             int bytes = (int) (imageBlockValue.length
                     - ((pos + 1) * imageBlockSize));
@@ -487,7 +488,7 @@ public class GXDLMSImageTransfer extends GXDLMSObject implements IGXDLMSBase {
                 System.arraycopy(imageBlockValue, (int) (pos * imageBlockSize),
                         tmp, 0, (int) imageBlockSize);
             }
-            GXCommon.setData(data, DataType.OCTET_STRING, tmp);
+            GXCommon.setData(null, data, DataType.OCTET_STRING, tmp);
             packets.addAll(Arrays.asList(
                     client.method(this, 2, data.array(), DataType.ARRAY)));
         }

@@ -26,7 +26,7 @@
 // MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. 
 // See the GNU General Public License for more details.
 //
-// More information of Gurux products: http://www.gurux.org
+// More information of Gurux products: https://www.gurux.org
 //
 // This code is licensed under the GNU General Public License v2. 
 // Full text may be retrieved at http://www.gnu.org/licenses/gpl-2.0.txt
@@ -76,7 +76,7 @@ import gurux.dlms.secure.GXDLMSSecureClient;
 
 /**
  * Online help: <br>
- * http://www.gurux.fi/Gurux.DLMS.Objects.GXDLMSSecuritySetup
+ * https://www.gurux.fi/Gurux.DLMS.Objects.GXDLMSSecuritySetup
  */
 public class GXDLMSSecuritySetup extends GXDLMSObject implements IGXDLMSBase {
     /**
@@ -291,9 +291,9 @@ public class GXDLMSSecuritySetup extends GXDLMSObject implements IGXDLMSBase {
         for (GXSimpleEntry<GlobalKeyType, byte[]> it : list) {
             bb.setUInt8(DataType.STRUCTURE.getValue());
             bb.setUInt8(2);
-            GXCommon.setData(bb, DataType.ENUM, it.getKey().ordinal());
+            GXCommon.setData(null, bb, DataType.ENUM, it.getKey().ordinal());
             tmp = GXDLMSSecureClient.encrypt(kek, it.getValue());
-            GXCommon.setData(bb, DataType.OCTET_STRING, tmp);
+            GXCommon.setData(null, bb, DataType.OCTET_STRING, tmp);
         }
         return client.method(this, 2, bb.array(), DataType.ARRAY);
     }
@@ -319,8 +319,8 @@ public class GXDLMSSecuritySetup extends GXDLMSObject implements IGXDLMSBase {
         for (GXSimpleEntry<GlobalKeyType, byte[]> it : list) {
             bb.setUInt8(DataType.STRUCTURE.getValue());
             bb.setUInt8(2);
-            GXCommon.setData(bb, DataType.ENUM, it.getKey().ordinal());
-            GXCommon.setData(bb, DataType.OCTET_STRING, it.getValue());
+            GXCommon.setData(null, bb, DataType.ENUM, it.getKey().ordinal());
+            GXCommon.setData(null, bb, DataType.OCTET_STRING, it.getValue());
         }
         return client.method(this, 3, bb.array(), DataType.ARRAY);
     }
@@ -457,7 +457,7 @@ public class GXDLMSSecuritySetup extends GXDLMSObject implements IGXDLMSBase {
         bb.setUInt8(DataType.ENUM.getValue());
         bb.setUInt8(type.getValue());
         // system_title
-        GXCommon.setData(bb, DataType.OCTET_STRING, systemTitle);
+        GXCommon.setData(null, bb, DataType.OCTET_STRING, systemTitle);
         return client.method(this, 7, bb.array(), DataType.STRUCTURE);
     }
 
@@ -485,9 +485,10 @@ public class GXDLMSSecuritySetup extends GXDLMSObject implements IGXDLMSBase {
         bb.setUInt8(DataType.STRUCTURE.getValue());
         bb.setUInt8(2);
         // serialNumber
-        GXCommon.setData(bb, DataType.OCTET_STRING, serialNumber.getBytes());
+        GXCommon.setData(null, bb, DataType.OCTET_STRING,
+                serialNumber.getBytes());
         // issuer
-        GXCommon.setData(bb, DataType.OCTET_STRING, issuer.getBytes());
+        GXCommon.setData(null, bb, DataType.OCTET_STRING, issuer.getBytes());
         return client.method(this, 7, bb.array(), DataType.STRUCTURE);
     }
 
@@ -523,7 +524,7 @@ public class GXDLMSSecuritySetup extends GXDLMSObject implements IGXDLMSBase {
         bb.setUInt8(DataType.ENUM.getValue());
         bb.setUInt8(type.getValue());
         // system_title
-        GXCommon.setData(bb, DataType.OCTET_STRING, systemTitle);
+        GXCommon.setData(null, bb, DataType.OCTET_STRING, systemTitle);
         return client.method(this, 8, bb.array(), DataType.STRUCTURE);
     }
 
@@ -551,9 +552,10 @@ public class GXDLMSSecuritySetup extends GXDLMSObject implements IGXDLMSBase {
         bb.setUInt8(DataType.STRUCTURE.getValue());
         bb.setUInt8(2);
         // serialNumber
-        GXCommon.setData(bb, DataType.OCTET_STRING, serialNumber.getBytes());
+        GXCommon.setData(null, bb, DataType.OCTET_STRING,
+                serialNumber.getBytes());
         // issuer
-        GXCommon.setData(bb, DataType.OCTET_STRING, issuer.getBytes());
+        GXCommon.setData(null, bb, DataType.OCTET_STRING, issuer.getBytes());
         return client.method(this, 8, bb.array(), DataType.STRUCTURE);
     }
 

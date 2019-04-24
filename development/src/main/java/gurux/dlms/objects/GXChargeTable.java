@@ -26,7 +26,7 @@
 // MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. 
 // See the GNU General Public License for more details.
 //
-// More information of Gurux products: http://www.gurux.org
+// More information of Gurux products: https://www.gurux.org
 //
 // This code is licensed under the GNU General Public License v2. 
 // Full text may be retrieved at http://www.gnu.org/licenses/gpl-2.0.txt
@@ -36,26 +36,26 @@ package gurux.dlms.objects;
 
 /**
  * Online help:<br>
- * http://www.gurux.fi/Gurux.DLMS.Objects.GXDLMSCharge
+ * https://www.gurux.fi/Gurux.DLMS.Objects.GXDLMSCharge
  */
 public class GXChargeTable {
     /**
      * Index.<br>
      * Online help:<br>
-     * http://www.gurux.fi/Gurux.DLMS.Objects.GXDLMSCharge
+     * https://www.gurux.fi/Gurux.DLMS.Objects.GXDLMSCharge
      */
     private String index;
 
     /**
      * Charge per unit.<br>
      * Online help:<br>
-     * http://www.gurux.fi/Gurux.DLMS.Objects.GXDLMSCharge
+     * https://www.gurux.fi/Gurux.DLMS.Objects.GXDLMSCharge
      */
     private short chargePerUnit;
 
     /**
      * Online help:<br>
-     * http://www.gurux.fi/Gurux.DLMS.Objects.GXDLMSCharge
+     * https://www.gurux.fi/Gurux.DLMS.Objects.GXDLMSCharge
      * 
      * @return Index.
      */
@@ -65,7 +65,7 @@ public class GXChargeTable {
 
     /**
      * Online help:<br>
-     * http://www.gurux.fi/Gurux.DLMS.Objects.GXDLMSCharge
+     * https://www.gurux.fi/Gurux.DLMS.Objects.GXDLMSCharge
      * 
      * @param value
      *            Index.
@@ -76,7 +76,7 @@ public class GXChargeTable {
 
     /**
      * Online help:<br>
-     * http://www.gurux.fi/Gurux.DLMS.Objects.GXDLMSCharge
+     * https://www.gurux.fi/Gurux.DLMS.Objects.GXDLMSCharge
      * 
      * @return Charge per unit.
      */
@@ -86,7 +86,7 @@ public class GXChargeTable {
 
     /**
      * Online help:<br>
-     * http://www.gurux.fi/Gurux.DLMS.Objects.GXDLMSCharge
+     * https://www.gurux.fi/Gurux.DLMS.Objects.GXDLMSCharge
      * 
      * @param value
      *            Charge per unit.

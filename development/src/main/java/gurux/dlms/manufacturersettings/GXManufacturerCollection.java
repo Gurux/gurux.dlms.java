@@ -26,7 +26,7 @@
 // MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. 
 // See the GNU General Public License for more details.
 //
-// More information of Gurux products: http://www.gurux.org
+// More information of Gurux products: https://www.gurux.org
 //
 // This code is licensed under the GNU General Public License v2. 
 // Full text may be retrieved at http://www.gnu.org/licenses/gpl-2.0.txt
@@ -129,7 +129,7 @@ public class GXManufacturerCollection
                     }
                 }
             }
-            URL gurux = new URL("http://www.gurux.fi/obis/files.xml");
+            URL gurux = new URL("https://www.gurux.fi/obis/files.xml");
             URLConnection gx = gurux.openConnection();
             InputStream io = gx.getInputStream();
             xmlStreamReader = inputFactory.createXMLStreamReader(io);
@@ -182,7 +182,7 @@ public class GXManufacturerCollection
         InputStreamReader r = null;
         try {
             String path = directory + File.separator + "files.xml";
-            URL gurux = new URL("http://www.gurux.fi/obis/files.xml");
+            URL gurux = new URL("https://www.gurux.fi/obis/files.xml");
             URLConnection gx = gurux.openConnection();
             io = gx.getInputStream();
             String target, data, line;
@@ -214,7 +214,7 @@ public class GXManufacturerCollection
                     data = xmlStreamReader.getText();
                 } else if (event == XMLStreamConstants.END_ELEMENT) {
                     if (target.equalsIgnoreCase("file")) {
-                        URL f = new URL("http://www.gurux.org/obis/" + data);
+                        URL f = new URL("https://www.gurux.org/obis/" + data);
                         URLConnection fc = f.openConnection();
                         BufferedReader in = new BufferedReader(
                                 new InputStreamReader(fc.getInputStream()));

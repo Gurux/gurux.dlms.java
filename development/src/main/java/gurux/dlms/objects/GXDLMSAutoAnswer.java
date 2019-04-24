@@ -26,7 +26,7 @@
 // MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. 
 // See the GNU General Public License for more details.
 //
-// More information of Gurux products: http://www.gurux.org
+// More information of Gurux products: https://www.gurux.org
 //
 // This code is licensed under the GNU General Public License v2. 
 // Full text may be retrieved at http://www.gnu.org/licenses/gpl-2.0.txt
@@ -56,7 +56,7 @@ import gurux.dlms.objects.enums.AutoAnswerStatus;
 
 /**
  * Online help: <br>
- * http://www.gurux.fi/Gurux.DLMS.Objects.GXDLMSAutoAnswer
+ * https://www.gurux.fi/Gurux.DLMS.Objects.GXDLMSAutoAnswer
  */
 public class GXDLMSAutoAnswer extends GXDLMSObject implements IGXDLMSBase {
     private AutoAnswerMode mode;
@@ -261,9 +261,10 @@ public class GXDLMSAutoAnswer extends GXDLMSObject implements IGXDLMSBase {
                     // Count
                     buff.setUInt8(2);
                     // Start time
-                    GXCommon.setData(buff, DataType.OCTET_STRING, it.getKey());
+                    GXCommon.setData(null, buff, DataType.OCTET_STRING,
+                            it.getKey());
                     // End time
-                    GXCommon.setData(buff, DataType.OCTET_STRING,
+                    GXCommon.setData(null, buff, DataType.OCTET_STRING,
                             it.getValue());
                 }
             }
@@ -279,9 +280,9 @@ public class GXDLMSAutoAnswer extends GXDLMSObject implements IGXDLMSBase {
             GXByteBuffer buff = new GXByteBuffer();
             buff.setUInt8(DataType.STRUCTURE.getValue());
             GXCommon.setObjectCount(2, buff);
-            GXCommon.setData(buff, DataType.UINT8,
+            GXCommon.setData(null, buff, DataType.UINT8,
                     new Integer(numberOfRingsInListeningWindow));
-            GXCommon.setData(buff, DataType.UINT8,
+            GXCommon.setData(null, buff, DataType.UINT8,
                     new Integer(numberOfRingsOutListeningWindow));
             return buff.array();
         }

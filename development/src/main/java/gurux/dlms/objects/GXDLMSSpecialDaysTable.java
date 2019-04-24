@@ -26,7 +26,7 @@
 // MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. 
 // See the GNU General Public License for more details.
 //
-// More information of Gurux products: http://www.gurux.org
+// More information of Gurux products: https://www.gurux.org
 //
 // This code is licensed under the GNU General Public License v2. 
 // Full text may be retrieved at http://www.gnu.org/licenses/gpl-2.0.txt
@@ -53,7 +53,7 @@ import gurux.dlms.internal.GXCommon;
 
 /**
  * Online help: <br>
- * http://www.gurux.fi/Gurux.DLMS.Objects.GXDLMSSpecialDaysTable
+ * https://www.gurux.fi/Gurux.DLMS.Objects.GXDLMSSpecialDaysTable
  */
 public class GXDLMSSpecialDaysTable extends GXDLMSObject
         implements IGXDLMSBase {
@@ -138,9 +138,9 @@ public class GXDLMSSpecialDaysTable extends GXDLMSObject
         for (GXDLMSSpecialDay entry : entries) {
             bb.setUInt8(DataType.STRUCTURE.getValue());
             bb.setUInt8(3);
-            GXCommon.setData(bb, DataType.UINT16, entry.getIndex());
-            GXCommon.setData(bb, DataType.OCTET_STRING, entry.getDate());
-            GXCommon.setData(bb, DataType.UINT8, entry.getDayId());
+            GXCommon.setData(null, bb, DataType.UINT16, entry.getIndex());
+            GXCommon.setData(null, bb, DataType.OCTET_STRING, entry.getDate());
+            GXCommon.setData(null, bb, DataType.UINT8, entry.getDayId());
         }
         return client.method(this, 1, bb.array(), DataType.ARRAY);
     }
@@ -229,10 +229,11 @@ public class GXDLMSSpecialDaysTable extends GXDLMSObject
                 for (GXDLMSSpecialDay it : entries) {
                     data.setUInt8(DataType.STRUCTURE.getValue());
                     data.setUInt8(3); // Count
-                    GXCommon.setData(data, DataType.UINT16,
+                    GXCommon.setData(null, data, DataType.UINT16,
                             new Integer(it.getIndex()));
-                    GXCommon.setData(data, DataType.OCTET_STRING, it.getDate());
-                    GXCommon.setData(data, DataType.UINT8,
+                    GXCommon.setData(null, data, DataType.OCTET_STRING,
+                            it.getDate());
+                    GXCommon.setData(null, data, DataType.UINT8,
                             new Integer(it.getDayId()));
                 }
             }

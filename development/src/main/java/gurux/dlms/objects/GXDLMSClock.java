@@ -26,7 +26,7 @@
 // MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. 
 // See the GNU General Public License for more details.
 //
-// More information of Gurux products: http://www.gurux.org
+// More information of Gurux products: https://www.gurux.org
 //
 // This code is licensed under the GNU General Public License v2. 
 // Full text may be retrieved at http://www.gnu.org/licenses/gpl-2.0.txt
@@ -57,7 +57,7 @@ import gurux.dlms.objects.enums.ClockBase;
 
 /**
  * Online help: <br>
- * http://www.gurux.fi/Gurux.DLMS.Objects.GXDLMSClock
+ * https://www.gurux.fi/Gurux.DLMS.Objects.GXDLMSClock
  */
 public class GXDLMSClock extends GXDLMSObject implements IGXDLMSBase {
     private ClockBase clockBase;
@@ -400,9 +400,11 @@ public class GXDLMSClock extends GXDLMSObject implements IGXDLMSBase {
         GXByteBuffer buff = new GXByteBuffer(44);
         buff.setUInt8(DataType.STRUCTURE.getValue());
         buff.setUInt8(3);
-        GXCommon.setData(buff, DataType.OCTET_STRING, presetTime);
-        GXCommon.setData(buff, DataType.OCTET_STRING, validityIntervalStart);
-        GXCommon.setData(buff, DataType.OCTET_STRING, validityIntervalEnd);
+        GXCommon.setData(null, buff, DataType.OCTET_STRING, presetTime);
+        GXCommon.setData(null, buff, DataType.OCTET_STRING,
+                validityIntervalStart);
+        GXCommon.setData(null, buff, DataType.OCTET_STRING,
+                validityIntervalEnd);
         return client.method(this, 5, buff.array(), DataType.ARRAY);
     }
 

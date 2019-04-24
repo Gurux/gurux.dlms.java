@@ -26,7 +26,7 @@
 // MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. 
 // See the GNU General Public License for more details.
 //
-// More information of Gurux products: http://www.gurux.org
+// More information of Gurux products: https://www.gurux.org
 //
 // This code is licensed under the GNU General Public License v2. 
 // Full text may be retrieved at http://www.gnu.org/licenses/gpl-2.0.txt
@@ -36,27 +36,27 @@ package gurux.dlms.objects;
 
 /**
  * Online help:<br>
- * http://www.gurux.fi/Gurux.DLMS.Objects.GXDLMSCharge
+ * https://www.gurux.fi/Gurux.DLMS.Objects.GXDLMSCharge
  */
 public class GXUnitCharge {
     /**
      * Charge per unit scaling. <br>
      * Online help:<br>
-     * http://www.gurux.fi/Gurux.DLMS.Objects.GXDLMSCharge
+     * https://www.gurux.fi/Gurux.DLMS.Objects.GXDLMSCharge
      */
     private GXChargePerUnitScaling chargePerUnitScaling;
 
     /**
      * Commodity.<br>
      * Online help:<br>
-     * http://www.gurux.fi/Gurux.DLMS.Objects.GXDLMSCharge
+     * https://www.gurux.fi/Gurux.DLMS.Objects.GXDLMSCharge
      */
     private GXCommodity commodity;
 
     /**
      * Charge tables.<br>
      * Online help:<br>
-     * http://www.gurux.fi/Gurux.DLMS.Objects.GXDLMSCharge
+     * https://www.gurux.fi/Gurux.DLMS.Objects.GXDLMSCharge
      */
     private GXChargeTable[] chargeTables;
 
@@ -70,7 +70,7 @@ public class GXUnitCharge {
 
     /**
      * Online help:<br>
-     * http://www.gurux.fi/Gurux.DLMS.Objects.GXDLMSCharge
+     * https://www.gurux.fi/Gurux.DLMS.Objects.GXDLMSCharge
      * 
      * @return Charge per unit scaling.
      */
@@ -80,7 +80,7 @@ public class GXUnitCharge {
 
     /**
      * Online help:<br>
-     * http://www.gurux.fi/Gurux.DLMS.Objects.GXDLMSCharge
+     * https://www.gurux.fi/Gurux.DLMS.Objects.GXDLMSCharge
      * 
      * @param value
      *            Charge per unit scaling.
@@ -92,7 +92,7 @@ public class GXUnitCharge {
 
     /**
      * Online help:<br>
-     * http://www.gurux.fi/Gurux.DLMS.Objects.GXDLMSCharge
+     * https://www.gurux.fi/Gurux.DLMS.Objects.GXDLMSCharge
      * 
      * @return Commodity
      */
@@ -102,7 +102,7 @@ public class GXUnitCharge {
 
     /**
      * Online help:<br>
-     * http://www.gurux.fi/Gurux.DLMS.Objects.GXDLMSCharge
+     * https://www.gurux.fi/Gurux.DLMS.Objects.GXDLMSCharge
      * 
      * @param value
      *            Commodity
@@ -113,7 +113,7 @@ public class GXUnitCharge {
 
     /**
      * Online help:<br>
-     * http://www.gurux.fi/Gurux.DLMS.Objects.GXDLMSCharge
+     * https://www.gurux.fi/Gurux.DLMS.Objects.GXDLMSCharge
      * 
      * @return Charge tables.
      */
@@ -123,7 +123,7 @@ public class GXUnitCharge {
 
     /**
      * Online help:<br>
-     * http://www.gurux.fi/Gurux.DLMS.Objects.GXDLMSCharge
+     * https://www.gurux.fi/Gurux.DLMS.Objects.GXDLMSCharge
      * 
      * @param value
      *            Charge tables.

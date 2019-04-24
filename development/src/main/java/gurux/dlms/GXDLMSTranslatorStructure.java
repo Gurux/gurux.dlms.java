@@ -26,7 +26,7 @@
 // MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. 
 // See the GNU General Public License for more details.
 //
-// More information of Gurux products: http://www.gurux.org
+// More information of Gurux products: https://www.gurux.org
 //
 // This code is licensed under the GNU General Public License v2. 
 // Full text may be retrieved at http://www.gnu.org/licenses/gpl-2.0.txt
@@ -151,6 +151,25 @@ public class GXDLMSTranslatorStructure {
             throw new IllegalArgumentException("Tag");
         }
         appendLine(tmp, name, value);
+    }
+
+    public final void appendInvokeId(final int value) {
+        if (comments) {
+            StringBuilder sb = new StringBuilder();
+            if ((value & 0x80) != 0) {
+                sb.append("Priority: HIGH ");
+            } else {
+                sb.append("Priority: NORMAL ");
+            }
+            if ((value & 0x40) != 0) {
+                sb.append("ServiceClass: CONFIRMED ");
+            } else {
+                sb.append("ServiceClass: UN_CONFIRMED ");
+            }
+            sb.append("invokeID: " + String.valueOf(value & 0xF));
+            appendComment(sb.toString());
+        }
+        appendLine(TranslatorTags.INVOKE_ID, "Value", integerToHex(value, 2));
     }
 
     public final void appendLine(final String tag, final String name,

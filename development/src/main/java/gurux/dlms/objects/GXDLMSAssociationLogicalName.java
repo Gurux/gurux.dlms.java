@@ -26,7 +26,7 @@
 // MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. 
 // See the GNU General Public License for more details.
 //
-// More information of Gurux products: http://www.gurux.org
+// More information of Gurux products: https://www.gurux.org
 //
 // This code is licensed under the GNU General Public License v2. 
 // Full text may be retrieved at http://www.gnu.org/licenses/gpl-2.0.txt
@@ -65,7 +65,7 @@ import gurux.dlms.secure.GXSecure;
 
 /**
  * Online help: <br>
- * http://www.gurux.fi/Gurux.DLMS.Objects.GXDLMSAssociationLogicalName
+ * https://www.gurux.fi/Gurux.DLMS.Objects.GXDLMSAssociationLogicalName
  */
 public class GXDLMSAssociationLogicalName extends GXDLMSObject
         implements IGXDLMSBase {
@@ -241,8 +241,8 @@ public class GXDLMSAssociationLogicalName extends GXDLMSObject
         data.setUInt8(DataType.STRUCTURE.getValue());
         // Add structure size.
         data.setUInt8(2);
-        GXCommon.setData(data, DataType.UINT8, id);
-        GXCommon.setData(data, DataType.STRING, name);
+        GXCommon.setData(null, data, DataType.UINT8, id);
+        GXCommon.setData(null, data, DataType.STRING, name);
         return client.method(this, 5, data.array(), DataType.STRUCTURE);
     }
 
@@ -263,8 +263,8 @@ public class GXDLMSAssociationLogicalName extends GXDLMSObject
         data.setUInt8(DataType.STRUCTURE.getValue());
         // Add structure size.
         data.setUInt8(2);
-        GXCommon.setData(data, DataType.UINT8, id);
-        GXCommon.setData(data, DataType.STRING, name);
+        GXCommon.setData(null, data, DataType.UINT8, id);
+        GXCommon.setData(null, data, DataType.STRING, name);
         return client.method(this, 6, data.array(), DataType.STRUCTURE);
     }
 
@@ -475,14 +475,16 @@ public class GXDLMSAssociationLogicalName extends GXDLMSObject
                     // Count
                     data.setUInt8(4);
                     // ClassID
-                    GXCommon.setData(data, DataType.UINT16,
+                    GXCommon.setData(settings, data, DataType.UINT16,
                             it.getObjectType().getValue());
                     // Version
-                    GXCommon.setData(data, DataType.UINT8, it.getVersion());
+                    GXCommon.setData(settings, data, DataType.UINT8,
+                            it.getVersion());
                     // LN
-                    GXCommon.setData(data, DataType.OCTET_STRING,
+                    GXCommon.setData(settings, data, DataType.OCTET_STRING,
                             GXCommon.logicalNameToBytes(it.getLogicalName()));
-                    getAccessRights(it, e.getServer(), data); // Access rights.
+                    getAccessRights(settings, it, e.getServer(), data); // Access
+                                                                        // rights.
                     settings.setIndex(settings.getIndex() + 1);
                     if (settings.isServer()) {
                         // If PDU is full.
@@ -502,9 +504,9 @@ public class GXDLMSAssociationLogicalName extends GXDLMSObject
 
     }
 
-    private void getAccessRights(final GXDLMSObject item,
-            final GXDLMSServerBase server, final GXByteBuffer data)
-            throws Exception {
+    private void getAccessRights(final GXDLMSSettings settings,
+            final GXDLMSObject item, final GXDLMSServerBase server,
+            final GXByteBuffer data) throws Exception {
         data.setUInt8(DataType.STRUCTURE.getValue());
         data.setUInt8(2);
         if (server == null) {
@@ -523,9 +525,9 @@ public class GXDLMSAssociationLogicalName extends GXDLMSObject
                 // attribute_access_item
                 data.setUInt8(DataType.STRUCTURE.getValue());
                 data.setUInt8(3);
-                GXCommon.setData(data, DataType.INT8, pos + 1);
-                GXCommon.setData(data, DataType.ENUM, m.getValue());
-                GXCommon.setData(data, DataType.NONE, null);
+                GXCommon.setData(settings, data, DataType.INT8, pos + 1);
+                GXCommon.setData(settings, data, DataType.ENUM, m.getValue());
+                GXCommon.setData(settings, data, DataType.NONE, null);
             }
             data.setUInt8(DataType.ARRAY.getValue());
             cnt = item.getMethodCount();
@@ -535,13 +537,15 @@ public class GXDLMSAssociationLogicalName extends GXDLMSObject
                 // attribute_access_item
                 data.setUInt8(DataType.STRUCTURE.getValue());
                 data.setUInt8(2);
-                GXCommon.setData(data, DataType.INT8, pos + 1);
+                GXCommon.setData(settings, data, DataType.INT8, pos + 1);
                 MethodAccessMode m = server.notifyGetMethodAccess(e);
                 // If version is 0.
                 if (getVersion() == 0) {
-                    GXCommon.setData(data, DataType.BOOLEAN, m.getValue() != 0);
+                    GXCommon.setData(settings, data, DataType.BOOLEAN,
+                            m.getValue() != 0);
                 } else {
-                    GXCommon.setData(data, DataType.ENUM, m.getValue());
+                    GXCommon.setData(settings, data, DataType.ENUM,
+                            m.getValue());
                 }
             }
         }
@@ -597,8 +601,9 @@ public class GXDLMSAssociationLogicalName extends GXDLMSObject
                 settings.setIndex(settings.getIndex() + 1);
                 data.setUInt8(DataType.STRUCTURE.getValue());
                 data.setUInt8(2); // Count
-                GXCommon.setData(data, DataType.UINT8, it.getKey()); // Id
-                GXCommon.setData(data, DataType.STRING, it.getValue()); // Name
+                GXCommon.setData(settings, data, DataType.UINT8, it.getKey()); // Id
+                GXCommon.setData(settings, data, DataType.STRING,
+                        it.getValue()); // Name
             }
         }
         return data;
@@ -673,19 +678,19 @@ public class GXDLMSAssociationLogicalName extends GXDLMSObject
             data.setUInt8(DataType.STRUCTURE.getValue());
             // Add count
             data.setUInt8(0x7);
-            GXCommon.setData(data, DataType.UINT8,
+            GXCommon.setData(settings, data, DataType.UINT8,
                     applicationContextName.getJointIsoCtt());
-            GXCommon.setData(data, DataType.UINT8,
+            GXCommon.setData(settings, data, DataType.UINT8,
                     applicationContextName.getCountry());
-            GXCommon.setData(data, DataType.UINT16,
+            GXCommon.setData(settings, data, DataType.UINT16,
                     applicationContextName.getCountryName());
-            GXCommon.setData(data, DataType.UINT8,
+            GXCommon.setData(settings, data, DataType.UINT8,
                     applicationContextName.getIdentifiedOrganization());
-            GXCommon.setData(data, DataType.UINT8,
+            GXCommon.setData(settings, data, DataType.UINT8,
                     applicationContextName.getDlmsUA());
-            GXCommon.setData(data, DataType.UINT8,
+            GXCommon.setData(settings, data, DataType.UINT8,
                     applicationContextName.getApplicationContext());
-            GXCommon.setData(data, DataType.UINT8,
+            GXCommon.setData(settings, data, DataType.UINT8,
                     applicationContextName.getContextId().getValue());
             return data.array();
         }
@@ -696,16 +701,17 @@ public class GXDLMSAssociationLogicalName extends GXDLMSObject
             GXByteBuffer bb = new GXByteBuffer();
             bb.setUInt32(
                     Conformance.toInteger(xDLMSContextInfo.getConformance()));
-            GXCommon.setData(data, DataType.BITSTRING, bb.subArray(1, 3));
-            GXCommon.setData(data, DataType.UINT16,
+            GXCommon.setData(settings, data, DataType.BITSTRING,
+                    bb.subArray(1, 3));
+            GXCommon.setData(settings, data, DataType.UINT16,
                     xDLMSContextInfo.getMaxReceivePduSize());
-            GXCommon.setData(data, DataType.UINT16,
+            GXCommon.setData(settings, data, DataType.UINT16,
                     xDLMSContextInfo.getMaxSendPduSize());
-            GXCommon.setData(data, DataType.UINT8,
+            GXCommon.setData(settings, data, DataType.UINT8,
                     xDLMSContextInfo.getDlmsVersionNumber());
-            GXCommon.setData(data, DataType.INT8,
+            GXCommon.setData(settings, data, DataType.INT8,
                     xDLMSContextInfo.getQualityOfService());
-            GXCommon.setData(data, DataType.OCTET_STRING,
+            GXCommon.setData(settings, data, DataType.OCTET_STRING,
                     xDLMSContextInfo.getCypheringInfo());
             return data.array();
         }
@@ -714,19 +720,20 @@ public class GXDLMSAssociationLogicalName extends GXDLMSObject
             data.setUInt8(DataType.STRUCTURE.getValue());
             // Add count
             data.setUInt8(0x7);
-            GXCommon.setData(data, DataType.UINT8,
+            GXCommon.setData(settings, data, DataType.UINT8,
                     authenticationMechanismName.getJointIsoCtt());
-            GXCommon.setData(data, DataType.UINT8,
+            GXCommon.setData(settings, data, DataType.UINT8,
                     authenticationMechanismName.getCountry());
-            GXCommon.setData(data, DataType.UINT16,
+            GXCommon.setData(settings, data, DataType.UINT16,
                     authenticationMechanismName.getCountryName());
-            GXCommon.setData(data, DataType.UINT8,
+            GXCommon.setData(settings, data, DataType.UINT8,
                     authenticationMechanismName.getIdentifiedOrganization());
-            GXCommon.setData(data, DataType.UINT8,
+            GXCommon.setData(settings, data, DataType.UINT8,
                     authenticationMechanismName.getDlmsUA());
-            GXCommon.setData(data, DataType.UINT8, authenticationMechanismName
-                    .getAuthenticationMechanismName());
-            GXCommon.setData(data, DataType.UINT8,
+            GXCommon.setData(settings, data, DataType.UINT8,
+                    authenticationMechanismName
+                            .getAuthenticationMechanismName());
+            GXCommon.setData(settings, data, DataType.UINT8,
                     authenticationMechanismName.getMechanismId().getValue());
             return data.array();
         }
@@ -748,11 +755,13 @@ public class GXDLMSAssociationLogicalName extends GXDLMSObject
             // Add structure size.
             data.setUInt8(2);
             if (currentUser == null) {
-                GXCommon.setData(data, DataType.UINT8, 0);
-                GXCommon.setData(data, DataType.STRING, null);
+                GXCommon.setData(settings, data, DataType.UINT8, 0);
+                GXCommon.setData(settings, data, DataType.STRING, null);
             } else {
-                GXCommon.setData(data, DataType.UINT8, currentUser.getKey());
-                GXCommon.setData(data, DataType.STRING, currentUser.getValue());
+                GXCommon.setData(settings, data, DataType.UINT8,
+                        currentUser.getKey());
+                GXCommon.setData(settings, data, DataType.STRING,
+                        currentUser.getValue());
             }
             return data.array();
         }

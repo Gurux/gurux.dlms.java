@@ -26,7 +26,7 @@
 // MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. 
 // See the GNU General Public License for more details.
 //
-// More information of Gurux products: http://www.gurux.org
+// More information of Gurux products: https://www.gurux.org
 //
 // This code is licensed under the GNU General Public License v2. 
 // Full text may be retrieved at http://www.gnu.org/licenses/gpl-2.0.txt
@@ -36,26 +36,26 @@ package gurux.dlms.objects;
 
 /**
  * Online help:<br>
- * http://www.gurux.fi/Gurux.DLMS.Objects.GXDLMSAccount
+ * https://www.gurux.fi/Gurux.DLMS.Objects.GXDLMSAccount
  */
 public class GXTokenGatewayConfiguration {
     /**
      * Credit reference.<br>
      * Online help:<br>
-     * http://www.gurux.fi/Gurux.DLMS.Objects.GXDLMSAccount
+     * https://www.gurux.fi/Gurux.DLMS.Objects.GXDLMSAccount
      */
     private String creditReference;
 
     /**
      * Token proportion.<br>
      * Online help:<br>
-     * http://www.gurux.fi/Gurux.DLMS.Objects.GXDLMSAccount
+     * https://www.gurux.fi/Gurux.DLMS.Objects.GXDLMSAccount
      */
     private byte tokenProportion;
 
     /**
      * Online help:<br>
-     * http://www.gurux.fi/Gurux.DLMS.Objects.GXDLMSAccount
+     * https://www.gurux.fi/Gurux.DLMS.Objects.GXDLMSAccount
      * 
      * @return Credit reference.
      */
@@ -65,7 +65,7 @@ public class GXTokenGatewayConfiguration {
 
     /**
      * Online help:<br>
-     * http://www.gurux.fi/Gurux.DLMS.Objects.GXDLMSAccount
+     * https://www.gurux.fi/Gurux.DLMS.Objects.GXDLMSAccount
      * 
      * @param value
      *            Credit reference.
@@ -76,7 +76,7 @@ public class GXTokenGatewayConfiguration {
 
     /**
      * Online help:<br>
-     * http://www.gurux.fi/Gurux.DLMS.Objects.GXDLMSAccount
+     * https://www.gurux.fi/Gurux.DLMS.Objects.GXDLMSAccount
      * 
      * @return Token proportion.
      */
@@ -86,7 +86,7 @@ public class GXTokenGatewayConfiguration {
 
     /**
      * Online help:<br>
-     * http://www.gurux.fi/Gurux.DLMS.Objects.GXDLMSAccount
+     * https://www.gurux.fi/Gurux.DLMS.Objects.GXDLMSAccount
      * 
      * @param value
      *            Token proportion.

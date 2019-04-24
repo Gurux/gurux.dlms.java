@@ -26,7 +26,7 @@
 // MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. 
 // See the GNU General Public License for more details.
 //
-// More information of Gurux products: http://www.gurux.org
+// More information of Gurux products: https://www.gurux.org
 //
 // This code is licensed under the GNU General Public License v2. 
 // Full text may be retrieved at http://www.gnu.org/licenses/gpl-2.0.txt
@@ -51,7 +51,7 @@ import gurux.dlms.objects.enums.BaudRate;
 
 /**
  * Online help: <br>
- * http://www.gurux.fi/Gurux.DLMS.Objects.GXDLMSModemConfiguration
+ * https://www.gurux.fi/Gurux.DLMS.Objects.GXDLMSModemConfiguration
  */
 public class GXDLMSModemConfiguration extends GXDLMSObject
         implements IGXDLMSBase {
@@ -223,11 +223,11 @@ public class GXDLMSModemConfiguration extends GXDLMSObject
                 for (GXDLMSModemInitialisation it : initialisationStrings) {
                     data.setUInt8(DataType.STRUCTURE.getValue());
                     data.setUInt8(3); // Count
-                    GXCommon.setData(data, DataType.OCTET_STRING,
+                    GXCommon.setData(settings, data, DataType.OCTET_STRING,
                             GXCommon.getBytes(it.getRequest()));
-                    GXCommon.setData(data, DataType.OCTET_STRING,
+                    GXCommon.setData(settings, data, DataType.OCTET_STRING,
                             GXCommon.getBytes(it.getResponse()));
-                    GXCommon.setData(data, DataType.UINT16,
+                    GXCommon.setData(settings, data, DataType.UINT16,
                             new Integer(it.getDelay()));
                 }
             }
@@ -244,7 +244,7 @@ public class GXDLMSModemConfiguration extends GXDLMSObject
             GXCommon.setObjectCount(cnt, data);
             if (cnt != 0) {
                 for (String it : modemProfile) {
-                    GXCommon.setData(data, DataType.OCTET_STRING,
+                    GXCommon.setData(settings, data, DataType.OCTET_STRING,
                             GXCommon.getBytes(it));
                 }
             }

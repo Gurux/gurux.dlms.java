@@ -26,7 +26,7 @@
 // MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. 
 // See the GNU General Public License for more details.
 //
-// More information of Gurux products: http://www.gurux.org
+// More information of Gurux products: https://www.gurux.org
 //
 // This code is licensed under the GNU General Public License v2. 
 // Full text may be retrieved at http://www.gnu.org/licenses/gpl-2.0.txt
@@ -53,7 +53,7 @@ import gurux.dlms.internal.GXCommon;
 
 /**
  * Online help: <br>
- * http://www.gurux.fi/Gurux.DLMS.Objects.GXDLMSSapAssignment
+ * https://www.gurux.fi/Gurux.DLMS.Objects.GXDLMSSapAssignment
  */
 public class GXDLMSSapAssignment extends GXDLMSObject implements IGXDLMSBase {
     private List<Entry<Integer, String>> sapAssignmentList;
@@ -174,8 +174,9 @@ public class GXDLMSSapAssignment extends GXDLMSObject implements IGXDLMSBase {
                 for (Entry<Integer, String> it : sapAssignmentList) {
                     data.setUInt8(DataType.STRUCTURE.getValue());
                     data.setUInt8(2); // Count
-                    GXCommon.setData(data, DataType.UINT16, it.getKey());
-                    GXCommon.setData(data, DataType.OCTET_STRING,
+                    GXCommon.setData(settings, data, DataType.UINT16,
+                            it.getKey());
+                    GXCommon.setData(settings, data, DataType.OCTET_STRING,
                             GXCommon.getBytes(it.getValue()));
                 }
             }

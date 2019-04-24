@@ -1,7 +1,7 @@
 //
 // --------------------------------------------------------------------------
 //  Gurux Ltd
-// 
+//
 //
 //
 // Filename:        $HeadURL$
@@ -19,16 +19,16 @@
 // This file is a part of Gurux Device Framework.
 //
 // Gurux Device Framework is Open Source software; you can redistribute it
-// and/or modify it under the terms of the GNU General Public License 
+// and/or modify it under the terms of the GNU General Public License
 // as published by the Free Software Foundation; version 2 of the License.
 // Gurux Device Framework is distributed in the hope that it will be useful,
-// but WITHOUT ANY WARRANTY; without even the implied warranty of 
-// MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. 
+// but WITHOUT ANY WARRANTY; without even the implied warranty of
+// MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
 // See the GNU General Public License for more details.
 //
-// More information of Gurux products: http://www.gurux.org
+// More information of Gurux products: https://www.gurux.org
 //
-// This code is licensed under the GNU General Public License v2. 
+// This code is licensed under the GNU General Public License v2.
 // Full text may be retrieved at http://www.gnu.org/licenses/gpl-2.0.txt
 //---------------------------------------------------------------------------
 
@@ -51,7 +51,7 @@ import gurux.dlms.internal.GXCommon;
 
 /**
  * Online help: <br>
- * http://www.gurux.fi/Gurux.DLMS.Objects.GXDLMSLimiter
+ * https://www.gurux.fi/Gurux.DLMS.Objects.GXDLMSLimiter
  */
 public class GXDLMSLimiter extends GXDLMSObject implements IGXDLMSBase {
     private GXDLMSObject monitoredValue;
@@ -79,7 +79,7 @@ public class GXDLMSLimiter extends GXDLMSObject implements IGXDLMSBase {
 
     /**
      * Constructor.
-     * 
+     *
      * @param ln
      *            Logical Name of the object.
      */
@@ -92,7 +92,7 @@ public class GXDLMSLimiter extends GXDLMSObject implements IGXDLMSBase {
 
     /**
      * Constructor.
-     * 
+     *
      * @param ln
      *            Logical Name of the object.
      * @param sn
@@ -411,16 +411,18 @@ public class GXDLMSLimiter extends GXDLMSObject implements IGXDLMSBase {
             data.setUInt8(DataType.STRUCTURE.getValue());
             data.setUInt8(3);
             if (monitoredValue == null) {
-                GXCommon.setData(data, DataType.INT16, new Integer(0));
-                GXCommon.setData(data, DataType.OCTET_STRING,
+                GXCommon.setData(settings, data, DataType.UINT16,
+                        new Integer(0));
+                GXCommon.setData(settings, data, DataType.OCTET_STRING,
                         GXCommon.logicalNameToBytes(null));
-                GXCommon.setData(data, DataType.INT8, 0);
+                GXCommon.setData(settings, data, DataType.INT8, 0);
             } else {
-                GXCommon.setData(data, DataType.INT16,
+                GXCommon.setData(settings, data, DataType.UINT16,
                         new Integer(monitoredValue.getObjectType().getValue()));
-                GXCommon.setData(data, DataType.OCTET_STRING, GXCommon
+                GXCommon.setData(settings, data, DataType.OCTET_STRING, GXCommon
                         .logicalNameToBytes(monitoredValue.getLogicalName()));
-                GXCommon.setData(data, DataType.INT8, monitoredAttributeIndex);
+                GXCommon.setData(settings, data, DataType.INT8,
+                        monitoredAttributeIndex);
             }
             return data.array();
         } else if (e.getIndex() == 3) {
@@ -437,11 +439,11 @@ public class GXDLMSLimiter extends GXDLMSObject implements IGXDLMSBase {
             GXByteBuffer data = new GXByteBuffer();
             data.setUInt8(DataType.STRUCTURE.getValue());
             data.setUInt8(3);
-            GXCommon.setData(data, DataType.UINT16,
+            GXCommon.setData(settings, data, DataType.UINT16,
                     new Integer(emergencyProfile.getID()));
-            GXCommon.setData(data, DataType.OCTET_STRING,
+            GXCommon.setData(settings, data, DataType.OCTET_STRING,
                     emergencyProfile.getActivationTime());
-            GXCommon.setData(data, DataType.UINT32,
+            GXCommon.setData(settings, data, DataType.UINT32,
                     new Long(emergencyProfile.getDuration()));
             return data.array();
         } else if (e.getIndex() == 9) {
@@ -449,7 +451,7 @@ public class GXDLMSLimiter extends GXDLMSObject implements IGXDLMSBase {
             data.setUInt8((byte) DataType.ARRAY.getValue());
             data.setUInt8((byte) emergencyProfileGroupIDs.length);
             for (Object it : emergencyProfileGroupIDs) {
-                GXCommon.setData(data, DataType.UINT16, it);
+                GXCommon.setData(settings, data, DataType.UINT16, it);
             }
             return data.array();
         } else if (e.getIndex() == 10) {
@@ -460,15 +462,15 @@ public class GXDLMSLimiter extends GXDLMSObject implements IGXDLMSBase {
             data.setUInt8(2);
             data.setUInt8(DataType.STRUCTURE.getValue());
             data.setUInt8(2);
-            GXCommon.setData(data, DataType.OCTET_STRING, GXCommon
+            GXCommon.setData(settings, data, DataType.OCTET_STRING, GXCommon
                     .logicalNameToBytes(actionOverThreshold.getLogicalName()));
-            GXCommon.setData(data, DataType.UINT16,
+            GXCommon.setData(settings, data, DataType.UINT16,
                     new Integer(actionOverThreshold.getScriptSelector()));
             data.setUInt8(DataType.STRUCTURE.getValue());
             data.setUInt8(2);
-            GXCommon.setData(data, DataType.OCTET_STRING, GXCommon
+            GXCommon.setData(settings, data, DataType.OCTET_STRING, GXCommon
                     .logicalNameToBytes(actionUnderThreshold.getLogicalName()));
-            GXCommon.setData(data, DataType.UINT16,
+            GXCommon.setData(settings, data, DataType.UINT16,
                     new Integer(actionUnderThreshold.getScriptSelector()));
             return data.array();
         }

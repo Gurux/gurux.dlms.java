@@ -26,7 +26,7 @@
 // MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. 
 // See the GNU General Public License for more details.
 //
-// More information of Gurux products: http://www.gurux.org
+// More information of Gurux products: https://www.gurux.org
 //
 // This code is licensed under the GNU General Public License v2. 
 // Full text may be retrieved at http://www.gnu.org/licenses/gpl-2.0.txt
@@ -798,7 +798,7 @@ public class GXDLMSClient {
         boolean equals = false;
         byte[] secret;
         long ic = 0;
-        byte[] value = (byte[]) GXCommon.getData(reply, info);
+        byte[] value = (byte[]) GXCommon.getData(settings, reply, info);
         if (value != null) {
             if (settings.getAuthentication() == Authentication.HIGH_ECDSA) {
                 try {
@@ -971,7 +971,8 @@ public class GXDLMSClient {
             info.setCount(0);
             info.setIndex(0);
             info.setType(DataType.NONE);
-            Object[] objects = (Object[]) GXCommon.getData(buff, info);
+            Object[] objects =
+                    (Object[]) GXCommon.getData(settings, buff, info);
             if (objects.length != 4) {
                 throw new GXDLMSException("Invalid structure format.");
             }
@@ -1102,7 +1103,8 @@ public class GXDLMSClient {
             info.setType(DataType.NONE);
             info.setIndex(0);
             info.setCount(0);
-            Object[] objects = (Object[]) GXCommon.getData(buff, info);
+            Object[] objects =
+                    (Object[]) GXCommon.getData(settings, buff, info);
             if (objects.length != 4) {
                 throw new GXDLMSException("Invalid structure format.");
             }
@@ -1182,7 +1184,26 @@ public class GXDLMSClient {
      */
     public static Object getValue(final GXByteBuffer data) {
         GXDataInfo info = new GXDataInfo();
-        return GXCommon.getData(data, info);
+        return GXCommon.getData(null, data, info);
+    }
+
+    /**
+     * Get Value from byte array received from the meter.
+     * 
+     * @param data
+     *            Byte array received from the meter.
+     * @param useUtc
+     *            Standard says that Time zone is from normal time to UTC in
+     *            minutes. If meter is configured to use UTC time (UTC to normal
+     *            time) set this to true.
+     * @return Received data.
+     */
+    public static Object getValue(final GXByteBuffer data,
+            final boolean useUtc) {
+        GXDataInfo info = new GXDataInfo();
+        GXDLMSSettings settings = new GXDLMSSettings(false);
+        settings.setUseUtc2NormalTime(useUtc);
+        return GXCommon.getData(settings, data, info);
     }
 
     /**
@@ -1237,6 +1258,24 @@ public class GXDLMSClient {
      * @return Value changed by type.
      */
     public static Object changeType(final byte[] value, final DataType type) {
+        return changeType(value, type, false);
+    }
+
+    /**
+     * Changes byte array received from the meter to given type.
+     * 
+     * @param value
+     *            Byte array received from the meter.
+     * @param type
+     *            Wanted type.
+     * @param useUtc
+     *            Standard says that Time zone is from normal time to UTC in
+     *            minutes. If meter is configured to use UTC time (UTC to normal
+     *            time) set this to true.
+     * @return Value changed by type.
+     */
+    public static Object changeType(final byte[] value, final DataType type,
+            final boolean useUtc) {
         if (value == null) {
             return null;
         }
@@ -1257,9 +1296,11 @@ public class GXDLMSClient {
             return new GXTime(new Date(0));
         }
 
+        GXDLMSSettings settings = new GXDLMSSettings(false);
+        settings.setUseUtc2NormalTime(useUtc);
         GXDataInfo info = new GXDataInfo();
         info.setType(type);
-        Object ret = GXCommon.getData(new GXByteBuffer(value), info);
+        Object ret = GXCommon.getData(settings, new GXByteBuffer(value), info);
         if (!info.isComplete()) {
             throw new IllegalArgumentException(
                     "Change type failed. Not enought data.");
@@ -1342,7 +1383,7 @@ public class GXDLMSClient {
         List<byte[]> reply;
         GXByteBuffer data = new GXByteBuffer();
         GXByteBuffer attributeDescriptor = new GXByteBuffer();
-        GXCommon.setData(data, type, value);
+        GXCommon.setData(settings, data, type, value);
 
         if (getUseLogicalNameReferencing()) {
             // CI
@@ -1452,7 +1493,7 @@ public class GXDLMSClient {
         List<byte[]> reply;
         GXByteBuffer data = new GXByteBuffer();
         GXByteBuffer attributeDescriptor = new GXByteBuffer();
-        GXCommon.setData(data, type, value);
+        GXCommon.setData(settings, data, type, value);
         if (getUseLogicalNameReferencing()) {
             // Add CI.
             attributeDescriptor.setUInt16(objectType.getValue());
@@ -1540,7 +1581,7 @@ public class GXDLMSClient {
                     }
                 }
             }
-            GXCommon.setData(data, type, value);
+            GXCommon.setData(settings, data, type, value);
         }
         if (this.getUseLogicalNameReferencing()) {
             GXDLMSLNParameters p = new GXDLMSLNParameters(settings, 0,
@@ -1845,16 +1886,17 @@ public class GXDLMSClient {
         // Add item count
         buff.setUInt8(0x04);
         // Add start index
-        GXCommon.setData(buff, DataType.UINT32, index);
+        GXCommon.setData(settings, buff, DataType.UINT32, index);
         // Add Count
         if (count == 0) {
-            GXCommon.setData(buff, DataType.UINT32, count);
+            GXCommon.setData(settings, buff, DataType.UINT32, count);
         } else {
-            GXCommon.setData(buff, DataType.UINT32, index + count - 1);
+            GXCommon.setData(settings, buff, DataType.UINT32,
+                    index + count - 1);
         }
         // Select columns to read.
-        GXCommon.setData(buff, DataType.UINT16, columnStart);
-        GXCommon.setData(buff, DataType.UINT16, columnEnd);
+        GXCommon.setData(settings, buff, DataType.UINT16, columnStart);
+        GXCommon.setData(settings, buff, DataType.UINT16, columnEnd);
         return read(pg.getName(), ObjectType.PROFILE_GENERIC, 2, buff);
     }
 
@@ -1989,29 +2031,31 @@ public class GXDLMSClient {
         // Add item count
         buff.setUInt8(0x04);
         // CI
-        GXCommon.setData(buff, DataType.UINT16,
+        GXCommon.setData(settings, buff, DataType.UINT16,
                 sort.getObjectType().getValue());
         // LN
-        GXCommon.setData(buff, DataType.OCTET_STRING,
+        GXCommon.setData(settings, buff, DataType.OCTET_STRING,
                 GXCommon.logicalNameToBytes(sort.getLogicalName()));
         // Add attribute index.
-        GXCommon.setData(buff, DataType.INT8, 2);
+        GXCommon.setData(settings, buff, DataType.INT8, 2);
         // Add version
-        GXCommon.setData(buff, DataType.UINT16, sort.getVersion());
+        GXCommon.setData(settings, buff, DataType.UINT16, sort.getVersion());
         // If Unix time is used.
         if (pg.getCaptureObjects().size() != 0
                 && pg.getCaptureObjects().get(0).getKey() instanceof GXDLMSData
                 && pg.getCaptureObjects().get(0).getKey().getLogicalName()
                         .equals("0.0.1.1.0.255")) {
             // Add start time
-            GXCommon.setData(buff, DataType.UINT32, GXDateTime.toUnixTime(s));
+            GXCommon.setData(settings, buff, DataType.UINT32,
+                    GXDateTime.toUnixTime(s));
             // Add end time
-            GXCommon.setData(buff, DataType.UINT32, GXDateTime.toUnixTime(e));
+            GXCommon.setData(settings, buff, DataType.UINT32,
+                    GXDateTime.toUnixTime(e));
         } else {
             // Add start time
-            GXCommon.setData(buff, DataType.OCTET_STRING, s);
+            GXCommon.setData(settings, buff, DataType.OCTET_STRING, s);
             // Add end time
-            GXCommon.setData(buff, DataType.OCTET_STRING, e);
+            GXCommon.setData(settings, buff, DataType.OCTET_STRING, e);
         }
 
         // Add array of read columns.
@@ -2026,16 +2070,16 @@ public class GXDLMSClient {
                 // Add items count.
                 buff.setUInt8(4);
                 // CI
-                GXCommon.setData(buff, DataType.UINT16,
+                GXCommon.setData(settings, buff, DataType.UINT16,
                         it.getKey().getObjectType().getValue());
                 // LN
-                GXCommon.setData(buff, DataType.OCTET_STRING, GXCommon
+                GXCommon.setData(settings, buff, DataType.OCTET_STRING, GXCommon
                         .logicalNameToBytes(it.getKey().getLogicalName()));
                 // Add attribute index.
-                GXCommon.setData(buff, DataType.INT8,
+                GXCommon.setData(settings, buff, DataType.INT8,
                         it.getValue().getAttributeIndex());
                 // Add data index.
-                GXCommon.setData(buff, DataType.INT16,
+                GXCommon.setData(settings, buff, DataType.INT16,
                         it.getValue().getDataIndex());
             }
         }
@@ -2312,7 +2356,7 @@ public class GXDLMSClient {
                 if (type == DataType.NONE) {
                     type = GXDLMSConverter.getDLMSDataType(value);
                 }
-                GXCommon.setData(bb, type, value);
+                GXCommon.setData(settings, bb, type, value);
             }
         }
         GXDLMSLNParameters p = new GXDLMSLNParameters(settings, 0,
@@ -2348,7 +2392,7 @@ public class GXDLMSClient {
                 new ArrayList<Map.Entry<Object, ErrorCode>>(cnt);
         for (pos = 0; pos != cnt; ++pos) {
             info.clear();
-            Object value = GXCommon.getData(data, info);
+            Object value = GXCommon.getData(settings, data, info);
             values.add(value);
         }
         // Get status codes.

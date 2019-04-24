@@ -26,7 +26,7 @@
 // MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. 
 // See the GNU General Public License for more details.
 //
-// More information of Gurux products: http://www.gurux.org
+// More information of Gurux products: https://www.gurux.org
 //
 // This code is licensed under the GNU General Public License v2. 
 // Full text may be retrieved at http://www.gnu.org/licenses/gpl-2.0.txt
@@ -48,7 +48,7 @@ import gurux.dlms.objects.enums.ControlState;
 
 /**
  * Online help: <br>
- * http://www.gurux.fi/Gurux.DLMS.Objects.GXDLMSDisconnectControl
+ * https://www.gurux.fi/Gurux.DLMS.Objects.GXDLMSDisconnectControl
  */
 public class GXDLMSDisconnectControl extends GXDLMSObject
         implements IGXDLMSBase {
@@ -60,7 +60,7 @@ public class GXDLMSDisconnectControl extends GXDLMSObject
      * Constructor.
      */
     public GXDLMSDisconnectControl() {
-        this(null);
+        this("0.0.96.3.10.255", 0);
     }
 
     /**
