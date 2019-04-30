@@ -34,6 +34,8 @@
 
 package gurux.dlms;
 
+import gurux.dlms.enums.Command;
+
 /**
  * LN Parameters
  */
@@ -138,6 +140,13 @@ class GXDLMSLNParameters {
         setMultipleBlocks(forSettings.getCount() != forSettings.getIndex());
         setLastBlock(forSettings.getCount() == forSettings.getIndex());
         windowSize = 1;
+        if (settings != null) {
+            settings.setCommand(forCommand);
+            if (forCommand == Command.GET_REQUEST
+                    && forCommandType != GetCommandType.NEXT_DATA_BLOCK) {
+                settings.setCommandType((byte) forCommandType);
+            }
+        }
     }
 
     /**

@@ -2859,6 +2859,57 @@ abstract class GXDLMS {
      * @param index
      *            Block index number.
      */
+    static void handleGetResponseWithList(final GXDLMSSettings settings,
+            final GXReplyData reply) {
+        short ch = 0;
+        GXByteBuffer data = reply.getData();
+        // Get object count.
+        int cnt = GXCommon.getObjectCount(data);
+        Object[] values = new Object[cnt];
+        if (reply.getXml() != null) {
+            // Result start tag.
+            reply.getXml().appendStartTag(TranslatorTags.RESULT, "Qty",
+                    reply.getXml().integerToHex(cnt, 2));
+        }
+        for (int pos = 0; pos != cnt; ++pos) {
+            // Result
+            ch = data.getUInt8();
+            if (ch != 0) {
+                reply.setError(data.getUInt8());
+            } else {
+                if (reply.getXml() != null) {
+                    GXDataInfo di = new GXDataInfo();
+                    di.setXml(reply.getXml());
+                    // Data.
+                    reply.getXml().appendStartTag(Command.READ_RESPONSE,
+                            SingleReadResponse.DATA);
+                    GXCommon.getData(settings, reply.getData(), di);
+                    reply.getXml().appendEndTag(Command.READ_RESPONSE,
+                            SingleReadResponse.DATA);
+                } else {
+                    reply.setReadPosition(reply.getData().position());
+                    getValueFromData(settings, reply);
+                    reply.getData().position(reply.getReadPosition());
+                    if (values != null) {
+                        values[pos] = reply.getValue();
+                    }
+                    reply.setValue(null);
+                }
+            }
+        }
+        reply.setValue(values);
+    }
+
+    /**
+     * Handle get response and get data from block and/or update error status.
+     * 
+     * @param settings
+     *            DLMS settings.
+     * @param reply
+     *            Received data from the client.
+     * @param index
+     *            Block index number.
+     */
     static boolean handleGetResponse(final GXDLMSSettings settings,
             final GXReplyData reply, final int index) {
         long number;
@@ -3005,42 +3056,14 @@ abstract class GXDLMS {
                     }
                 }
             }
+            if (reply.getMoreData() == RequestTypes.NONE && settings != null
+                    && settings.getCommand() == Command.GET_REQUEST
+                    && settings.getCommandType() == GetCommandType.WITH_LIST) {
+                handleGetResponseWithList(settings, reply);
+                ret = false;
+            }
         } else if (type == GetCommandType.WITH_LIST) {
-            // Get object count.
-            int cnt = GXCommon.getObjectCount(data);
-            Object[] values = new Object[cnt];
-            if (reply.getXml() != null) {
-                // Result start tag.
-                reply.getXml().appendStartTag(TranslatorTags.RESULT, "Qty",
-                        reply.getXml().integerToHex(cnt, 2));
-            }
-            for (int pos = 0; pos != cnt; ++pos) {
-                // Result
-                ch = data.getUInt8();
-                if (ch != 0) {
-                    reply.setError(data.getUInt8());
-                } else {
-                    if (reply.getXml() != null) {
-                        GXDataInfo di = new GXDataInfo();
-                        di.setXml(reply.getXml());
-                        // Data.
-                        reply.getXml().appendStartTag(Command.READ_RESPONSE,
-                                SingleReadResponse.DATA);
-                        GXCommon.getData(settings, reply.getData(), di);
-                        reply.getXml().appendEndTag(Command.READ_RESPONSE,
-                                SingleReadResponse.DATA);
-                    } else {
-                        reply.setReadPosition(reply.getData().position());
-                        getValueFromData(settings, reply);
-                        reply.getData().position(reply.getReadPosition());
-                        if (values != null) {
-                            values[pos] = reply.getValue();
-                        }
-                        reply.setValue(null);
-                    }
-                }
-            }
-            reply.setValue(values);
+            handleGetResponseWithList(settings, reply);
             ret = false;
         } else {
             throw new IllegalArgumentException("Invalid Get response.");

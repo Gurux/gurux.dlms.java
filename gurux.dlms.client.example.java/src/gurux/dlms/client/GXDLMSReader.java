@@ -508,11 +508,9 @@ public class GXDLMSReader {
             List<Object> values = new ArrayList<Object>(list.size());
             for (byte[] it : data) {
                 readDataBlock(it, reply);
-                if (list.size() != 1 && reply.getValue() instanceof Object[]) {
+                // Value is null if data is send in multiple frames.
+                if (reply.getValue() != null) {
                     values.addAll(Arrays.asList((Object[]) reply.getValue()));
-                } else if (reply.getValue() != null) {
-                    // Value is null if data is send multiple frames.
-                    values.add(reply.getValue());
                 }
                 reply.clear();
             }

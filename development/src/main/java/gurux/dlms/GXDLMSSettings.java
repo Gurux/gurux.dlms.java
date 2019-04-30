@@ -284,6 +284,16 @@ public class GXDLMSSettings {
     private Standard standard;
 
     /**
+     * Last executed command.
+     */
+    private int command;
+
+    /**
+     * Last executed command type
+     */
+    private byte commandType;
+
+    /**
      * Protocol version.
      */
     private String protocolVersion = null;
@@ -1133,5 +1143,35 @@ public class GXDLMSSettings {
      */
     public void setPreEstablishedSystemTitle(final byte[] value) {
         preEstablishedSystemTitle = value;
+    }
+
+    /**
+     * @return the command
+     */
+    public int getCommand() {
+        return command;
+    }
+
+    /**
+     * @param value
+     *            the command to set
+     */
+    public void setCommand(final int value) {
+        command = value;
+    }
+
+    /**
+     * @return the commandType
+     */
+    public byte getCommandType() {
+        return commandType;
+    }
+
+    /**
+     * @param commandType
+     *            the commandType to set
+     */
+    public void setCommandType(final byte value) {
+        commandType = value;
     }
 }

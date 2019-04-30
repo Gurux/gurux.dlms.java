@@ -413,7 +413,7 @@ public class GXDLMSCompactData extends GXDLMSObject implements IGXDLMSBase {
             }
             break;
         case 4:
-            templateId = (short) e.getValue();
+            templateId = ((Number) e.getValue()).shortValue();
             break;
         case 5:
             templateDescription = (byte[]) e.getValue();
