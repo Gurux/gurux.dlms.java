@@ -1168,7 +1168,7 @@ public class GXDLMSSettings {
     }
 
     /**
-     * @param commandType
+     * @param value
      *            the commandType to set
      */
     public void setCommandType(final byte value) {
