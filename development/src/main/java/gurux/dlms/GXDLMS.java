@@ -98,6 +98,7 @@ import gurux.dlms.objects.GXDLMSSecuritySetup;
 import gurux.dlms.objects.GXDLMSSpecialDaysTable;
 import gurux.dlms.objects.GXDLMSTcpUdpSetup;
 import gurux.dlms.objects.GXDLMSTokenGateway;
+import gurux.dlms.objects.GXDLMSUtilityTables;
 import gurux.dlms.objects.enums.CertificateType;
 import gurux.dlms.objects.enums.SecuritySuite;
 import gurux.dlms.secure.AesGcmParameter;
@@ -236,7 +237,7 @@ abstract class GXDLMS {
         case ZIG_BEE_SAS_APS_FRAGMENTATION:
             return new GXDLMSObject();
         case UTILITY_TABLES:
-            return new GXDLMSObject();
+            return new GXDLMSUtilityTables();
         case PUSH_SETUP:
             return new GXDLMSPushSetup();
         case MBUS_MASTER_PORT_SETUP:
@@ -1099,7 +1100,9 @@ abstract class GXDLMS {
         AesGcmParameter s = new AesGcmParameter(cmd, cipher.getSecurity(),
                 cipher.getInvocationCounter(), cipher.getSystemTitle(), key,
                 cipher.getAuthenticationKey());
-        return GXCiphering.encrypt(s, data);
+        byte[] tmp = GXCiphering.encrypt(s, data);
+        cipher.setInvocationCounter(cipher.getInvocationCounter() + 1);
+        return tmp;
     }
 
     /**

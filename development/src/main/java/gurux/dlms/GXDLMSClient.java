@@ -866,6 +866,10 @@ public class GXDLMSClient {
         buff.setUInt8(0x80);
         buff.setUInt8(01);
         buff.setUInt8(00);
+        if (settings.getCipher() != null && settings.getCipher().isCiphered()) {
+            settings.getCipher().setInvocationCounter(
+                    settings.getCipher().getInvocationCounter() + 1);
+        }
         GXAPDU.generateUserInformation(settings, settings.getCipher(), null,
                 buff);
         buff.setUInt8(0, (byte) (buff.size() - 1));
@@ -1318,10 +1322,26 @@ public class GXDLMSClient {
      * @return Read request, as byte array.
      */
     public final byte[] getObjectsRequest() {
+        return getObjectsRequest(null);
+    }
+
+    /**
+     * Reads the Association view from the device. This method is used to get
+     * all objects in the device.
+     * 
+     * @param ln
+     *            Logical name of Association view.
+     * @return Read request, as byte array.
+     */
+    public final byte[] getObjectsRequest(final String ln) {
         Object name;
         settings.resetBlockIndex();
         if (getUseLogicalNameReferencing()) {
-            name = "0.0.40.0.0.255";
+            if (ln == null || ln == "") {
+                name = "0.0.40.0.0.255";
+            } else {
+                name = ln;
+            }
         } else {
             name = (short) 0xFA00;
         }

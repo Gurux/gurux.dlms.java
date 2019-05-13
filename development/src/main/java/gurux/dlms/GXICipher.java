@@ -110,6 +110,12 @@ public interface GXICipher {
     long getInvocationCounter();
 
     /**
+     * @param value
+     *            Invocation counter.
+     */
+    void setInvocationCounter(long value);
+
+    /**
      * @return Ephemeral key pair.
      */
     KeyPair getEphemeralKeyPair();

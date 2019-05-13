@@ -1673,7 +1673,7 @@ public final class GXCommon {
             info.setComplete(false);
             return null;
         }
-        Long value = new Long(buff.getUInt32());
+        long value = buff.getUInt32();
         if (info.getXml() != null) {
             info.getXml().appendLine(info.getXml().getDataType(info.getType()),
                     null, info.getXml().integerToHex(value, 8));
@@ -1756,10 +1756,10 @@ public final class GXCommon {
             info.setComplete(false);
             return null;
         }
-        Boolean value = new Boolean(buff.getUInt8() != 0);
+        boolean value = buff.getUInt8() != 0;
         if (info.getXml() != null) {
             info.getXml().appendLine(info.getXml().getDataType(info.getType()),
-                    null, value.toString());
+                    null, String.valueOf(value));
         }
         return value;
     }
