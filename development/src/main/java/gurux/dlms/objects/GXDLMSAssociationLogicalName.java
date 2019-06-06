@@ -468,6 +468,8 @@ public class GXDLMSAssociationLogicalName extends GXDLMSObject
                 GXCommon.setObjectCount(objectList.size(), data);
             }
             int pos = 0;
+            boolean gbt = settings.getNegotiatedConformance()
+                    .contains(Conformance.GENERAL_BLOCK_TRANSFER);
             for (GXDLMSObject it : objectList) {
                 ++pos;
                 if (!(pos <= settings.getIndex())) {
@@ -488,13 +490,12 @@ public class GXDLMSAssociationLogicalName extends GXDLMSObject
                     settings.setIndex(settings.getIndex() + 1);
                     if (settings.isServer()) {
                         // If PDU is full.
-                        if (!e.isSkipMaxPduSize()
+                        if (!gbt && !e.isSkipMaxPduSize()
                                 && data.size() >= settings.getMaxPduSize()) {
                             break;
                         }
                     }
                 }
-
             }
             return data.array();
         } catch (Exception ex) {

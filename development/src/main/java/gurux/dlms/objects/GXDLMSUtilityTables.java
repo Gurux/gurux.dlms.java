@@ -240,7 +240,11 @@ public class GXDLMSUtilityTables extends GXDLMSObject implements IGXDLMSBase {
             // Skip len.
             break;
         case 4:
-            buffer = (byte[]) e.getValue();
+            if (e.getValue() instanceof String) {
+                buffer = GXCommon.hexToBytes((String) e.getValue());
+            } else {
+                buffer = (byte[]) e.getValue();
+            }
             break;
         default:
             e.setError(ErrorCode.READ_WRITE_DENIED);

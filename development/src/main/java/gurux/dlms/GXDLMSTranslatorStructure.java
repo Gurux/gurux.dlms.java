@@ -404,6 +404,9 @@ public class GXDLMSTranslatorStructure {
                 && outputType == TranslatorOutputType.SIMPLE_XML)) {
             return GXCommon.integerToHex(value, desimals);
         }
+        if (desimals != 0) {
+            return String.format("%0" + desimals + "d", value);
+        }
         return String.valueOf(value);
     }
 

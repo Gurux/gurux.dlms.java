@@ -86,10 +86,8 @@ final class GXDLMSLNCommandHandler {
         }
     }
 
-    /**
+    /*
      * Handle set request.
-     * 
-     * @return Reply to the client.
      */
     public static void handleSetRequest(final GXDLMSSettings settings,
             final GXDLMSServerBase server, final GXByteBuffer data,
@@ -313,11 +311,8 @@ final class GXDLMSLNCommandHandler {
         }
     }
 
-    /**
+    /*
      * Handle get request next data block command.
-     * 
-     * @param data
-     *            Received data.
      */
     static void getRequestNextDataBlock(final GXDLMSSettings settings,
             final int invokeID, final GXDLMSServerBase server,
@@ -802,12 +797,8 @@ final class GXDLMSLNCommandHandler {
         }
     }
 
-    /**
+    /*
      * Handle action request.
-     * 
-     * @param reply
-     *            Received data from the client.
-     * @return Reply.
      */
     static void handleMethodRequest(final GXDLMSSettings settings,
             final GXDLMSServerBase server, final GXByteBuffer data,
@@ -931,19 +922,13 @@ final class GXDLMSLNCommandHandler {
         }
     }
 
-    /**
+    /*
      * Handle Access request.
-     * 
-     * @param settings
-     *            DLMS settings.
-     * @param server
-     *            server.
-     * @param data
-     *            Received data from the client.
-     * @param reply
-     *            reply data-
-     * @param xml
-     *            XML settings.
+     * @param settings DLMS settings.
+     * @param server server.
+     * @param data Received data from the client.
+     * @param reply reply data-
+     * @param xml XML settings.
      */
     public static void handleAccessRequest(final GXDLMSSettings settings,
             final GXDLMSServerBase server, final GXByteBuffer data,

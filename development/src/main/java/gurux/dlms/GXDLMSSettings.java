@@ -274,6 +274,11 @@ public class GXDLMSSettings {
      */
     private int userId;
 
+    /*
+     * Quality of service.
+     */
+    private byte qualityOfService;
+
     /**
      * Standard says that Time zone is from normal time to UTC in minutes. If
      * meter is configured to use UTC time (UTC to normal time) set this to
@@ -1173,5 +1178,20 @@ public class GXDLMSSettings {
      */
     public void setCommandType(final byte value) {
         commandType = value;
+    }
+
+    /**
+     * @return Quality of service.
+     */
+    public byte getQualityOfService() {
+        return qualityOfService;
+    }
+
+    /**
+     * @param value
+     *            Quality of service.
+     */
+    public void setQualityOfService(final byte value) {
+        qualityOfService = value;
     }
 }

@@ -1169,7 +1169,8 @@ public class GXDLMSClient {
                 target.setUIDataType(attributeIndex, type);
             }
             if (type != DataType.NONE) {
-                val = changeType((byte[]) value, type);
+                val = changeType((byte[]) value, type,
+                        settings.getUseUtc2NormalTime());
             }
         }
         ValueEventArgs e = new ValueEventArgs(settings, target, attributeIndex,
@@ -2127,6 +2128,18 @@ public class GXDLMSClient {
      */
     public final byte[] receiverReady(final RequestTypes type) {
         return GXDLMS.receiverReady(settings, type);
+    }
+
+    /**
+     * Generates an acknowledgment message, with which the server is informed to
+     * send next packets.
+     * 
+     * @param reply
+     *            Received data.
+     * @return Acknowledgment message as byte array.
+     */
+    public final byte[] receiverReady(final GXReplyData reply) {
+        return GXDLMS.receiverReady(settings, reply);
     }
 
     /**

@@ -85,9 +85,14 @@ class GXDLMSLNParameters {
      */
     int blockIndex;
 
-    /// <summary>
-    /// Block number ack.
-    /// </summary>
+    /*
+     * GBT block number.
+     */
+    int blockNumber;
+
+    /*
+     * Block number ack.
+     */
     public int blockNumberAck;
 
     /**
@@ -289,5 +294,82 @@ class GXDLMSLNParameters {
      */
     public final void setInvokeId(final long value) {
         invokeId = value;
+    }
+
+    /**
+     * @return GBT block number.
+     */
+    public final int getBlockNumber() {
+        return blockNumber;
+    }
+
+    /**
+     * @param value
+     *            GBT block number.
+     */
+    final void setBlockNumber(final int value) {
+        blockNumber = value;
+    }
+
+    /**
+     * @return GBT block number ACK.
+     */
+    public final int getBlockNumberAck() {
+        return blockNumberAck;
+    }
+
+    /**
+     * @param value
+     *            GBT block number ACK.
+     */
+    final void setBlockNumberAck(final int value) {
+        blockNumberAck = value;
+    }
+
+    /**
+     * @return Is GBT streaming in use.
+     */
+    public final boolean getStreaming() {
+        return streaming;
+    }
+
+    /**
+     * @param value
+     *            Is GBT streaming in use.
+     */
+    final void setStreaming(boolean value) {
+        streaming = value;
+    }
+
+    /**
+     * @return GBT Window size. This is for internal use.
+     */
+    public final byte getWindowSize() {
+        return windowSize;
+    }
+
+    /**
+     * @param value
+     *            GBT Window size. This is for internal use.
+     */
+    public final void setWindowSize(byte value) {
+        windowSize = value;
+    }
+
+    /**
+     * @return Is GBT streaming.
+     * @deprecated use {@link #isStreaming} instead.
+     */
+    @Deprecated
+    public final boolean IsStreaming() {
+        return isStreaming();
+    }
+
+    /**
+     * @return Is GBT streaming.
+     */
+    public final boolean isStreaming() {
+        return getStreaming() && (getBlockNumberAck() * getWindowSize())
+                + 1 > getBlockNumber();
     }
 }

@@ -386,14 +386,14 @@ final class GXAPDU {
             // component
             tag = data.getUInt8();
             if (tag != 0) {
-                len = data.getUInt8();
-                data.position(data.position() + len);
-                if (len == 0 && xml != null && xml
+                settings.setQualityOfService((byte) data.getUInt8());
+                if (xml != null && xml
                         .getOutputType() == TranslatorOutputType.SIMPLE_XML) {
                     // NegotiatedQualityOfService
                     xml.appendLine(
                             TranslatorGeneralTags.NEGOTIATED_QUALITY_OF_SERVICE,
-                            "Value", "00");
+                            "Value", String.format("%02d",
+                                    settings.getQualityOfService()));
                 }
             }
         } else if (tag2 == Command.INITIATE_REQUEST) {

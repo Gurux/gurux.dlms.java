@@ -61,7 +61,12 @@ public enum RequestTypes {
     /**
      * More data frames and data blocks are available for the request.
      */
-    BOTH(3);
+    BOTH(3),
+
+    /**
+     * More data is available for GBT.
+     */
+    GBT(4);
 
     /**
      * Integer value of enumerator.
@@ -97,7 +102,7 @@ public enum RequestTypes {
      */
     RequestTypes(final int value) {
         intValue = value;
-        getMappings().put(new Integer(value), this);
+        getMappings().put(value, this);
     }
 
     /**
@@ -117,6 +122,6 @@ public enum RequestTypes {
      * @return Enumeration value.
      */
     public static RequestTypes forValue(final int value) {
-        return getMappings().get(new Integer(value));
+        return getMappings().get(value);
     }
 }

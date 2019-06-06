@@ -816,7 +816,7 @@ public class GXDateTime {
                 return tz;
             }
         }
-        if (!tz.observesDaylightTime()
+        if (tz != null && !tz.observesDaylightTime()
                 && tz.getRawOffset() / 60000 == deviation) {
             return tz;
         }
