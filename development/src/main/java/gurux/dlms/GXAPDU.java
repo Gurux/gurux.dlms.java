@@ -38,6 +38,7 @@ import java.security.InvalidKeyException;
 import java.security.NoSuchAlgorithmException;
 import java.util.Set;
 
+import gurux.dlms.enums.AcseServiceProvider;
 import gurux.dlms.enums.AssociationResult;
 import gurux.dlms.enums.Authentication;
 import gurux.dlms.enums.BerType;
@@ -815,7 +816,7 @@ final class GXAPDU {
     /**
      * Parse APDU.
      */
-    public static SourceDiagnostic parsePDU(final GXDLMSSettings settings,
+    public static Object parsePDU(final GXDLMSSettings settings,
             final GXICipher cipher, final GXByteBuffer buff,
             final GXDLMSTranslatorStructure xml) {
         // Get AARE tag and length
@@ -836,7 +837,7 @@ final class GXAPDU {
                 xml.appendStartTag(Command.AARE);
             }
         }
-        SourceDiagnostic ret = parsePDU2(settings, cipher, buff, xml);
+        Object ret = parsePDU2(settings, cipher, buff, xml);
         // Closing tags
         if (xml != null) {
             if (settings.isServer()) {
@@ -848,11 +849,15 @@ final class GXAPDU {
         return ret;
     }
 
-    private static void parseProtocolVersion(GXDLMSSettings settings,
-            GXByteBuffer buff, GXDLMSTranslatorStructure xml) {
+    private static AcseServiceProvider parseProtocolVersion(
+            GXDLMSSettings settings, GXByteBuffer buff,
+            GXDLMSTranslatorStructure xml) {
         // Get count.
         buff.getUInt8();
         byte unusedBits = (byte) buff.getUInt8();
+        if (unusedBits > 8) {
+            throw new RuntimeException("unusedBits");
+        }
         byte value = (byte) buff.getUInt8();
         StringBuilder sb = new StringBuilder();
         GXCommon.toBitString(sb, value, 8 - unusedBits);
@@ -860,17 +865,26 @@ final class GXAPDU {
         if (xml != null) {
             xml.appendLine(TranslatorTags.PROTOCOL_VERSION, "Value",
                     settings.getProtocolVersion());
+        } else {
+            if (!settings.getProtocolVersion().equals("100001")) {
+                return AcseServiceProvider.NO_COMMON_ACSE_VERSION;
+            }
         }
+        if (xml != null) {
+            xml.appendLine(TranslatorTags.PROTOCOL_VERSION, "Value",
+                    settings.getProtocolVersion());
+        }
+        return AcseServiceProvider.NONE;
     }
 
     /**
      * Parse APDU.
      */
-    public static SourceDiagnostic parsePDU2(final GXDLMSSettings settings,
+    public static Object parsePDU2(final GXDLMSSettings settings,
             final GXICipher cipher, final GXByteBuffer buff,
             final GXDLMSTranslatorStructure xml) {
         AssociationResult resultComponent = AssociationResult.ACCEPTED;
-        SourceDiagnostic resultDiagnosticValue = SourceDiagnostic.NONE;
+        Object ret = 0;
         int len, tag;
         byte[] tmp;
         while (buff.position() < buff.size()) {
@@ -936,8 +950,7 @@ final class GXAPDU {
             // SourceDiagnostic
             case BerType.CONTEXT | BerType.CONSTRUCTED
                     | PduType.CALLED_AE_QUALIFIER: // 0xA3
-                resultDiagnosticValue =
-                        parseSourceDiagnostic(settings, buff, xml);
+                ret = parseSourceDiagnostic(settings, buff, xml);
                 break;
             // Result
             case BerType.CONTEXT | BerType.CONSTRUCTED
@@ -1069,17 +1082,24 @@ final class GXAPDU {
                 break;
             case BerType.CONTEXT | BerType.CONSTRUCTED
                     | PduType.USER_INFORMATION:// 0xBE
-                // Check result component. Some meters are returning invalid
-                // user-information if connection failed.
-                if (xml == null && resultComponent != AssociationResult.ACCEPTED
-                        && resultDiagnosticValue != SourceDiagnostic.NONE) {
-                    throw new GXDLMSException(resultComponent,
-                            resultDiagnosticValue);
-                }
                 try {
                     parseUserInformation(settings, cipher, buff, xml);
                 } catch (Exception e) {
                     if (xml == null) {
+                        // Check result component. Some meters are returning
+                        // invalid user-information if connection failed.
+                        if (resultComponent != AssociationResult.ACCEPTED
+                                && ret instanceof SourceDiagnostic
+                                && (SourceDiagnostic) ret != SourceDiagnostic.NONE) {
+                            throw new GXDLMSException(resultComponent,
+                                    (SourceDiagnostic) ret);
+                        }
+                        if (resultComponent != AssociationResult.ACCEPTED
+                                && ret instanceof AcseServiceProvider
+                                && (AcseServiceProvider) ret != AcseServiceProvider.NONE) {
+                            throw new GXDLMSException(resultComponent,
+                                    (AcseServiceProvider) ret);
+                        }
                         throw new GXDLMSException(
                                 AssociationResult.PERMANENT_REJECTED,
                                 SourceDiagnostic.NO_REASON_GIVEN);
@@ -1087,7 +1107,12 @@ final class GXAPDU {
                 }
                 break;
             case BerType.CONTEXT: // 0x80
-                parseProtocolVersion(settings, buff, xml);
+                AcseServiceProvider tmp2 =
+                        parseProtocolVersion(settings, buff, xml);
+                if (tmp2 != AcseServiceProvider.NONE) {
+                    resultComponent = AssociationResult.PERMANENT_REJECTED;
+                }
+                ret = tmp2;
                 break;
             default:
                 // Unknown tags.
@@ -1101,11 +1126,18 @@ final class GXAPDU {
         }
         // All meters don't send user-information if connection is failed.
         // For this reason result component is check again.
-        if (xml == null && resultComponent != AssociationResult.ACCEPTED
-                && resultDiagnosticValue != SourceDiagnostic.NONE) {
-            throw new GXDLMSException(resultComponent, resultDiagnosticValue);
+        if (!settings.isServer() && xml == null
+                && resultComponent != AssociationResult.ACCEPTED
+                && !(ret instanceof Integer)) {
+            if (ret instanceof SourceDiagnostic) {
+                throw new GXDLMSException(resultComponent,
+                        (SourceDiagnostic) ret);
+            } else {
+                throw new GXDLMSException(resultComponent,
+                        (AcseServiceProvider) ret);
+            }
         }
-        return resultDiagnosticValue;
+        return ret;
     }
 
     private static void parseResult(final GXDLMSSettings settings,
@@ -1150,12 +1182,11 @@ final class GXAPDU {
         }
     }
 
-    private static SourceDiagnostic parseSourceDiagnostic(
-            final GXDLMSSettings settings, final GXByteBuffer buff,
-            final GXDLMSTranslatorStructure xml) {
+    private static Object parseSourceDiagnostic(final GXDLMSSettings settings,
+            final GXByteBuffer buff, final GXDLMSTranslatorStructure xml) {
         int tag;
         int len;
-        SourceDiagnostic resultDiagnosticValue = SourceDiagnostic.NONE;
+        Object ret = 0;
         len = buff.getUInt8();
         // ACSE service user tag.
         tag = buff.getUInt8();
@@ -1177,18 +1208,34 @@ final class GXAPDU {
             if (len != 1) {
                 throw new RuntimeException("Invalid tag.");
             }
-            resultDiagnosticValue = SourceDiagnostic.forValue(buff.getUInt8());
-            if (xml != null) {
-                if (resultDiagnosticValue != SourceDiagnostic.NONE) {
-                    xml.appendComment(resultDiagnosticValue.toString());
+            if (tag == 0xA1) {
+                ret = SourceDiagnostic.forValue(buff.getUInt8());
+                if (xml != null) {
+                    if ((SourceDiagnostic) ret != SourceDiagnostic.NONE) {
+                        xml.appendComment(ret.toString());
+                    }
+                    xml.appendLine(TranslatorGeneralTags.ACSE_SERVICE_USER,
+                            "Value", xml.integerToHex(
+                                    ((SourceDiagnostic) ret).getValue(), 2));
                 }
-                xml.appendLine(TranslatorGeneralTags.ACSE_SERVICE_USER, "Value",
-                        xml.integerToHex(resultDiagnosticValue.getValue(), 2));
+            } else {
+                // ACSEServiceProvicer
+                ret = AcseServiceProvider.forValue(buff.getUInt8());
+                if (xml != null) {
+                    if ((AcseServiceProvider) ret != AcseServiceProvider.NONE) {
+                        xml.appendComment(ret.toString());
+                    }
+                    xml.appendLine(TranslatorGeneralTags.ACSE_SERVICE_PROVIDER,
+                            "Value", xml.integerToHex(
+                                    ((AcseServiceProvider) ret).getValue(), 2));
+                }
+            }
+            if (xml != null) {
                 xml.appendEndTag(
                         TranslatorGeneralTags.RESULT_SOURCE_DIAGNOSTIC);
             }
         }
-        return resultDiagnosticValue;
+        return ret;
     }
 
     private static void appendServerSystemTitleToXml(
@@ -1344,7 +1391,7 @@ final class GXAPDU {
      */
     public static void generateAARE(final GXDLMSSettings settings,
             final GXByteBuffer data, final AssociationResult result,
-            final SourceDiagnostic diagnostic, final GXICipher cipher,
+            final Object diagnostic, final GXICipher cipher,
             final GXByteBuffer errorData, final GXByteBuffer encryptedData) {
         int offset = data.size();
         // Set AARE tag and length 0x61
@@ -1363,13 +1410,22 @@ final class GXAPDU {
         // SourceDiagnostic
         data.setUInt8(0xA3);
         data.setUInt8(5); // len
-        data.setUInt8(0xA1); // Tag
+        // Tag
+        if (diagnostic instanceof SourceDiagnostic) {
+            data.setUInt8(0xA1);
+        } else {
+            data.setUInt8(0xA2);
+        }
         data.setUInt8(3); // len
         data.setUInt8(2); // Tag
         // Choice for result (INTEGER, universal)
         data.setUInt8(1); // Len
         // diagnostic
-        data.setUInt8(diagnostic.getValue());
+        if (diagnostic instanceof SourceDiagnostic) {
+            data.setUInt8(((SourceDiagnostic) diagnostic).getValue());
+        } else {
+            data.setUInt8(((AcseServiceProvider) diagnostic).getValue());
+        }
         // SystemTitle
         if (cipher != null
                 && (settings.getAuthentication() == Authentication.HIGH_GMAC

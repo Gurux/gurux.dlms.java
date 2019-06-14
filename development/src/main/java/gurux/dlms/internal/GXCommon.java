@@ -420,6 +420,8 @@ public final class GXCommon {
                 return data.getUInt8();
             } else if (cnt == 0x82) {
                 return data.getUInt16();
+            } else if (cnt == 0x83) {
+                return data.getUInt24();
             } else if (cnt == 0x84) {
                 return (int) data.getUInt32();
             } else {

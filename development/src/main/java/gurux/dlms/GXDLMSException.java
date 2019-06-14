@@ -34,6 +34,7 @@
 
 package gurux.dlms;
 
+import gurux.dlms.enums.AcseServiceProvider;
 import gurux.dlms.enums.AssociationResult;
 import gurux.dlms.enums.ExceptionServiceError;
 import gurux.dlms.enums.SourceDiagnostic;
@@ -49,7 +50,7 @@ public class GXDLMSException extends RuntimeException {
      */
     private static final long serialVersionUID = 1L;
     private AssociationResult result = AssociationResult.ACCEPTED;
-    private SourceDiagnostic diagnostic = SourceDiagnostic.NONE;
+    private int diagnostic = 0;
     private int errorCode;
     private StateError stateError;
     private ExceptionServiceError exceptionServiceError;
@@ -71,7 +72,18 @@ public class GXDLMSException extends RuntimeException {
         super("Connection is " + getResult(forResult) + "\r\n"
                 + getDiagnostic(forDiagnostic));
         result = forResult;
-        diagnostic = forDiagnostic;
+        diagnostic = forDiagnostic.getValue();
+    }
+
+    /**
+     * Constructor for AARE error.
+     */
+    GXDLMSException(final AssociationResult forResult,
+            final AcseServiceProvider forDiagnostic) {
+        super("Connection is " + getResult(forResult) + "\r\n"
+                + getDiagnostic(forDiagnostic));
+        result = forResult;
+        diagnostic = forDiagnostic.getValue();
     }
 
     /**
@@ -144,6 +156,28 @@ public class GXDLMSException extends RuntimeException {
         throw new UnsupportedOperationException();
     }
 
+    /*
+     * Get diagnostic as a string.
+     */
+    private static String getDiagnostic(AcseServiceProvider diagnostic) {
+        String str;
+        switch (diagnostic) {
+        case NONE:
+            str = "None.";
+            break;
+        case NO_REASON_GIVEN:
+            str = "No reason given.";
+            break;
+        case NO_COMMON_ACSE_VERSION:
+            str = "No Common Acse version.";
+            break;
+        default:
+            str = "Unknown diagnostic error.";
+            break;
+        }
+        return str;
+    }
+
     /**
      * Get diagnostic as a string.
      * 
@@ -196,26 +230,10 @@ public class GXDLMSException extends RuntimeException {
     }
 
     /**
-     * @param value
-     *            Association Result in AARE message.
-     */
-    final void setResult(final AssociationResult value) {
-        result = value;
-    }
-
-    /**
      * @return Diagnostic code in AARE message.
      */
-    public final SourceDiagnostic getDiagnostic() {
+    public final int getDiagnostic() {
         return diagnostic;
-    }
-
-    /**
-     * @param value
-     *            Diagnostic code in AARE message.
-     */
-    final void setDiagnostic(final SourceDiagnostic value) {
-        diagnostic = value;
     }
 
     /**

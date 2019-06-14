@@ -387,6 +387,12 @@ public class GXByteBuffer {
         return value;
     }
 
+    public final int getUInt24() {
+        int value = getUInt24(position());
+        position += 3;
+        return value;
+    }
+
     public final int getInt32() {
         int value = getInt32(position());
         position += 4;
@@ -399,6 +405,14 @@ public class GXByteBuffer {
         }
         return (data[index] & 0xFF) << 24 | (data[index + 1] & 0xFF) << 16
                 | (data[index + 2] & 0xFF) << 8 | (data[index + 3] & 0xFF);
+    }
+
+    public final int getUInt24(final int index) {
+        if (index + 3 > size) {
+            throw new IllegalArgumentException("getUInt24");
+        }
+        return (data[index] & 0xFF) << 16 | (data[index + 1] & 0xFF) << 8
+                | (data[index + 2] & 0xFF);
     }
 
     public final long getUInt32(final int index) {

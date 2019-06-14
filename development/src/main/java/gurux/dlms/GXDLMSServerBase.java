@@ -5,6 +5,7 @@ import java.util.logging.Level;
 import java.util.logging.Logger;
 
 import gurux.dlms.enums.AccessMode;
+import gurux.dlms.enums.AcseServiceProvider;
 import gurux.dlms.enums.AssociationResult;
 import gurux.dlms.enums.Authentication;
 import gurux.dlms.enums.Command;
@@ -367,111 +368,122 @@ public class GXDLMSServerBase {
         if (settings.getInterfaceType() == InterfaceType.WRAPPER) {
             reset(true);
         }
-        SourceDiagnostic diagnostic = SourceDiagnostic.NO_REASON_GIVEN;
+        Object ret;
         try {
-            diagnostic =
-                    GXAPDU.parsePDU(settings, settings.getCipher(), data, null);
-            if (settings.getNegotiatedConformance().size() == 0) {
-                result = AssociationResult.PERMANENT_REJECTED;
-                diagnostic = SourceDiagnostic.NO_REASON_GIVEN;
-                error = new GXByteBuffer();
-                error.setUInt8(0xE);
-                error.setUInt8(ConfirmedServiceError.INITIATE_ERROR.getValue());
-                error.setUInt8(ServiceError.INITIATE.getValue());
-                error.setUInt8(Initiate.INCOMPATIBLE_CONFORMANCE.getValue());
-            } else if (settings.getMaxPduSize() < 64) {
-                // If PDU is too low.
-                result = AssociationResult.PERMANENT_REJECTED;
-                diagnostic = SourceDiagnostic.NO_REASON_GIVEN;
-                error = new GXByteBuffer();
-                error.setUInt8(0xE);
-                error.setUInt8(ConfirmedServiceError.INITIATE_ERROR.getValue());
-                error.setUInt8(ServiceError.INITIATE.getValue());
-                error.setUInt8(Initiate.PDU_SIZE_TOO_SHORT.getValue());
-            } else if (settings.getDLMSVersion() != 6) {
-                settings.setDLMSVersion(6);
-                result = AssociationResult.PERMANENT_REJECTED;
-                diagnostic = SourceDiagnostic.NO_REASON_GIVEN;
-                error = new GXByteBuffer();
-                error.setUInt8(0xE);
-                error.setUInt8(ConfirmedServiceError.INITIATE_ERROR.getValue());
-                error.setUInt8(ServiceError.INITIATE.getValue());
-                error.setUInt8(Initiate.DLMS_VERSION_TOO_LOW.getValue());
-            } else if (diagnostic != SourceDiagnostic.NONE) {
-                result = AssociationResult.PERMANENT_REJECTED;
-                diagnostic = SourceDiagnostic.NOT_SUPPORTED;
-                notifyInvalidConnection(connectionInfo);
-            } else {
-                if (owner instanceof GXDLMSServer) {
-                    GXDLMSServer b = (GXDLMSServer) owner;
-                    diagnostic = b.validateAuthentication(
-                            settings.getAuthentication(),
-                            settings.getPassword());
-                } else {
-                    GXDLMSServer2 b = (GXDLMSServer2) owner;
-                    diagnostic = b.onValidateAuthentication(
-                            settings.getAuthentication(),
-                            settings.getPassword());
-                }
-
-                if (diagnostic != SourceDiagnostic.NONE) {
+            ret = GXAPDU.parsePDU(settings, settings.getCipher(), data, null);
+            if (!(ret instanceof AcseServiceProvider)) {
+                if (settings.getNegotiatedConformance().size() == 0) {
                     result = AssociationResult.PERMANENT_REJECTED;
-                } else if (settings.getAuthentication()
-                        .getValue() > Authentication.LOW.getValue()) {
-                    result = AssociationResult.ACCEPTED;
-                    diagnostic = SourceDiagnostic.AUTHENTICATION_REQUIRED;
-                    if (getUseLogicalNameReferencing()) {
-                        GXDLMSAssociationLogicalName ln =
-                                (GXDLMSAssociationLogicalName) getItems()
-                                        .findByLN(
-                                                ObjectType.ASSOCIATION_LOGICAL_NAME,
-                                                "0.0.40.0.0.255");
-                        if (ln != null) {
-                            if (settings.getCipher() == null
-                                    || settings.getCipher()
-                                            .getSecurity() == Security.NONE) {
-                                ln.getApplicationContextName().setContextId(
-                                        ApplicationContextName.LOGICAL_NAME);
-                            } else {
-                                ln.getApplicationContextName().setContextId(
-                                        ApplicationContextName.LOGICAL_NAME_WITH_CIPHERING);
-                            }
-                            ln.getAuthenticationMechanismName().setMechanismId(
-                                    settings.getAuthentication());
-                            ln.setAssociationStatus(
-                                    AssociationStatus.ASSOCIATION_PENDING);
-                        }
-                    }
+                    ret = SourceDiagnostic.NO_REASON_GIVEN;
+                    error = new GXByteBuffer();
+                    error.setUInt8(0xE);
+                    error.setUInt8(
+                            ConfirmedServiceError.INITIATE_ERROR.getValue());
+                    error.setUInt8(ServiceError.INITIATE.getValue());
+                    error.setUInt8(
+                            Initiate.INCOMPATIBLE_CONFORMANCE.getValue());
+                } else if (settings.getMaxPduSize() < 64) {
+                    // If PDU is too low.
+                    result = AssociationResult.PERMANENT_REJECTED;
+                    ret = SourceDiagnostic.NO_REASON_GIVEN;
+                    error = new GXByteBuffer();
+                    error.setUInt8(0xE);
+                    error.setUInt8(
+                            ConfirmedServiceError.INITIATE_ERROR.getValue());
+                    error.setUInt8(ServiceError.INITIATE.getValue());
+                    error.setUInt8(Initiate.PDU_SIZE_TOO_SHORT.getValue());
+                } else if (settings.getDLMSVersion() != 6) {
+                    settings.setDLMSVersion(6);
+                    result = AssociationResult.PERMANENT_REJECTED;
+                    ret = SourceDiagnostic.NO_REASON_GIVEN;
+                    error = new GXByteBuffer();
+                    error.setUInt8(0xE);
+                    error.setUInt8(
+                            ConfirmedServiceError.INITIATE_ERROR.getValue());
+                    error.setUInt8(ServiceError.INITIATE.getValue());
+                    error.setUInt8(Initiate.DLMS_VERSION_TOO_LOW.getValue());
+                } else if (SourceDiagnostic
+                        .forValue((int) ret) != SourceDiagnostic.NONE) {
+                    result = AssociationResult.PERMANENT_REJECTED;
+                    ret = SourceDiagnostic.NOT_SUPPORTED;
+                    notifyInvalidConnection(connectionInfo);
                 } else {
-                    if (getUseLogicalNameReferencing()) {
-                        GXDLMSAssociationLogicalName ln =
-                                (GXDLMSAssociationLogicalName) getItems()
-                                        .findByLN(
-                                                ObjectType.ASSOCIATION_LOGICAL_NAME,
-                                                "0.0.40.0.0.255");
-                        if (ln != null) {
-                            if (settings.getCipher() == null
-                                    || settings.getCipher()
-                                            .getSecurity() == Security.NONE) {
-                                ln.getApplicationContextName().setContextId(
-                                        ApplicationContextName.LOGICAL_NAME);
-                            } else {
-                                ln.getApplicationContextName().setContextId(
-                                        ApplicationContextName.LOGICAL_NAME_WITH_CIPHERING);
-                            }
-                            ln.getAuthenticationMechanismName().setMechanismId(
-                                    settings.getAuthentication());
-                            ln.setAssociationStatus(
-                                    AssociationStatus.ASSOCIATED);
-                        }
+                    if (owner instanceof GXDLMSServer) {
+                        GXDLMSServer b = (GXDLMSServer) owner;
+                        ret = b.validateAuthentication(
+                                settings.getAuthentication(),
+                                settings.getPassword());
+                    } else {
+                        GXDLMSServer2 b = (GXDLMSServer2) owner;
+                        ret = b.onValidateAuthentication(
+                                settings.getAuthentication(),
+                                settings.getPassword());
                     }
-                    settings.setConnected(
-                            settings.getConnected() | ConnectionState.DLMS);
+
+                    if ((SourceDiagnostic) ret != SourceDiagnostic.NONE) {
+                        result = AssociationResult.PERMANENT_REJECTED;
+                    } else if (settings.getAuthentication()
+                            .getValue() > Authentication.LOW.getValue()) {
+                        result = AssociationResult.ACCEPTED;
+                        ret = SourceDiagnostic.AUTHENTICATION_REQUIRED;
+                        if (getUseLogicalNameReferencing()) {
+                            GXDLMSAssociationLogicalName ln =
+                                    (GXDLMSAssociationLogicalName) getItems()
+                                            .findByLN(
+                                                    ObjectType.ASSOCIATION_LOGICAL_NAME,
+                                                    "0.0.40.0.0.255");
+                            if (ln != null) {
+                                if (settings.getCipher() == null || settings
+                                        .getCipher()
+                                        .getSecurity() == Security.NONE) {
+                                    ln.getApplicationContextName().setContextId(
+                                            ApplicationContextName.LOGICAL_NAME);
+                                } else {
+                                    ln.getApplicationContextName().setContextId(
+                                            ApplicationContextName.LOGICAL_NAME_WITH_CIPHERING);
+                                }
+                                ln.getAuthenticationMechanismName()
+                                        .setMechanismId(
+                                                settings.getAuthentication());
+                                ln.setAssociationStatus(
+                                        AssociationStatus.ASSOCIATION_PENDING);
+                            }
+                        }
+                    } else {
+                        if (getUseLogicalNameReferencing()) {
+                            GXDLMSAssociationLogicalName ln =
+                                    (GXDLMSAssociationLogicalName) getItems()
+                                            .findByLN(
+                                                    ObjectType.ASSOCIATION_LOGICAL_NAME,
+                                                    "0.0.40.0.0.255");
+                            if (ln != null) {
+                                if (settings.getCipher() == null || settings
+                                        .getCipher()
+                                        .getSecurity() == Security.NONE) {
+                                    ln.getApplicationContextName().setContextId(
+                                            ApplicationContextName.LOGICAL_NAME);
+                                } else {
+                                    ln.getApplicationContextName().setContextId(
+                                            ApplicationContextName.LOGICAL_NAME_WITH_CIPHERING);
+                                }
+                                ln.getAuthenticationMechanismName()
+                                        .setMechanismId(
+                                                settings.getAuthentication());
+                                ln.setAssociationStatus(
+                                        AssociationStatus.ASSOCIATED);
+                            }
+                        }
+                        settings.setConnected(
+                                settings.getConnected() | ConnectionState.DLMS);
+                    }
                 }
+            } else if (result == AssociationResult.ACCEPTED
+                    && ((AcseServiceProvider) ret).getValue() != 0) {
+                result = AssociationResult.PERMANENT_REJECTED;
             }
         } catch (GXDLMSConfirmedServiceError e) {
             result = AssociationResult.PERMANENT_REJECTED;
-            diagnostic = SourceDiagnostic.NO_REASON_GIVEN;
+            ret = SourceDiagnostic.NO_REASON_GIVEN;
             error = new GXByteBuffer();
             error.setUInt8(0xE);
             error.setUInt8(e.getConfirmedServiceError().getValue());
@@ -479,7 +491,7 @@ public class GXDLMSServerBase {
             error.setUInt8(e.getServiceErrorValue());
         } catch (GXDLMSException e) {
             result = e.getResult();
-            diagnostic = e.getDiagnostic();
+            ret = e.getDiagnostic();
         }
         if (settings.getInterfaceType() == InterfaceType.HDLC) {
             replyData.set(GXCommon.LLC_REPLY_BYTES);
@@ -492,7 +504,7 @@ public class GXDLMSServerBase {
         }
 
         // Generate AARE packet.
-        GXAPDU.generateAARE(settings, replyData, result, diagnostic,
+        GXAPDU.generateAARE(settings, replyData, result, ret,
                 settings.getCipher(), error, null);
     }
 

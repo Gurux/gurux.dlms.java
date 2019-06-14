@@ -108,6 +108,9 @@ final class TranslatorSimpleTags {
                 "ResultSourceDiagnostic");
         GXDLMSTranslator.addTag(list, TranslatorGeneralTags.ACSE_SERVICE_USER,
                 "ACSEServiceUser");
+        GXDLMSTranslator.addTag(list,
+                TranslatorGeneralTags.ACSE_SERVICE_PROVIDER,
+                "ACSEServiceProvider");
         GXDLMSTranslator.addTag(list, TranslatorGeneralTags.CALLING_AP_TITLE,
                 "CallingAPTitle");
         GXDLMSTranslator.addTag(list, TranslatorGeneralTags.RESPONDING_AP_TITLE,
