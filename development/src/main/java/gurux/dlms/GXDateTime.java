@@ -153,6 +153,8 @@ public class GXDateTime {
      *            Used time Zone.
      * @deprecated use {@link #GXDateTime} instead.
      */
+    @Deprecated
+    @SuppressWarnings("squid:S00107")
     public GXDateTime(final int year, final int month, final int day,
             final int hour, final int minute, final int second,
             final int millisecond, final int timeZone) {
@@ -283,7 +285,8 @@ public class GXDateTime {
                             } else if (tmp.equals("dd") || tmp.equals("d")) {
                                 skip.add(DateTimeSkips.DAY);
                             } else if (tmp.equals("h") || tmp.equals("hh")
-                                    || tmp.equals("HH") || tmp.equals("H")) {
+                                    || tmp.equals("HH") || tmp.equals("H")
+                                    || tmp.equals("a")) {
                                 skip.add(DateTimeSkips.HOUR);
                                 int pos2 = format.indexOf("a");
                                 if (pos2 != -1) {
@@ -291,14 +294,8 @@ public class GXDateTime {
                                 }
                             } else if (tmp.equals("mm") || tmp.equals("m")) {
                                 skip.add(DateTimeSkips.MINUTE);
-                            } else if (tmp.equals("a")) {
-                                skip.add(DateTimeSkips.HOUR);
-                                int pos2 = format.indexOf("a");
-                                if (pos2 != -1) {
-                                    format.replace(pos2, pos2 + 1, "");
-                                }
                             } else if (!tmp.isEmpty() && !tmp.equals("G")) {
-                                throw new RuntimeException(
+                                throw new IllegalArgumentException(
                                         "Invalid date time format.");
                             }
                         } else {
@@ -339,15 +336,15 @@ public class GXDateTime {
                         sd = new SimpleDateFormat(format.toString().trim());
                         meterCalendar.setTime(sd.parse(v));
                     } catch (java.text.ParseException e2) {
-                        throw new RuntimeException(e2);
+                        throw new IllegalArgumentException(e2);
                     } catch (Exception e2) {
-                        throw new RuntimeException(e);
+                        throw new IllegalArgumentException(e);
                     }
                 } catch (Exception e1) {
-                    throw new RuntimeException(e1);
+                    throw new IllegalArgumentException(e1);
                 }
             } catch (Exception e) {
-                throw new RuntimeException(e);
+                throw new IllegalArgumentException(e);
             }
         }
 
@@ -357,6 +354,7 @@ public class GXDateTime {
      * @return Used calendar.
      * @deprecated use {@link #getMeterCalendar} instead.
      */
+    @Deprecated
     public final Calendar getCalendar() {
         return meterCalendar;
     }
@@ -388,6 +386,7 @@ public class GXDateTime {
     /**
      * @return Used meter calendar.
      */
+    @SuppressWarnings("squid:S4144")
     public final Calendar getMeterCalendar() {
         return meterCalendar;
     }
@@ -510,9 +509,8 @@ public class GXDateTime {
      * @return Deviation is time from current time zone to UTC time.
      */
     public final int getDeviation() {
-        int value = -((meterCalendar.get(Calendar.ZONE_OFFSET)
+        return -((meterCalendar.get(Calendar.ZONE_OFFSET)
                 + meterCalendar.get(Calendar.DST_OFFSET)) / 60000);
-        return value;
     }
 
     /**

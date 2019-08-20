@@ -214,7 +214,7 @@ public class GXManufacturerCollection
                     data = xmlStreamReader.getText();
                 } else if (event == XMLStreamConstants.END_ELEMENT) {
                     if (target.equalsIgnoreCase("file")) {
-                        URL f = new URL("https://www.gurux.org/obis/" + data);
+                        URL f = new URL("https://www.gurux.fi/obis/" + data);
                         URLConnection fc = f.openConnection();
                         BufferedReader in = new BufferedReader(
                                 new InputStreamReader(fc.getInputStream()));
@@ -378,7 +378,7 @@ public class GXManufacturerCollection
                 } else if (target.equalsIgnoreCase("Type")) {
                     if (authentication != null) {
                         authentication.setType(gurux.dlms.enums.Authentication
-                                .valueOf(data.toUpperCase()));
+                                .valueOfString(data.toUpperCase()));
                     } else {
                         if (data.equals("BinaryCodedDesimal")) {
                             att.setType(gurux.dlms.enums.DataType.BCD);

@@ -26,7 +26,7 @@ public final class CertificateVersion {
 
     CertificateVersion(final int mode) {
         value = (byte) mode;
-        getMappings().put(new Byte((byte) mode), this);
+        getMappings().put(value, this);
     }
 
     /*
@@ -40,7 +40,7 @@ public final class CertificateVersion {
      * Convert string for enumeration value.
      */
     public static CertificateVersion forValue(final int value) {
-        return getMappings().get(new Byte((byte) value));
+        return getMappings().get((byte) value);
     }
 
     @Override

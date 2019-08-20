@@ -72,7 +72,7 @@ public enum VdeStateError {
 
     VdeStateError(final int mode) {
         this.value = mode;
-        getMappings().put(new Integer(mode), this);
+        getMappings().put(mode, this);
     }
 
     /*
@@ -86,6 +86,6 @@ public enum VdeStateError {
      * Convert integer for enum value.
      */
     public static VdeStateError forValue(final int value) {
-        return getMappings().get(new Integer(value));
+        return getMappings().get(value);
     }
 }

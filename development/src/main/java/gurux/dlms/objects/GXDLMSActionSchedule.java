@@ -118,6 +118,7 @@ public class GXDLMSActionSchedule extends GXDLMSObject implements IGXDLMSBase {
      * @return Executed script logical name.
      * @deprecated use {@link #getTarget} instead.
      */
+    @Deprecated
     public final String getExecutedScriptLogicalName() {
         return executedScriptLogicalName;
     }
@@ -127,6 +128,7 @@ public class GXDLMSActionSchedule extends GXDLMSObject implements IGXDLMSBase {
      *            Executed script logical name.
      * @deprecated use {@link #setTarget} instead.
      */
+    @Deprecated
     public final void setExecutedScriptLogicalName(final String value) {
         executedScriptLogicalName = value;
     }
@@ -136,6 +138,7 @@ public class GXDLMSActionSchedule extends GXDLMSObject implements IGXDLMSBase {
      *            Executed script logical name.
      * @deprecated use {@link #getTarget} instead.
      */
+    @Deprecated
     public final void setTarget(final String value) {
         executedScriptLogicalName = value;
     }
@@ -182,19 +185,19 @@ public class GXDLMSActionSchedule extends GXDLMSObject implements IGXDLMSBase {
         // LN is static and read only once.
         if (all || getLogicalName() == null
                 || getLogicalName().compareTo("") == 0) {
-            attributes.add(new Integer(1));
+            attributes.add(1);
         }
         // ExecutedScriptLogicalName is static and read only once.
         if (all || !isRead(2)) {
-            attributes.add(new Integer(2));
+            attributes.add(2);
         }
         // Type is static and read only once.
         if (all || !isRead(3)) {
-            attributes.add(new Integer(3));
+            attributes.add(3);
         }
         // ExecutionTime is static and read only once.
         if (all || !isRead(4)) {
-            attributes.add(new Integer(4));
+            attributes.add(4);
         }
         return GXDLMSObjectHelpers.toIntArray(attributes);
     }
@@ -249,11 +252,11 @@ public class GXDLMSActionSchedule extends GXDLMSObject implements IGXDLMSBase {
             GXCommon.setData(settings, stream, DataType.OCTET_STRING,
                     GXCommon.logicalNameToBytes(executedScriptLogicalName));
             GXCommon.setData(settings, stream, DataType.UINT16,
-                    new Integer(executedScriptSelector));
+                    executedScriptSelector);
             return stream.array();
         }
         if (e.getIndex() == 3) {
-            return new Integer(getType().getValue());
+            return getType().getValue();
         }
         if (e.getIndex() == 4) {
             GXByteBuffer bb = new GXByteBuffer();

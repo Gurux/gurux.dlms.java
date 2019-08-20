@@ -72,6 +72,7 @@ public class GXAsn1PublicKey {
         if (key == null) {
             throw new IllegalArgumentException("key");
         }
+        @SuppressWarnings({ "unused", "squid:S1481" })
         Object[] data =
                 (Object[]) GXAsn1Converter.fromByteArray(key.getEncoded());
         /*

@@ -179,23 +179,23 @@ public class GXDLMSPppSetup extends GXDLMSObject implements IGXDLMSBase {
         // LN is static and read only once.
         if (all || getLogicalName() == null
                 || getLogicalName().compareTo("") == 0) {
-            attributes.add(new Integer(1));
+            attributes.add(1);
         }
         // PHYReference
         if (all || !isRead(2)) {
-            attributes.add(new Integer(2));
+            attributes.add(2);
         }
         // LCPOptions
         if (all || !isRead(3)) {
-            attributes.add(new Integer(3));
+            attributes.add(3);
         }
         // IPCPOptions
         if (all || !isRead(4)) {
-            attributes.add(new Integer(4));
+            attributes.add(4);
         }
         // PPPAuthentication
         if (all || !isRead(5)) {
-            attributes.add(new Integer(5));
+            attributes.add(5);
         }
         return GXDLMSObjectHelpers.toIntArray(attributes);
     }
@@ -231,6 +231,9 @@ public class GXDLMSPppSetup extends GXDLMSObject implements IGXDLMSBase {
             return DataType.ARRAY;
         }
         if (index == 5) {
+            if (userName == null || userName.length == 0) {
+                return DataType.NONE;
+            }
             return DataType.STRUCTURE;
         }
         throw new IllegalArgumentException(
@@ -258,11 +261,11 @@ public class GXDLMSPppSetup extends GXDLMSObject implements IGXDLMSBase {
                 data.setUInt8((byte) lcpOptions.length);
                 for (GXDLMSPppSetupLcpOption it : lcpOptions) {
                     data.setUInt8((byte) DataType.STRUCTURE.getValue());
-                    data.setUInt8((byte) 3);
+                    data.setUInt8(3);
                     GXCommon.setData(settings, data, DataType.UINT8,
                             it.getType().getValue());
                     GXCommon.setData(settings, data, DataType.UINT8,
-                            new Integer(it.getLength()));
+                            it.getLength());
                     GXCommon.setData(settings, data,
                             GXDLMSConverter.getDLMSDataType(it.getData()),
                             it.getData());
@@ -279,11 +282,11 @@ public class GXDLMSPppSetup extends GXDLMSObject implements IGXDLMSBase {
                 data.setUInt8((byte) ipcpOptions.length);
                 for (GXDLMSPppSetupIPCPOption it : ipcpOptions) {
                     data.setUInt8((byte) DataType.STRUCTURE.getValue());
-                    data.setUInt8((byte) 3);
+                    data.setUInt8(3);
                     GXCommon.setData(settings, data, DataType.UINT8,
                             it.getType().getValue());
                     GXCommon.setData(settings, data, DataType.UINT8,
-                            new Integer(it.getLength()));
+                            it.getLength());
                     GXCommon.setData(settings, data,
                             GXDLMSConverter.getDLMSDataType(it.getData()),
                             it.getData());
@@ -291,6 +294,9 @@ public class GXDLMSPppSetup extends GXDLMSObject implements IGXDLMSBase {
             }
             return data.array();
         } else if (e.getIndex() == 5) {
+            if (userName == null || userName.length == 0) {
+                return null;
+            }
             GXByteBuffer data = new GXByteBuffer();
             data.setUInt8((byte) DataType.STRUCTURE.getValue());
             data.setUInt8(2);
@@ -344,8 +350,12 @@ public class GXDLMSPppSetup extends GXDLMSObject implements IGXDLMSBase {
             ipcpOptions =
                     items.toArray(new GXDLMSPppSetupIPCPOption[items.size()]);
         } else if (e.getIndex() == 5) {
-            userName = (byte[]) ((Object[]) e.getValue())[0];
-            password = (byte[]) ((Object[]) e.getValue())[1];
+            if (e.getValue() != null) {
+                userName = (byte[]) ((Object[]) e.getValue())[0];
+                password = (byte[]) ((Object[]) e.getValue())[1];
+            } else {
+                userName = password = null;
+            }
         } else {
             e.setError(ErrorCode.READ_WRITE_DENIED);
         }
@@ -420,5 +430,6 @@ public class GXDLMSPppSetup extends GXDLMSObject implements IGXDLMSBase {
 
     @Override
     public final void postLoad(final GXXmlReader reader) {
+        // Not needed for this object.
     }
 }

@@ -366,7 +366,7 @@ public enum ObjectType {
 
     ObjectType(final int value) {
         intValue = value;
-        getMappings().put(new Integer(value), this);
+        getMappings().put(value, this);
     }
 
     /*
@@ -380,7 +380,7 @@ public enum ObjectType {
      * Convert integer for enum value.
      */
     public static ObjectType forValue(final int value) {
-        ObjectType ot = getMappings().get(new Integer(value));
+        ObjectType ot = getMappings().get(value);
         return ot;
     }
 

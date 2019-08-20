@@ -107,11 +107,11 @@ public class GXDLMSScriptTable extends GXDLMSObject implements IGXDLMSBase {
         // LN is static and read only once.
         if (all || getLogicalName() == null
                 || getLogicalName().compareTo("") == 0) {
-            attributes.add(new Integer(1));
+            attributes.add(1);
         }
         // Scripts
         if (all || !isRead(2)) {
-            attributes.add(new Integer(2));
+            attributes.add(2);
         }
         return GXDLMSObjectHelpers.toIntArray(attributes);
     }
@@ -147,6 +147,7 @@ public class GXDLMSScriptTable extends GXDLMSObject implements IGXDLMSBase {
     /*
      * Returns value of given attribute.
      */
+    @SuppressWarnings("deprecation")
     @Override
     public final Object getValue(final GXDLMSSettings settings,
             final ValueEventArgs e) {
@@ -173,11 +174,11 @@ public class GXDLMSScriptTable extends GXDLMSObject implements IGXDLMSBase {
                     data.setUInt8(5);
                     // service_id
                     GXCommon.setData(settings, data, DataType.ENUM,
-                            new Integer(a.getType().ordinal()));
+                            a.getType().ordinal());
                     if (a.getTarget() == null) {
                         // class_id
                         GXCommon.setData(settings, data, DataType.UINT16,
-                                new Integer(a.getObjectType().getValue()));
+                                a.getObjectType().getValue());
                         // logical_name
                         GXCommon.setData(settings, data, DataType.OCTET_STRING,
                                 GXCommon.logicalNameToBytes(
@@ -185,8 +186,7 @@ public class GXDLMSScriptTable extends GXDLMSObject implements IGXDLMSBase {
                     } else {
                         // class_id
                         GXCommon.setData(settings, data, DataType.UINT16,
-                                new Integer(a.getTarget().getObjectType()
-                                        .getValue()));
+                                a.getTarget().getObjectType().getValue());
                         // logical_name
                         GXCommon.setData(settings, data, DataType.OCTET_STRING,
                                 GXCommon.logicalNameToBytes(
@@ -194,7 +194,7 @@ public class GXDLMSScriptTable extends GXDLMSObject implements IGXDLMSBase {
                     }
                     // index
                     GXCommon.setData(settings, data, DataType.INT8,
-                            new Integer(a.getIndex()));
+                            a.getIndex());
                     // parameter
                     GXCommon.setData(settings, data, a.getParameterType(),
                             a.getParameter());
@@ -391,6 +391,7 @@ public class GXDLMSScriptTable extends GXDLMSObject implements IGXDLMSBase {
 
     @Override
     public final void postLoad(final GXXmlReader reader) {
+        // Not needed for this object.
     }
 
 }

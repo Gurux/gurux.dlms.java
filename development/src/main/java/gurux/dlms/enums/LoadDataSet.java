@@ -84,7 +84,7 @@ public enum LoadDataSet {
 
     LoadDataSet(final int mode) {
         this.value = mode;
-        getMappings().put(new Integer(mode), this);
+        getMappings().put(mode, this);
     }
 
     /*
@@ -98,6 +98,6 @@ public enum LoadDataSet {
      * Convert integer for enum value.
      */
     public static LoadDataSet forValue(final int value) {
-        return getMappings().get(new Integer(value));
+        return getMappings().get(value);
     }
 }

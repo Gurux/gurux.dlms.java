@@ -149,8 +149,7 @@ public class GXDLMSRegister extends GXDLMSObject implements IGXDLMSBase {
      * Reset value.
      */
     public final byte[][] reset(final GXDLMSClient client) {
-        return client.method(getName(), getObjectType(), 1, new Integer(0),
-                DataType.INT8);
+        return client.method(getName(), getObjectType(), 1, 0, DataType.INT8);
     }
 
     // CHECKSTYLE:OFF
@@ -196,15 +195,15 @@ public class GXDLMSRegister extends GXDLMSObject implements IGXDLMSBase {
         // LN is static and read only once.
         if (all || getLogicalName() == null
                 || getLogicalName().compareTo("") == 0) {
-            attributes.add(new Integer(1));
+            attributes.add(1);
         }
         // ScalerUnit
         if (all || !isRead(3)) {
-            attributes.add(new Integer(3));
+            attributes.add(3);
         }
         // Value
         if (all || canRead(2)) {
-            attributes.add(new Integer(2));
+            attributes.add(2);
         }
         return GXDLMSObjectHelpers.toIntArray(attributes);
     }
@@ -257,16 +256,10 @@ public class GXDLMSRegister extends GXDLMSObject implements IGXDLMSBase {
             return GXCommon.logicalNameToBytes(getLogicalName());
         }
         if (e.getIndex() == 2) {
-            // If client set new value.
-            if (!settings.isServer() && getScaler() != 1
+            if (settings != null && !settings.isServer() && getScaler() != 1
                     && objectValue != null) {
-                DataType type = DataType.NONE;
-                if (objectValue != null) {
-                    type = GXDLMSConverter.getDLMSDataType(objectValue);
-                }
-                Object tmp;
-                tmp = new Double(
-                        ((Number) objectValue).doubleValue() / getScaler());
+                DataType type = GXDLMSConverter.getDLMSDataType(objectValue);
+                Object tmp = ((Number) objectValue).doubleValue() / getScaler();
                 if (type != DataType.NONE) {
                     tmp = GXDLMSConverter.changeType(tmp, type);
                 }
@@ -278,9 +271,8 @@ public class GXDLMSRegister extends GXDLMSObject implements IGXDLMSBase {
             GXByteBuffer data = new GXByteBuffer();
             data.setUInt8(DataType.STRUCTURE.getValue());
             data.setUInt8(2);
-            GXCommon.setData(settings, data, DataType.INT8,
-                    new Integer(scaler));
-            GXCommon.setData(settings, data, DataType.ENUM, new Integer(unit));
+            GXCommon.setData(settings, data, DataType.INT8, scaler);
+            GXCommon.setData(settings, data, DataType.ENUM, unit);
             return data.array();
         }
         e.setError(ErrorCode.READ_WRITE_DENIED);
@@ -298,15 +290,11 @@ public class GXDLMSRegister extends GXDLMSObject implements IGXDLMSBase {
         if (e.getIndex() == 1) {
             setLogicalName(GXCommon.toLogicalName(e.getValue()));
         } else if (e.getIndex() == 2) {
-            if (scaler != 1 && e.getValue() != null) {
+            if (settings != null && !settings.isServer() && getScaler() != 1
+                    && e.getValue() != null) {
                 try {
-                    if (settings.isServer()) {
-                        setValue(e.getValue());
-                    } else {
-                        objectValue =
-                                new Double(((Number) e.getValue()).doubleValue()
-                                        * getScaler());
-                    }
+                    objectValue =
+                            ((Number) e.getValue()).doubleValue() * getScaler();
                 } catch (Exception e1) {
                     // Sometimes scaler is set for wrong Object type.
                     setValue(e.getValue());
@@ -350,6 +338,7 @@ public class GXDLMSRegister extends GXDLMSObject implements IGXDLMSBase {
 
     @Override
     public void postLoad(final GXXmlReader reader) {
+        // Not needed for this object.
     }
 
 }

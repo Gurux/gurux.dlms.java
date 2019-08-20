@@ -27,6 +27,7 @@ import java.util.Map;
 import java.util.Map.Entry;
 import java.util.TimeZone;
 
+import javax.xml.XMLConstants;
 import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.DocumentBuilderFactory;
 
@@ -78,7 +79,7 @@ public final class GXAsn1Converter {
         System.arraycopy(value, 0, key, privKeyBytes.length, value.length);
         PKCS8EncodedKeySpec priv = new PKCS8EncodedKeySpec(key);
         KeyFactory kf = KeyFactory.getInstance("EC");
-        System.out.println(GXCommon.toHex(key));
+        // System.out.println(GXCommon.toHex(key));
         return kf.generatePrivate(priv);
     }
 
@@ -108,7 +109,7 @@ public final class GXAsn1Converter {
             X509EncodedKeySpec ecpks = new X509EncodedKeySpec(encodedKey);
             return eckf.generatePublic(ecpks);
         } catch (InvalidKeySpecException e) {
-            throw new RuntimeException(e.getMessage());
+            throw new IllegalArgumentException(e.getMessage());
         }
     }
 
@@ -443,7 +444,7 @@ public final class GXAsn1Converter {
         long v = calendar.getTimeInMillis();
         calendar = Calendar.getInstance(TimeZone.getTimeZone("UTC"));
         calendar.setTimeInMillis(v);
-        StringBuffer sb = new StringBuffer();
+        StringBuilder sb = new StringBuilder();
         sb.append(
                 GXCommon.integerString(calendar.get(Calendar.YEAR) - 2000, 2));
         sb.append(GXCommon.integerString(1 + calendar.get(Calendar.MONTH), 2));
@@ -510,18 +511,7 @@ public final class GXAsn1Converter {
             cnt += bb.size() - start;
             bb.set(tmp);
             return cnt;
-        } else if (target instanceof GXAsn1Sequence) {
-            tmp = new GXByteBuffer();
-            for (Object it : (List<Object>) target) {
-                cnt += getBytes(tmp, it);
-            }
-            start = bb.size();
-            bb.setUInt8(BerType.CONSTRUCTED | BerType.SEQUENCE);
-            GXCommon.setObjectCount(cnt, bb);
-            cnt += bb.size() - start;
-            bb.set(tmp);
-            return cnt;
-        } else if (target instanceof List) {
+        } else if (target instanceof GXAsn1Sequence || target instanceof List) {
             tmp = new GXByteBuffer();
             for (Object it : (List<Object>) target) {
                 cnt += getBytes(tmp, it);
@@ -588,7 +578,7 @@ public final class GXAsn1Converter {
                 GXCommon.setObjectCount(cnt, tmp);
                 tmp.set(tmp2);
             } else {
-                cnt += getBytes(tmp2, ((List<Object>) e.getKey()).get(0));
+                getBytes(tmp2, ((List<Object>) e.getKey()).get(0));
                 tmp = tmp2;
             }
             // Update len.
@@ -633,7 +623,7 @@ public final class GXAsn1Converter {
             bb.setUInt8(str.length());
             bb.add(str);
         } else {
-            throw new RuntimeException(
+            throw new IllegalArgumentException(
                     "Invalid type: " + target.getClass().toString());
         }
         return bb.size() - start;
@@ -812,7 +802,7 @@ public final class GXAsn1Converter {
                 Date d = f.parse(node.getChildNodes().item(0).getNodeValue());
                 list.add(d);
             } catch (DOMException | ParseException e) {
-                throw new RuntimeException(e.getMessage());
+                throw new IllegalArgumentException(e.getMessage());
             }
 
             break;
@@ -850,12 +840,15 @@ public final class GXAsn1Converter {
      *            XML.
      * @return ASN.1 PDU.
      */
+    @SuppressWarnings("squid:S00112")
     public static byte[] xmlToPdu(final String xml) {
         DocumentBuilder docBuilder;
         Document doc;
         DocumentBuilderFactory docBuilderFactory =
                 DocumentBuilderFactory.newInstance();
         try {
+            docBuilderFactory.setFeature(XMLConstants.FEATURE_SECURE_PROCESSING,
+                    true);
             docBuilder = docBuilderFactory.newDocumentBuilder();
             doc = docBuilder.parse(new InputSource(new StringReader(xml)));
         } catch (Exception e) {

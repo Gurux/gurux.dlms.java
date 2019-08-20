@@ -121,7 +121,7 @@ public enum AutoConnectMode {
         } else {
             this.value = forValue;
         }
-        getMappings().put(new Integer(this.value), this);
+        getMappings().put(this.value, this);
     }
 
     /*
@@ -138,6 +138,6 @@ public enum AutoConnectMode {
         if (value > 200 && value < 255) {
             return MANUFACTURE_SPESIFIC;
         }
-        return getMappings().get(new Integer(value));
+        return getMappings().get(value);
     }
 }

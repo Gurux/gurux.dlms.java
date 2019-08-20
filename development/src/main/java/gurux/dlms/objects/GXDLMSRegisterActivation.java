@@ -158,19 +158,19 @@ public class GXDLMSRegisterActivation extends GXDLMSObject
         // LN is static and read only once.
         if (all || getLogicalName() == null
                 || getLogicalName().compareTo("") == 0) {
-            attributes.add(new Integer(1));
+            attributes.add(1);
         }
         // RegisterAssignment
         if (all || !isRead(2)) {
-            attributes.add(new Integer(2));
+            attributes.add(2);
         }
         // MaskList
         if (all || !isRead(3)) {
-            attributes.add(new Integer(3));
+            attributes.add(3);
         }
         // ActiveMask
         if (all || !isRead(4)) {
-            attributes.add(new Integer(4));
+            attributes.add(4);
         }
         return GXDLMSObjectHelpers.toIntArray(attributes);
     }
@@ -226,7 +226,7 @@ public class GXDLMSRegisterActivation extends GXDLMSObject
                 data.setUInt8(DataType.STRUCTURE.getValue());
                 data.setUInt8(2);
                 GXCommon.setData(settings, data, DataType.UINT16,
-                        new Integer(it.getObjectType().getValue()));
+                        it.getObjectType().getValue());
                 GXCommon.setData(settings, data, DataType.OCTET_STRING,
                         GXCommon.logicalNameToBytes(it.getLogicalName()));
             }
@@ -244,8 +244,7 @@ public class GXDLMSRegisterActivation extends GXDLMSObject
                 data.setUInt8(DataType.ARRAY.getValue());
                 data.setUInt8(it.getValue().length);
                 for (byte b : it.getValue()) {
-                    GXCommon.setData(settings, data, DataType.UINT8,
-                            new Byte(b));
+                    GXCommon.setData(settings, data, DataType.UINT8, b);
                 }
             }
             return data.array();
@@ -363,5 +362,6 @@ public class GXDLMSRegisterActivation extends GXDLMSObject
 
     @Override
     public final void postLoad(final GXXmlReader reader) {
+        // Not needed for this object.
     }
 }

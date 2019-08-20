@@ -137,7 +137,7 @@ public class GXDLMSDisconnectControl extends GXDLMSObject
      * disconnection is enabled.
      */
     public final byte[][] remoteDisconnect(final GXDLMSClient client) {
-        return client.method(this, 1, new Integer(0), DataType.INT8);
+        return client.method(this, 1, 0, DataType.INT8);
     }
 
     /*
@@ -145,12 +145,12 @@ public class GXDLMSDisconnectControl extends GXDLMSObject
      * state if a direct remote reconnection is disabled.
      */
     public final byte[][] remoteReconnect(final GXDLMSClient client) {
-        return client.method(this, 2, new Integer(0), DataType.INT8);
+        return client.method(this, 2, 0, DataType.INT8);
     }
 
     @Override
     public final Object[] getValues() {
-        return new Object[] { getLogicalName(), new Boolean(getOutputState()),
+        return new Object[] { getLogicalName(), getOutputState(),
                 getControlState(), getControlMode() };
     }
 
@@ -161,19 +161,19 @@ public class GXDLMSDisconnectControl extends GXDLMSObject
         // LN is static and read only once.
         if (all || getLogicalName() == null
                 || getLogicalName().compareTo("") == 0) {
-            attributes.add(new Integer(1));
+            attributes.add(1);
         }
         // OutputState
         if (all || canRead(2)) {
-            attributes.add(new Integer(2));
+            attributes.add(2);
         }
         // ControlState
         if (all || canRead(3)) {
-            attributes.add(new Integer(3));
+            attributes.add(3);
         }
         // ControlMode
         if (all || canRead(4)) {
-            attributes.add(new Integer(4));
+            attributes.add(4);
         }
         return GXDLMSObjectHelpers.toIntArray(attributes);
     }
@@ -213,13 +213,13 @@ public class GXDLMSDisconnectControl extends GXDLMSObject
             return GXCommon.logicalNameToBytes(getLogicalName());
         }
         if (e.getIndex() == 2) {
-            return new Boolean(getOutputState());
+            return getOutputState();
         }
         if (e.getIndex() == 3) {
-            return new Integer(getControlState().ordinal());
+            return getControlState().ordinal();
         }
         if (e.getIndex() == 4) {
-            return new Integer(getControlMode().ordinal());
+            return getControlMode().ordinal();
         }
         e.setError(ErrorCode.READ_WRITE_DENIED);
         return null;
@@ -278,5 +278,6 @@ public class GXDLMSDisconnectControl extends GXDLMSObject
 
     @Override
     public final void postLoad(final GXXmlReader reader) {
+        // Not needed for this object.
     }
 }

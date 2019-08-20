@@ -114,7 +114,7 @@ public enum SourceDiagnostic {
 
     SourceDiagnostic(final int value) {
         intValue = value;
-        getMappings().put(new Integer(value), this);
+        getMappings().put(value, this);
     }
 
     /*
@@ -128,6 +128,6 @@ public enum SourceDiagnostic {
      * Convert integer for enumeration value.
      */
     public static SourceDiagnostic forValue(final int value) {
-        return getMappings().get(new Integer(value));
+        return getMappings().get(value);
     }
 }

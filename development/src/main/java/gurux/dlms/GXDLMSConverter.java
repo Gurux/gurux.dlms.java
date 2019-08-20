@@ -258,6 +258,7 @@ public class GXDLMSConverter {
      *            Used standard.
      * @return Collection for special OBIC codes.
      */
+    @SuppressWarnings("squid:S00112")
     static GXObisCode[] getObjects(Standard standard) {
         List<GXObisCode> codes = new ArrayList<GXObisCode>();
         InputStream stream = null;
@@ -309,6 +310,7 @@ public class GXDLMSConverter {
      * @param codes
      *            Collection of standard OBIS codes.
      */
+    @SuppressWarnings("squid:S00112")
     private static void readStandardObisInfo(final Standard standard,
             final GXStandardObisCodeCollection codes) {
 
@@ -548,8 +550,7 @@ public class GXDLMSConverter {
             return ((Number) value).longValue();
         case UINT8:
             if (value instanceof String) {
-                return new Short(
-                        (short) (Short.parseShort((String) value) & 0xFF));
+                return (short) (Short.parseShort((String) value) & 0xFF);
             }
             return ((Number) value).byteValue();
         default:

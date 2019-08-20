@@ -68,7 +68,7 @@ public enum Definition {
 
     Definition(final int mode) {
         this.value = mode;
-        getMappings().put(new Integer(mode), this);
+        getMappings().put(mode, this);
     }
 
     /*
@@ -82,6 +82,6 @@ public enum Definition {
      * Convert integer for enum value.
      */
     public static Definition forValue(final int value) {
-        return getMappings().get(new Integer(value));
+        return getMappings().get(value);
     }
 }

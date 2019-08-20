@@ -178,39 +178,39 @@ public class GXDLMSIECOpticalPortSetup extends GXDLMSObject
         // LN is static and read only once.
         if (all || getLogicalName() == null
                 || getLogicalName().compareTo("") == 0) {
-            attributes.add(new Integer(1));
+            attributes.add(1);
         }
         // DefaultMode
         if (all || !isRead(2)) {
-            attributes.add(new Integer(2));
+            attributes.add(2);
         }
         // DefaultBaudrate
         if (all || !isRead(3)) {
-            attributes.add(new Integer(3));
+            attributes.add(3);
         }
         // ProposedBaudrate
         if (all || !isRead(4)) {
-            attributes.add(new Integer(4));
+            attributes.add(4);
         }
         // ResponseTime
         if (all || !isRead(5)) {
-            attributes.add(new Integer(5));
+            attributes.add(5);
         }
         // DeviceAddress
         if (all || !isRead(6)) {
-            attributes.add(new Integer(6));
+            attributes.add(6);
         }
         // Password1
         if (all || !isRead(7)) {
-            attributes.add(new Integer(7));
+            attributes.add(7);
         }
         // Password2
         if (all || !isRead(8)) {
-            attributes.add(new Integer(8));
+            attributes.add(8);
         }
         // Password5
         if (all || !isRead(9)) {
-            attributes.add(new Integer(9));
+            attributes.add(9);
         }
         return GXDLMSObjectHelpers.toIntArray(attributes);
     }
@@ -274,16 +274,16 @@ public class GXDLMSIECOpticalPortSetup extends GXDLMSObject
             return GXCommon.logicalNameToBytes(getLogicalName());
         }
         if (e.getIndex() == 2) {
-            return new Integer(this.getDefaultMode().getValue());
+            return this.getDefaultMode().getValue();
         }
         if (e.getIndex() == 3) {
-            return new Integer(getDefaultBaudrate().ordinal());
+            return getDefaultBaudrate().ordinal();
         }
         if (e.getIndex() == 4) {
-            return new Integer(getProposedBaudrate().ordinal());
+            return getProposedBaudrate().ordinal();
         }
         if (e.getIndex() == 5) {
-            return new Integer(getResponseTime().ordinal());
+            return getResponseTime().ordinal();
         }
         if (e.getIndex() == 6) {
             return GXCommon.getBytes(deviceAddress);
@@ -373,5 +373,6 @@ public class GXDLMSIECOpticalPortSetup extends GXDLMSObject
 
     @Override
     public final void postLoad(final GXXmlReader reader) {
+        // Not needed for this object.
     }
 }

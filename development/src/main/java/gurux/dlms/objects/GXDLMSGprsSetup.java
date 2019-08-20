@@ -116,9 +116,8 @@ public class GXDLMSGprsSetup extends GXDLMSObject implements IGXDLMSBase {
 
     @Override
     public final Object[] getValues() {
-        return new Object[] { getLogicalName(), getAPN(),
-                new Long(getPINCode()), getDefaultQualityOfService(),
-                getRequestedQualityOfService() };
+        return new Object[] { getLogicalName(), getAPN(), getPINCode(),
+                getDefaultQualityOfService(), getRequestedQualityOfService() };
     }
 
     /*
@@ -132,19 +131,19 @@ public class GXDLMSGprsSetup extends GXDLMSObject implements IGXDLMSBase {
         // LN is static and read only once.
         if (all || getLogicalName() == null
                 || getLogicalName().compareTo("") == 0) {
-            attributes.add(new Integer(1));
+            attributes.add(1);
         }
         // APN
         if (all || !isRead(2)) {
-            attributes.add(new Integer(2));
+            attributes.add(2);
         }
         // PINCode
         if (all || !isRead(3)) {
-            attributes.add(new Integer(3));
+            attributes.add(3);
         }
         // DefaultQualityOfService + RequestedQualityOfService
         if (all || !isRead(4)) {
-            attributes.add(new Integer(4));
+            attributes.add(4);
         }
         return GXDLMSObjectHelpers.toIntArray(attributes);
     }
@@ -199,7 +198,7 @@ public class GXDLMSGprsSetup extends GXDLMSObject implements IGXDLMSBase {
             return apn.getBytes();
         }
         if (e.getIndex() == 3) {
-            return new Long(getPINCode());
+            return getPINCode();
         }
         if (e.getIndex() == 4) {
             GXByteBuffer data = new GXByteBuffer();
@@ -208,27 +207,27 @@ public class GXDLMSGprsSetup extends GXDLMSObject implements IGXDLMSBase {
             data.setUInt8(DataType.STRUCTURE.getValue());
             data.setUInt8(5);
             GXCommon.setData(settings, data, DataType.UINT8,
-                    new Integer(defaultQualityOfService.getPrecedence()));
+                    defaultQualityOfService.getPrecedence());
             GXCommon.setData(settings, data, DataType.UINT8,
-                    new Integer(defaultQualityOfService.getDelay()));
+                    defaultQualityOfService.getDelay());
             GXCommon.setData(settings, data, DataType.UINT8,
-                    new Integer(defaultQualityOfService.getReliability()));
+                    defaultQualityOfService.getReliability());
             GXCommon.setData(settings, data, DataType.UINT8,
-                    new Integer(defaultQualityOfService.getPeakThroughput()));
+                    defaultQualityOfService.getPeakThroughput());
             GXCommon.setData(settings, data, DataType.UINT8,
-                    new Integer(defaultQualityOfService.getMeanThroughput()));
+                    defaultQualityOfService.getMeanThroughput());
             data.setUInt8(DataType.STRUCTURE.getValue());
             data.setUInt8(5);
             GXCommon.setData(settings, data, DataType.UINT8,
-                    new Integer(requestedQualityOfService.getPrecedence()));
+                    requestedQualityOfService.getPrecedence());
             GXCommon.setData(settings, data, DataType.UINT8,
-                    new Integer(requestedQualityOfService.getDelay()));
+                    requestedQualityOfService.getDelay());
             GXCommon.setData(settings, data, DataType.UINT8,
-                    new Integer(requestedQualityOfService.getReliability()));
+                    requestedQualityOfService.getReliability());
             GXCommon.setData(settings, data, DataType.UINT8,
-                    new Integer(requestedQualityOfService.getPeakThroughput()));
+                    requestedQualityOfService.getPeakThroughput());
             GXCommon.setData(settings, data, DataType.UINT8,
-                    new Integer(requestedQualityOfService.getMeanThroughput()));
+                    requestedQualityOfService.getMeanThroughput());
             return data.array();
         }
         e.setError(ErrorCode.READ_WRITE_DENIED);
@@ -346,5 +345,6 @@ public class GXDLMSGprsSetup extends GXDLMSObject implements IGXDLMSBase {
 
     @Override
     public final void postLoad(final GXXmlReader reader) {
+        // Not needed for this object.
     }
 }

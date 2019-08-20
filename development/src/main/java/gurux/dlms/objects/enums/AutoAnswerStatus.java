@@ -51,7 +51,7 @@ public enum AutoAnswerStatus {
 
     AutoAnswerStatus(final int value) {
         intValue = value;
-        getMappings().put(new Integer(value), this);
+        getMappings().put(value, this);
     }
 
     /*
@@ -65,6 +65,6 @@ public enum AutoAnswerStatus {
      * Convert integer for enum value.
      */
     public static AutoAnswerStatus forValue(final int value) {
-        return getMappings().get(new Integer(value));
+        return getMappings().get(value);
     }
 }

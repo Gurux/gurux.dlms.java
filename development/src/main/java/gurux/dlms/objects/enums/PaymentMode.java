@@ -83,7 +83,7 @@ public enum PaymentMode {
      */
     PaymentMode(final int value) {
         intValue = value;
-        getMappings().put(new Integer(value), this);
+        getMappings().put(value, this);
     }
 
     /**
@@ -103,6 +103,6 @@ public enum PaymentMode {
      * @return Enumeration value.
      */
     public static PaymentMode forValue(final int value) {
-        return getMappings().get(new Integer(value));
+        return getMappings().get(value);
     }
 }

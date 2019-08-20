@@ -157,7 +157,7 @@ public class GXDLMSAutoAnswer extends GXDLMSObject implements IGXDLMSBase {
         String str = String.valueOf(numberOfRingsInListeningWindow) + "/"
                 + String.valueOf(numberOfRingsOutListeningWindow);
         return new Object[] { getLogicalName(), getMode(), getListeningWindow(),
-                getStatus(), new Integer(getNumberOfCalls()), str };
+                getStatus(), getNumberOfCalls(), str };
     }
 
     /*
@@ -171,28 +171,28 @@ public class GXDLMSAutoAnswer extends GXDLMSObject implements IGXDLMSBase {
         // LN is static and read only once.
         if (all || getLogicalName() == null
                 || getLogicalName().compareTo("") == 0) {
-            attributes.add(new Integer(1));
+            attributes.add(1);
         }
         // Mode is static and read only once.
         if (all || !isRead(2)) {
-            attributes.add(new Integer(2));
+            attributes.add(2);
         }
         // ListeningWindow is static and read only once.
         if (all || !isRead(3)) {
-            attributes.add(new Integer(3));
+            attributes.add(3);
         }
         // Status is not static.
         if (all || canRead(4)) {
-            attributes.add(new Integer(4));
+            attributes.add(4);
         }
 
         // NumberOfCalls is static and read only once.
         if (all || !isRead(5)) {
-            attributes.add(new Integer(5));
+            attributes.add(5);
         }
         // NumberOfRingsInListeningWindow is static and read only once.
         if (all || !isRead(6)) {
-            attributes.add(new Integer(6));
+            attributes.add(6);
         }
         return GXDLMSObjectHelpers.toIntArray(attributes);
     }
@@ -247,7 +247,7 @@ public class GXDLMSAutoAnswer extends GXDLMSObject implements IGXDLMSBase {
             return GXCommon.logicalNameToBytes(getLogicalName());
         }
         if (e.getIndex() == 2) {
-            return new Integer(getMode().ordinal());
+            return getMode().ordinal();
         }
         if (e.getIndex() == 3) {
             int cnt = getListeningWindow().size();
@@ -271,19 +271,19 @@ public class GXDLMSAutoAnswer extends GXDLMSObject implements IGXDLMSBase {
             return buff.array();
         }
         if (e.getIndex() == 4) {
-            return new Integer(getStatus().getValue());
+            return getStatus().getValue();
         }
         if (e.getIndex() == 5) {
-            return new Integer(getNumberOfCalls());
+            return getNumberOfCalls();
         }
         if (e.getIndex() == 6) {
             GXByteBuffer buff = new GXByteBuffer();
             buff.setUInt8(DataType.STRUCTURE.getValue());
             GXCommon.setObjectCount(2, buff);
             GXCommon.setData(null, buff, DataType.UINT8,
-                    new Integer(numberOfRingsInListeningWindow));
+                    numberOfRingsInListeningWindow);
             GXCommon.setData(null, buff, DataType.UINT8,
-                    new Integer(numberOfRingsOutListeningWindow));
+                    numberOfRingsOutListeningWindow);
             return buff.array();
         }
         e.setError(ErrorCode.READ_WRITE_DENIED);
@@ -386,5 +386,6 @@ public class GXDLMSAutoAnswer extends GXDLMSObject implements IGXDLMSBase {
 
     @Override
     public final void postLoad(final GXXmlReader reader) {
+        // Not needed for this object.
     }
 }

@@ -171,11 +171,11 @@ public class GXDLMSSpecialDaysTable extends GXDLMSObject
         // LN is static and read only once.
         if (all || getLogicalName() == null
                 || getLogicalName().compareTo("") == 0) {
-            attributes.add(new Integer(1));
+            attributes.add(1);
         }
         // Entries
         if (all || !isRead(2)) {
-            attributes.add(new Integer(2));
+            attributes.add(2);
         }
         return GXDLMSObjectHelpers.toIntArray(attributes);
     }
@@ -230,11 +230,10 @@ public class GXDLMSSpecialDaysTable extends GXDLMSObject
                     data.setUInt8(DataType.STRUCTURE.getValue());
                     data.setUInt8(3); // Count
                     GXCommon.setData(null, data, DataType.UINT16,
-                            new Integer(it.getIndex()));
+                            it.getIndex());
                     GXCommon.setData(null, data, DataType.OCTET_STRING,
                             it.getDate());
-                    GXCommon.setData(null, data, DataType.UINT8,
-                            new Integer(it.getDayId()));
+                    GXCommon.setData(null, data, DataType.UINT8, it.getDayId());
                 }
             }
             return data.array();
@@ -345,5 +344,6 @@ public class GXDLMSSpecialDaysTable extends GXDLMSObject
 
     @Override
     public final void postLoad(final GXXmlReader reader) {
+        // Not needed for this object.
     }
 }

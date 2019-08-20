@@ -130,9 +130,9 @@ public class GXx509Certificate {
     }
 
     static String getAlgorithm(final String algorithm) {
-        if (algorithm.toString().endsWith("RSA")) {
+        if (algorithm.endsWith("RSA")) {
             return "RSA";
-        } else if (algorithm.toString().endsWith("ECDSA")) {
+        } else if (algorithm.endsWith("ECDSA")) {
             return "EC";
         } else {
             throw new IllegalStateException("Unknown algorithm:" + algorithm);
@@ -142,6 +142,7 @@ public class GXx509Certificate {
     /*
      * https://tools.ietf.org/html/rfc5280#section-4.1
      */
+    @SuppressWarnings("squid:S106")
     private void init(final byte[] data) {
         GXAsn1Sequence seq =
                 (GXAsn1Sequence) GXAsn1Converter.fromByteArray(data);
@@ -172,7 +173,7 @@ public class GXx509Certificate {
         if (reqInfo.size() > 7) {
             for (Object it : (GXAsn1Sequence) ((GXAsn1Context) reqInfo.get(7))
                     .get(0)) {
-                GXAsn1Sequence s = (GXAsn1Sequence) ((GXAsn1Sequence) it);
+                GXAsn1Sequence s = (GXAsn1Sequence) it;
                 GXAsn1ObjectIdentifier id = (GXAsn1ObjectIdentifier) s.get(0);
                 Object value = s.get(1);
                 X509Certificate t = X509Certificate.forValue(id.toString());
@@ -216,7 +217,7 @@ public class GXx509Certificate {
             X509EncodedKeySpec ecpks = new X509EncodedKeySpec(encodedKey);
             publicKey = eckf.generatePublic(ecpks);
         } catch (InvalidKeySpecException e) {
-            throw new RuntimeException(e.getMessage());
+            throw new IllegalArgumentException(e.getMessage());
         }
         signatureAlgorithm = HashAlgorithm
                 .forValue(((GXAsn1Sequence) seq.get(1)).get(0).toString());
@@ -497,7 +498,7 @@ public class GXx509Certificate {
             signatureAlgorithm = hashAlgorithm;
             signature = instance.sign();
         } catch (Exception e) {
-            throw new RuntimeException(e.getMessage());
+            throw new IllegalArgumentException(e.getMessage());
         }
     }
 
@@ -699,7 +700,7 @@ public class GXx509Certificate {
      *             IO exception.
      */
     public void save(final Path path) throws IOException {
-        StringBuffer sb = new StringBuffer();
+        StringBuilder sb = new StringBuilder();
         if (publicKey != null) {
             sb.append("-----BEGIN CERTIFICATE-----" + System.lineSeparator());
             sb.append(GXCommon.toBase64(getEncoded()));

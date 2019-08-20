@@ -147,19 +147,19 @@ public class GXDLMSModemConfiguration extends GXDLMSObject
         // LN is static and read only once.
         if (all || getLogicalName() == null
                 || getLogicalName().compareTo("") == 0) {
-            attributes.add(new Integer(1));
+            attributes.add(1);
         }
         // CommunicationSpeed
         if (all || !isRead(2)) {
-            attributes.add(new Integer(2));
+            attributes.add(2);
         }
         // InitialisationStrings
         if (all || !isRead(3)) {
-            attributes.add(new Integer(3));
+            attributes.add(3);
         }
         // ModemProfile
         if (all || !isRead(4)) {
-            attributes.add(new Integer(4));
+            attributes.add(4);
         }
         return GXDLMSObjectHelpers.toIntArray(attributes);
     }
@@ -208,7 +208,7 @@ public class GXDLMSModemConfiguration extends GXDLMSObject
             return GXCommon.logicalNameToBytes(getLogicalName());
         }
         if (e.getIndex() == 2) {
-            return new Integer(communicationSpeed.ordinal());
+            return communicationSpeed.ordinal();
         }
         if (e.getIndex() == 3) {
             GXByteBuffer data = new GXByteBuffer();
@@ -228,7 +228,7 @@ public class GXDLMSModemConfiguration extends GXDLMSObject
                     GXCommon.setData(settings, data, DataType.OCTET_STRING,
                             GXCommon.getBytes(it.getResponse()));
                     GXCommon.setData(settings, data, DataType.UINT16,
-                            new Integer(it.getDelay()));
+                            it.getDelay());
                 }
             }
             return data.array();
@@ -347,5 +347,6 @@ public class GXDLMSModemConfiguration extends GXDLMSObject
 
     @Override
     public final void postLoad(final GXXmlReader reader) {
+        // Not needed for this object.
     }
 }

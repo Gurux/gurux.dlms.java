@@ -272,7 +272,7 @@ public class GXDLMSServerBase {
             if (it instanceof GXDLMSAssociationShortName
                     && !this.getUseLogicalNameReferencing()) {
                 if (((GXDLMSAssociationShortName) it).getObjectList()
-                        .size() == 0) {
+                        .isEmpty()) {
                     ((GXDLMSAssociationShortName) it).getObjectList()
                             .addAll(getItems());
                 }
@@ -281,7 +281,7 @@ public class GXDLMSServerBase {
                     && this.getUseLogicalNameReferencing()) {
                 GXDLMSAssociationLogicalName ln =
                         (GXDLMSAssociationLogicalName) it;
-                if (ln.getObjectList().size() == 0) {
+                if (ln.getObjectList().isEmpty()) {
                     ln.getObjectList().addAll(getItems());
                 }
                 associationObject = it;
@@ -372,7 +372,7 @@ public class GXDLMSServerBase {
         try {
             ret = GXAPDU.parsePDU(settings, settings.getCipher(), data, null);
             if (!(ret instanceof AcseServiceProvider)) {
-                if (settings.getNegotiatedConformance().size() == 0) {
+                if (settings.getNegotiatedConformance().isEmpty()) {
                     result = AssociationResult.PERMANENT_REJECTED;
                     ret = SourceDiagnostic.NO_REASON_GIVEN;
                     error = new GXByteBuffer();
@@ -516,6 +516,7 @@ public class GXDLMSServerBase {
      * @param connectionInfo
      *            Connection info.
      */
+    @SuppressWarnings("squid:S1172")
     private void handleReleaseRequest(final GXByteBuffer data,
             final GXDLMSConnectionEventArgs connectionInfo) {
         if (getSettings().getInterfaceType() == InterfaceType.HDLC) {
@@ -663,6 +664,8 @@ public class GXDLMSServerBase {
      * @param sr
      *            Server reply.
      */
+    @SuppressWarnings({ "squid:S00112", "squid:S1193", "squid:S1066",
+            "squid:S1141" })
     public final void handleRequest(GXServerReply sr) {
         if (!sr.isStreaming()
                 && (sr.getData() == null || sr.getData().length == 0)) {
@@ -802,7 +805,6 @@ public class GXDLMSServerBase {
                 settings.setIndex(0);
                 info.clear();
                 receivedData.clear();
-                return;
             } else {
                 reset();
                 if ((settings.getConnected() & ConnectionState.DLMS) != 0) {
@@ -816,10 +818,10 @@ public class GXDLMSServerBase {
                         try {
                             b.onDisconnected(sr.getConnectionInfo());
                         } catch (Exception ex) {
+                            // It's OK if this fails.
                         }
                     }
                 }
-                return;
             }
         }
     }
@@ -890,6 +892,7 @@ public class GXDLMSServerBase {
      * @param connectionInfo Connection info.
      * @return Response for the client.
      */
+    @SuppressWarnings("squid:S1168")
     private byte[] handleCommand(final int cmd, final GXByteBuffer data,
             final GXServerReply sr, final int cipheredCommand)
             throws Exception {
@@ -971,7 +974,8 @@ public class GXDLMSServerBase {
             // Client wants to get next block.
             break;
         default:
-            throw new Exception("Invalid command: " + String.valueOf(cmd));
+            throw new IllegalArgumentException(
+                    "Invalid command: " + String.valueOf(cmd));
         }
         byte[] reply;
         if (settings.getInterfaceType() == InterfaceType.WRAPPER) {
@@ -1047,7 +1051,8 @@ public class GXDLMSServerBase {
             }
         } else {
             // BlockControl
-            short bc = data.getUInt8();
+            // short bc =
+            data.getUInt8();
             // Block number.
             int blockNumber = data.getUInt16();
             // Block number acknowledged.

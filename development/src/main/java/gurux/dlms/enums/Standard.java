@@ -68,7 +68,7 @@ public enum Standard {
 
     Standard(final int mode) {
         this.value = mode;
-        getMappings().put(new Integer(mode), this);
+        getMappings().put(mode, this);
     }
 
     /*
@@ -82,6 +82,6 @@ public enum Standard {
      * Convert integer for enumerated value.
      */
     public static Standard forValue(final int value) {
-        return getMappings().get(new Integer(value));
+        return getMappings().get(value);
     }
 }

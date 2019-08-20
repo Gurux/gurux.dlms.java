@@ -209,20 +209,20 @@ public class GXDLMSAssociationShortName extends GXDLMSObject
         // LN is static and read only once.
         if (all || getLogicalName() == null
                 || getLogicalName().compareTo("") == 0) {
-            attributes.add(new Integer(1));
+            attributes.add(1);
         }
         // ObjectList is static and read only once.
         if (all || !isRead(2)) {
-            attributes.add(new Integer(2));
+            attributes.add(2);
         }
         if (getVersion() > 1) {
             // AccessRightsList is static and read only once.
             if (all || !isRead(3)) {
-                attributes.add(new Integer(3));
+                attributes.add(3);
             }
             // SecuritySetupReference is static and read only once.
             if (all || !isRead(4)) {
-                attributes.add(new Integer(4));
+                attributes.add(4);
             }
         }
         return GXDLMSObjectHelpers.toIntArray(attributes);

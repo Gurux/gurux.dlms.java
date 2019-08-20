@@ -144,16 +144,13 @@ public class GXDLMSAutoConnect extends GXDLMSObject implements IGXDLMSBase {
      * @return Action bytes.
      */
     public final byte[][] connect(final GXDLMSClient client) {
-        return client.method(getName(), getObjectType(), 1, new Integer(0),
-                DataType.INT8);
+        return client.method(getName(), getObjectType(), 1, 0, DataType.INT8);
     }
 
     @Override
     public final Object[] getValues() {
-        return new Object[] { getLogicalName(), getMode(),
-                new Integer(getRepetitions()),
-                new Integer(getRepetitionDelay()), getCallingWindow(),
-                getDestinations() };
+        return new Object[] { getLogicalName(), getMode(), getRepetitions(),
+                getRepetitionDelay(), getCallingWindow(), getDestinations() };
     }
 
     @Override
@@ -176,27 +173,27 @@ public class GXDLMSAutoConnect extends GXDLMSObject implements IGXDLMSBase {
         // LN is static and read only once.
         if (all || getLogicalName() == null
                 || getLogicalName().compareTo("") == 0) {
-            attributes.add(new Integer(1));
+            attributes.add(1);
         }
         // Mode
         if (all || canRead(2)) {
-            attributes.add(new Integer(2));
+            attributes.add(2);
         }
         // Repetitions
         if (all || canRead(3)) {
-            attributes.add(new Integer(3));
+            attributes.add(3);
         }
         // RepetitionDelay
         if (all || canRead(4)) {
-            attributes.add(new Integer(4));
+            attributes.add(4);
         }
         // CallingWindow
         if (all || canRead(5)) {
-            attributes.add(new Integer(5));
+            attributes.add(5);
         }
         // Destinations
         if (all || canRead(6)) {
-            attributes.add(new Integer(6));
+            attributes.add(6);
         }
         return GXDLMSObjectHelpers.toIntArray(attributes);
     }
@@ -251,13 +248,13 @@ public class GXDLMSAutoConnect extends GXDLMSObject implements IGXDLMSBase {
             return GXCommon.logicalNameToBytes(getLogicalName());
         }
         if (e.getIndex() == 2) {
-            return new Byte((byte) mode.getValue());
+            return (byte) mode.getValue();
         }
         if (e.getIndex() == 3) {
-            return new Integer(getRepetitions());
+            return getRepetitions();
         }
         if (e.getIndex() == 4) {
-            return new Integer(getRepetitionDelay());
+            return getRepetitionDelay();
         }
         if (e.getIndex() == 5) {
             int cnt = getCallingWindow().size();
@@ -394,5 +391,6 @@ public class GXDLMSAutoConnect extends GXDLMSObject implements IGXDLMSBase {
 
     @Override
     public final void postLoad(final GXXmlReader reader) {
+        // Not needed for this object.
     }
 }

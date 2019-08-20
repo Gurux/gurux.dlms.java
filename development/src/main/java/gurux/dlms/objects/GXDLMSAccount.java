@@ -653,7 +653,7 @@ public class GXDLMSAccount extends GXDLMSObject implements IGXDLMSBase {
         // LN is static and read only once.
         if (all || getLogicalName() == null
                 || getLogicalName().compareTo("") == 0) {
-            attributes.add(new Integer(1));
+            attributes.add(1);
         }
         // PaymentMode, AccountStatus
         if (all || canRead(2)) {

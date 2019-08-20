@@ -72,10 +72,10 @@ final class GXAPDU {
      * Retrieves the string that indicates the level of authentication, if any.
      */
     private static void getAuthenticationString(final GXDLMSSettings settings,
-            final GXByteBuffer data) {
-        if (settings.getAuthentication() != Authentication.NONE
-                || (settings.getCipher() != null && settings.getCipher()
-                        .getSecurity() != Security.NONE)) {
+            final GXByteBuffer data, final boolean ignoreAcse) {
+        if (settings.getAuthentication() != Authentication.NONE || (!ignoreAcse
+                && settings.getCipher() != null
+                && settings.getCipher().getSecurity() != Security.NONE)) {
             // Add sender ACSE-requirements field component.
             data.setUInt8(BerType.CONTEXT | PduType.SENDER_ACSE_REQUIREMENTS);
             data.setUInt8(2);
@@ -129,6 +129,7 @@ final class GXAPDU {
      * @param cipher
      *            Is ciphering settings.
      */
+    @SuppressWarnings("squid:S2259")
     private static void generateApplicationContextName(
             final GXDLMSSettings settings, final GXByteBuffer data,
             final GXICipher cipher) {
@@ -148,17 +149,23 @@ final class GXAPDU {
         // Len
         data.setUInt8(0x07);
         boolean ciphered = cipher != null && cipher.isCiphered();
+        data.setUInt8(0x60);
+        data.setUInt8(0x85);
+        data.setUInt8(0x74);
+        data.setUInt8(0x5);
+        data.setUInt8(0x8);
+        data.setUInt8(0x1);
         if (settings.getUseLogicalNameReferencing()) {
             if (ciphered) {
-                data.set(GXCommon.LOGICAL_NAME_OBJECT_ID_WITH_CIPHERING);
+                data.setUInt8(3);
             } else {
-                data.set(GXCommon.LOGICAL_NAME_OBJECT_ID);
+                data.setUInt8(1);
             }
         } else {
             if (ciphered) {
-                data.set(GXCommon.SHORT_NAME_OBJECT_ID_WITH_CIPHERING);
+                data.setUInt8(4);
             } else {
-                data.set(GXCommon.SHORT_NAME_OBJECT_ID);
+                data.setUInt8(2);
             }
         }
         // Add system title.
@@ -197,11 +204,10 @@ final class GXAPDU {
      * 
      * @param settings
      *            DLMS settings.
-     * @param cipher
      * @param data
      */
     static void getInitiateRequest(final GXDLMSSettings settings,
-            final GXICipher cipher, final GXByteBuffer data) {
+            final GXByteBuffer data) {
         // Tag for xDLMS-Initiate request
         data.setUInt8(Command.INITIATE_REQUEST);
         // Usage field for the response allowed component.
@@ -261,7 +267,7 @@ final class GXAPDU {
             // Length
             data.setUInt8(0);
             int offset = data.size();
-            getInitiateRequest(settings, cipher, data);
+            getInitiateRequest(settings, data);
             data.setUInt8(offset - 1, data.size() - offset);
         } else {
             if (encryptedData != null && encryptedData.size() != 0) {
@@ -270,14 +276,12 @@ final class GXAPDU {
                 // Tag
                 data.setUInt8(BerType.OCTET_STRING);
                 data.setUInt8((byte) (2 + encryptedData.size()));
-                // Coding the choice for user-information (Octet STRING,
-                // universal)
                 data.setUInt8((byte) Command.GLO_INITIATE_REQUEST);
                 data.setUInt8((byte) encryptedData.size());
                 data.set(encryptedData);
             } else {
                 GXByteBuffer tmp = new GXByteBuffer();
-                getInitiateRequest(settings, cipher, tmp);
+                getInitiateRequest(settings, tmp);
                 AesGcmParameter p = new AesGcmParameter(
                         Command.GLO_INITIATE_REQUEST, cipher.getSecurity(),
                         cipher.getInvocationCounter(), cipher.getSystemTitle(),
@@ -286,8 +290,6 @@ final class GXAPDU {
                 byte[] crypted = GXCiphering.encrypt(p, tmp.array());
                 // Length for AARQ user field
                 data.setUInt8((2 + crypted.length));
-                // Coding the choice for user-information (Octet string,
-                // universal)
                 data.setUInt8(BerType.OCTET_STRING);
                 data.setUInt8(crypted.length);
                 data.set(crypted);
@@ -312,7 +314,8 @@ final class GXAPDU {
         ///////////////////////////////////////////
         // Add Application context name.
         generateApplicationContextName(settings, data, cipher);
-        getAuthenticationString(settings, data);
+        getAuthenticationString(settings, data,
+                (encryptedData != null && encryptedData.size() != 0));
         generateUserInformation(settings, cipher, encryptedData, data);
         data.setUInt8(offset, (data.size() - offset - 1));
     }
@@ -346,19 +349,19 @@ final class GXAPDU {
         short len = data.getUInt8();
         if (data.size() - data.position() < len) {
             if (xml == null) {
-                throw new RuntimeException("Not enough data.");
+                throw new IllegalArgumentException("Not enough data.");
             }
             xml.appendComment("Error: Invalid data size.");
         }
         // Encoding the choice for user information
         short tag = data.getUInt8();
         if (tag != 0x4) {
-            throw new RuntimeException("Invalid tag.");
+            throw new IllegalArgumentException("Invalid tag.");
         }
         len = data.getUInt8();
         if (data.size() - data.position() < len) {
             if (xml == null) {
-                throw new RuntimeException("Not enough data.");
+                throw new IllegalArgumentException("Not enough data.");
             }
             xml.appendComment("Error: Invalid data size.");
         }
@@ -373,6 +376,7 @@ final class GXAPDU {
         parseInitiate(false, settings, cipher, data, xml);
     }
 
+    @SuppressWarnings("squid:S1066")
     static void parse(final boolean initiateRequest,
             final GXDLMSSettings settings, final GXICipher cipher,
             final GXByteBuffer data, final GXDLMSTranslatorStructure xml,
@@ -484,17 +488,15 @@ final class GXAPDU {
                 data.position(data.size());
                 return;
             }
-            throw new RuntimeException("Invalid tag.");
+            throw new IllegalArgumentException("Invalid tag.");
         }
         // Get DLMS version number.
         if (!response) {
             int ver = data.getUInt8();
             settings.setDLMSVersion(ver);
-            if (ver != 6) {
-                if (!settings.isServer()) {
-                    throw new IllegalArgumentException(
-                            "Invalid DLMS version number.");
-                }
+            if (ver != 6 && !settings.isServer()) {
+                throw new IllegalArgumentException(
+                        "Invalid DLMS version number.");
             }
             // ProposedDlmsVersionNumber
             if (xml != null && (initiateRequest || xml
@@ -521,15 +523,17 @@ final class GXAPDU {
         // Tag for conformance block
         tag = data.getUInt8();
         if (tag != 0x5F) {
-            throw new RuntimeException("Invalid tag.");
+            throw new IllegalArgumentException("Invalid tag.");
         }
         // Old Way...
         if (data.getUInt8(data.position()) == 0x1F) {
             data.getUInt8();
         }
-        len = data.getUInt8();
+        // len =
+        data.getUInt8();
         // The number of unused bits in the bit string.
-        tag = data.getUInt8();
+        // tag =
+        data.getUInt8();
         byte[] tmp = new byte[3];
         GXByteBuffer bb = new GXByteBuffer(4);
         data.get(tmp);
@@ -725,18 +729,33 @@ final class GXAPDU {
         // Get length.
         int len = buff.getUInt8();
         if (buff.size() - buff.position() < len) {
-            throw new RuntimeException("Encoding failed. Not enough data.");
+            throw new IllegalArgumentException(
+                    "Encoding failed. Not enough data.");
         }
         if (buff.getUInt8() != 0x6) {
-            throw new RuntimeException("Encoding failed. Not an Object ID.");
+            throw new IllegalArgumentException(
+                    "Encoding failed. Not an Object ID.");
         }
         if (settings.isServer() && settings.getCipher() != null) {
             settings.getCipher().setSecurity(Security.NONE);
         }
         // Object ID length.
         len = buff.getUInt8();
+        byte[] tmp = new byte[len];
+        buff.get(tmp);
+        if (tmp[0] != 0x60 || tmp[1] != -123 || tmp[2] != 0x74 || tmp[3] != 0x5
+                || tmp[4] != 0x8 || tmp[5] != 0x1) {
+            if (xml != null) {
+                xml.appendLine(TranslatorGeneralTags.APPLICATION_CONTEXT_NAME,
+                        "Value", "UNKNOWN");
+                return true;
+            }
+            throw new IllegalArgumentException(
+                    "Encoding failed. Invalid Application context name.");
+        }
+        byte name = tmp[6];
         if (xml != null) {
-            if (buff.compare(GXCommon.LOGICAL_NAME_OBJECT_ID)) {
+            if (name == 1) {
                 if (xml.getOutputType() == TranslatorOutputType.SIMPLE_XML) {
                     xml.appendLine(
                             TranslatorGeneralTags.APPLICATION_CONTEXT_NAME,
@@ -747,8 +766,7 @@ final class GXAPDU {
                             null, "1");
                 }
                 settings.setUseLogicalNameReferencing(true);
-            } else if (buff
-                    .compare(GXCommon.LOGICAL_NAME_OBJECT_ID_WITH_CIPHERING)) {
+            } else if (name == 3) {
                 if (xml.getOutputType() == TranslatorOutputType.SIMPLE_XML) {
                     xml.appendLine(
                             TranslatorGeneralTags.APPLICATION_CONTEXT_NAME,
@@ -759,7 +777,7 @@ final class GXAPDU {
                             null, "3");
                 }
                 settings.setUseLogicalNameReferencing(true);
-            } else if (buff.compare(GXCommon.SHORT_NAME_OBJECT_ID)) {
+            } else if (name == 2) {
                 if (xml.getOutputType() == TranslatorOutputType.SIMPLE_XML) {
                     xml.appendLine(
                             TranslatorGeneralTags.APPLICATION_CONTEXT_NAME,
@@ -770,8 +788,7 @@ final class GXAPDU {
                             null, "2");
                 }
                 settings.setUseLogicalNameReferencing(false);
-            } else if (buff
-                    .compare(GXCommon.SHORT_NAME_OBJECT_ID_WITH_CIPHERING)) {
+            } else if (name == 4) {
                 if (xml.getOutputType() == TranslatorOutputType.SIMPLE_XML) {
                     xml.appendLine(
                             TranslatorGeneralTags.APPLICATION_CONTEXT_NAME,
@@ -788,17 +805,17 @@ final class GXAPDU {
             return true;
         }
         if (settings.getUseLogicalNameReferencing()) {
-            if (buff.compare(GXCommon.LOGICAL_NAME_OBJECT_ID)) {
+            if (name == 1) {
                 return true;
             }
             // If ciphering is used.
-            return buff.compare(GXCommon.LOGICAL_NAME_OBJECT_ID_WITH_CIPHERING);
+            return name == 3;
         }
-        if (buff.compare(GXCommon.SHORT_NAME_OBJECT_ID)) {
+        if (name == 2) {
             return true;
         }
         // If ciphering is used.
-        return buff.compare(GXCommon.SHORT_NAME_OBJECT_ID_WITH_CIPHERING);
+        return name == 4;
     }
 
     private static void validateAare(final GXDLMSSettings settings,
@@ -807,12 +824,12 @@ final class GXAPDU {
         if (settings.isServer()) {
             if (tag != (BerType.APPLICATION | BerType.CONSTRUCTED
                     | PduType.PROTOCOL_VERSION)) {
-                throw new RuntimeException("Invalid tag.");
+                throw new IllegalArgumentException("Invalid tag.");
             }
         } else {
             if (tag != (BerType.APPLICATION | BerType.CONSTRUCTED
                     | PduType.APPLICATION_CONTEXT_NAME)) {
-                throw new RuntimeException("Invalid tag.");
+                throw new IllegalArgumentException("Invalid tag.");
             }
         }
     }
@@ -829,7 +846,7 @@ final class GXAPDU {
         int size = buff.size() - buff.position();
         if (len > size) {
             if (xml == null) {
-                throw new RuntimeException("Not enough data.");
+                throw new IllegalArgumentException("Not enough data.");
             }
             xml.appendComment("Error: Invalid data size.");
         }
@@ -860,7 +877,7 @@ final class GXAPDU {
         buff.getUInt8();
         byte unusedBits = (byte) buff.getUInt8();
         if (unusedBits > 8) {
-            throw new RuntimeException("unusedBits");
+            throw new IllegalArgumentException("unusedBits");
         }
         byte value = (byte) buff.getUInt8();
         StringBuilder sb = new StringBuilder();
@@ -884,6 +901,7 @@ final class GXAPDU {
     /**
      * Parse APDU.
      */
+    @SuppressWarnings("squid:S106")
     public static Object parsePDU2(final GXDLMSSettings settings,
             final GXICipher cipher, final GXByteBuffer buff,
             final GXDLMSTranslatorStructure xml) {
@@ -906,12 +924,12 @@ final class GXAPDU {
                     | PduType.CALLED_AP_TITLE: // 0xA2
                 // Get length.
                 if (buff.getUInt8() != 3) {
-                    throw new RuntimeException("Invalid tag.");
+                    throw new IllegalArgumentException("Invalid tag.");
                 }
                 if (settings.isServer()) {
                     // Choice for result (INTEGER, universal)
                     if (buff.getUInt8() != BerType.OCTET_STRING) {
-                        throw new RuntimeException("Invalid tag.");
+                        throw new IllegalArgumentException("Invalid tag.");
                     }
                     len = buff.getUInt8();
                     tmp = new byte[len];
@@ -931,11 +949,11 @@ final class GXAPDU {
                 } else {
                     // Choice for result (INTEGER, universal)
                     if (buff.getUInt8() != BerType.INTEGER) {
-                        throw new RuntimeException("Invalid tag.");
+                        throw new IllegalArgumentException("Invalid tag.");
                     }
                     // Get length.
                     if (buff.getUInt8() != 1) {
-                        throw new RuntimeException("Invalid tag.");
+                        throw new IllegalArgumentException("Invalid tag.");
                     }
                     resultComponent =
                             AssociationResult.forValue(buff.getUInt8());
@@ -964,8 +982,10 @@ final class GXAPDU {
             // Client system title.
             case BerType.CONTEXT | BerType.CONSTRUCTED
                     | PduType.CALLING_AP_TITLE: // 0xA6
-                len = buff.getUInt8();
-                tag = buff.getUInt8();
+                // len =
+                buff.getUInt8();
+                // tag =
+                buff.getUInt8();
                 len = buff.getUInt8();
                 tmp = new byte[len];
                 buff.get(tmp);
@@ -981,7 +1001,8 @@ final class GXAPDU {
             // Server system title.
             case BerType.CONTEXT | BerType.CONSTRUCTED
                     | PduType.SENDER_ACSE_REQUIREMENTS: // 0xAA
-                len = buff.getUInt8();
+                // len =
+                buff.getUInt8();
                 tag = buff.getUInt8();
                 len = buff.getUInt8();
                 tmp = new byte[len];
@@ -992,9 +1013,12 @@ final class GXAPDU {
             // Client AEInvocationId.
             case BerType.CONTEXT | BerType.CONSTRUCTED
                     | PduType.CALLING_AE_INVOCATION_ID:// 0xA9
-                len = buff.getUInt8();
-                tag = buff.getUInt8();
-                len = buff.getUInt8();
+                // len =
+                buff.getUInt8();
+                // tag =
+                buff.getUInt8();
+                // len =
+                buff.getUInt8();
                 settings.setUserId(buff.getUInt8());
                 if (xml != null) {
                     // CallingAPTitle
@@ -1006,9 +1030,12 @@ final class GXAPDU {
             // Client CalledAeInvocationId.
             case BerType.CONTEXT | BerType.CONSTRUCTED
                     | PduType.CALLED_AE_INVOCATION_ID:// 0xA5
-                len = buff.getUInt8();
-                tag = buff.getUInt8();
-                len = buff.getUInt8();
+                // len =
+                buff.getUInt8();
+                // tag =
+                buff.getUInt8();
+                // len =
+                buff.getUInt8();
                 settings.setUserId(buff.getUInt8());
                 if (xml != null) {
                     // CallingAPTitle
@@ -1019,9 +1046,12 @@ final class GXAPDU {
                 break;
             // Server RespondingAEInvocationId.
             case BerType.CONTEXT | BerType.CONSTRUCTED | 7:// 0xA7
-                len = buff.getUInt8();
-                tag = buff.getUInt8();
-                len = buff.getUInt8();
+                // len =
+                buff.getUInt8();
+                // tag =
+                buff.getUInt8();
+                // len =
+                buff.getUInt8();
                 settings.setUserId(buff.getUInt8());
                 if (xml != null) {
                     // CallingAPTitle
@@ -1033,13 +1063,13 @@ final class GXAPDU {
             case BerType.CONTEXT | BerType.CONSTRUCTED
                     | PduType.CALLING_AP_INVOCATION_ID:// 0xA8
                 if (buff.getUInt8() != 3) {
-                    throw new RuntimeException("Invalid tag.");
+                    throw new IllegalArgumentException("Invalid tag.");
                 }
                 if (buff.getUInt8() != 2) {
-                    throw new RuntimeException("Invalid length.");
+                    throw new IllegalArgumentException("Invalid length.");
                 }
                 if (buff.getUInt8() != 1) {
-                    throw new RuntimeException("Invalid tag length.");
+                    throw new IllegalArgumentException("Invalid tag length.");
                 }
                 // Get value.
                 len = buff.getUInt8();
@@ -1053,10 +1083,10 @@ final class GXAPDU {
             case BerType.CONTEXT | PduType.CALLING_AP_INVOCATION_ID: // 0x88
                 // Get sender ACSE-requirements field component.
                 if (buff.getUInt8() != 2) {
-                    throw new RuntimeException("Invalid tag.");
+                    throw new IllegalArgumentException("Invalid tag.");
                 }
                 if (buff.getUInt8() != BerType.OBJECT_DESCRIPTOR) {
-                    throw new RuntimeException("Invalid tag.");
+                    throw new IllegalArgumentException("Invalid tag.");
                 }
                 // Get only value because client application is
                 // sending system title with LOW authentication.
@@ -1151,14 +1181,14 @@ final class GXAPDU {
         if (settings.isServer()) {
             // Get len.
             if (buff.getUInt8() != 3) {
-                throw new RuntimeException("Invalid tag.");
+                throw new IllegalArgumentException("Invalid tag.");
             }
             // Choice for result (Universal, Octetstring type)
             if (buff.getUInt8() != BerType.INTEGER) {
-                throw new RuntimeException("Invalid tag.");
+                throw new IllegalArgumentException("Invalid tag.");
             }
             if (buff.getUInt8() != 1) {
-                throw new RuntimeException("Invalid tag length.");
+                throw new IllegalArgumentException("Invalid tag length.");
             }
             // Get value.
             len = buff.getUInt8();
@@ -1170,11 +1200,11 @@ final class GXAPDU {
         } else {
             // Get length.
             if (buff.getUInt8() != 0xA) {
-                throw new RuntimeException("Invalid tag.");
+                throw new IllegalArgumentException("Invalid tag.");
             }
             // Choice for result (Universal, Octet string type)
             if (buff.getUInt8() != BerType.OCTET_STRING) {
-                throw new RuntimeException("Invalid tag.");
+                throw new IllegalArgumentException("Invalid tag.");
             }
             // responding-AP-title-field
             // Get length.
@@ -1191,7 +1221,8 @@ final class GXAPDU {
         int tag;
         int len;
         Object ret = 0;
-        len = buff.getUInt8();
+        // len =
+        buff.getUInt8();
         // ACSE service user tag.
         tag = buff.getUInt8();
         len = buff.getUInt8();
@@ -1204,13 +1235,11 @@ final class GXAPDU {
             }
         } else {
             // Result source diagnostic component.
-            tag = buff.getUInt8();
-            if (tag != BerType.INTEGER) {
-                throw new RuntimeException("Invalid tag.");
+            if (buff.getUInt8() != BerType.INTEGER) {
+                throw new IllegalArgumentException("Invalid tag.");
             }
-            len = buff.getUInt8();
-            if (len != 1) {
-                throw new RuntimeException("Invalid tag.");
+            if (buff.getUInt8() != 1) {
+                throw new IllegalArgumentException("Invalid tag.");
             }
             if (tag == 0xA1) {
                 ret = SourceDiagnostic.forValue(buff.getUInt8());
@@ -1284,10 +1313,11 @@ final class GXAPDU {
             final GXByteBuffer buff, final GXDLMSTranslatorStructure xml) {
         byte[] tmp;
         int len;
-        len = buff.getUInt8();
+        // len =
+        buff.getUInt8();
         // Get authentication information.
         if (buff.getUInt8() != 0x80) {
-            throw new RuntimeException("Invalid tag.");
+            throw new IllegalArgumentException("Invalid tag.");
         }
         len = buff.getUInt8();
         tmp = new byte[len];
@@ -1326,28 +1356,29 @@ final class GXAPDU {
 
     private static void updateAuthentication(final GXDLMSSettings settings,
             final GXByteBuffer buff) {
-        int ch = buff.getUInt8();
+        int ch;
+        buff.getUInt8();
         if (buff.getUInt8() != 0x60) {
-            throw new RuntimeException("Invalid tag.");
+            throw new IllegalArgumentException("Invalid tag.");
         }
         if (buff.getUInt8() != 0x85) {
-            throw new RuntimeException("Invalid tag.");
+            throw new IllegalArgumentException("Invalid tag.");
         }
         if (buff.getUInt8() != 0x74) {
-            throw new RuntimeException("Invalid tag.");
+            throw new IllegalArgumentException("Invalid tag.");
         }
         if (buff.getUInt8() != 0x05) {
-            throw new RuntimeException("Invalid tag.");
+            throw new IllegalArgumentException("Invalid tag.");
         }
         if (buff.getUInt8() != 0x08) {
-            throw new RuntimeException("Invalid tag.");
+            throw new IllegalArgumentException("Invalid tag.");
         }
         if (buff.getUInt8() != 0x02) {
-            throw new RuntimeException("Invalid tag.");
+            throw new IllegalArgumentException("Invalid tag.");
         }
         ch = buff.getUInt8();
         if (ch < 0 || ch > 7) {
-            throw new RuntimeException("Invalid tag.");
+            throw new IllegalArgumentException("Invalid tag.");
         }
         settings.setAuthentication(Authentication.forValue(ch));
     }

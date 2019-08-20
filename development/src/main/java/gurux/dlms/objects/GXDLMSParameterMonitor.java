@@ -256,7 +256,7 @@ public class GXDLMSParameterMonitor extends GXDLMSObject
         // LN is static and read only once.
         if (all || getLogicalName() == null
                 || getLogicalName().compareTo("") == 0) {
-            attributes.add(new Integer(1));
+            attributes.add(1);
         }
         // ChangedParameter
         if (all || canRead(2)) {

@@ -84,7 +84,7 @@ public enum Service {
      */
     Service(final int value) {
         intValue = value;
-        getMappings().put(new Integer(value), this);
+        getMappings().put(value, this);
     }
 
     /**
@@ -104,6 +104,6 @@ public enum Service {
      * @return Enumeration value.
      */
     public static Service forValue(final int value) {
-        return getMappings().get(new Integer(value));
+        return getMappings().get(value);
     }
 }

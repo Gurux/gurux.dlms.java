@@ -68,7 +68,7 @@ public enum MBusControlInfo {
      */
     MBusControlInfo(final int value) {
         intValue = value;
-        getMappings().put(new Integer(value), this);
+        getMappings().put(value, this);
     }
 
     /**
@@ -88,6 +88,6 @@ public enum MBusControlInfo {
      * @return Enumeration value.
      */
     public static MBusControlInfo forValue(final int value) {
-        return getMappings().get(new Integer(value));
+        return getMappings().get(value);
     }
 }

@@ -203,8 +203,7 @@ public class GXDLMSPushSetup extends GXDLMSObject implements IGXDLMSBase {
     public final Object[] getValues() {
         return new Object[] { getLogicalName(), pushObjectList,
                 sendDestinationAndMethod, communicationWindow,
-                new Integer(randomisationStartInterval),
-                new Integer(numberOfRetries), new Integer(repetitionDelay) };
+                randomisationStartInterval, numberOfRetries, repetitionDelay };
     }
 
     @Override
@@ -220,8 +219,7 @@ public class GXDLMSPushSetup extends GXDLMSObject implements IGXDLMSBase {
      * Activates the push process.
      */
     public final byte[][] activate(final GXDLMSClient client) {
-        return client.method(getName(), getObjectType(), 1, new Integer(0),
-                DataType.INT8);
+        return client.method(getName(), getObjectType(), 1, 0, DataType.INT8);
     }
 
     @Override
@@ -231,31 +229,31 @@ public class GXDLMSPushSetup extends GXDLMSObject implements IGXDLMSBase {
         // LN is static and read only once.
         if (all || getLogicalName() == null
                 || getLogicalName().compareTo("") == 0) {
-            attributes.add(new Integer(1));
+            attributes.add(1);
         }
         // PushObjectList
         if (all || canRead(2)) {
-            attributes.add(new Integer(2));
+            attributes.add(2);
         }
         // SendDestinationAndMethod
         if (all || canRead(3)) {
-            attributes.add(new Integer(3));
+            attributes.add(3);
         }
         // CommunicationWindow
         if (all || canRead(4)) {
-            attributes.add(new Integer(4));
+            attributes.add(4);
         }
         // RandomisationStartInterval
         if (all || canRead(5)) {
-            attributes.add(new Integer(5));
+            attributes.add(5);
         }
         // NumberOfRetries
         if (all || canRead(6)) {
-            attributes.add(new Integer(6));
+            attributes.add(6);
         }
         // RepetitionDelay
         if (all || canRead(7)) {
-            attributes.add(new Integer(7));
+            attributes.add(7);
         }
         return GXDLMSObjectHelpers.toIntArray(attributes);
     }
@@ -320,21 +318,21 @@ public class GXDLMSPushSetup extends GXDLMSObject implements IGXDLMSBase {
                 buff.setUInt8(DataType.STRUCTURE.getValue());
                 buff.setUInt8(4);
                 GXCommon.setData(settings, buff, DataType.UINT16,
-                        new Integer(it.getKey().getObjectType().getValue()));
+                        it.getKey().getObjectType().getValue());
                 GXCommon.setData(settings, buff, DataType.OCTET_STRING, GXCommon
                         .logicalNameToBytes(it.getKey().getLogicalName()));
                 GXCommon.setData(settings, buff, DataType.INT8,
-                        new Integer(it.getValue().getAttributeIndex()));
+                        it.getValue().getAttributeIndex());
                 GXCommon.setData(settings, buff, DataType.UINT16,
-                        new Integer(it.getValue().getDataIndex()));
+                        it.getValue().getDataIndex());
             }
             return buff.array();
         }
         if (e.getIndex() == 3) {
             buff.setUInt8(DataType.STRUCTURE.getValue());
             buff.setUInt8(3);
-            GXCommon.setData(settings, buff, DataType.ENUM, new Integer(
-                    sendDestinationAndMethod.getService().getValue()));
+            GXCommon.setData(settings, buff, DataType.ENUM,
+                    sendDestinationAndMethod.getService().getValue());
             if (sendDestinationAndMethod.getDestination() != null) {
                 GXCommon.setData(settings, buff, DataType.OCTET_STRING,
                         sendDestinationAndMethod.getDestination().getBytes());
@@ -359,13 +357,13 @@ public class GXDLMSPushSetup extends GXDLMSObject implements IGXDLMSBase {
             return buff.array();
         }
         if (e.getIndex() == 5) {
-            return new Integer(randomisationStartInterval);
+            return randomisationStartInterval;
         }
         if (e.getIndex() == 6) {
-            return new Integer(numberOfRetries);
+            return numberOfRetries;
         }
         if (e.getIndex() == 7) {
-            return new Integer(repetitionDelay);
+            return repetitionDelay;
         }
         e.setError(ErrorCode.READ_WRITE_DENIED);
         return null;
@@ -522,5 +520,6 @@ public class GXDLMSPushSetup extends GXDLMSObject implements IGXDLMSBase {
 
     @Override
     public final void postLoad(final GXXmlReader reader) {
+        // Not needed for this object.
     }
 }

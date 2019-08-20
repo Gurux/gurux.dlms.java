@@ -110,11 +110,11 @@ public class GXDLMSMBusMasterPortSetup extends GXDLMSObject
         // LN is static and read only once.
         if (all || getLogicalName() == null
                 || getLogicalName().compareTo("") == 0) {
-            attributes.add(new Integer(1));
+            attributes.add(1);
         }
         // CommSpeed
         if (all || canRead(2)) {
-            attributes.add(new Integer(2));
+            attributes.add(2);
         }
         return GXDLMSObjectHelpers.toIntArray(attributes);
     }
@@ -157,7 +157,7 @@ public class GXDLMSMBusMasterPortSetup extends GXDLMSObject
             return getLogicalName();
         }
         if (e.getIndex() == 2) {
-            return new Integer(commSpeed.ordinal());
+            return commSpeed.ordinal();
         }
         e.setError(ErrorCode.READ_WRITE_DENIED);
         return null;
@@ -193,5 +193,6 @@ public class GXDLMSMBusMasterPortSetup extends GXDLMSObject
 
     @Override
     public final void postLoad(final GXXmlReader reader) {
+        // Not needed for this object.
     }
 }

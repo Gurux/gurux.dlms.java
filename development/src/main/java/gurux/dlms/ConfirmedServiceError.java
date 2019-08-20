@@ -86,7 +86,7 @@ public enum ConfirmedServiceError {
      */
     ConfirmedServiceError(final int value) {
         intValue = value;
-        getMappings().put(new Integer(value), this);
+        getMappings().put(value, this);
     }
 
     /**
@@ -106,6 +106,6 @@ public enum ConfirmedServiceError {
      * @return Enumeration value.
      */
     public static ConfirmedServiceError forValue(final int value) {
-        return getMappings().get(new Integer(value));
+        return getMappings().get(value);
     }
 }

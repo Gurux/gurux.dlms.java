@@ -71,7 +71,7 @@ enum HdlcControlFrame {
 
     HdlcControlFrame(final int value) {
         intValue = value;
-        getMappings().put(new Integer(value), this);
+        getMappings().put(value, this);
     }
 
     /*
@@ -85,6 +85,6 @@ enum HdlcControlFrame {
      * Convert integer for enum value.
      */
     public static HdlcControlFrame forValue(final int value) {
-        return getMappings().get(new Integer(value));
+        return getMappings().get(value);
     }
 }

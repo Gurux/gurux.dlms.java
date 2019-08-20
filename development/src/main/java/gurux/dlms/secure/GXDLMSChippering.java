@@ -34,8 +34,6 @@
 
 package gurux.dlms.secure;
 
-import java.util.logging.Logger;
-
 import gurux.dlms.GXByteBuffer;
 import gurux.dlms.GXDLMSException;
 import gurux.dlms.GXICipher;
@@ -46,9 +44,6 @@ import gurux.dlms.objects.enums.CertificateType;
 import gurux.dlms.objects.enums.SecuritySuite;
 
 final class GXDLMSChippering {
-    private static final Logger LOGGER =
-            Logger.getLogger(GXDLMSChippering.class.getName());
-
     /*
      * Constructor.
      */
@@ -142,9 +137,7 @@ final class GXDLMSChippering {
             tmp2.set(data.getData(), 0, data.size());
             data = tmp2;
         }
-        byte[] crypted = data.array();
-        // LOGGER.log(Level.INFO, "Crypted: " + GXCommon.toHex(crypted, false));
-        return crypted;
+        return data.array();
     }
 
     private static byte[] getAuthenticatedData(final AesGcmParameter p,
@@ -275,11 +268,13 @@ final class GXDLMSChippering {
                 p.setOtherInformation(tmp);
             }
             // KeyInfo OPTIONAL
-            len = data.getUInt8();
+            // len =
+            data.getUInt8();
             // AgreedKey CHOICE tag.
             data.getUInt8();
             // key-parameters
-            len = data.getUInt8();
+            // len =
+            data.getUInt8();
             value = data.getUInt8();
             p.setKeyParameters(value);
             if (value == 1) {
@@ -300,7 +295,8 @@ final class GXDLMSChippering {
                 throw new IllegalArgumentException("key-parameters");
             }
         }
-        len = GXCommon.getObjectCount(data);
+        // len =
+        GXCommon.getObjectCount(data);
         p.setCipheredContent(data.remaining());
         byte sc = (byte) data.getUInt8();
         Security security = Security.forValue(sc & 0x30);

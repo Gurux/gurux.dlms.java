@@ -145,7 +145,7 @@ public class GXPkcs10 {
             X509EncodedKeySpec ecpks = new X509EncodedKeySpec(encodedKey);
             publicKey = eckf.generatePublic(ecpks);
         } catch (InvalidKeySpecException e) {
-            throw new RuntimeException(e.getMessage());
+            throw new IllegalArgumentException(e.getMessage());
         }
 
         /////////////////////////////
@@ -153,13 +153,13 @@ public class GXPkcs10 {
         GXAsn1Sequence sign = (GXAsn1Sequence) seq.get(1);
         signatureAlgorithm = HashAlgorithm.forValue(sign.get(0).toString());
         if (sign.size() != 1) {
-            signatureParameters = (String) sign.get(1);
+            signatureParameters = sign.get(1);
         }
         /////////////////////////////
         // signature
         signature = ((GXAsn1BitString) seq.get(2)).getValue();
         if (!verify(GXAsn1Converter.toByteArray(reqInfo), signature)) {
-            throw new RuntimeException("Invalid Signature.");
+            throw new IllegalArgumentException("Invalid Signature.");
         }
     }
 
@@ -278,7 +278,7 @@ public class GXPkcs10 {
         bb.append("\r\n");
 
         bb.append("Subject: ");
-        bb.append(subject.toString());
+        bb.append(subject);
         bb.append("\r\n");
 
         bb.append("Algorithm: ");
@@ -315,7 +315,7 @@ public class GXPkcs10 {
             } else if (signatureAlgorithm == HashAlgorithm.SHA_256_RSA) {
                 instance = Signature.getInstance("SHA256withRSA");
             } else {
-                throw new RuntimeException(
+                throw new IllegalArgumentException(
                         "Invalid Signature: " + signatureAlgorithm.toString());
             }
             // instance = Signature.getInstance(signatureAlgorithm.toString());
@@ -323,7 +323,7 @@ public class GXPkcs10 {
             instance.update(data);
             return instance.verify(sign);
         } catch (Exception e) {
-            throw new RuntimeException(e.getMessage());
+            throw new IllegalArgumentException(e.getMessage());
         }
     }
 
@@ -345,7 +345,7 @@ public class GXPkcs10 {
 
     public final byte[] getEncoded() {
         if (signature == null) {
-            throw new RuntimeException("Sign first.");
+            throw new IllegalArgumentException("Sign first.");
         }
         // Certification request info.
         // subject Public key info.
@@ -364,6 +364,7 @@ public class GXPkcs10 {
      * @param hashAlgorithm
      *            Used algorithm for signing.
      */
+    @SuppressWarnings("squid:S00112")
     public void sign(final KeyPair kp, final HashAlgorithm hashAlgorithm) {
         byte[] data = GXAsn1Converter.toByteArray(getdata());
         try {
@@ -420,7 +421,7 @@ public class GXPkcs10 {
      *             IO exception.
      */
     public void save(final Path path) throws IOException {
-        StringBuffer sb = new StringBuffer();
+        StringBuilder sb = new StringBuilder();
         sb.append(
                 "-----BEGIN CERTIFICATE REQUEST-----" + System.lineSeparator());
         sb.append(GXCommon.toBase64(getEncoded()));

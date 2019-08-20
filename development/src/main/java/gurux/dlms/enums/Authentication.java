@@ -132,7 +132,7 @@ public enum Authentication {
     }
 
     public static Authentication valueOfString(final String value) {
-        Authentication v = Authentication.NONE;
+        Authentication v;
         if ("None".equalsIgnoreCase(value)) {
             v = Authentication.NONE;
         } else if ("Low".equalsIgnoreCase(value)) {

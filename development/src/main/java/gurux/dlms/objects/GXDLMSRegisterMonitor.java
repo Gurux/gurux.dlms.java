@@ -129,19 +129,19 @@ public class GXDLMSRegisterMonitor extends GXDLMSObject implements IGXDLMSBase {
         // LN is static and read only once.
         if (all || getLogicalName() == null
                 || getLogicalName().compareTo("") == 0) {
-            attributes.add(new Integer(1));
+            attributes.add(1);
         }
         // Thresholds
         if (all || !isRead(2)) {
-            attributes.add(new Integer(2));
+            attributes.add(2);
         }
         // MonitoredValue
         if (all || !isRead(3)) {
-            attributes.add(new Integer(3));
+            attributes.add(3);
         }
         // Actions
         if (all || !isRead(4)) {
-            attributes.add(new Integer(4));
+            attributes.add(4);
         }
         return GXDLMSObjectHelpers.toIntArray(attributes);
     }
@@ -198,13 +198,13 @@ public class GXDLMSRegisterMonitor extends GXDLMSObject implements IGXDLMSBase {
             bb.setUInt8(3);
             // ClassID
             GXCommon.setData(settings, bb, DataType.UINT16,
-                    new Integer(monitoredValue.getObjectType().getValue()));
+                    monitoredValue.getObjectType().getValue());
             // LN.
             GXCommon.setData(settings, bb, DataType.OCTET_STRING, GXCommon
                     .logicalNameToBytes(monitoredValue.getLogicalName()));
             // Attribute index.
             GXCommon.setData(settings, bb, DataType.INT8,
-                    new Integer(monitoredValue.getAttributeIndex()));
+                    monitoredValue.getAttributeIndex());
             return bb.array();
         }
         if (e.getIndex() == 4) {
@@ -225,7 +225,7 @@ public class GXDLMSRegisterMonitor extends GXDLMSObject implements IGXDLMSBase {
                                     it.getActionUp().getLogicalName()));
                     // ScriptSelector
                     GXCommon.setData(settings, bb, DataType.UINT16,
-                            new Integer(it.getActionUp().getScriptSelector()));
+                            it.getActionUp().getScriptSelector());
                     bb.setUInt8((byte) DataType.STRUCTURE.getValue());
                     bb.setUInt8(2);
                     // LN
@@ -233,8 +233,8 @@ public class GXDLMSRegisterMonitor extends GXDLMSObject implements IGXDLMSBase {
                             GXCommon.logicalNameToBytes(
                                     it.getActionDown().getLogicalName()));
                     // ScriptSelector
-                    GXCommon.setData(settings, bb, DataType.UINT16, new Integer(
-                            it.getActionDown().getScriptSelector()));
+                    GXCommon.setData(settings, bb, DataType.UINT16,
+                            it.getActionDown().getScriptSelector());
                 }
             }
             return bb.array();
@@ -377,5 +377,6 @@ public class GXDLMSRegisterMonitor extends GXDLMSObject implements IGXDLMSBase {
 
     @Override
     public final void postLoad(final GXXmlReader reader) {
+        // Not needed for this object.
     }
 }

@@ -34,8 +34,7 @@
 
 package gurux.dlms.internal;
 
-import java.io.UnsupportedEncodingException;
-import java.nio.charset.Charset;
+import java.nio.charset.StandardCharsets;
 import java.security.PrivateKey;
 import java.security.PublicKey;
 import java.text.DateFormat;
@@ -90,21 +89,10 @@ public final class GXCommon {
 
     }
 
-    /*
-     * HDLC frame start and end character.
-     */
-    public static final byte HDLC_FRAME_START_END = 0x7E;
-    public static final byte[] LOGICAL_NAME_OBJECT_ID =
-            { 0x60, (byte) 0x85, 0x74, 0x05, 0x08, 0x01, 0x01 };
-    public static final byte[] SHORT_NAME_OBJECT_ID =
-            { 0x60, (byte) 0x85, 0x74, 0x05, 0x08, 0x01, 0x02 };
-    public static final byte[] LOGICAL_NAME_OBJECT_ID_WITH_CIPHERING =
-            { 0x60, (byte) 0x85, 0x74, 0x05, 0x08, 0x01, 0x03 };
-    public static final byte[] SHORT_NAME_OBJECT_ID_WITH_CIPHERING =
-            { 0x60, (byte) 0x85, 0x74, 0x05, 0x08, 0x01, 0x04 };
-
+    @SuppressWarnings("squid:S2386")
     public static final byte[] LLC_SEND_BYTES =
             { (byte) 0xE6, (byte) 0xE6, 0x00 };
+    @SuppressWarnings("squid:S2386")
     public static final byte[] LLC_REPLY_BYTES =
             { (byte) 0xE6, (byte) 0xE7, 0x00 };
 
@@ -138,14 +126,10 @@ public final class GXCommon {
      * @return String as bytes.
      */
     public static byte[] getBytes(final String value) {
-        try {
-            if (value == null) {
-                return new byte[0];
-            }
-            return value.getBytes("ASCII");
-        } catch (UnsupportedEncodingException e) {
-            throw new RuntimeException(e.getMessage());
+        if (value == null) {
+            return new byte[0];
         }
+        return value.getBytes(StandardCharsets.US_ASCII);
     }
 
     /*
@@ -179,6 +163,7 @@ public final class GXCommon {
      *            Hex string.
      * @return byte array.
      */
+    @SuppressWarnings("squid:S3034")
     public static byte[] hexToBytes(final String value) {
         if (value == null || value.length() == 0) {
             return new byte[0];
@@ -285,11 +270,9 @@ public final class GXCommon {
         char ch;
         for (int pos = 0; pos != value.length(); ++pos) {
             ch = value.charAt(pos);
-            if (ch != ' ') {
-                if (!((ch > 0x40 && ch < 'G') || (ch > 0x60 && ch < 'g')
-                        || (ch > '/' && ch < ':'))) {
-                    return false;
-                }
+            if (ch != ' ' && !((ch > 0x40 && ch < 'G')
+                    || (ch > 0x60 && ch < 'g') || (ch > '/' && ch < ':'))) {
+                return false;
             }
         }
         return true;
@@ -516,9 +499,9 @@ public final class GXCommon {
     /*
      * Reserved for internal use.
      */
+    @SuppressWarnings("squid:S3034")
     public static void toBitString(final StringBuilder sb, final byte value,
             final int count) {
-
         int count2 = count;
         if (count2 > 0) {
             if (count2 > 8) {
@@ -597,7 +580,7 @@ public final class GXCommon {
             value = getOctetString(data, info, knownType);
             break;
         case BCD:
-            value = getBcd(data, info, knownType);
+            value = getBcd(data, info);
             break;
         case INT8:
             value = getInt8(data, info);
@@ -639,7 +622,7 @@ public final class GXCommon {
             value = getTime(data, info);
             break;
         default:
-            throw new RuntimeException("Invalid data type.");
+            throw new IllegalArgumentException("Invalid data type.");
         }
         return value;
     }
@@ -994,7 +977,7 @@ public final class GXCommon {
             info.setComplete(false);
             return null;
         }
-        value = new Double(buff.getDouble());
+        value = buff.getDouble();
         if (info.getXml() != null) {
             if (info.getXml().isComments()) {
                 info.getXml().appendComment(String.format("%.2f", value));
@@ -1026,7 +1009,7 @@ public final class GXCommon {
             info.setComplete(false);
             return null;
         }
-        value = new Float(buff.getFloat());
+        value = buff.getFloat();
         if (info.getXml() != null) {
 
             if (info.getXml().isComments()) {
@@ -1059,7 +1042,7 @@ public final class GXCommon {
             info.setComplete(false);
             return null;
         }
-        value = new Short(buff.getUInt8());
+        value = buff.getUInt8();
         if (info.getXml() != null) {
             info.getXml().appendLine(info.getXml().getDataType(info.getType()),
                     null, info.getXml().integerToHex(value, 2));
@@ -1109,7 +1092,7 @@ public final class GXCommon {
             info.setComplete(false);
             return null;
         }
-        value = new Long(buff.getInt64());
+        value = buff.getInt64();
         if (info.getXml() != null) {
             info.getXml().appendLine(info.getXml().getDataType(info.getType()),
                     null, info.getXml().integerToHex(value, 16));
@@ -1134,7 +1117,7 @@ public final class GXCommon {
             info.setComplete(false);
             return null;
         }
-        value = new Integer(buff.getUInt16());
+        value = buff.getUInt16();
         if (info.getXml() != null) {
             info.getXml().appendLine(info.getXml().getDataType(info.getType()),
                     null, info.getXml().integerToHex(value, 4));
@@ -1143,6 +1126,7 @@ public final class GXCommon {
         return value;
     }
 
+    @SuppressWarnings("squid:S1172")
     private static void getCompactArrayItem(final GXDLMSSettings settings,
             GXByteBuffer buff, Object[] dt, List<Object> list, int len) {
         List<Object> tmp2 = new ArrayList<Object>();
@@ -1386,7 +1370,7 @@ public final class GXCommon {
                     }
                     info.getXml().append(";");
                 }
-                if (list.size() != 0) {
+                if (!list.isEmpty()) {
                     info.getXml()
                             .setXmlLength(info.getXml().getXmlLength() - 1);
                 }
@@ -1415,7 +1399,7 @@ public final class GXCommon {
             info.setComplete(false);
             return null;
         }
-        value = new Integer(buff.getUInt8() & 0xFF);
+        value = buff.getUInt8() & 0xFF;
         if (info.getXml() != null) {
             info.getXml().appendLine(info.getXml().getDataType(info.getType()),
                     null, info.getXml().integerToHex(value, 2));
@@ -1441,7 +1425,7 @@ public final class GXCommon {
             info.setComplete(false);
             return null;
         }
-        value = new Short(buff.getInt16());
+        value = buff.getInt16();
         if (info.getXml() != null) {
             info.getXml().appendLine(info.getXml().getDataType(info.getType()),
                     null, info.getXml().integerToHex(value, 4));
@@ -1466,7 +1450,7 @@ public final class GXCommon {
             info.setComplete(false);
             return null;
         }
-        value = new Byte(buff.getInt8());
+        value = buff.getInt8();
         if (info.getXml() != null) {
             info.getXml().appendLine(info.getXml().getDataType(info.getType()),
                     null, info.getXml().integerToHex(value, 2));
@@ -1483,8 +1467,8 @@ public final class GXCommon {
      *            Data info.
      * @return parsed BCD value.
      */
-    private static Object getBcd(final GXByteBuffer buff, final GXDataInfo info,
-            final boolean knownType) {
+    private static Object getBcd(final GXByteBuffer buff,
+            final GXDataInfo info) {
         // If there is not enough data available.
         if (buff.size() - buff.position() < 1) {
             info.setComplete(false);
@@ -1652,8 +1636,7 @@ public final class GXCommon {
                                 buff.position() - len, len));
             } else {
                 info.getXml().appendLine(
-                        info.getXml().getDataType(info.getType()), null,
-                        value.toString());
+                        info.getXml().getDataType(info.getType()), null, value);
             }
         }
         return value;
@@ -1699,7 +1682,7 @@ public final class GXCommon {
             info.setComplete(false);
             return null;
         }
-        Integer value = new Integer(buff.getInt32());
+        Integer value = buff.getInt32();
         if (info.getXml() != null) {
             info.getXml().appendLine(info.getXml().getDataType(info.getType()),
                     null, info.getXml().integerToHex(value, 8));
@@ -1808,7 +1791,7 @@ public final class GXCommon {
             final Object value) {
         // If value is enum get integer value.
         if (value instanceof Enum) {
-            throw new RuntimeException(
+            throw new IllegalArgumentException(
                     "Value can't be enum. Give integer value.");
         }
         if ((dataType == DataType.ARRAY || dataType == DataType.STRUCTURE)
@@ -1890,7 +1873,7 @@ public final class GXCommon {
         case COMPACT_ARRAY:
             // Compact array is not work with java because we don't know data
             // types of each element. Java is not support unsigned values.
-            throw new RuntimeException("Invalid data type.");
+            throw new IllegalArgumentException("Invalid data type.");
         case DATETIME:
             setDateTime(settings, buff, value);
             break;
@@ -1901,7 +1884,7 @@ public final class GXCommon {
             setTime(buff, value);
             break;
         default:
-            throw new RuntimeException("Invalid data type.");
+            throw new IllegalArgumentException("Invalid data type.");
         }
     }
 
@@ -1929,11 +1912,11 @@ public final class GXCommon {
             try {
                 tm.setTime(f.parse(value.toString()));
             } catch (ParseException e) {
-                throw new RuntimeException(
+                throw new IllegalArgumentException(
                         "Invalid date time value.\r\n" + e.getMessage());
             }
         } else {
-            throw new RuntimeException("Invalid date format.");
+            throw new IllegalArgumentException("Invalid date format.");
         }
         // Add time.
         if (skip.contains(DateTimeSkips.HOUR)) {
@@ -1980,10 +1963,10 @@ public final class GXCommon {
             try {
                 dt = new GXDateTime(f.parse(String.valueOf(value)));
             } catch (ParseException e) {
-                throw new RuntimeException(e.getMessage());
+                throw new IllegalArgumentException(e.getMessage());
             }
         } else {
-            throw new RuntimeException("Invalid date format.");
+            throw new IllegalArgumentException("Invalid date format.");
         }
         java.util.Calendar tm = java.util.Calendar.getInstance();
         tm.setTime(dt.getMeterCalendar().getTime());
@@ -2037,11 +2020,11 @@ public final class GXCommon {
                 dt = new GXDateTime(f.parse(value.toString()));
                 dt.getSkip().add(DateTimeSkips.MILLISECOND);
             } catch (ParseException e) {
-                throw new RuntimeException(
+                throw new IllegalArgumentException(
                         "Invalid date time value." + e.getMessage());
             }
         } else {
-            throw new RuntimeException("Invalid date format.");
+            throw new IllegalArgumentException("Invalid date format.");
         }
         return dt;
     }
@@ -2286,7 +2269,7 @@ public final class GXCommon {
         } else if (value == null) {
             setObjectCount(0, buff);
         } else {
-            throw new RuntimeException("Invalid data type.");
+            throw new IllegalArgumentException("Invalid data type.");
         }
     }
 
@@ -2301,13 +2284,9 @@ public final class GXCommon {
     private static void setUtfString(final GXByteBuffer buff,
             final Object value) {
         if (value != null) {
-            try {
-                byte[] tmp = String.valueOf(value).getBytes("UTF-8");
-                setObjectCount(tmp.length, buff);
-                buff.set(tmp);
-            } catch (UnsupportedEncodingException e) {
-                throw new RuntimeException(e.getMessage());
-            }
+            byte[] tmp = String.valueOf(value).getBytes(StandardCharsets.UTF_8);
+            setObjectCount(tmp.length, buff);
+            buff.set(tmp);
         } else {
             buff.setUInt8(0);
         }
@@ -2360,7 +2339,7 @@ public final class GXCommon {
                 if (it == '1') {
                     val |= (byte) (1 << index);
                 } else if (it != '0') {
-                    throw new RuntimeException("Not a bit string.");
+                    throw new IllegalArgumentException("Not a bit string.");
                 }
                 --index;
                 if (index == -1) {
@@ -2382,7 +2361,8 @@ public final class GXCommon {
         } else if (value == null) {
             buff.setUInt8(0);
         } else {
-            throw new RuntimeException("BitString must give as string.");
+            throw new IllegalArgumentException(
+                    "BitString must give as string.");
         }
     }
 
@@ -2462,6 +2442,7 @@ public final class GXCommon {
      *            Certificate type.
      * @return Shared secret.
      */
+    @SuppressWarnings("squid:S00112")
     public static byte[] getSharedSecret(final GXICipher c,
             final CertificateType type) {
         try {
@@ -2486,9 +2467,7 @@ public final class GXCommon {
             KeyAgreement ka = KeyAgreement.getInstance("ECDH");
             ka.init(p);
             ka.doPhase(pk, true);
-            byte[] sharedSecret = ka.generateSecret();
-            System.out.println("Shared secret:" + GXCommon.toHex(sharedSecret));
-            return sharedSecret;
+            return ka.generateSecret();
         } catch (Exception ex) {
             throw new RuntimeException(ex.getMessage());
         }
@@ -2504,7 +2483,7 @@ public final class GXCommon {
     public static String toLogicalName(final Object value) {
         if (value instanceof byte[]) {
             byte[] buff = (byte[]) value;
-            if (buff == null || buff.length == 0) {
+            if (buff.length == 0) {
                 buff = new byte[6];
             }
             if (buff.length == 6) {
@@ -2604,7 +2583,7 @@ public final class GXCommon {
                 .inDaylightTime(date.getMeterCalendar().getTime())) {
             calendar.add(Calendar.MINUTE, -60);
         }
-        StringBuffer sb = new StringBuffer();
+        StringBuilder sb = new StringBuilder();
         sb.append(GXCommon.integerString(calendar.get(Calendar.YEAR), 4));
         sb.append(GXCommon.integerString(1 + calendar.get(Calendar.MONTH), 2));
         sb.append(
@@ -2626,6 +2605,6 @@ public final class GXCommon {
      * @return Is ASCII string
      */
     public static boolean isAscii(final String value) {
-        return Charset.forName("US-ASCII").newEncoder().canEncode(value);
+        return StandardCharsets.US_ASCII.newEncoder().canEncode(value);
     }
 }

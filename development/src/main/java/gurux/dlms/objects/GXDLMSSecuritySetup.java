@@ -890,28 +890,28 @@ public class GXDLMSSecuritySetup extends GXDLMSObject implements IGXDLMSBase {
         // LN is static and read only once.
         if (all || getLogicalName() == null
                 || getLogicalName().compareTo("") == 0) {
-            attributes.add(new Integer(1));
+            attributes.add(1);
         }
         // SecurityPolicy
         if (all || canRead(2)) {
-            attributes.add(new Integer(2));
+            attributes.add(2);
         }
         // SecuritySuite
         if (all || canRead(3)) {
-            attributes.add(new Integer(3));
+            attributes.add(3);
         }
         // ClientSystemTitle
         if (all || canRead(4)) {
-            attributes.add(new Integer(4));
+            attributes.add(4);
         }
         // ServerSystemTitle
         if (all || canRead(5)) {
-            attributes.add(new Integer(5));
+            attributes.add(5);
         }
         if (getVersion() != 0) {
             // Certificates
             if (all || canRead(6)) {
-                attributes.add(new Integer(6));
+                attributes.add(6);
             }
         }
         return GXDLMSObjectHelpers.toIntArray(attributes);
@@ -1004,12 +1004,12 @@ public class GXDLMSSecuritySetup extends GXDLMSObject implements IGXDLMSBase {
         }
         if (e.getIndex() == 2) {
             if (getVersion() == 0) {
-                return new Integer(securityPolicy0.ordinal());
+                return securityPolicy0.ordinal();
             }
-            return new Integer(SecurityPolicy.toInteger(securityPolicy));
+            return SecurityPolicy.toInteger(securityPolicy);
         }
         if (e.getIndex() == 3) {
-            return new Integer(getSecuritySuite().getValue());
+            return getSecuritySuite().getValue();
         }
         if (e.getIndex() == 4) {
             return getClientSystemTitle();
@@ -1169,5 +1169,6 @@ public class GXDLMSSecuritySetup extends GXDLMSObject implements IGXDLMSBase {
 
     @Override
     public final void postLoad(final GXXmlReader reader) {
+        // Not needed for this object.
     }
 }

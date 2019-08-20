@@ -229,7 +229,7 @@ public class GXDLMSGSMDiagnostic extends GXDLMSObject implements IGXDLMSBase {
         // LN is static and read only once.
         if (all || getLogicalName() == null
                 || getLogicalName().compareTo("") == 0) {
-            attributes.add(new Integer(1));
+            attributes.add(1);
         }
         // Operator
         if (all || canRead(2)) {

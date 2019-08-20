@@ -205,11 +205,9 @@ public class GXDLMSMBusClient extends GXDLMSObject implements IGXDLMSBase {
     @Override
     public final Object[] getValues() {
         return new Object[] { getLogicalName(), mBusPortReference,
-                captureDefinition, new Long(capturePeriod),
-                new Integer(primaryAddress), new Long(identificationNumber),
-                new Integer(manufacturerID), new Integer(dataHeaderVersion),
-                new Integer(deviceType), new Integer(accessNumber),
-                new Integer(status), new Integer(alarm) };
+                captureDefinition, capturePeriod, primaryAddress,
+                identificationNumber, manufacturerID, dataHeaderVersion,
+                deviceType, accessNumber, status, alarm };
     }
 
     /*
@@ -223,51 +221,51 @@ public class GXDLMSMBusClient extends GXDLMSObject implements IGXDLMSBase {
         // LN is static and read only once.
         if (all || getLogicalName() == null
                 || getLogicalName().compareTo("") == 0) {
-            attributes.add(new Integer(1));
+            attributes.add(1);
         }
         // MBusPortReference
         if (all || canRead(2)) {
-            attributes.add(new Integer(2));
+            attributes.add(2);
         }
         // CaptureDefinition
         if (all || canRead(3)) {
-            attributes.add(new Integer(3));
+            attributes.add(3);
         }
         // CapturePeriod
         if (all || canRead(4)) {
-            attributes.add(new Integer(4));
+            attributes.add(4);
         }
         // PrimaryAddress
         if (all || canRead(5)) {
-            attributes.add(new Integer(5));
+            attributes.add(5);
         }
         // IdentificationNumber
         if (all || canRead(6)) {
-            attributes.add(new Integer(6));
+            attributes.add(6);
         }
         // ManufacturerID
         if (all || canRead(7)) {
-            attributes.add(new Integer(7));
+            attributes.add(7);
         }
         // Version
         if (all || canRead(8)) {
-            attributes.add(new Integer(8));
+            attributes.add(8);
         }
         // DeviceType
         if (all || canRead(9)) {
-            attributes.add(new Integer(9));
+            attributes.add(9);
         }
         // AccessNumber
         if (all || canRead(10)) {
-            attributes.add(new Integer(10));
+            attributes.add(10);
         }
         // Status
         if (all || canRead(11)) {
-            attributes.add(new Integer(11));
+            attributes.add(11);
         }
         // Alarm
         if (all || canRead(12)) {
-            attributes.add(new Integer(12));
+            attributes.add(12);
         }
         return GXDLMSObjectHelpers.toIntArray(attributes);
     }
@@ -361,31 +359,31 @@ public class GXDLMSMBusClient extends GXDLMSObject implements IGXDLMSBase {
             return buff.array();
         }
         if (e.getIndex() == 4) {
-            return new Long(capturePeriod);
+            return capturePeriod;
         }
         if (e.getIndex() == 5) {
-            return new Integer(primaryAddress);
+            return primaryAddress;
         }
         if (e.getIndex() == 6) {
-            return new Long(identificationNumber);
+            return identificationNumber;
         }
         if (e.getIndex() == 7) {
-            return new Integer(manufacturerID);
+            return manufacturerID;
         }
         if (e.getIndex() == 8) {
-            return new Integer(dataHeaderVersion);
+            return dataHeaderVersion;
         }
         if (e.getIndex() == 9) {
-            return new Integer(deviceType);
+            return deviceType;
         }
         if (e.getIndex() == 10) {
-            return new Integer(accessNumber);
+            return accessNumber;
         }
         if (e.getIndex() == 11) {
-            return new Integer(status);
+            return status;
         }
         if (e.getIndex() == 12) {
-            return new Integer(alarm);
+            return alarm;
         }
         e.setError(ErrorCode.READ_WRITE_DENIED);
         return null;
@@ -482,5 +480,6 @@ public class GXDLMSMBusClient extends GXDLMSObject implements IGXDLMSBase {
 
     @Override
     public final void postLoad(final GXXmlReader reader) {
+        // Not needed for this object.
     }
 }

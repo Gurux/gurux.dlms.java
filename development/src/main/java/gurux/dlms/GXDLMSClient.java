@@ -792,6 +792,7 @@ public class GXDLMSClient {
      * @param reply
      *            Received reply from the server.
      */
+    @SuppressWarnings("squid:S00112")
     public final void
             parseApplicationAssociationResponse(final GXByteBuffer reply) {
         GXDataInfo info = new GXDataInfo();
@@ -830,9 +831,9 @@ public class GXDLMSClient {
                 GXByteBuffer challenge = new GXByteBuffer(tmp);
                 equals = challenge.compare(value);
                 if (!equals) {
-                    LOGGER.log(Level.INFO,
-                            "Invalid StoC:" + GXCommon.toHex(value, true) + "-"
-                                    + GXCommon.toHex(tmp, true));
+                    String str = "Invalid StoC:" + GXCommon.toHex(value, true)
+                            + "-" + GXCommon.toHex(tmp, true);
+                    LOGGER.log(Level.INFO, str);
                 }
             }
         } else {
@@ -989,9 +990,9 @@ public class GXDLMSClient {
                         || comp.getClass() != GXDLMSObject.class) {
                     items.add(comp);
                 } else {
-                    System.out.println(
-                            "Unknown object : " + String.valueOf(classID) + " "
-                                    + String.valueOf(baseName));
+                    String str = "Unknown object : " + String.valueOf(classID)
+                            + " " + String.valueOf(baseName);
+                    LOGGER.log(Level.INFO, str);
                 }
             }
         }
@@ -1120,9 +1121,9 @@ public class GXDLMSClient {
                         || comp.getClass() != GXDLMSObject.class) {
                     items.add(comp);
                 } else {
-                    System.out.println("Unknown object : "
-                            + String.valueOf(classID) + " "
-                            + GXCommon.toLogicalName((byte[]) objects[2]));
+                    String str = "Unknown object : " + String.valueOf(classID)
+                            + " " + GXCommon.toLogicalName((byte[]) objects[2]);
+                    LOGGER.log(Level.INFO, str);
                 }
             }
         }
@@ -1338,7 +1339,7 @@ public class GXDLMSClient {
         Object name;
         settings.resetBlockIndex();
         if (getUseLogicalNameReferencing()) {
-            if (ln == null || ln == "") {
+            if (ln == null || ln.isEmpty()) {
                 name = "0.0.40.0.0.255";
             } else {
                 name = ln;
@@ -1831,10 +1832,11 @@ public class GXDLMSClient {
         int pos = 0;
         int columnStart = 1, columnEnd = 0;
         // If columns are given find indexes.
-        if (columns != null && columns.size() != 0) {
+        if (columns != null && !columns.isEmpty()) {
             if (pg.getCaptureObjects() == null
-                    || pg.getCaptureObjects().size() == 0) {
-                throw new RuntimeException("Read capture objects first.");
+                    || pg.getCaptureObjects().isEmpty()) {
+                throw new IllegalArgumentException(
+                        "Read capture objects first.");
             }
             columnStart = pg.getCaptureObjects().size();
             columnEnd = 1;
@@ -1861,7 +1863,7 @@ public class GXDLMSClient {
                     }
                 }
                 if (!found) {
-                    throw new RuntimeException(
+                    throw new IllegalArgumentException(
                             "Invalid column: " + c.getKey().getLogicalName());
                 }
             }
@@ -2033,7 +2035,7 @@ public class GXDLMSClient {
         s.getSkip().add(DateTimeSkips.DAY_OF_WEEK);
         e.getSkip().add(DateTimeSkips.DAY_OF_WEEK);
         GXDLMSObject sort = pg.getSortObject();
-        if (sort == null && pg.getCaptureObjects().size() != 0) {
+        if (sort == null && !pg.getCaptureObjects().isEmpty()) {
             sort = pg.getCaptureObjects().get(0).getKey();
         }
         // If sort object is not found or it is not clock object read all.
@@ -2062,7 +2064,7 @@ public class GXDLMSClient {
         // Add version
         GXCommon.setData(settings, buff, DataType.UINT16, sort.getVersion());
         // If Unix time is used.
-        if (pg.getCaptureObjects().size() != 0
+        if (!pg.getCaptureObjects().isEmpty()
                 && pg.getCaptureObjects().get(0).getKey() instanceof GXDLMSData
                 && pg.getCaptureObjects().get(0).getKey().getLogicalName()
                         .equals("0.0.1.1.0.255")) {
@@ -2359,7 +2361,7 @@ public class GXDLMSClient {
      * @return Read request as byte array. {@link parseAccessResponse}
      */
     public final byte[][] accessRequest(final Date time,
-            final ArrayList<GXDLMSAccessItem> list) {
+            final List<GXDLMSAccessItem> list) {
         GXByteBuffer bb = new GXByteBuffer();
         GXCommon.setObjectCount(list.size(), bb);
         for (GXDLMSAccessItem it : list) {
@@ -2466,19 +2468,17 @@ public class GXDLMSClient {
             getInitialConformance(final boolean useLogicalNameReferencing) {
         Set<Conformance> list = new HashSet<Conformance>();
         if (useLogicalNameReferencing) {
-            list.addAll(Arrays.asList(
-                    new Conformance[] { Conformance.BLOCK_TRANSFER_WITH_ACTION,
-                            Conformance.BLOCK_TRANSFER_WITH_SET_OR_WRITE,
-                            Conformance.BLOCK_TRANSFER_WITH_GET_OR_READ,
-                            Conformance.SET, Conformance.SELECTIVE_ACCESS,
-                            Conformance.ACTION, Conformance.MULTIPLE_REFERENCES,
-                            Conformance.GET }));
+            list.addAll(Arrays.asList(Conformance.BLOCK_TRANSFER_WITH_ACTION,
+                    Conformance.BLOCK_TRANSFER_WITH_SET_OR_WRITE,
+                    Conformance.BLOCK_TRANSFER_WITH_GET_OR_READ,
+                    Conformance.SET, Conformance.SELECTIVE_ACCESS,
+                    Conformance.ACTION, Conformance.MULTIPLE_REFERENCES,
+                    Conformance.GET));
         } else {
-            list.addAll(Arrays
-                    .asList(new Conformance[] { Conformance.INFORMATION_REPORT,
-                            Conformance.READ, Conformance.UN_CONFIRMED_WRITE,
-                            Conformance.WRITE, Conformance.PARAMETERIZED_ACCESS,
-                            Conformance.MULTIPLE_REFERENCES }));
+            list.addAll(Arrays.asList(Conformance.INFORMATION_REPORT,
+                    Conformance.READ, Conformance.UN_CONFIRMED_WRITE,
+                    Conformance.WRITE, Conformance.PARAMETERIZED_ACCESS,
+                    Conformance.MULTIPLE_REFERENCES));
         }
         return list;
     }
@@ -2521,7 +2521,7 @@ public class GXDLMSClient {
      * @return Array of objects and called indexes.
      */
     public final List<Entry<GXDLMSObject, Integer>>
-            ParsePushObjects(final Object[] data) {
+            parsePushObjects(final Object[] data) {
         List<Entry<GXDLMSObject, Integer>> objects =
                 new ArrayList<Entry<GXDLMSObject, Integer>>();
         if (data != null) {
@@ -2543,14 +2543,30 @@ public class GXDLMSClient {
                         objects.add(new GXSimpleEntry<GXDLMSObject, Integer>(
                                 comp, ((Number) tmp[2]).intValue()));
                     } else {
-                        System.out.println("Unknown object: "
+                        String str = "Unknown object: "
                                 + String.valueOf(classID) + " "
-                                + GXCommon.toLogicalName((byte[]) tmp[1]));
+                                + GXCommon.toLogicalName((byte[]) tmp[1]);
+                        LOGGER.log(Level.INFO, str);
                     }
                 }
             }
         }
         return objects;
+    }
+
+    /**
+     * Returns collection of push objects.
+     * 
+     * @param data
+     *            Received value.
+     * @return Array of objects and called indexes.
+     * @deprecated use {@link #parsePushObjects} instead.
+     */
+    @Deprecated
+    @SuppressWarnings({ "squid:S00100", "squid:S1133", "squid:S1845" })
+    public final List<Entry<GXDLMSObject, Integer>>
+            ParsePushObjects(final Object[] data) {
+        return parsePushObjects(data);
     }
 
     /**

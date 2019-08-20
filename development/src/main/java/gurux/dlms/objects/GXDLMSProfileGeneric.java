@@ -167,7 +167,7 @@ public class GXDLMSProfileGeneric extends GXDLMSObject implements IGXDLMSBase {
      * @return Action bytes.
      */
     public final byte[][] reset(final GXDLMSClient client) {
-        return client.method(this, 1, new Integer(0), DataType.INT8);
+        return client.method(this, 1, 0, DataType.INT8);
     }
 
     /**
@@ -179,7 +179,7 @@ public class GXDLMSProfileGeneric extends GXDLMSObject implements IGXDLMSBase {
      * @return Action bytes.
      */
     public final byte[][] capture(final GXDLMSClient client) {
-        return client.method(this, 2, new Integer(0), DataType.INT8);
+        return client.method(this, 2, 0, DataType.INT8);
     }
 
     /*
@@ -352,35 +352,35 @@ public class GXDLMSProfileGeneric extends GXDLMSObject implements IGXDLMSBase {
         // LN is static and read only once.
         if (all || getLogicalName() == null
                 || getLogicalName().compareTo("") == 0) {
-            attributes.add(new Integer(1));
+            attributes.add(1);
         }
         // Buffer
         if (all || !isRead(2)) {
-            attributes.add(new Integer(2));
+            attributes.add(2);
         }
         // CaptureObjects
         if (all || !isRead(3)) {
-            attributes.add(new Integer(3));
+            attributes.add(3);
         }
         // CapturePeriod
         if (all || !isRead(4)) {
-            attributes.add(new Integer(4));
+            attributes.add(4);
         }
         // SortMethod
         if (all || !isRead(5)) {
-            attributes.add(new Integer(5));
+            attributes.add(5);
         }
         // SortObject
         if (all || !isRead(6)) {
-            attributes.add(new Integer(6));
+            attributes.add(6);
         }
         // EntriesInUse
         if (all || !isRead(7)) {
-            attributes.add(new Integer(7));
+            attributes.add(7);
         }
         // ProfileEntries
         if (all || !isRead(8)) {
-            attributes.add(new Integer(8));
+            attributes.add(8);
         }
         return GXDLMSObjectHelpers.toIntArray(attributes);
     }

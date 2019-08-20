@@ -45,13 +45,13 @@ final class GXAsn1Settings {
      */
     private boolean comments;
 
-    private final StringBuffer sb = new StringBuffer();
+    private final StringBuilder sb = new StringBuilder();
     private HashMap<Short, String> tags = new HashMap<Short, String>();
     private HashMap<String, Short> tagbyName = new HashMap<String, Short>();
 
     private void addTag(final int key, final String value) {
-        tags.put(new Short((short) key), value);
-        tagbyName.put(value.toLowerCase(), new Short((short) key));
+        tags.put((short) key, value);
+        tagbyName.put(value.toLowerCase(), (short) key);
     }
 
     /**
@@ -105,11 +105,11 @@ final class GXAsn1Settings {
     public void appendComment(final int offset, final String value) {
         if (comments) {
             boolean empty = sb.length() == 0;
-            StringBuffer tmp;
+            StringBuilder tmp;
             if (empty) {
                 tmp = sb;
             } else {
-                tmp = new StringBuffer();
+                tmp = new StringBuilder();
             }
             for (int pos = 0; pos < count - 1; ++pos) {
                 tmp.append(' ');

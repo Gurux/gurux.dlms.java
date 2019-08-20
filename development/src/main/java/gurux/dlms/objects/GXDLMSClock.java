@@ -260,8 +260,7 @@ public class GXDLMSClock extends GXDLMSObject implements IGXDLMSBase {
             tm.getSkip().add(DateTimeSkips.DEVITATION);
         } else {
             // If clock's time zone is different what user want's to use.
-            int offset =
-                    timeZone + (int) now.getTimeZone().getRawOffset() / 60000;
+            int offset = timeZone + now.getTimeZone().getRawOffset() / 60000;
             if (offset != 0) {
                 TimeZone tz = GXDateTime.getTimeZone(timeZone, enabled);
                 if (tz != null) {
@@ -286,6 +285,7 @@ public class GXDLMSClock extends GXDLMSObject implements IGXDLMSBase {
     }
 
     @Override
+    @SuppressWarnings("squid:S1168")
     public final byte[] invoke(final GXDLMSSettings settings,
             final ValueEventArgs e) {
         // Resets the value to the default value.
@@ -332,12 +332,12 @@ public class GXDLMSClock extends GXDLMSObject implements IGXDLMSBase {
             GXDateTime presetTime = (GXDateTime) GXDLMSClient.changeType(
                     (byte[]) ((Object[]) e.getParameters())[0],
                     DataType.DATETIME);
-            GXDateTime validityIntervalStart = (GXDateTime) GXDLMSClient
-                    .changeType((byte[]) ((Object[]) e.getParameters())[1],
-                            DataType.DATETIME);
-            GXDateTime validityIntervalEnd = (GXDateTime) GXDLMSClient
-                    .changeType((byte[]) ((Object[]) e.getParameters())[2],
-                            DataType.DATETIME);
+            // GXDateTime validityIntervalStart = (GXDateTime)
+            GXDLMSClient.changeType((byte[]) ((Object[]) e.getParameters())[1],
+                    DataType.DATETIME);
+            // GXDateTime validityIntervalEnd = (GXDateTime)
+            GXDLMSClient.changeType((byte[]) ((Object[]) e.getParameters())[2],
+                    DataType.DATETIME);
             setTime(presetTime);
         } else if (e.getIndex() == 6) {
             // Shifts the time.
@@ -359,7 +359,7 @@ public class GXDLMSClock extends GXDLMSObject implements IGXDLMSBase {
      * (*:00, *:15, *:30, *:45).
      */
     public final byte[][] adjustToQuarter(final GXDLMSClient client) {
-        return client.method(this, 1, new Integer(0), DataType.INT8);
+        return client.method(this, 1, 0, DataType.INT8);
     }
 
     /*
@@ -367,7 +367,7 @@ public class GXDLMSClock extends GXDLMSObject implements IGXDLMSBase {
      * period.
      */
     public final byte[][] adjustToMeasuringPeriod(final GXDLMSClient client) {
-        return client.method(this, 2, new Integer(0), DataType.INT8);
+        return client.method(this, 2, 0, DataType.INT8);
     }
 
     /*
@@ -377,7 +377,7 @@ public class GXDLMSClock extends GXDLMSObject implements IGXDLMSBase {
      * incremented if necessary.
      */
     public final byte[][] adjustToMinute(final GXDLMSClient client) {
-        return client.method(this, 3, new Integer(0), DataType.INT8);
+        return client.method(this, 3, 0, DataType.INT8);
     }
 
     /*
@@ -386,7 +386,7 @@ public class GXDLMSClock extends GXDLMSObject implements IGXDLMSBase {
      * validity_interval_end, then time is set to preset_time.
      */
     public final byte[][] adjustToPresetTime(final GXDLMSClient client) {
-        return client.method(this, 4, new Integer(0), DataType.INT8);
+        return client.method(this, 4, 0, DataType.INT8);
     }
 
     /*
@@ -415,7 +415,7 @@ public class GXDLMSClock extends GXDLMSObject implements IGXDLMSBase {
         if (forTime < -900 || forTime > 900) {
             throw new IllegalArgumentException("Invalid shift time.");
         }
-        return client.method(this, 6, new Integer(forTime), DataType.INT16);
+        return client.method(this, 6, forTime, DataType.INT16);
     }
 
     /*
@@ -677,5 +677,6 @@ public class GXDLMSClock extends GXDLMSObject implements IGXDLMSBase {
 
     @Override
     public final void postLoad(final GXXmlReader reader) {
+        // Not needed for this object.
     }
 }

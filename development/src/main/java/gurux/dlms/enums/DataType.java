@@ -172,7 +172,7 @@ public enum DataType {
 
     DataType(final int value) {
         intValue = value;
-        getMappings().put(new Integer(value), this);
+        getMappings().put(value, this);
     }
 
     /*
@@ -186,7 +186,7 @@ public enum DataType {
      * Convert integer for enum value.
      */
     public static DataType forValue(final int value) {
-        DataType type = getMappings().get(new Integer(value));
+        DataType type = getMappings().get(value);
         if (type == null) {
             throw new IllegalArgumentException(
                     "Invalid data type: " + String.valueOf(value));

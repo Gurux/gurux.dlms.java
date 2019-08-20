@@ -211,6 +211,7 @@ public class GXDLMSSecureClient extends GXDLMSClient {
                 type, getSettings().getSourceSystemTitle());
     }
 
+    @SuppressWarnings("squid:S00112")
     public final void parseServerCertificate(final byte[] data,
             final PublicKey pk) {
         // ephemeral public key
@@ -239,6 +240,7 @@ public class GXDLMSSecureClient extends GXDLMSClient {
      * @param sPk
      *            Server's public key.
      */
+    @SuppressWarnings("squid:S00112")
     public final void getSharedSecret(final byte[] data, final PublicKey sPk) {
         // ephemeral public key
         GXByteBuffer data2 = new GXByteBuffer(65);

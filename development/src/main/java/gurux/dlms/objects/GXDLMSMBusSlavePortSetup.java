@@ -153,8 +153,7 @@ public class GXDLMSMBusSlavePortSetup extends GXDLMSObject
     @Override
     public final Object[] getValues() {
         return new Object[] { getLogicalName(), getDefaultBaud(),
-                getAvailableBaud(), getAddressState(),
-                new Integer(getBusAddress()) };
+                getAvailableBaud(), getAddressState(), getBusAddress() };
     }
 
     /*
@@ -168,23 +167,23 @@ public class GXDLMSMBusSlavePortSetup extends GXDLMSObject
         // LN is static and read only once.
         if (all || getLogicalName() == null
                 || getLogicalName().compareTo("") == 0) {
-            attributes.add(new Integer(1));
+            attributes.add(1);
         }
         // DefaultBaud
         if (all || !isRead(2)) {
-            attributes.add(new Integer(2));
+            attributes.add(2);
         }
         // AvailableBaud
         if (all || !isRead(3)) {
-            attributes.add(new Integer(3));
+            attributes.add(3);
         }
         // AddressState
         if (all || !isRead(4)) {
-            attributes.add(new Integer(4));
+            attributes.add(4);
         }
         // BusAddress
         if (all || !isRead(5)) {
-            attributes.add(new Integer(5));
+            attributes.add(5);
         }
         return GXDLMSObjectHelpers.toIntArray(attributes);
     }
@@ -233,16 +232,16 @@ public class GXDLMSMBusSlavePortSetup extends GXDLMSObject
             return GXCommon.logicalNameToBytes(getLogicalName());
         }
         if (e.getIndex() == 2) {
-            return new Integer(getDefaultBaud().ordinal());
+            return getDefaultBaud().ordinal();
         }
         if (e.getIndex() == 3) {
-            return new Integer(getAvailableBaud().ordinal());
+            return getAvailableBaud().ordinal();
         }
         if (e.getIndex() == 4) {
-            return new Integer(getAddressState().ordinal());
+            return getAddressState().ordinal();
         }
         if (e.getIndex() == 5) {
-            return new Integer(getBusAddress());
+            return getBusAddress();
         }
         e.setError(ErrorCode.READ_WRITE_DENIED);
         return null;
@@ -309,5 +308,6 @@ public class GXDLMSMBusSlavePortSetup extends GXDLMSObject
 
     @Override
     public final void postLoad(final GXXmlReader reader) {
+        // Not needed for this object.
     }
 }

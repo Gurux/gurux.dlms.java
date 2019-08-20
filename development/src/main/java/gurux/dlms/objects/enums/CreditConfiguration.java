@@ -98,7 +98,7 @@ public enum CreditConfiguration {
      */
     CreditConfiguration(final int value) {
         intValue = value;
-        getMappings().put(new Integer(value), this);
+        getMappings().put(value, this);
     }
 
     /*

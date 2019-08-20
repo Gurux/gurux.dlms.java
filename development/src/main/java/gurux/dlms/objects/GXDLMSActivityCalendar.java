@@ -194,44 +194,44 @@ public class GXDLMSActivityCalendar extends GXDLMSObject
         // LN is static and read only once.
         if (all || getLogicalName() == null
                 || getLogicalName().compareTo("") == 0) {
-            attributes.add(new Integer(1));
+            attributes.add(1);
         }
         // CalendarNameActive
         if (all || canRead(2)) {
-            attributes.add(new Integer(2));
+            attributes.add(2);
         }
         // SeasonProfileActive
         if (all || canRead(3)) {
-            attributes.add(new Integer(3));
+            attributes.add(3);
         }
 
         // WeekProfileTableActive
         if (all || canRead(4)) {
-            attributes.add(new Integer(4));
+            attributes.add(4);
         }
         // DayProfileTableActive
         if (all || canRead(5)) {
-            attributes.add(new Integer(5));
+            attributes.add(5);
         }
         // CalendarNamePassive
         if (all || canRead(6)) {
-            attributes.add(new Integer(6));
+            attributes.add(6);
         }
         // SeasonProfilePassive
         if (all || canRead(7)) {
-            attributes.add(new Integer(7));
+            attributes.add(7);
         }
         // WeekProfileTablePassive
         if (all || canRead(8)) {
-            attributes.add(new Integer(8));
+            attributes.add(8);
         }
         // DayProfileTablePassive
         if (all || canRead(9)) {
-            attributes.add(new Integer(9));
+            attributes.add(9);
         }
         // Time.
         if (all || canRead(10)) {
-            attributes.add(new Integer(10));
+            attributes.add(10);
         }
         return GXDLMSObjectHelpers.toIntArray(attributes);
     }
@@ -332,19 +332,19 @@ public class GXDLMSActivityCalendar extends GXDLMSObject
                 GXCommon.setData(settings, data, DataType.OCTET_STRING,
                         it.getName());
                 GXCommon.setData(settings, data, DataType.UINT8,
-                        new Integer(it.getMonday()));
+                        it.getMonday());
                 GXCommon.setData(settings, data, DataType.UINT8,
-                        new Integer(it.getTuesday()));
+                        it.getTuesday());
                 GXCommon.setData(settings, data, DataType.UINT8,
-                        new Integer(it.getWednesday()));
+                        it.getWednesday());
                 GXCommon.setData(settings, data, DataType.UINT8,
-                        new Integer(it.getThursday()));
+                        it.getThursday());
                 GXCommon.setData(settings, data, DataType.UINT8,
-                        new Integer(it.getFriday()));
+                        it.getFriday());
                 GXCommon.setData(settings, data, DataType.UINT8,
-                        new Integer(it.getSaturday()));
+                        it.getSaturday());
                 GXCommon.setData(settings, data, DataType.UINT8,
-                        new Integer(it.getSunday()));
+                        it.getSunday());
             }
         }
         return data.array();
@@ -363,8 +363,7 @@ public class GXDLMSActivityCalendar extends GXDLMSObject
             for (final GXDLMSDayProfile it : target) {
                 data.setUInt8(DataType.STRUCTURE.getValue());
                 data.setUInt8(2);
-                GXCommon.setData(settings, data, DataType.UINT8,
-                        new Integer(it.getDayId()));
+                GXCommon.setData(settings, data, DataType.UINT8, it.getDayId());
                 data.setUInt8(DataType.ARRAY.getValue());
                 // Add count
                 GXCommon.setObjectCount(it.getDaySchedules().length, data);
@@ -378,7 +377,7 @@ public class GXDLMSActivityCalendar extends GXDLMSObject
                             GXCommon.logicalNameToBytes(
                                     action.getScriptLogicalName()));
                     GXCommon.setData(settings, data, DataType.UINT16,
-                            new Integer(action.getScriptSelector()));
+                            action.getScriptSelector());
                 }
             }
         }
@@ -751,5 +750,6 @@ public class GXDLMSActivityCalendar extends GXDLMSObject
 
     @Override
     public final void postLoad(final GXXmlReader reader) {
+        // Not needed for this object.
     }
 }

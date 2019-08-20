@@ -36,10 +36,10 @@ package gurux.dlms;
 import java.io.StringReader;
 import java.io.StringWriter;
 
+import javax.xml.XMLConstants;
 import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.DocumentBuilderFactory;
 import javax.xml.transform.Transformer;
-import javax.xml.transform.TransformerConfigurationException;
 import javax.xml.transform.TransformerException;
 import javax.xml.transform.TransformerFactory;
 import javax.xml.transform.dom.DOMSource;
@@ -176,8 +176,8 @@ public class GXDLMSXmlPdu {
         privateSleep = value;
     }
 
-    static String getOuterXml(Node node)
-            throws TransformerConfigurationException, TransformerException {
+    @SuppressWarnings("squid:S4435")
+    static String getOuterXml(Node node) throws TransformerException {
         Transformer transformer =
                 TransformerFactory.newInstance().newTransformer();
         transformer.setOutputProperty("omit-xml-declaration", "yes");
@@ -197,10 +197,11 @@ public class GXDLMSXmlPdu {
         try {
             return getOuterXml(xmlNode);
         } catch (Exception ex) {
-            throw new RuntimeException(ex.getMessage());
+            throw new IllegalArgumentException(ex.getMessage());
         }
     }
 
+    @SuppressWarnings("squid:S1066")
     private static void compare(final Node expectedNode, final Node actualNode,
             final java.util.ArrayList<String> list) {
         int cnt = expectedNode.getChildNodes().getLength();
@@ -279,6 +280,7 @@ public class GXDLMSXmlPdu {
      *            XML string to compare.
      * @return True, if content is same.
      */
+    @SuppressWarnings("squid:S00112")
     public final java.util.ArrayList<String> compare(String xml) {
         java.util.ArrayList<String> list = new java.util.ArrayList<String>();
         // XmlDocument doc2 = new XmlDocument();
@@ -288,6 +290,8 @@ public class GXDLMSXmlPdu {
         DocumentBuilderFactory docBuilderFactory =
                 DocumentBuilderFactory.newInstance();
         try {
+            docBuilderFactory.setFeature(XMLConstants.FEATURE_SECURE_PROCESSING,
+                    true);
             docBuilder = docBuilderFactory.newDocumentBuilder();
             doc = docBuilder.parse(new InputSource(new StringReader(xml)));
         } catch (Exception e) {

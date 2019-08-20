@@ -1088,7 +1088,7 @@ final class GXDLMSLNCommandHandler {
                 v.setValue(value);
                 obj.setValue(settings, v);
                 list.add(new GXSimpleEntry<GXDLMSObject, Integer>(obj,
-                        new Integer(index)));
+                        (int) index));
             } else {
                 System.out
                         .println("InformationReport message. Unknown object : "

@@ -115,7 +115,7 @@ public class GXPkcs8 {
                 X509EncodedKeySpec ecpks = new X509EncodedKeySpec(encodedKey);
                 setPublicKey(eckf.generatePublic(ecpks));
             } catch (InvalidKeySpecException e) {
-                throw new RuntimeException(e.getMessage());
+                throw new IllegalArgumentException(e.getMessage());
             }
 
             // PublicKeyInfo ::= SEQUENCE {
@@ -163,7 +163,7 @@ public class GXPkcs8 {
                 PKCS8EncodedKeySpec ecpks = new PKCS8EncodedKeySpec(data);
                 privateKey = (eckf.generatePrivate(ecpks));
             } catch (InvalidKeySpecException e) {
-                throw new RuntimeException(e.getMessage());
+                throw new IllegalArgumentException(e.getMessage());
             }
         }
     }
@@ -267,7 +267,7 @@ public class GXPkcs8 {
      *             IO exception.
      */
     public void save(final Path path) throws IOException {
-        StringBuffer sb = new StringBuffer();
+        StringBuilder sb = new StringBuilder();
         if (publicKey != null) {
             sb.append("-----BEGIN PUBLIC KEY-----" + System.lineSeparator());
             sb.append(GXCommon.toBase64(publicKey.getEncoded()));

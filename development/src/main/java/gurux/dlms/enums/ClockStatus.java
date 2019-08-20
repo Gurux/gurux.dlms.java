@@ -104,7 +104,7 @@ public enum ClockStatus {
 
     ClockStatus(final int forValue) {
         this.value = forValue;
-        getMappings().put(new Integer(forValue), this);
+        getMappings().put(forValue, this);
     }
 
     /*

@@ -95,7 +95,7 @@ public enum Ip4SetupIpOptionType {
 
     Ip4SetupIpOptionType(final int value) {
         intValue = value;
-        getMappings().put(new Integer(value), this);
+        getMappings().put(value, this);
     }
 
     public int getValue() {
@@ -103,6 +103,6 @@ public enum Ip4SetupIpOptionType {
     }
 
     public static Ip4SetupIpOptionType forValue(final int value) {
-        return getMappings().get(new Integer(value));
+        return getMappings().get(value);
     }
 }

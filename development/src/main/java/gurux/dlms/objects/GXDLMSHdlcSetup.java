@@ -161,13 +161,10 @@ public class GXDLMSHdlcSetup extends GXDLMSObject implements IGXDLMSBase {
     @Override
     public final Object[] getValues() {
         return new Object[] { getLogicalName(), getCommunicationSpeed(),
-                new Integer(getWindowSizeTransmit()),
-                new Integer(getWindowSizeReceive()),
-                new Integer(getMaximumInfoLengthTransmit()),
-                new Integer(getMaximumInfoLengthReceive()),
-                new Integer(getInterCharachterTimeout()),
-                new Integer(getInactivityTimeout()),
-                new Integer(getDeviceAddress()) };
+                getWindowSizeTransmit(), getWindowSizeReceive(),
+                getMaximumInfoLengthTransmit(), getMaximumInfoLengthReceive(),
+                getInterCharachterTimeout(), getInactivityTimeout(),
+                getDeviceAddress() };
     }
 
     /*
@@ -181,39 +178,39 @@ public class GXDLMSHdlcSetup extends GXDLMSObject implements IGXDLMSBase {
         // LN is static and read only once.
         if (all || getLogicalName() == null
                 || getLogicalName().compareTo("") == 0) {
-            attributes.add(new Integer(1));
+            attributes.add(1);
         }
         // CommunicationSpeed
         if (all || !isRead(2)) {
-            attributes.add(new Integer(2));
+            attributes.add(2);
         }
         // WindowSizeTransmit
         if (all || !isRead(3)) {
-            attributes.add(new Integer(3));
+            attributes.add(3);
         }
         // WindowSizeReceive
         if (all || !isRead(4)) {
-            attributes.add(new Integer(4));
+            attributes.add(4);
         }
         // MaximumInfoLengthTransmit
         if (all || !isRead(5)) {
-            attributes.add(new Integer(5));
+            attributes.add(5);
         }
         // MaximumInfoLengthReceive
         if (all || !isRead(6)) {
-            attributes.add(new Integer(6));
+            attributes.add(6);
         }
         // InterCharachterTimeout
         if (all || !isRead(7)) {
-            attributes.add(new Integer(7));
+            attributes.add(7);
         }
         // InactivityTimeout
         if (all || !isRead(8)) {
-            attributes.add(new Integer(8));
+            attributes.add(8);
         }
         // DeviceAddress
         if (all || !isRead(9)) {
-            attributes.add(new Integer(9));
+            attributes.add(9);
         }
         return GXDLMSObjectHelpers.toIntArray(attributes);
     }
@@ -283,28 +280,28 @@ public class GXDLMSHdlcSetup extends GXDLMSObject implements IGXDLMSBase {
             return GXCommon.logicalNameToBytes(getLogicalName());
         }
         if (e.getIndex() == 2) {
-            return new Integer(communicationSpeed.ordinal());
+            return communicationSpeed.ordinal();
         }
         if (e.getIndex() == 3) {
-            return new Integer(windowSizeTransmit);
+            return windowSizeTransmit;
         }
         if (e.getIndex() == 4) {
-            return new Integer(windowSizeReceive);
+            return windowSizeReceive;
         }
         if (e.getIndex() == 5) {
-            return new Integer(maximumInfoLengthTransmit);
+            return maximumInfoLengthTransmit;
         }
         if (e.getIndex() == 6) {
-            return new Integer(maximumInfoLengthReceive);
+            return maximumInfoLengthReceive;
         }
         if (e.getIndex() == 7) {
-            return new Integer(interCharachterTimeout);
+            return interCharachterTimeout;
         }
         if (e.getIndex() == 8) {
-            return new Integer(inactivityTimeout);
+            return inactivityTimeout;
         }
         if (e.getIndex() == 9) {
-            return new Integer(deviceAddress);
+            return deviceAddress;
         }
         e.setError(ErrorCode.READ_WRITE_DENIED);
         return null;
@@ -373,5 +370,6 @@ public class GXDLMSHdlcSetup extends GXDLMSObject implements IGXDLMSBase {
 
     @Override
     public final void postLoad(final GXXmlReader reader) {
+        // Not needed for this object.
     }
 }
