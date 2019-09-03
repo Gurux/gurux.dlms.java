@@ -88,7 +88,19 @@ public final class GXCommon {
     private GXCommon() {
 
     }
-
+    /*
+     * HDLC frame start and end character.
+    */
+    public static final byte HDLC_FRAME_START_END = 0x7E;
+    public static final byte[] LOGICAL_NAME_OBJECT_ID =
+            { 0x60, (byte) 0x85, 0x74, 0x05, 0x08, 0x01, 0x01 };
+    public static final byte[] SHORT_NAME_OBJECT_ID =
+            { 0x60, (byte) 0x85, 0x74, 0x05, 0x08, 0x01, 0x02 };
+    public static final byte[] LOGICAL_NAME_OBJECT_ID_WITH_CIPHERING =
+            { 0x60, (byte) 0x85, 0x74, 0x05, 0x08, 0x01, 0x03 };
+    public static final byte[] SHORT_NAME_OBJECT_ID_WITH_CIPHERING =
+            { 0x60, (byte) 0x85, 0x74, 0x05, 0x08, 0x01, 0x04 };
+    
     @SuppressWarnings("squid:S2386")
     public static final byte[] LLC_SEND_BYTES =
             { (byte) 0xE6, (byte) 0xE6, 0x00 };
