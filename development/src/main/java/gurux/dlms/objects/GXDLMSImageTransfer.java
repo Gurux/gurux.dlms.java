@@ -260,9 +260,9 @@ public class GXDLMSImageTransfer extends GXDLMSObject implements IGXDLMSBase {
         if (e.getIndex() == 1) {
             imageFirstNotTransferredBlockNumber = 0;
             imageTransferredBlocksStatus = "";
-            Object[] value = (Object[]) e.getParameters();
-            byte[] imageIdentifier = (byte[]) value[0];
-            imageSize = ((Number) value[1]).longValue();
+            List<?> value = (List<?>) e.getParameters();
+            byte[] imageIdentifier = (byte[]) value.get(0);
+            imageSize = ((Number) value.get(1)).longValue();
             imageTransferStatus = ImageTransferStatus.IMAGE_TRANSFER_INITIATED;
             List<GXDLMSImageActivateInfo> list =
                     new ArrayList<GXDLMSImageActivateInfo>();
@@ -294,13 +294,13 @@ public class GXDLMSImageTransfer extends GXDLMSObject implements IGXDLMSBase {
             return null;
         } else if (e.getIndex() == 2) {
             // Image block transfer
-            Object[] value = (Object[]) e.getParameters();
-            long imageIndex = ((Number) value[0]).longValue();
+            List<?> value = (List<?>) e.getParameters();
+            long imageIndex = ((Number) value.get(0)).longValue();
             byte[] tmp = imageTransferredBlocksStatus.getBytes();
             tmp[(int) imageIndex] = '1';
             imageTransferredBlocksStatus = new String(tmp);
             imageFirstNotTransferredBlockNumber = imageIndex + 1;
-            imageData.put(imageIndex, (byte[]) value[1]);
+            imageData.put(imageIndex, (byte[]) value.get(1));
             imageTransferStatus = ImageTransferStatus.IMAGE_TRANSFER_INITIATED;
             return null;
         } else if (e.getIndex() == 3) {
@@ -428,12 +428,12 @@ public class GXDLMSImageTransfer extends GXDLMSObject implements IGXDLMSBase {
             if (e.getValue() != null) {
                 List<GXDLMSImageActivateInfo> list =
                         new ArrayList<GXDLMSImageActivateInfo>();
-                for (Object it : (Object[]) e.getValue()) {
+                for (Object it : (List<?>) e.getValue()) {
                     GXDLMSImageActivateInfo item =
                             new GXDLMSImageActivateInfo();
-                    item.setSize(((Number) ((Object[]) it)[0]).longValue());
-                    item.setIdentification((byte[]) ((Object[]) it)[1]);
-                    item.setSignature((byte[]) ((Object[]) it)[2]);
+                    item.setSize(((Number) ((List<?>) it).get(0)).longValue());
+                    item.setIdentification((byte[]) ((List<?>) it).get(1));
+                    item.setSignature((byte[]) ((List<?>) it).get(2));
                     list.add(item);
                 }
                 imageActivateInfo =

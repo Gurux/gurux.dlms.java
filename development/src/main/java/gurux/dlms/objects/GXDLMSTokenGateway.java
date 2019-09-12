@@ -400,7 +400,7 @@ public class GXDLMSTokenGateway extends GXDLMSObject implements IGXDLMSBase {
         case 4:
             descriptions.clear();
             if (e.getValue() != null) {
-                for (Object it : (Object[]) e.getValue()) {
+                for (Object it : (List<?>) e.getValue()) {
                     descriptions.add(new String((byte[]) it));
                 }
             }
@@ -411,8 +411,8 @@ public class GXDLMSTokenGateway extends GXDLMSObject implements IGXDLMSBase {
             break;
         case 6:
             statusCode = TokenStatusCode.forValue(
-                    ((Number) ((Object[]) e.getValue())[0]).intValue());
-            dataValue = String.valueOf(((Object[]) e.getValue())[1]);
+                    ((Number) ((List<?>) e.getValue()).get(0)).intValue());
+            dataValue = String.valueOf(((List<?>) e.getValue()).get(1));
             break;
         default:
             e.setError(ErrorCode.READ_WRITE_DENIED);

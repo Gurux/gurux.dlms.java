@@ -576,6 +576,7 @@ public class GXDLMSSecuritySetup extends GXDLMSObject implements IGXDLMSBase {
         return subject;
     }
 
+    @SuppressWarnings("unchecked")
     @Override
     public final byte[] invoke(final GXDLMSSettings settings,
             final ValueEventArgs e) {
@@ -610,11 +611,11 @@ public class GXDLMSSecuritySetup extends GXDLMSObject implements IGXDLMSBase {
                 }
             }
         } else if (e.getIndex() == 2) {
-            for (Object tmp : (Object[]) e.getParameters()) {
-                Object[] item = (Object[]) tmp;
-                GlobalKeyType type =
-                        GlobalKeyType.values()[((Number) item[0]).intValue()];
-                byte[] data = (byte[]) item[1];
+            for (Object tmp : (List<?>) e.getParameters()) {
+                List<?> item = (List<?>) tmp;
+                GlobalKeyType type = GlobalKeyType
+                        .values()[((Number) item.get(0)).intValue()];
+                byte[] data = (byte[]) item.get(1);
                 switch (type) {
                 case UNICAST_ENCRYPTION:
                 case BROADCAST_ENCRYPTION:
@@ -636,12 +637,14 @@ public class GXDLMSSecuritySetup extends GXDLMSObject implements IGXDLMSBase {
         } else if (e.getIndex() == 3) {
             // key_agreement
             try {
-                Object[] tmp = (Object[]) ((Object[]) e.getParameters())[0];
-                short keyId = (short) tmp[0];
+                List<Object> tmp =
+                        (List<Object>) ((List<Object>) e.getParameters())
+                                .get(0);
+                short keyId = (short) tmp.get(0);
                 if (keyId != 0) {
                     e.setError(ErrorCode.READ_WRITE_DENIED);
                 } else {
-                    byte[] data = (byte[]) tmp[1];
+                    byte[] data = (byte[]) tmp.get(1);
                     // ephemeral public key
                     GXByteBuffer data2 = new GXByteBuffer(65);
                     data2.setUInt8(keyId);
@@ -760,20 +763,21 @@ public class GXDLMSSecuritySetup extends GXDLMSObject implements IGXDLMSBase {
             }
         } else if (e.getIndex() == 7) {
             // export_certificate
-            Object[] tmp = ((Object[]) e.getParameters());
-            short type = (short) tmp[0];
+            List<Object> tmp = (List<Object>) e.getParameters();
+            short type = (short) tmp.get(0);
             GXx509Certificate cert = null;
             synchronized (settings.getCipher().getCertificates()) {
                 if (type == 0) {
-                    tmp = (Object[]) tmp[1];
+                    tmp = (List<Object>) tmp.get(1);
                     cert = findCertificateByEntity(settings,
-                            CertificateEntity.forValue((short) tmp[0]),
-                            CertificateType.forValue((short) tmp[1]),
-                            (byte[]) tmp[2]);
+                            CertificateEntity.forValue((short) tmp.get(0)),
+                            CertificateType.forValue((short) tmp.get(1)),
+                            (byte[]) tmp.get(2));
                 } else if (type == 1) {
-                    tmp = (Object[]) tmp[1];
-                    cert = findCertificateBySerial(settings, (byte[]) tmp[1],
-                            new String((byte[]) tmp[2]));
+                    tmp = (List<Object>) tmp.get(1);
+                    cert = findCertificateBySerial(settings,
+                            (byte[]) tmp.get(1),
+                            new String((byte[]) tmp.get(2)));
                 }
                 if (cert == null) {
                     e.setError(ErrorCode.HARDWARE_FAULT);
@@ -783,18 +787,20 @@ public class GXDLMSSecuritySetup extends GXDLMSObject implements IGXDLMSBase {
             }
         } else if (e.getIndex() == 8) {
             // remove_certificate
-            Object[] tmp = (Object[]) ((Object[]) e.getParameters())[0];
-            short type = (short) tmp[0];
+            List<Object> tmp =
+                    (List<Object>) ((List<?>) e.getParameters()).get(0);
+            short type = (short) tmp.get(0);
             GXx509Certificate cert = null;
             synchronized (settings.getCipher().getCertificates()) {
                 if (type == 0) {
                     cert = findCertificateByEntity(settings,
-                            CertificateEntity.forValue((int) tmp[1]),
-                            CertificateType.forValue((int) tmp[2]),
-                            (byte[]) tmp[3]);
+                            CertificateEntity.forValue((int) tmp.get(1)),
+                            CertificateType.forValue((int) tmp.get(2)),
+                            (byte[]) tmp.get(3));
                 } else if (type == 1) {
-                    cert = findCertificateBySerial(settings, (byte[]) tmp[1],
-                            new String((byte[]) tmp[2]));
+                    cert = findCertificateBySerial(settings,
+                            (byte[]) tmp.get(1),
+                            new String((byte[]) tmp.get(2)));
                 }
                 if (cert == null) {
                     e.setError(ErrorCode.HARDWARE_FAULT);
@@ -1024,20 +1030,20 @@ public class GXDLMSSecuritySetup extends GXDLMSObject implements IGXDLMSBase {
         return null;
     }
 
-    private void updateSertificates(final Object[] list) {
+    private void updateSertificates(final List<?> list) {
         certificates.clear();
         if (list != null) {
             for (Object tmp : list) {
-                Object[] it = (Object[]) tmp;
+                List<?> it = (List<?>) tmp;
                 GXDLMSCertificateInfo info = new GXDLMSCertificateInfo();
                 info.setEntity(CertificateEntity
-                        .forValue(((Number) it[0]).intValue()));
-                info.setType(
-                        CertificateType.forValue(((Number) it[1]).intValue()));
-                info.setSerialNumber(new String((byte[]) it[2]));
-                info.setIssuer(new String((byte[]) it[3]));
-                info.setSubject(new String((byte[]) it[4]));
-                info.setSubjectAltName(new String((byte[]) it[5]));
+                        .forValue(((Number) it.get(0)).intValue()));
+                info.setType(CertificateType
+                        .forValue(((Number) it.get(1)).intValue()));
+                info.setSerialNumber(new String((byte[]) it.get(2)));
+                info.setIssuer(new String((byte[]) it.get(3)));
+                info.setSubject(new String((byte[]) it.get(4)));
+                info.setSubjectAltName(new String((byte[]) it.get(5)));
                 certificates.add(info);
             }
         }
@@ -1072,7 +1078,7 @@ public class GXDLMSSecuritySetup extends GXDLMSObject implements IGXDLMSBase {
         } else if (e.getIndex() == 5) {
             setServerSystemTitle((byte[]) e.getValue());
         } else if (e.getIndex() == 6) {
-            updateSertificates((Object[]) e.getValue());
+            updateSertificates((List<?>) e.getValue());
         } else {
             e.setError(ErrorCode.READ_WRITE_DENIED);
         }

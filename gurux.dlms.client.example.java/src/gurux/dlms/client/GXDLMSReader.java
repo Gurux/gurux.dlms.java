@@ -1,7 +1,7 @@
 //
 // --------------------------------------------------------------------------
 //  Gurux Ltd
-// 
+//
 //
 //
 // Filename:        $HeadURL$
@@ -19,16 +19,16 @@
 // This file is a part of Gurux Device Framework.
 //
 // Gurux Device Framework is Open Source software; you can redistribute it
-// and/or modify it under the terms of the GNU General Public License 
+// and/or modify it under the terms of the GNU General Public License
 // as published by the Free Software Foundation; version 2 of the License.
 // Gurux Device Framework is distributed in the hope that it will be useful,
-// but WITHOUT ANY WARRANTY; without even the implied warranty of 
-// MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. 
+// but WITHOUT ANY WARRANTY; without even the implied warranty of
+// MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
 // See the GNU General Public License for more details.
 //
 // More information of Gurux products: http://www.gurux.org
 //
-// This code is licensed under the GNU General Public License v2. 
+// This code is licensed under the GNU General Public License v2.
 // Full text may be retrieved at http://www.gnu.org/licenses/gpl-2.0.txt
 //---------------------------------------------------------------------------
 package gurux.dlms.client;
@@ -43,7 +43,6 @@ import java.nio.file.Paths;
 import java.text.NumberFormat;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.Date;
 import java.util.List;
 import java.util.Map.Entry;
@@ -164,7 +163,7 @@ public class GXDLMSReader {
 
     /**
      * Handle received notify messages.
-     * 
+     *
      * @param reply
      *            Received data.
      * @throws Exception
@@ -182,8 +181,8 @@ public class GXDLMSReader {
             }
         } else // Show data notification.
         {
-            if (value instanceof Object[]) {
-                for (Object it : (Object[]) value) {
+            if (value instanceof List<?>) {
+                for (Object it : (List<?>) value) {
                     System.out.println("Value:" + String.valueOf(it));
                 }
             } else {
@@ -311,7 +310,7 @@ public class GXDLMSReader {
 
     /**
      * Reads next data block.
-     * 
+     *
      * @param data
      * @return
      * @throws Exception
@@ -323,7 +322,7 @@ public class GXDLMSReader {
                 if (reply.isStreaming()) {
                     data = null;
                 } else {
-                    data = dlms.receiverReady(reply.getMoreData());
+                    data = dlms.receiverReady(reply);
                 }
                 readDLMSPacket(data, reply);
             }
@@ -332,7 +331,7 @@ public class GXDLMSReader {
 
     /**
      * Initializes connection.
-     * 
+     *
      * @param port
      * @throws InterruptedException
      * @throws Exception
@@ -353,16 +352,17 @@ public class GXDLMSReader {
                 synchronized (Media.getSynchronous()) {
                     data = "/?!\r\n";
                     writeTrace(
-                            "RX: " + now() + "\t"
+                            "TX: " + now() + "\t"
                                     + GXCommon
                                             .bytesToHex(data.getBytes("ASCII")),
                             TraceLevel.VERBOSE);
                     Media.send(data, null);
                     if (!Media.receive(p)) {
-                        throw new Exception("Invalid meter type.");
+                        throw new Exception(
+                                "Failed to received reply from the media.");
                     }
                     writeTrace(
-                            "TX: " + now() + "\t"
+                            "RX: " + now() + "\t"
                                     + GXCommon.bytesToHex(p.getReply()),
                             TraceLevel.VERBOSE);
                     // If echo is used.
@@ -370,10 +370,11 @@ public class GXDLMSReader {
                     if (data.equals(replyStr)) {
                         p.setReply(null);
                         if (!Media.receive(p)) {
-                            throw new Exception("Invalid meter type.");
+                            throw new Exception(
+                                    "Failed to received reply from the media.");
                         }
                         writeTrace(
-                                "TX: " + now() + "\t"
+                                "RX: " + now() + "\t"
                                         + GXCommon.bytesToHex(p.getReply()),
                                 TraceLevel.VERBOSE);
                         replyStr = new String(p.getReply());
@@ -479,7 +480,7 @@ public class GXDLMSReader {
 
     /**
      * Reads selected DLMS object with selected attribute index.
-     * 
+     *
      * @param item
      * @param attributeIndex
      * @return
@@ -510,7 +511,7 @@ public class GXDLMSReader {
                 readDataBlock(it, reply);
                 // Value is null if data is send in multiple frames.
                 if (reply.getValue() != null) {
-                    values.addAll(Arrays.asList((Object[]) reply.getValue()));
+                    values.addAll((List<?>) reply.getValue());
                 }
                 reply.clear();
             }
@@ -524,7 +525,7 @@ public class GXDLMSReader {
 
     /**
      * Writes value to DLMS object with selected attribute index.
-     * 
+     *
      * @param item
      * @param attributeIndex
      * @throws Exception
@@ -552,7 +553,7 @@ public class GXDLMSReader {
 
     /**
      * Read Profile Generic's data by entry start and count.
-     * 
+     *
      * @param pg
      * @param index
      * @param count
@@ -569,7 +570,7 @@ public class GXDLMSReader {
 
     /**
      * Read Profile Generic's data by range (start and end time).
-     * 
+     *
      * @param pg
      * @param sortedItem
      * @param start
@@ -712,20 +713,33 @@ public class GXDLMSReader {
         } else if (val instanceof Double) {
             NumberFormat formatter = NumberFormat.getNumberInstance();
             val = formatter.format(val);
+        } else if (val instanceof List) {
+            StringBuilder sb = new StringBuilder();
+            for (Object tmp : (List<?>) val) {
+                if (sb.length() != 0) {
+                    sb.append(", ");
+                }
+                if (tmp instanceof byte[]) {
+                    sb.append(GXCommon.bytesToHex((byte[]) tmp));
+                } else {
+                    sb.append(String.valueOf(tmp));
+                }
+            }
+            val = sb.toString();
         } else if (val != null && val.getClass().isArray()) {
-            String str = "";
+            StringBuilder sb = new StringBuilder();
             for (int pos2 = 0; pos2 != Array.getLength(val); ++pos2) {
-                if (!str.equals("")) {
-                    str += ", ";
+                if (sb.length() != 0) {
+                    sb.append(", ");
                 }
                 Object tmp = Array.get(val, pos2);
                 if (tmp instanceof byte[]) {
-                    str += GXCommon.bytesToHex((byte[]) tmp);
+                    sb.append(GXCommon.bytesToHex((byte[]) tmp));
                 } else {
-                    str += String.valueOf(tmp);
+                    sb.append(String.valueOf(tmp));
                 }
             }
-            val = str;
+            val = sb.toString();
         }
         writeTrace("Index: " + pos + " Value: " + String.valueOf(val),
                 TraceLevel.INFO);
@@ -817,7 +831,7 @@ public class GXDLMSReader {
 
     /**
      * Read association view.
-     * 
+     *
      * @throws Exception
      */
     public void getAssociationView() throws Exception {

@@ -486,10 +486,10 @@ public class GXDLMSLimiter extends GXDLMSObject implements IGXDLMSBase {
             setLogicalName(GXCommon.toLogicalName(e.getValue()));
         } else if (e.getIndex() == 2) {
             ObjectType ot = ObjectType.forValue(
-                    ((Number) (((Object[]) e.getValue())[0])).intValue());
-            String ln = GXCommon.toLogicalName(((Object[]) e.getValue())[1]);
+                    ((Number) (((List<?>) e.getValue()).get(0))).intValue());
+            String ln = GXCommon.toLogicalName(((List<?>) e.getValue()).get(1));
             monitoredAttributeIndex =
-                    ((Number) (((Object[]) e.getValue())[2])).intValue();
+                    ((Number) (((List<?>) e.getValue()).get(2))).intValue();
             monitoredValue = settings.getObjects().findByLN(ot, ln);
         } else if (e.getIndex() == 3) {
             thresholdActive = e.getValue();
@@ -502,16 +502,16 @@ public class GXDLMSLimiter extends GXDLMSObject implements IGXDLMSBase {
         } else if (e.getIndex() == 7) {
             minUnderThresholdDuration = ((Number) e.getValue()).longValue();
         } else if (e.getIndex() == 8) {
-            Object[] tmp = (Object[]) e.getValue();
-            emergencyProfile.setID(((Number) tmp[0]).intValue());
+            List<?> tmp = (List<?>) e.getValue();
+            emergencyProfile.setID(((Number) tmp.get(0)).intValue());
             emergencyProfile.setActivationTime((GXDateTime) GXDLMSClient
-                    .changeType((byte[]) tmp[1], DataType.DATETIME));
-            emergencyProfile.setDuration(((Long) tmp[2]).longValue());
+                    .changeType((byte[]) tmp.get(1), DataType.DATETIME));
+            emergencyProfile.setDuration(((Long) tmp.get(2)).longValue());
         } else if (e.getIndex() == 9) {
             java.util.ArrayList<Integer> list =
                     new java.util.ArrayList<Integer>();
             if (e.getValue() != null) {
-                for (Object it : (Object[]) e.getValue()) {
+                for (Object it : (List<?>) e.getValue()) {
                     list.add(((Number) it).intValue());
                 }
             }
@@ -519,16 +519,17 @@ public class GXDLMSLimiter extends GXDLMSObject implements IGXDLMSBase {
         } else if (e.getIndex() == 10) {
             emergencyProfileActive = ((Boolean) e.getValue()).booleanValue();
         } else if (e.getIndex() == 11) {
-            Object[] tmp = (Object[]) e.getValue();
-            Object[] tmp1 = (Object[]) tmp[0];
-            Object[] tmp2 = (Object[]) tmp[1];
-            actionOverThreshold.setLogicalName(GXCommon.toLogicalName(tmp1[0]));
+            List<?> tmp = (List<?>) e.getValue();
+            List<?> tmp1 = (List<?>) tmp.get(0);
+            List<?> tmp2 = (List<?>) tmp.get(1);
             actionOverThreshold
-                    .setScriptSelector(((Number) (tmp1[1])).intValue());
+                    .setLogicalName(GXCommon.toLogicalName(tmp1.get(0)));
+            actionOverThreshold
+                    .setScriptSelector(((Number) tmp1.get(1)).intValue());
             actionUnderThreshold
-                    .setLogicalName(GXCommon.toLogicalName(tmp2[0]));
+                    .setLogicalName(GXCommon.toLogicalName(tmp2.get(0)));
             actionUnderThreshold
-                    .setScriptSelector(((Number) (tmp2[1])).intValue());
+                    .setScriptSelector(((Number) tmp2.get(1)).intValue());
         } else {
             e.setError(ErrorCode.READ_WRITE_DENIED);
         }

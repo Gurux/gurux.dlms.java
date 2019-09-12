@@ -293,13 +293,13 @@ public class GXDLMSIecTwistedPairSetup extends GXDLMSObject
             setSpeed(BaudRate.values()[((Number) e.getValue()).intValue()]);
         } else if (e.getIndex() == 4) {
             List<Byte> list = new ArrayList<Byte>();
-            for (Object it : (Object[]) e.getValue()) {
+            for (Object it : (List<?>) e.getValue()) {
                 list.add(((Number) it).byteValue());
             }
             setPrimaryAddresses(toByteArray(list));
         } else if (e.getIndex() == 5) {
             List<Byte> list = new ArrayList<Byte>();
-            for (Object it : (Object[]) e.getValue()) {
+            for (Object it : (List<?>) e.getValue()) {
                 list.add(((Number) it).byteValue());
             }
             setTabis(toByteArray(list));

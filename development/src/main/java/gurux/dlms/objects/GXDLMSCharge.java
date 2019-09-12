@@ -629,24 +629,24 @@ public class GXDLMSCharge extends GXDLMSObject implements IGXDLMSBase {
 
     private void setUnitCharge(final GXDLMSSettings settings,
             GXUnitCharge charge, Object value) {
-        Object[] tmp = (Object[]) value;
-        Object[] tmp2 = (Object[]) tmp[0];
+        List<?> tmp = (List<?>) value;
+        List<?> tmp2 = (List<?>) tmp.get(0);
         charge.getChargePerUnitScaling()
-                .setCommodityScale(((Number) tmp2[0]).shortValue());
+                .setCommodityScale(((Number) tmp2.get(0)).shortValue());
         charge.getChargePerUnitScaling()
-                .setPriceScale(((Number) tmp2[1]).shortValue());
-        tmp2 = (Object[]) tmp[1];
-        ObjectType ot = ObjectType.forValue(((Number) tmp2[0]).intValue());
-        String ln = GXCommon.toLogicalName(tmp2[1]);
+                .setPriceScale(((Number) tmp2.get(1)).shortValue());
+        tmp2 = (List<?>) tmp.get(1);
+        ObjectType ot = ObjectType.forValue(((Number) tmp2.get(0)).intValue());
+        String ln = GXCommon.toLogicalName(tmp2.get(1));
         charge.getCommodity().setTarget(settings.getObjects().findByLN(ot, ln));
-        charge.getCommodity().setIndex(((Number) tmp2[2]).intValue());
+        charge.getCommodity().setIndex(((Number) tmp2.get(2)).intValue());
         List<GXChargeTable> list = new ArrayList<GXChargeTable>();
-        tmp2 = (Object[]) tmp[2];
+        tmp2 = (List<?>) tmp.get(2);
         for (Object tmp3 : tmp2) {
-            Object[] it = (Object[]) tmp3;
+            List<?> it = (List<?>) tmp3;
             GXChargeTable item = new GXChargeTable();
-            item.setIndex(new String((byte[]) it[0]));
-            item.setChargePerUnit(((Number) it[1]).shortValue());
+            item.setIndex(new String((byte[]) it.get(0)));
+            item.setChargePerUnit(((Number) it.get(1)).shortValue());
             list.add(item);
         }
         charge.setChargeTables(list.toArray(new GXChargeTable[0]));

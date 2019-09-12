@@ -935,9 +935,9 @@ public class GXDLMSAccount extends GXDLMSObject implements IGXDLMSBase {
             break;
         case 2:
             accountStatus = AccountStatus.forValue(
-                    ((Number) ((Object[]) e.getValue())[0]).intValue());
+                    ((Number) ((List<?>) e.getValue()).get(0)).intValue());
             paymentMode = PaymentMode.forValue(
-                    ((Number) ((Object[]) e.getValue())[1]).intValue());
+                    ((Number) ((List<?>) e.getValue()).get(1)).intValue());
             break;
         case 3:
             currentCreditInUse = ((Number) e.getValue()).byteValue();
@@ -962,7 +962,7 @@ public class GXDLMSAccount extends GXDLMSObject implements IGXDLMSBase {
         case 9:
             creditReferences.clear();
             if (e.getValue() != null) {
-                for (Object it : (Object[]) e.getValue()) {
+                for (Object it : (List<?>) e.getValue()) {
                     creditReferences.add(GXCommon.toLogicalName(it));
                 }
             }
@@ -970,7 +970,7 @@ public class GXDLMSAccount extends GXDLMSObject implements IGXDLMSBase {
         case 10:
             chargeReferences.clear();
             if (e.getValue() != null) {
-                for (Object it : (Object[]) e.getValue()) {
+                for (Object it : (List<?>) e.getValue()) {
                     chargeReferences.add(GXCommon.toLogicalName(it));
                 }
             }
@@ -978,14 +978,14 @@ public class GXDLMSAccount extends GXDLMSObject implements IGXDLMSBase {
         case 11:
             creditChargeConfigurations.clear();
             if (e.getValue() != null) {
-                for (Object it2 : (Object[]) e.getValue()) {
-                    Object[] it = (Object[]) it2;
+                for (Object it2 : (List<?>) e.getValue()) {
+                    List<?> it = (List<?>) it2;
                     GXCreditChargeConfiguration item =
                             new GXCreditChargeConfiguration();
-                    item.setCreditReference(GXCommon.toLogicalName(it[0]));
-                    item.setChargeReference(GXCommon.toLogicalName(it[1]));
+                    item.setCreditReference(GXCommon.toLogicalName(it.get(0)));
+                    item.setChargeReference(GXCommon.toLogicalName(it.get(1)));
                     GXByteBuffer bs = new GXByteBuffer();
-                    GXCommon.setBitString(bs, String.valueOf(it[2]), false);
+                    GXCommon.setBitString(bs, String.valueOf(it.get(2)), false);
                     item.setCollectionConfiguration(
                             CreditCollectionConfiguration
                                     .forValue(bs.getUInt8(0)));
@@ -996,12 +996,12 @@ public class GXDLMSAccount extends GXDLMSObject implements IGXDLMSBase {
         case 12:
             tokenGatewayConfigurations.clear();
             if (e.getValue() != null) {
-                for (Object it2 : (Object[]) e.getValue()) {
-                    Object[] it = (Object[]) it2;
+                for (Object it2 : (List<?>) e.getValue()) {
+                    List<?> it = (List<?>) it2;
                     GXTokenGatewayConfiguration item =
                             new GXTokenGatewayConfiguration();
-                    item.setCreditReference(GXCommon.toLogicalName(it[0]));
-                    item.setTokenProportion(((Number) it[1]).byteValue());
+                    item.setCreditReference(GXCommon.toLogicalName(it.get(0)));
+                    item.setTokenProportion(((Number) it.get(1)).byteValue());
                     tokenGatewayConfigurations.add(item);
                 }
             }
@@ -1035,10 +1035,11 @@ public class GXDLMSAccount extends GXDLMSObject implements IGXDLMSBase {
             }
             break;
         case 15:
-            Object[] tmp = (Object[]) e.getValue();
-            currency.setName((String) tmp[0]);
-            currency.setScale(((Number) tmp[1]).byteValue());
-            currency.setUnit(Currency.forValue(((Number) tmp[2]).intValue()));
+            List<?> tmp = (List<?>) e.getValue();
+            currency.setName((String) tmp.get(0));
+            currency.setScale(((Number) tmp.get(1)).byteValue());
+            currency.setUnit(
+                    Currency.forValue(((Number) tmp.get(2)).intValue()));
             break;
         case 16:
             lowCreditThreshold = ((Number) e.getValue()).intValue();

@@ -270,17 +270,18 @@ public class GXDLMSModemConfiguration extends GXDLMSObject
             if (e.getValue() != null) {
                 List<GXDLMSModemInitialisation> items =
                         new ArrayList<GXDLMSModemInitialisation>();
-                for (Object it : (Object[]) e.getValue()) {
+                for (Object it : (List<?>) e.getValue()) {
+                    List<?> arr = (List<?>) it;
                     GXDLMSModemInitialisation item =
                             new GXDLMSModemInitialisation();
-                    item.setRequest(
-                            GXDLMSClient.changeType((byte[]) ((Object[]) it)[0],
-                                    DataType.STRING).toString());
-                    item.setResponse(
-                            GXDLMSClient.changeType((byte[]) ((Object[]) it)[1],
-                                    DataType.STRING).toString());
-                    if (((Object[]) it).length > 2) {
-                        item.setDelay(((Number) ((Object[]) it)[2]).intValue());
+                    item.setRequest(GXDLMSClient
+                            .changeType((byte[]) arr.get(0), DataType.STRING)
+                            .toString());
+                    item.setResponse(GXDLMSClient
+                            .changeType((byte[]) arr.get(1), DataType.STRING)
+                            .toString());
+                    if (arr.size() > 2) {
+                        item.setDelay(((Number) arr.get(2)).intValue());
                     }
                     items.add(item);
                 }
@@ -291,7 +292,7 @@ public class GXDLMSModemConfiguration extends GXDLMSObject
             modemProfile = null;
             if (e.getValue() != null) {
                 List<String> items = new ArrayList<String>();
-                for (Object it : (Object[]) e.getValue()) {
+                for (Object it : (List<?>) e.getValue()) {
                     items.add(GXDLMSClient
                             .changeType((byte[]) it, DataType.STRING)
                             .toString());

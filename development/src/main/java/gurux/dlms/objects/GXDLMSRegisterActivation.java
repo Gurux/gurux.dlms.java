@@ -267,24 +267,24 @@ public class GXDLMSRegisterActivation extends GXDLMSObject
         } else if (e.getIndex() == 2) {
             registerAssignment.clear();
             if (e.getValue() != null) {
-                for (Object it : (Object[]) e.getValue()) {
+                for (Object it : (List<?>) e.getValue()) {
                     GXDLMSObjectDefinition item = new GXDLMSObjectDefinition();
                     item.setObjectType(ObjectType.forValue(
-                            ((Number) ((Object[]) it)[0]).intValue()));
+                            ((Number) ((List<?>) it).get(0)).intValue()));
                     item.setLogicalName(GXCommon
-                            .toLogicalName((byte[]) ((Object[]) it)[1]));
+                            .toLogicalName((byte[]) ((List<?>) it).get(1)));
                     registerAssignment.add(item);
                 }
             }
         } else if (e.getIndex() == 3) {
             maskList.clear();
             if (e.getValue() != null) {
-                for (Object it : (Object[]) e.getValue()) {
-                    byte[] key = (byte[]) ((Object[]) it)[0];
-                    Object arr = ((Object[]) it)[1];
-                    byte[] tmp = new byte[((Object[]) arr).length];
+                for (Object it : (List<?>) e.getValue()) {
+                    byte[] key = (byte[]) ((List<?>) it).get(0);
+                    List<?> arr = (List<?>) ((List<?>) it).get(1);
+                    byte[] tmp = new byte[arr.size()];
                     for (int pos = 0; pos != tmp.length; ++pos) {
-                        tmp[pos] = ((Number) ((Object[]) arr)[pos]).byteValue();
+                        tmp[pos] = ((Number) arr.get(pos)).byteValue();
                     }
                     maskList.add(new GXSimpleEntry<byte[], byte[]>(key, tmp));
                 }

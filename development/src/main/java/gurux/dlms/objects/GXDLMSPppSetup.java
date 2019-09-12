@@ -321,13 +321,13 @@ public class GXDLMSPppSetup extends GXDLMSObject implements IGXDLMSBase {
         } else if (e.getIndex() == 3) {
             java.util.ArrayList<GXDLMSPppSetupLcpOption> items =
                     new java.util.ArrayList<GXDLMSPppSetupLcpOption>();
-            if (e.getValue() instanceof Object[]) {
-                for (Object item : (Object[]) e.getValue()) {
+            if (e.getValue() instanceof List<?>) {
+                for (Object item : (List<?>) e.getValue()) {
                     GXDLMSPppSetupLcpOption it = new GXDLMSPppSetupLcpOption();
                     it.setType(PppSetupLcpOptionType.forValue(
-                            ((Number) ((Object[]) item)[0]).intValue()));
-                    it.setLength(((Number) ((Object[]) item)[1]).intValue());
-                    it.setData(((Object[]) item)[2]);
+                            ((Number) ((List<?>) item).get(0)).intValue()));
+                    it.setLength(((Number) ((List<?>) item).get(1)).intValue());
+                    it.setData(((List<?>) item).get(2));
                     items.add(it);
                 }
             }
@@ -336,14 +336,14 @@ public class GXDLMSPppSetup extends GXDLMSObject implements IGXDLMSBase {
         } else if (e.getIndex() == 4) {
             java.util.ArrayList<GXDLMSPppSetupIPCPOption> items =
                     new java.util.ArrayList<GXDLMSPppSetupIPCPOption>();
-            if (e.getValue() instanceof Object[]) {
-                for (Object item : (Object[]) e.getValue()) {
+            if (e.getValue() instanceof List<?>) {
+                for (Object item : (List<?>) e.getValue()) {
                     GXDLMSPppSetupIPCPOption it =
                             new GXDLMSPppSetupIPCPOption();
                     it.setType(PppSetupIPCPOptionType.forValue(
-                            ((Number) ((Object[]) item)[0]).intValue()));
-                    it.setLength(((Number) ((Object[]) item)[1]).intValue());
-                    it.setData(((Object[]) item)[2]);
+                            ((Number) ((List<?>) item).get(0)).intValue()));
+                    it.setLength(((Number) ((List<?>) item).get(1)).intValue());
+                    it.setData(((List<?>) item).get(2));
                     items.add(it);
                 }
             }
@@ -351,8 +351,8 @@ public class GXDLMSPppSetup extends GXDLMSObject implements IGXDLMSBase {
                     items.toArray(new GXDLMSPppSetupIPCPOption[items.size()]);
         } else if (e.getIndex() == 5) {
             if (e.getValue() != null) {
-                userName = (byte[]) ((Object[]) e.getValue())[0];
-                password = (byte[]) ((Object[]) e.getValue())[1];
+                userName = (byte[]) ((List<?>) e.getValue()).get(0);
+                password = (byte[]) ((List<?>) e.getValue()).get(1);
             } else {
                 userName = password = null;
             }

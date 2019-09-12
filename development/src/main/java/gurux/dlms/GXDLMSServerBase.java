@@ -519,6 +519,13 @@ public class GXDLMSServerBase {
     @SuppressWarnings("squid:S1172")
     private void handleReleaseRequest(final GXByteBuffer data,
             final GXDLMSConnectionEventArgs connectionInfo) {
+        // Return error if connection is not established.
+        if ((settings.getConnected() & ConnectionState.DLMS) == 0) {
+            replyData.set(GXDLMSServerBase.generateConfirmedServiceError(
+                    ConfirmedServiceError.INITIATE_ERROR, ServiceError.SERVICE,
+                    Service.UNSUPPORTED.getValue()));
+            return;
+        }
         if (getSettings().getInterfaceType() == InterfaceType.HDLC) {
             replyData.set(0, GXCommon.LLC_REPLY_BYTES);
         }
@@ -724,9 +731,7 @@ public class GXDLMSServerBase {
                 }
 
                 // If client want next frame.
-                if ((info.getMoreData().getValue()
-                        & RequestTypes.FRAME.getValue()) == RequestTypes.FRAME
-                                .getValue()) {
+                if (info.getMoreData().contains(RequestTypes.FRAME)) {
                     dataReceived = Calendar.getInstance().getTimeInMillis();
                     sr.setReply(GXDLMS.getHdlcFrame(settings,
                             settings.getReceiverReady(), replyData));

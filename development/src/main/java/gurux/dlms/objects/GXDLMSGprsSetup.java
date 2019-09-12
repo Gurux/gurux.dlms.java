@@ -34,6 +34,8 @@
 
 package gurux.dlms.objects;
 
+import java.util.List;
+
 import javax.xml.stream.XMLStreamException;
 
 import gurux.dlms.GXByteBuffer;
@@ -253,25 +255,27 @@ public class GXDLMSGprsSetup extends GXDLMSObject implements IGXDLMSBase {
         } else if (e.getIndex() == 3) {
             setPINCode(((Number) e.getValue()).intValue());
         } else if (e.getIndex() == 4) {
-            Object[] arr = (Object[]) ((Object[]) e.getValue())[0];
-            defaultQualityOfService.setPrecedence(((Number) arr[0]).intValue());
-            defaultQualityOfService.setDelay(((Number) arr[1]).intValue());
+            List<?> arr = (List<?>) ((List<?>) e.getValue()).get(0);
             defaultQualityOfService
-                    .setReliability(((Number) arr[2]).intValue());
+                    .setPrecedence(((Number) arr.get(0)).intValue());
+            defaultQualityOfService.setDelay(((Number) arr.get(1)).intValue());
             defaultQualityOfService
-                    .setPeakThroughput(((Number) arr[3]).intValue());
+                    .setReliability(((Number) arr.get(2)).intValue());
             defaultQualityOfService
-                    .setMeanThroughput(((Number) arr[4]).intValue());
-            arr = (Object[]) ((Object[]) e.getValue())[1];
+                    .setPeakThroughput(((Number) arr.get(3)).intValue());
+            defaultQualityOfService
+                    .setMeanThroughput(((Number) arr.get(4)).intValue());
+            arr = (List<?>) ((List<?>) e.getValue()).get(1);
             requestedQualityOfService
-                    .setPrecedence(((Number) arr[0]).intValue());
-            requestedQualityOfService.setDelay(((Number) arr[1]).intValue());
+                    .setPrecedence(((Number) arr.get(0)).intValue());
             requestedQualityOfService
-                    .setReliability(((Number) arr[2]).intValue());
+                    .setDelay(((Number) arr.get(1)).intValue());
             requestedQualityOfService
-                    .setPeakThroughput(((Number) arr[3]).intValue());
+                    .setReliability(((Number) arr.get(2)).intValue());
             requestedQualityOfService
-                    .setMeanThroughput(((Number) arr[4]).intValue());
+                    .setPeakThroughput(((Number) arr.get(3)).intValue());
+            requestedQualityOfService
+                    .setMeanThroughput(((Number) arr.get(4)).intValue());
         } else {
             e.setError(ErrorCode.READ_WRITE_DENIED);
         }

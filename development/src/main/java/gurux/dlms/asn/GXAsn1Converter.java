@@ -181,12 +181,11 @@ public final class GXAsn1Converter {
         return list;
     }
 
-    @SuppressWarnings("unchecked")
     static String getSubject(final GXAsn1Sequence values) {
         Object value;
         StringBuilder sb = new StringBuilder();
         for (Object tmp : values) {
-            Map.Entry<Object, Object> it = (Map.Entry<Object, Object>) tmp;
+            Map.Entry<?, ?> it = (Map.Entry<?, ?>) tmp;
             sb.append(X509Name.forValue(it.getKey().toString()));
             sb.append('=');
             value = it.getValue();
@@ -483,7 +482,6 @@ public final class GXAsn1Converter {
      *            ANS1 object
      * @return Size of object.
      */
-    @SuppressWarnings("unchecked")
     private static int getBytes(final GXByteBuffer bb, final Object target) {
         GXByteBuffer tmp;
         String str;
@@ -513,7 +511,7 @@ public final class GXAsn1Converter {
             return cnt;
         } else if (target instanceof GXAsn1Sequence || target instanceof List) {
             tmp = new GXByteBuffer();
-            for (Object it : (List<Object>) target) {
+            for (Object it : (List<?>) target) {
                 cnt += getBytes(tmp, it);
             }
             start = bb.size();
@@ -568,7 +566,7 @@ public final class GXAsn1Converter {
             GXCommon.setObjectCount(t.length, bb);
             bb.add(t);
         } else if (target instanceof Entry) {
-            Entry<Object, Object> e = (Entry<Object, Object>) target;
+            Entry<?, ?> e = (Entry<?, ?>) target;
             GXByteBuffer tmp2 = new GXByteBuffer();
             if (e.getValue() != null) {
                 tmp = new GXByteBuffer();
@@ -578,7 +576,7 @@ public final class GXAsn1Converter {
                 GXCommon.setObjectCount(cnt, tmp);
                 tmp.set(tmp2);
             } else {
-                getBytes(tmp2, ((List<Object>) e.getKey()).get(0));
+                getBytes(tmp2, ((List<?>) e.getKey()).get(0));
                 tmp = tmp2;
             }
             // Update len.

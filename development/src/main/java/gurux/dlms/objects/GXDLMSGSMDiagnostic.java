@@ -304,9 +304,11 @@ public class GXDLMSGSMDiagnostic extends GXDLMSObject implements IGXDLMSBase {
             return DataType.ARRAY;
         case 8:
             return DataType.DATETIME;
+        default:
+            throw new IllegalArgumentException(
+                    "getDataType failed. Invalid attribute index.");
+
         }
-        throw new IllegalArgumentException(
-                "getDataType failed. Invalid attribute index.");
     }
 
     /*
@@ -379,8 +381,9 @@ public class GXDLMSGSMDiagnostic extends GXDLMSObject implements IGXDLMSBase {
             return bb.array();
         case 8:
             return captureTime;
+        default:
+            e.setError(ErrorCode.READ_WRITE_DENIED);
         }
-        e.setError(ErrorCode.READ_WRITE_DENIED);
         return null;
     }
 
@@ -418,26 +421,28 @@ public class GXDLMSGSMDiagnostic extends GXDLMSObject implements IGXDLMSBase {
             break;
         case 6:
             if (e.getValue() != null) {
-                Object[] tmp = (Object[]) e.getValue();
-                cellInfo.setCellId(((Number) tmp[0]).longValue());
-                cellInfo.setLocationId(((Number) tmp[1]).intValue());
-                cellInfo.setSignalQuality(((Number) tmp[2]).intValue());
-                cellInfo.setBer(((Number) tmp[3]).intValue());
+                List<?> tmp = (List<?>) e.getValue();
+                cellInfo.setCellId(((Number) tmp.get(0)).longValue());
+                cellInfo.setLocationId(((Number) tmp.get(1)).intValue());
+                cellInfo.setSignalQuality(((Number) tmp.get(2)).intValue());
+                cellInfo.setBer(((Number) tmp.get(3)).intValue());
                 if (getVersion() > 0) {
-                    cellInfo.setMobileCountryCode(((Number) tmp[4]).intValue());
-                    cellInfo.setMobileNetworkCode(((Number) tmp[5]).intValue());
-                    cellInfo.setChannelNumber(((Number) tmp[6]).intValue());
+                    cellInfo.setMobileCountryCode(
+                            ((Number) tmp.get(4)).intValue());
+                    cellInfo.setMobileNetworkCode(
+                            ((Number) tmp.get(5)).intValue());
+                    cellInfo.setChannelNumber(((Number) tmp.get(6)).intValue());
                 }
             }
             break;
         case 7:
             adjacentCells.clear();
             if (e.getValue() != null) {
-                for (Object it : (Object[]) e.getValue()) {
-                    Object[] tmp = (Object[]) it;
+                for (Object it : (List<?>) e.getValue()) {
+                    List<?> tmp = (List<?>) it;
                     GXAdjacentCell ac = new GXAdjacentCell();
-                    ac.setCellId(((Number) tmp[0]).longValue());
-                    ac.setSignalQuality(((Number) tmp[1]).shortValue());
+                    ac.setCellId(((Number) tmp.get(0)).longValue());
+                    ac.setSignalQuality(((Number) tmp.get(1)).shortValue());
                     adjacentCells.add(ac);
                 }
             }

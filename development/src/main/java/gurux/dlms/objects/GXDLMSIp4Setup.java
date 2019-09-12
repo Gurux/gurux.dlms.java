@@ -423,7 +423,7 @@ public class GXDLMSIp4Setup extends GXDLMSObject implements IGXDLMSBase {
             java.util.ArrayList<Integer> data =
                     new java.util.ArrayList<Integer>();
             if (e.getValue() != null) {
-                for (Object it : (Object[]) e.getValue()) {
+                for (Object it : (List<?>) e.getValue()) {
                     data.add(((Number) it).intValue());
                 }
             }
@@ -432,13 +432,13 @@ public class GXDLMSIp4Setup extends GXDLMSObject implements IGXDLMSBase {
             java.util.ArrayList<GXDLMSIp4SetupIpOption> data =
                     new java.util.ArrayList<GXDLMSIp4SetupIpOption>();
             if (e.getValue() != null) {
-                for (Object it : (Object[]) e.getValue()) {
+                for (Object it : (List<?>) e.getValue()) {
                     GXDLMSIp4SetupIpOption item = new GXDLMSIp4SetupIpOption();
                     item.setType(Ip4SetupIpOptionType.forValue(
-                            ((Number) ((Object[]) it)[0]).intValue()));
+                            ((Number) ((List<?>) it).get(0)).intValue()));
                     item.setLength(
-                            ((Number) (((Object[]) it)[1])).shortValue());
-                    item.setData((byte[]) ((Object[]) it)[2]);
+                            ((Number) (((List<?>) it).get(1))).shortValue());
+                    item.setData((byte[]) ((List<?>) it).get(2));
                     data.add(item);
                 }
             }

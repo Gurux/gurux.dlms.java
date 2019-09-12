@@ -34,7 +34,6 @@
 
 package gurux.dlms.objects;
 
-import java.lang.reflect.Array;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map.Entry;
@@ -197,9 +196,9 @@ public class GXDLMSSapAssignment extends GXDLMSObject implements IGXDLMSBase {
         } else if (e.getIndex() == 2) {
             sapAssignmentList.clear();
             if (e.getValue() != null) {
-                for (Object item : (Object[]) e.getValue()) {
+                for (Object item : (List<?>) e.getValue()) {
                     String str;
-                    Object tmp = Array.get(item, 1);
+                    Object tmp = ((List<?>) item).get(1);
                     if (tmp instanceof byte[]) {
                         str = GXDLMSClient
                                 .changeType((byte[]) tmp, DataType.STRING)
@@ -208,7 +207,8 @@ public class GXDLMSSapAssignment extends GXDLMSObject implements IGXDLMSBase {
                         str = tmp.toString();
                     }
                     sapAssignmentList.add(new GXSimpleEntry<Integer, String>(
-                            ((Number) Array.get(item, 0)).intValue(), str));
+                            ((Number) ((List<?>) item).get(0)).intValue(),
+                            str));
                 }
             }
         } else {

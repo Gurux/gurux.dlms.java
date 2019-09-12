@@ -400,7 +400,7 @@ public class GXDLMSIp6Setup extends GXDLMSObject implements IGXDLMSBase {
             } else if (e.getIndex() == 4) {
                 List<InetAddress> data = new ArrayList<InetAddress>();
                 if (e.getValue() != null) {
-                    for (Object it : (Object[]) e.getValue()) {
+                    for (Object it : (List<?>) e.getValue()) {
                         data.add(InetAddress.getByAddress((byte[]) it));
                     }
                 }
@@ -408,7 +408,7 @@ public class GXDLMSIp6Setup extends GXDLMSObject implements IGXDLMSBase {
             } else if (e.getIndex() == 5) {
                 List<InetAddress> data = new ArrayList<InetAddress>();
                 if (e.getValue() != null) {
-                    for (Object it : (Object[]) e.getValue()) {
+                    for (Object it : (List<?>) e.getValue()) {
                         data.add(InetAddress.getByAddress((byte[]) it));
                     }
                 }
@@ -416,7 +416,7 @@ public class GXDLMSIp6Setup extends GXDLMSObject implements IGXDLMSBase {
             } else if (e.getIndex() == 6) {
                 List<InetAddress> data = new ArrayList<InetAddress>();
                 if (e.getValue() != null) {
-                    for (Object it : (Object[]) e.getValue()) {
+                    for (Object it : (List<?>) e.getValue()) {
                         data.add(InetAddress.getByAddress((byte[]) it));
                     }
                 }
@@ -443,13 +443,13 @@ public class GXDLMSIp6Setup extends GXDLMSObject implements IGXDLMSBase {
                 List<GXNeighborDiscoverySetup> data =
                         new ArrayList<GXNeighborDiscoverySetup>();
                 if (e.getValue() != null) {
-                    for (Object it : (Object[]) e.getValue()) {
-                        Object[] tmp = (Object[]) it;
+                    for (Object it : (List<?>) e.getValue()) {
+                        List<?> tmp = (List<?>) it;
                         GXNeighborDiscoverySetup v =
                                 new GXNeighborDiscoverySetup();
-                        v.setMaxRetry(((Number) tmp[0]).byteValue());
-                        v.setRetryWaitTime(((Number) tmp[1]).shortValue());
-                        v.setSendPeriod(((Number) tmp[2]).longValue());
+                        v.setMaxRetry(((Number) tmp.get(0)).byteValue());
+                        v.setRetryWaitTime(((Number) tmp.get(1)).shortValue());
+                        v.setSendPeriod(((Number) tmp.get(2)).longValue());
                         data.add(v);
                     }
                 }

@@ -380,44 +380,44 @@ public class GXDLMSPushSetup extends GXDLMSObject implements IGXDLMSBase {
         } else if (e.getIndex() == 2) {
             pushObjectList.clear();
             Entry<GXDLMSObject, GXDLMSCaptureObject> ent;
-            if (e.getValue() instanceof Object[]) {
-                for (Object it : (Object[]) e.getValue()) {
-                    Object[] tmp = (Object[]) it;
-                    ObjectType type =
-                            ObjectType.forValue(((Number) tmp[0]).intValue());
-                    String ln = GXCommon.toLogicalName(tmp[1]);
+            if (e.getValue() instanceof List<?>) {
+                for (Object it : (List<?>) e.getValue()) {
+                    List<?> tmp = (List<?>) it;
+                    ObjectType type = ObjectType
+                            .forValue(((Number) tmp.get(0)).intValue());
+                    String ln = GXCommon.toLogicalName(tmp.get(1));
                     GXDLMSObject obj = settings.getObjects().findByLN(type, ln);
                     if (obj == null) {
                         obj = gurux.dlms.GXDLMSClient.createObject(type);
                         obj.setLogicalName(ln);
                     }
                     GXDLMSCaptureObject co = new GXDLMSCaptureObject();
-                    co.setAttributeIndex(((Number) tmp[2]).intValue());
-                    co.setDataIndex(((Number) tmp[3]).intValue());
+                    co.setAttributeIndex(((Number) tmp.get(2)).intValue());
+                    co.setDataIndex(((Number) tmp.get(3)).intValue());
                     ent = new GXSimpleEntry<GXDLMSObject, GXDLMSCaptureObject>(
                             obj, co);
                     pushObjectList.add(ent);
                 }
             }
         } else if (e.getIndex() == 3) {
-            Object[] tmp = (Object[]) e.getValue();
+            List<?> tmp = (List<?>) e.getValue();
             if (tmp != null) {
                 sendDestinationAndMethod.setService(
-                        ServiceType.forValue(((Number) tmp[0]).intValue()));
+                        ServiceType.forValue(((Number) tmp.get(0)).intValue()));
                 sendDestinationAndMethod
-                        .setDestination(new String((byte[]) tmp[1]));
+                        .setDestination(new String((byte[]) tmp.get(1)));
                 sendDestinationAndMethod.setMessage(
-                        MessageType.forValue(((Number) tmp[2]).intValue()));
+                        MessageType.forValue(((Number) tmp.get(2)).intValue()));
             }
         } else if (e.getIndex() == 4) {
             communicationWindow.clear();
-            if (e.getValue() instanceof Object[]) {
-                for (Object it : (Object[]) e.getValue()) {
-                    Object[] tmp = (Object[]) it;
+            if (e.getValue() instanceof List<?>) {
+                for (Object it : (List<?>) e.getValue()) {
+                    List<?> tmp = (List<?>) it;
                     GXDateTime start = (GXDateTime) GXDLMSClient
-                            .changeType((byte[]) tmp[0], DataType.DATETIME);
+                            .changeType((byte[]) tmp.get(0), DataType.DATETIME);
                     GXDateTime end = (GXDateTime) GXDLMSClient
-                            .changeType((byte[]) tmp[1], DataType.DATETIME);
+                            .changeType((byte[]) tmp.get(1), DataType.DATETIME);
                     communicationWindow.add(
                             new GXSimpleEntry<GXDateTime, GXDateTime>(start,
                                     end));

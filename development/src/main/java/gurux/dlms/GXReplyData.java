@@ -34,6 +34,9 @@
 
 package gurux.dlms;
 
+import java.util.HashSet;
+import java.util.List;
+
 import gurux.dlms.enums.Command;
 import gurux.dlms.enums.DataType;
 import gurux.dlms.enums.RequestTypes;
@@ -48,7 +51,7 @@ public class GXReplyData {
     /**
      * Is more data available.
      */
-    private RequestTypes moreData;
+    private java.util.Set<RequestTypes> moreData;
 
     /**
      * Received command.
@@ -187,7 +190,8 @@ public class GXReplyData {
             final GXByteBuffer buff, final boolean forComplete,
             final byte err) {
         clear();
-        moreData = more;
+        moreData = new HashSet<RequestTypes>();
+        moreData.add(more);
         command = cmd;
         data = buff;
         complete = forComplete;
@@ -198,6 +202,7 @@ public class GXReplyData {
      * Constructor.
      */
     public GXReplyData() {
+        moreData = new HashSet<RequestTypes>();
         clear();
     }
 
@@ -283,7 +288,7 @@ public class GXReplyData {
      * Reset data values to default.
      */
     public final void clear() {
-        moreData = RequestTypes.NONE;
+        moreData.clear();
         cipheredCommand = command = Command.NONE;
         commandType = 0;
         data.capacity(0);
@@ -306,7 +311,7 @@ public class GXReplyData {
      * @return Is more data available.
      */
     public final boolean isMoreData() {
-        return moreData != RequestTypes.NONE && error == 0;
+        return !moreData.isEmpty() && error == 0;
     }
 
     /**
@@ -323,12 +328,8 @@ public class GXReplyData {
      * 
      * @return Return None if more data is not available or Frame or Block type.
      */
-    public final RequestTypes getMoreData() {
+    public final java.util.Set<RequestTypes> getMoreData() {
         return moreData;
-    }
-
-    public final void setMoreData(final RequestTypes forValue) {
-        moreData = forValue;
     }
 
     /**
@@ -391,8 +392,8 @@ public class GXReplyData {
      * @see #getTotalCount
      */
     public final int getCount() {
-        if (dataValue instanceof Object[]) {
-            return ((Object[]) dataValue).length;
+        if (dataValue instanceof List<?>) {
+            return ((List<?>) dataValue).size();
         }
         return 0;
     }

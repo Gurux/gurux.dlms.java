@@ -976,16 +976,15 @@ public class GXDLMSClient {
             info.setCount(0);
             info.setIndex(0);
             info.setType(DataType.NONE);
-            Object[] objects =
-                    (Object[]) GXCommon.getData(settings, buff, info);
-            if (objects.length != 4) {
+            List<?> objects = (List<?>) GXCommon.getData(settings, buff, info);
+            if (objects.size() != 4) {
                 throw new GXDLMSException("Invalid structure format.");
             }
-            int classID = ((Number) (objects[1])).intValue() & 0xFFFF;
-            int baseName = ((Number) (objects[0])).intValue() & 0xFFFF;
+            int classID = ((Number) (objects.get(1))).intValue() & 0xFFFF;
+            int baseName = ((Number) (objects.get(0))).intValue() & 0xFFFF;
             if (baseName > 0) {
-                GXDLMSObject comp = createDLMSObject(classID, objects[2],
-                        baseName, objects[3], null);
+                GXDLMSObject comp = createDLMSObject(classID, objects.get(2),
+                        baseName, objects.get(3), null);
                 if (!onlyKnownObjects
                         || comp.getClass() != GXDLMSObject.class) {
                     items.add(comp);
@@ -1014,33 +1013,34 @@ public class GXDLMSClient {
             final Object accessRights) {
         obj.setObjectType(objectType);
         // Check access rights.
-        if (accessRights instanceof Object[]
-                && ((Object[]) accessRights).length == 2) {
+        if (accessRights instanceof List<?>
+                && ((List<?>) accessRights).size() == 2) {
             // access_rights: access_right
-            Object[] access = (Object[]) accessRights;
-            for (Object attributeAccess : (Object[]) access[0]) {
-                int id = ((Number) ((Object[]) attributeAccess)[0]).intValue();
+            List<?> access = (List<?>) accessRights;
+            for (Object attributeAccess : (List<?>) access.get(0)) {
+                int id = ((Number) ((List<?>) attributeAccess).get(0))
+                        .intValue();
                 // Kamstrup is returning -1 here.
                 if (id > 0) {
-                    int tmp = ((Number) ((Object[]) attributeAccess)[1])
+                    int tmp = ((Number) ((List<?>) attributeAccess).get(1))
                             .intValue();
                     AccessMode mode = AccessMode.forValue(tmp);
                     obj.setAccess(id, mode);
                 }
             }
-            for (Object methodAccess : (Object[]) access[1]) {
-                int id = ((Number) ((Object[]) methodAccess)[0]).intValue();
+            for (Object methodAccess : (List<?>) access.get(1)) {
+                int id = ((Number) ((List<?>) methodAccess).get(0)).intValue();
                 int tmp;
                 // If version is 0
-                if (((Object[]) methodAccess)[1] instanceof Boolean) {
-                    if ((Boolean) ((Object[]) methodAccess)[1]) {
+                if (((List<?>) methodAccess).get(1) instanceof Boolean) {
+                    if ((Boolean) ((List<?>) methodAccess).get(1)) {
                         tmp = 1;
                     } else {
                         tmp = 0;
                     }
                 } else {
                     // If version is 1.
-                    tmp = ((Number) ((Object[]) methodAccess)[1]).intValue();
+                    tmp = ((Number) ((List<?>) methodAccess).get(1)).intValue();
                 }
                 MethodAccessMode mode = MethodAccessMode.forValue(tmp);
                 obj.setMethodAccess(id, mode);
@@ -1108,21 +1108,21 @@ public class GXDLMSClient {
             info.setType(DataType.NONE);
             info.setIndex(0);
             info.setCount(0);
-            Object[] objects =
-                    (Object[]) GXCommon.getData(settings, buff, info);
-            if (objects.length != 4) {
+            List<?> objects = (List<?>) GXCommon.getData(settings, buff, info);
+            if (objects.size() != 4) {
                 throw new GXDLMSException("Invalid structure format.");
             }
-            int classID = ((Number) (objects[0])).intValue() & 0xFFFF;
+            int classID = ((Number) (objects.get(0))).intValue() & 0xFFFF;
             if (classID > 0) {
-                GXDLMSObject comp = createDLMSObject(classID, objects[1], 0,
-                        objects[2], objects[3]);
+                GXDLMSObject comp = createDLMSObject(classID, objects.get(1), 0,
+                        objects.get(2), objects.get(3));
                 if (!onlyKnownObjects
                         || comp.getClass() != GXDLMSObject.class) {
                     items.add(comp);
                 } else {
                     String str = "Unknown object : " + String.valueOf(classID)
-                            + " " + GXCommon.toLogicalName((byte[]) objects[2]);
+                            + " "
+                            + GXCommon.toLogicalName((byte[]) objects.get(2));
                     LOGGER.log(Level.INFO, str);
                 }
             }
@@ -1222,28 +1222,7 @@ public class GXDLMSClient {
      */
     public final void updateValues(
             final List<Entry<GXDLMSObject, Integer>> list,
-            final Object[] values) {
-        int pos = 0;
-        for (Entry<GXDLMSObject, Integer> it : list) {
-            ValueEventArgs e = new ValueEventArgs(settings, it.getKey(),
-                    it.getValue(), 0, null);
-            e.setValue(values[pos]);
-            it.getKey().setValue(settings, e);
-            ++pos;
-        }
-    }
-
-    /**
-     * Update list of values.
-     * 
-     * @param list
-     *            read objects.
-     * @param values
-     *            Received values.
-     */
-    public final void updateValues(
-            final List<Entry<GXDLMSObject, Integer>> list,
-            final List<Object> values) {
+            final List<?> values) {
         int pos = 0;
         for (Entry<GXDLMSObject, Integer> it : list) {
             ValueEventArgs e = new ValueEventArgs(settings, it.getKey(),
@@ -2136,6 +2115,18 @@ public class GXDLMSClient {
      * Generates an acknowledgment message, with which the server is informed to
      * send next packets.
      * 
+     * @param type
+     *            Frame type
+     * @return Acknowledgment message as byte array.
+     */
+    public final byte[] receiverReady(final java.util.Set<RequestTypes> type) {
+        return GXDLMS.receiverReady(settings, type);
+    }
+
+    /**
+     * Generates an acknowledgment message, with which the server is informed to
+     * send next packets.
+     * 
      * @param reply
      *            Received data.
      * @return Acknowledgment message as byte array.
@@ -2210,8 +2201,7 @@ public class GXDLMSClient {
             }
             ret = true;
         }
-        if (ret && translator != null
-                && data.getMoreData() == RequestTypes.NONE) {
+        if (ret && translator != null && data.getMoreData().isEmpty()) {
             if (data.getXml() == null) {
                 data.setXml(new GXDLMSTranslatorStructure(
                         translator.getOutputType(),
@@ -2521,52 +2511,37 @@ public class GXDLMSClient {
      * @return Array of objects and called indexes.
      */
     public final List<Entry<GXDLMSObject, Integer>>
-            parsePushObjects(final Object[] data) {
+            parsePushObjects(final List<?> data) {
         List<Entry<GXDLMSObject, Integer>> objects =
                 new ArrayList<Entry<GXDLMSObject, Integer>>();
         if (data != null) {
             GXDLMSConverter c = new GXDLMSConverter(getStandard());
             for (Object it : data) {
-                Object[] tmp = (Object[]) it;
-                int classID = ((Number) (tmp[0])).intValue() & 0xFFFF;
+                List<?> tmp = (List<?>) it;
+                int classID = ((Number) (tmp.get(0))).intValue() & 0xFFFF;
                 if (classID > 0) {
                     GXDLMSObject comp;
                     comp = getObjects().findByLN(ObjectType.forValue(classID),
-                            GXCommon.toLogicalName((byte[]) tmp[1]));
+                            GXCommon.toLogicalName((byte[]) tmp.get(1)));
                     if (comp == null) {
                         comp = GXDLMSClient.createDLMSObject(classID, 0, 0,
-                                tmp[1], null);
+                                tmp.get(1), null);
                         settings.getObjects().add(comp);
                         c.updateOBISCodeInformation(comp);
                     }
                     if (comp.getClass() != GXDLMSObject.class) {
                         objects.add(new GXSimpleEntry<GXDLMSObject, Integer>(
-                                comp, ((Number) tmp[2]).intValue()));
+                                comp, ((Number) tmp.get(2)).intValue()));
                     } else {
                         String str = "Unknown object: "
                                 + String.valueOf(classID) + " "
-                                + GXCommon.toLogicalName((byte[]) tmp[1]);
+                                + GXCommon.toLogicalName((byte[]) tmp.get(1));
                         LOGGER.log(Level.INFO, str);
                     }
                 }
             }
         }
         return objects;
-    }
-
-    /**
-     * Returns collection of push objects.
-     * 
-     * @param data
-     *            Received value.
-     * @return Array of objects and called indexes.
-     * @deprecated use {@link #parsePushObjects} instead.
-     */
-    @Deprecated
-    @SuppressWarnings({ "squid:S00100", "squid:S1133", "squid:S1845" })
-    public final List<Entry<GXDLMSObject, Integer>>
-            ParsePushObjects(final Object[] data) {
-        return parsePushObjects(data);
     }
 
     /**

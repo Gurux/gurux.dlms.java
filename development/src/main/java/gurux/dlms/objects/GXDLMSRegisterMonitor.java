@@ -252,33 +252,37 @@ public class GXDLMSRegisterMonitor extends GXDLMSObject implements IGXDLMSBase {
         if (e.getIndex() == 1) {
             setLogicalName(GXCommon.toLogicalName(e.getValue()));
         } else if (e.getIndex() == 2) {
-            setThresholds((Object[]) e.getValue());
+            if (e.getValue() == null) {
+                setThresholds(null);
+            } else {
+                setThresholds(((List<?>) e.getValue()).toArray());
+            }
         } else if (e.getIndex() == 3) {
             if (getMonitoredValue() == null) {
                 setMonitoredValue(new GXDLMSMonitoredValue());
             }
             getMonitoredValue().setObjectType(ObjectType.forValue(
-                    ((Number) ((Object[]) e.getValue())[0]).intValue()));
+                    ((Number) ((List<?>) e.getValue()).get(0)).intValue()));
             getMonitoredValue().setLogicalName(
-                    GXCommon.toLogicalName(((Object[]) e.getValue())[1]));
+                    GXCommon.toLogicalName(((List<?>) e.getValue()).get(1)));
             getMonitoredValue().setAttributeIndex(
-                    ((Number) ((Object[]) e.getValue())[2]).intValue());
+                    ((Number) ((List<?>) e.getValue()).get(2)).intValue());
         } else if (e.getIndex() == 4) {
             setActions(new GXDLMSActionSet[0]);
             if (e.getValue() != null) {
                 List<GXDLMSActionSet> items = new ArrayList<GXDLMSActionSet>();
-                for (Object as : (Object[]) e.getValue()) {
+                for (Object as : (List<?>) e.getValue()) {
                     GXDLMSActionSet set = new GXDLMSActionSet();
-                    Object[] target = (Object[]) ((Object[]) as)[0];
-                    set.getActionUp()
-                            .setLogicalName(GXCommon.toLogicalName(target[0]));
-                    set.getActionUp()
-                            .setScriptSelector(((Number) target[1]).intValue());
-                    target = (Object[]) ((Object[]) as)[1];
-                    set.getActionDown()
-                            .setLogicalName(GXCommon.toLogicalName(target[0]));
-                    set.getActionDown()
-                            .setScriptSelector(((Number) target[1]).intValue());
+                    List<?> target = (List<?>) ((List<?>) as).get(0);
+                    set.getActionUp().setLogicalName(
+                            GXCommon.toLogicalName(target.get(0)));
+                    set.getActionUp().setScriptSelector(
+                            ((Number) target.get(1)).intValue());
+                    target = (List<?>) ((List<?>) as).get(1);
+                    set.getActionDown().setLogicalName(
+                            GXCommon.toLogicalName(target.get(0)));
+                    set.getActionDown().setScriptSelector(
+                            ((Number) target.get(1)).intValue());
                     items.add(set);
                 }
                 setActions(items.toArray(new GXDLMSActionSet[items.size()]));

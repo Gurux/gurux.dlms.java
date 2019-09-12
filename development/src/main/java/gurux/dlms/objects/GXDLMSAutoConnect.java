@@ -316,11 +316,13 @@ public class GXDLMSAutoConnect extends GXDLMSObject implements IGXDLMSBase {
         } else if (e.getIndex() == 5) {
             getCallingWindow().clear();
             if (e.getValue() != null) {
-                for (Object item : (Object[]) e.getValue()) {
+                for (Object item : (List<?>) e.getValue()) {
                     GXDateTime start = (GXDateTime) GXDLMSClient.changeType(
-                            (byte[]) ((Object[]) item)[0], DataType.DATETIME);
+                            (byte[]) ((List<?>) item).get(0),
+                            DataType.DATETIME);
                     GXDateTime end = (GXDateTime) GXDLMSClient.changeType(
-                            (byte[]) ((Object[]) item)[1], DataType.DATETIME);
+                            (byte[]) ((List<?>) item).get(1),
+                            DataType.DATETIME);
                     getCallingWindow().add(
                             new GXSimpleEntry<GXDateTime, GXDateTime>(start,
                                     end));
@@ -330,7 +332,7 @@ public class GXDLMSAutoConnect extends GXDLMSObject implements IGXDLMSBase {
             setDestinations(null);
             if (e.getValue() != null) {
                 List<String> items = new ArrayList<String>();
-                for (Object item : (Object[]) e.getValue()) {
+                for (Object item : (List<?>) e.getValue()) {
                     String it = GXDLMSClient
                             .changeType((byte[]) item, DataType.STRING)
                             .toString();

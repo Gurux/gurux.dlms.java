@@ -610,7 +610,7 @@ public class GXDLMSTranslator {
                         if (multipleFrames || data.isMoreData()) {
                             if (getCompletePdu()) {
                                 pduFrames.set(data.getData().getData());
-                                if (data.getMoreData() == RequestTypes.NONE) {
+                                if (data.getMoreData().isEmpty()) {
                                     xml.appendLine(
                                             pduToXml(pduFrames, true, true));
                                     pduFrames.clear();
@@ -624,7 +624,8 @@ public class GXDLMSTranslator {
                                                         .getData().position())
                                         + "\" />");
                             }
-                            if (data.getMoreData() != RequestTypes.DATABLOCK) {
+                            if (data.getMoreData()
+                                    .contains(RequestTypes.DATABLOCK)) {
                                 multipleFrames = false;
                             }
                         } else {
@@ -1021,6 +1022,7 @@ public class GXDLMSTranslator {
             case Command.GLO_METHOD_RESPONSE:
             case Command.DED_GET_REQUEST:
             case Command.DED_SET_REQUEST:
+            case Command.DED_READ_RESPONSE:
             case Command.DED_GET_RESPONSE:
             case Command.DED_SET_RESPONSE:
             case Command.DED_METHOD_REQUEST:
@@ -1046,9 +1048,18 @@ public class GXDLMSTranslator {
                         }
                         if (st != null) {
                             AesGcmParameter p;
-                            if (c == Command.DED_GET_REQUEST
+                            if ((c == Command.DED_GET_REQUEST
                                     || c == Command.DED_SET_REQUEST
-                                    || c == Command.DED_METHOD_REQUEST) {
+                                    || c == Command.DED_READ_RESPONSE
+                                    || c == Command.DED_WRITE_RESPONSE
+                                    || c == Command.DED_GET_RESPONSE
+                                    || c == Command.DED_SET_RESPONSE
+                                    || c == Command.DED_METHOD_REQUEST
+                                    || c == Command.DED_METHOD_RESPONSE)
+                                    && settings.getCipher()
+                                            .getDedicatedKey() != null
+                                    && settings.getCipher()
+                                            .getDedicatedKey().length != 0) {
                                 p = new AesGcmParameter(st,
                                         settings.getCipher().getDedicatedKey(),
                                         settings.getCipher()
@@ -1089,6 +1100,7 @@ public class GXDLMSTranslator {
                                 value.size() - value.position()));
                 break;
             case Command.GENERAL_GLO_CIPHERING:
+            case Command.GENERAL_DED_CIPHERING:
                 if (settings.getCipher() != null && comments) {
                     int len = xml.getXmlLength();
                     try {
@@ -1100,8 +1112,10 @@ public class GXDLMSTranslator {
                                 settings.getCipher().getSystemTitle(),
                                 settings.getCipher().getBlockCipherKey(),
                                 settings.getCipher().getAuthenticationKey());
+                        p.setXml(xml);
                         tmp = new GXByteBuffer(GXCiphering
                                 .decrypt(settings.getCipher(), p, tmp));
+                        len = xml.getXmlLength();
                         xml.startComment("Decrypt data:");
                         pduToXml(xml, tmp, omitDeclaration, omitNameSpace,
                                 false);

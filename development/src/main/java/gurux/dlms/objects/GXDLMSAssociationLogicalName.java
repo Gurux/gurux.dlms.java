@@ -34,7 +34,6 @@
 
 package gurux.dlms.objects;
 
-import java.lang.reflect.Array;
 import java.security.Signature;
 import java.util.ArrayList;
 import java.util.List;
@@ -347,20 +346,21 @@ public class GXDLMSAssociationLogicalName extends GXDLMSObject
                 secret = tmp;
             }
         } else if (e.getIndex() == 5) {
-            Object[] tmp = (Object[]) e.getParameters();
-            if (tmp == null || tmp.length != 2) {
+            List<?> tmp = (List<?>) e.getParameters();
+            if (tmp == null || tmp.size() != 2) {
                 e.setError(ErrorCode.READ_WRITE_DENIED);
             } else {
                 userList.add(new GXSimpleEntry<Byte, String>(
-                        ((Number) tmp[0]).byteValue(), (String) tmp[1]));
+                        ((Number) tmp.get(0)).byteValue(),
+                        (String) tmp.get(1)));
             }
         } else if (e.getIndex() == 6) {
-            Object[] tmp = (Object[]) e.getParameters();
-            if (tmp == null || tmp.length != 2) {
+            List<?> tmp = (List<?>) e.getParameters();
+            if (tmp == null || tmp.size() != 2) {
                 e.setError(ErrorCode.READ_WRITE_DENIED);
             } else {
-                byte id = ((Number) tmp[0]).byteValue();
-                String name = (String) tmp[1];
+                byte id = ((Number) tmp.get(0)).byteValue();
+                String name = (String) tmp.get(1);
                 for (Entry<Byte, String> it : userList) {
                     if (it.getKey() == id
                             && it.getValue().compareTo(name) == 0) {
@@ -553,29 +553,29 @@ public class GXDLMSAssociationLogicalName extends GXDLMSObject
     }
 
     static final void updateAccessRights(final GXDLMSObject obj,
-            final Object[] buff) {
-        if (buff != null && buff.length != 0) {
-            for (Object access : (Object[]) Array.get(buff, 0)) {
-                Object[] attributeAccess = (Object[]) access;
-                int id = ((Number) attributeAccess[0]).intValue();
-                int tmp = ((Number) attributeAccess[1]).intValue();
+            final List<?> buff) {
+        if (buff != null && !buff.isEmpty()) {
+            for (Object access : (List<?>) buff.get(0)) {
+                List<?> attributeAccess = (List<?>) access;
+                int id = ((Number) attributeAccess.get(0)).intValue();
+                int tmp = ((Number) attributeAccess.get(1)).intValue();
                 AccessMode aMode = AccessMode.forValue(tmp);
                 obj.setAccess(id, aMode);
             }
-            for (Object access : (Object[]) Array.get(buff, 1)) {
-                Object[] methodAccess = (Object[]) access;
-                int id = ((Number) methodAccess[0]).intValue();
+            for (Object access : (List<?>) buff.get(1)) {
+                List<?> methodAccess = (List<?>) access;
+                int id = ((Number) methodAccess.get(0)).intValue();
                 int tmp;
                 // If version is 0.
-                if (methodAccess[1] instanceof Boolean) {
-                    if (((Boolean) methodAccess[1]).booleanValue()) {
+                if (methodAccess.get(1) instanceof Boolean) {
+                    if (((Boolean) methodAccess.get(1)).booleanValue()) {
                         tmp = 1;
                     } else {
                         tmp = 0;
                     }
                 } else {
                     // If version is 1.
-                    tmp = ((Number) methodAccess[1]).intValue();
+                    tmp = ((Number) methodAccess.get(1)).intValue();
                 }
                 MethodAccessMode mode = MethodAccessMode.forValue(tmp);
                 obj.setMethodAccess(id, mode);
@@ -774,11 +774,12 @@ public class GXDLMSAssociationLogicalName extends GXDLMSObject
             final GXDLMSObjectCollection target, final Object value) {
         target.clear();
         if (value != null) {
-            for (Object item : (Object[]) value) {
-                ObjectType type = ObjectType
-                        .forValue(((Number) Array.get(item, 0)).intValue());
-                int version = ((Number) Array.get(item, 1)).intValue();
-                String ln = GXCommon.toLogicalName((byte[]) Array.get(item, 2));
+            for (Object tmp : (List<?>) value) {
+                List<?> item = (List<?>) tmp;
+                ObjectType type =
+                        ObjectType.forValue(((Number) item.get(0)).intValue());
+                int version = ((Number) item.get(1)).intValue();
+                String ln = GXCommon.toLogicalName((byte[]) item.get(2));
                 GXDLMSObject obj = settings.getObjects().findByLN(type, ln);
                 if (obj == null) {
                     obj = gurux.dlms.GXDLMSClient.createObject(type);
@@ -787,7 +788,7 @@ public class GXDLMSAssociationLogicalName extends GXDLMSObject
                 }
                 // Add only known objects.
                 if (obj instanceof IGXDLMSBase) {
-                    updateAccessRights(obj, (Object[]) Array.get(item, 3));
+                    updateAccessRights(obj, (List<?>) item.get(3));
                     target.add(obj);
                 }
             }
@@ -854,20 +855,21 @@ public class GXDLMSAssociationLogicalName extends GXDLMSObject
             }
         } else {
             if (value != null) {
-                applicationContextName.setJointIsoCtt(
-                        ((Number) Array.get(value, 0)).intValue());
+                List<?> arr = (List<?>) value;
                 applicationContextName
-                        .setCountry(((Number) Array.get(value, 1)).intValue());
-                applicationContextName.setCountryName(
-                        ((Number) Array.get(value, 2)).intValue());
+                        .setJointIsoCtt(((Number) arr.get(0)).intValue());
+                applicationContextName
+                        .setCountry(((Number) arr.get(1)).intValue());
+                applicationContextName
+                        .setCountryName(((Number) arr.get(2)).intValue());
                 applicationContextName.setIdentifiedOrganization(
-                        ((Number) Array.get(value, 3)).intValue());
+                        ((Number) arr.get(3)).intValue());
                 applicationContextName
-                        .setDlmsUA(((Number) Array.get(value, 4)).intValue());
+                        .setDlmsUA(((Number) arr.get(4)).intValue());
                 applicationContextName.setApplicationContext(
-                        ((Number) Array.get(value, 5)).intValue());
+                        ((Number) arr.get(5)).intValue());
                 applicationContextName.setContextId(ApplicationContextName
-                        .forValue(((Number) Array.get(value, 6)).intValue()));
+                        .forValue(((Number) arr.get(6)).intValue()));
             }
         }
     }
@@ -935,23 +937,21 @@ public class GXDLMSAssociationLogicalName extends GXDLMSObject
                             Authentication.forValue(buff.getUInt8()));
                 }
             } else {
-                if (value != null) {
-                    authenticationMechanismName.setJointIsoCtt(
-                            ((Number) Array.get(value, 0)).intValue());
-                    authenticationMechanismName.setCountry(
-                            ((Number) Array.get(value, 1)).intValue());
-                    authenticationMechanismName.setCountryName(
-                            ((Number) Array.get(value, 2)).intValue());
-                    authenticationMechanismName.setIdentifiedOrganization(
-                            ((Number) Array.get(value, 3)).intValue());
-                    authenticationMechanismName.setDlmsUA(
-                            ((Number) Array.get(value, 4)).intValue());
-                    authenticationMechanismName.setAuthenticationMechanismName(
-                            ((Number) Array.get(value, 5)).intValue());
-                    authenticationMechanismName
-                            .setMechanismId(Authentication.forValue(
-                                    ((Number) Array.get(value, 6)).intValue()));
-                }
+                List<?> arr = (List<?>) value;
+                authenticationMechanismName
+                        .setJointIsoCtt(((Number) arr.get(0)).intValue());
+                authenticationMechanismName
+                        .setCountry(((Number) arr.get(1)).intValue());
+                authenticationMechanismName
+                        .setCountryName(((Number) arr.get(2)).intValue());
+                authenticationMechanismName.setIdentifiedOrganization(
+                        ((Number) arr.get(3)).intValue());
+                authenticationMechanismName
+                        .setDlmsUA(((Number) arr.get(4)).intValue());
+                authenticationMechanismName.setAuthenticationMechanismName(
+                        ((Number) arr.get(5)).intValue());
+                authenticationMechanismName.setMechanismId(Authentication
+                        .forValue(((Number) arr.get(6)).intValue()));
             }
         }
     }
@@ -971,8 +971,9 @@ public class GXDLMSAssociationLogicalName extends GXDLMSObject
             break;
         case 3:
             if (e.getValue() != null) {
-                clientSAP = ((Number) Array.get(e.getValue(), 0)).shortValue();
-                serverSAP = ((Number) Array.get(e.getValue(), 1)).shortValue();
+                List<?> tmp = (List<?>) e.getValue();
+                clientSAP = ((Number) tmp.get(0)).shortValue();
+                serverSAP = ((Number) tmp.get(1)).shortValue();
             }
             break;
         case 4:
@@ -982,20 +983,20 @@ public class GXDLMSAssociationLogicalName extends GXDLMSObject
             if (e.getValue() != null) {
 
                 GXByteBuffer bb = new GXByteBuffer();
-                GXCommon.setBitString(bb, Array.get(e.getValue(), 0), true);
+                List<?> arr = (List<?>) e.getValue();
+                GXCommon.setBitString(bb, arr.get(0), true);
                 bb.setUInt8(0, 0);
                 xDLMSContextInfo
                         .setConformance(Conformance.forValue(bb.getInt32()));
-                xDLMSContextInfo.setMaxReceivePduSize(
-                        ((Number) Array.get(e.getValue(), 1)).intValue());
-                xDLMSContextInfo.setMaxSendPduSize(
-                        ((Number) Array.get(e.getValue(), 2)).intValue());
-                xDLMSContextInfo.setDlmsVersionNumber(
-                        ((Number) Array.get(e.getValue(), 3)).byteValue());
-                xDLMSContextInfo.setQualityOfService(
-                        ((Number) Array.get(e.getValue(), 4)).intValue());
                 xDLMSContextInfo
-                        .setCypheringInfo((byte[]) Array.get(e.getValue(), 5));
+                        .setMaxReceivePduSize(((Number) arr.get(1)).intValue());
+                xDLMSContextInfo
+                        .setMaxSendPduSize(((Number) arr.get(2)).intValue());
+                xDLMSContextInfo.setDlmsVersionNumber(
+                        ((Number) arr.get(3)).byteValue());
+                xDLMSContextInfo
+                        .setQualityOfService(((Number) arr.get(4)).intValue());
+                xDLMSContextInfo.setCypheringInfo((byte[]) arr.get(5));
             }
             break;
         case 6:
@@ -1019,18 +1020,18 @@ public class GXDLMSAssociationLogicalName extends GXDLMSObject
         case 10:
             userList.clear();
             if (e.getValue() != null) {
-                for (Object tmp : (Object[]) e.getValue()) {
-                    Object[] item = (Object[]) tmp;
-                    userList.add(new GXSimpleEntry<Byte, String>((Byte) item[0],
-                            (String) item[1]));
+                for (Object tmp : (List<?>) e.getValue()) {
+                    List<?> item = (List<?>) tmp;
+                    userList.add(new GXSimpleEntry<Byte, String>(
+                            (Byte) item.get(0), (String) item.get(1)));
                 }
             }
             break;
         case 11:
             if (e.getValue() != null) {
-                Object[] tmp = (Object[]) e.getValue();
+                List<?> tmp = (List<?>) e.getValue();
                 currentUser = new GXSimpleEntry<Byte, String>(
-                        ((Number) tmp[0]).byteValue(), (String) tmp[1]);
+                        ((Number) tmp.get(0)).byteValue(), (String) tmp.get(1));
             } else {
                 currentUser = null;
             }

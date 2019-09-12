@@ -292,9 +292,9 @@ public class GXDLMSActionSchedule extends GXDLMSObject implements IGXDLMSBase {
             setLogicalName(GXCommon.toLogicalName(e.getValue()));
         } else if (e.getIndex() == 2) {
             setExecutedScriptLogicalName(
-                    GXCommon.toLogicalName(((Object[]) e.getValue())[0]));
+                    GXCommon.toLogicalName(((List<?>) e.getValue()).get(0)));
             setExecutedScriptSelector(
-                    ((Number) ((Object[]) e.getValue())[1]).intValue());
+                    ((Number) ((List<?>) e.getValue()).get(1)).intValue());
         } else if (e.getIndex() == 3) {
             setType(SingleActionScheduleType
                     .forValue(((Number) e.getValue()).intValue()));
@@ -303,9 +303,9 @@ public class GXDLMSActionSchedule extends GXDLMSObject implements IGXDLMSBase {
             if (e.getValue() != null) {
                 java.util.ArrayList<GXDateTime> items =
                         new java.util.ArrayList<GXDateTime>();
-                for (Object it : (Object[]) e.getValue()) {
+                for (Object it : (List<?>) e.getValue()) {
                     GXDateTime time = (GXDateTime) GXDLMSClient.changeType(
-                            (byte[]) ((Object[]) it)[0], DataType.TIME);
+                            (byte[]) ((List<?>) it).get(0), DataType.TIME);
                     time.setSkip(DateTimeSkips.forValue(DateTimeSkips
                             .toInteger(time.getSkip())
                             & ~(DateTimeSkips.YEAR.getValue()
@@ -313,7 +313,7 @@ public class GXDLMSActionSchedule extends GXDLMSObject implements IGXDLMSBase {
                                     | DateTimeSkips.DAY.getValue()
                                     | DateTimeSkips.DAY_OF_WEEK.getValue())));
                     GXDateTime date = (GXDateTime) GXDLMSClient.changeType(
-                            (byte[]) ((Object[]) it)[1], DataType.DATE);
+                            (byte[]) ((List<?>) it).get(1), DataType.DATE);
                     date.setSkip(DateTimeSkips.forValue(DateTimeSkips
                             .toInteger(date.getSkip())
                             & ~(DateTimeSkips.HOUR.getValue()

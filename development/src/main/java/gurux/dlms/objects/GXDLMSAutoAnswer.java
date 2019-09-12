@@ -304,11 +304,13 @@ public class GXDLMSAutoAnswer extends GXDLMSObject implements IGXDLMSBase {
         } else if (e.getIndex() == 3) {
             getListeningWindow().clear();
             if (e.getValue() != null) {
-                for (Object item : (Object[]) e.getValue()) {
+                for (Object item : (List<?>) e.getValue()) {
                     GXDateTime start = (GXDateTime) GXDLMSClient.changeType(
-                            (byte[]) ((Object[]) item)[0], DataType.DATETIME);
+                            (byte[]) ((List<?>) item).get(0),
+                            DataType.DATETIME);
                     GXDateTime end = (GXDateTime) GXDLMSClient.changeType(
-                            (byte[]) ((Object[]) item)[1], DataType.DATETIME);
+                            (byte[]) ((List<?>) item).get(1),
+                            DataType.DATETIME);
                     getListeningWindow().add(
                             new GXSimpleEntry<GXDateTime, GXDateTime>(start,
                                     end));
@@ -324,9 +326,9 @@ public class GXDLMSAutoAnswer extends GXDLMSObject implements IGXDLMSBase {
             numberOfRingsOutListeningWindow = 0;
             if (e.getValue() != null) {
                 numberOfRingsInListeningWindow =
-                        ((Number) ((Object[]) e.getValue())[0]).intValue();
+                        ((Number) ((List<?>) e.getValue()).get(0)).intValue();
                 numberOfRingsOutListeningWindow =
-                        ((Number) ((Object[]) e.getValue())[1]).intValue();
+                        ((Number) ((List<?>) e.getValue()).get(1)).intValue();
             }
         } else {
             e.setError(ErrorCode.READ_WRITE_DENIED);

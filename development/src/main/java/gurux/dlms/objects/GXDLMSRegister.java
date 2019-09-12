@@ -35,6 +35,7 @@
 package gurux.dlms.objects;
 
 import java.text.NumberFormat;
+import java.util.List;
 
 import javax.xml.stream.XMLStreamException;
 
@@ -308,13 +309,13 @@ public class GXDLMSRegister extends GXDLMSObject implements IGXDLMSBase {
                 scaler = 0;
                 unit = 0;
             } else {
-                Object[] arr = (Object[]) e.getValue();
-                if (arr == null || arr.length != 2) {
+                List<?> arr = (List<?>) e.getValue();
+                if (arr == null || arr.size() != 2) {
                     scaler = 0;
                     unit = 0;
                 } else {
-                    scaler = ((Number) arr[0]).intValue();
-                    unit = (((Number) arr[1]).intValue() & 0xFF);
+                    scaler = ((Number) arr.get(0)).intValue();
+                    unit = (((Number) arr.get(1)).intValue() & 0xFF);
                 }
             }
         } else {

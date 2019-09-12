@@ -255,13 +255,13 @@ public class GXDLMSSpecialDaysTable extends GXDLMSObject
             if (e.getValue() != null) {
                 java.util.ArrayList<GXDLMSSpecialDay> items =
                         new java.util.ArrayList<GXDLMSSpecialDay>();
-                for (Object item : (Object[]) e.getValue()) {
+                for (Object i : (List<?>) e.getValue()) {
+                    List<?> item = (List<?>) i;
                     GXDLMSSpecialDay it = new GXDLMSSpecialDay();
-
-                    it.setIndex(((Number) ((Object[]) item)[0]).intValue());
-                    it.setDate((GXDateTime) GXDLMSClient.changeType(
-                            (byte[]) ((Object[]) item)[1], DataType.DATE));
-                    it.setDayId(((Number) ((Object[]) item)[2]).intValue());
+                    it.setIndex(((Number) item.get(0)).intValue());
+                    it.setDate((GXDateTime) GXDLMSClient
+                            .changeType((byte[]) item.get(1), DataType.DATE));
+                    it.setDayId(((Number) item.get(2)).intValue());
                     items.add(it);
                 }
                 entries = items.toArray(new GXDLMSSpecialDay[0]);
@@ -282,12 +282,12 @@ public class GXDLMSSpecialDaysTable extends GXDLMSObject
                 items.addAll(Arrays.asList(entries));
             }
             if (e.getIndex() == 1) {
-                Object[] item = (Object[]) e.getParameters();
+                List<?> tmp = (List<?>) e.getParameters();
                 GXDLMSSpecialDay it = new GXDLMSSpecialDay();
-                it.setIndex(((Number) item[0]).intValue());
-                it.setDate((GXDate) GXDLMSClient.changeType((byte[]) item[1],
+                it.setIndex(((Number) tmp.get(0)).intValue());
+                it.setDate((GXDate) GXDLMSClient.changeType((byte[]) tmp.get(1),
                         DataType.DATE));
-                it.setDayId(((Number) item[2]).intValue());
+                it.setDayId(((Number) tmp.get(2)).intValue());
                 for (GXDLMSSpecialDay item2 : items) {
                     if (item2.getIndex() == it.getIndex()) {
                         items.remove(item2);

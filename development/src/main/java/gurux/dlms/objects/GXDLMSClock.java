@@ -37,6 +37,7 @@ package gurux.dlms.objects;
 import java.util.Calendar;
 import java.util.Date;
 import java.util.HashSet;
+import java.util.List;
 import java.util.Set;
 import java.util.TimeZone;
 
@@ -327,17 +328,15 @@ public class GXDLMSClock extends GXDLMSObject implements IGXDLMSBase {
             setTime(dt);
 
         } else if (e.getIndex() == 5) {
+            List<?> arr = (List<?>) e.getParameters();
             // Presets the time to a new value (preset_time) and defines
             // avalidity_interval within which the new time can be activated.
-            GXDateTime presetTime = (GXDateTime) GXDLMSClient.changeType(
-                    (byte[]) ((Object[]) e.getParameters())[0],
-                    DataType.DATETIME);
+            GXDateTime presetTime = (GXDateTime) GXDLMSClient
+                    .changeType((byte[]) arr.get(0), DataType.DATETIME);
             // GXDateTime validityIntervalStart = (GXDateTime)
-            GXDLMSClient.changeType((byte[]) ((Object[]) e.getParameters())[1],
-                    DataType.DATETIME);
+            GXDLMSClient.changeType((byte[]) arr.get(1), DataType.DATETIME);
             // GXDateTime validityIntervalEnd = (GXDateTime)
-            GXDLMSClient.changeType((byte[]) ((Object[]) e.getParameters())[2],
-                    DataType.DATETIME);
+            GXDLMSClient.changeType((byte[]) arr.get(2), DataType.DATETIME);
             setTime(presetTime);
         } else if (e.getIndex() == 6) {
             // Shifts the time.

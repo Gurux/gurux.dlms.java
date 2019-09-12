@@ -34,6 +34,8 @@
 
 package gurux.dlms.objects;
 
+import java.util.List;
+
 import javax.xml.stream.XMLStreamException;
 
 import gurux.dlms.GXByteBuffer;
@@ -446,13 +448,13 @@ public class GXDLMSDemandRegister extends GXDLMSObject implements IGXDLMSBase {
                 scaler = 0;
                 unit = 0;
             } else {
-                Object[] arr = (Object[]) e.getValue();
-                if (arr.length != 2) {
+                List<?> arr = (List<?>) e.getValue();
+                if (arr.size() != 2) {
                     throw new IllegalArgumentException(
                             "setValue failed. Invalid scaler unit value.");
                 }
-                scaler = ((Number) arr[0]).intValue();
-                unit = (((Number) arr[1]).intValue() & 0xFF);
+                scaler = ((Number) arr.get(0)).intValue();
+                unit = (((Number) arr.get(1)).intValue() & 0xFF);
             }
         } else if (e.getIndex() == 5) {
             if (e.getValue() == null) {

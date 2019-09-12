@@ -182,25 +182,25 @@ public class GXDLMSSchedule extends GXDLMSObject implements IGXDLMSBase {
             setLogicalName(GXCommon.toLogicalName(e.getValue()));
         } else if (e.getIndex() == 2) {
             entries.clear();
-            Object[] arr = (Object[]) e.getValue();
+            List<?> arr = (List<?>) e.getValue();
             for (Object it : arr) {
                 GXDLMSScheduleEntry item = new GXDLMSScheduleEntry();
-                Object[] tmp = (Object[]) it;
-                item.setIndex(((Number) tmp[0]).intValue());
-                item.setEnable(((Boolean) tmp[1]).booleanValue());
+                List<?> tmp = (List<?>) it;
+                item.setIndex(((Number) tmp.get(0)).intValue());
+                item.setEnable(((Boolean) tmp.get(1)).booleanValue());
                 item.setLogicalName(GXDLMSClient
-                        .changeType((byte[]) tmp[2], DataType.OCTET_STRING)
+                        .changeType((byte[]) tmp.get(2), DataType.OCTET_STRING)
                         .toString());
-                item.setScriptSelector(((Number) tmp[3]).intValue());
+                item.setScriptSelector(((Number) tmp.get(3)).intValue());
                 item.setSwitchTime((GXDateTime) GXDLMSClient
-                        .changeType((byte[]) tmp[4], DataType.DATETIME));
-                item.setValidityWindow(((Number) tmp[5]).intValue());
-                item.setExecWeekdays((String) tmp[6]);
-                item.setExecSpecDays((String) tmp[7]);
+                        .changeType((byte[]) tmp.get(4), DataType.DATETIME));
+                item.setValidityWindow(((Number) tmp.get(5)).intValue());
+                item.setExecWeekdays((String) tmp.get(6));
+                item.setExecSpecDays((String) tmp.get(7));
                 item.setBeginDate((GXDateTime) GXDLMSClient
-                        .changeType((byte[]) tmp[8], DataType.DATETIME));
+                        .changeType((byte[]) tmp.get(8), DataType.DATETIME));
                 item.setEndDate((GXDateTime) GXDLMSClient
-                        .changeType((byte[]) tmp[9], DataType.DATETIME));
+                        .changeType((byte[]) tmp.get(9), DataType.DATETIME));
                 entries.add(item);
             }
         } else {

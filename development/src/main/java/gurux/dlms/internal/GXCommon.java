@@ -41,7 +41,6 @@ import java.text.DateFormat;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.Calendar;
 import java.util.Date;
 import java.util.HashSet;
@@ -51,6 +50,7 @@ import java.util.TimeZone;
 
 import javax.crypto.KeyAgreement;
 
+import gurux.dlms.GXArray;
 import gurux.dlms.GXBitString;
 import gurux.dlms.GXByteBuffer;
 import gurux.dlms.GXDLMSClient;
@@ -59,6 +59,7 @@ import gurux.dlms.GXDLMSSettings;
 import gurux.dlms.GXDate;
 import gurux.dlms.GXDateTime;
 import gurux.dlms.GXICipher;
+import gurux.dlms.GXStructure;
 import gurux.dlms.GXTime;
 import gurux.dlms.TranslatorOutputType;
 import gurux.dlms.enums.ClockStatus;
@@ -95,30 +96,6 @@ public final class GXCommon {
     @SuppressWarnings("squid:S2386")
     public static final byte[] LLC_REPLY_BYTES =
             { (byte) 0xE6, (byte) 0xE7, 0x00 };
-
-    /*
-     * Convert array to list.
-     * @param value Converted array.
-     * @return Converted list.
-     */
-    public static List<Object> asList(final Object[] value) {
-        List<Object> list = new ArrayList<Object>(value.length);
-        for (Object it : value) {
-            list.add(it);
-        }
-        return list;
-    }
-
-    /*
-     * Add all items to the list.
-     * @param target
-     * @param list
-     */
-    public static void addAll(final List<Object> target, final Object[] list) {
-        for (Object it : list) {
-            target.add(it);
-        }
-    }
 
     /*
      * Convert string to byte array.
@@ -678,7 +655,6 @@ public final class GXCommon {
      */
     private static Object getArray(final GXDLMSSettings settings,
             final GXByteBuffer buff, final GXDataInfo info, final int index) {
-        Object value;
         if (info.getCount() == 0) {
             info.setCount(GXCommon.getObjectCount(buff));
         }
@@ -693,7 +669,12 @@ public final class GXCommon {
             return null;
         }
         int startIndex = index;
-        java.util.ArrayList<Object> arr = new java.util.ArrayList<Object>();
+        java.util.ArrayList<Object> arr;
+        if (info.getType() == DataType.ARRAY) {
+            arr = new GXArray();
+        } else {
+            arr = new GXStructure();
+        }
         // Position where last row was found. Cache uses this info.
         int pos = info.getIndex();
         for (; pos != info.getCount(); ++pos) {
@@ -716,8 +697,7 @@ public final class GXCommon {
                     .appendEndTag(info.getXml().getDataType(info.getType()));
         }
         info.setIndex(pos);
-        value = arr.toArray();
-        return value;
+        return arr;
     }
 
     /**
@@ -1128,13 +1108,13 @@ public final class GXCommon {
 
     @SuppressWarnings("squid:S1172")
     private static void getCompactArrayItem(final GXDLMSSettings settings,
-            GXByteBuffer buff, Object[] dt, List<Object> list, int len) {
+            GXByteBuffer buff, List<?> dt, List<Object> list, int len) {
         List<Object> tmp2 = new ArrayList<Object>();
         for (Object it : dt) {
             if (it instanceof DataType) {
                 getCompactArrayItem(settings, buff, (DataType) it, tmp2, 1);
             } else {
-                getCompactArrayItem(settings, buff, (Object[]) it, tmp2, 1);
+                getCompactArrayItem(settings, buff, (List<?>) it, tmp2, 1);
             }
         }
         list.add(tmp2.toArray());
@@ -1206,23 +1186,23 @@ public final class GXCommon {
         }
     }
 
-    private static void appendDataTypeAsXml(Object[] cols, GXDataInfo info) {
+    private static void appendDataTypeAsXml(List<?> cols, GXDataInfo info) {
         for (Object it : cols) {
             if (it instanceof DataType) {
                 info.getXml().appendEmptyTag(
                         info.getXml().getDataType((DataType) it));
-            } else if (it instanceof Object[]) {
+            } else if (it instanceof GXStructure) {
                 info.getXml().appendStartTag(
                         DATA_TYPE_OFFSET + DataType.STRUCTURE.getValue(), null,
                         null);
-                appendDataTypeAsXml((Object[]) it, info);
+                appendDataTypeAsXml((List<?>) it, info);
                 info.getXml().appendEndTag(
                         DATA_TYPE_OFFSET + DataType.STRUCTURE.getValue());
-            } else if (it instanceof List<?>) {
+            } else if (it instanceof GXArray) {
                 info.getXml().appendStartTag(
                         DATA_TYPE_OFFSET + DataType.ARRAY.getValue(), null,
                         null);
-                appendDataTypeAsXml(((List<?>) it).toArray(), info);
+                appendDataTypeAsXml(((List<?>) it), info);
                 info.getXml().appendEndTag(
                         DATA_TYPE_OFFSET + DataType.ARRAY.getValue());
             }
@@ -1255,7 +1235,7 @@ public final class GXCommon {
 
         if (dt == DataType.STRUCTURE) {
             // Get data types.
-            List<Object> cols = new ArrayList<Object>();
+            GXStructure cols = new GXStructure();
             getDataTypes(buff, cols, len);
             len = GXCommon.getObjectCount(buff);
             if (info.getXml() != null) {
@@ -1263,8 +1243,7 @@ public final class GXCommon {
                         info.getXml().getDataType(DataType.COMPACT_ARRAY), null,
                         null);
                 info.getXml().appendStartTag(CONTENTS_DESCRIPTION);
-                appendDataTypeAsXml(cols.toArray(new Object[cols.size()]),
-                        info);
+                appendDataTypeAsXml(cols, info);
                 info.getXml().appendEndTag(CONTENTS_DESCRIPTION);
                 if (info.getXml()
                         .getOutputType() == TranslatorOutputType.STANDARD_XML) {
@@ -1281,14 +1260,14 @@ public final class GXCommon {
             while (buff.position() - start < len) {
                 List<Object> row = new ArrayList<Object>();
                 for (int pos = 0; pos != cols.size(); ++pos) {
-                    if (cols.get(pos) instanceof Object[]) {
+                    if (cols.get(pos) instanceof GXStructure) {
                         getCompactArrayItem(settings, buff,
-                                (Object[]) cols.get(pos), row, 1);
-                    } else if (cols.get(pos) instanceof List<?>) {
+                                (List<?>) cols.get(pos), row, 1);
+                    } else if (cols.get(pos) instanceof GXArray) {
                         List<Object> tmp2 = new ArrayList<Object>();
                         getCompactArrayItem(settings, buff,
-                                ((List<?>) cols.get(pos)).toArray(), tmp2, 1);
-                        row.add(Arrays.asList((Object[]) tmp2.get(0)));
+                                ((List<?>) cols.get(pos)), tmp2, 1);
+                        row.add((List<?>) tmp2.get(0));
                     } else {
                         getCompactArrayItem(settings, buff,
                                 (DataType) cols.get(pos), row, 1);
@@ -1299,7 +1278,7 @@ public final class GXCommon {
                 }
                 // If all columns are read.
                 if (row.size() >= cols.size()) {
-                    list.add(row.toArray(new Object[cols.size()]));
+                    list.add(row);
                 } else {
                     break;
                 }
@@ -1308,11 +1287,11 @@ public final class GXCommon {
                     .getOutputType() == TranslatorOutputType.SIMPLE_XML) {
                 StringBuilder sb = new StringBuilder();
                 for (Object row : list) {
-                    for (Object it : (Object[]) row) {
+                    for (Object it : (List<?>) row) {
                         if (it instanceof byte[]) {
                             sb.append(GXCommon.toHex((byte[]) it));
-                        } else if (it instanceof Object[]) {
-                            for (Object it2 : (Object[]) it) {
+                        } else if (it instanceof List<?>) {
+                            for (Object it2 : (List<?>) it) {
                                 if (it2 instanceof byte[]) {
                                     sb.append(GXCommon.toHex((byte[]) it2));
                                 } else {
@@ -1320,7 +1299,7 @@ public final class GXCommon {
                                 }
                                 sb.append(";");
                             }
-                            if (((Object[]) it).length != 0) {
+                            if (!((List<?>) it).isEmpty()) {
                                 sb.setLength(sb.length() - 1);
                             }
                         } else {
@@ -1341,7 +1320,7 @@ public final class GXCommon {
                 info.getXml().appendEndTag(
                         info.getXml().getDataType(DataType.COMPACT_ARRAY));
             }
-            return list.toArray(new Object[list.size()]);
+            return list;
         } else {
             if (info.getXml() != null) {
                 info.getXml().appendStartTag(
@@ -1379,7 +1358,7 @@ public final class GXCommon {
                         info.getXml().getDataType(DataType.COMPACT_ARRAY));
             }
         }
-        return list.toArray(new Object[list.size()]);
+        return list;
     }
 
     /**
@@ -2157,11 +2136,11 @@ public final class GXCommon {
     private static void setArray(final GXDLMSSettings settings,
             final GXByteBuffer buff, final Object value) {
         if (value != null) {
-            Object[] arr = ((Object[]) value);
-            int len = arr.length;
+            List<?> arr = ((List<?>) value);
+            int len = arr.size();
             setObjectCount(len, buff);
             for (int pos = 0; pos != len; ++pos) {
-                Object it = arr[pos];
+                Object it = arr.get(pos);
                 setData(settings, buff, GXDLMSConverter.getDLMSDataType(it),
                         it);
             }
