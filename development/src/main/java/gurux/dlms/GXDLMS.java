@@ -1213,9 +1213,7 @@ abstract class GXDLMS {
         java.util.ArrayList<byte[]> messages =
                 new java.util.ArrayList<byte[]>();
         byte frame = 0x0;
-        if (p.getCommand() == Command.AARQ) {
-            frame = 0x10;
-        } else if (p.getCommand() == Command.INFORMATION_REPORT) {
+        if (p.getCommand() == Command.INFORMATION_REPORT) {
             frame = 0x13;
         } else if (p.getCommand() == Command.NONE) {
             frame = p.getSettings().getNextSend(true);
