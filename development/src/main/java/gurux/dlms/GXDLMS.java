@@ -1165,9 +1165,7 @@ abstract class GXDLMS {
         GXByteBuffer reply = new GXByteBuffer();
         java.util.ArrayList<byte[]> messages = new ArrayList<byte[]>();
         byte frame = 0;
-        if (p.getCommand() == Command.AARQ) {
-            frame = 0x10;
-        } else if (p.getCommand() == Command.DATA_NOTIFICATION
+        if (p.getCommand() == Command.DATA_NOTIFICATION
                 || p.getCommand() == Command.EVENT_NOTIFICATION) {
             frame = 0x13;
         }

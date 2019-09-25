@@ -271,6 +271,16 @@ public class GXDLMSClient {
     }
 
     /**
+     * Meter returns system title when ciphered connection is made or GMAC
+     * authentication is used.
+     * 
+     * @return Source system title.
+     */
+    public byte[] getSourceSystemTitle() {
+        return settings.getSourceSystemTitle();
+    }
+
+    /**
      * @return GBT window size.
      */
     public final int getWindowSize() {

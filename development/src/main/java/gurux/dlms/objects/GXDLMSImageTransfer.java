@@ -447,7 +447,11 @@ public class GXDLMSImageTransfer extends GXDLMSObject implements IGXDLMSBase {
     public final byte[][] imageTransferInitiate(final GXDLMSClient client,
             final String imageIdentifier, final long forImageSize) {
         if (imageBlockSize == 0) {
-            throw new IllegalArgumentException("Invalid image block size");
+            throw new IllegalArgumentException("Invalid image block size.");
+        }
+        if (imageBlockSize > client.getMaxReceivePDUSize()) {
+            throw new IllegalArgumentException(
+                    "Image block size is bigger than max PDU size.");
         }
         GXByteBuffer data = new GXByteBuffer();
         data.setUInt8(DataType.STRUCTURE.getValue());
