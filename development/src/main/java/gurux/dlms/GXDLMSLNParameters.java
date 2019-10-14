@@ -125,6 +125,10 @@ class GXDLMSLNParameters {
      *            Attribute descriptor.
      * @param forData
      *            Data.
+     * @param forStatus
+     *            Status.
+     * @param forCipheredCommand
+     *            Ciphered command.
      */
     GXDLMSLNParameters(final GXDLMSSettings forSettings, final long forInvokeId,
             final int forCommand, final int forCommandType,

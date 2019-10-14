@@ -99,11 +99,9 @@ public class GXDLMSTranslatorStructure {
         showStringAsHex = value;
     }
 
-    /**
+    /*
      * Constructor.
-     * 
-     * @param list
-     *            List of tags.
+     * @param list List of tags.
      */
     GXDLMSTranslatorStructure(final TranslatorOutputType type,
             boolean numericsAshex, final boolean numericshex, final boolean hex,

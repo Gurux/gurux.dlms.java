@@ -77,18 +77,13 @@ class GXDLMSSNParameters {
      */
     private int blockIndex;
 
-    /**
+    /*
      * Constructor.
-     * 
-     * @param forSettings
-     *            DLMS settings.
-     * @param forCommand
-     *            Command.
-     * @param forCommandType
-     *            Command type.
+     * @param forSettings DLMS settings.
+     * @param forCommand Command.
+     * @param forCommandType Command type.
      * @param forAttributeDescriptor
-     * @param forData
-     *            Attribute descriptor
+     * @param forData Attribute descriptor
      * @return Generated messages.
      */
     GXDLMSSNParameters(final GXDLMSSettings forSettings, final int forCommand,

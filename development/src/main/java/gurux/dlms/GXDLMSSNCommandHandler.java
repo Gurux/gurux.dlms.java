@@ -328,11 +328,9 @@ final class GXDLMSSNCommandHandler {
         }
     }
 
-    /**
+    /*
      * Handle read request.
-     * 
-     * @param data
-     *            Received data.
+     * @param data Received data.
      */
     static void handleReadRequest(final GXDLMSSettings settings,
             final GXDLMSServerBase server, final GXByteBuffer data,
@@ -474,11 +472,9 @@ final class GXDLMSSNCommandHandler {
         return i;
     }
 
-    /**
+    /*
      * Handle write request.
-     * 
-     * @param Reply
-     *            Received data from the client.
+     * @param Reply Received data from the client.
      * @return Reply.
      */
     static void handleWriteRequest(final GXDLMSSettings settings,

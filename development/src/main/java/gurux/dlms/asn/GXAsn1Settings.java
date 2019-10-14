@@ -123,11 +123,8 @@ final class GXAsn1Settings {
         }
     }
 
-    /**
+    /*
      * Append spaces to the buffer.
-     * 
-     * @param count
-     *            Amount of spaces.
      */
     public void appendSpaces() {
         for (int pos = 0; pos != count; ++pos) {
@@ -162,7 +159,7 @@ final class GXAsn1Settings {
     }
 
     /**
-     * @param comments
+     * @param value
      *            Are comments used.
      */
     public void setComments(final boolean value) {

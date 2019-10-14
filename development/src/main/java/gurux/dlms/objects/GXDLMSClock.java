@@ -131,7 +131,7 @@ public class GXDLMSClock extends GXDLMSObject implements IGXDLMSBase {
         if (index == 2 || index == 5 || index == 6) {
             return DataType.DATETIME;
         }
-        return super.getDataType(index);
+        return super.getUIDataType(index);
     }
 
     /**

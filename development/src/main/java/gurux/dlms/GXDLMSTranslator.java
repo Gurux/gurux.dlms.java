@@ -846,11 +846,9 @@ public class GXDLMSTranslator {
         return pduToXml(xml, value, omitDeclaration, omitNameSpace, true);
     }
 
-    /**
+    /*
      * Convert bytes to XML.
-     * 
-     * @param value
-     *            Bytes to convert.
+     * @param value Bytes to convert.
      * @return Converted XML.
      */
     @SuppressWarnings({ "squid:S00112", "squid:S1141", "squid:S1871" })

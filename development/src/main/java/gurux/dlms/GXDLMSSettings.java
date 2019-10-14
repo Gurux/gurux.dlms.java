@@ -303,7 +303,7 @@ public class GXDLMSSettings {
      */
     private String protocolVersion = null;
 
-    /**
+    /*
      * Constructor.
      */
     GXDLMSSettings(final boolean isServer) {

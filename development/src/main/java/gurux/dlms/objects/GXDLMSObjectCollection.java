@@ -282,7 +282,7 @@ public class GXDLMSObjectCollection extends ArrayList<GXDLMSObject>
                 if (d != null && d.length() != 0) {
                     writer.writeElementString("Description", d);
                 }
-                if (settings.getValues()) {
+                if (settings != null && settings.getValues()) {
                     ((IGXDLMSBase) it).save(writer);
                 }
                 // Close object.

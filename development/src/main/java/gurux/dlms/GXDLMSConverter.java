@@ -459,6 +459,12 @@ public class GXDLMSConverter {
         if (value instanceof BigInteger) {
             return DataType.UINT64;
         }
+        if (value instanceof GXArray) {
+            return DataType.ARRAY;
+        }
+        if (value instanceof GXStructure) {
+            return DataType.STRUCTURE;
+        }
         throw new IllegalArgumentException("Invalid value.");
     }
 

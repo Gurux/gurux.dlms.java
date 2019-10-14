@@ -73,9 +73,8 @@ class GXDLMSXmlSettings {
 
     private TranslatorOutputType outputType;
 
-    /**
+    /*
      * Constructor.
-     * 
      * @param list
      */
     GXDLMSXmlSettings(final TranslatorOutputType type,

@@ -64,7 +64,7 @@ public class GXDLMSException extends RuntimeException {
         super(message);
     }
 
-    /**
+    /*
      * Constructor for AARE error.
      */
     GXDLMSException(final AssociationResult forResult,
@@ -75,7 +75,7 @@ public class GXDLMSException extends RuntimeException {
         diagnostic = forDiagnostic.getValue();
     }
 
-    /**
+    /*
      * Constructor for AARE error.
      */
     GXDLMSException(final AssociationResult forResult,

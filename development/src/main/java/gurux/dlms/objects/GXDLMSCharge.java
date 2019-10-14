@@ -525,7 +525,7 @@ public class GXDLMSCharge extends GXDLMSObject implements IGXDLMSBase {
         case 9:
             return DataType.BITSTRING;
         case 10:
-            return DataType.OCTET_STRING;
+            return DataType.DATETIME;
         case 11:
             return DataType.INT32;
         case 12:
@@ -536,6 +536,14 @@ public class GXDLMSCharge extends GXDLMSObject implements IGXDLMSBase {
             throw new IllegalArgumentException(
                     "getDataType failed. Invalid attribute index.");
         }
+    }
+
+    @Override
+    public final DataType getUIDataType(final int index) {
+        if (index == 7 || index == 10) {
+            return DataType.DATETIME;
+        }
+        return super.getUIDataType(index);
     }
 
     private static byte[] getUnitCharge(GXUnitCharge charge) {
@@ -689,8 +697,12 @@ public class GXDLMSCharge extends GXDLMSObject implements IGXDLMSBase {
             chargeConfiguration = String.valueOf(e.getValue());
             break;
         case 10:
-            lastCollectionTime = (GXDateTime) GXDLMSClient
-                    .changeType((byte[]) e.getValue(), DataType.DATETIME);
+            if (e.getValue() instanceof GXDateTime) {
+                lastCollectionTime = (GXDateTime) e.getValue();
+            } else {
+                lastCollectionTime = (GXDateTime) GXDLMSClient
+                        .changeType((byte[]) e.getValue(), DataType.DATETIME);
+            }
             break;
         case 11:
             lastCollectionAmount = ((Number) e.getValue()).intValue();
