@@ -127,7 +127,7 @@ public class sampleclient {
         System.out.println(
                 "GuruxDlmsSample reads data from the DLMS/COSEM device.");
         System.out.println(
-                "GuruxDlmsSample -h [Meter IP Address] -p [Meter Port No] -c 16 -s 1 -r SN");
+                "GuruxDlmsSample -h [Meter IP Address] -p [Meter Port No] -c 16 -s 1 -r sn");
         System.out.println(" -h \t host name or IP address.");
         System.out.println(" -p \t port number or name (Example: 1000).");
         System.out.println(" -S \t serial port.");
@@ -147,9 +147,9 @@ public class sampleclient {
         System.out.println("Example:");
         System.out.println("Read LG device using TCP/IP connection.");
         System.out.println(
-                "GuruxDlmsSample -r SN -c 16 -s 1 -h [Meter IP Address] -p [Meter Port No]");
+                "GuruxDlmsSample -r sn -c 16 -s 1 -h [Meter IP Address] -p [Meter Port No]");
         System.out.println("Read LG device using serial port connection.");
-        System.out.println("GuruxDlmsSample -r SN -c 16 -s 1 -sp COM1 -i");
+        System.out.println("GuruxDlmsSample -r sn -c 16 -s 1 -S COM1 -i");
         System.out.println("Read Indian device using serial port connection.");
         System.out.println(
                 "GuruxDlmsSample -S COM1 -c 16 -s 1 -a Low -P [password]");
