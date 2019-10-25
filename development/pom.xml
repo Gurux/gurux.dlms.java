@@ -2,7 +2,7 @@
   <modelVersion>4.0.0</modelVersion>
   <groupId>org.gurux</groupId>
   <artifactId>gurux.dlms</artifactId>
-  <version>3.0.3</version>
+  <version>3.0.4-SNAPSHOT</version>
   <packaging>jar</packaging>
   <name>gurux.dlms.java</name>
   <url>http://www.gurux.org</url>
@@ -27,69 +27,45 @@
   </developers>
   <properties>
     <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+    <maven.compiler.source>7</maven.compiler.source>
+    <maven.compiler.target>1.7</maven.compiler.target>
   </properties>
   <scm>
+    <connection>scm:git:https://github.com/gurux/gurux.dlms.java.git</connection>
     <url>https://github.com/gurux/gurux.dlms.java/</url>
+    <developerConnection>scm:git:https://github.com/gurux/gurux.dlms.java.git</developerConnection>
   </scm>
-  <!-- Update component to Central repository. -->
+ <!-- Update component to Central repository. -->
   <distributionManagement>
     <snapshotRepository>
-      <id>ossrh</id>
+      <id>nexus-snapshot</id>
       <url>https://oss.sonatype.org/content/repositories/snapshots</url>
     </snapshotRepository>
     <repository>
-      <id>ossrh</id>
+      <id>nexus-releases</id>
       <url>https://oss.sonatype.org/service/local/staging/deploy/maven2/</url>
     </repository>
   </distributionManagement>
+
   <build>
     <plugins>
-      <!-- Set used JRE version. -->
       <plugin>
         <groupId>org.apache.maven.plugins</groupId>
-        <artifactId>maven-compiler-plugin</artifactId>
-        <version>3.3</version>
+        <artifactId>maven-release-plugin</artifactId>
+        <version>2.5.3</version>
         <configuration>
-          <source>1.7</source>
-          <target>1.7</target>
+          <tagNameFormat>v@{project.version}</tagNameFormat>
+          <autoVersionSubmodules>true</autoVersionSubmodules>
+          <releaseProfiles>releases</releaseProfiles>
         </configuration>
-      </plugin>
-      <!-- Generate sources. -->
-      <plugin>
-        <groupId>org.apache.maven.plugins</groupId>
-        <artifactId>maven-source-plugin</artifactId>
-        <version>2.4</version>
-        <executions>
-          <execution>
-            <id>attach-sources</id>
-            <goals>
-              <goal>jar</goal>
-            </goals>
-          </execution>
-        </executions>
       </plugin>
     </plugins>
   </build>
-
   <profiles>
     <profile>
-      <id>release</id>
+      <id>releases</id>
       <build>
         <plugins>
-          <!-- Generate java doc. -->
-          <plugin>
-            <groupId>org.apache.maven.plugins</groupId>
-            <artifactId>maven-javadoc-plugin</artifactId>
-            <version>2.9.1</version>
-            <executions>
-              <execution>
-                <id>attach-javadocs</id>
-                <goals>
-                  <goal>jar</goal>
-                </goals>
-              </execution>
-            </executions>
-          </plugin>
           <!--  Sign the component. -->
           <plugin>
             <groupId>org.apache.maven.plugins</groupId>
@@ -109,10 +85,10 @@
           <plugin>
             <groupId>org.sonatype.plugins</groupId>
             <artifactId>nexus-staging-maven-plugin</artifactId>
-            <version>1.6.3</version>
+            <version>1.6.6</version>
             <extensions>true</extensions>
             <configuration>
-              <serverId>ossrh</serverId>
+              <serverId>nexus-releases</serverId>
               <nexusUrl>https://oss.sonatype.org/</nexusUrl>
               <autoReleaseAfterClose>true</autoReleaseAfterClose>
             </configuration>
