@@ -39,6 +39,7 @@ import java.util.Map;
 import gurux.common.GXCmdParameter;
 import gurux.common.GXCommon;
 import gurux.common.enums.TraceLevel;
+import gurux.dlms.GXDLMSClient;
 import gurux.dlms.GXSimpleEntry;
 import gurux.dlms.enums.Authentication;
 import gurux.dlms.enums.InterfaceType;
@@ -158,7 +159,7 @@ public class sampleclient {
 
     static int getParameters(String[] args, Settings settings) {
         ArrayList<GXCmdParameter> parameters =
-                GXCommon.getParameters(args, "h:p:c:s:r:it:a:p:wP:g:S:");
+                GXCommon.getParameters(args, "h:p:c:s:r:it:a:p:wP:g:S:n:");
         GXNet net = null;
         for (GXCmdParameter it : parameters) {
             switch (it.getTag()) {
@@ -250,6 +251,10 @@ public class sampleclient {
             case 's':
                 settings.client
                         .setServerAddress(Integer.parseInt(it.getValue()));
+                break;
+            case 'n':
+                settings.client.setServerAddress(GXDLMSClient
+                        .getServerAddress(Integer.parseInt(it.getValue())));
                 break;
             case '?':
                 switch (it.getTag()) {
