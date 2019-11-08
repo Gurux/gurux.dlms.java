@@ -51,9 +51,6 @@ public class GXAttributeCollection
     }
 
     public final GXDLMSAttributeSettings find(final int index) {
-        if (index < 1) {
-            throw new IllegalArgumentException("Invalid attribute Index.");
-        }
         for (GXDLMSAttributeSettings it : this) {
             if (it.getIndex() == index) {
                 return it;

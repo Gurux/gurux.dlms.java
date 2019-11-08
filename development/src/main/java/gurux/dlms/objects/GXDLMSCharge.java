@@ -687,8 +687,12 @@ public class GXDLMSCharge extends GXDLMSObject implements IGXDLMSBase {
             setUnitCharge(settings, unitChargePassive, e.getValue());
             break;
         case 7:
-            unitChargeActivationTime = (GXDateTime) GXDLMSClient
-                    .changeType((byte[]) e.getValue(), DataType.DATETIME);
+            if (e.getValue() instanceof GXDateTime) {
+                unitChargeActivationTime = (GXDateTime) e.getValue();
+            } else {
+                unitChargeActivationTime = (GXDateTime) GXDLMSClient
+                        .changeType((byte[]) e.getValue(), DataType.DATETIME);
+            }
             break;
         case 8:
             period = ((Number) e.getValue()).intValue();
