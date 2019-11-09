@@ -1052,6 +1052,7 @@ final class GXDLMSLNCommandHandler {
         byte[] tmp = null;
         // If date time is given.
         if (len != 0) {
+            len = reply.getData().getUInt8();
             tmp = new byte[len];
             reply.getData().get(tmp);
             reply.setTime((GXDateTime) GXDLMSClient.changeType(tmp,
