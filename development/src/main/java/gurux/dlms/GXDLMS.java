@@ -678,11 +678,11 @@ abstract class GXDLMS {
                     reply.setUInt8(DataType.NONE.getValue());
                 } else {
                     // Data is send in octet string.
-                    // Remove data type except from DataNotification.
+                    // Remove data type except from event Notification.
                     int pos = reply.size();
                     GXCommon.setData(null, reply, DataType.OCTET_STRING,
                             p.getTime());
-                    if (p.getCommand() != Command.DATA_NOTIFICATION) {
+                    if (p.getCommand() != Command.EVENT_NOTIFICATION) {
                         reply.move(pos + 1, pos, reply.size() - pos - 1);
                     }
                 }
