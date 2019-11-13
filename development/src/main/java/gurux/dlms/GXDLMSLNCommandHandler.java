@@ -410,7 +410,8 @@ final class GXDLMSLNCommandHandler {
                     xml.integerToHex(cnt, 2));
         }
         for (pos = 0; pos != cnt; ++pos) {
-            ObjectType ci = ObjectType.forValue(data.getUInt16());
+            int ci = data.getUInt16();
+            ObjectType ot = ObjectType.forValue(ci);
             byte[] ln = new byte[6];
             data.get(ln);
             short attributeIndex = data.getUInt8();
@@ -428,11 +429,11 @@ final class GXDLMSLNCommandHandler {
                 xml.appendStartTag(
                         TranslatorTags.ATTRIBUTE_DESCRIPTOR_WITH_SELECTION);
                 xml.appendStartTag(TranslatorTags.ATTRIBUTE_DESCRIPTOR);
-                if (xml.isComments()) {
-                    xml.appendComment(ci.toString());
+                if (xml.isComments() && ot != null) {
+                    xml.appendComment(ot.toString());
                 }
                 xml.appendLine(TranslatorTags.CLASS_ID, "Value",
-                        xml.integerToHex(ci.getValue(), 4));
+                        xml.integerToHex(ci, 4));
                 xml.appendComment(GXCommon.toLogicalName(ln));
                 xml.appendLine(TranslatorTags.INSTANCE_ID, "Value",
                         GXCommon.toHex(ln, false));
@@ -442,10 +443,10 @@ final class GXDLMSLNCommandHandler {
                 xml.appendEndTag(
                         TranslatorTags.ATTRIBUTE_DESCRIPTOR_WITH_SELECTION);
             } else {
-                GXDLMSObject obj = settings.getObjects().findByLN(ci,
+                GXDLMSObject obj = settings.getObjects().findByLN(ot,
                         GXCommon.toLogicalName(ln));
                 if (obj == null) {
-                    obj = server.notifyFindObject(ci, 0,
+                    obj = server.notifyFindObject(ot, 0,
                             GXCommon.toLogicalName(ln));
                 }
                 ValueEventArgs arg = new ValueEventArgs(server, obj,
@@ -704,7 +705,8 @@ final class GXDLMSLNCommandHandler {
         }
         try {
             for (int pos = 0; pos != cnt; ++pos) {
-                ObjectType ci = ObjectType.forValue(data.getUInt16());
+                int ci = data.getUInt16();
+                ObjectType ot = ObjectType.forValue(ci);
                 byte[] ln = new byte[6];
                 data.get(ln);
                 short attributeIndex = data.getUInt8();
@@ -721,9 +723,11 @@ final class GXDLMSLNCommandHandler {
                     xml.appendStartTag(
                             TranslatorTags.ATTRIBUTE_DESCRIPTOR_WITH_SELECTION);
                     xml.appendStartTag(TranslatorTags.ATTRIBUTE_DESCRIPTOR);
-                    xml.appendComment(ci.toString());
+                    if (ot != null) {
+                        xml.appendComment(ot.toString());
+                    }
                     xml.appendLine(TranslatorTags.CLASS_ID, "Value",
-                            xml.integerToHex(ci.getValue(), 4));
+                            xml.integerToHex(ci, 4));
                     xml.appendComment(GXCommon.toLogicalName(ln));
                     xml.appendLine(TranslatorTags.INSTANCE_ID, "Value",
                             GXCommon.toHex(ln, false));
@@ -733,10 +737,10 @@ final class GXDLMSLNCommandHandler {
                     xml.appendEndTag(
                             TranslatorTags.ATTRIBUTE_DESCRIPTOR_WITH_SELECTION);
                 } else {
-                    GXDLMSObject obj = settings.getObjects().findByLN(ci,
+                    GXDLMSObject obj = settings.getObjects().findByLN(ot,
                             GXCommon.toLogicalName(ln));
                     if (obj == null) {
-                        obj = server.notifyFindObject(ci, 0,
+                        obj = server.notifyFindObject(ot, 0,
                                 GXCommon.toLogicalName(ln));
                     }
                     if (obj == null) {
