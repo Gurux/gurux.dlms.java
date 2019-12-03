@@ -53,7 +53,6 @@ import gurux.dlms.enums.Authentication;
 import gurux.dlms.enums.Command;
 import gurux.dlms.enums.Conformance;
 import gurux.dlms.enums.DataType;
-import gurux.dlms.enums.DateTimeSkips;
 import gurux.dlms.enums.ErrorCode;
 import gurux.dlms.enums.InterfaceType;
 import gurux.dlms.enums.MethodAccessMode;
@@ -861,8 +860,6 @@ public class GXDLMSClient {
     }
 
     /**
-     * Generates a release request.
-     * 
      * @return Release request, as byte array.
      */
     public byte[][] releaseRequest() {
@@ -914,22 +911,22 @@ public class GXDLMSClient {
      * @return Disconnected request, as byte array.
      */
     public final byte[] disconnectRequest(final boolean force) {
-        settings.setMaxPduSize(0xFFFF);
         // If connection is not established, there is no need to send
         // DisconnectRequest.
-        if (!force && settings.getConnected() == ConnectionState.NONE) {
-            return null;
+        byte[] reply = null;
+        if (force || (settings.getConnected() & ConnectionState.NONE) != 0) {
+            if (this.getInterfaceType() == InterfaceType.HDLC) {
+                settings.setConnected(ConnectionState.NONE);
+                reply = GXDLMS.getHdlcFrame(settings,
+                        Command.DISCONNECT_REQUEST, null);
+            } else if ((settings.getConnected() & ConnectionState.DLMS) != 0) {
+                reply = releaseRequest()[0];
+            }
         }
-        if (this.getInterfaceType() == InterfaceType.HDLC) {
-            settings.setConnected(ConnectionState.NONE);
-            return GXDLMS.getHdlcFrame(settings, Command.DISCONNECT_REQUEST,
-                    null);
-        }
-        byte[][] reply = releaseRequest();
-        if (reply == null) {
-            return null;
-        }
-        return reply[0];
+        settings.setMaxPduSize(0xFFFF);
+        settings.setConnected(ConnectionState.NONE);
+        settings.resetFrameSequence();
+        return reply;
     }
 
     /**
@@ -2021,8 +2018,6 @@ public class GXDLMSClient {
         settings.resetBlockIndex();
         GXDateTime s = GXCommon.getDateTime(start);
         GXDateTime e = GXCommon.getDateTime(end);
-        s.getSkip().add(DateTimeSkips.DAY_OF_WEEK);
-        e.getSkip().add(DateTimeSkips.DAY_OF_WEEK);
         GXDLMSObject sort = pg.getSortObject();
         if (sort == null && !pg.getCaptureObjects().isEmpty()) {
             sort = pg.getCaptureObjects().get(0).getKey();
