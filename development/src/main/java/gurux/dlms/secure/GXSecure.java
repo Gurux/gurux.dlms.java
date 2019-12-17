@@ -72,7 +72,7 @@ public final class GXSecure {
     private static final byte[] IV = { (byte) 0xA6, (byte) 0xA6, (byte) 0xA6,
             (byte) 0xA6, (byte) 0xA6, (byte) 0xA6, (byte) 0xA6, (byte) 0xA6 };
 
-    /**
+    /*
      * Constructor.
      */
     private GXSecure() {
@@ -86,13 +86,10 @@ public final class GXSecure {
         return data.length + (16 - data.length % 16);
     }
 
-    /**
+    /*
      * Encrypt data using AES.
-     * 
-     * @param data
-     *            Encrypted data.
-     * @param secret
-     *            Secret.
+     * @param data Encrypted data.
+     * @param secret Secret.
      */
     static byte[] aes1Encrypt(final byte[] data, final byte[] secret)
             throws NoSuchAlgorithmException, NoSuchPaddingException,
@@ -109,13 +106,10 @@ public final class GXSecure {
         return cipher.doFinal(d);
     }
 
-    /**
+    /*
      * Decrypt data using AES.
-     * 
-     * @param data
-     *            Encrypted data.
-     * @param secret
-     *            Secret.
+     * @param data Encrypted data.
+     * @param secret Secret.
      */
     static byte[] aes1Decrypt(final byte[] data, final byte[] secret)
             throws NoSuchAlgorithmException, NoSuchPaddingException,
@@ -133,11 +127,9 @@ public final class GXSecure {
         return cipher.doFinal(d);
     }
 
-    /**
+    /*
      * Encrypt data using AES RFC3394 key-wrapping.
-     * 
-     * @param data
-     *            Encrypted data.
+     * @param data Encrypted data.
      */
     static byte[] encryptAesKeyWrapping(final byte[] data, final byte[] kek)
             throws InvalidKeyException, NoSuchAlgorithmException,
@@ -177,11 +169,10 @@ public final class GXSecure {
         return block;
     }
 
-    /**
+    /*
      * Decrypt data using AES RFC3394 key-wrapping.
-     * 
-     * @param data
-     *            Decrypted data.
+     * @param input Decrypted data.
+     * @param kek KEK.
      */
     static byte[] decryptAesKeyWrapping(final byte[] input, final byte[] kek) {
         if (kek == null || kek.length % 8 != 0) {
@@ -237,19 +228,13 @@ public final class GXSecure {
         return block;
     }
 
-    /**
+    /*
      * Chipher text.
-     * 
-     * @param settings
-     *            DLMS settings.
-     * @param cipher
-     *            Chipher settings.
-     * @param ic
-     *            IC
-     * @param data
-     *            Text to chipher.
-     * @param secret
-     *            Secret.
+     * @param settings DLMS settings.
+     * @param cipher Chipher settings.
+     * @param ic IC
+     * @param data Text to chipher.
+     * @param secret Secret.
      * @return Chiphered text.
      */
     public static byte[] secure(final GXDLMSSettings settings,
@@ -324,11 +309,9 @@ public final class GXSecure {
         }
     }
 
-    /**
+    /*
      * Generates challenge.
-     * 
-     * @param authentication
-     *            Used authentication.
+     * @param authentication Used authentication.
      * @return Generated challenge.
      */
     public static byte[]
@@ -630,13 +613,10 @@ public final class GXSecure {
         return c.doFinal(data);
     }
 
-    /**
+    /*
      * Decrypt data using Aes Gcm.
-     * 
-     * @param c
-     *            Cipher settings.
-     * @param p
-     *            GMAC Parameter.
+     * @param c Cipher settings.
+     * @param p GMAC Parameter.
      * @return Encrypted data.
      */
     static byte[] decryptAesGcm(final GXICipher c, final AesGcmParameter p,

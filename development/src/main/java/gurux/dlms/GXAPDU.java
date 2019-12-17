@@ -1440,7 +1440,7 @@ final class GXAPDU {
         return data.array();
     }
 
-    /**
+    /*
      * Server generates AARE message.
      */
     public static void generateAARE(final GXDLMSSettings settings,

@@ -2236,7 +2236,6 @@ public class GXDLMSClient {
      * @param data
      *            Information from the received data.
      * @return Is frame complete.
-     * @throws Exception
      */
     public final boolean getData(final byte[] reply, final GXReplyData data)
             throws InvalidKeyException, NoSuchAlgorithmException,
@@ -2255,7 +2254,6 @@ public class GXDLMSClient {
      * @param notify
      *            Information from the notify message.
      * @return Is frame complete.
-     * @throws Exception
      */
     public final boolean getData(final byte[] reply, final GXReplyData data,
             final GXReplyData notify)
@@ -2273,7 +2271,6 @@ public class GXDLMSClient {
      * @param data
      *            The exported reply information.
      * @return Is frame complete.
-     * @throws Exception
      */
     public final boolean getData(final GXByteBuffer reply,
             final GXReplyData data)
@@ -2293,7 +2290,6 @@ public class GXDLMSClient {
      * @param notify
      *            Information from the notify message.
      * @return Is frame complete.
-     * @throws Exception
      */
     public final boolean getData(final GXByteBuffer reply,
             final GXReplyData data, final GXReplyData notify)

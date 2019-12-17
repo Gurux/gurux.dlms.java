@@ -285,6 +285,8 @@ public class GXDateTime {
      * 
      * @param value
      *            Date time value as a string.
+     * @param locale
+     *            Used locale.
      */
     public GXDateTime(final String value, final Locale locale) {
         if (skip == null) {

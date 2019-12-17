@@ -110,6 +110,8 @@ public class GXDate extends GXDateTime {
      * 
      * @param value
      *            Date time value as a string.
+     * @param locale
+     *            Used locale.
      */
     public GXDate(final String value, final Locale locale) {
         super(value);
