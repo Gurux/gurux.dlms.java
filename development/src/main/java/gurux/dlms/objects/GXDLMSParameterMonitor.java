@@ -34,10 +34,16 @@
 
 package gurux.dlms.objects;
 
+import java.security.InvalidAlgorithmParameterException;
+import java.security.InvalidKeyException;
+import java.security.NoSuchAlgorithmException;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 
+import javax.crypto.BadPaddingException;
+import javax.crypto.IllegalBlockSizeException;
+import javax.crypto.NoSuchPaddingException;
 import javax.xml.stream.XMLStreamException;
 
 import gurux.dlms.GXByteBuffer;
@@ -164,7 +170,10 @@ public class GXDLMSParameterMonitor extends GXDLMSObject
      *         already defined day is inserted, the old entry will be
      *         overwritten.
      */
-    public final byte[][] insert(GXDLMSClient client, GXDLMSTarget entry) {
+    public final byte[][] insert(GXDLMSClient client, GXDLMSTarget entry)
+            throws InvalidKeyException, NoSuchAlgorithmException,
+            NoSuchPaddingException, InvalidAlgorithmParameterException,
+            IllegalBlockSizeException, BadPaddingException {
         GXByteBuffer bb = new GXByteBuffer();
         bb.setUInt8(DataType.STRUCTURE.getValue());
         bb.setUInt8(3);
@@ -185,7 +194,10 @@ public class GXDLMSParameterMonitor extends GXDLMSObject
      *            Removed entry.
      * @return Action bytes.
      */
-    public final byte[][] delete(GXDLMSClient client, GXDLMSTarget entry) {
+    public final byte[][] delete(GXDLMSClient client, GXDLMSTarget entry)
+            throws InvalidKeyException, NoSuchAlgorithmException,
+            NoSuchPaddingException, InvalidAlgorithmParameterException,
+            IllegalBlockSizeException, BadPaddingException {
 
         GXByteBuffer bb = new GXByteBuffer();
         bb.setUInt8(DataType.STRUCTURE.getValue());
@@ -450,6 +462,7 @@ public class GXDLMSParameterMonitor extends GXDLMSObject
 
     @Override
     public final void load(final GXXmlReader reader) throws XMLStreamException {
+        DataType[] dt = new DataType[1];
         changedParameter = new GXDLMSTarget();
         if (reader.isStartElement("ChangedParameter", true)) {
             ObjectType ot =
@@ -462,16 +475,14 @@ public class GXDLMSParameterMonitor extends GXDLMSObject
             }
             changedParameter
                     .setAttributeIndex(reader.readElementContentAsInt("Index"));
-            changedParameter
-                    .setValue(reader.readElementContentAsObject("Value", null));
+            changedParameter.setValue(
+                    reader.readElementContentAsObject("Value", null, dt));
             reader.readEndElement("ChangedParameter");
         }
-        if ("Time".compareToIgnoreCase(reader.getName()) == 0) {
-            captureTime =
-                    new GXDateTime(reader.readElementContentAsString("Time"))
-                            .getMeterCalendar().getTime();
-        } else {
-            captureTime = new Date(0);
+        GXDateTime tmp = reader.readElementContentAsDateTime("Time");
+        captureTime = null;
+        if (tmp != null) {
+            captureTime = tmp.getMeterCalendar().getTime();
         }
         parameters.clear();
         if (reader.isStartElement("Parameters", true)) {

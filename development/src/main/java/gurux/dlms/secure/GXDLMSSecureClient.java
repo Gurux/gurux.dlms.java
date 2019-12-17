@@ -34,9 +34,18 @@
 
 package gurux.dlms.secure;
 
+import java.security.InvalidAlgorithmParameterException;
+import java.security.InvalidKeyException;
+import java.security.NoSuchAlgorithmException;
 import java.security.PublicKey;
 
+import javax.crypto.BadPaddingException;
+import javax.crypto.Cipher;
+import javax.crypto.IllegalBlockSizeException;
 import javax.crypto.KeyAgreement;
+import javax.crypto.NoSuchPaddingException;
+import javax.crypto.spec.GCMParameterSpec;
+import javax.crypto.spec.SecretKeySpec;
 
 import gurux.dlms.GXByteBuffer;
 import gurux.dlms.GXDLMSClient;
@@ -111,6 +120,26 @@ public class GXDLMSSecureClient extends GXDLMSClient {
         return ciphering;
     }
 
+    public static Cipher getCipher(final boolean encrypt, final byte[] kek)
+            throws NoSuchAlgorithmException, NoSuchPaddingException,
+            InvalidKeyException, InvalidAlgorithmParameterException {
+        GXByteBuffer iv = new GXByteBuffer();
+        // iv.set(IV);
+
+        // iv.set(p.getSystemTitle());
+        // iv.setUInt32(p.getInvocationCounter());
+        SecretKeySpec eks = new SecretKeySpec(kek, "AES");
+        Cipher c = Cipher.getInstance("AES/GCM/NoPadding");
+        int mode;
+        if (encrypt) {
+            mode = Cipher.ENCRYPT_MODE;
+        } else {
+            mode = Cipher.DECRYPT_MODE;
+        }
+        c.init(mode, eks, new GCMParameterSpec(12 * 8, iv.array()));
+        return c;
+    }
+
     /**
      * Encrypt data using Key Encrypting Key.
      * 
@@ -118,20 +147,12 @@ public class GXDLMSSecureClient extends GXDLMSClient {
      *            Key Encrypting Key, also known as Master key.
      * @param data
      *            Data to encrypt.
-     * @return Encrypt data.
      */
-    public static byte[] encrypt(final byte[] kek, final byte[] data) {
-        if (kek == null) {
-            throw new NullPointerException("Key Encrypting Key");
-        }
-        if (kek.length < 16) {
-            throw new IllegalArgumentException("Key Encrypting Key");
-        }
-        if (kek.length % 8 != 0) {
-            throw new IllegalArgumentException("Key Encrypting Key");
-        }
-        GXDLMSChipperingStream gcm = new GXDLMSChipperingStream(true, kek);
-        return gcm.encryptAes(data);
+    public static byte[] encrypt(final byte[] kek, final byte[] data)
+            throws NoSuchAlgorithmException, NoSuchPaddingException,
+            InvalidKeyException, InvalidAlgorithmParameterException,
+            IllegalBlockSizeException, BadPaddingException {
+        return GXSecure.encryptAesKeyWrapping(data, kek);
     }
 
     /**
@@ -162,8 +183,11 @@ public class GXDLMSSecureClient extends GXDLMSClient {
         if (data.length % 8 != 0) {
             throw new IllegalArgumentException("data");
         }
-        GXDLMSChipperingStream gcm = new GXDLMSChipperingStream(false, kek);
-        return gcm.decryptAes(data);
+        try {
+            return GXSecure.decryptAesKeyWrapping(data, kek);
+        } catch (Exception ex) {
+            throw new RuntimeException(ex.getMessage());
+        }
     }
 
     /**
@@ -206,7 +230,10 @@ public class GXDLMSSecureClient extends GXDLMSClient {
      * @return Generated action.
      */
     public final byte[][] getServerCertificate(final GXDLMSSecuritySetup ss,
-            final CertificateType type) {
+            final CertificateType type)
+            throws InvalidKeyException, NoSuchAlgorithmException,
+            NoSuchPaddingException, InvalidAlgorithmParameterException,
+            IllegalBlockSizeException, BadPaddingException {
         return ss.exportCertificateByEntity(this, CertificateEntity.SERVER,
                 type, getSettings().getSourceSystemTitle());
     }
@@ -223,7 +250,7 @@ public class GXDLMSSecureClient extends GXDLMSClient {
         // PublicKey pk = GXAsn1Converter.getPublicKey(data2.subArray(1, 64));
         getSettings().setTargetEphemeralKey(pk);
         try {
-            if (!GXASymmetric.validateEphemeralPublicKeySignature(data2.array(),
+            if (!GXSecure.validateEphemeralPublicKeySignature(data2.array(),
                     sign.array(), pk)) {
                 throw new IllegalArgumentException("Key agreement failed.");
             }
@@ -250,7 +277,7 @@ public class GXDLMSSecureClient extends GXDLMSClient {
         sign.set(data, 64, 64);
         getSettings().setTargetEphemeralKey(null);
         try {
-            if (!GXASymmetric.validateEphemeralPublicKeySignature(data2.array(),
+            if (!GXSecure.validateEphemeralPublicKeySignature(data2.array(),
                     sign.array(), sPk)) {
                 throw new IllegalArgumentException("Key agreement failed.");
             }

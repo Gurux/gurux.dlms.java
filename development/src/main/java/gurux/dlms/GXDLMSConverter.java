@@ -494,12 +494,21 @@ public class GXDLMSConverter {
                     "Can't change enumeration types.");
         case FLOAT32:
             if (value instanceof String) {
-                return Float.parseFloat((String) value);
+                try {
+                    return Float.parseFloat((String) value);
+                } catch (NumberFormatException e) {
+                    return Float.parseFloat(((String) value).replace(",", "."));
+                }
             }
             return ((Number) value).floatValue();
         case FLOAT64:
             if (value instanceof String) {
-                return Double.parseDouble((String) value);
+                try {
+                    return Double.parseDouble((String) value);
+                } catch (NumberFormatException e) {
+                    return Double
+                            .parseDouble(((String) value).replace(",", "."));
+                }
             }
             return ((Number) value).doubleValue();
         case INT16:

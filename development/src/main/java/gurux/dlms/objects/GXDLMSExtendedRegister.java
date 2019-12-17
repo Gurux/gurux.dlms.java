@@ -231,12 +231,14 @@ public class GXDLMSExtendedRegister extends GXDLMSRegister {
 
     @Override
     public final void load(final GXXmlReader reader) throws XMLStreamException {
+        DataType[] dt = new DataType[1];
         setUnit(Unit.forValue(reader.readElementContentAsInt("Unit", 0)));
         setScaler(reader.readElementContentAsDouble("Scaler", 1));
-        setValue(reader.readElementContentAsObject("Value", null));
-        status = reader.readElementContentAsObject("Status", null);
-        captureTime = (GXDateTime) reader
-                .readElementContentAsObject("CaptureTime", null);
+        setValue(reader.readElementContentAsObject("Value", null, dt));
+        setDataType(2, dt[0]);
+        status = reader.readElementContentAsObject("Status", null, dt);
+        setDataType(4, dt[0]);
+        captureTime = reader.readElementContentAsDateTime("CaptureTime");
     }
 
     @Override

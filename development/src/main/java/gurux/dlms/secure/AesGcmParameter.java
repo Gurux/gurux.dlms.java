@@ -65,10 +65,6 @@ public class AesGcmParameter {
      * Count type.
      */
     private int type;
-    /**
-     * Counted tag.
-     */
-    private byte[] countTag;
 
     /**
      * Recipient system title.
@@ -257,14 +253,6 @@ public class AesGcmParameter {
 
     public final void setType(final int value) {
         type = value;
-    }
-
-    public final byte[] getCountTag() {
-        return countTag;
-    }
-
-    public final void setCountTag(final byte[] value) {
-        countTag = value;
     }
 
     @Override

@@ -537,6 +537,7 @@ public class GXDLMSLimiter extends GXDLMSObject implements IGXDLMSBase {
 
     @Override
     public final void load(final GXXmlReader reader) throws XMLStreamException {
+        DataType[] dt = new DataType[1];
         if (reader.isStartElement("MonitoredValue", true)) {
             ObjectType ot = ObjectType
                     .forValue(reader.readElementContentAsInt("ObjectType"));
@@ -552,19 +553,22 @@ public class GXDLMSLimiter extends GXDLMSObject implements IGXDLMSBase {
             reader.readEndElement("MonitoredValue");
         }
         thresholdActive =
-                reader.readElementContentAsObject("ThresholdActive", null);
+                reader.readElementContentAsObject("ThresholdActive", null, dt);
+        setDataType(3, dt[0]);
         thresholdNormal =
-                reader.readElementContentAsObject("ThresholdNormal", null);
-        thresholdEmergency =
-                reader.readElementContentAsObject("ThresholdEmergency", null);
+                reader.readElementContentAsObject("ThresholdNormal", null, dt);
+        setDataType(4, dt[0]);
+        thresholdEmergency = reader
+                .readElementContentAsObject("ThresholdEmergency", null, dt);
+        setDataType(5, dt[0]);
         minOverThresholdDuration =
                 reader.readElementContentAsInt("MinOverThresholdDuration");
         minUnderThresholdDuration =
                 reader.readElementContentAsInt("MinUnderThresholdDuration");
         if (reader.isStartElement("EmergencyProfile", true)) {
             emergencyProfile.setID(reader.readElementContentAsInt("ID"));
-            emergencyProfile.setActivationTime((GXDateTime) reader
-                    .readElementContentAsObject("Time", new GXDateTime()));
+            emergencyProfile.setActivationTime(
+                    reader.readElementContentAsDateTime("Time"));
             emergencyProfile
                     .setDuration(reader.readElementContentAsInt("Duration"));
             reader.readEndElement("EmergencyProfile");

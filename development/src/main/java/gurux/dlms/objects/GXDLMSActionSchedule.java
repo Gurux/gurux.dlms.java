@@ -51,6 +51,7 @@ import gurux.dlms.enums.DataType;
 import gurux.dlms.enums.DateTimeSkips;
 import gurux.dlms.enums.ErrorCode;
 import gurux.dlms.enums.ObjectType;
+import gurux.dlms.enums.Standard;
 import gurux.dlms.internal.GXCommon;
 import gurux.dlms.objects.enums.SingleActionScheduleType;
 
@@ -268,12 +269,22 @@ public class GXDLMSActionSchedule extends GXDLMSObject implements IGXDLMSBase {
                 for (GXDateTime it : getExecutionTime()) {
                     bb.setUInt8(DataType.STRUCTURE.getValue());
                     bb.setUInt8(2); // Count
-                    // Time
-                    GXCommon.setData(settings, bb, DataType.OCTET_STRING,
-                            new GXTime(it));
-                    // Date
-                    GXCommon.setData(settings, bb, DataType.OCTET_STRING,
-                            new GXDate(it));
+                    if (settings != null && settings
+                            .getStandard() == Standard.SAUDI_ARABIA) {
+                        // Time
+                        GXCommon.setData(settings, bb, DataType.TIME,
+                                new GXTime(it));
+                        // Date
+                        GXCommon.setData(settings, bb, DataType.DATE,
+                                new GXDate(it));
+                    } else {
+                        // Time
+                        GXCommon.setData(settings, bb, DataType.OCTET_STRING,
+                                new GXTime(it));
+                        // Date
+                        GXCommon.setData(settings, bb, DataType.OCTET_STRING,
+                                new GXDate(it));
+                    }
                 }
             }
             return bb.array();
@@ -320,7 +331,7 @@ public class GXDLMSActionSchedule extends GXDLMSObject implements IGXDLMSBase {
                                     | DateTimeSkips.MINUTE.getValue()
                                     | DateTimeSkips.SECOND.getValue()
                                     | DateTimeSkips.MILLISECOND.getValue())));
-                    GXDateTime tmp = new GXDateTime(date.getMeterCalendar());
+                    GXDateTime tmp = new GXDateTime(date);
                     tmp.getMeterCalendar().add(Calendar.HOUR_OF_DAY,
                             time.getMeterCalendar().get(Calendar.HOUR_OF_DAY));
                     tmp.getMeterCalendar().add(Calendar.MINUTE,
@@ -357,8 +368,7 @@ public class GXDLMSActionSchedule extends GXDLMSObject implements IGXDLMSBase {
         List<GXDateTime> list = new ArrayList<GXDateTime>();
         if (reader.isStartElement("ExecutionTime", true)) {
             while (reader.isStartElement("Time", false)) {
-                GXDateTime it = new GXDateTime(
-                        reader.readElementContentAsString("Time"));
+                GXDateTime it = reader.readElementContentAsDateTime("Time");
                 list.add(it);
             }
             reader.readEndElement("ExecutionTime");
@@ -379,7 +389,7 @@ public class GXDLMSActionSchedule extends GXDLMSObject implements IGXDLMSBase {
         if (executionTime != null) {
             writer.writeStartElement("ExecutionTime");
             for (GXDateTime it : executionTime) {
-                writer.writeElementString("Time", it.toFormatString());
+                writer.writeElementString("Time", it);
             }
             writer.writeEndElement();
         }

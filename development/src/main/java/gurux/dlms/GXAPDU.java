@@ -34,9 +34,14 @@
 
 package gurux.dlms;
 
+import java.security.InvalidAlgorithmParameterException;
 import java.security.InvalidKeyException;
 import java.security.NoSuchAlgorithmException;
 import java.util.Set;
+
+import javax.crypto.BadPaddingException;
+import javax.crypto.IllegalBlockSizeException;
+import javax.crypto.NoSuchPaddingException;
 
 import gurux.dlms.enums.AcseServiceProvider;
 import gurux.dlms.enums.AssociationResult;
@@ -256,7 +261,10 @@ final class GXAPDU {
      */
     static void generateUserInformation(final GXDLMSSettings settings,
             final GXICipher cipher, final GXByteBuffer encryptedData,
-            final GXByteBuffer data) {
+            final GXByteBuffer data)
+            throws InvalidKeyException, NoSuchAlgorithmException,
+            NoSuchPaddingException, InvalidAlgorithmParameterException,
+            IllegalBlockSizeException, BadPaddingException {
         data.setUInt8(BerType.CONTEXT | BerType.CONSTRUCTED
                 | PduType.USER_INFORMATION);
         if (cipher == null || !cipher.isCiphered()) {
@@ -299,13 +307,13 @@ final class GXAPDU {
 
     /**
      * Generates Aarq.
-     * 
-     * @throws NoSuchAlgorithmException
-     * @throws InvalidKeyException
      */
     public static void generateAarq(final GXDLMSSettings settings,
             final GXICipher cipher, final GXByteBuffer encryptedData,
-            final GXByteBuffer data) {
+            final GXByteBuffer data)
+            throws InvalidKeyException, NoSuchAlgorithmException,
+            NoSuchPaddingException, InvalidAlgorithmParameterException,
+            IllegalBlockSizeException, BadPaddingException {
         // AARQ APDU Tag
         data.setUInt8(BerType.APPLICATION | BerType.CONSTRUCTED);
         // Length is updated later.
@@ -342,10 +350,12 @@ final class GXAPDU {
 
     /**
      * Parse User Information from PDU.
+     * 
+     * @throws Exception
      */
     static void parseUserInformation(final GXDLMSSettings settings,
             final GXICipher cipher, final GXByteBuffer data,
-            final GXDLMSTranslatorStructure xml) {
+            final GXDLMSTranslatorStructure xml) throws Exception {
         short len = data.getUInt8();
         if (data.size() - data.position() < len) {
             if (xml == null) {
@@ -646,7 +656,10 @@ final class GXAPDU {
 
     static void parseInitiate(final boolean initiateRequest,
             final GXDLMSSettings settings, final GXICipher cipher,
-            final GXByteBuffer data, final GXDLMSTranslatorStructure xml) {
+            final GXByteBuffer data, final GXDLMSTranslatorStructure xml)
+            throws InvalidKeyException, NoSuchAlgorithmException,
+            NoSuchPaddingException, InvalidAlgorithmParameterException,
+            IllegalBlockSizeException, BadPaddingException {
         // Tag for xDLMS-Initate.response
         int tag = data.getUInt8();
         int originalPos;
@@ -1330,6 +1343,9 @@ final class GXAPDU {
         if (xml != null) {
             if (xml.getOutputType() == TranslatorOutputType.SIMPLE_XML) {
                 if (settings.getAuthentication() == Authentication.LOW) {
+                    if (GXByteBuffer.isAsciiString(settings.getPassword())) {
+                        xml.appendComment(new String(settings.getPassword()));
+                    }
                     xml.appendLine(TranslatorGeneralTags.CALLING_AUTHENTICATION,
                             "Value",
                             GXCommon.toHex(settings.getPassword(), false));
@@ -1384,7 +1400,10 @@ final class GXAPDU {
     }
 
     static byte[] getUserInformation(final GXDLMSSettings settings,
-            final GXICipher cipher) {
+            final GXICipher cipher)
+            throws InvalidKeyException, NoSuchAlgorithmException,
+            NoSuchPaddingException, InvalidAlgorithmParameterException,
+            IllegalBlockSizeException, BadPaddingException {
         GXByteBuffer data = new GXByteBuffer();
         // Tag for xDLMS-Initiate response
         data.setUInt8(Command.INITIATE_RESPONSE);
@@ -1427,7 +1446,10 @@ final class GXAPDU {
     public static void generateAARE(final GXDLMSSettings settings,
             final GXByteBuffer data, final AssociationResult result,
             final Object diagnostic, final GXICipher cipher,
-            final GXByteBuffer errorData, final GXByteBuffer encryptedData) {
+            final GXByteBuffer errorData, final GXByteBuffer encryptedData)
+            throws InvalidKeyException, NoSuchAlgorithmException,
+            NoSuchPaddingException, InvalidAlgorithmParameterException,
+            IllegalBlockSizeException, BadPaddingException {
         int offset = data.size();
         // Set AARE tag and length 0x61
         data.setUInt8(BerType.APPLICATION | BerType.CONSTRUCTED

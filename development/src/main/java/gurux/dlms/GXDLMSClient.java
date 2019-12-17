@@ -34,7 +34,11 @@
 
 package gurux.dlms;
 
+import java.security.InvalidAlgorithmParameterException;
+import java.security.InvalidKeyException;
+import java.security.NoSuchAlgorithmException;
 import java.security.Signature;
+import java.security.SignatureException;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Calendar;
@@ -46,6 +50,10 @@ import java.util.Map.Entry;
 import java.util.Set;
 import java.util.logging.Level;
 import java.util.logging.Logger;
+
+import javax.crypto.BadPaddingException;
+import javax.crypto.IllegalBlockSizeException;
+import javax.crypto.NoSuchPaddingException;
 
 import gurux.dlms.enums.AccessMode;
 import gurux.dlms.enums.AccessServiceCommandType;
@@ -694,7 +702,10 @@ public class GXDLMSClient {
      * @return AARQ request as byte array.
      * @see GXDLMSClient#parseAareResponse
      */
-    public final byte[][] aarqRequest() {
+    public final byte[][] aarqRequest()
+            throws InvalidKeyException, NoSuchAlgorithmException,
+            NoSuchPaddingException, InvalidAlgorithmParameterException,
+            IllegalBlockSizeException, BadPaddingException {
         settings.setConnected(settings.getConnected() & ~ConnectionState.DLMS);
         GXByteBuffer buff = new GXByteBuffer(20);
         settings.resetBlockIndex();
@@ -767,7 +778,10 @@ public class GXDLMSClient {
     /**
      * @return Get challenge request if HLS authentication is used.
      */
-    public final byte[][] getApplicationAssociationRequest() {
+    public final byte[][] getApplicationAssociationRequest()
+            throws InvalidKeyException, NoSuchAlgorithmException,
+            NoSuchPaddingException, InvalidAlgorithmParameterException,
+            IllegalBlockSizeException, BadPaddingException, SignatureException {
         if (settings.getAuthentication() != Authentication.HIGH_ECDSA
                 && settings.getAuthentication() != Authentication.HIGH_GMAC
                 && (settings.getPassword() == null
@@ -802,8 +816,10 @@ public class GXDLMSClient {
      *            Received reply from the server.
      */
     @SuppressWarnings("squid:S00112")
-    public final void
-            parseApplicationAssociationResponse(final GXByteBuffer reply) {
+    public final void parseApplicationAssociationResponse(
+            final GXByteBuffer reply) throws InvalidKeyException,
+            NoSuchPaddingException, InvalidAlgorithmParameterException,
+            IllegalBlockSizeException, BadPaddingException, SignatureException {
         GXDataInfo info = new GXDataInfo();
         boolean equals = false;
         byte[] secret;
@@ -862,7 +878,10 @@ public class GXDLMSClient {
     /**
      * @return Release request, as byte array.
      */
-    public byte[][] releaseRequest() {
+    public byte[][] releaseRequest()
+            throws InvalidKeyException, NoSuchAlgorithmException,
+            NoSuchPaddingException, InvalidAlgorithmParameterException,
+            IllegalBlockSizeException, BadPaddingException {
         // If connection is not established, there is no need to send
         // release request.
         if ((settings.getConnected() & ConnectionState.DLMS) == 0) {
@@ -899,7 +918,10 @@ public class GXDLMSClient {
      * 
      * @return Disconnected request, as byte array.
      */
-    public final byte[] disconnectRequest() {
+    public final byte[] disconnectRequest()
+            throws InvalidKeyException, NoSuchAlgorithmException,
+            NoSuchPaddingException, InvalidAlgorithmParameterException,
+            IllegalBlockSizeException, BadPaddingException {
         return disconnectRequest(false);
     }
 
@@ -910,11 +932,14 @@ public class GXDLMSClient {
      *            Is disconnect method called always.
      * @return Disconnected request, as byte array.
      */
-    public final byte[] disconnectRequest(final boolean force) {
+    public final byte[] disconnectRequest(final boolean force)
+            throws InvalidKeyException, NoSuchAlgorithmException,
+            NoSuchPaddingException, InvalidAlgorithmParameterException,
+            IllegalBlockSizeException, BadPaddingException {
         // If connection is not established, there is no need to send
         // DisconnectRequest.
         byte[] reply = null;
-        if (force || (settings.getConnected() & ConnectionState.NONE) != 0) {
+        if (force || settings.getConnected() != ConnectionState.NONE) {
             if (this.getInterfaceType() == InterfaceType.HDLC) {
                 settings.setConnected(ConnectionState.NONE);
                 reply = GXDLMS.getHdlcFrame(settings,
@@ -1309,7 +1334,10 @@ public class GXDLMSClient {
      * 
      * @return Read request, as byte array.
      */
-    public final byte[] getObjectsRequest() {
+    public final byte[] getObjectsRequest()
+            throws InvalidKeyException, NoSuchAlgorithmException,
+            NoSuchPaddingException, InvalidAlgorithmParameterException,
+            IllegalBlockSizeException, BadPaddingException {
         return getObjectsRequest(null);
     }
 
@@ -1321,7 +1349,10 @@ public class GXDLMSClient {
      *            Logical name of Association view.
      * @return Read request, as byte array.
      */
-    public final byte[] getObjectsRequest(final String ln) {
+    public final byte[] getObjectsRequest(final String ln)
+            throws InvalidKeyException, NoSuchAlgorithmException,
+            NoSuchPaddingException, InvalidAlgorithmParameterException,
+            IllegalBlockSizeException, BadPaddingException {
         Object name;
         settings.resetBlockIndex();
         if (getUseLogicalNameReferencing()) {
@@ -1350,7 +1381,10 @@ public class GXDLMSClient {
      * @return DLMS action message.
      */
     public final byte[][] method(final GXDLMSObject item, final int index,
-            final Object data, final DataType type) {
+            final Object data, final DataType type)
+            throws InvalidKeyException, NoSuchAlgorithmException,
+            NoSuchPaddingException, InvalidAlgorithmParameterException,
+            IllegalBlockSizeException, BadPaddingException {
         return method(item.getName(), item.getObjectType(), index, data, type);
     }
 
@@ -1370,8 +1404,10 @@ public class GXDLMSClient {
      * @return DLMS action message.
      */
     public final byte[][] method(final Object name, final ObjectType objectType,
-            final int methodIndex, final Object value,
-            final DataType dataType) {
+            final int methodIndex, final Object value, final DataType dataType)
+            throws InvalidKeyException, NoSuchAlgorithmException,
+            NoSuchPaddingException, InvalidAlgorithmParameterException,
+            IllegalBlockSizeException, BadPaddingException {
         if (name == null || methodIndex < 1) {
             throw new IllegalArgumentException("Invalid parameter");
         }
@@ -1451,7 +1487,10 @@ public class GXDLMSClient {
      *            Attribute index.
      * @return Generated write message(s).
      */
-    public final byte[][] write(final GXDLMSObject item, final int index) {
+    public final byte[][] write(final GXDLMSObject item, final int index)
+            throws InvalidKeyException, NoSuchAlgorithmException,
+            NoSuchPaddingException, InvalidAlgorithmParameterException,
+            IllegalBlockSizeException, BadPaddingException {
         ValueEventArgs e = new ValueEventArgs(settings, item, index, 0, null);
         Object value = item.getValue(settings, e);
         DataType type = item.getDataType(index);
@@ -1482,7 +1521,10 @@ public class GXDLMSClient {
      */
     public final byte[][] write(final Object name, final Object value,
             final DataType dataType, final ObjectType objectType,
-            final int index) {
+            final int index)
+            throws InvalidKeyException, NoSuchAlgorithmException,
+            NoSuchPaddingException, InvalidAlgorithmParameterException,
+            IllegalBlockSizeException, BadPaddingException {
         if (index < 1) {
             throw new GXDLMSException("Invalid parameter");
         }
@@ -1541,7 +1583,10 @@ public class GXDLMSClient {
      *            DLMS objects to write.
      * @return Write request as byte array.
      */
-    public final byte[][] writeList(final List<GXWriteItem> list) {
+    public final byte[][] writeList(final List<GXWriteItem> list)
+            throws InvalidKeyException, NoSuchAlgorithmException,
+            NoSuchPaddingException, InvalidAlgorithmParameterException,
+            IllegalBlockSizeException, BadPaddingException {
         if (list == null || list.isEmpty()) {
             throw new IllegalArgumentException("Invalid parameter.");
         }
@@ -1616,7 +1661,10 @@ public class GXDLMSClient {
      * @return Generated read message(s).
      */
     public final byte[][] read(final Object name, final ObjectType objectType,
-            final int attributeOrdinal) {
+            final int attributeOrdinal)
+            throws InvalidKeyException, NoSuchAlgorithmException,
+            NoSuchPaddingException, InvalidAlgorithmParameterException,
+            IllegalBlockSizeException, BadPaddingException {
         return read(name, objectType, attributeOrdinal, null);
     }
 
@@ -1634,7 +1682,10 @@ public class GXDLMSClient {
      * @return Generated read message(s).
      */
     private byte[][] read(final Object name, final ObjectType objectType,
-            final int attributeOrdinal, final GXByteBuffer data) {
+            final int attributeOrdinal, final GXByteBuffer data)
+            throws InvalidKeyException, NoSuchAlgorithmException,
+            NoSuchPaddingException, InvalidAlgorithmParameterException,
+            IllegalBlockSizeException, BadPaddingException {
         if ((attributeOrdinal < 1)) {
             throw new IllegalArgumentException("Invalid parameter");
         }
@@ -1692,7 +1743,10 @@ public class GXDLMSClient {
      * @return Read request as byte array.
      */
     public final byte[][] read(final GXDLMSObject item,
-            final int attributeOrdinal) {
+            final int attributeOrdinal)
+            throws InvalidKeyException, NoSuchAlgorithmException,
+            NoSuchPaddingException, InvalidAlgorithmParameterException,
+            IllegalBlockSizeException, BadPaddingException {
         return read(item.getName(), item.getObjectType(), attributeOrdinal);
     }
 
@@ -1704,7 +1758,10 @@ public class GXDLMSClient {
      * @return Read request as byte array.
      */
     public final byte[][]
-            readList(final List<Entry<GXDLMSObject, Integer>> list) {
+            readList(final List<Entry<GXDLMSObject, Integer>> list)
+                    throws InvalidKeyException, NoSuchAlgorithmException,
+                    NoSuchPaddingException, InvalidAlgorithmParameterException,
+                    IllegalBlockSizeException, BadPaddingException {
         if (list == null || list.isEmpty()) {
             throw new IllegalArgumentException("Invalid parameter.");
         }
@@ -1795,7 +1852,10 @@ public class GXDLMSClient {
      * @return Read message as byte array.
      */
     public final byte[][] readRowsByEntry(final GXDLMSProfileGeneric pg,
-            final int index, final int count) {
+            final int index, final int count)
+            throws InvalidKeyException, NoSuchAlgorithmException,
+            NoSuchPaddingException, InvalidAlgorithmParameterException,
+            IllegalBlockSizeException, BadPaddingException {
         return readRowsByEntry(pg, index, count, null);
     }
 
@@ -1814,7 +1874,10 @@ public class GXDLMSClient {
      */
     public final byte[][] readRowsByEntry(final GXDLMSProfileGeneric pg,
             final int index, final int count,
-            final List<Entry<GXDLMSObject, GXDLMSCaptureObject>> columns) {
+            final List<Entry<GXDLMSObject, GXDLMSCaptureObject>> columns)
+            throws InvalidKeyException, NoSuchAlgorithmException,
+            NoSuchPaddingException, InvalidAlgorithmParameterException,
+            IllegalBlockSizeException, BadPaddingException {
         int pos = 0;
         int columnStart = 1, columnEnd = 0;
         // If columns are given find indexes.
@@ -1874,7 +1937,10 @@ public class GXDLMSClient {
      */
     public final byte[][] readRowsByEntry(final GXDLMSProfileGeneric pg,
             final int index, final int count, final int columnStart,
-            final int columnEnd) {
+            final int columnEnd)
+            throws InvalidKeyException, NoSuchAlgorithmException,
+            NoSuchPaddingException, InvalidAlgorithmParameterException,
+            IllegalBlockSizeException, BadPaddingException {
         if (index < 0) {
             throw new IllegalArgumentException("index");
         }
@@ -1922,7 +1988,10 @@ public class GXDLMSClient {
      * @return Generated read message.
      */
     public final byte[][] readRowsByRange(final GXDLMSProfileGeneric pg,
-            final GXDateTime start, final GXDateTime end) {
+            final GXDateTime start, final GXDateTime end)
+            throws InvalidKeyException, NoSuchAlgorithmException,
+            NoSuchPaddingException, InvalidAlgorithmParameterException,
+            IllegalBlockSizeException, BadPaddingException {
         return readByRange(pg, start, end, null);
     }
 
@@ -1939,7 +2008,10 @@ public class GXDLMSClient {
      * @return Generated read message.
      */
     public final byte[][] readRowsByRange(final GXDLMSProfileGeneric pg,
-            final java.util.Date start, final java.util.Date end) {
+            final java.util.Date start, final java.util.Date end)
+            throws InvalidKeyException, NoSuchAlgorithmException,
+            NoSuchPaddingException, InvalidAlgorithmParameterException,
+            IllegalBlockSizeException, BadPaddingException {
         return readByRange(pg, start, end, null);
     }
 
@@ -1959,7 +2031,10 @@ public class GXDLMSClient {
      */
     public final byte[][] readRowsByRange(final GXDLMSProfileGeneric pg,
             final java.util.Date start, final java.util.Date end,
-            final List<Entry<GXDLMSObject, GXDLMSCaptureObject>> columns) {
+            final List<Entry<GXDLMSObject, GXDLMSCaptureObject>> columns)
+            throws InvalidKeyException, NoSuchAlgorithmException,
+            NoSuchPaddingException, InvalidAlgorithmParameterException,
+            IllegalBlockSizeException, BadPaddingException {
         return readByRange(pg, start, end, columns);
     }
 
@@ -1976,7 +2051,10 @@ public class GXDLMSClient {
      * @return Generated read message.
      */
     public final byte[][] readRowsByRange(final GXDLMSProfileGeneric pg,
-            final Calendar start, final Calendar end) {
+            final Calendar start, final Calendar end)
+            throws InvalidKeyException, NoSuchAlgorithmException,
+            NoSuchPaddingException, InvalidAlgorithmParameterException,
+            IllegalBlockSizeException, BadPaddingException {
         return readByRange(pg, start, end, null);
     }
 
@@ -1996,7 +2074,10 @@ public class GXDLMSClient {
      */
     public final byte[][] readRowsByRange(final GXDLMSProfileGeneric pg,
             final Calendar start, final Calendar end,
-            final List<Entry<GXDLMSObject, GXDLMSCaptureObject>> columns) {
+            final List<Entry<GXDLMSObject, GXDLMSCaptureObject>> columns)
+            throws InvalidKeyException, NoSuchAlgorithmException,
+            NoSuchPaddingException, InvalidAlgorithmParameterException,
+            IllegalBlockSizeException, BadPaddingException {
         return readByRange(pg, start, end, columns);
     }
 
@@ -2014,7 +2095,10 @@ public class GXDLMSClient {
      */
     private byte[][] readByRange(final GXDLMSProfileGeneric pg,
             final Object start, final Object end,
-            final List<Entry<GXDLMSObject, GXDLMSCaptureObject>> columns) {
+            final List<Entry<GXDLMSObject, GXDLMSCaptureObject>> columns)
+            throws InvalidKeyException, NoSuchAlgorithmException,
+            NoSuchPaddingException, InvalidAlgorithmParameterException,
+            IllegalBlockSizeException, BadPaddingException {
         settings.resetBlockIndex();
         GXDateTime s = GXCommon.getDateTime(start);
         GXDateTime e = GXCommon.getDateTime(end);
@@ -2137,7 +2221,11 @@ public class GXDLMSClient {
      * @return Acknowledgment message as byte array.
      */
     public final byte[] receiverReady(final GXReplyData reply) {
-        return GXDLMS.receiverReady(settings, reply);
+        try {
+            return GXDLMS.receiverReady(settings, reply);
+        } catch (Exception e) {
+            throw new RuntimeException(e.getMessage());
+        }
     }
 
     /**
@@ -2148,8 +2236,12 @@ public class GXDLMSClient {
      * @param data
      *            Information from the received data.
      * @return Is frame complete.
+     * @throws Exception
      */
-    public final boolean getData(final byte[] reply, final GXReplyData data) {
+    public final boolean getData(final byte[] reply, final GXReplyData data)
+            throws InvalidKeyException, NoSuchAlgorithmException,
+            NoSuchPaddingException, InvalidAlgorithmParameterException,
+            IllegalBlockSizeException, BadPaddingException {
         return getData(new GXByteBuffer(reply), data, null);
     }
 
@@ -2163,9 +2255,13 @@ public class GXDLMSClient {
      * @param notify
      *            Information from the notify message.
      * @return Is frame complete.
+     * @throws Exception
      */
     public final boolean getData(final byte[] reply, final GXReplyData data,
-            final GXReplyData notify) {
+            final GXReplyData notify)
+            throws InvalidKeyException, NoSuchAlgorithmException,
+            NoSuchPaddingException, InvalidAlgorithmParameterException,
+            IllegalBlockSizeException, BadPaddingException {
         return getData(new GXByteBuffer(reply), data, notify);
     }
 
@@ -2177,9 +2273,13 @@ public class GXDLMSClient {
      * @param data
      *            The exported reply information.
      * @return Is frame complete.
+     * @throws Exception
      */
     public final boolean getData(final GXByteBuffer reply,
-            final GXReplyData data) {
+            final GXReplyData data)
+            throws InvalidKeyException, NoSuchAlgorithmException,
+            NoSuchPaddingException, InvalidAlgorithmParameterException,
+            IllegalBlockSizeException, BadPaddingException {
         return getData(reply, data, null);
     }
 
@@ -2193,9 +2293,13 @@ public class GXDLMSClient {
      * @param notify
      *            Information from the notify message.
      * @return Is frame complete.
+     * @throws Exception
      */
     public final boolean getData(final GXByteBuffer reply,
-            final GXReplyData data, final GXReplyData notify) {
+            final GXReplyData data, final GXReplyData notify)
+            throws InvalidKeyException, NoSuchAlgorithmException,
+            NoSuchPaddingException, InvalidAlgorithmParameterException,
+            IllegalBlockSizeException, BadPaddingException {
         data.setXml(null);
         boolean ret = false;
         try {
@@ -2356,7 +2460,10 @@ public class GXDLMSClient {
      * @return Read request as byte array. {@link parseAccessResponse}
      */
     public final byte[][] accessRequest(final Date time,
-            final List<GXDLMSAccessItem> list) {
+            final List<GXDLMSAccessItem> list)
+            throws InvalidKeyException, NoSuchAlgorithmException,
+            NoSuchPaddingException, InvalidAlgorithmParameterException,
+            IllegalBlockSizeException, BadPaddingException {
         GXByteBuffer bb = new GXByteBuffer();
         GXCommon.setObjectCount(list.size(), bb);
         for (GXDLMSAccessItem it : list) {

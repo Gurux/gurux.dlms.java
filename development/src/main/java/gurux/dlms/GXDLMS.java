@@ -34,10 +34,16 @@
 
 package gurux.dlms;
 
+import java.security.InvalidAlgorithmParameterException;
 import java.security.InvalidKeyException;
+import java.security.NoSuchAlgorithmException;
 import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
+
+import javax.crypto.BadPaddingException;
+import javax.crypto.IllegalBlockSizeException;
+import javax.crypto.NoSuchPaddingException;
 
 import gurux.dlms.asn.GXAsn1Converter;
 import gurux.dlms.enums.Command;
@@ -103,8 +109,8 @@ import gurux.dlms.objects.enums.CertificateType;
 import gurux.dlms.objects.enums.SecuritySuite;
 import gurux.dlms.secure.AesGcmParameter;
 import gurux.dlms.secure.CountType;
-import gurux.dlms.secure.GXASymmetric;
 import gurux.dlms.secure.GXCiphering;
+import gurux.dlms.secure.GXSecure;
 
 /**
  * GXDLMS implements methods to communicate with DLMS/COSEM metering devices.
@@ -269,6 +275,8 @@ abstract class GXDLMS {
      * Generates an acknowledgment message, with which the server is informed to
      * send next packets.
      * 
+     * @param settings
+     *            DLMS settings.
      * @param type
      *            Frame type.
      * @return Acknowledgment message as byte array.
@@ -277,13 +285,19 @@ abstract class GXDLMS {
             final RequestTypes type) {
         java.util.Set<RequestTypes> tmp = new HashSet<RequestTypes>();
         tmp.add(type);
-        return receiverReady(settings, tmp);
+        try {
+            return receiverReady(settings, tmp);
+        } catch (Exception e) {
+            throw new RuntimeException(e.getMessage());
+        }
     }
 
     /**
      * Generates an acknowledgment message, with which the server is informed to
      * send next packets.
      * 
+     * @param settings
+     *            DLMS settings.
      * @param type
      *            Frame type.
      * @return Acknowledgment message as byte array.
@@ -295,19 +309,25 @@ abstract class GXDLMS {
         reply.setWindowSize(settings.getWindowSize());
         reply.setBlockNumberAck(settings.getBlockNumberAck());
         reply.setBlockNumber(settings.getBlockIndex());
-        return receiverReady(settings, reply);
+        try {
+            return receiverReady(settings, reply);
+        } catch (Exception e) {
+            throw new RuntimeException(e.getMessage());
+        }
     }
 
-    /**
+    /*
      * Generates an acknowledgment message, with which the server is informed to
      * send next packets.
-     * 
-     * @param reply
-     *            Received data.
+     * @param settings DLMS settings.
+     * @param reply Received data.
      * @return Acknowledgment message as byte array.
      */
     public static byte[] receiverReady(final GXDLMSSettings settings,
-            final GXReplyData reply) {
+            final GXReplyData reply)
+            throws InvalidKeyException, NoSuchAlgorithmException,
+            NoSuchPaddingException, InvalidAlgorithmParameterException,
+            IllegalBlockSizeException, BadPaddingException {
         if (reply.getMoreData().isEmpty()) {
             throw new IllegalArgumentException(
                     "Invalid receiverReady RequestTypes parameter.");
@@ -427,7 +447,7 @@ abstract class GXDLMS {
         return str;
     }
 
-    /**
+    /*
      * Reserved for internal use.
      */
     static void checkInit(final GXDLMSSettings settings) {
@@ -585,13 +605,10 @@ abstract class GXDLMS {
         data.set(tmp);
     }
 
-    /**
+    /*
      * Check is all data fit to one data block.
-     * 
-     * @param p
-     *            LN parameters.
-     * @param reply
-     *            Generated reply.
+     * @param p LN parameters.
+     * @param reply Generated reply.
      */
     @SuppressWarnings("squid:S1940")
     static void multipleBlocks(final GXDLMSLNParameters p,
@@ -624,19 +641,17 @@ abstract class GXDLMS {
         }
     }
 
-    /**
+    /*
      * Get next logical name PDU.
-     * 
-     * @param p
-     *            LN parameters.
-     * @param reply
-     *            Generated message.
-     * @throws NoSuchAlgorithmExceptionp
-     * @throws InvalidKeyException
+     * @param p LN parameters.
+     * @param reply Generated message.
      */
     @SuppressWarnings("squid:S1066")
     public static void getLNPdu(final GXDLMSLNParameters p,
-            final GXByteBuffer reply) {
+            final GXByteBuffer reply)
+            throws InvalidKeyException, NoSuchAlgorithmException,
+            NoSuchPaddingException, InvalidAlgorithmParameterException,
+            IllegalBlockSizeException, BadPaddingException {
         boolean ciphering = p.getCommand() != Command.AARQ
                 && p.getCommand() != Command.AARE
                 && p.getSettings().getCipher() != null
@@ -951,8 +966,10 @@ abstract class GXDLMS {
      * @param reply
      *            Data to encrypt.
      */
-    private static byte[] cipher1(final GXDLMSLNParameters p,
-            final byte[] data) {
+    private static byte[] cipher1(final GXDLMSLNParameters p, final byte[] data)
+            throws InvalidKeyException, NoSuchAlgorithmException,
+            NoSuchPaddingException, InvalidAlgorithmParameterException,
+            IllegalBlockSizeException, BadPaddingException {
         byte keyid = 0;
         if (p.getSettings().getTargetEphemeralKey() != null) {
             keyid = 1;
@@ -1023,7 +1040,7 @@ abstract class GXDLMS {
             }
         }
         tmp2.set(c.getRecipientSystemTitle());
-        byte[] kdf = GXASymmetric.generateKDF(alg, z, keyDataLen,
+        byte[] kdf = GXSecure.generateKDF(alg, z, keyDataLen,
                 GXCommon.hexToBytes(algID), c.getSystemTitle(), tmp2.array(),
                 null, null, c.getSecuritySuite());
         // System.out.println("kdf: " + GXCommon.toHex(kdf));
@@ -1070,7 +1087,7 @@ abstract class GXDLMS {
                         .toUIn64(c.getEphemeralKeyPair().getPublic()));
 
                 // Ephemeral Public Key Signature.
-                reply.set(GXASymmetric.getEphemeralPublicKeySignature(keyid,
+                reply.set(GXSecure.getEphemeralPublicKeySignature(keyid,
                         c.getEphemeralKeyPair().getPublic(), p.getSettings()
                                 .getCipher().getSigningKeyPair().getPrivate()));
             } catch (Exception e) {
@@ -1097,15 +1114,15 @@ abstract class GXDLMS {
                 || cmd == Command.GLO_METHOD_REQUEST;
     }
 
-    /**
+    /*
      * Cipher using security suite 0.
-     * 
-     * @param p
-     *            LN settings.
-     * @param reply
-     *            Data to encrypt.
+     * @param p LN settings.
+     * @param data Data to encrypt.
      */
-    static byte[] cipher0(final GXDLMSLNParameters p, final byte[] data) {
+    static byte[] cipher0(final GXDLMSLNParameters p, final byte[] data)
+            throws InvalidKeyException, NoSuchAlgorithmException,
+            NoSuchPaddingException, InvalidAlgorithmParameterException,
+            IllegalBlockSizeException, BadPaddingException {
         int cmd;
         byte[] key;
         GXICipher cipher = p.getSettings().getCipher();
@@ -1157,14 +1174,15 @@ abstract class GXDLMS {
         return tmp;
     }
 
-    /**
+    /*
      * Get all Logical name messages. Client uses this to generate messages.
-     * 
-     * @param p
-     *            LN settings.
+     * @param p LN settings.
      * @return Generated messages.
      */
-    public static List<byte[]> getLnMessages(final GXDLMSLNParameters p) {
+    public static List<byte[]> getLnMessages(final GXDLMSLNParameters p)
+            throws InvalidKeyException, NoSuchAlgorithmException,
+            NoSuchPaddingException, InvalidAlgorithmParameterException,
+            IllegalBlockSizeException, BadPaddingException {
         GXByteBuffer reply = new GXByteBuffer();
         java.util.ArrayList<byte[]> messages = new ArrayList<byte[]>();
         byte frame = 0;
@@ -1192,26 +1210,27 @@ abstract class GXDLMS {
                 } else if (p.getSettings()
                         .getInterfaceType() == InterfaceType.PDU) {
                     messages.add(reply.array());
-                    frame = 0;
                     break;
                 } else {
                     throw new IllegalArgumentException("InterfaceType");
                 }
             }
             reply.clear();
+            frame = 0;
         } while (p.getData() != null
                 && p.getData().position() != p.getData().size());
         return messages;
     }
 
-    /**
+    /*
      * Get all Short Name messages. Client uses this to generate messages.
-     * 
-     * @param p
-     *            DLMS SN parameters.
+     * @param p DLMS SN parameters.
      * @return Generated SN messages.
      */
-    public static List<byte[]> getSnMessages(final GXDLMSSNParameters p) {
+    public static List<byte[]> getSnMessages(final GXDLMSSNParameters p)
+            throws InvalidKeyException, NoSuchAlgorithmException,
+            NoSuchPaddingException, InvalidAlgorithmParameterException,
+            IllegalBlockSizeException, BadPaddingException {
         GXByteBuffer reply = new GXByteBuffer();
         java.util.ArrayList<byte[]> messages =
                 new java.util.ArrayList<byte[]>();
@@ -1232,11 +1251,7 @@ abstract class GXDLMS {
                         .getInterfaceType() == InterfaceType.HDLC) {
                     messages.add(getHdlcFrame(p.getSettings(), frame, reply));
                     if (reply.position() != reply.size()) {
-                        if (p.getSettings().isServer()) {
-                            frame = 0;
-                        } else {
-                            frame = p.getSettings().getNextSend(false);
-                        }
+                        frame = p.getSettings().getNextSend(false);
                     }
                 } else if (p.getSettings()
                         .getInterfaceType() == InterfaceType.PDU) {
@@ -1247,6 +1262,7 @@ abstract class GXDLMS {
                 }
             }
             reply.clear();
+            frame = 0;
         } while (p.getData() != null
                 && p.getData().position() != p.getData().size());
         return messages;
@@ -1293,12 +1309,15 @@ abstract class GXDLMS {
         return maxSize;
     }
 
-    /**
+    /*
      * @param p
      * @param reply
      */
     public static void getSNPdu(final GXDLMSSNParameters p,
-            final GXByteBuffer reply) {
+            final GXByteBuffer reply)
+            throws InvalidKeyException, NoSuchAlgorithmException,
+            NoSuchPaddingException, InvalidAlgorithmParameterException,
+            IllegalBlockSizeException, BadPaddingException {
         boolean ciphering = p.getSettings().getCipher() != null
                 && p.getSettings().getCipher().getSecurity() != Security.NONE;
         if ((!ciphering || p.getCommand() == Command.AARQ
@@ -1893,12 +1912,10 @@ abstract class GXDLMS {
         throw new IllegalArgumentException("Invalid address.");
     }
 
-    /**
+    /*
      * Convert HDLC address to bytes.
-     * 
      * @param value
-     * @param size
-     *            Address size in bytes.
+     * @param size Address size in bytes.
      * @return
      */
     public static byte[] getHdlcAddressBytes(int value, int size) {
@@ -2011,15 +2028,11 @@ abstract class GXDLMS {
         return true;
     }
 
-    /**
+    /*
      * Get data from TCP/IP frame.
-     * 
-     * @param settings
-     *            DLMS settigns.
-     * @param buff
-     *            Received data.
-     * @param target
-     *            Reply information.
+     * @param settings DLMS settigns.
+     * @param buff Received data.
+     * @param target Reply information.
      */
     @SuppressWarnings({ "squid:S1940", "squid:S106" })
     static boolean getTcpData(final GXDLMSSettings settings,
@@ -2040,7 +2053,9 @@ abstract class GXDLMS {
             if (value == 1) {
                 // Check TCP/IP addresses.
                 if (!checkWrapperAddress(settings, buff, target)) {
-                    target = notify;
+                    if (notify != null) {
+                        target = notify;
+                    }
                     isData = false;
                 }
                 // Get length.
@@ -2251,15 +2266,11 @@ abstract class GXDLMS {
         return ret;
     }
 
-    /**
+    /*
      * Handle read response data block result.
-     * 
-     * @param settings
-     *            DLMS settings.
-     * @param reply
-     *            Received reply.
-     * @param index
-     *            Starting index.
+     * @param settings DLMS settings.
+     * @param reply Received reply.
+     * @param index Starting index.
      */
     @java.lang.SuppressWarnings("squid:S1192")
     static boolean readResponseDataBlockResult(final GXDLMSSettings settings,
@@ -2319,11 +2330,10 @@ abstract class GXDLMS {
         return true;
     }
 
-    /**
+    /*
      * Handle read response and get data from block and/or update error status.
-     * 
-     * @param data
-     *            Received data from the client.
+     * @param settings DLMS settings.
+     * @param data Received data from the client.
      */
     @SuppressWarnings("squid:S3034")
     static boolean handleReadResponse(final GXDLMSSettings settings,
@@ -2540,12 +2550,10 @@ abstract class GXDLMS {
         }
     }
 
-    /**
+    /*
      * Handle method response and get data from block and/or update error
      * status.
-     * 
-     * @param data
-     *            Received data from the client.
+     * @param data Received data from the client.
      */
     static void handleMethodResponse(final GXDLMSSettings settings,
             final GXReplyData data) {
@@ -2756,11 +2764,9 @@ abstract class GXDLMS {
         }
     }
 
-    /**
+    /*
      * Handle set response and update error status.
-     * 
-     * @param reply
-     *            Received data from the client.
+     * @param reply Received data from the client.
      */
     static void handleSetResponse(final GXReplyData data) {
         byte type = (byte) data.getData().getUInt8();
@@ -2870,15 +2876,11 @@ abstract class GXDLMS {
         }
     }
 
-    /**
+    /*
      * Handle get response and get data from block and/or update error status.
-     * 
-     * @param settings
-     *            DLMS settings.
-     * @param reply
-     *            Received data from the client.
-     * @param index
-     *            Block index number.
+     * @param settings DLMS settings.
+     * @param reply Received data from the client.
+     * @param index Block index number.
      */
     static void handleGetResponseWithList(final GXDLMSSettings settings,
             final GXReplyData reply) {
@@ -2919,15 +2921,11 @@ abstract class GXDLMS {
         reply.setValue(values);
     }
 
-    /**
+    /*
      * Handle get response and get data from block and/or update error status.
-     * 
-     * @param settings
-     *            DLMS settings.
-     * @param reply
-     *            Received data from the client.
-     * @param index
-     *            Block index number.
+     * @param settings DLMS settings.
+     * @param reply Received data from the client.
+     * @param index Block index number.
      */
     @SuppressWarnings("squid:S1066")
     static boolean handleGetResponse(final GXDLMSSettings settings,
@@ -3100,7 +3098,10 @@ abstract class GXDLMS {
      */
     @SuppressWarnings("squid:S106")
     private static void handleGbt(final GXDLMSSettings settings,
-            final GXReplyData data) {
+            final GXReplyData data)
+            throws InvalidKeyException, NoSuchAlgorithmException,
+            NoSuchPaddingException, InvalidAlgorithmParameterException,
+            IllegalBlockSizeException, BadPaddingException {
         int index = data.getData().position() - 1;
         data.setWindowSize(settings.getWindowSize());
         // BlockControl
@@ -3194,16 +3195,16 @@ abstract class GXDLMS {
         }
     }
 
-    /**
+    /*
      * Get PDU from the packet.
-     * 
-     * @param settings
-     *            DLMS settings.
-     * @param data
-     *            received data.
+     * @param settings DLMS settings.
+     * @param data received data.
      */
     public static void getPdu(final GXDLMSSettings settings,
-            final GXReplyData data) {
+            final GXReplyData data)
+            throws InvalidKeyException, NoSuchAlgorithmException,
+            NoSuchPaddingException, InvalidAlgorithmParameterException,
+            IllegalBlockSizeException, BadPaddingException {
         int cmd = data.getCommand();
         // If header is not read yet or GBT message.
         if (data.getCommand() == Command.NONE) {
@@ -3447,7 +3448,10 @@ abstract class GXDLMS {
     }
 
     private static void handleGloDedRequest(final GXDLMSSettings settings,
-            final GXReplyData data) {
+            final GXReplyData data)
+            throws InvalidKeyException, NoSuchAlgorithmException,
+            NoSuchPaddingException, InvalidAlgorithmParameterException,
+            IllegalBlockSizeException, BadPaddingException {
         if (data.getXml() != null) {
             data.getData().position(data.getData().position() - 1);
         } else {
@@ -3499,7 +3503,10 @@ abstract class GXDLMS {
     }
 
     private static void handleGloDedResponse(final GXDLMSSettings settings,
-            final GXReplyData data, final int index) {
+            final GXReplyData data, final int index)
+            throws InvalidKeyException, NoSuchAlgorithmException,
+            NoSuchPaddingException, InvalidAlgorithmParameterException,
+            IllegalBlockSizeException, BadPaddingException {
         if (data.getXml() != null) {
             data.getData().position(data.getData().position() - 1);
         } else {
@@ -3547,7 +3554,10 @@ abstract class GXDLMS {
     }
 
     private static void handleGeneralCiphering(final GXDLMSSettings settings,
-            final GXReplyData data) {
+            final GXReplyData data)
+            throws InvalidKeyException, NoSuchAlgorithmException,
+            NoSuchPaddingException, InvalidAlgorithmParameterException,
+            IllegalBlockSizeException, BadPaddingException {
         if (settings.getCipher() == null) {
             throw new IllegalArgumentException(
                     "Secure connection is not supported.");
@@ -3608,11 +3618,10 @@ abstract class GXDLMS {
         }
     }
 
-    /**
+    /*
      * Get value from data.
-     * 
-     * @param reply
-     *            Received data.
+     * @param settings DLMS settings.
+     * @param reply Received data.
      */
     @SuppressWarnings("unchecked")
     static void getValueFromData(final GXDLMSSettings settings,
@@ -3670,7 +3679,10 @@ abstract class GXDLMS {
 
     public static boolean getData(final GXDLMSSettings settings,
             final GXByteBuffer reply, final GXReplyData data,
-            final GXReplyData notify) {
+            final GXReplyData notify)
+            throws InvalidKeyException, NoSuchAlgorithmException,
+            NoSuchPaddingException, InvalidAlgorithmParameterException,
+            IllegalBlockSizeException, BadPaddingException {
         short frame = 0;
         boolean isNotify = false;
         GXReplyData target = data;
@@ -3709,6 +3721,20 @@ abstract class GXDLMS {
             return true;
         }
         getPdu(settings, target);
+        if (!isNotify) {
+            // Check command to make sure it's not notify message.
+            switch (target.getCommand()) {
+            case Command.DATA_NOTIFICATION:
+            case Command.GLO_EVENT_NOTIFICATION_REQUEST:
+            case Command.INFORMATION_REPORT:
+            case Command.EVENT_NOTIFICATION:
+            case Command.DED_EVENT_NOTIFICATION:
+                isNotify = true;
+                break;
+            default:
+                break;
+            }
+        }
         return !isNotify;
     }
 

@@ -575,8 +575,7 @@ public class GXDLMSActivityCalendar extends GXDLMSObject
                 GXDLMSSeasonProfile it = new GXDLMSSeasonProfile();
                 it.setName(GXDLMSTranslator
                         .hexToBytes(reader.readElementContentAsString("Name")));
-                it.setStart(new GXDateTime(
-                        reader.readElementContentAsString("Start")));
+                it.setStart(reader.readElementContentAsDateTime("Start"));
                 it.setWeekName(GXDLMSTranslator.hexToBytes(
                         reader.readElementContentAsString("WeekName")));
                 list.add(it);
@@ -624,8 +623,8 @@ public class GXDLMSActivityCalendar extends GXDLMSObject
                     while (reader.isStartElement("Action", true)) {
                         GXDLMSDayProfileAction d = new GXDLMSDayProfileAction();
                         actions.add(d);
-                        d.setStartTime(new GXTime(
-                                reader.readElementContentAsString("Start")));
+                        d.setStartTime(
+                                reader.readElementContentAsTime("Start"));
                         d.setScriptLogicalName(
                                 reader.readElementContentAsString("LN"));
                         d.setScriptSelector(
@@ -658,10 +657,7 @@ public class GXDLMSActivityCalendar extends GXDLMSObject
                 loadWeekProfileTable(reader, "WeekProfileTablePassive");
         dayProfileTablePassive =
                 loadDayProfileTable(reader, "DayProfileTablePassive");
-        String str = reader.readElementContentAsString("Time");
-        if (str != null && str.length() != 0) {
-            time = new GXDateTime(str);
-        }
+        time = reader.readElementContentAsDateTime("Time");
     }
 
     private void saveSeasonProfile(final GXXmlWriter writer,
@@ -673,8 +669,7 @@ public class GXDLMSActivityCalendar extends GXDLMSObject
                 writer.writeStartElement("Item");
                 writer.writeElementString("Name",
                         GXDLMSTranslator.toHex(it.getName()));
-                writer.writeElementString("Start",
-                        it.getStart().toFormatString());
+                writer.writeElementString("Start", it.getStart());
                 writer.writeElementString("WeekName",
                         GXDLMSTranslator.toHex(it.getWeekName()));
                 writer.writeEndElement();
@@ -717,8 +712,7 @@ public class GXDLMSActivityCalendar extends GXDLMSObject
                 writer.writeStartElement("Actions");
                 for (GXDLMSDayProfileAction d : it.getDaySchedules()) {
                     writer.writeStartElement("Action");
-                    writer.writeElementString("Start",
-                            d.getStartTime().toFormatString());
+                    writer.writeElementString("Start", d.getStartTime());
                     writer.writeElementString("LN", d.getScriptLogicalName());
                     writer.writeElementString("Selector",
                             d.getScriptSelector());
@@ -745,9 +739,7 @@ public class GXDLMSActivityCalendar extends GXDLMSObject
                 "WeekProfileTablePassive");
         saveDayProfileTable(writer, dayProfileTablePassive,
                 "DayProfileTablePassive");
-        if (time != null) {
-            writer.writeElementString("Time", time.toFormatString());
-        }
+        writer.writeElementString("Time", time);
     }
 
     @Override

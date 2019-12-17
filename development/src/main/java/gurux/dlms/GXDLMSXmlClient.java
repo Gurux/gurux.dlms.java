@@ -35,9 +35,15 @@ package gurux.dlms;
 
 import java.io.File;
 import java.io.StringReader;
+import java.security.InvalidAlgorithmParameterException;
+import java.security.InvalidKeyException;
+import java.security.NoSuchAlgorithmException;
 import java.util.ArrayList;
 import java.util.List;
 
+import javax.crypto.BadPaddingException;
+import javax.crypto.IllegalBlockSizeException;
+import javax.crypto.NoSuchPaddingException;
 import javax.xml.XMLConstants;
 import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.DocumentBuilderFactory;
@@ -378,7 +384,10 @@ public class GXDLMSXmlClient extends GXDLMSSecureClient {
      *            Parsed PDU.
      * @return Generated messages (frames).
      */
-    public final byte[][] pduToMessages(final GXDLMSXmlPdu pdu) {
+    public final byte[][] pduToMessages(final GXDLMSXmlPdu pdu)
+            throws InvalidKeyException, NoSuchAlgorithmException,
+            NoSuchPaddingException, InvalidAlgorithmParameterException,
+            IllegalBlockSizeException, BadPaddingException {
         List<byte[]> messages = new ArrayList<byte[]>();
         if (pdu.getCommand() == Command.SNRM) {
             messages.add(pdu.getData());

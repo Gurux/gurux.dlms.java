@@ -34,11 +34,17 @@
 
 package gurux.dlms.objects;
 
+import java.security.InvalidAlgorithmParameterException;
+import java.security.InvalidKeyException;
+import java.security.NoSuchAlgorithmException;
 import java.util.AbstractMap.SimpleEntry;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map.Entry;
 
+import javax.crypto.BadPaddingException;
+import javax.crypto.IllegalBlockSizeException;
+import javax.crypto.NoSuchPaddingException;
 import javax.xml.stream.XMLStreamException;
 
 import gurux.dlms.GXByteBuffer;
@@ -143,7 +149,10 @@ public class GXDLMSAutoConnect extends GXDLMSObject implements IGXDLMSBase {
      *            DLMS client.
      * @return Action bytes.
      */
-    public final byte[][] connect(final GXDLMSClient client) {
+    public final byte[][] connect(final GXDLMSClient client)
+            throws InvalidKeyException, NoSuchAlgorithmException,
+            NoSuchPaddingException, InvalidAlgorithmParameterException,
+            IllegalBlockSizeException, BadPaddingException {
         return client.method(getName(), getObjectType(), 1, 0, DataType.INT8);
     }
 
@@ -353,10 +362,8 @@ public class GXDLMSAutoConnect extends GXDLMSObject implements IGXDLMSBase {
         callingWindow.clear();
         if (reader.isStartElement("CallingWindow", true)) {
             while (reader.isStartElement("Item", true)) {
-                GXDateTime start = new GXDateTime(
-                        reader.readElementContentAsString("Start"));
-                GXDateTime end = new GXDateTime(
-                        reader.readElementContentAsString("End"));
+                GXDateTime start = reader.readElementContentAsDateTime("Start");
+                GXDateTime end = reader.readElementContentAsDateTime("End");
                 callingWindow.add(
                         new SimpleEntry<GXDateTime, GXDateTime>(start, end));
             }
@@ -377,10 +384,8 @@ public class GXDLMSAutoConnect extends GXDLMSObject implements IGXDLMSBase {
             writer.writeStartElement("CallingWindow");
             for (Entry<GXDateTime, GXDateTime> it : callingWindow) {
                 writer.writeStartElement("Item");
-                writer.writeElementString("Start",
-                        it.getKey().toFormatString());
-                writer.writeElementString("End",
-                        it.getValue().toFormatString());
+                writer.writeElementString("Start", it.getKey());
+                writer.writeElementString("End", it.getValue());
                 writer.writeEndElement();
             }
             writer.writeEndElement();

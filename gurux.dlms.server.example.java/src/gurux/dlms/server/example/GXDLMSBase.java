@@ -45,8 +45,10 @@ import java.text.SimpleDateFormat;
 import java.util.AbstractMap;
 import java.util.Calendar;
 import java.util.Date;
+import java.util.List;
 import java.util.Map.Entry;
 
+import gurux.common.IGXMedia;
 import gurux.common.IGXMediaListener;
 import gurux.common.MediaStateEventArgs;
 import gurux.common.PropertyChangedEventArgs;
@@ -110,8 +112,11 @@ import gurux.dlms.objects.enums.OpticalProtocolMode;
 import gurux.dlms.objects.enums.SingleActionScheduleType;
 import gurux.dlms.objects.enums.SortMethod;
 import gurux.dlms.secure.GXDLMSSecureServer2;
+import gurux.io.Parity;
+import gurux.io.StopBits;
 import gurux.net.GXNet;
 import gurux.net.enums.NetworkType;
+import gurux.serial.GXSerial;
 
 /**
  * All example servers are using same objects.
@@ -120,7 +125,7 @@ public class GXDLMSBase extends GXDLMSSecureServer2
         implements IGXMediaListener, gurux.net.IGXNetListener {
 
     TraceLevel Trace = TraceLevel.INFO;
-    private GXNet media;
+    private IGXMedia media;
 
     static final Object fileLock = new Object();
 
@@ -543,6 +548,25 @@ public class GXDLMSBase extends GXDLMSSecureServer2
     }
 
     /**
+     * @param port
+     *            Serial port.
+     * @param trace
+     * @throws Exception
+     */
+    public void initialize(String port, TraceLevel trace) throws Exception {
+        // If pre-established connections are used.
+        setClientSystemTitle("ABCDEFGH".getBytes());
+        getCiphering().setSecurity(Security.AUTHENTICATION_ENCRYPTION);
+        media = new GXSerial(port, gurux.io.BaudRate.BAUD_RATE_9600, 8,
+                Parity.NONE, StopBits.ONE);
+        media.setTrace(TraceLevel.VERBOSE);
+        Trace = trace;
+        media.addListener(this);
+        media.open();
+        init();
+    }
+
+    /**
      * Add available objects.
      * 
      * @param server
@@ -552,11 +576,15 @@ public class GXDLMSBase extends GXDLMSSecureServer2
         setClientSystemTitle("ABCDEFGH".getBytes());
         getCiphering().setSecurity(Security.AUTHENTICATION_ENCRYPTION);
 
-        media = new gurux.net.GXNet(NetworkType.TCP, port);
+        media = new GXNet(NetworkType.TCP, port);
         media.setTrace(TraceLevel.VERBOSE);
         Trace = trace;
         media.addListener(this);
         media.open();
+        init();
+    }
+
+    void init() {
         ///////////////////////////////////////////////////////////////////////
         // Add objects of the meter.
         addLogicalDeviceName();
@@ -679,10 +707,11 @@ public class GXDLMSBase extends GXDLMSSecureServer2
      *            Item count.
      */
     private void getProfileGenericDataByRange(ValueEventArgs e) {
-        GXDateTime start = (GXDateTime) GXDLMSClient.changeType(
-                (byte[]) ((Object[]) e.getParameters())[1], DataType.DATETIME);
-        GXDateTime end = (GXDateTime) GXDLMSClient.changeType(
-                (byte[]) ((Object[]) e.getParameters())[2], DataType.DATETIME);
+        List<?> arr = (List<?>) e.getParameters();
+        GXDateTime start = (GXDateTime) GXDLMSClient
+                .changeType((byte[]) arr.get(1), DataType.DATETIME);
+        GXDateTime end = (GXDateTime) GXDLMSClient
+                .changeType((byte[]) arr.get(1), DataType.DATETIME);
 
         synchronized (fileLock) {
             BufferedReader reader = null;
@@ -780,10 +809,10 @@ public class GXDLMSBase extends GXDLMSSecureServer2
                             getProfileGenericDataByRange(e);
                         } else if (e.getSelector() == 2) {
                             // Read by range.
-                            e.setRowBeginIndex(
-                                    ((long) ((Object[]) e.getParameters())[0]));
-                            e.setRowEndIndex(e.getRowBeginIndex()
-                                    + (long) ((Object[]) e.getParameters())[1]);
+                            List<?> arr = (List<?>) e.getParameters();
+                            e.setRowBeginIndex(((long) arr.get(0)));
+                            e.setRowEndIndex(
+                                    e.getRowBeginIndex() + (long) arr.get(1));
                             // If client wants to read more data what we have.
                             int cnt = getProfileGenericDataCount();
                             if (e.getRowEndIndex() - e.getRowBeginIndex() > cnt
@@ -954,7 +983,7 @@ public class GXDLMSBase extends GXDLMSSecureServer2
         try {
             synchronized (this) {
                 if (Trace == TraceLevel.VERBOSE) {
-                    System.out.println("<- " + gurux.common.GXCommon
+                    System.out.println("RX:\t" + gurux.common.GXCommon
                             .bytesToHex((byte[]) e.getData()));
                 }
                 GXServerReply sr = new GXServerReply((byte[]) e.getData());
@@ -966,7 +995,7 @@ public class GXDLMSBase extends GXDLMSSecureServer2
                     // server or client address.
                     if (sr.getReply() != null) {
                         if (Trace == TraceLevel.VERBOSE) {
-                            System.out.println("-> " + gurux.common.GXCommon
+                            System.out.println("TX:\t" + gurux.common.GXCommon
                                     .bytesToHex(sr.getReply()));
                         }
                         media.send(sr.getReply(), e.getSenderInfo());

@@ -35,8 +35,8 @@
 package gurux.dlms.enums;
 
 /**
-* Enumerable units.
-*/
+ * Enumerable units.
+ */
 public enum Unit {
     /**
      * No Unit.
@@ -446,7 +446,7 @@ public enum Unit {
             str = "ActiveEnergy";
             break;
         case 31: // APPARENT_ENERGY
-            str = "ApparentEenergy";
+            str = "ApparentEnenergy";
             break;
         case 32: // REACTIVE_ENERGY
             str = "ReactiveEnergy";

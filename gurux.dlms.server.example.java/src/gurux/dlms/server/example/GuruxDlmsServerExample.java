@@ -37,10 +37,13 @@ package gurux.dlms.server.example;
 import gurux.common.GXCmdParameter;
 import gurux.common.GXCommon;
 import gurux.common.enums.TraceLevel;
+import gurux.serial.GXSerial;
 
 class Settings {
     public TraceLevel trace = TraceLevel.INFO;
     public int port = 4060;
+    public String serial;
+    public boolean useLogicalNameReferencing = true;
 }
 
 /**
@@ -60,69 +63,109 @@ public class GuruxDlmsServerExample {
         // Create servers and start listen events.
         try {
             getParameters(args, settings);
-            ///////////////////////////////////////////////////////////////////////
-            // Create Gurux DLMS server component for Short Name
-            // and start listen events.
-            GXDLMSServerSN SNServer = new GXDLMSServerSN();
-            SNServer.initialize(settings.port, settings.trace);
-            System.out.println("Short Name DLMS Server in port "
-                    + String.valueOf(settings.port));
-            System.out.println("Example connection settings:");
-            System.out.println(
-                    "Gurux.DLMS.Client.Example.Net -r sn -h localhost -p "
-                            + String.valueOf(settings.port));
-            System.out.println(
-                    "----------------------------------------------------------");
-            ///////////////////////////////////////////////////////////////////////
-            // Create Gurux DLMS server component for Logical Name
-            // and start listen events.
-            GXDLMSServerLN LNServer = new GXDLMSServerLN();
-            LNServer.initialize(settings.port + 1, settings.trace);
-            System.out.println("Logical Name DLMS Server in port "
-                    + String.valueOf(settings.port + 1));
-            System.out.println("Example connection settings:");
-            System.out.println("Gurux.DLMS.Client.Example.Net -h=localhost -p "
-                    + String.valueOf(settings.port + 1));
-            System.out.println(
-                    "----------------------------------------------------------");
-            ///////////////////////////////////////////////////////////////////////
-            // Create Gurux DLMS server component for Short Name
-            // and start listen events.
-            GXDLMSServerSN_47 SN_47Server = new GXDLMSServerSN_47();
-            SN_47Server.initialize(settings.port + 2, settings.trace);
-            System.out
-                    .println("Short Name DLMS Server with IEC 62056-47 in port "
-                            + String.valueOf(settings.port + 2));
-            System.out.println("Example connection settings:");
-            System.out.println(
-                    "Gurux.DLMS.Client.Example.Net -r sn -h localhost -w -p "
-                            + String.valueOf(settings.port + 2));
-            System.out.println(
-                    "----------------------------------------------------------");
-            ///////////////////////////////////////////////////////////////////////
-            // Create Gurux DLMS server component for Logical Name
-            // and start listen events.
-            GXDLMSServerLN_47 LN_47Server = new GXDLMSServerLN_47();
-            LN_47Server.initialize(settings.port + 3, settings.trace);
-            System.out.println(
-                    "Logical Name DLMS Server with IEC 62056-47 in port "
-                            + String.valueOf(settings.port + 3));
-            System.out.println("Example connection settings:");
-            System.out
-                    .println("Gurux.DLMS.Client.Example.Net -h localhost -w -p "
-                            + String.valueOf(settings.port + 3));
-
-            System.out.println("Press Enter to close.");
-            while (System.in.read() != 13) {
+            if (settings.serial != null) {
+                GXDLMSBase server;
+                if (settings.useLogicalNameReferencing) {
+                    server = new GXDLMSServerLN();
+                    System.out
+                            .println("Logical Name DLMS Server in serial port "
+                                    + settings.serial);
+                } else {
+                    server = new GXDLMSServerSN();
+                    System.out.println("Short Name DLMS Server in serial port "
+                            + settings.serial);
+                }
+                try {
+                    server.initialize(settings.serial, settings.trace);
+                } catch (Exception ex) {
+                    System.out.println(
+                            "----------------------------------------------------------");
+                    System.out.println(ex.getMessage());
+                    System.out.println("Available ports:");
+                    StringBuilder sb = new StringBuilder();
+                    for (String it : GXSerial.getPortNames()) {
+                        if (sb.length() != 0) {
+                            sb.append(", ");
+                        }
+                        sb.append(it);
+                    }
+                    System.out.println(sb.toString());
+                    return;
+                }
+                System.out.println(
+                        "----------------------------------------------------------");
                 System.out.println("Press Enter to close.");
+                while (System.in.read() != 13) {
+                    System.out.println("Press Enter to close.");
+                }
+                // Close server.
+                server.close();
+            } else {
+                ///////////////////////////////////////////////////////////////////////
+                // Create Gurux DLMS server component for Short Name
+                // and start listen events.
+                GXDLMSServerSN SNServer = new GXDLMSServerSN();
+                SNServer.initialize(settings.port, settings.trace);
+                System.out.println("Short Name DLMS Server in port "
+                        + String.valueOf(settings.port));
+                System.out.println("Example connection settings:");
+                System.out.println(
+                        "Gurux.DLMS.Client.Example.Net -r sn -h localhost -p "
+                                + String.valueOf(settings.port));
+                System.out.println(
+                        "----------------------------------------------------------");
+                ///////////////////////////////////////////////////////////////////////
+                // Create Gurux DLMS server component for Logical Name
+                // and start listen events.
+                GXDLMSServerLN LNServer = new GXDLMSServerLN();
+                LNServer.initialize(settings.port + 1, settings.trace);
+                System.out.println("Logical Name DLMS Server in port "
+                        + String.valueOf(settings.port + 1));
+                System.out.println("Example connection settings:");
+                System.out.println(
+                        "Gurux.DLMS.Client.Example.Net -h=localhost -p "
+                                + String.valueOf(settings.port + 1));
+                System.out.println(
+                        "----------------------------------------------------------");
+                ///////////////////////////////////////////////////////////////////////
+                // Create Gurux DLMS server component for Short Name
+                // and start listen events.
+                GXDLMSServerSN_47 SN_47Server = new GXDLMSServerSN_47();
+                SN_47Server.initialize(settings.port + 2, settings.trace);
+                System.out.println(
+                        "Short Name DLMS Server with IEC 62056-47 in port "
+                                + String.valueOf(settings.port + 2));
+                System.out.println("Example connection settings:");
+                System.out.println(
+                        "Gurux.DLMS.Client.Example.Net -r sn -h localhost -w -p "
+                                + String.valueOf(settings.port + 2));
+                System.out.println(
+                        "----------------------------------------------------------");
+                ///////////////////////////////////////////////////////////////////////
+                // Create Gurux DLMS server component for Logical Name
+                // and start listen events.
+                GXDLMSServerLN_47 LN_47Server = new GXDLMSServerLN_47();
+                LN_47Server.initialize(settings.port + 3, settings.trace);
+                System.out.println(
+                        "Logical Name DLMS Server with IEC 62056-47 in port "
+                                + String.valueOf(settings.port + 3));
+                System.out.println("Example connection settings:");
+                System.out.println(
+                        "Gurux.DLMS.Client.Example.Net -h localhost -w -p "
+                                + String.valueOf(settings.port + 3));
+
+                System.out.println("Press Enter to close.");
+                while (System.in.read() != 13) {
+                    System.out.println("Press Enter to close.");
+                }
+                /// Close servers.
+                System.out.println("Closing servers.");
+                SNServer.close();
+                LNServer.close();
+                SN_47Server.close();
+                LN_47Server.close();
+                System.out.println("Servers closed.");
             }
-            /// Close servers.
-            System.out.println("Closing servers.");
-            SNServer.close();
-            LNServer.close();
-            SN_47Server.close();
-            LN_47Server.close();
-            System.out.println("Servers closed.");
         } catch (RuntimeException ex) {
             System.out.println(ex.getMessage());
             throw ex;
@@ -130,8 +173,8 @@ public class GuruxDlmsServerExample {
     }
 
     private static int getParameters(String[] args, Settings settings) {
-        java.util.ArrayList<GXCmdParameter> parameters =
-                GXCommon.getParameters(args, "t:p:");
+        java.util.List<GXCmdParameter> parameters =
+                GXCommon.getParameters(args, "t:p:S:r:");
         for (GXCmdParameter it : parameters) {
             switch (it.getTag()) {
             case 't':
@@ -148,6 +191,20 @@ public class GuruxDlmsServerExample {
                 // Port.
                 settings.port = Integer.parseInt(it.getValue());
                 break;
+            case 'r':
+                if ("sn".compareTo(it.getValue()) == 0) {
+                    settings.useLogicalNameReferencing = false;
+                } else if ("ln".compareTo(it.getValue()) == 0) {
+                    settings.useLogicalNameReferencing = true;
+                } else {
+                    throw new IllegalArgumentException(
+                            "Invalid reference option.");
+                }
+                break;
+            case 'S':
+                // serial port.
+                settings.serial = it.getValue();
+                break;
             case '?':
                 switch (it.getTag()) {
                 case 'p':
@@ -156,6 +213,12 @@ public class GuruxDlmsServerExample {
                 case 't':
                     throw new IllegalArgumentException(
                             "Missing mandatory trace option.\n");
+                case 'r':
+                    throw new IllegalArgumentException(
+                            "Missing mandatory reference option.");
+                case 'S':
+                    throw new IllegalArgumentException(
+                            "Missing mandatory Serial port option.\n");
                 default:
                     showHelp();
                     return 1;
@@ -174,5 +237,8 @@ public class GuruxDlmsServerExample {
         System.out.println(
                 " -t [Error, Warning, Info, Verbose] Trace messages.\r\n");
         System.out.println(" -p Start port number. Default is 4060.\r\n");
+        System.out.println(" -S \t serial port.");
+        System.out.println(
+                " -r [sn, sn]\t Short name or Logican Name (default) referencing is used.");
     }
 }

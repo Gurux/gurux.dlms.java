@@ -165,7 +165,7 @@ public class GXDLMSObjectCollection extends ArrayList<GXDLMSObject>
             throws XMLStreamException {
         GXDLMSObject obj = null;
         String target;
-        ObjectType type;
+        ObjectType type = null;
         GXXmlReader reader = new GXXmlReader(stream);
         while (!reader.isEOF()) {
             if (reader.isStartElement()) {
@@ -282,7 +282,7 @@ public class GXDLMSObjectCollection extends ArrayList<GXDLMSObject>
                 if (d != null && d.length() != 0) {
                     writer.writeElementString("Description", d);
                 }
-                if (settings != null && settings.getValues()) {
+                if (settings == null || settings.getValues()) {
                     ((IGXDLMSBase) it).save(writer);
                 }
                 // Close object.

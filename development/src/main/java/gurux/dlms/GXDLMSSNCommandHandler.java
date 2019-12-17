@@ -1,10 +1,18 @@
 package gurux.dlms;
 
+import java.security.InvalidAlgorithmParameterException;
+import java.security.InvalidKeyException;
+import java.security.NoSuchAlgorithmException;
+import java.security.SignatureException;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map.Entry;
 import java.util.logging.Level;
 import java.util.logging.Logger;
+
+import javax.crypto.BadPaddingException;
+import javax.crypto.IllegalBlockSizeException;
+import javax.crypto.NoSuchPaddingException;
 
 import gurux.dlms.enums.AccessMode;
 import gurux.dlms.enums.Command;
@@ -200,7 +208,10 @@ final class GXDLMSSNCommandHandler {
      * @return Response type.
      */
     private static byte getReadData(final GXDLMSSettings settings,
-            final ValueEventArgs[] list, final GXByteBuffer data) {
+            final ValueEventArgs[] list, final GXByteBuffer data)
+            throws InvalidKeyException, NoSuchPaddingException,
+            InvalidAlgorithmParameterException, IllegalBlockSizeException,
+            BadPaddingException, SignatureException {
         Object value;
         boolean first = true;
         byte type = SingleReadResponse.DATA;
@@ -425,8 +436,10 @@ final class GXDLMSSNCommandHandler {
     }
 
     private static void returnSNError(final GXDLMSSettings settings,
-            final int cmd, final ErrorCode error,
-            final GXByteBuffer replyData) {
+            final int cmd, final ErrorCode error, final GXByteBuffer replyData)
+            throws InvalidKeyException, NoSuchAlgorithmException,
+            NoSuchPaddingException, InvalidAlgorithmParameterException,
+            IllegalBlockSizeException, BadPaddingException {
         GXByteBuffer bb = new GXByteBuffer();
         bb.setUInt8(error.getValue());
         GXDLMS.getSNPdu(

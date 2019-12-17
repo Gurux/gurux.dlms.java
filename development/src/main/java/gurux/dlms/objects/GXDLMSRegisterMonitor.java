@@ -294,10 +294,12 @@ public class GXDLMSRegisterMonitor extends GXDLMSObject implements IGXDLMSBase {
 
     @Override
     public final void load(final GXXmlReader reader) throws XMLStreamException {
+        DataType[] dt = new DataType[1];
         List<Object> tmp = new ArrayList<Object>();
         if (reader.isStartElement("Thresholds", true)) {
             while (reader.isStartElement("Value", false)) {
-                Object it = reader.readElementContentAsObject("Value", null);
+                Object it =
+                        reader.readElementContentAsObject("Value", null, dt);
                 tmp.add(it);
             }
             reader.readEndElement("Thresholds");

@@ -34,9 +34,15 @@
 
 package gurux.dlms.objects;
 
+import java.security.InvalidAlgorithmParameterException;
+import java.security.InvalidKeyException;
+import java.security.NoSuchAlgorithmException;
 import java.text.NumberFormat;
 import java.util.List;
 
+import javax.crypto.BadPaddingException;
+import javax.crypto.IllegalBlockSizeException;
+import javax.crypto.NoSuchPaddingException;
 import javax.xml.stream.XMLStreamException;
 
 import gurux.dlms.GXByteBuffer;
@@ -149,7 +155,10 @@ public class GXDLMSRegister extends GXDLMSObject implements IGXDLMSBase {
     /*
      * Reset value.
      */
-    public final byte[][] reset(final GXDLMSClient client) {
+    public final byte[][] reset(final GXDLMSClient client)
+            throws InvalidKeyException, NoSuchAlgorithmException,
+            NoSuchPaddingException, InvalidAlgorithmParameterException,
+            IllegalBlockSizeException, BadPaddingException {
         return client.method(getName(), getObjectType(), 1, 0, DataType.INT8);
     }
 
@@ -325,16 +334,19 @@ public class GXDLMSRegister extends GXDLMSObject implements IGXDLMSBase {
 
     @Override
     public void load(final GXXmlReader reader) throws XMLStreamException {
+        DataType[] dt = new DataType[1];
         unit = reader.readElementContentAsInt("Unit", 0);
         setScaler(reader.readElementContentAsDouble("Scaler", 1));
-        setValue(reader.readElementContentAsObject("Value", null));
+        setValue(reader.readElementContentAsObject("Value", null, dt));
+        setDataType(2, dt[0]);
     }
 
     @Override
     public void save(final GXXmlWriter writer) throws XMLStreamException {
         writer.writeElementString("Unit", unit);
         writer.writeElementString("Scaler", getScaler(), 1);
-        writer.writeElementObject("Value", getValue());
+        writer.writeElementObject("Value", getValue(), getDataType(2),
+                getUIDataType(2));
     }
 
     @Override

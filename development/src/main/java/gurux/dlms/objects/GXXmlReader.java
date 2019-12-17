@@ -37,6 +37,7 @@ package gurux.dlms.objects;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.InputStream;
+import java.util.Locale;
 
 import javax.xml.stream.XMLInputFactory;
 import javax.xml.stream.XMLStreamConstants;
@@ -250,20 +251,24 @@ public class GXXmlReader implements AutoCloseable {
     }
 
     private Object[] readArray() throws XMLStreamException {
+        DataType[] dt = new DataType[1];
         java.util.ArrayList<Object> list = new java.util.ArrayList<Object>();
         while (isStartElement("Item", false)) {
-            list.add(readElementContentAsObject("Item", null));
+            list.add(readElementContentAsObject("Item", null, dt));
         }
         return list.toArray(new Object[0]);
     }
 
     public final Object readElementContentAsObject(final String name,
-            final Object defaultValue) throws XMLStreamException {
+            final Object defaultValue, final DataType dt[])
+            throws XMLStreamException {
         getNext();
+        dt[0] = DataType.NONE;
         if (name.compareToIgnoreCase(getName()) == 0) {
             Object ret = null;
             String str = getAttribute(0);
             DataType tp = DataType.forValue(Integer.parseInt(str));
+            dt[0] = tp;
             if (tp == DataType.ARRAY) {
                 read();
                 getNext();
@@ -275,11 +280,11 @@ public class GXXmlReader implements AutoCloseable {
                 if (tp == DataType.OCTET_STRING) {
                     ret = GXDLMSTranslator.hexToBytes(str);
                 } else if (tp == DataType.DATETIME) {
-                    ret = new GXDateTime(str);
+                    ret = new GXDateTime(str, Locale.ROOT);
                 } else if (tp == DataType.DATE) {
-                    ret = new GXDate(str);
+                    ret = new GXDate(str, Locale.ROOT);
                 } else if (tp == DataType.TIME) {
-                    ret = new GXTime(str);
+                    ret = new GXTime(str, Locale.ROOT);
                 } else {
                     ret = GXDLMSConverter.changeType(str, tp);
                 }
@@ -298,6 +303,36 @@ public class GXXmlReader implements AutoCloseable {
     public final String readElementContentAsString(final String name)
             throws XMLStreamException {
         return readElementContentAsString(name, null);
+    }
+
+    public final GXDateTime readElementContentAsDateTime(final String name)
+            throws XMLStreamException {
+        String str = readElementContentAsString(name, null);
+        GXDateTime it = null;
+        if (str != null) {
+            it = new GXDateTime(str, Locale.ROOT);
+        }
+        return it;
+    }
+
+    public final GXDate readElementContentAsDate(final String name)
+            throws XMLStreamException {
+        String str = readElementContentAsString(name, null);
+        GXDate it = null;
+        if (str != null) {
+            it = new GXDate(str, Locale.ROOT);
+        }
+        return it;
+    }
+
+    public final GXTime readElementContentAsTime(final String name)
+            throws XMLStreamException {
+        String str = readElementContentAsString(name, null);
+        GXTime it = null;
+        if (str != null) {
+            it = new GXTime(str, Locale.ROOT);
+        }
+        return it;
     }
 
     private String getText() throws XMLStreamException {

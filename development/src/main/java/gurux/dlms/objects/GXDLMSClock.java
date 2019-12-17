@@ -34,6 +34,9 @@
 
 package gurux.dlms.objects;
 
+import java.security.InvalidAlgorithmParameterException;
+import java.security.InvalidKeyException;
+import java.security.NoSuchAlgorithmException;
 import java.util.Calendar;
 import java.util.Date;
 import java.util.HashSet;
@@ -41,6 +44,9 @@ import java.util.List;
 import java.util.Set;
 import java.util.TimeZone;
 
+import javax.crypto.BadPaddingException;
+import javax.crypto.IllegalBlockSizeException;
+import javax.crypto.NoSuchPaddingException;
 import javax.xml.stream.XMLStreamException;
 
 import gurux.dlms.GXByteBuffer;
@@ -357,7 +363,10 @@ public class GXDLMSClock extends GXDLMSObject implements IGXDLMSBase {
      * Sets the meter's time to the nearest (+/-) quarter of an hour value
      * (*:00, *:15, *:30, *:45).
      */
-    public final byte[][] adjustToQuarter(final GXDLMSClient client) {
+    public final byte[][] adjustToQuarter(final GXDLMSClient client)
+            throws InvalidKeyException, NoSuchAlgorithmException,
+            NoSuchPaddingException, InvalidAlgorithmParameterException,
+            IllegalBlockSizeException, BadPaddingException {
         return client.method(this, 1, 0, DataType.INT8);
     }
 
@@ -365,7 +374,10 @@ public class GXDLMSClock extends GXDLMSObject implements IGXDLMSBase {
      * Sets the meter's time to the nearest (+/-) starting point of a measuring
      * period.
      */
-    public final byte[][] adjustToMeasuringPeriod(final GXDLMSClient client) {
+    public final byte[][] adjustToMeasuringPeriod(final GXDLMSClient client)
+            throws InvalidKeyException, NoSuchAlgorithmException,
+            NoSuchPaddingException, InvalidAlgorithmParameterException,
+            IllegalBlockSizeException, BadPaddingException {
         return client.method(this, 2, 0, DataType.INT8);
     }
 
@@ -375,7 +387,10 @@ public class GXDLMSClock extends GXDLMSObject implements IGXDLMSBase {
      * is set to 0, and minute_counter and all depending clock values are
      * incremented if necessary.
      */
-    public final byte[][] adjustToMinute(final GXDLMSClient client) {
+    public final byte[][] adjustToMinute(final GXDLMSClient client)
+            throws InvalidKeyException, NoSuchAlgorithmException,
+            NoSuchPaddingException, InvalidAlgorithmParameterException,
+            IllegalBlockSizeException, BadPaddingException {
         return client.method(this, 3, 0, DataType.INT8);
     }
 
@@ -384,7 +399,10 @@ public class GXDLMSClock extends GXDLMSObject implements IGXDLMSBase {
      * If the meter's time lies between validity_interval_start and
      * validity_interval_end, then time is set to preset_time.
      */
-    public final byte[][] adjustToPresetTime(final GXDLMSClient client) {
+    public final byte[][] adjustToPresetTime(final GXDLMSClient client)
+            throws InvalidKeyException, NoSuchAlgorithmException,
+            NoSuchPaddingException, InvalidAlgorithmParameterException,
+            IllegalBlockSizeException, BadPaddingException {
         return client.method(this, 4, 0, DataType.INT8);
     }
 
@@ -394,7 +412,10 @@ public class GXDLMSClock extends GXDLMSObject implements IGXDLMSBase {
      */
     public final byte[][] presetAdjustingTime(final GXDLMSClient client,
             final Date presetTime, final Date validityIntervalStart,
-            final Date validityIntervalEnd) {
+            final Date validityIntervalEnd)
+            throws InvalidKeyException, NoSuchAlgorithmException,
+            NoSuchPaddingException, InvalidAlgorithmParameterException,
+            IllegalBlockSizeException, BadPaddingException {
         GXByteBuffer buff = new GXByteBuffer(44);
         buff.setUInt8(DataType.STRUCTURE.getValue());
         buff.setUInt8(3);
@@ -410,7 +431,10 @@ public class GXDLMSClock extends GXDLMSObject implements IGXDLMSBase {
      * Shifts the time by n (-900 <= n <= 900) s.
      */
     public final byte[][] shiftTime(final GXDLMSClient client,
-            final int forTime) {
+            final int forTime)
+            throws InvalidKeyException, NoSuchAlgorithmException,
+            NoSuchPaddingException, InvalidAlgorithmParameterException,
+            IllegalBlockSizeException, BadPaddingException {
         if (forTime < -900 || forTime > 900) {
             throw new IllegalArgumentException("Invalid shift time.");
         }
@@ -635,19 +659,11 @@ public class GXDLMSClock extends GXDLMSObject implements IGXDLMSBase {
 
     @Override
     public final void load(final GXXmlReader reader) throws XMLStreamException {
-        if ("Time".compareToIgnoreCase(reader.getName()) == 0) {
-            time = new GXDateTime(reader.readElementContentAsString("Time"));
-        }
+        time = reader.readElementContentAsDateTime("Time");
         timeZone = reader.readElementContentAsInt("TimeZone");
         status = ClockStatus.forValue(reader.readElementContentAsInt("Status"));
-        String str = reader.readElementContentAsString("Begin");
-        if (str != null) {
-            begin = new GXDateTime(str);
-        }
-        str = reader.readElementContentAsString("End");
-        if (str != null) {
-            end = new GXDateTime(str);
-        }
+        begin = reader.readElementContentAsDateTime("Begin");
+        end = reader.readElementContentAsDateTime("End");
         deviation = reader.readElementContentAsInt("Deviation");
         enabled = reader.readElementContentAsInt("Enabled") != 0;
         clockBase =
@@ -656,19 +672,11 @@ public class GXDLMSClock extends GXDLMSObject implements IGXDLMSBase {
 
     @Override
     public final void save(final GXXmlWriter writer) throws XMLStreamException {
-        if (time != null) {
-            writer.writeElementString("Time", time.toFormatString());
-        }
-        if (timeZone != 0) {
-            writer.writeElementString("TimeZone", timeZone);
-        }
+        writer.writeElementString("Time", time);
+        writer.writeElementString("TimeZone", timeZone);
         writer.writeElementString("Status", ClockStatus.toInteger(status));
-        if (begin != null) {
-            writer.writeElementString("Begin", begin.toFormatString());
-        }
-        if (end != null) {
-            writer.writeElementString("End", end.toFormatString());
-        }
+        writer.writeElementString("Begin", begin);
+        writer.writeElementString("End", end);
         writer.writeElementString("Deviation", deviation);
         writer.writeElementString("Enabled", enabled);
         writer.writeElementString("ClockBase", clockBase.ordinal());

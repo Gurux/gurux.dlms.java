@@ -34,14 +34,17 @@
 
 package gurux.dlms;
 
+import java.text.DateFormat;
 import java.text.DecimalFormat;
 import java.text.SimpleDateFormat;
 import java.util.Calendar;
 import java.util.Date;
 import java.util.HashSet;
+import java.util.Locale;
 import java.util.TimeZone;
 
 import gurux.dlms.enums.ClockStatus;
+import gurux.dlms.enums.DateTimeExtraInfo;
 import gurux.dlms.enums.DateTimeSkips;
 import gurux.dlms.internal.GXCommon;
 
@@ -55,19 +58,16 @@ public class GXDateTime {
      * Skipped fields.
      */
     private java.util.Set<DateTimeSkips> skip;
+
     /**
-     * Daylight savings begin.
+     * Date time extra information.
      */
-    private boolean daylightSavingsBegin;
-    /**
-     * Daylight savings end.
-     */
-    private boolean daylightSavingsEnd;
+    private java.util.Set<DateTimeExtraInfo> extra;
 
     /**
      * Day of week.
      */
-    private int dayOfWeek;
+    private int dayOfWeek = 0;
 
     /**
      * Constructor.
@@ -77,7 +77,7 @@ public class GXDateTime {
         meterCalendar = Calendar.getInstance();
         status = new HashSet<ClockStatus>();
         status.add(ClockStatus.OK);
-        dayOfWeek = 0;
+        extra = new HashSet<DateTimeExtraInfo>();
     }
 
     /**
@@ -92,6 +92,7 @@ public class GXDateTime {
         meterCalendar.setTime(value);
         status = new HashSet<ClockStatus>();
         status.add(ClockStatus.OK);
+        extra = new HashSet<DateTimeExtraInfo>();
     }
 
     /**
@@ -105,6 +106,26 @@ public class GXDateTime {
         meterCalendar = value;
         status = new HashSet<ClockStatus>();
         status.add(ClockStatus.OK);
+        extra = new HashSet<DateTimeExtraInfo>();
+    }
+
+    /**
+     * Constructor.
+     * 
+     * @param value
+     *            Date value.
+     */
+    public GXDateTime(final GXDateTime value) {
+        skip = new HashSet<DateTimeSkips>();
+        meterCalendar = Calendar.getInstance();
+        meterCalendar = value.getMeterCalendar();
+        status = new HashSet<ClockStatus>();
+        extra = new HashSet<DateTimeExtraInfo>();
+        if (value != null) {
+            skip.addAll(value.getSkip());
+            status.addAll(value.getStatus());
+            extra.addAll(value.getExtra());
+        }
     }
 
     /**
@@ -191,6 +212,7 @@ public class GXDateTime {
         int s = second;
         int ms = millisecond;
         skip = new HashSet<DateTimeSkips>();
+        extra = new HashSet<DateTimeExtraInfo>();
         status = new HashSet<ClockStatus>();
         status.add(ClockStatus.OK);
         if (y < 1 || y == 0xFFFF) {
@@ -198,21 +220,28 @@ public class GXDateTime {
             Calendar tm = Calendar.getInstance();
             y = tm.get(Calendar.YEAR);
         }
-        daylightSavingsBegin = m == 0xFE;
-        daylightSavingsEnd = m == 0xFD;
-        if (m < 1 || m > 12) {
+        if (m == 0xFE) {
+            m = 0;
+            extra.add(DateTimeExtraInfo.DST_BEGIN);
+        } else if (m == 0xFD) {
+            m = 0;
+            extra.add(DateTimeExtraInfo.DST_END);
+        } else if (m < 1 || m > 12) {
             skip.add(DateTimeSkips.MONTH);
             m = 0;
         } else {
             m -= 1;
         }
 
-        if (d == -1 || d == 0 || d > 31) {
+        if (d == 0xFE) {
+            d = 1;
+            extra.add(DateTimeExtraInfo.LAST_DAY);
+        } else if (d == 0xFD) {
+            d = 1;
+            extra.add(DateTimeExtraInfo.LAST_DAY2);
+        } else if (d == -1 || d == 0 || d > 31) {
             skip.add(DateTimeSkips.DAY);
             d = 1;
-        } else if (d < 0) {
-            Calendar cal = Calendar.getInstance();
-            d = cal.getActualMaximum(Calendar.DATE) + d + 3;
         }
         if (h < 0 || h > 24) {
             skip.add(DateTimeSkips.HOUR);
@@ -248,8 +277,21 @@ public class GXDateTime {
      *            Date time value as a string.
      */
     public GXDateTime(final String value) {
+        this(value, null);
+    }
+
+    /**
+     * Constructor
+     * 
+     * @param value
+     *            Date time value as a string.
+     */
+    public GXDateTime(final String value, final Locale locale) {
         if (skip == null) {
             skip = new HashSet<DateTimeSkips>();
+        }
+        if (extra == null) {
+            extra = new HashSet<DateTimeExtraInfo>();
         }
         if (status == null) {
             status = new HashSet<ClockStatus>();
@@ -257,11 +299,37 @@ public class GXDateTime {
         }
 
         if (value != null) {
-            SimpleDateFormat sd = new SimpleDateFormat();
+            SimpleDateFormat sd;
+            if (locale != null) {
+                if (locale == Locale.ROOT) {
+                    sd = new SimpleDateFormat("MM/dd/yyyy HH:mm:ss");
+                } else {
+                    sd = (SimpleDateFormat) DateFormat.getDateTimeInstance(
+                            DateFormat.SHORT, DateFormat.SHORT, locale);
+                }
+            } else {
+                sd = new SimpleDateFormat();
+            }
             StringBuilder format = new StringBuilder();
             format.append(sd.toPattern());
             remove(format);
             String v = value;
+            if (value.indexOf("BEGIN") != -1) {
+                extra.add(DateTimeExtraInfo.DST_BEGIN);
+                v = v.replace("BEGIN", "01");
+            }
+            if (value.indexOf("END") != -1) {
+                extra.add(DateTimeExtraInfo.DST_END);
+                v = v.replace("END", "01");
+            }
+            if (value.indexOf("-1") != -1) {
+                extra.add(DateTimeExtraInfo.LAST_DAY);
+                v = v.replace("-1", "01");
+            }
+            if (value.indexOf("-2") != -1) {
+                extra.add(DateTimeExtraInfo.LAST_DAY2);
+                v = v.replace("-2", "01");
+            }
             if (value.indexOf('*') != -1) {
                 int lastFormatIndex = -1;
                 for (int pos = 0; pos < value.length(); ++pos) {
@@ -307,9 +375,12 @@ public class GXDateTime {
             }
             meterCalendar = Calendar.getInstance();
             try {
-                sd = new SimpleDateFormat(format.toString().trim());
+                if (locale != null && locale != Locale.ROOT) {
+                    sd = new SimpleDateFormat(format.toString().trim(), locale);
+                } else {
+                    sd = new SimpleDateFormat(format.toString().trim());
+                }
                 meterCalendar.setTime(sd.parse(v));
-                getSkip().add(DateTimeSkips.SECOND);
                 getSkip().add(DateTimeSkips.MILLISECOND);
             } catch (java.text.ParseException e) {
                 try {
@@ -476,36 +547,6 @@ public class GXDateTime {
     }
 
     /**
-     * @return Daylight savings begin.
-     */
-    public final boolean getDaylightSavingsBegin() {
-        return daylightSavingsBegin;
-    }
-
-    /**
-     * @param forValue
-     *            Daylight savings begin.
-     */
-    public final void setDaylightSavingsBegin(final boolean forValue) {
-        daylightSavingsBegin = forValue;
-    }
-
-    /**
-     * @return Daylight savings end.
-     */
-    public final boolean getDaylightSavingsEnd() {
-        return daylightSavingsEnd;
-    }
-
-    /**
-     * @param forValue
-     *            Daylight savings end.
-     */
-    public final void setDaylightSavingsEnd(final boolean forValue) {
-        daylightSavingsEnd = forValue;
-    }
-
-    /**
      * @return Deviation is time from current time zone to UTC time.
      */
     public final int getDeviation() {
@@ -545,6 +586,7 @@ public class GXDateTime {
             remove(format, "hh", true);
             remove(format, "h", true);
             remove(format, "mm", true);
+            remove(format, "ss", true);
             remove(format, "m", true);
             remove(format, "a", true);
         } else if (this instanceof GXTime) {
@@ -562,25 +604,57 @@ public class GXDateTime {
     }
 
     public String toFormatString() {
+        return toFormatString(null);
+    }
+
+    public String toFormatString(final Locale locale) {
         StringBuilder format = new StringBuilder();
-        SimpleDateFormat sd = new SimpleDateFormat();
+        SimpleDateFormat sd;
+        if (locale != null) {
+            if (locale == Locale.ROOT) {
+                // Hour is save in 24 format.
+                sd = new SimpleDateFormat("MM/dd/yyyy HH:mm:ss");
+            } else {
+                sd = (SimpleDateFormat) DateFormat.getDateTimeInstance(
+                        DateFormat.SHORT, DateFormat.SHORT, locale);
+            }
+        } else {
+            sd = new SimpleDateFormat();
+        }
         if (!getSkip().isEmpty()) {
             // Separate date and time parts.
             format.append(sd.toPattern());
             remove(format);
+            if (extra.contains(DateTimeExtraInfo.DST_BEGIN)) {
+                replace(format, "MM", "-3");
+                replace(format, "M", "-3");
+            } else if (extra.contains(DateTimeExtraInfo.DST_END)) {
+                replace(format, "MM", "-4");
+                replace(format, "M", "-4");
+            } else if (extra.contains(DateTimeExtraInfo.LAST_DAY)) {
+                replace(format, "dd", "-1");
+                replace(format, "d", "-1");
+            } else if (extra.contains(DateTimeExtraInfo.LAST_DAY2)) {
+                replace(format, "dd", "-2");
+                replace(format, "d", "-2");
+            }
             if (getSkip().contains(DateTimeSkips.YEAR)) {
                 replace(format, "yyyy");
                 replace(format, "yy");
+                replace(format, "y");
             }
             if (getSkip().contains(DateTimeSkips.MONTH)) {
+                replace(format, "MM");
                 replace(format, "M");
             }
             if (getSkip().contains(DateTimeSkips.DAY)) {
+                replace(format, "dd");
                 replace(format, "d");
             }
             if (getSkip().contains(DateTimeSkips.HOUR)) {
                 replace(format, "HH");
                 replace(format, "H");
+                replace(format, "hh");
                 replace(format, "h");
                 remove(format, "a", false);
             }
@@ -595,7 +669,7 @@ public class GXDateTime {
             }
             if (getSkip().contains(DateTimeSkips.SECOND)) {
                 replace(format, "ss");
-            } else {
+            } else if (format.indexOf("ss") == -1) {
                 int index = format.indexOf("mm");
                 if (index != -1) {
                     String sep = format.substring(index - 1, index);
@@ -606,8 +680,13 @@ public class GXDateTime {
                 replace(format, "mm");
                 replace(format, "m");
             }
-            sd = new SimpleDateFormat(format.toString().trim());
-            return sd.format(getLocalCalendar().getTime());
+            if (locale != null && locale != Locale.ROOT) {
+                sd = new SimpleDateFormat(format.toString().trim(), locale);
+            } else {
+                sd = new SimpleDateFormat(format.toString().trim());
+            }
+            return sd.format(getLocalCalendar().getTime())
+                    .replace("-3", "BEGIN").replace("-4", "END");
         }
         return sd.format(getLocalCalendar().getTime());
     }
@@ -625,10 +704,15 @@ public class GXDateTime {
     }
 
     private void replace(final StringBuilder value, final String tag) {
+        replace(value, tag, "*");
+    }
+
+    private void replace(final StringBuilder value, final String tag,
+            final String newValue) {
         int pos = value.indexOf(tag);
         if (pos != -1) {
             int len = pos + tag.length();
-            value.replace(pos, len, "*");
+            value.replace(pos, len, newValue);
         }
     }
 
@@ -863,5 +947,20 @@ public class GXDateTime {
      */
     public static long toUnixTime(final GXDateTime date) {
         return date.getLocalCalendar().getTime().getTime() / 1000;
+    }
+
+    /**
+     * @return Date time extra information.
+     */
+    public java.util.Set<DateTimeExtraInfo> getExtra() {
+        return extra;
+    }
+
+    /**
+     * @param value
+     *            Date time extra information.
+     */
+    public void setExtra(final java.util.Set<DateTimeExtraInfo> value) {
+        extra = value;
     }
 }

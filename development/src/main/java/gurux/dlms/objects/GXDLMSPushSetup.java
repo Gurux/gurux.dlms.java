@@ -34,11 +34,17 @@
 
 package gurux.dlms.objects;
 
+import java.security.InvalidAlgorithmParameterException;
+import java.security.InvalidKeyException;
+import java.security.NoSuchAlgorithmException;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
 
+import javax.crypto.BadPaddingException;
+import javax.crypto.IllegalBlockSizeException;
+import javax.crypto.NoSuchPaddingException;
 import javax.xml.stream.XMLStreamException;
 
 import gurux.dlms.GXByteBuffer;
@@ -218,7 +224,10 @@ public class GXDLMSPushSetup extends GXDLMSObject implements IGXDLMSBase {
     /*
      * Activates the push process.
      */
-    public final byte[][] activate(final GXDLMSClient client) {
+    public final byte[][] activate(final GXDLMSClient client)
+            throws InvalidKeyException, NoSuchAlgorithmException,
+            NoSuchPaddingException, InvalidAlgorithmParameterException,
+            IllegalBlockSizeException, BadPaddingException {
         return client.method(getName(), getObjectType(), 1, 0, DataType.INT8);
     }
 
@@ -462,10 +471,8 @@ public class GXDLMSPushSetup extends GXDLMSObject implements IGXDLMSBase {
         communicationWindow.clear();
         if (reader.isStartElement("CommunicationWindow", true)) {
             while (reader.isStartElement("Item", true)) {
-                GXDateTime start = new GXDateTime(
-                        reader.readElementContentAsString("Start"));
-                GXDateTime end = new GXDateTime(
-                        reader.readElementContentAsString("End"));
+                GXDateTime start = reader.readElementContentAsDateTime("Start");
+                GXDateTime end = reader.readElementContentAsDateTime("End");
                 communicationWindow.add(
                         new GXSimpleEntry<GXDateTime, GXDateTime>(start, end));
             }
@@ -504,10 +511,8 @@ public class GXDLMSPushSetup extends GXDLMSObject implements IGXDLMSBase {
             writer.writeStartElement("CommunicationWindow");
             for (Entry<GXDateTime, GXDateTime> it : communicationWindow) {
                 writer.writeStartElement("Item");
-                writer.writeElementString("Start",
-                        it.getKey().toFormatString());
-                writer.writeElementString("End",
-                        it.getValue().toFormatString());
+                writer.writeElementString("Start", it.getKey());
+                writer.writeElementString("End", it.getValue());
                 writer.writeEndElement();
             }
             writer.writeEndElement();

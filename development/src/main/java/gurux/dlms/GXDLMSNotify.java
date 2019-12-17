@@ -34,10 +34,17 @@
 
 package gurux.dlms;
 
+import java.security.InvalidAlgorithmParameterException;
+import java.security.InvalidKeyException;
+import java.security.NoSuchAlgorithmException;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 import java.util.Map.Entry;
+
+import javax.crypto.BadPaddingException;
+import javax.crypto.IllegalBlockSizeException;
+import javax.crypto.NoSuchPaddingException;
 
 import gurux.dlms.enums.Command;
 import gurux.dlms.enums.Conformance;
@@ -222,7 +229,10 @@ public class GXDLMSNotify {
      * @return Is frame complete.
      */
     public final boolean getData(final GXByteBuffer reply,
-            final GXReplyData data) {
+            final GXReplyData data)
+            throws InvalidKeyException, NoSuchAlgorithmException,
+            NoSuchPaddingException, InvalidAlgorithmParameterException,
+            IllegalBlockSizeException, BadPaddingException {
         return GXDLMS.getData(settings, reply, data, null);
     }
 
@@ -279,7 +289,10 @@ public class GXDLMSNotify {
      * @return Generated data notification message(s).
      */
     public final byte[][] generateDataNotificationMessages(final Date time,
-            final byte[] data) {
+            final byte[] data)
+            throws InvalidKeyException, NoSuchAlgorithmException,
+            NoSuchPaddingException, InvalidAlgorithmParameterException,
+            IllegalBlockSizeException, BadPaddingException {
         return generateDataNotificationMessages(time, new GXByteBuffer(data));
     }
 
@@ -293,7 +306,10 @@ public class GXDLMSNotify {
      * @return Generated data notification message(s).
      */
     public final byte[][] generateDataNotificationMessages(final Date time,
-            final GXByteBuffer data) {
+            final GXByteBuffer data)
+            throws InvalidKeyException, NoSuchAlgorithmException,
+            NoSuchPaddingException, InvalidAlgorithmParameterException,
+            IllegalBlockSizeException, BadPaddingException {
         List<byte[]> reply;
         if (getUseLogicalNameReferencing()) {
             GXDLMSLNParameters p = new GXDLMSLNParameters(settings, 0,
@@ -329,7 +345,10 @@ public class GXDLMSNotify {
      * @return Generated data notification message(s).
      */
     public final byte[][] generateDataNotificationMessages(final Date date,
-            final List<Entry<GXDLMSObject, Integer>> objects) {
+            final List<Entry<GXDLMSObject, Integer>> objects)
+            throws InvalidKeyException, NoSuchAlgorithmException,
+            NoSuchPaddingException, InvalidAlgorithmParameterException,
+            IllegalBlockSizeException, BadPaddingException {
         if (objects == null) {
             throw new IllegalArgumentException("objects");
         }
@@ -352,7 +371,10 @@ public class GXDLMSNotify {
      * @return Generated data notification message(s).
      */
     public final byte[][] generatePushSetupMessages(final Date date,
-            final GXDLMSPushSetup push) {
+            final GXDLMSPushSetup push)
+            throws InvalidKeyException, NoSuchAlgorithmException,
+            NoSuchPaddingException, InvalidAlgorithmParameterException,
+            IllegalBlockSizeException, BadPaddingException {
         if (push == null) {
             throw new IllegalArgumentException("push");
         }
@@ -481,7 +503,10 @@ public class GXDLMSNotify {
      * @return Report request as byte array.
      */
     public byte[][] generateReport(final GXDateTime time,
-            final List<Entry<GXDLMSObject, Integer>> list) {
+            final List<Entry<GXDLMSObject, Integer>> list)
+            throws InvalidKeyException, NoSuchAlgorithmException,
+            NoSuchPaddingException, InvalidAlgorithmParameterException,
+            IllegalBlockSizeException, BadPaddingException {
         if (list == null || list.size() == 0) {
             throw new IllegalArgumentException("list");
         }

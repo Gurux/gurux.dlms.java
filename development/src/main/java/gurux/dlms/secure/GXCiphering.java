@@ -34,11 +34,18 @@
 
 package gurux.dlms.secure;
 
+import java.security.InvalidAlgorithmParameterException;
+import java.security.InvalidKeyException;
 import java.security.KeyPair;
+import java.security.NoSuchAlgorithmException;
 import java.security.PublicKey;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
+
+import javax.crypto.BadPaddingException;
+import javax.crypto.IllegalBlockSizeException;
+import javax.crypto.NoSuchPaddingException;
 
 import gurux.dlms.GXByteBuffer;
 import gurux.dlms.GXICipher;
@@ -132,10 +139,13 @@ public class GXCiphering implements GXICipher {
     }
 
     public static byte[] decrypt(final GXICipher c, final AesGcmParameter p,
-            final GXByteBuffer data) {
+            final GXByteBuffer data)
+            throws InvalidKeyException, NoSuchAlgorithmException,
+            NoSuchPaddingException, InvalidAlgorithmParameterException,
+            IllegalBlockSizeException, BadPaddingException {
         byte[] tmp;
         p.setSharedSecret(c.getSharedSecret());
-        tmp = GXDLMSChippering.decryptAesGcm(c, p, data);
+        tmp = GXSecure.decryptAesGcm(c, p, data);
         c.setSharedSecret(p.getSharedSecret());
         return tmp;
     }
@@ -149,9 +159,12 @@ public class GXCiphering implements GXICipher {
      *            Plain text.
      * @return Secured data.
      */
-    public static byte[] encrypt(final AesGcmParameter p, final byte[] data) {
+    public static byte[] encrypt(final AesGcmParameter p, final byte[] data)
+            throws InvalidKeyException, NoSuchAlgorithmException,
+            NoSuchPaddingException, InvalidAlgorithmParameterException,
+            IllegalBlockSizeException, BadPaddingException {
         if (p.getSecurity() != Security.NONE) {
-            byte[] tmp = GXDLMSChippering.encryptAesGcm(p, data);
+            byte[] tmp = GXSecure.encryptAesGcm(true, p, data);
             p.setInvocationCounter(p.getInvocationCounter() + 1);
             return tmp;
         }
@@ -368,15 +381,17 @@ public class GXCiphering implements GXICipher {
      *            Client to Server or Server to Client challenge.
      * @return Generated challenge.
      */
-    public byte[] generateGmacPassword(final byte[] challenge) {
+    public byte[] generateGmacPassword(final byte[] challenge)
+            throws InvalidKeyException, IllegalBlockSizeException,
+            BadPaddingException, NoSuchAlgorithmException,
+            NoSuchPaddingException, InvalidAlgorithmParameterException {
         AesGcmParameter p = new AesGcmParameter(0x10, Security.AUTHENTICATION,
                 invocationCounter, systemTitle, blockCipherKey,
                 authenticationKey);
         GXByteBuffer bb = new GXByteBuffer();
-        GXDLMSChippering.encryptAesGcm(p, challenge);
         bb.setUInt8(0x10);
         bb.setUInt32(invocationCounter);
-        bb.set(p.getCountTag());
+        bb.set(GXSecure.encryptAesGcm(true, p, challenge));
         return bb.array();
     }
 

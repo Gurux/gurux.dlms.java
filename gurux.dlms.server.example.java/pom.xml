@@ -4,10 +4,12 @@
   <artifactId>gurux.dlms.server.example.java</artifactId>
   <version>0.0.1-SNAPSHOT</version>
   <properties>
+    <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
     <maven.compiler.source>7</maven.compiler.source>
     <maven.compiler.target>1.7</maven.compiler.target>
   </properties>
   <build>
+   <sourceDirectory>src</sourceDirectory>
     <plugins>
       <!-- Build an executable JAR -->
       <plugin>
@@ -36,12 +38,17 @@
     <dependency>
       <groupId>org.gurux</groupId>
       <artifactId>gurux.net</artifactId>
-      <version>1.0.16</version>
+      <version>1.0.19</version>
+    </dependency>
+     <dependency>
+      <groupId>org.gurux</groupId>
+      <artifactId>gurux.serial</artifactId>
+      <version>1.0.18</version>
     </dependency>
     <dependency>
       <groupId>org.gurux</groupId>
       <artifactId>gurux.dlms</artifactId>
-      <version>3.0.6</version>
+      <version>3.1.1</version>
     </dependency>
   </dependencies>
   <licenses>

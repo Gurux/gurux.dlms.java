@@ -220,18 +220,17 @@ public class GXDLMSSchedule extends GXDLMSObject implements IGXDLMSBase {
                         reader.readElementContentAsString("LogicalName"));
                 it.setScriptSelector((byte) reader
                         .readElementContentAsInt("ScriptSelector"));
-                it.setSwitchTime((GXDateTime) reader.readElementContentAsObject(
-                        "SwitchTime", new GXDateTime()));
+                it.setSwitchTime(
+                        reader.readElementContentAsDateTime("SwitchTime"));
                 it.setValidityWindow((byte) reader
                         .readElementContentAsInt("ValidityWindow"));
                 it.setExecWeekdays(
                         reader.readElementContentAsString("ExecWeekdays"));
                 it.setExecSpecDays(
                         reader.readElementContentAsString("ExecSpecDays"));
-                it.setBeginDate((GXDateTime) reader.readElementContentAsObject(
-                        "BeginDate", new GXDateTime()));
-                it.setEndDate((GXDateTime) reader.readElementContentAsObject(
-                        "EndDate", new GXDateTime()));
+                it.setBeginDate(
+                        reader.readElementContentAsDateTime("BeginDate"));
+                it.setEndDate(reader.readElementContentAsDateTime("EndDate"));
                 entries.add(it);
             }
             reader.readEndElement("Entries");

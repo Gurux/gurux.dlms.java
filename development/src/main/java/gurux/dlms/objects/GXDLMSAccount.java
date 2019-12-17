@@ -1126,15 +1126,10 @@ public class GXDLMSAccount extends GXDLMSObject implements IGXDLMSBase {
         loadReferences(reader, "ChargeReferences", chargeReferences);
         loadCreditChargeConfigurations(reader, creditChargeConfigurations);
         loadTokenGatewayConfigurations(reader, tokenGatewayConfigurations);
-        String tmp = reader.readElementContentAsString("AccountActivationTime");
-        if (tmp != null) {
-            accountActivationTime = new GXDateTime(tmp);
-        }
-        tmp = reader.readElementContentAsString("AccountClosureTime");
-        if (tmp != null) {
-            accountClosureTime = new GXDateTime(tmp);
-        }
-
+        accountActivationTime =
+                reader.readElementContentAsDateTime("AccountActivationTime");
+        accountClosureTime =
+                reader.readElementContentAsDateTime("AccountClosureTime");
         currency.setName(reader.readElementContentAsString("CurrencyName"));
         currency.setScale(
                 (byte) reader.readElementContentAsInt("CurrencyScale"));
@@ -1209,14 +1204,9 @@ public class GXDLMSAccount extends GXDLMSObject implements IGXDLMSBase {
         saveReferences(writer, chargeReferences, "ChargeReferences");
         saveCreditChargeConfigurations(writer, creditChargeConfigurations);
         saveTokenGatewayConfigurations(writer, tokenGatewayConfigurations);
-        if (accountActivationTime != null) {
-            writer.writeElementString("AccountActivationTime",
-                    accountActivationTime.toFormatString());
-        }
-        if (accountClosureTime != null) {
-            writer.writeElementString("AccountClosureTime",
-                    accountClosureTime.toFormatString());
-        }
+        writer.writeElementString("AccountActivationTime",
+                accountActivationTime);
+        writer.writeElementString("AccountClosureTime", accountClosureTime);
         writer.writeElementString("CurrencyName", currency.getName());
         writer.writeElementString("CurrencyScale", currency.getScale());
         writer.writeElementString("CurrencyUnit",
@@ -1228,6 +1218,7 @@ public class GXDLMSAccount extends GXDLMSObject implements IGXDLMSBase {
 
         writer.writeElementString("MaxProvision", maxProvision);
         writer.writeElementString("MaxProvisionPeriod", maxProvisionPeriod);
+
     }
 
     @Override

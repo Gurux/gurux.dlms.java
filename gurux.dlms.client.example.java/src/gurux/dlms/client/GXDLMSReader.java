@@ -52,10 +52,10 @@ import gurux.common.IGXMedia;
 import gurux.common.ReceiveParameters;
 import gurux.common.enums.TraceLevel;
 import gurux.dlms.GXByteBuffer;
-import gurux.dlms.GXDLMSClient;
 import gurux.dlms.GXDLMSConverter;
 import gurux.dlms.GXDLMSException;
 import gurux.dlms.GXDLMSTranslator;
+import gurux.dlms.GXDateTime;
 import gurux.dlms.GXReplyData;
 import gurux.dlms.GXSimpleEntry;
 import gurux.dlms.TranslatorOutputType;
@@ -65,6 +65,7 @@ import gurux.dlms.enums.DataType;
 import gurux.dlms.enums.ErrorCode;
 import gurux.dlms.enums.InterfaceType;
 import gurux.dlms.enums.ObjectType;
+import gurux.dlms.enums.Security;
 import gurux.dlms.objects.GXDLMSCaptureObject;
 import gurux.dlms.objects.GXDLMSDemandRegister;
 import gurux.dlms.objects.GXDLMSObject;
@@ -72,6 +73,7 @@ import gurux.dlms.objects.GXDLMSObjectCollection;
 import gurux.dlms.objects.GXDLMSProfileGeneric;
 import gurux.dlms.objects.GXDLMSRegister;
 import gurux.dlms.objects.IGXDLMSBase;
+import gurux.dlms.secure.GXDLMSSecureClient;
 import gurux.io.BaudRate;
 import gurux.io.Parity;
 import gurux.io.StopBits;
@@ -81,7 +83,7 @@ import gurux.serial.GXSerial;
 public class GXDLMSReader {
     IGXMedia Media;
     TraceLevel Trace;
-    GXDLMSClient dlms;
+    GXDLMSSecureClient dlms;
     boolean iec;
     java.nio.ByteBuffer replyBuff;
     int WaitTime = 60000;
@@ -92,8 +94,8 @@ public class GXDLMSReader {
      * void traceLn(String text) { logFile.write(text + "\r\n");
      * System.out.print(text + "\r\n"); }
      */
-    public GXDLMSReader(GXDLMSClient client, IGXMedia media, TraceLevel trace)
-            throws Exception {
+    public GXDLMSReader(GXDLMSSecureClient client, IGXMedia media,
+            TraceLevel trace) throws Exception {
         Files.deleteIfExists(Paths.get("trace.txt"));
         logFile = new PrintWriter(
                 new BufferedWriter(new FileWriter("logFile.txt")));
@@ -120,7 +122,15 @@ public class GXDLMSReader {
             System.out.println("DisconnectRequest");
             GXReplyData reply = new GXReplyData();
             try {
-                readDataBlock(dlms.releaseRequest(), reply);
+                // Release is call only for secured connections.
+                // All meters are not supporting Release and it's causing
+                // problems.
+                if (dlms.getInterfaceType() == InterfaceType.WRAPPER
+                        || (dlms.getInterfaceType() == InterfaceType.HDLC
+                                && dlms.getCiphering()
+                                        .getSecurity() != Security.NONE)) {
+                    readDataBlock(dlms.releaseRequest(), reply);
+                }
             } catch (Exception e) {
                 // All meters don't support release.
             }
@@ -586,6 +596,24 @@ public class GXDLMSReader {
         return (Object[]) dlms.updateValue(pg, 2, reply.getValue());
     }
 
+    /**
+     * Read Profile Generic's data by range (start and end time).
+     *
+     * @param pg
+     * @param sortedItem
+     * @param start
+     * @param end
+     * @return
+     * @throws Exception
+     */
+    public Object[] readRowsByRange(final GXDLMSProfileGeneric pg,
+            final GXDateTime start, final GXDateTime end) throws Exception {
+        GXReplyData reply = new GXReplyData();
+        byte[][] data = dlms.readRowsByRange(pg, start, end);
+        readDataBlock(data, reply);
+        return (Object[]) dlms.updateValue(pg, 2, reply.getValue());
+    }
+
     /*
      * Read Scalers and units from the register objects.
      */
@@ -694,6 +722,9 @@ public class GXDLMSReader {
                     TraceLevel.INFO);
             for (int pos : ((IGXDLMSBase) it).getAttributeIndexToRead(true)) {
                 try {
+                    if (pos == 1) {
+                        continue;
+                    }
                     Object val = read(it, pos);
                     showValue(pos, val);
                 } catch (Exception ex) {
@@ -808,8 +839,9 @@ public class GXDLMSReader {
                 end.set(java.util.Calendar.SECOND, 0); // set second in
                                                        // minute
                 end.set(java.util.Calendar.MILLISECOND, 0);
-                cells = readRowsByRange((GXDLMSProfileGeneric) it,
-                        start.getTime(), end.getTime());
+                GXDateTime s = new GXDateTime(start);
+                GXDateTime e = new GXDateTime(end);
+                cells = readRowsByRange((GXDLMSProfileGeneric) it, s, e);
                 for (Object rows : cells) {
                     for (Object cell : (Object[]) rows) {
                         if (cell instanceof byte[]) {

@@ -34,11 +34,17 @@
 
 package gurux.dlms.objects;
 
+import java.security.InvalidAlgorithmParameterException;
+import java.security.InvalidKeyException;
 import java.security.Signature;
+import java.security.SignatureException;
 import java.util.List;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
+import javax.crypto.BadPaddingException;
+import javax.crypto.IllegalBlockSizeException;
+import javax.crypto.NoSuchPaddingException;
 import javax.xml.stream.XMLStreamException;
 
 import gurux.dlms.ConnectionState;
@@ -133,7 +139,9 @@ public class GXDLMSAssociationShortName extends GXDLMSObject
      */
     @Override
     public final byte[] invoke(final GXDLMSSettings settings,
-            final ValueEventArgs e) {
+            final ValueEventArgs e) throws InvalidKeyException,
+            NoSuchPaddingException, InvalidAlgorithmParameterException,
+            IllegalBlockSizeException, BadPaddingException, SignatureException {
         // Check reply_to_HLS_authentication
         if (e.getIndex() == 8) {
             byte[] serverChallenge = null, clientChallenge = null;

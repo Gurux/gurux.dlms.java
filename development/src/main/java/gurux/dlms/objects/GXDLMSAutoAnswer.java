@@ -341,10 +341,8 @@ public class GXDLMSAutoAnswer extends GXDLMSObject implements IGXDLMSBase {
         listeningWindow.clear();
         if (reader.isStartElement("ListeningWindow", true)) {
             while (reader.isStartElement("Item", true)) {
-                GXDateTime start = new GXDateTime(
-                        reader.readElementContentAsString("Start"));
-                GXDateTime end = new GXDateTime(
-                        reader.readElementContentAsString("End"));
+                GXDateTime start = reader.readElementContentAsDateTime("Start");
+                GXDateTime end = reader.readElementContentAsDateTime("End");
                 listeningWindow.add(
                         new SimpleEntry<GXDateTime, GXDateTime>(start, end));
             }
@@ -368,10 +366,8 @@ public class GXDLMSAutoAnswer extends GXDLMSObject implements IGXDLMSBase {
             writer.writeStartElement("ListeningWindow");
             for (Entry<GXDateTime, GXDateTime> it : listeningWindow) {
                 writer.writeStartElement("Item");
-                writer.writeElementString("Start",
-                        it.getKey().toFormatString());
-                writer.writeElementString("End",
-                        it.getValue().toFormatString());
+                writer.writeElementString("Start", it.getKey());
+                writer.writeElementString("End", it.getValue());
                 writer.writeEndElement();
             }
             writer.writeEndElement();

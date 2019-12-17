@@ -34,11 +34,17 @@
 
 package gurux.dlms.objects;
 
+import java.security.InvalidAlgorithmParameterException;
+import java.security.InvalidKeyException;
+import java.security.NoSuchAlgorithmException;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Map.Entry;
 
+import javax.crypto.BadPaddingException;
+import javax.crypto.IllegalBlockSizeException;
+import javax.crypto.NoSuchPaddingException;
 import javax.xml.stream.XMLStreamException;
 
 import gurux.dlms.GXByteBuffer;
@@ -166,7 +172,10 @@ public class GXDLMSProfileGeneric extends GXDLMSObject implements IGXDLMSBase {
      *            DLMS client.
      * @return Action bytes.
      */
-    public final byte[][] reset(final GXDLMSClient client) {
+    public final byte[][] reset(final GXDLMSClient client)
+            throws InvalidKeyException, NoSuchAlgorithmException,
+            NoSuchPaddingException, InvalidAlgorithmParameterException,
+            IllegalBlockSizeException, BadPaddingException {
         return client.method(this, 1, 0, DataType.INT8);
     }
 
@@ -178,7 +187,10 @@ public class GXDLMSProfileGeneric extends GXDLMSObject implements IGXDLMSBase {
      *            DLMS client.
      * @return Action bytes.
      */
-    public final byte[][] capture(final GXDLMSClient client) {
+    public final byte[][] capture(final GXDLMSClient client)
+            throws InvalidKeyException, NoSuchAlgorithmException,
+            NoSuchPaddingException, InvalidAlgorithmParameterException,
+            IllegalBlockSizeException, BadPaddingException {
         return client.method(this, 2, 0, DataType.INT8);
     }
 
@@ -1017,12 +1029,14 @@ public class GXDLMSProfileGeneric extends GXDLMSObject implements IGXDLMSBase {
 
     @Override
     public final void load(final GXXmlReader reader) throws XMLStreamException {
+        DataType[] dt = new DataType[1];
         buffer.clear();
         if (reader.isStartElement("Buffer", true)) {
             while (reader.isStartElement("Row", true)) {
                 List<Object> row = new ArrayList<Object>();
                 while (reader.isStartElement("Cell", false)) {
-                    row.add(reader.readElementContentAsObject("Cell", null));
+                    row.add(reader.readElementContentAsObject("Cell", null,
+                            dt));
                 }
                 this.addRow(row.toArray(new Object[row.size()]));
             }

@@ -34,9 +34,16 @@
 
 package gurux.dlms;
 
+import java.security.InvalidAlgorithmParameterException;
+import java.security.InvalidKeyException;
+import java.security.NoSuchAlgorithmException;
 import java.util.Date;
 import java.util.List;
 import java.util.Map.Entry;
+
+import javax.crypto.BadPaddingException;
+import javax.crypto.IllegalBlockSizeException;
+import javax.crypto.NoSuchPaddingException;
 
 import gurux.dlms.enums.AccessMode;
 import gurux.dlms.enums.Authentication;
@@ -404,7 +411,10 @@ public abstract class GXDLMSServer2 {
      * @return Response to the request. Response is null if request packet is
      *         not complete.
      */
-    public final byte[] handleRequest(final byte[] buff) {
+    public final byte[] handleRequest(final byte[] buff)
+            throws InvalidKeyException, NoSuchAlgorithmException,
+            NoSuchPaddingException, InvalidAlgorithmParameterException,
+            IllegalBlockSizeException, BadPaddingException {
         return handleRequest(buff, new GXDLMSConnectionEventArgs());
     }
 
@@ -419,7 +429,10 @@ public abstract class GXDLMSServer2 {
      *         not complete.
      */
     public final byte[] handleRequest(final byte[] buff,
-            final GXDLMSConnectionEventArgs connectionInfo) {
+            final GXDLMSConnectionEventArgs connectionInfo)
+            throws InvalidKeyException, NoSuchAlgorithmException,
+            NoSuchPaddingException, InvalidAlgorithmParameterException,
+            IllegalBlockSizeException, BadPaddingException {
         GXServerReply sr = new GXServerReply(buff);
         sr.setConnectionInfo(connectionInfo);
         base.handleRequest(sr);
@@ -432,7 +445,10 @@ public abstract class GXDLMSServer2 {
      * @param sr
      *            Server reply.
      */
-    public final void handleRequest(GXServerReply sr) {
+    public final void handleRequest(GXServerReply sr)
+            throws InvalidKeyException, NoSuchAlgorithmException,
+            NoSuchPaddingException, InvalidAlgorithmParameterException,
+            IllegalBlockSizeException, BadPaddingException {
         base.handleRequest(sr);
     }
 
@@ -656,7 +672,10 @@ public abstract class GXDLMSServer2 {
      * @return Generated data notification message(s).
      */
     public final byte[][] generateDataNotificationMessages(final Date time,
-            final GXByteBuffer data) {
+            final GXByteBuffer data)
+            throws InvalidKeyException, NoSuchAlgorithmException,
+            NoSuchPaddingException, InvalidAlgorithmParameterException,
+            IllegalBlockSizeException, BadPaddingException {
         List<byte[]> reply;
         if (getUseLogicalNameReferencing()) {
             GXDLMSLNParameters p = new GXDLMSLNParameters(getSettings(), 0,
@@ -692,7 +711,10 @@ public abstract class GXDLMSServer2 {
      * @return Generated data notification message(s).
      */
     public final byte[][] generatePushSetupMessages(final Date date,
-            final GXDLMSPushSetup push) {
+            final GXDLMSPushSetup push)
+            throws InvalidKeyException, NoSuchAlgorithmException,
+            NoSuchPaddingException, InvalidAlgorithmParameterException,
+            IllegalBlockSizeException, BadPaddingException {
         if (push == null) {
             throw new IllegalArgumentException("push");
         }

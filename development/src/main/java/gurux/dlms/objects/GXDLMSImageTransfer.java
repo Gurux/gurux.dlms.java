@@ -34,11 +34,17 @@
 
 package gurux.dlms.objects;
 
+import java.security.InvalidAlgorithmParameterException;
+import java.security.InvalidKeyException;
+import java.security.NoSuchAlgorithmException;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Hashtable;
 import java.util.List;
 
+import javax.crypto.BadPaddingException;
+import javax.crypto.IllegalBlockSizeException;
+import javax.crypto.NoSuchPaddingException;
 import javax.xml.stream.XMLStreamException;
 
 import gurux.dlms.GXByteBuffer;
@@ -445,7 +451,10 @@ public class GXDLMSImageTransfer extends GXDLMSObject implements IGXDLMSBase {
     }
 
     public final byte[][] imageTransferInitiate(final GXDLMSClient client,
-            final String imageIdentifier, final long forImageSize) {
+            final String imageIdentifier, final long forImageSize)
+            throws InvalidKeyException, NoSuchAlgorithmException,
+            NoSuchPaddingException, InvalidAlgorithmParameterException,
+            IllegalBlockSizeException, BadPaddingException {
         if (imageBlockSize == 0) {
             throw new IllegalArgumentException("Invalid image block size.");
         }
@@ -463,7 +472,10 @@ public class GXDLMSImageTransfer extends GXDLMSObject implements IGXDLMSBase {
     }
 
     public final byte[][] imageBlockTransfer(final GXDLMSClient client,
-            final byte[] imageBlockValue, final int[] imageBlockCount) {
+            final byte[] imageBlockValue, final int[] imageBlockCount)
+            throws InvalidKeyException, NoSuchAlgorithmException,
+            NoSuchPaddingException, InvalidAlgorithmParameterException,
+            IllegalBlockSizeException, BadPaddingException {
         int cnt = (int) (imageBlockValue.length / imageBlockSize);
         if (imageBlockValue.length % imageBlockSize != 0) {
             ++cnt;
@@ -506,11 +518,17 @@ public class GXDLMSImageTransfer extends GXDLMSObject implements IGXDLMSBase {
 
     }
 
-    public final byte[][] imageVerify(final GXDLMSClient client) {
+    public final byte[][] imageVerify(final GXDLMSClient client)
+            throws InvalidKeyException, NoSuchAlgorithmException,
+            NoSuchPaddingException, InvalidAlgorithmParameterException,
+            IllegalBlockSizeException, BadPaddingException {
         return client.method(this, 3, 0, DataType.INT8);
     }
 
-    public final byte[][] imageActivate(final GXDLMSClient client) {
+    public final byte[][] imageActivate(final GXDLMSClient client)
+            throws InvalidKeyException, NoSuchAlgorithmException,
+            NoSuchPaddingException, InvalidAlgorithmParameterException,
+            IllegalBlockSizeException, BadPaddingException {
         return client.method(this, 4, 0, DataType.INT8);
     }
 

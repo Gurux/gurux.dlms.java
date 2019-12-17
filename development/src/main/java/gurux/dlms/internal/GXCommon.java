@@ -41,6 +41,7 @@ import java.text.DateFormat;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Calendar;
 import java.util.Date;
 import java.util.HashSet;
@@ -64,6 +65,7 @@ import gurux.dlms.GXTime;
 import gurux.dlms.TranslatorOutputType;
 import gurux.dlms.enums.ClockStatus;
 import gurux.dlms.enums.DataType;
+import gurux.dlms.enums.DateTimeExtraInfo;
 import gurux.dlms.enums.DateTimeSkips;
 import gurux.dlms.objects.enums.CertificateType;
 
@@ -775,10 +777,41 @@ public final class GXCommon {
             int year = buff.getUInt16();
             // Get month
             int month = buff.getUInt8();
+
+            java.util.Set<DateTimeExtraInfo> extra =
+                    new HashSet<DateTimeExtraInfo>();
+            java.util.Set<DateTimeSkips> skip = new HashSet<DateTimeSkips>();
+            if (month == 0 || month == 0xFF) {
+                month = 1;
+                skip.add(DateTimeSkips.MONTH);
+            } else if (month == 0xFE) {
+                // Daylight savings begin.
+                month = 1;
+                extra.add(DateTimeExtraInfo.DST_BEGIN);
+            } else if (month == 0xFD) {
+                // Daylight savings end.
+                month = 1;
+                extra.add(DateTimeExtraInfo.DST_END);
+            }
             // Get day
             int day = buff.getUInt8();
+            if (day == 0xFD) {
+                // 2nd last day of month.
+                day = 1;
+                extra.add(DateTimeExtraInfo.LAST_DAY2);
+            } else if (day == 0xFE) {
+                // Last day of month
+                day = 1;
+                extra.add(DateTimeExtraInfo.LAST_DAY);
+            } else if (day < 1 || day == 0xFF) {
+                day = 1;
+                skip.add(DateTimeSkips.DAY);
+            }
+
             GXDate dt = new GXDate(year, month, day);
             value = dt;
+            dt.setExtra(extra);
+            dt.getSkip().addAll(skip);
             // Skip week day
             if (buff.getUInt8() == 0xFF) {
                 dt.getSkip().add(DateTimeSkips.DAY_OF_WEEK);
@@ -842,11 +875,34 @@ public final class GXCommon {
             int year = buff.getUInt16();
             // Get month
             int month = buff.getUInt8();
+            if (month == 0 || month == 0xFF) {
+                month = 1;
+                skip.add(DateTimeSkips.MONTH);
+            } else if (month == 0xFE) {
+                // Daylight savings begin.
+                month = 1;
+                dt.getExtra().add(DateTimeExtraInfo.DST_BEGIN);
+            } else if (month == 0xFD) {
+                // Daylight savings end.
+                month = 1;
+                dt.getExtra().add(DateTimeExtraInfo.DST_END);
+            }
             // Get day
             int day = buff.getUInt8();
+            if (day == 0xFD) {
+                // 2nd last day of month.
+                day = 1;
+                dt.getExtra().add(DateTimeExtraInfo.LAST_DAY2);
+            } else if (day == 0xFE) {
+                // Last day of month
+                day = 1;
+                dt.getExtra().add(DateTimeExtraInfo.LAST_DAY);
+            } else if (day < 1 || day == 0xFF) {
+                day = 1;
+                skip.add(DateTimeSkips.DAY);
+            }
             // Skip week day
             int dayOfWeek = buff.getUInt8();
-
             if (dayOfWeek == 0xFF) {
                 skip.add(DateTimeSkips.DAY_OF_WEEK);
             } else {
@@ -874,20 +930,19 @@ public final class GXCommon {
                 java.util.Calendar tm = java.util.Calendar.getInstance();
                 year = tm.get(Calendar.YEAR);
             }
-            dt.setDaylightSavingsBegin(month == 0xFE);
-            dt.setDaylightSavingsEnd(month == 0xFD);
-            if (month < 1 || month > 12) {
-                skip.add(DateTimeSkips.MONTH);
-                month = 0;
-            } else {
-                month -= 1;
+            if (month != 0xFE && month != 0xFD) {
+                if (month < 1 || month > 12) {
+                    skip.add(DateTimeSkips.MONTH);
+                    month = 0;
+                } else {
+                    month -= 1;
+                }
             }
-            if (day == -1 || day == 0 || day > 31) {
-                skip.add(DateTimeSkips.DAY);
-                day = 1;
-            } else if (day < 0) {
-                Calendar cal = Calendar.getInstance();
-                day = cal.getActualMaximum(Calendar.DATE) + day + 3;
+            if (day != 0xFE && day != 0xFD) {
+                if (day == -1 || day == 0 || day > 31) {
+                    skip.add(DateTimeSkips.DAY);
+                    day = 1;
+                }
             }
             if (hour < 0 || hour > 24) {
                 skip.add(DateTimeSkips.HOUR);
@@ -923,7 +978,7 @@ public final class GXCommon {
                 tm.set(Calendar.MILLISECOND, ms);
             }
             dt.setMeterCalendar(tm);
-            dt.setSkip(skip);
+            dt.getSkip().addAll(skip);
             value = dt;
         } catch (Exception ex) {
             if (info.getXml() == null) {
@@ -1956,9 +2011,9 @@ public final class GXCommon {
             buff.setUInt16(tm.get(java.util.Calendar.YEAR));
         }
         // Add month
-        if (dt.getDaylightSavingsBegin()) {
+        if (dt.getExtra().contains(DateTimeExtraInfo.DST_BEGIN)) {
             buff.setUInt8(0xFE);
-        } else if (dt.getDaylightSavingsEnd()) {
+        } else if (dt.getExtra().contains(DateTimeExtraInfo.DST_END)) {
             buff.setUInt8(0xFD);
         } else if (dt.getSkip().contains(DateTimeSkips.MONTH)) {
             buff.setUInt8(0xFF);
@@ -1966,7 +2021,11 @@ public final class GXCommon {
             buff.setUInt8((tm.get(java.util.Calendar.MONTH) + 1));
         }
         // Add day
-        if (dt.getSkip().contains(DateTimeSkips.DAY)) {
+        if (dt.getExtra().contains(DateTimeExtraInfo.LAST_DAY)) {
+            buff.setUInt8(0xFE);
+        } else if (dt.getExtra().contains(DateTimeExtraInfo.LAST_DAY2)) {
+            buff.setUInt8(0xFD);
+        } else if (dt.getSkip().contains(DateTimeSkips.DAY)) {
             buff.setUInt8(0xFF);
         } else {
             buff.setUInt8(tm.get(java.util.Calendar.DATE));
@@ -2027,17 +2086,21 @@ public final class GXCommon {
             buff.setUInt16(tm.get(java.util.Calendar.YEAR));
         }
         // Add month
-        if (dt.getDaylightSavingsEnd()) {
-            buff.setUInt8(0xFD);
-        } else if (dt.getDaylightSavingsBegin()) {
+        if (dt.getExtra().contains(DateTimeExtraInfo.DST_BEGIN)) {
             buff.setUInt8(0xFE);
+        } else if (dt.getExtra().contains(DateTimeExtraInfo.DST_END)) {
+            buff.setUInt8(0xFD);
         } else if (dt.getSkip().contains(DateTimeSkips.MONTH)) {
             buff.setUInt8(0xFF);
         } else {
             buff.setUInt8((tm.get(java.util.Calendar.MONTH) + 1));
         }
         // Add day
-        if (dt.getSkip().contains(DateTimeSkips.DAY)) {
+        if (dt.getExtra().contains(DateTimeExtraInfo.LAST_DAY)) {
+            buff.setUInt8(0xFE);
+        } else if (dt.getExtra().contains(DateTimeExtraInfo.LAST_DAY2)) {
+            buff.setUInt8(0xFD);
+        } else if (dt.getSkip().contains(DateTimeSkips.DAY)) {
             buff.setUInt8(0xFF);
         } else {
             buff.setUInt8(tm.get(java.util.Calendar.DATE));
@@ -2136,11 +2199,17 @@ public final class GXCommon {
     private static void setArray(final GXDLMSSettings settings,
             final GXByteBuffer buff, final Object value) {
         if (value != null) {
-            List<?> arr = ((List<?>) value);
+            List<?> arr;
+            if (value instanceof List<?>) {
+                arr = ((List<?>) value);
+            } else {
+                List<Object> tmp = new ArrayList<Object>();
+                tmp.addAll(Arrays.asList((Object[]) value));
+                arr = tmp;
+            }
             int len = arr.size();
             setObjectCount(len, buff);
-            for (int pos = 0; pos != len; ++pos) {
-                Object it = arr.get(pos);
+            for (Object it : arr) {
                 setData(settings, buff, GXDLMSConverter.getDLMSDataType(it),
                         it);
             }

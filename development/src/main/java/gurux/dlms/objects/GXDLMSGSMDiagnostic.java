@@ -489,8 +489,7 @@ public class GXDLMSGSMDiagnostic extends GXDLMSObject implements IGXDLMSBase {
             }
             reader.readEndElement("AdjacentCells");
         }
-        captureTime = new GXDateTime(
-                reader.readElementContentAsString("CaptureTime"));
+        captureTime = reader.readElementContentAsDateTime("CaptureTime");
     }
 
     @Override

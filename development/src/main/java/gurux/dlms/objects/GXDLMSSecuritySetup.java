@@ -34,6 +34,7 @@
 
 package gurux.dlms.objects;
 
+import java.security.InvalidAlgorithmParameterException;
 import java.security.InvalidKeyException;
 import java.security.KeyPair;
 import java.security.NoSuchAlgorithmException;
@@ -45,7 +46,10 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 
+import javax.crypto.BadPaddingException;
+import javax.crypto.IllegalBlockSizeException;
 import javax.crypto.KeyAgreement;
+import javax.crypto.NoSuchPaddingException;
 import javax.xml.stream.XMLStreamException;
 
 import gurux.dlms.GXByteBuffer;
@@ -71,8 +75,8 @@ import gurux.dlms.objects.enums.GlobalKeyType;
 import gurux.dlms.objects.enums.SecurityPolicy;
 import gurux.dlms.objects.enums.SecurityPolicy0;
 import gurux.dlms.objects.enums.SecuritySuite;
-import gurux.dlms.secure.GXASymmetric;
 import gurux.dlms.secure.GXDLMSSecureClient;
+import gurux.dlms.secure.GXSecure;
 
 /**
  * Online help: <br>
@@ -247,7 +251,10 @@ public class GXDLMSSecuritySetup extends GXDLMSObject implements IGXDLMSBase {
      * @return Generated action.
      */
     public final byte[][] activate(final GXDLMSClient client,
-            final SecurityPolicy0 security) {
+            final SecurityPolicy0 security)
+            throws InvalidKeyException, NoSuchAlgorithmException,
+            NoSuchPaddingException, InvalidAlgorithmParameterException,
+            IllegalBlockSizeException, BadPaddingException {
         return client.method(this, 1, security.ordinal(), DataType.ENUM);
     }
 
@@ -262,7 +269,10 @@ public class GXDLMSSecuritySetup extends GXDLMSObject implements IGXDLMSBase {
      * @return Generated action.
      */
     public final byte[][] activate(final GXDLMSClient client,
-            final Set<SecurityPolicy> security) {
+            final Set<SecurityPolicy> security)
+            throws InvalidKeyException, NoSuchAlgorithmException,
+            NoSuchPaddingException, InvalidAlgorithmParameterException,
+            IllegalBlockSizeException, BadPaddingException {
         return client.method(this, 1, SecurityPolicy.toInteger(security),
                 DataType.ENUM);
     }
@@ -280,8 +290,11 @@ public class GXDLMSSecuritySetup extends GXDLMSObject implements IGXDLMSBase {
      */
     public final byte[][] globalKeyTransfer(final GXDLMSClient client,
             final byte[] kek,
-            final List<GXSimpleEntry<GlobalKeyType, byte[]>> list) {
-        if (list == null || list.size() == 0) {
+            final List<GXSimpleEntry<GlobalKeyType, byte[]>> list)
+            throws InvalidKeyException, NoSuchAlgorithmException,
+            NoSuchPaddingException, InvalidAlgorithmParameterException,
+            IllegalBlockSizeException, BadPaddingException {
+        if (list == null || list.isEmpty()) {
             throw new IllegalArgumentException("Invalid list. It is empty.");
         }
         GXByteBuffer bb = new GXByteBuffer();
@@ -308,8 +321,11 @@ public class GXDLMSSecuritySetup extends GXDLMSObject implements IGXDLMSBase {
      * @return Generated action.
      */
     public final byte[][] keyAgreement(final GXDLMSClient client,
-            final List<GXSimpleEntry<GlobalKeyType, byte[]>> list) {
-        if (list == null || list.size() == 0) {
+            final List<GXSimpleEntry<GlobalKeyType, byte[]>> list)
+            throws InvalidKeyException, NoSuchAlgorithmException,
+            NoSuchPaddingException, InvalidAlgorithmParameterException,
+            IllegalBlockSizeException, BadPaddingException {
+        if (list == null || list.isEmpty()) {
             throw new IllegalArgumentException("Invalid list. It is empty.");
         }
 
@@ -342,7 +358,9 @@ public class GXDLMSSecuritySetup extends GXDLMSObject implements IGXDLMSBase {
      */
     public final byte[][] keyAgreement(final GXDLMSSecureClient client,
             final GlobalKeyType type) throws NoSuchAlgorithmException,
-            InvalidKeyException, SignatureException {
+            InvalidKeyException, SignatureException, NoSuchPaddingException,
+            InvalidAlgorithmParameterException, IllegalBlockSizeException,
+            BadPaddingException {
         GXByteBuffer bb = new GXByteBuffer();
         byte[] data = getEphemeralPublicKeyData(type.ordinal(),
                 client.getCiphering().getEphemeralKeyPair().getPublic());
@@ -351,10 +369,9 @@ public class GXDLMSSecuritySetup extends GXDLMSObject implements IGXDLMSBase {
                 .getSigningKeyPair().getPublic().toString());
 
         // Add signature.
-        byte[] sign =
-                GXASymmetric.getEphemeralPublicKeySignature(type.ordinal(),
-                        client.getCiphering().getEphemeralKeyPair().getPublic(),
-                        client.getCiphering().getSigningKeyPair().getPrivate());
+        byte[] sign = GXSecure.getEphemeralPublicKeySignature(type.ordinal(),
+                client.getCiphering().getEphemeralKeyPair().getPublic(),
+                client.getCiphering().getSigningKeyPair().getPrivate());
         bb.set(sign);
         System.out.println("Data: " + GXCommon.toHex(data));
         System.out.println("Sign: " + GXCommon.toHex(sign));
@@ -375,7 +392,10 @@ public class GXDLMSSecuritySetup extends GXDLMSObject implements IGXDLMSBase {
      * @return Generated action.
      */
     public final byte[][] generateKeyPair(final GXDLMSClient client,
-            final CertificateType type) {
+            final CertificateType type)
+            throws InvalidKeyException, NoSuchAlgorithmException,
+            NoSuchPaddingException, InvalidAlgorithmParameterException,
+            IllegalBlockSizeException, BadPaddingException {
         return client.method(this, 4, type.getValue(), DataType.ENUM);
     }
 
@@ -390,7 +410,10 @@ public class GXDLMSSecuritySetup extends GXDLMSObject implements IGXDLMSBase {
      * @return Generated action.
      */
     public final byte[][] generateCertificate(final GXDLMSClient client,
-            final CertificateType type) {
+            final CertificateType type)
+            throws InvalidKeyException, NoSuchAlgorithmException,
+            NoSuchPaddingException, InvalidAlgorithmParameterException,
+            IllegalBlockSizeException, BadPaddingException {
         return client.method(this, 5, type.getValue(), DataType.ENUM);
     }
 
@@ -404,7 +427,10 @@ public class GXDLMSSecuritySetup extends GXDLMSObject implements IGXDLMSBase {
      * @return Generated action.
      */
     public final byte[][] importCertificate(final GXDLMSClient client,
-            final GXx509Certificate certificate) {
+            final GXx509Certificate certificate)
+            throws InvalidKeyException, NoSuchAlgorithmException,
+            NoSuchPaddingException, InvalidAlgorithmParameterException,
+            IllegalBlockSizeException, BadPaddingException {
         return importCertificate(client, certificate.getEncoded());
     }
 
@@ -418,7 +444,10 @@ public class GXDLMSSecuritySetup extends GXDLMSObject implements IGXDLMSBase {
      * @return Generated action.
      */
     public final byte[][] importCertificate(final GXDLMSClient client,
-            final byte[] key) {
+            final byte[] key)
+            throws InvalidKeyException, NoSuchAlgorithmException,
+            NoSuchPaddingException, InvalidAlgorithmParameterException,
+            IllegalBlockSizeException, BadPaddingException {
         return client.method(this, 6, key, DataType.OCTET_STRING);
     }
 
@@ -437,7 +466,10 @@ public class GXDLMSSecuritySetup extends GXDLMSObject implements IGXDLMSBase {
      */
     public final byte[][] exportCertificateByEntity(
             final GXDLMSSecureClient client, final CertificateEntity entity,
-            final CertificateType type, final byte[] systemTitle) {
+            final CertificateType type, final byte[] systemTitle)
+            throws InvalidKeyException, NoSuchAlgorithmException,
+            NoSuchPaddingException, InvalidAlgorithmParameterException,
+            IllegalBlockSizeException, BadPaddingException {
         if (systemTitle == null || systemTitle.length == 0) {
             throw new IllegalArgumentException("Invalid system title.");
         }
@@ -474,7 +506,10 @@ public class GXDLMSSecuritySetup extends GXDLMSObject implements IGXDLMSBase {
      */
     public final byte[][] exportCertificateBySerial(
             final GXDLMSSecureClient client, final String serialNumber,
-            final String issuer) {
+            final String issuer)
+            throws InvalidKeyException, NoSuchAlgorithmException,
+            NoSuchPaddingException, InvalidAlgorithmParameterException,
+            IllegalBlockSizeException, BadPaddingException {
         GXByteBuffer bb = new GXByteBuffer();
         bb.setUInt8(DataType.STRUCTURE.getValue());
         bb.setUInt8(2);
@@ -507,7 +542,10 @@ public class GXDLMSSecuritySetup extends GXDLMSObject implements IGXDLMSBase {
      */
     public final byte[][] removeCertificateByEntity(
             final GXDLMSSecureClient client, final CertificateEntity entity,
-            final CertificateType type, final byte[] systemTitle) {
+            final CertificateType type, final byte[] systemTitle)
+            throws InvalidKeyException, NoSuchAlgorithmException,
+            NoSuchPaddingException, InvalidAlgorithmParameterException,
+            IllegalBlockSizeException, BadPaddingException {
         GXByteBuffer bb = new GXByteBuffer();
         bb.setUInt8(DataType.STRUCTURE.getValue());
         bb.setUInt8(2);
@@ -541,7 +579,10 @@ public class GXDLMSSecuritySetup extends GXDLMSObject implements IGXDLMSBase {
      */
     public final byte[][] removeCertificateBySerial(
             final GXDLMSSecureClient client, final String serialNumber,
-            final String issuer) {
+            final String issuer)
+            throws InvalidKeyException, NoSuchAlgorithmException,
+            NoSuchPaddingException, InvalidAlgorithmParameterException,
+            IllegalBlockSizeException, BadPaddingException {
         GXByteBuffer bb = new GXByteBuffer();
         bb.setUInt8(DataType.STRUCTURE.getValue());
         bb.setUInt8(2);
@@ -663,9 +704,9 @@ public class GXDLMSSecuritySetup extends GXDLMSObject implements IGXDLMSBase {
                             break;
                         }
                     }
-                    if (pk == null || !GXASymmetric
-                            .validateEphemeralPublicKeySignature(data2.array(),
-                                    sign.array(), pk)) {
+                    if (pk == null
+                            || !GXSecure.validateEphemeralPublicKeySignature(
+                                    data2.array(), sign.array(), pk)) {
                         e.setError(ErrorCode.READ_WRITE_DENIED);
                         settings.setTargetEphemeralKey(null);
                     } else {
@@ -691,11 +732,9 @@ public class GXDLMSSecuritySetup extends GXDLMSObject implements IGXDLMSBase {
                                 eKpS.getPublic());
                         bb.set(data, 1, 64);
                         // Add signature.
-                        byte[] tmp2 =
-                                GXASymmetric.getEphemeralPublicKeySignature(
-                                        keyId, eKpS.getPublic(),
-                                        settings.getCipher().getSigningKeyPair()
-                                                .getPrivate());
+                        byte[] tmp2 = GXSecure.getEphemeralPublicKeySignature(
+                                keyId, eKpS.getPublic(), settings.getCipher()
+                                        .getSigningKeyPair().getPrivate());
                         bb.set(tmp2);
                         System.out.println("Data: " + GXCommon.toHex(data));
                         System.out.println("Sign: " + GXCommon.toHex(tmp2));

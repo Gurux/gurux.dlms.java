@@ -35,10 +35,16 @@
 package gurux.dlms;
 
 import java.io.StringReader;
+import java.security.InvalidAlgorithmParameterException;
+import java.security.InvalidKeyException;
+import java.security.NoSuchAlgorithmException;
 import java.util.HashMap;
 import java.util.Map.Entry;
 import java.util.Set;
 
+import javax.crypto.BadPaddingException;
+import javax.crypto.IllegalBlockSizeException;
+import javax.crypto.NoSuchPaddingException;
 import javax.xml.XMLConstants;
 import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.DocumentBuilderFactory;
@@ -311,7 +317,10 @@ public class GXDLMSTranslator {
      */
     @SuppressWarnings("squid:S135")
     public final boolean findNextFrame(final GXByteBuffer data,
-            final GXByteBuffer pdu) {
+            final GXByteBuffer pdu)
+            throws InvalidKeyException, NoSuchAlgorithmException,
+            NoSuchPaddingException, InvalidAlgorithmParameterException,
+            IllegalBlockSizeException, BadPaddingException {
         GXDLMSSettings settings = new GXDLMSSettings(true);
         GXReplyData reply = new GXReplyData();
         reply.setXml(new GXDLMSTranslatorStructure(outputType, omitXmlNameSpace,
@@ -450,7 +459,10 @@ public class GXDLMSTranslator {
         }
     }
 
-    public final byte[] getPdu(final byte[] value) {
+    public final byte[] getPdu(final byte[] value)
+            throws InvalidKeyException, NoSuchAlgorithmException,
+            NoSuchPaddingException, InvalidAlgorithmParameterException,
+            IllegalBlockSizeException, BadPaddingException {
         return getPdu(new GXByteBuffer(value));
     }
 
@@ -476,7 +488,10 @@ public class GXDLMSTranslator {
         throw new IllegalArgumentException("Invalid DLMS framing.");
     }
 
-    public final byte[] getPdu(final GXByteBuffer value) {
+    public final byte[] getPdu(final GXByteBuffer value)
+            throws InvalidKeyException, NoSuchAlgorithmException,
+            NoSuchPaddingException, InvalidAlgorithmParameterException,
+            IllegalBlockSizeException, BadPaddingException {
         InterfaceType framing = getDlmsFraming(value);
 
         GXReplyData data = new GXReplyData();
@@ -516,7 +531,10 @@ public class GXDLMSTranslator {
      *            Bytes to convert.
      * @return Converted xml. {@link setPduOnly} {@link setCompleatePdu}
      */
-    public final String messageToXml(final byte[] value) {
+    public final String messageToXml(final byte[] value)
+            throws InvalidKeyException, NoSuchAlgorithmException,
+            NoSuchPaddingException, InvalidAlgorithmParameterException,
+            IllegalBlockSizeException, BadPaddingException {
         return messageToXml(new GXByteBuffer(value));
     }
 
@@ -555,7 +573,10 @@ public class GXDLMSTranslator {
      *         {@link setCompleatePdu}
      */
     @SuppressWarnings("squid:S106")
-    public final String messageToXml(final GXByteBuffer value) {
+    public final String messageToXml(final GXByteBuffer value)
+            throws InvalidKeyException, NoSuchAlgorithmException,
+            NoSuchPaddingException, InvalidAlgorithmParameterException,
+            IllegalBlockSizeException, BadPaddingException {
         if (value == null || value.size() == 0) {
             throw new IllegalArgumentException("value");
         }
@@ -1359,7 +1380,10 @@ public class GXDLMSTranslator {
      */
     @SuppressWarnings("squid:S1479")
     private static void handleAarqAare(final Node node,
-            final GXDLMSXmlSettings s, final int tag) {
+            final GXDLMSXmlSettings s, final int tag)
+            throws InvalidKeyException, NoSuchAlgorithmException,
+            NoSuchPaddingException, InvalidAlgorithmParameterException,
+            IllegalBlockSizeException, BadPaddingException {
         byte[] tmp;
         Set<Conformance> list;
         int value;
@@ -1670,7 +1694,10 @@ public class GXDLMSTranslator {
      * @param s
      */
     @SuppressWarnings({ "squid:S1479", "squid:S3034", "squid:S1871" })
-    private static void readNode(final Node node, final GXDLMSXmlSettings s) {
+    private static void readNode(final Node node, final GXDLMSXmlSettings s)
+            throws InvalidKeyException, NoSuchAlgorithmException,
+            NoSuchPaddingException, InvalidAlgorithmParameterException,
+            IllegalBlockSizeException, BadPaddingException {
         long value;
         byte[] tmp;
         GXByteBuffer preData = null;
@@ -2500,7 +2527,10 @@ public class GXDLMSTranslator {
      *            Converted XML.
      * @return Converted PDU in hex string.
      */
-    public final String xmlToHexPdu(final String xml) {
+    public final String xmlToHexPdu(final String xml)
+            throws InvalidKeyException, NoSuchAlgorithmException,
+            NoSuchPaddingException, InvalidAlgorithmParameterException,
+            IllegalBlockSizeException, BadPaddingException {
         return GXCommon.toHex(xmlToPdu(xml, null), false);
     }
 
@@ -2513,7 +2543,10 @@ public class GXDLMSTranslator {
      *            Add spaces between bytes.
      * @return Converted PDU in hex string.
      */
-    public final String xmlToHexPdu(final String xml, final boolean addSpace) {
+    public final String xmlToHexPdu(final String xml, final boolean addSpace)
+            throws InvalidKeyException, NoSuchAlgorithmException,
+            NoSuchPaddingException, InvalidAlgorithmParameterException,
+            IllegalBlockSizeException, BadPaddingException {
         return GXCommon.toHex(xmlToPdu(xml, null), addSpace);
     }
 
@@ -2524,7 +2557,10 @@ public class GXDLMSTranslator {
      *            Converted XML.
      * @return Converted PDU in bytes.
      */
-    public final byte[] xmlToPdu(final String xml) {
+    public final byte[] xmlToPdu(final String xml)
+            throws InvalidKeyException, NoSuchAlgorithmException,
+            NoSuchPaddingException, InvalidAlgorithmParameterException,
+            IllegalBlockSizeException, BadPaddingException {
         return xmlToPdu(xml, null);
     }
 
@@ -2539,7 +2575,10 @@ public class GXDLMSTranslator {
      */
     @SuppressWarnings({ "squid:S00112", "squid:S1871" })
     public final byte[] xmlToPdu(final String xml,
-            final GXDLMSXmlSettings settings) {
+            final GXDLMSXmlSettings settings)
+            throws InvalidKeyException, NoSuchAlgorithmException,
+            NoSuchPaddingException, InvalidAlgorithmParameterException,
+            IllegalBlockSizeException, BadPaddingException {
         DocumentBuilder docBuilder;
         Document doc;
         DocumentBuilderFactory docBuilderFactory =

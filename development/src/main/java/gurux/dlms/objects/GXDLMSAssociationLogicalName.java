@@ -34,13 +34,20 @@
 
 package gurux.dlms.objects;
 
+import java.security.InvalidAlgorithmParameterException;
+import java.security.InvalidKeyException;
+import java.security.NoSuchAlgorithmException;
 import java.security.Signature;
+import java.security.SignatureException;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map.Entry;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
+import javax.crypto.BadPaddingException;
+import javax.crypto.IllegalBlockSizeException;
+import javax.crypto.NoSuchPaddingException;
 import javax.xml.stream.XMLStreamException;
 
 import gurux.dlms.GXByteBuffer;
@@ -204,7 +211,10 @@ public class GXDLMSAssociationLogicalName extends GXDLMSObject
      *            DLMS client.
      * @return Action bytes.
      */
-    public byte[][] updateSecret(final GXDLMSClient client) {
+    public byte[][] updateSecret(final GXDLMSClient client)
+            throws InvalidKeyException, NoSuchAlgorithmException,
+            NoSuchPaddingException, InvalidAlgorithmParameterException,
+            IllegalBlockSizeException, BadPaddingException {
         if (getAuthenticationMechanismName()
                 .getMechanismId() == Authentication.NONE) {
             throw new IllegalArgumentException(
@@ -235,7 +245,10 @@ public class GXDLMSAssociationLogicalName extends GXDLMSObject
      * @return Action bytes.
      */
     public final byte[][] addUser(final GXDLMSClient client, final byte id,
-            final String name) {
+            final String name)
+            throws InvalidKeyException, NoSuchAlgorithmException,
+            NoSuchPaddingException, InvalidAlgorithmParameterException,
+            IllegalBlockSizeException, BadPaddingException {
         GXByteBuffer data = new GXByteBuffer();
         data.setUInt8(DataType.STRUCTURE.getValue());
         // Add structure size.
@@ -257,7 +270,10 @@ public class GXDLMSAssociationLogicalName extends GXDLMSObject
      * @return Action bytes.
      */
     public final byte[][] removeUser(final GXDLMSClient client, final byte id,
-            final String name) {
+            final String name)
+            throws InvalidKeyException, NoSuchAlgorithmException,
+            NoSuchPaddingException, InvalidAlgorithmParameterException,
+            IllegalBlockSizeException, BadPaddingException {
         GXByteBuffer data = new GXByteBuffer();
         data.setUInt8(DataType.STRUCTURE.getValue());
         // Add structure size.
@@ -278,7 +294,9 @@ public class GXDLMSAssociationLogicalName extends GXDLMSObject
 
     @Override
     public final byte[] invoke(final GXDLMSSettings settings,
-            final ValueEventArgs e) {
+            final ValueEventArgs e) throws InvalidKeyException,
+            NoSuchPaddingException, InvalidAlgorithmParameterException,
+            IllegalBlockSizeException, BadPaddingException, SignatureException {
         // Check reply_to_HLS_authentication
         if (e.getIndex() == 1) {
             byte[] serverChallenge = null, clientChallenge = null;
@@ -1078,7 +1096,8 @@ public class GXDLMSAssociationLogicalName extends GXDLMSObject
                     reader.readElementContentAsString("CypheringInfo")));
             reader.readEndElement("XDLMSContextInfo");
         }
-        if (reader.isStartElement("XDLMSContextInfo", true)) {
+        if (reader.isStartElement("AuthenticationMechanismName", true)
+                || reader.isStartElement("XDLMSContextInfo", true)) {
             authenticationMechanismName.setJointIsoCtt(
                     reader.readElementContentAsInt("JointIsoCtt"));
             authenticationMechanismName
@@ -1093,6 +1112,7 @@ public class GXDLMSAssociationLogicalName extends GXDLMSObject
                     .readElementContentAsInt("AuthenticationMechanismName"));
             authenticationMechanismName.setMechanismId(Authentication
                     .forValue(reader.readElementContentAsInt("MechanismId")));
+            reader.readEndElement("AuthenticationMechanismName");
             reader.readEndElement("XDLMSContextInfo");
         }
         String str = reader.readElementContentAsString("Secret");

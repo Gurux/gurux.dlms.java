@@ -523,10 +523,7 @@ public class GXDLMSCredit extends GXDLMSObject implements IGXDLMSBase {
                 reader.readElementContentAsInt("PresetCreditAmount");
         creditAvailableThreshold =
                 reader.readElementContentAsInt("CreditAvailableThreshold");
-        String str = reader.readElementContentAsString("Period");
-        if (str != null) {
-            period = new GXDateTime(str);
-        }
+        period = reader.readElementContentAsDateTime("Period");
     }
 
     @Override

@@ -34,9 +34,15 @@
 
 package gurux.dlms.objects;
 
+import java.security.InvalidAlgorithmParameterException;
+import java.security.InvalidKeyException;
+import java.security.NoSuchAlgorithmException;
 import java.util.ArrayList;
 import java.util.List;
 
+import javax.crypto.BadPaddingException;
+import javax.crypto.IllegalBlockSizeException;
+import javax.crypto.NoSuchPaddingException;
 import javax.xml.stream.XMLStreamException;
 
 import gurux.dlms.GXByteBuffer;
@@ -296,7 +302,10 @@ public class GXDLMSScriptTable extends GXDLMSObject implements IGXDLMSBase {
      * @return Action bytes.
      */
     public final byte[][] execute(final GXDLMSClient client,
-            final GXDLMSScript script) {
+            final GXDLMSScript script)
+            throws InvalidKeyException, NoSuchAlgorithmException,
+            NoSuchPaddingException, InvalidAlgorithmParameterException,
+            IllegalBlockSizeException, BadPaddingException {
         return client.method(this, 1, script.getId(), DataType.UINT16);
     }
 
@@ -309,13 +318,16 @@ public class GXDLMSScriptTable extends GXDLMSObject implements IGXDLMSBase {
      *            Executed script ID.
      * @return Action bytes.
      */
-    public final byte[][] execute(final GXDLMSClient client,
-            final int scriptId) {
+    public final byte[][] execute(final GXDLMSClient client, final int scriptId)
+            throws InvalidKeyException, NoSuchAlgorithmException,
+            NoSuchPaddingException, InvalidAlgorithmParameterException,
+            IllegalBlockSizeException, BadPaddingException {
         return client.method(this, 1, scriptId, DataType.UINT16);
     }
 
     @Override
     public final void load(final GXXmlReader reader) throws XMLStreamException {
+        DataType[] dt = new DataType[1];
         scripts.clear();
         if (reader.isStartElement("Scripts", true)) {
             while (reader.isStartElement("Script", true)) {
@@ -337,10 +349,10 @@ public class GXDLMSScriptTable extends GXDLMSObject implements IGXDLMSBase {
                         }
                         a.setTarget(t);
                         a.setIndex(reader.readElementContentAsInt("Index"));
-                        DataType dt = DataType.forValue(reader
+                        DataType dt2 = DataType.forValue(reader
                                 .readElementContentAsInt("ParameterDataType"));
                         a.setParameter(reader.readElementContentAsObject(
-                                "Parameter", null), dt);
+                                "Parameter", null, dt), dt2);
                         it.getActions().add(a);
                     }
                     reader.readEndElement("Actions");

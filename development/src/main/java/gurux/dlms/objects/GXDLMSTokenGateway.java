@@ -423,10 +423,7 @@ public class GXDLMSTokenGateway extends GXDLMSObject implements IGXDLMSBase {
     @Override
     public final void load(final GXXmlReader reader) throws XMLStreamException {
         token = GXCommon.hexToBytes(reader.readElementContentAsString("Token"));
-        String tmp = reader.readElementContentAsString("Time");
-        if (tmp != null) {
-            time = new GXDateTime(tmp);
-        }
+        time = reader.readElementContentAsDateTime("Time");
         descriptions.clear();
         if (reader.isStartElement("Descriptions", true)) {
             while (reader.isStartElement("Item", true)) {

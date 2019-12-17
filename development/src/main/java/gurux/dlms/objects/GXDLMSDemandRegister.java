@@ -507,25 +507,20 @@ public class GXDLMSDemandRegister extends GXDLMSObject implements IGXDLMSBase {
 
     @Override
     public final void load(final GXXmlReader reader) throws XMLStreamException {
-        currentAverageValue =
-                reader.readElementContentAsObject("CurrentAverageValue", null);
+        DataType[] dt = new DataType[1];
+        currentAverageValue = reader
+                .readElementContentAsObject("CurrentAverageValue", null, dt);
+        this.setDataType(2, dt[0]);
         lastAverageValue =
-                reader.readElementContentAsObject("LastAverageValue", null);
+                reader.readElementContentAsObject("LastAverageValue", null, dt);
+        this.setDataType(3, dt[0]);
         setScaler(reader.readElementContentAsDouble("Scaler", 1));
         unit = reader.readElementContentAsInt("Unit");
-        status = reader.readElementContentAsObject("Status", null);
-        String str = reader.readElementContentAsString("CaptureTime");
-        if (str == null) {
-            captureTime = null;
-        } else {
-            captureTime = new GXDateTime(str);
-        }
-        str = reader.readElementContentAsString("StartTimeCurrent");
-        if (str == null) {
-            startTimeCurrent = null;
-        } else {
-            startTimeCurrent = new GXDateTime(str);
-        }
+        status = reader.readElementContentAsObject("Status", null, dt);
+        this.setDataType(5, dt[0]);
+        captureTime = reader.readElementContentAsDateTime("CaptureTime");
+        startTimeCurrent =
+                reader.readElementContentAsDateTime("StartTimeCurrent");
         period = reader.readElementContentAsInt("Period");
         numberOfPeriods = reader.readElementContentAsInt("NumberOfPeriods");
     }

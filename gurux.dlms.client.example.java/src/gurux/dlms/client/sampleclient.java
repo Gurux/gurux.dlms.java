@@ -33,8 +33,11 @@
 //---------------------------------------------------------------------------
 package gurux.dlms.client;
 
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Map;
+
+import javax.xml.stream.XMLStreamException;
 
 import gurux.common.GXCmdParameter;
 import gurux.common.GXCommon;
@@ -55,8 +58,11 @@ public class sampleclient {
     /**
      * @param args
      *            the command line arguments
+     * @throws IOException
+     * @throws XMLStreamException
      */
-    public static void main(String[] args) {
+    public static void main(String[] args)
+            throws XMLStreamException, IOException {
         Settings settings = new Settings();
 
         GXDLMSReader reader = null;

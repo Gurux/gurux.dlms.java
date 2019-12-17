@@ -34,6 +34,13 @@
 
 package gurux.dlms.objects;
 
+import java.security.InvalidAlgorithmParameterException;
+import java.security.InvalidKeyException;
+import java.security.NoSuchAlgorithmException;
+
+import javax.crypto.BadPaddingException;
+import javax.crypto.IllegalBlockSizeException;
+import javax.crypto.NoSuchPaddingException;
 import javax.xml.stream.XMLStreamException;
 
 import gurux.dlms.GXDLMSClient;
@@ -136,7 +143,10 @@ public class GXDLMSDisconnectControl extends GXDLMSObject
      * Forces the disconnect control object into 'disconnected' state if remote
      * disconnection is enabled.
      */
-    public final byte[][] remoteDisconnect(final GXDLMSClient client) {
+    public final byte[][] remoteDisconnect(final GXDLMSClient client)
+            throws InvalidKeyException, NoSuchAlgorithmException,
+            NoSuchPaddingException, InvalidAlgorithmParameterException,
+            IllegalBlockSizeException, BadPaddingException {
         return client.method(this, 1, 0, DataType.INT8);
     }
 
@@ -144,7 +154,10 @@ public class GXDLMSDisconnectControl extends GXDLMSObject
      * Forces the disconnect control object into the 'ready_for_reconnection'
      * state if a direct remote reconnection is disabled.
      */
-    public final byte[][] remoteReconnect(final GXDLMSClient client) {
+    public final byte[][] remoteReconnect(final GXDLMSClient client)
+            throws InvalidKeyException, NoSuchAlgorithmException,
+            NoSuchPaddingException, InvalidAlgorithmParameterException,
+            IllegalBlockSizeException, BadPaddingException {
         return client.method(this, 2, 0, DataType.INT8);
     }
 

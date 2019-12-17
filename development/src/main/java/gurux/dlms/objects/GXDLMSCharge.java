@@ -736,18 +736,13 @@ public class GXDLMSCharge extends GXDLMSObject implements IGXDLMSBase {
         priority = (byte) reader.readElementContentAsInt("Priority");
         loadUnitChargeActive(reader, "UnitChargeActive", unitChargeActive);
         loadUnitChargeActive(reader, "UnitChargePassive", unitChargePassive);
-        String tmp =
-                reader.readElementContentAsString("UnitChargeActivationTime");
-        if (tmp != null) {
-            unitChargeActivationTime = new GXDateTime(tmp);
-        }
+        unitChargeActivationTime =
+                reader.readElementContentAsDateTime("UnitChargeActivationTime");
         period = reader.readElementContentAsInt("Period");
         chargeConfiguration =
                 reader.readElementContentAsString("ChargeConfiguration");
-        tmp = reader.readElementContentAsString("LastCollectionTime");
-        if (tmp != null) {
-            lastCollectionTime = new GXDateTime(tmp);
-        }
+        lastCollectionTime =
+                reader.readElementContentAsDateTime("LastCollectionTime");
         lastCollectionAmount =
                 reader.readElementContentAsInt("LastCollectionAmount");
         totalAmountRemaining =

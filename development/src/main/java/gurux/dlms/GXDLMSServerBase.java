@@ -1,8 +1,15 @@
 package gurux.dlms;
 
+import java.security.InvalidAlgorithmParameterException;
+import java.security.InvalidKeyException;
+import java.security.NoSuchAlgorithmException;
 import java.util.Calendar;
 import java.util.logging.Level;
 import java.util.logging.Logger;
+
+import javax.crypto.BadPaddingException;
+import javax.crypto.IllegalBlockSizeException;
+import javax.crypto.NoSuchPaddingException;
 
 import gurux.dlms.enums.AccessMode;
 import gurux.dlms.enums.AcseServiceProvider;
@@ -518,7 +525,10 @@ public class GXDLMSServerBase {
      */
     @SuppressWarnings("squid:S1172")
     private void handleReleaseRequest(final GXByteBuffer data,
-            final GXDLMSConnectionEventArgs connectionInfo) {
+            final GXDLMSConnectionEventArgs connectionInfo)
+            throws InvalidKeyException, NoSuchAlgorithmException,
+            NoSuchPaddingException, InvalidAlgorithmParameterException,
+            IllegalBlockSizeException, BadPaddingException {
         // Return error if connection is not established.
         if ((settings.getConnected() & ConnectionState.DLMS) == 0) {
             replyData.set(GXDLMSServerBase.generateConfirmedServiceError(
@@ -673,7 +683,10 @@ public class GXDLMSServerBase {
      */
     @SuppressWarnings({ "squid:S00112", "squid:S1193", "squid:S1066",
             "squid:S1141" })
-    public final void handleRequest(GXServerReply sr) {
+    public final void handleRequest(GXServerReply sr)
+            throws InvalidKeyException, NoSuchAlgorithmException,
+            NoSuchPaddingException, InvalidAlgorithmParameterException,
+            IllegalBlockSizeException, BadPaddingException {
         if (!sr.isStreaming()
                 && (sr.getData() == null || sr.getData().length == 0)) {
             return;
@@ -849,7 +862,10 @@ public class GXDLMSServerBase {
         }
     }
 
-    private byte[] reportError(final int command, final ErrorCode error) {
+    private byte[] reportError(final int command, final ErrorCode error)
+            throws InvalidKeyException, NoSuchAlgorithmException,
+            NoSuchPaddingException, InvalidAlgorithmParameterException,
+            IllegalBlockSizeException, BadPaddingException {
         short cmd;
         switch (command) {
         case Command.READ_REQUEST:
