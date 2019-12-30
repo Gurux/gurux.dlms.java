@@ -47,6 +47,7 @@ import gurux.dlms.GXSimpleEntry;
 import gurux.dlms.enums.Authentication;
 import gurux.dlms.enums.InterfaceType;
 import gurux.dlms.enums.ObjectType;
+import gurux.dlms.enums.Security;
 import gurux.io.BaudRate;
 import gurux.io.Parity;
 import gurux.io.StopBits;
@@ -96,9 +97,9 @@ public class sampleclient {
             }
             ////////////////////////////////////////
             reader = new GXDLMSReader(settings.client, settings.media,
-                    settings.trace);
+                    settings.trace, settings.invocationCounter);
             settings.media.open();
-            if (settings.readObjects.size() != 0) {
+            if (!settings.readObjects.isEmpty()) {
                 reader.initializeConnection();
                 reader.getAssociationView();
                 for (Map.Entry<String, Integer> it : settings.readObjects) {
@@ -165,7 +166,7 @@ public class sampleclient {
 
     static int getParameters(String[] args, Settings settings) {
         ArrayList<GXCmdParameter> parameters =
-                GXCommon.getParameters(args, "h:p:c:s:r:it:a:p:wP:g:S:n:");
+                GXCommon.getParameters(args, "h:p:c:s:r:it:a:p:wP:g:S:n:C:v:");
         GXNet net = null;
         for (GXCmdParameter it : parameters) {
             switch (it.getTag()) {
@@ -204,7 +205,8 @@ public class sampleclient {
                     settings.trace = TraceLevel.OFF;
                 else
                     throw new IllegalArgumentException(
-                            "Invalid Authentication option. (Error, Warning, Info, Verbose, Off).");
+                            "Invalid Authentication option '" + it.getValue()
+                                    + "'. (Error, Warning, Info, Verbose, Off).");
                 break;
             case 'p':
                 // Port.
@@ -220,6 +222,30 @@ public class sampleclient {
             case 'i':
                 // IEC.
                 settings.iec = true;
+                break;
+            case 'C':
+                if ("None".compareTo(it.getValue()) == 0) {
+                    settings.client.getCiphering().setSecurity(Security.NONE);
+                } else if ("Authentication".compareTo(it.getValue()) == 0) {
+                    settings.client.getCiphering()
+                            .setSecurity(Security.AUTHENTICATION);
+                } else if ("Encryption".compareTo(it.getValue()) == 0) {
+                    settings.client.getCiphering()
+                            .setSecurity(Security.ENCRYPTION);
+                } else if ("AuthenticationEncryption"
+                        .compareTo(it.getValue()) == 0) {
+                    settings.client.getCiphering()
+                            .setSecurity(Security.AUTHENTICATION_ENCRYPTION);
+                } else {
+                    throw new IllegalArgumentException(
+                            "Invalid Ciphering option '" + it.getValue()
+                                    + "'. (None, Authentication, Encryption, AuthenticationEncryption)");
+                }
+                break;
+            case 'v':
+                settings.invocationCounter = it.getValue();
+                // TODO:
+                // GXDLMSObject.ValidateLogicalName(settings.invocationCounter);
                 break;
             case 'g':
                 // Get (read) selected objects.

@@ -46,6 +46,7 @@ public class Settings {
     public TraceLevel trace = TraceLevel.INFO;
     public boolean iec = false;
     public GXDLMSSecureClient client = new GXDLMSSecureClient(true);
+    String invocationCounter;
     // Objects to read.
     public List<Map.Entry<String, Integer>> readObjects =
             new ArrayList<Map.Entry<String, Integer>>();

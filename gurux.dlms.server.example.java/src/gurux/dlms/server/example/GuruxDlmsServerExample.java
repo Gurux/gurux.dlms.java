@@ -106,6 +106,13 @@ public class GuruxDlmsServerExample {
                 // and start listen events.
                 GXDLMSServerSN SNServer = new GXDLMSServerSN();
                 SNServer.initialize(settings.port, settings.trace);
+
+                System.out.println("System Title: " + GXCommon
+                        .bytesToHex(SNServer.getCiphering().getSystemTitle()));
+                System.out.println("Authentication key: " + GXCommon.bytesToHex(
+                        SNServer.getCiphering().getAuthenticationKey()));
+                System.out.println("Block cipher key: " + GXCommon.bytesToHex(
+                        SNServer.getCiphering().getBlockCipherKey()));
                 System.out.println("Short Name DLMS Server in port "
                         + String.valueOf(settings.port));
                 System.out.println("Example connection settings:");

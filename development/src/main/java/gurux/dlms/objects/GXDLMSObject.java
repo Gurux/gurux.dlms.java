@@ -104,6 +104,16 @@ public class GXDLMSObject {
         logicalName = ln;
     }
 
+    /**
+     * Validate logical name.
+     * 
+     * @param value
+     *            Logical Name.
+     */
+    public static void validateLogicalName(final String value) {
+        GXCommon.logicalNameToBytes(value);
+    }
+
     protected static byte[] toByteArray(final List<Byte> list) {
         byte[] ret = new byte[list.size()];
         int i = -1;
