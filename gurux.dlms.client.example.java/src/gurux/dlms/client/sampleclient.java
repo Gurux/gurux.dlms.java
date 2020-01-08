@@ -88,7 +88,7 @@ public class sampleclient {
             }
             ////////////////////////////////////////
             reader = new GXDLMSReader(settings.client, settings.media,
-                    settings.trace, settings.invocationCounter);
+                    settings.trace, settings.iec, settings.invocationCounter);
             settings.media.open();
             if (!settings.readObjects.isEmpty()) {
                 reader.initializeConnection();

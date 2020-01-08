@@ -78,7 +78,7 @@ public class Settings {
         System.out.println(" -s \t Server address. (Default: 1)");
         System.out.println(" -n \t Server address as serial number.");
         System.out.println(
-                " -r [sn, sn]\t Short name or Logican Name (default) referencing is used.");
+                " -r [sn, sn]\t Short name or Logical Name (default) referencing is used.");
         System.out.println(" -w WRAPPER profile is used. HDLC is default.");
         System.out
                 .println(" -t [Error, Warning, Info, Verbose] Trace messages.");

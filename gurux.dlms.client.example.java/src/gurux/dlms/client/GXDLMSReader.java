@@ -98,11 +98,13 @@ public class GXDLMSReader {
      * System.out.print(text + "\r\n"); }
      */
     public GXDLMSReader(GXDLMSSecureClient client, IGXMedia media,
-            TraceLevel trace, final String invocationCounter) throws Exception {
+            TraceLevel trace, final boolean useIec,
+            final String invocationCounter) throws Exception {
         Files.deleteIfExists(Paths.get("trace.txt"));
         logFile = new PrintWriter(
                 new BufferedWriter(new FileWriter("logFile.txt")));
 
+        iec = useIec;
         Trace = trace;
         Media = media;
         dlms = client;
