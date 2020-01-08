@@ -126,8 +126,6 @@ public class GXDLMSReader {
             System.out.println("DisconnectRequest");
             GXReplyData reply = new GXReplyData();
             readDLMSPacket(dlms.disconnectRequest(), reply);
-            Media.close();
-            Media = null;
         }
     }
 
