@@ -1186,6 +1186,7 @@ public class GXDLMSTranslator {
                 if (!allowUnknownCommand) {
                     throw new IllegalArgumentException("Invalid command.");
                 }
+                value.position(value.position() - 1);
                 xml.appendLine(
                         "<Data=\""
                                 + GXCommon.toHex(value.getData(), false,

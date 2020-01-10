@@ -1558,7 +1558,8 @@ abstract class GXDLMS {
         } else {
             len = frameSize;
             // More data to left.
-            bb.setUInt8(0xA8 | ((len >> 8) & 0x7));
+            bb.setUInt8(0xA8 | ((7 + primaryAddress.length
+                    + secondaryAddress.length + len >> 8) & 0x7));
         }
         // Frame len.
         if (len == 0) {

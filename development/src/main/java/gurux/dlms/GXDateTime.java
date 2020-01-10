@@ -324,13 +324,13 @@ public class GXDateTime {
                 extra.add(DateTimeExtraInfo.DST_END);
                 v = v.replace("END", "01");
             }
-            if (value.indexOf("-1") != -1) {
+            if (value.indexOf("LASTDAY") != -1) {
                 extra.add(DateTimeExtraInfo.LAST_DAY);
-                v = v.replace("-1", "01");
+                v = v.replace("LASTDAY", "01");
             }
-            if (value.indexOf("-2") != -1) {
+            if (value.indexOf("LASTDAY2") != -1) {
                 extra.add(DateTimeExtraInfo.LAST_DAY2);
-                v = v.replace("-2", "01");
+                v = v.replace("LASTDAY2", "01");
             }
             if (value.indexOf('*') != -1) {
                 int lastFormatIndex = -1;
@@ -634,11 +634,11 @@ public class GXDateTime {
                 replace(format, "MM", "-4");
                 replace(format, "M", "-4");
             } else if (extra.contains(DateTimeExtraInfo.LAST_DAY)) {
-                replace(format, "dd", "-1");
-                replace(format, "d", "-1");
+                replace(format, "dd", "LASTDAY");
+                replace(format, "d", "LASTDAY");
             } else if (extra.contains(DateTimeExtraInfo.LAST_DAY2)) {
-                replace(format, "dd", "-2");
-                replace(format, "d", "-2");
+                replace(format, "dd", "LASTDAY2");
+                replace(format, "d", "LASTDAY2");
             }
             if (getSkip().contains(DateTimeSkips.YEAR)) {
                 replace(format, "yyyy");

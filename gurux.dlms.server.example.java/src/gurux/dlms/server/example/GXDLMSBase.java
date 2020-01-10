@@ -224,6 +224,16 @@ public class GXDLMSBase extends GXDLMSSecureServer2
         getItems().add(d);
     }
 
+    /*
+     * Add invocation counter.
+     */
+    void addInvocationCounter() {
+        GXDLMSData d = new GXDLMSData("0.0.43.1.0.255");
+        d.setValue(0);
+        d.setDataType(2, DataType.UINT32);
+        getItems().add(d);
+    }
+
     GXDLMSRegister addRegister() {
         // Add Last average.
         GXDLMSRegister r = new GXDLMSRegister("1.1.21.25.0.255");
@@ -590,6 +600,8 @@ public class GXDLMSBase extends GXDLMSSecureServer2
         addLogicalDeviceName();
         // Add firmware version.
         addFirmwareVersion();
+        // Add invocation counter.
+        addInvocationCounter();
         // Add example register object.
         GXDLMSRegister register = addRegister();
         // Add default clock object.

@@ -48,7 +48,7 @@
     <dependency>
       <groupId>org.gurux</groupId>
       <artifactId>gurux.dlms</artifactId>
-      <version>3.1.1</version>
+      <version>3.1.2-SNAPSHOT</version>
     </dependency>
   </dependencies>
   <licenses>

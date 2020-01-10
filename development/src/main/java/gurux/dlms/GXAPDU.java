@@ -1480,8 +1480,10 @@ final class GXAPDU {
         // diagnostic
         if (diagnostic instanceof SourceDiagnostic) {
             data.setUInt8(((SourceDiagnostic) diagnostic).getValue());
-        } else {
+        } else if (diagnostic instanceof AcseServiceProvider) {
             data.setUInt8(((AcseServiceProvider) diagnostic).getValue());
+        } else {
+            data.setUInt8(((int) diagnostic));
         }
         // SystemTitle
         if (cipher != null

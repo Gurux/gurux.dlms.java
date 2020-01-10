@@ -90,16 +90,11 @@ public class GXDLMSReader {
     int WaitTime = 60000;
     final PrintWriter logFile;
     // Invocation counter (frame counter).
-    String InvocationCounter = null;
+    String invocationCounter = null;
 
-    /*
-     * void trace(String text) { logFile.write(text); System.out.print(text); }
-     * void traceLn(String text) { logFile.write(text + "\r\n");
-     * System.out.print(text + "\r\n"); }
-     */
     public GXDLMSReader(GXDLMSSecureClient client, IGXMedia media,
-            TraceLevel trace, final boolean useIec,
-            final String invocationCounter) throws Exception {
+            TraceLevel trace, final boolean useIec, final String frameCounter)
+            throws Exception {
         Files.deleteIfExists(Paths.get("trace.txt"));
         logFile = new PrintWriter(
                 new BufferedWriter(new FileWriter("logFile.txt")));
@@ -108,7 +103,7 @@ public class GXDLMSReader {
         Trace = trace;
         Media = media;
         dlms = client;
-        InvocationCounter = invocationCounter;
+        invocationCounter = frameCounter;
         if (trace.ordinal() > TraceLevel.WARNING.ordinal()) {
             System.out.println("Authentication: " + dlms.getAuthentication());
             System.out.println("ClientAddress: 0x"
@@ -380,7 +375,7 @@ public class GXDLMSReader {
      */
     private void updateFrameCounter() throws Exception {
         // Read frame counter if GeneralProtection is used.
-        if (InvocationCounter != null && dlms.getCiphering() != null
+        if (invocationCounter != null && dlms.getCiphering() != null
                 && dlms.getCiphering().getSecurity() != Security.NONE) {
             initializeOpticalHead();
             byte[] data;
@@ -418,10 +413,12 @@ public class GXDLMSReader {
                     // Parse reply.
                     dlms.parseAareResponse(reply.getData());
                     reply.clear();
-                    GXDLMSData d = new GXDLMSData(InvocationCounter);
+                    GXDLMSData d = new GXDLMSData(invocationCounter);
                     read(d, 2);
-                    dlms.getCiphering().setInvocationCounter(
-                            1 + ((Number) d.getValue()).longValue());
+                    long iv = ((Number) d.getValue()).longValue();
+                    dlms.getCiphering().setInvocationCounter(1 + iv);
+                    System.out.println(
+                            "Invocation counter: " + String.valueOf(iv));
                     reply.clear();
                     disconnect();
                 } catch (Exception Ex) {
