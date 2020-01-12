@@ -324,13 +324,13 @@ public class GXDateTime {
                 extra.add(DateTimeExtraInfo.DST_END);
                 v = v.replace("END", "01");
             }
-            if (value.indexOf("LASTDAY") != -1) {
-                extra.add(DateTimeExtraInfo.LAST_DAY);
-                v = v.replace("LASTDAY", "01");
-            }
             if (value.indexOf("LASTDAY2") != -1) {
                 extra.add(DateTimeExtraInfo.LAST_DAY2);
                 v = v.replace("LASTDAY2", "01");
+            }
+            if (value.indexOf("LASTDAY") != -1) {
+                extra.add(DateTimeExtraInfo.LAST_DAY);
+                v = v.replace("LASTDAY", "01");
             }
             if (value.indexOf('*') != -1) {
                 int lastFormatIndex = -1;
