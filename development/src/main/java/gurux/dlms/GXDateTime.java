@@ -628,11 +628,11 @@ public class GXDateTime {
             format.append(sd.toPattern());
             remove(format);
             if (extra.contains(DateTimeExtraInfo.DST_BEGIN)) {
-                replace(format, "MM", "-3");
-                replace(format, "M", "-3");
+                replace(format, "MM", "BEGIN");
+                replace(format, "M", "BEGIN");
             } else if (extra.contains(DateTimeExtraInfo.DST_END)) {
-                replace(format, "MM", "-4");
-                replace(format, "M", "-4");
+                replace(format, "MM", "END");
+                replace(format, "M", "END");
             } else if (extra.contains(DateTimeExtraInfo.LAST_DAY)) {
                 replace(format, "dd", "LASTDAY");
                 replace(format, "d", "LASTDAY");
