@@ -1170,7 +1170,7 @@ abstract class GXDLMS {
                 cipher.getInvocationCounter(), cipher.getSystemTitle(), key,
                 cipher.getAuthenticationKey());
         byte[] tmp = GXCiphering.encrypt(s, data);
-        cipher.setInvocationCounter(cipher.getInvocationCounter() + 1);
+        cipher.setInvocationCounter(1 + cipher.getInvocationCounter());
         return tmp;
     }
 

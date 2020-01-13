@@ -1765,6 +1765,11 @@ public class GXDLMSClient {
         if (list == null || list.isEmpty()) {
             throw new IllegalArgumentException("Invalid parameter.");
         }
+        if (!getNegotiatedConformance()
+                .contains(Conformance.MULTIPLE_REFERENCES)) {
+            throw new IllegalArgumentException(
+                    "Meter doesn't support multiple objects reading with one request.");
+        }
         List<byte[]> messages = new ArrayList<byte[]>();
         GXByteBuffer data = new GXByteBuffer();
         settings.resetBlockIndex();

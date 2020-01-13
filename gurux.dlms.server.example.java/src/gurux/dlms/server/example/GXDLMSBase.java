@@ -231,6 +231,8 @@ public class GXDLMSBase extends GXDLMSSecureServer2
         GXDLMSData d = new GXDLMSData("0.0.43.1.0.255");
         d.setValue(0);
         d.setDataType(2, DataType.UINT32);
+        // Set initial value.
+        d.setValue(100);
         getItems().add(d);
     }
 

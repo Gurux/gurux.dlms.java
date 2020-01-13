@@ -164,9 +164,7 @@ public class GXCiphering implements GXICipher {
             NoSuchPaddingException, InvalidAlgorithmParameterException,
             IllegalBlockSizeException, BadPaddingException {
         if (p.getSecurity() != Security.NONE) {
-            byte[] tmp = GXSecure.encryptAesGcm(true, p, data);
-            p.setInvocationCounter(p.getInvocationCounter() + 1);
-            return tmp;
+            return GXSecure.encryptAesGcm(true, p, data);
         }
         return data;
     }

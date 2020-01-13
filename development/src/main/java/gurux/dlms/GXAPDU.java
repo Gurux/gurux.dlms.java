@@ -301,6 +301,7 @@ final class GXAPDU {
                 data.setUInt8(BerType.OCTET_STRING);
                 data.setUInt8(crypted.length);
                 data.set(crypted);
+                cipher.setInvocationCounter(1 + cipher.getInvocationCounter());
             }
         }
     }
@@ -1435,7 +1436,9 @@ final class GXAPDU {
                     Command.GLO_INITIATE_RESPONSE, cipher.getSecurity(),
                     cipher.getInvocationCounter(), cipher.getSystemTitle(),
                     cipher.getBlockCipherKey(), cipher.getAuthenticationKey());
-            return GXCiphering.encrypt(p, data.array());
+            byte[] tmp = GXCiphering.encrypt(p, data.array());
+            cipher.setInvocationCounter(1 + cipher.getInvocationCounter());
+            return tmp;
         }
         return data.array();
     }
