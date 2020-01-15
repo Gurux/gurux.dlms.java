@@ -253,6 +253,14 @@ public final class GXSecure {
             // Get shared secret
             if (settings.getAuthentication() == Authentication.HIGH_GMAC) {
                 challenge.set(data);
+            } else if (settings
+                    .getAuthentication() == Authentication.HIGH_SHA256) {
+                challenge.set(secret);
+                challenge.set(settings.getCipher().getSystemTitle());
+                challenge.set(settings.getSourceSystemTitle());
+                challenge.set(settings.getStoCChallenge());
+                challenge.set(settings.getCtoSChallenge());
+                challenge.set(data);
             } else {
                 challenge.set(data);
                 challenge.set(secret);
