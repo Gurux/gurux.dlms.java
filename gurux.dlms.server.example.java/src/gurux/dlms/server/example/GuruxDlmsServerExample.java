@@ -37,6 +37,7 @@ package gurux.dlms.server.example;
 import gurux.common.GXCmdParameter;
 import gurux.common.GXCommon;
 import gurux.common.enums.TraceLevel;
+import gurux.dlms.GXDLMSTranslator;
 import gurux.serial.GXSerial;
 
 class Settings {
@@ -113,6 +114,12 @@ public class GuruxDlmsServerExample {
                         SNServer.getCiphering().getAuthenticationKey()));
                 System.out.println("Block cipher key: " + GXCommon.bytesToHex(
                         SNServer.getCiphering().getBlockCipherKey()));
+
+                System.out.println("Client System title: " + GXDLMSTranslator
+                        .toHex(SNServer.getClientSystemTitle()));
+                System.out.println("Master key (KEK) title: "
+                        + GXDLMSTranslator.toHex(SNServer.getKek()));
+
                 System.out.println("Short Name DLMS Server in port "
                         + String.valueOf(settings.port));
                 System.out.println("Example connection settings:");

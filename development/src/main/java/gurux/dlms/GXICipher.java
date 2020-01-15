@@ -89,6 +89,12 @@ public interface GXICipher {
     byte[] getRecipientSystemTitle();
 
     /**
+     * @param value
+     *            Block cipher key.
+     */
+    void setBlockCipherKey(byte[] value);
+
+    /**
      * @return Block cipher key.
      */
     byte[] getBlockCipherKey();

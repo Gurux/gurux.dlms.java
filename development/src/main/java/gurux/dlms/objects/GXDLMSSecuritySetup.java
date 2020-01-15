@@ -659,9 +659,13 @@ public class GXDLMSSecuritySetup extends GXDLMSObject implements IGXDLMSBase {
                 byte[] data = (byte[]) item.get(1);
                 switch (type) {
                 case UNICAST_ENCRYPTION:
+                    settings.getCipher().setBlockCipherKey(GXDLMSSecureClient
+                            .decrypt(settings.getKek(), data));
+                    break;
                 case BROADCAST_ENCRYPTION:
                     // Invalid type
                     e.setError(ErrorCode.READ_WRITE_DENIED);
+                    break;
                 case AUTHENTICATION:
                     // if settings.Cipher is null non secure server is used.
                     settings.getCipher().setAuthenticationKey(GXDLMSSecureClient

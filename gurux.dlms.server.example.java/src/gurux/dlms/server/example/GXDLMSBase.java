@@ -48,6 +48,7 @@ import java.util.Date;
 import java.util.List;
 import java.util.Map.Entry;
 
+import gurux.common.GXCommon;
 import gurux.common.IGXMedia;
 import gurux.common.IGXMediaListener;
 import gurux.common.MediaStateEventArgs;
@@ -57,6 +58,7 @@ import gurux.common.TraceEventArgs;
 import gurux.common.enums.TraceLevel;
 import gurux.dlms.GXDLMSClient;
 import gurux.dlms.GXDLMSConnectionEventArgs;
+import gurux.dlms.GXDLMSTranslator;
 import gurux.dlms.GXDateTime;
 import gurux.dlms.GXServerReply;
 import gurux.dlms.GXSimpleEntry;
@@ -101,6 +103,7 @@ import gurux.dlms.objects.GXDLMSScript;
 import gurux.dlms.objects.GXDLMSScriptAction;
 import gurux.dlms.objects.GXDLMSScriptTable;
 import gurux.dlms.objects.GXDLMSSeasonProfile;
+import gurux.dlms.objects.GXDLMSSecuritySetup;
 import gurux.dlms.objects.GXDLMSTcpUdpSetup;
 import gurux.dlms.objects.GXDLMSWeekProfile;
 import gurux.dlms.objects.enums.AutoAnswerMode;
@@ -152,6 +155,11 @@ public class GXDLMSBase extends GXDLMSSecureServer2
         this.setMaxReceivePDUSize(1024);
         byte[] secret = "Gurux".getBytes();
         ln.setSecret(secret);
+        // Add security setup object.
+        ln.setSecuritySetupReference("0.0.43.0.0.255");
+        GXDLMSSecuritySetup s = new GXDLMSSecuritySetup("0.0.43.0.0.255");
+        s.setServerSystemTitle(getCiphering().getSystemTitle());
+        getItems().add(s);
     }
 
     /**
@@ -168,6 +176,11 @@ public class GXDLMSBase extends GXDLMSSecureServer2
         this.setMaxReceivePDUSize(1024);
         byte[] secret = "Gurux".getBytes();
         sn.setSecret(secret);
+        // Add security setup object.
+        sn.setSecuritySetupReference("0.0.43.0.0.255");
+        GXDLMSSecuritySetup s = new GXDLMSSecuritySetup("0.0.43.0.0.255");
+        s.setServerSystemTitle(getCiphering().getSystemTitle());
+        getItems().add(s);
     }
 
     /**
@@ -184,6 +197,11 @@ public class GXDLMSBase extends GXDLMSSecureServer2
         this.setMaxReceivePDUSize(1024);
         byte[] secret = "Gurux".getBytes();
         ln.setSecret(secret);
+        // Add security setup object.
+        ln.setSecuritySetupReference("0.0.43.0.0.255");
+        GXDLMSSecuritySetup s = new GXDLMSSecuritySetup("0.0.43.0.0.255");
+        s.setServerSystemTitle(getCiphering().getSystemTitle());
+        getItems().add(s);
     }
 
     /**
@@ -200,6 +218,11 @@ public class GXDLMSBase extends GXDLMSSecureServer2
         this.setMaxReceivePDUSize(1024);
         byte[] secret = "Gurux".getBytes();
         sn.setSecret(secret);
+        // Add security setup object.
+        sn.setSecuritySetupReference("0.0.43.0.0.255");
+        GXDLMSSecuritySetup s = new GXDLMSSecuritySetup("0.0.43.0.0.255");
+        s.setServerSystemTitle(getCiphering().getSystemTitle());
+        getItems().add(s);
     }
 
     /*
@@ -597,7 +620,8 @@ public class GXDLMSBase extends GXDLMSSecureServer2
     }
 
     void init() {
-        ///////////////////////////////////////////////////////////////////////
+        setKek("1111111111111111".getBytes());
+        ///////// 1//////////////////////////////////////////////////////////////
         // Add objects of the meter.
         addLogicalDeviceName();
         // Add firmware version.
@@ -978,6 +1002,23 @@ public class GXDLMSBase extends GXDLMSSecureServer2
         for (ValueEventArgs it : args) {
             if (it.getTarget() instanceof GXDLMSProfileGeneric) {
                 handleProfileGenericActions(it);
+            }
+            if (it.getTarget() instanceof GXDLMSSecuritySetup
+                    && it.getIndex() == 2) {
+                System.out.println(
+                        "----------------------------------------------------------");
+                System.out.println("Updated keys:");
+
+                System.out.println("Server System title: "
+                        + GXCommon.bytesToHex(getCiphering().getSystemTitle()));
+                System.out.println("Authentication key: " + GXCommon
+                        .bytesToHex(getCiphering().getAuthenticationKey()));
+                System.out.println("Block cipher key: " + GXCommon
+                        .bytesToHex(getCiphering().getBlockCipherKey()));
+                System.out.println("Client System title: "
+                        + GXDLMSTranslator.toHex(getClientSystemTitle()));
+                System.out.println("Master key (KEK) title: "
+                        + GXDLMSTranslator.toHex(getKek()));
             }
         }
     }

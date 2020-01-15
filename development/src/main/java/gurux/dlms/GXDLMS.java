@@ -2006,7 +2006,10 @@ abstract class GXDLMS {
                                 + ".");
             }
             // Check that server addresses match.
-            if (settings.getServerAddress() != source) {
+            if (settings.getServerAddress() != source &&
+            // If All-station (Broadcast).
+                    settings.getServerAddress() != 0x7F
+                    && settings.getServerAddress() != 0x3FFF) {
                 // Check logical and physical address separately.
                 // This is done because some meters might send four bytes
                 // when only two bytes is needed.
