@@ -258,9 +258,13 @@ public final class GXSecure {
                 challenge.set(secret);
                 challenge.set(settings.getCipher().getSystemTitle());
                 challenge.set(settings.getSourceSystemTitle());
-                challenge.set(settings.getStoCChallenge());
-                challenge.set(settings.getCtoSChallenge());
-                challenge.set(data);
+                if (settings.isServer()) {
+                    challenge.set(settings.getCtoSChallenge());
+                    challenge.set(settings.getStoCChallenge());
+                } else {
+                    challenge.set(settings.getStoCChallenge());
+                    challenge.set(settings.getCtoSChallenge());
+                }
             } else {
                 challenge.set(data);
                 challenge.set(secret);
