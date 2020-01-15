@@ -652,32 +652,38 @@ public class GXDLMSSecuritySetup extends GXDLMSObject implements IGXDLMSBase {
                 }
             }
         } else if (e.getIndex() == 2) {
-            for (Object tmp : (List<?>) e.getParameters()) {
-                List<?> item = (List<?>) tmp;
-                GlobalKeyType type = GlobalKeyType
-                        .values()[((Number) item.get(0)).intValue()];
-                byte[] data = (byte[]) item.get(1);
-                switch (type) {
-                case UNICAST_ENCRYPTION:
-                    settings.getCipher().setBlockCipherKey(GXDLMSSecureClient
-                            .decrypt(settings.getKek(), data));
-                    break;
-                case BROADCAST_ENCRYPTION:
-                    // Invalid type
-                    e.setError(ErrorCode.READ_WRITE_DENIED);
-                    break;
-                case AUTHENTICATION:
-                    // if settings.Cipher is null non secure server is used.
-                    settings.getCipher().setAuthenticationKey(GXDLMSSecureClient
-                            .decrypt(settings.getKek(), data));
-                    break;
-                case KEK:
-                    settings.setKek(GXDLMSSecureClient
-                            .decrypt(settings.getKek(), data));
-                    break;
-                default:
-                    e.setError(ErrorCode.READ_WRITE_DENIED);
+            try {
+                for (Object tmp : (List<?>) e.getParameters()) {
+                    List<?> item = (List<?>) tmp;
+                    GlobalKeyType type = GlobalKeyType
+                            .values()[((Number) item.get(0)).intValue()];
+                    byte[] data = (byte[]) item.get(1);
+                    switch (type) {
+                    case UNICAST_ENCRYPTION:
+                        settings.getCipher()
+                                .setBlockCipherKey(GXDLMSSecureClient
+                                        .decrypt(settings.getKek(), data));
+                        break;
+                    case BROADCAST_ENCRYPTION:
+                        // Invalid type
+                        e.setError(ErrorCode.READ_WRITE_DENIED);
+                        break;
+                    case AUTHENTICATION:
+                        // if settings.Cipher is null non secure server is used.
+                        settings.getCipher()
+                                .setAuthenticationKey(GXDLMSSecureClient
+                                        .decrypt(settings.getKek(), data));
+                        break;
+                    case KEK:
+                        settings.setKek(GXDLMSSecureClient
+                                .decrypt(settings.getKek(), data));
+                        break;
+                    default:
+                        e.setError(ErrorCode.READ_WRITE_DENIED);
+                    }
                 }
+            } catch (Exception ex) {
+                e.setError(ErrorCode.READ_WRITE_DENIED);
             }
         } else if (e.getIndex() == 3) {
             // key_agreement
