@@ -36,7 +36,6 @@ package gurux.dlms.push.listener.example;
 
 import java.util.Calendar;
 
-import gurux.dlms.GXDLMSNotify;
 import gurux.dlms.GXDateTime;
 import gurux.dlms.GXSimpleEntry;
 import gurux.dlms.enums.InterfaceType;
@@ -44,6 +43,7 @@ import gurux.dlms.objects.GXDLMSCaptureObject;
 import gurux.dlms.objects.GXDLMSClock;
 import gurux.dlms.objects.GXDLMSObject;
 import gurux.dlms.objects.GXDLMSPushSetup;
+import gurux.dlms.secure.GXDLMSSecureNotify;
 import gurux.net.GXNet;
 import gurux.net.enums.NetworkType;
 
@@ -61,7 +61,10 @@ public class GuruxDlmsPushListenerExample {
     public static void main(String[] args) {
         int port = 4061;
         GXNet media = new GXNet(NetworkType.TCP, "localhost", port);
-        GXDLMSNotify cl = new GXDLMSNotify(true, 1, 1, InterfaceType.WRAPPER);
+        GXDLMSSecureNotify cl =
+                new GXDLMSSecureNotify(true, 1, 1, InterfaceType.WRAPPER);
+        // Un-comment this if you want to send encrypted push messages.
+        // cl.getCiphering().setSecurity(Security.AUTHENTICATION_ENCRYPTION);
         GXDLMSPushSetup p = new GXDLMSPushSetup();
         GXDLMSClock clock = new GXDLMSClock();
         p.getPushObjectList()

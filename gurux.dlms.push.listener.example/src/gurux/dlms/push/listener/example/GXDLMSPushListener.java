@@ -42,12 +42,12 @@ import gurux.common.ReceiveEventArgs;
 import gurux.common.TraceEventArgs;
 import gurux.common.enums.TraceLevel;
 import gurux.dlms.GXByteBuffer;
-import gurux.dlms.GXDLMSClient;
 import gurux.dlms.GXDLMSTranslator;
 import gurux.dlms.GXReplyData;
 import gurux.dlms.TranslatorOutputType;
 import gurux.dlms.enums.Authentication;
 import gurux.dlms.enums.InterfaceType;
+import gurux.dlms.secure.GXDLMSSecureClient;
 import gurux.net.GXNet;
 import gurux.net.enums.NetworkType;
 
@@ -79,7 +79,7 @@ public class GXDLMSPushListener
     /**
      * Client used to parse received data.
      */
-    private GXDLMSClient client = new GXDLMSClient(true, 1, 1,
+    private GXDLMSSecureClient client = new GXDLMSSecureClient(true, 1, 1,
             Authentication.NONE, null, InterfaceType.WRAPPER);
 
     /**
@@ -154,7 +154,9 @@ public class GXDLMSPushListener
                     }
                 }
             }
-        } catch (Exception ex) {
+        } catch (
+
+        Exception ex) {
             System.out.println(ex.getMessage());
         }
     }
