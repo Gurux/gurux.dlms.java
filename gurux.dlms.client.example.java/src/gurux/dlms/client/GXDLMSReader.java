@@ -273,6 +273,9 @@ public class GXDLMSReader {
                 }
                 succeeded = Media.receive(p);
                 if (!succeeded) {
+                    if (p.getEop() == null) {
+                        p.setCount(dlms.getFrameSize(rd));
+                    }
                     // Try to read again...
                     if (pos++ == 3) {
                         throw new RuntimeException(

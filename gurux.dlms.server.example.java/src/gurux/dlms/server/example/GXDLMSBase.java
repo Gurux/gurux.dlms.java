@@ -157,7 +157,7 @@ public class GXDLMSBase extends GXDLMSSecureServer2
         ln.setSecret(secret);
         // Add security setup object.
         ln.setSecuritySetupReference("0.0.43.0.0.255");
-        GXDLMSSecuritySetup s = new GXDLMSSecuritySetup("0.0.43.0.0.255");
+        GXDLMSSecuritySetup s = new GXDLMSSecuritySetup();
         s.setServerSystemTitle(getCiphering().getSystemTitle());
         getItems().add(s);
     }
