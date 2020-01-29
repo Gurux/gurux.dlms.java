@@ -351,10 +351,18 @@ public class GXDLMSSecuritySetup extends GXDLMSObject implements IGXDLMSBase {
      * @return Generated action.
      * @throws NoSuchAlgorithmException
      *             No such algorithm exception.
+     * @throws BadPaddingException.
+     *             Bad padding exception.
+     * @throws IllegalBlockSizeException.
+     *             Illegal block size exception.
+     * @throws InvalidAlgorithmParameterException.
+     *             Invalid algorithm parameter exception.
+     * @throws NoSuchPaddingException
+     *             No such padding exception.
+     * @throws NoSuchAlgorithmException
+     *             No such algorithm exception.
      * @throws InvalidKeyException
-     *             Invalid key.
-     * @throws SignatureException
-     *             Invalid signature.
+     *             Invalid key exception.
      */
     public final byte[][] keyAgreement(final GXDLMSSecureClient client,
             final GlobalKeyType type) throws NoSuchAlgorithmException,
@@ -389,7 +397,18 @@ public class GXDLMSSecuritySetup extends GXDLMSObject implements IGXDLMSBase {
      *            DLMS client that is used to generate action.
      * @param type
      *            New certificate type.
-     * @return Generated action.
+     * @return Generated action. * @throws BadPaddingException. Bad padding
+     *         exception.
+     * @throws IllegalBlockSizeException.
+     *             Illegal block size exception.
+     * @throws InvalidAlgorithmParameterException.
+     *             Invalid algorithm parameter exception.
+     * @throws NoSuchPaddingException
+     *             No such padding exception.
+     * @throws NoSuchAlgorithmException
+     *             No such algorithm exception.
+     * @throws InvalidKeyException
+     *             Invalid key exception.
      */
     public final byte[][] generateKeyPair(final GXDLMSClient client,
             final CertificateType type)
@@ -424,7 +443,18 @@ public class GXDLMSSecuritySetup extends GXDLMSObject implements IGXDLMSBase {
      *            DLMS client that is used to generate action.
      * @param certificate
      *            X.509 v3 certificate.
-     * @return Generated action.
+     * @return Generated action. * @throws BadPaddingException. Bad padding
+     *         exception.
+     * @throws IllegalBlockSizeException.
+     *             Illegal block size exception.
+     * @throws InvalidAlgorithmParameterException.
+     *             Invalid algorithm parameter exception.
+     * @throws NoSuchPaddingException
+     *             No such padding exception.
+     * @throws NoSuchAlgorithmException
+     *             No such algorithm exception.
+     * @throws InvalidKeyException
+     *             Invalid key exception.
      */
     public final byte[][] importCertificate(final GXDLMSClient client,
             final GXx509Certificate certificate)
@@ -441,7 +471,18 @@ public class GXDLMSSecuritySetup extends GXDLMSObject implements IGXDLMSBase {
      *            DLMS client that is used to generate action.
      * @param key
      *            Public key.
-     * @return Generated action.
+     * @return Generated action. * @throws BadPaddingException. Bad padding
+     *         exception.
+     * @throws IllegalBlockSizeException.
+     *             Illegal block size exception.
+     * @throws InvalidAlgorithmParameterException.
+     *             Invalid algorithm parameter exception.
+     * @throws NoSuchPaddingException
+     *             No such padding exception.
+     * @throws NoSuchAlgorithmException
+     *             No such algorithm exception.
+     * @throws InvalidKeyException
+     *             Invalid key exception.
      */
     public final byte[][] importCertificate(final GXDLMSClient client,
             final byte[] key)
@@ -538,7 +579,42 @@ public class GXDLMSSecuritySetup extends GXDLMSObject implements IGXDLMSBase {
      *            Certificate type.
      * @param systemTitle
      *            System title.
-     * @return Generated action.
+     * @return Generated action. * @throws BadPaddingException. Bad padding
+     *         exception.
+     * @throws IllegalBlockSizeException.
+     *             Illegal block size exception.
+     * @throws InvalidAlgorithmParameterException.
+     *             Invalid algorithm parameter exception.
+     * @throws NoSuchPaddingException
+     *             No such padding exception.
+     * @throws NoSuchAlgorithmException
+     *             No such algorithm exception.
+     * @throws InvalidKeyException
+     *             Invalid key exception.
+     * @throws BadPaddingException.
+     *             Bad padding exception.
+     * @throws IllegalBlockSizeException.
+     *             Illegal block size exception.
+     * @throws InvalidAlgorithmParameterException.
+     *             Invalid algorithm parameter exception.
+     * @throws NoSuchPaddingException
+     *             No such padding exception.
+     * @throws NoSuchAlgorithmException
+     *             No such algorithm exception.
+     * @throws InvalidKeyException
+     *             Invalid key exception.
+     * @throws BadPaddingException.
+     *             Bad padding exception.
+     * @throws IllegalBlockSizeException.
+     *             Illegal block size exception.
+     * @throws InvalidAlgorithmParameterException.
+     *             Invalid algorithm parameter exception.
+     * @throws NoSuchPaddingException
+     *             No such padding exception.
+     * @throws NoSuchAlgorithmException
+     *             No such algorithm exception.
+     * @throws InvalidKeyException
+     *             Invalid key exception.
      */
     public final byte[][] removeCertificateByEntity(
             final GXDLMSSecureClient client, final CertificateEntity entity,
@@ -575,7 +651,18 @@ public class GXDLMSSecuritySetup extends GXDLMSObject implements IGXDLMSBase {
      *            Serial number.
      * @param issuer
      *            Issuer.
-     * @return Generated action.
+     * @return Generated action. * @throws BadPaddingException. Bad padding
+     *         exception.
+     * @throws IllegalBlockSizeException.
+     *             Illegal block size exception.
+     * @throws InvalidAlgorithmParameterException.
+     *             Invalid algorithm parameter exception.
+     * @throws NoSuchPaddingException
+     *             No such padding exception.
+     * @throws NoSuchAlgorithmException
+     *             No such algorithm exception.
+     * @throws InvalidKeyException
+     *             Invalid key exception.
      */
     public final byte[][] removeCertificateBySerial(
             final GXDLMSSecureClient client, final String serialNumber,

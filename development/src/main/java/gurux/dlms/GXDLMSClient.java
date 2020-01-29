@@ -792,6 +792,14 @@ public class GXDLMSClient {
         byte[] pw;
         if (settings.getAuthentication() == Authentication.HIGH_GMAC) {
             pw = settings.getCipher().getSystemTitle();
+        } else if (settings.getAuthentication() == Authentication.HIGH_SHA256) {
+            GXByteBuffer tmp = new GXByteBuffer();
+            tmp.set(settings.getPassword());
+            tmp.set(settings.getCipher().getSystemTitle());
+            tmp.set(settings.getSourceSystemTitle());
+            tmp.set(settings.getStoCChallenge());
+            tmp.set(settings.getCtoSChallenge());
+            pw = tmp.array();
         } else {
             pw = settings.getPassword();
         }
@@ -848,6 +856,15 @@ public class GXDLMSClient {
                     GXByteBuffer bb = new GXByteBuffer(value);
                     bb.getUInt8();
                     ic = bb.getUInt32();
+                } else if (settings
+                        .getAuthentication() == Authentication.HIGH_SHA256) {
+                    GXByteBuffer tmp2 = new GXByteBuffer();
+                    tmp2.set(settings.getPassword());
+                    tmp2.set(settings.getSourceSystemTitle());
+                    tmp2.set(settings.getCipher().getSystemTitle());
+                    tmp2.set(settings.getCtoSChallenge());
+                    tmp2.set(settings.getStoCChallenge());
+                    secret = tmp2.array();
                 } else {
                     secret = settings.getPassword();
                 }

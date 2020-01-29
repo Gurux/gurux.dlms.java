@@ -9,7 +9,7 @@
     <maven.compiler.target>1.7</maven.compiler.target>
   </properties>
   <build>
-   <sourceDirectory>src</sourceDirectory>
+    <sourceDirectory>src</sourceDirectory>
     <plugins>
       <!-- Build an executable JAR -->
       <plugin>
@@ -40,7 +40,7 @@
       <artifactId>gurux.net</artifactId>
       <version>1.0.19</version>
     </dependency>
-     <dependency>
+    <dependency>
       <groupId>org.gurux</groupId>
       <artifactId>gurux.serial</artifactId>
       <version>1.0.18</version>
@@ -48,7 +48,7 @@
     <dependency>
       <groupId>org.gurux</groupId>
       <artifactId>gurux.dlms</artifactId>
-      <version>3.1.7</version>
+      <version>3.1.8</version>
     </dependency>
   </dependencies>
   <licenses>

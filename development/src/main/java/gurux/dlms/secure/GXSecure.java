@@ -256,15 +256,6 @@ public final class GXSecure {
             } else if (settings
                     .getAuthentication() == Authentication.HIGH_SHA256) {
                 challenge.set(secret);
-                challenge.set(settings.getCipher().getSystemTitle());
-                challenge.set(settings.getSourceSystemTitle());
-                if (settings.isServer()) {
-                    challenge.set(settings.getCtoSChallenge());
-                    challenge.set(settings.getStoCChallenge());
-                } else {
-                    challenge.set(settings.getStoCChallenge());
-                    challenge.set(settings.getCtoSChallenge());
-                }
             } else {
                 challenge.set(data);
                 challenge.set(secret);

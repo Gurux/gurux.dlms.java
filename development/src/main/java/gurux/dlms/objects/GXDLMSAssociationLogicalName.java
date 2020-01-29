@@ -328,6 +328,15 @@ public class GXDLMSAssociationLogicalName extends GXDLMSObject
                             new GXByteBuffer((byte[]) e.getParameters());
                     bb.getUInt8();
                     ic = bb.getUInt32();
+                } else if (settings
+                        .getAuthentication() == Authentication.HIGH_SHA256) {
+                    GXByteBuffer tmp = new GXByteBuffer();
+                    tmp.set(secret);
+                    tmp.set(settings.getSourceSystemTitle());
+                    tmp.set(settings.getCipher().getSystemTitle());
+                    tmp.set(settings.getStoCChallenge());
+                    tmp.set(settings.getCtoSChallenge());
+                    readSecret = tmp.array();
                 } else {
                     readSecret = secret;
                 }
@@ -345,6 +354,16 @@ public class GXDLMSAssociationLogicalName extends GXDLMSObject
                     ic = settings.getCipher().getInvocationCounter();
                 } else {
                     readSecret = secret;
+                }
+                if (settings
+                        .getAuthentication() == Authentication.HIGH_SHA256) {
+                    GXByteBuffer tmp = new GXByteBuffer();
+                    tmp.set(secret);
+                    tmp.set(settings.getCipher().getSystemTitle());
+                    tmp.set(settings.getSourceSystemTitle());
+                    tmp.set(settings.getCtoSChallenge());
+                    tmp.set(settings.getStoCChallenge());
+                    readSecret = tmp.array();
                 }
                 byte[] tmp = GXSecure.secure(settings, settings.getCipher(), ic,
                         settings.getCtoSChallenge(), readSecret);

@@ -520,11 +520,16 @@ public class GXDLMSActivityCalendar extends GXDLMSObject
             setLogicalName(GXCommon.toLogicalName(e.getValue()));
             break;
         case 2:
-            tmp = new String((byte[]) e.getValue()).trim();
-            if (isSec || !GXCommon.isAscii(tmp)) {
-                setCalendarNameActive(GXCommon.toHex((byte[]) e.getValue()));
+            if (e.getValue() == null) {
+                setCalendarNameActive(null);
             } else {
-                setCalendarNameActive(tmp);
+                tmp = new String((byte[]) e.getValue()).trim();
+                if (isSec || !GXCommon.isAscii(tmp)) {
+                    setCalendarNameActive(
+                            GXCommon.toHex((byte[]) e.getValue()));
+                } else {
+                    setCalendarNameActive(tmp);
+                }
             }
             break;
         case 3:
@@ -537,11 +542,16 @@ public class GXDLMSActivityCalendar extends GXDLMSObject
             setDayProfileTableActive(getDayProfileTable(e.getValue()));
             break;
         case 6:
-            tmp = new String((byte[]) e.getValue());
-            if (isSec || !GXCommon.isAscii(tmp)) {
-                setCalendarNamePassive(GXCommon.toHex((byte[]) e.getValue()));
+            if (e.getValue() == null) {
+                setCalendarNamePassive(null);
             } else {
-                setCalendarNamePassive(new String((byte[]) e.getValue()));
+                tmp = new String((byte[]) e.getValue()).trim();
+                if (isSec || !GXCommon.isAscii(tmp)) {
+                    setCalendarNamePassive(
+                            GXCommon.toHex((byte[]) e.getValue()));
+                } else {
+                    setCalendarNamePassive(new String((byte[]) e.getValue()));
+                }
             }
             break;
         case 7:

@@ -176,6 +176,7 @@ final class GXAPDU {
         // Add system title.
         if (!settings.isServer() && (ciphered
                 || settings.getAuthentication() == Authentication.HIGH_GMAC)
+                || settings.getAuthentication() == Authentication.HIGH_SHA256
                 || settings.getAuthentication() == Authentication.HIGH_ECDSA) {
             if (cipher.getSystemTitle() == null
                     || cipher.getSystemTitle().length == 0) {
@@ -1489,9 +1490,11 @@ final class GXAPDU {
             data.setUInt8(((int) diagnostic));
         }
         // SystemTitle
-        if (cipher != null
-                && (settings.getAuthentication() == Authentication.HIGH_GMAC
-                        || cipher.isCiphered())) {
+        if (cipher != null && (settings
+                .getAuthentication() == Authentication.HIGH_GMAC
+                || settings.getAuthentication() == Authentication.HIGH_SHA256
+                || settings.getAuthentication() == Authentication.HIGH_ECDSA
+                || cipher.isCiphered())) {
             data.setUInt8(BerType.CONTEXT | BerType.CONSTRUCTED
                     | PduType.CALLED_AP_INVOCATION_ID);
             data.setUInt8((2 + cipher.getSystemTitle().length));

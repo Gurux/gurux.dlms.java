@@ -873,30 +873,38 @@ final class GXDLMSLNCommandHandler {
             if (server.notifyGetMethodAccess(e) == MethodAccessMode.NO_ACCESS) {
                 error = ErrorCode.READ_WRITE_DENIED;
             } else {
-                server.notifyAction(new ValueEventArgs[] { e });
-                byte[] actionReply;
-                if (e.getHandled()) {
-                    actionReply = (byte[]) e.getValue();
-                } else {
-                    actionReply = obj.invoke(settings, e);
-                }
-                server.notifyPostAction(new ValueEventArgs[] { e });
-                // Set default action reply if not given.
-                if (actionReply != null && e.getError() == ErrorCode.OK) {
-                    // Add return parameters
-                    bb.setUInt8(1);
-                    // Add parameters error code.
-                    bb.setUInt8(0);
-                    if (e.isByteArray()) {
-                        bb.set(actionReply);
+                try {
+                    server.notifyAction(new ValueEventArgs[] { e });
+                    byte[] actionReply;
+                    if (e.getHandled()) {
+                        actionReply = (byte[]) e.getValue();
                     } else {
-                        GXCommon.setData(settings, bb,
-                                GXDLMSConverter.getDLMSDataType(actionReply),
-                                actionReply);
+                        actionReply = obj.invoke(settings, e);
                     }
-                } else {
+                    server.notifyPostAction(new ValueEventArgs[] { e });
+                    // Set default action reply if not given.
+                    if (actionReply != null && e.getError() == ErrorCode.OK) {
+                        // Add return parameters
+                        bb.setUInt8(1);
+                        // Add parameters error code.
+                        bb.setUInt8(0);
+                        if (e.isByteArray()) {
+                            bb.set(actionReply);
+                        } else {
+                            GXCommon.setData(
+                                    settings, bb, GXDLMSConverter
+                                            .getDLMSDataType(actionReply),
+                                    actionReply);
+                        }
+                    } else {
+                        // Add parameters error code.
+                        error = e.getError();
+                        // Add return parameters
+                        bb.setUInt8(0);
+                    }
+                } catch (Exception ex) {
                     // Add parameters error code.
-                    error = e.getError();
+                    error = ErrorCode.READ_WRITE_DENIED;
                     // Add return parameters
                     bb.setUInt8(0);
                 }

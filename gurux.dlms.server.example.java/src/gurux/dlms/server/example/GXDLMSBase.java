@@ -90,6 +90,7 @@ import gurux.dlms.objects.GXDLMSHdlcSetup;
 import gurux.dlms.objects.GXDLMSIECOpticalPortSetup;
 import gurux.dlms.objects.GXDLMSImageTransfer;
 import gurux.dlms.objects.GXDLMSIp4Setup;
+import gurux.dlms.objects.GXDLMSIp6Setup;
 import gurux.dlms.objects.GXDLMSMacAddressSetup;
 import gurux.dlms.objects.GXDLMSModemConfiguration;
 import gurux.dlms.objects.GXDLMSModemInitialisation;
@@ -405,6 +406,8 @@ public class GXDLMSBase extends GXDLMSSecureServer2
                                         "0.0.1.0.0.255", 1) }) });
         activity.setTime(new GXDateTime(now));
         getItems().add(activity);
+
+        getItems().add(new GXDLMSIp6Setup());
     }
 
     /*

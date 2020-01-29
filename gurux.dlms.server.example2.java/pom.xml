@@ -3,7 +3,7 @@
   <groupId>org.gurux</groupId>
   <artifactId>gurux.dlms.server.example2.java</artifactId>
   <version>0.0.1-SNAPSHOT</version>
-   <properties>
+  <properties>
     <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
     <maven.compiler.source>7</maven.compiler.source>
     <maven.compiler.target>1.7</maven.compiler.target>
@@ -44,7 +44,7 @@
     <dependency>
       <groupId>org.gurux</groupId>
       <artifactId>gurux.dlms</artifactId>
-      <version>3.1.7</version>
+      <version>3.1.8</version>
     </dependency>
   </dependencies>
   <licenses>
