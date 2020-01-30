@@ -609,7 +609,7 @@ public class GXDLMSProfileGeneric extends GXDLMSObject implements IGXDLMSBase {
                             .getMeterCalendar().getTime();
             for (Object row : getBuffer()) {
                 java.util.Date tm;
-                Object tmp = ((Object[]) row)[0];
+                Object tmp = ((Object[]) row)[this.getSortObjectDataIndex()];
                 if (tmp instanceof GXDateTime) {
                     tm = ((GXDateTime) tmp).getMeterCalendar().getTime();
                 } else {
