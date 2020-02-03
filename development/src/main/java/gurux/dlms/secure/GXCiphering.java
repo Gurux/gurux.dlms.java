@@ -158,6 +158,18 @@ public class GXCiphering implements GXICipher {
      * @param data
      *            Plain text.
      * @return Secured data.
+     * @throws NoSuchPaddingException
+     *             No such padding exception.
+     * @throws NoSuchAlgorithmException
+     *             No such algorithm exception.
+     * @throws InvalidAlgorithmParameterException
+     *             Invalid algorithm parameter exception.
+     * @throws InvalidKeyException
+     *             Invalid key exception.
+     * @throws BadPaddingException
+     *             Bad padding exception.
+     * @throws IllegalBlockSizeException
+     *             Illegal block size exception.
      */
     public static byte[] encrypt(final AesGcmParameter p, final byte[] data)
             throws InvalidKeyException, NoSuchAlgorithmException,
@@ -378,6 +390,18 @@ public class GXCiphering implements GXICipher {
      * @param challenge
      *            Client to Server or Server to Client challenge.
      * @return Generated challenge.
+     * @throws NoSuchPaddingException
+     *             No such padding exception.
+     * @throws NoSuchAlgorithmException
+     *             No such algorithm exception.
+     * @throws InvalidAlgorithmParameterException
+     *             Invalid algorithm parameter exception.
+     * @throws InvalidKeyException
+     *             Invalid key exception.
+     * @throws BadPaddingException
+     *             Bad padding exception.
+     * @throws IllegalBlockSizeException
+     *             Illegal block size exception.
      */
     public byte[] generateGmacPassword(final byte[] challenge)
             throws InvalidKeyException, IllegalBlockSizeException,

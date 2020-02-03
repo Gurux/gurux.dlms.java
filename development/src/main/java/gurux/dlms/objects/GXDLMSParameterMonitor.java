@@ -169,6 +169,18 @@ public class GXDLMSParameterMonitor extends GXDLMSObject
      * @return If a special day with the same index or with the same date as an
      *         already defined day is inserted, the old entry will be
      *         overwritten.
+     * @throws NoSuchPaddingException
+     *             No such padding exception.
+     * @throws NoSuchAlgorithmException
+     *             No such algorithm exception.
+     * @throws InvalidAlgorithmParameterException
+     *             Invalid algorithm parameter exception.
+     * @throws InvalidKeyException
+     *             Invalid key exception.
+     * @throws BadPaddingException
+     *             Bad padding exception.
+     * @throws IllegalBlockSizeException
+     *             Illegal block size exception.
      */
     public final byte[][] insert(GXDLMSClient client, GXDLMSTarget entry)
             throws InvalidKeyException, NoSuchAlgorithmException,
@@ -193,6 +205,18 @@ public class GXDLMSParameterMonitor extends GXDLMSObject
      * @param entry
      *            Removed entry.
      * @return Action bytes.
+     * @throws NoSuchPaddingException
+     *             No such padding exception.
+     * @throws NoSuchAlgorithmException
+     *             No such algorithm exception.
+     * @throws InvalidAlgorithmParameterException
+     *             Invalid algorithm parameter exception.
+     * @throws InvalidKeyException
+     *             Invalid key exception.
+     * @throws BadPaddingException
+     *             Bad padding exception.
+     * @throws IllegalBlockSizeException
+     *             Illegal block size exception.
      */
     public final byte[][] delete(GXDLMSClient client, GXDLMSTarget entry)
             throws InvalidKeyException, NoSuchAlgorithmException,

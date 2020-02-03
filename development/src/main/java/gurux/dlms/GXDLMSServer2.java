@@ -410,6 +410,18 @@ public abstract class GXDLMSServer2 {
      *            Received data from the client.
      * @return Response to the request. Response is null if request packet is
      *         not complete.
+     * @throws NoSuchPaddingException
+     *             No such padding exception.
+     * @throws NoSuchAlgorithmException
+     *             No such algorithm exception.
+     * @throws InvalidAlgorithmParameterException
+     *             Invalid algorithm parameter exception.
+     * @throws InvalidKeyException
+     *             Invalid key exception.
+     * @throws BadPaddingException
+     *             Bad padding exception.
+     * @throws IllegalBlockSizeException
+     *             Illegal block size exception.
      */
     public final byte[] handleRequest(final byte[] buff)
             throws InvalidKeyException, NoSuchAlgorithmException,
@@ -427,6 +439,18 @@ public abstract class GXDLMSServer2 {
      *            Connection info.
      * @return Response to the request. Response is null if request packet is
      *         not complete.
+     * @throws NoSuchPaddingException
+     *             No such padding exception.
+     * @throws NoSuchAlgorithmException
+     *             No such algorithm exception.
+     * @throws InvalidAlgorithmParameterException
+     *             Invalid algorithm parameter exception.
+     * @throws InvalidKeyException
+     *             Invalid key exception.
+     * @throws BadPaddingException
+     *             Bad padding exception.
+     * @throws IllegalBlockSizeException
+     *             Illegal block size exception.
      */
     public final byte[] handleRequest(final byte[] buff,
             final GXDLMSConnectionEventArgs connectionInfo)
@@ -444,6 +468,18 @@ public abstract class GXDLMSServer2 {
      * 
      * @param sr
      *            Server reply.
+     * @throws NoSuchPaddingException
+     *             No such padding exception.
+     * @throws NoSuchAlgorithmException
+     *             No such algorithm exception.
+     * @throws InvalidAlgorithmParameterException
+     *             Invalid algorithm parameter exception.
+     * @throws InvalidKeyException
+     *             Invalid key exception.
+     * @throws BadPaddingException
+     *             Bad padding exception.
+     * @throws IllegalBlockSizeException
+     *             Illegal block size exception.
      */
     public final void handleRequest(GXServerReply sr)
             throws InvalidKeyException, NoSuchAlgorithmException,
@@ -670,6 +706,18 @@ public abstract class GXDLMSServer2 {
      * @param data
      *            Notification body.
      * @return Generated data notification message(s).
+     * @throws NoSuchPaddingException
+     *             No such padding exception.
+     * @throws NoSuchAlgorithmException
+     *             No such algorithm exception.
+     * @throws InvalidAlgorithmParameterException
+     *             Invalid algorithm parameter exception.
+     * @throws InvalidKeyException
+     *             Invalid key exception.
+     * @throws BadPaddingException
+     *             Bad padding exception.
+     * @throws IllegalBlockSizeException
+     *             Illegal block size exception.
      */
     public final byte[][] generateDataNotificationMessages(final Date time,
             final GXByteBuffer data)
@@ -709,6 +757,18 @@ public abstract class GXDLMSServer2 {
      * @param push
      *            Target Push object.
      * @return Generated data notification message(s).
+     * @throws NoSuchPaddingException
+     *             No such padding exception.
+     * @throws NoSuchAlgorithmException
+     *             No such algorithm exception.
+     * @throws InvalidAlgorithmParameterException
+     *             Invalid algorithm parameter exception.
+     * @throws InvalidKeyException
+     *             Invalid key exception.
+     * @throws BadPaddingException
+     *             Bad padding exception.
+     * @throws IllegalBlockSizeException
+     *             Illegal block size exception.
      */
     public final byte[][] generatePushSetupMessages(final Date date,
             final GXDLMSPushSetup push)

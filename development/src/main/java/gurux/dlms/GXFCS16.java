@@ -82,13 +82,8 @@ class GXFCS16 {
 
     };
 
-    /**
+    /*
      * Reserved for internal use.
-     * 
-     * @param buff
-     * @param offset
-     * @param count
-     * @return
      */
     static final int countFCS16(final byte[] buff, final int offset,
             final int count) {

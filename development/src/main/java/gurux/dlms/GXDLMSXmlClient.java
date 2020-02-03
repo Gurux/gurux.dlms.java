@@ -383,6 +383,18 @@ public class GXDLMSXmlClient extends GXDLMSSecureClient {
      * @param pdu
      *            Parsed PDU.
      * @return Generated messages (frames).
+     * @throws NoSuchPaddingException
+     *             No such padding exception.
+     * @throws NoSuchAlgorithmException
+     *             No such algorithm exception.
+     * @throws InvalidAlgorithmParameterException
+     *             Invalid algorithm parameter exception.
+     * @throws InvalidKeyException
+     *             Invalid key exception.
+     * @throws BadPaddingException
+     *             Bad padding exception.
+     * @throws IllegalBlockSizeException
+     *             Illegal block size exception.
      */
     public final byte[][] pduToMessages(final GXDLMSXmlPdu pdu)
             throws InvalidKeyException, NoSuchAlgorithmException,

@@ -636,15 +636,11 @@ final class GXDLMSSNCommandHandler {
         GXDLMS.getSNPdu(p, replyData);
     }
 
-    /**
+    /*
      * Handle information report.
-     * 
-     * @param settings
-     *            DLMS settings.
-     * @param reply
-     *            Received data.
-     * @param list
-     *            Received information report objects.
+     * @param settings DLMS settings.
+     * @param reply Received data.
+     * @param list Received information report objects.
      */
     static void handleInformationReport(final GXDLMSSettings settings,
             final GXReplyData reply,

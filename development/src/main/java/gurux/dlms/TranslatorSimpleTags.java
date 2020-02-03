@@ -26,11 +26,8 @@ final class TranslatorSimpleTags {
 
     }
 
-    /**
+    /*
      * Get general tags.
-     * 
-     * @param type
-     * @param list
      */
     static void getGeneralTags(final TranslatorOutputType type,
             final HashMap<Integer, String> list) {
@@ -125,11 +122,8 @@ final class TranslatorSimpleTags {
                 "EventNotificationRequest");
     }
 
-    /**
+    /*
      * Get SN tags.
-     * 
-     * @param type
-     * @param list
      */
     static void getSnTags(final TranslatorOutputType type,
             final HashMap<Integer, String> list) {
@@ -166,11 +160,8 @@ final class TranslatorSimpleTags {
                 "DataAccessError");
     }
 
-    /**
+    /*
      * Get LN tags.
-     * 
-     * @param type
-     * @param list
      */
     static void getLnTags(final TranslatorOutputType type,
             final HashMap<Integer, String> list) {
@@ -276,11 +267,8 @@ final class TranslatorSimpleTags {
                 "GatewayResponse");
     }
 
-    /**
+    /*
      * Get glo tags.
-     * 
-     * @param type
-     * @param list
      */
     static void getGloTags(final TranslatorOutputType type,
             final HashMap<Integer, String> list) {
@@ -315,11 +303,8 @@ final class TranslatorSimpleTags {
                 "GeneralCiphering");
     }
 
-    /**
+    /*
      * Get ded tags.
-     * 
-     * @param type
-     * @param list
      */
     static void getDedTags(final TranslatorOutputType type,
             final HashMap<Integer, String> list) {
@@ -343,11 +328,8 @@ final class TranslatorSimpleTags {
                 "GeneralDedCiphering");
     }
 
-    /**
+    /*
      * Get translator tags.
-     * 
-     * @param type
-     * @param list
      */
     static void getTranslatorTags(final TranslatorOutputType type,
             final HashMap<Integer, String> list) {

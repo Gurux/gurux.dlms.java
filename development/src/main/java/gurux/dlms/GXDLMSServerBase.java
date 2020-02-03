@@ -680,6 +680,18 @@ public class GXDLMSServerBase {
      * 
      * @param sr
      *            Server reply.
+     * @throws NoSuchPaddingException
+     *             No such padding exception.
+     * @throws NoSuchAlgorithmException
+     *             No such algorithm exception.
+     * @throws InvalidAlgorithmParameterException
+     *             Invalid algorithm parameter exception.
+     * @throws InvalidKeyException
+     *             Invalid key exception.
+     * @throws BadPaddingException
+     *             Bad padding exception.
+     * @throws IllegalBlockSizeException
+     *             Illegal block size exception.
      */
     @SuppressWarnings({ "squid:S00112", "squid:S1193", "squid:S1066",
             "squid:S1141" })

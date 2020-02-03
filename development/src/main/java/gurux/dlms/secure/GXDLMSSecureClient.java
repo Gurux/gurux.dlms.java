@@ -147,6 +147,19 @@ public class GXDLMSSecureClient extends GXDLMSClient {
      *            Key Encrypting Key, also known as Master key.
      * @param data
      *            Data to encrypt.
+     * @return Encrypted data.
+     * @throws NoSuchPaddingException
+     *             No such padding exception.
+     * @throws NoSuchAlgorithmException
+     *             No such algorithm exception.
+     * @throws InvalidAlgorithmParameterException
+     *             Invalid algorithm parameter exception.
+     * @throws InvalidKeyException
+     *             Invalid key exception.
+     * @throws BadPaddingException
+     *             Bad padding exception.
+     * @throws IllegalBlockSizeException
+     *             Illegal block size exception.
      */
     public static byte[] encrypt(final byte[] kek, final byte[] data)
             throws NoSuchAlgorithmException, NoSuchPaddingException,
@@ -228,6 +241,18 @@ public class GXDLMSSecureClient extends GXDLMSClient {
      * @param type
      *            Certificate type.
      * @return Generated action.
+     * @throws NoSuchPaddingException
+     *             No such padding exception.
+     * @throws NoSuchAlgorithmException
+     *             No such algorithm exception.
+     * @throws InvalidAlgorithmParameterException
+     *             Invalid algorithm parameter exception.
+     * @throws InvalidKeyException
+     *             Invalid key exception.
+     * @throws BadPaddingException
+     *             Bad padding exception.
+     * @throws IllegalBlockSizeException
+     *             Illegal block size exception.
      */
     public final byte[][] getServerCertificate(final GXDLMSSecuritySetup ss,
             final CertificateType type)

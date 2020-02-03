@@ -56,12 +56,8 @@ public class GXDLMSConfirmedServiceError extends RuntimeException {
     private ServiceError serviceError;
     private byte serviceErrorValue;
 
-    /**
+    /*
      * Constructor for Confirmed ServiceError.
-     * 
-     * @param service
-     * @param type
-     * @param value
      */
     GXDLMSConfirmedServiceError(final ConfirmedServiceError service,
             final ServiceError type, final int value) {

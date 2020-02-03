@@ -104,11 +104,9 @@ public class GXAsn1ObjectIdentifier {
         return sb.toString();
     }
 
-    /**
+    /*
      * Convert OID string to bytes.
-     * 
-     * @param oid
-     *            OID string.
+     * @param oid OID string.
      */
     static byte[] oidStringtoBytes(final String oid) {
         int value;

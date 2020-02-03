@@ -314,6 +314,18 @@ public class GXDLMSTranslator {
      * @param pdu
      *            PDU of received frame is set here.
      * @return Is new frame found.
+     * @throws NoSuchPaddingException
+     *             No such padding exception.
+     * @throws NoSuchAlgorithmException
+     *             No such algorithm exception.
+     * @throws InvalidAlgorithmParameterException
+     *             Invalid algorithm parameter exception.
+     * @throws InvalidKeyException
+     *             Invalid key exception.
+     * @throws BadPaddingException
+     *             Bad padding exception.
+     * @throws IllegalBlockSizeException
+     *             Illegal block size exception.
      */
     @SuppressWarnings("squid:S135")
     public final boolean findNextFrame(final GXByteBuffer data,
@@ -530,6 +542,18 @@ public class GXDLMSTranslator {
      * @param value
      *            Bytes to convert.
      * @return Converted xml. {@link setPduOnly} {@link setCompleatePdu}
+     * @throws NoSuchPaddingException
+     *             No such padding exception.
+     * @throws NoSuchAlgorithmException
+     *             No such algorithm exception.
+     * @throws InvalidAlgorithmParameterException
+     *             Invalid algorithm parameter exception.
+     * @throws InvalidKeyException
+     *             Invalid key exception.
+     * @throws BadPaddingException
+     *             Bad padding exception.
+     * @throws IllegalBlockSizeException
+     *             Illegal block size exception.
      */
     public final String messageToXml(final byte[] value)
             throws InvalidKeyException, NoSuchAlgorithmException,
@@ -571,6 +595,18 @@ public class GXDLMSTranslator {
      *            Bytes to convert.
      * @return Converted XML. {@link clear} {@link setPduOnly}
      *         {@link setCompleatePdu}
+     * @throws NoSuchPaddingException
+     *             No such padding exception.
+     * @throws NoSuchAlgorithmException
+     *             No such algorithm exception.
+     * @throws InvalidAlgorithmParameterException
+     *             Invalid algorithm parameter exception.
+     * @throws InvalidKeyException
+     *             Invalid key exception.
+     * @throws BadPaddingException
+     *             Bad padding exception.
+     * @throws IllegalBlockSizeException
+     *             Illegal block size exception.
      */
     @SuppressWarnings("squid:S106")
     public final String messageToXml(final GXByteBuffer value)
@@ -2527,6 +2563,18 @@ public class GXDLMSTranslator {
      * @param xml
      *            Converted XML.
      * @return Converted PDU in hex string.
+     * @throws NoSuchPaddingException
+     *             No such padding exception.
+     * @throws NoSuchAlgorithmException
+     *             No such algorithm exception.
+     * @throws InvalidAlgorithmParameterException
+     *             Invalid algorithm parameter exception.
+     * @throws InvalidKeyException
+     *             Invalid key exception.
+     * @throws BadPaddingException
+     *             Bad padding exception.
+     * @throws IllegalBlockSizeException
+     *             Illegal block size exception.
      */
     public final String xmlToHexPdu(final String xml)
             throws InvalidKeyException, NoSuchAlgorithmException,
@@ -2543,6 +2591,18 @@ public class GXDLMSTranslator {
      * @param addSpace
      *            Add spaces between bytes.
      * @return Converted PDU in hex string.
+     * @throws NoSuchPaddingException
+     *             No such padding exception.
+     * @throws NoSuchAlgorithmException
+     *             No such algorithm exception.
+     * @throws InvalidAlgorithmParameterException
+     *             Invalid algorithm parameter exception.
+     * @throws InvalidKeyException
+     *             Invalid key exception.
+     * @throws BadPaddingException
+     *             Bad padding exception.
+     * @throws IllegalBlockSizeException
+     *             Illegal block size exception.
      */
     public final String xmlToHexPdu(final String xml, final boolean addSpace)
             throws InvalidKeyException, NoSuchAlgorithmException,
@@ -2557,6 +2617,18 @@ public class GXDLMSTranslator {
      * @param xml
      *            Converted XML.
      * @return Converted PDU in bytes.
+     * @throws NoSuchPaddingException
+     *             No such padding exception.
+     * @throws NoSuchAlgorithmException
+     *             No such algorithm exception.
+     * @throws InvalidAlgorithmParameterException
+     *             Invalid algorithm parameter exception.
+     * @throws InvalidKeyException
+     *             Invalid key exception.
+     * @throws BadPaddingException
+     *             Bad padding exception.
+     * @throws IllegalBlockSizeException
+     *             Illegal block size exception.
      */
     public final byte[] xmlToPdu(final String xml)
             throws InvalidKeyException, NoSuchAlgorithmException,
@@ -2573,6 +2645,18 @@ public class GXDLMSTranslator {
      * @param settings
      *            XML settings.
      * @return Converted PDU in bytes.
+     * @throws NoSuchPaddingException
+     *             No such padding exception.
+     * @throws NoSuchAlgorithmException
+     *             No such algorithm exception.
+     * @throws InvalidAlgorithmParameterException
+     *             Invalid algorithm parameter exception.
+     * @throws InvalidKeyException
+     *             Invalid key exception.
+     * @throws BadPaddingException
+     *             Bad padding exception.
+     * @throws IllegalBlockSizeException
+     *             Illegal block size exception.
      */
     @SuppressWarnings({ "squid:S00112", "squid:S1871" })
     public final byte[] xmlToPdu(final String xml,

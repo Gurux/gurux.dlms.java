@@ -50,7 +50,7 @@ class GXStandardObisCode {
 
     }
 
-    /**
+    /*
      * Constructor.
      */
     GXStandardObisCode(final String[] forObis, final String desc,
@@ -64,7 +64,7 @@ class GXStandardObisCode {
         setDataType(forDataType);
     }
 
-    /**
+    /*
      * OBIS code.
      */
     public final String[] getOBIS() {
@@ -76,7 +76,7 @@ class GXStandardObisCode {
     }
 
     /**
-     * OBIS code description.
+     * @return OBIS code description.
      */
     public final String getDescription() {
         return description;
@@ -86,7 +86,7 @@ class GXStandardObisCode {
         description = value;
     }
 
-    /**
+    /*
      * Interfaces that are using this OBIS code.
      */
     public final String getInterfaces() {
@@ -98,7 +98,7 @@ class GXStandardObisCode {
     }
 
     /**
-     * Standard data types.
+     * @return Standard data types.
      */
     public final String getDataType() {
         return dataType;
@@ -109,9 +109,7 @@ class GXStandardObisCode {
     }
 
     /**
-     * Convert to string.
-     * 
-     * @return
+     * @return Convert to string.
      */
     @Override
     public String toString() {

@@ -300,6 +300,18 @@ public class GXDLMSScriptTable extends GXDLMSObject implements IGXDLMSBase {
      * @param script
      *            Executed script.
      * @return Action bytes.
+     * @throws NoSuchPaddingException
+     *             No such padding exception.
+     * @throws NoSuchAlgorithmException
+     *             No such algorithm exception.
+     * @throws InvalidAlgorithmParameterException
+     *             Invalid algorithm parameter exception.
+     * @throws InvalidKeyException
+     *             Invalid key exception.
+     * @throws BadPaddingException
+     *             Bad padding exception.
+     * @throws IllegalBlockSizeException
+     *             Illegal block size exception.
      */
     public final byte[][] execute(final GXDLMSClient client,
             final GXDLMSScript script)
@@ -317,6 +329,18 @@ public class GXDLMSScriptTable extends GXDLMSObject implements IGXDLMSBase {
      * @param scriptId
      *            Executed script ID.
      * @return Action bytes.
+     * @throws NoSuchPaddingException
+     *             No such padding exception.
+     * @throws NoSuchAlgorithmException
+     *             No such algorithm exception.
+     * @throws InvalidAlgorithmParameterException
+     *             Invalid algorithm parameter exception.
+     * @throws InvalidKeyException
+     *             Invalid key exception.
+     * @throws BadPaddingException
+     *             Bad padding exception.
+     * @throws IllegalBlockSizeException
+     *             Illegal block size exception.
      */
     public final byte[][] execute(final GXDLMSClient client, final int scriptId)
             throws InvalidKeyException, NoSuchAlgorithmException,

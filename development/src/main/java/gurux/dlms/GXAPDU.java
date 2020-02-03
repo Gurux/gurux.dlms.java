@@ -59,10 +59,11 @@ import gurux.dlms.secure.GXCiphering;
  * The services to access the attributes and methods of COSEM objects are
  * determined on DLMS/COSEM Application layer. The services are carried by
  * Application Protocol Data Units (APDUs).
- * <p />
+ * <p>
  * In DLMS/COSEM the meter is primarily a server, and the controlling system is
  * a client. Also unsolicited (received without a request) messages are
  * available.
+ * </p>
  */
 final class GXAPDU {
 
@@ -211,6 +212,7 @@ final class GXAPDU {
      * @param settings
      *            DLMS settings.
      * @param data
+     *            Received data.
      */
     static void getInitiateRequest(final GXDLMSSettings settings,
             final GXByteBuffer data) {
@@ -251,14 +253,11 @@ final class GXAPDU {
         data.setUInt16(settings.getMaxPduSize());
     }
 
-    /**
+    /*
      * Generate user information.
-     * 
-     * @param settings
-     *            DLMS settings.
-     * @param cipher
-     * @param data
-     *            Generated user information.
+     * @param settings DLMS settings.
+     * @param cipher Ciphering interface.
+     * @param data Generated user information.
      */
     static void generateUserInformation(final GXDLMSSettings settings,
             final GXICipher cipher, final GXByteBuffer encryptedData,
@@ -307,7 +306,7 @@ final class GXAPDU {
         }
     }
 
-    /**
+    /*
      * Generates Aarq.
      */
     public static void generateAarq(final GXDLMSSettings settings,
@@ -350,10 +349,8 @@ final class GXAPDU {
         }
     }
 
-    /**
+    /*
      * Parse User Information from PDU.
-     * 
-     * @throws Exception
      */
     static void parseUserInformation(final GXDLMSSettings settings,
             final GXICipher cipher, final GXByteBuffer data,
@@ -849,7 +846,7 @@ final class GXAPDU {
         }
     }
 
-    /**
+    /*
      * Parse APDU.
      */
     public static Object parsePDU(final GXDLMSSettings settings,
@@ -913,7 +910,7 @@ final class GXAPDU {
         return AcseServiceProvider.NONE;
     }
 
-    /**
+    /*
      * Parse APDU.
      */
     @SuppressWarnings("squid:S106")

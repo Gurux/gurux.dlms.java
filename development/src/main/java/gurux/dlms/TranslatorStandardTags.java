@@ -26,11 +26,8 @@ final class TranslatorStandardTags {
 
     }
 
-    /**
+    /*
      * Get general tags.
-     * 
-     * @param type
-     * @param list
      */
     static void getGeneralTags(final TranslatorOutputType type,
             final HashMap<Integer, String> list) {
@@ -137,11 +134,8 @@ final class TranslatorStandardTags {
                 "x:responding-AE-invocation-id");
     }
 
-    /**
+    /*
      * Get SN tags.
-     * 
-     * @param type
-     * @param list
      */
     static void getSnTags(final TranslatorOutputType type,
             final HashMap<Integer, String> list) {
@@ -182,11 +176,8 @@ final class TranslatorStandardTags {
                 "x:data-access-error");
     }
 
-    /**
+    /*
      * Get LN tags.
-     * 
-     * @param type
-     * @param list
      */
     static void getLnTags(final TranslatorOutputType type,
             final HashMap<Integer, String> list) {
@@ -288,11 +279,8 @@ final class TranslatorStandardTags {
                 "x:gateway-response");
     }
 
-    /**
+    /*
      * Get glo tags.
-     * 
-     * @param type
-     * @param list
      */
     static void getGloTags(final TranslatorOutputType type,
             final HashMap<Integer, String> list) {
@@ -326,11 +314,8 @@ final class TranslatorStandardTags {
                 "x:general-ciphering");
     }
 
-    /**
+    /*
      * Get ded tags.
-     * 
-     * @param type
-     * @param list
      */
     static void getDedTags(final TranslatorOutputType type,
             final HashMap<Integer, String> list) {
@@ -354,11 +339,8 @@ final class TranslatorStandardTags {
                 "x:general-ded-ciphering");
     }
 
-    /**
+    /*
      * Get translator tags.
-     * 
-     * @param type
-     * @param list
      */
     static void getTranslatorTags(final TranslatorOutputType type,
             final HashMap<Integer, String> list) {

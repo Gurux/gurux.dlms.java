@@ -414,7 +414,7 @@ class GXStandardObisCodeCollection
         return (String.valueOf(value + Integer.parseInt(formula.substring(1))));
     }
 
-    /**
+    /*
      * Find Standard OBIS Code description.
      */
     public final GXStandardObisCode[] find(final int[] obisCode, final int ic) {

@@ -210,6 +210,18 @@ public class GXDLMSAssociationLogicalName extends GXDLMSObject
      * @param client
      *            DLMS client.
      * @return Action bytes.
+     * @throws NoSuchPaddingException
+     *             No such padding exception.
+     * @throws NoSuchAlgorithmException
+     *             No such algorithm exception.
+     * @throws InvalidAlgorithmParameterException
+     *             Invalid algorithm parameter exception.
+     * @throws InvalidKeyException
+     *             Invalid key exception.
+     * @throws BadPaddingException
+     *             Bad padding exception.
+     * @throws IllegalBlockSizeException
+     *             Illegal block size exception.
      */
     public byte[][] updateSecret(final GXDLMSClient client)
             throws InvalidKeyException, NoSuchAlgorithmException,
@@ -243,6 +255,18 @@ public class GXDLMSAssociationLogicalName extends GXDLMSObject
      * @param name
      *            User name.
      * @return Action bytes.
+     * @throws NoSuchPaddingException
+     *             No such padding exception.
+     * @throws NoSuchAlgorithmException
+     *             No such algorithm exception.
+     * @throws InvalidAlgorithmParameterException
+     *             Invalid algorithm parameter exception.
+     * @throws InvalidKeyException
+     *             Invalid key exception.
+     * @throws BadPaddingException
+     *             Bad padding exception.
+     * @throws IllegalBlockSizeException
+     *             Illegal block size exception.
      */
     public final byte[][] addUser(final GXDLMSClient client, final byte id,
             final String name)
@@ -268,6 +292,18 @@ public class GXDLMSAssociationLogicalName extends GXDLMSObject
      * @param name
      *            User name.
      * @return Action bytes.
+     * @throws NoSuchPaddingException
+     *             No such padding exception.
+     * @throws NoSuchAlgorithmException
+     *             No such algorithm exception.
+     * @throws InvalidAlgorithmParameterException
+     *             Invalid algorithm parameter exception.
+     * @throws InvalidKeyException
+     *             Invalid key exception.
+     * @throws BadPaddingException
+     *             Bad padding exception.
+     * @throws IllegalBlockSizeException
+     *             Illegal block size exception.
      */
     public final byte[][] removeUser(final GXDLMSClient client, final byte id,
             final String name)

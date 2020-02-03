@@ -268,6 +268,18 @@ public abstract class GXDLMSServer {
      *            Received data from the client.
      * @return Response to the request. Response is null if request packet is
      *         not complete.
+     * @throws NoSuchPaddingException
+     *             No such padding exception.
+     * @throws NoSuchAlgorithmException
+     *             No such algorithm exception.
+     * @throws InvalidAlgorithmParameterException
+     *             Invalid algorithm parameter exception.
+     * @throws InvalidKeyException
+     *             Invalid key exception.
+     * @throws BadPaddingException
+     *             Bad padding exception.
+     * @throws IllegalBlockSizeException
+     *             Illegal block size exception.
      */
     public final byte[] handleRequest(final byte[] buff)
             throws InvalidKeyException, NoSuchAlgorithmException,
@@ -285,6 +297,18 @@ public abstract class GXDLMSServer {
      *            Connection info.
      * @return Response to the request. Response is null if request packet is
      *         not complete.
+     * @throws NoSuchPaddingException
+     *             No such padding exception.
+     * @throws NoSuchAlgorithmException
+     *             No such algorithm exception.
+     * @throws InvalidAlgorithmParameterException
+     *             Invalid algorithm parameter exception.
+     * @throws InvalidKeyException
+     *             Invalid key exception.
+     * @throws BadPaddingException
+     *             Bad padding exception.
+     * @throws IllegalBlockSizeException
+     *             Illegal block size exception.
      */
     public final byte[] handleRequest(final byte[] buff,
             final GXDLMSConnectionEventArgs connectionInfo)

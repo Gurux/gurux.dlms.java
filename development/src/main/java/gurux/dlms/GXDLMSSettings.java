@@ -512,7 +512,6 @@ public class GXDLMSSettings {
     }
 
     /**
-     * @return Generates I-frame.
      * @param first
      *            Is this first packet.
      * @return Generated I-frame

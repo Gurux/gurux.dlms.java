@@ -219,11 +219,26 @@ public class GXDLMSNotify {
         settings.setInvokeID(value);
     }
 
-    /*
+    /**
      * Removes the HDLC frame from the packet, and returns COSEM data only.
-     * @param reply The received data from the device.
-     * @param data Information from the received data.
+     * 
+     * @param reply
+     *            The received data from the device.
+     * @param data
+     *            Information from the received data.
      * @return Is frame complete.
+     * @throws NoSuchPaddingException
+     *             No such padding exception.
+     * @throws NoSuchAlgorithmException
+     *             No such algorithm exception.
+     * @throws InvalidAlgorithmParameterException
+     *             Invalid algorithm parameter exception.
+     * @throws InvalidKeyException
+     *             Invalid key exception.
+     * @throws BadPaddingException
+     *             Bad padding exception.
+     * @throws IllegalBlockSizeException
+     *             Illegal block size exception.
      */
     public final boolean getData(final GXByteBuffer reply,
             final GXReplyData data)
