@@ -219,13 +219,10 @@ public class GXDLMSNotify {
         settings.setInvokeID(value);
     }
 
-    /**
+    /*
      * Removes the HDLC frame from the packet, and returns COSEM data only.
-     * 
-     * @param reply
-     *            The received data from the device.
-     * @param data
-     *            Information from the received data.
+     * @param reply The received data from the device.
+     * @param data Information from the received data.
      * @return Is frame complete.
      */
     public final boolean getData(final GXByteBuffer reply,
@@ -287,6 +284,18 @@ public class GXDLMSNotify {
      * @param data
      *            Notification body.
      * @return Generated data notification message(s).
+     * @throws NoSuchPaddingException
+     *             No such padding exception.
+     * @throws NoSuchAlgorithmException
+     *             No such algorithm exception.
+     * @throws InvalidAlgorithmParameterException
+     *             Invalid algorithm parameter exception.
+     * @throws InvalidKeyException
+     *             Invalid key exception.
+     * @throws BadPaddingException
+     *             Bad padding exception.
+     * @throws IllegalBlockSizeException
+     *             Illegal block size exception.
      */
     public final byte[][] generateDataNotificationMessages(final Date time,
             final byte[] data)
@@ -304,6 +313,18 @@ public class GXDLMSNotify {
      * @param data
      *            Notification body.
      * @return Generated data notification message(s).
+     * @throws NoSuchPaddingException
+     *             No such padding exception.
+     * @throws NoSuchAlgorithmException
+     *             No such algorithm exception.
+     * @throws InvalidAlgorithmParameterException
+     *             Invalid algorithm parameter exception.
+     * @throws InvalidKeyException
+     *             Invalid key exception.
+     * @throws BadPaddingException
+     *             Bad padding exception.
+     * @throws IllegalBlockSizeException
+     *             Illegal block size exception.
      */
     public final byte[][] generateDataNotificationMessages(final Date time,
             final GXByteBuffer data)
@@ -343,6 +364,18 @@ public class GXDLMSNotify {
      * @param objects
      *            List of objects and attribute indexes to notify.
      * @return Generated data notification message(s).
+     * @throws NoSuchPaddingException
+     *             No such padding exception.
+     * @throws NoSuchAlgorithmException
+     *             No such algorithm exception.
+     * @throws InvalidAlgorithmParameterException
+     *             Invalid algorithm parameter exception.
+     * @throws InvalidKeyException
+     *             Invalid key exception.
+     * @throws BadPaddingException
+     *             Bad padding exception.
+     * @throws IllegalBlockSizeException
+     *             Illegal block size exception.
      */
     public final byte[][] generateDataNotificationMessages(final Date date,
             final List<Entry<GXDLMSObject, Integer>> objects)
@@ -369,6 +402,18 @@ public class GXDLMSNotify {
      * @param push
      *            Target Push object.
      * @return Generated data notification message(s).
+     * @throws NoSuchPaddingException
+     *             No such padding exception.
+     * @throws NoSuchAlgorithmException
+     *             No such algorithm exception.
+     * @throws InvalidAlgorithmParameterException
+     *             Invalid algorithm parameter exception.
+     * @throws InvalidKeyException
+     *             Invalid key exception.
+     * @throws BadPaddingException
+     *             Bad padding exception.
+     * @throws IllegalBlockSizeException
+     *             Illegal block size exception.
      */
     public final byte[][] generatePushSetupMessages(final Date date,
             final GXDLMSPushSetup push)
@@ -501,6 +546,18 @@ public class GXDLMSNotify {
      * @param list
      *            List of COSEM object and attribute index to report.
      * @return Report request as byte array.
+     * @throws NoSuchPaddingException
+     *             No such padding exception.
+     * @throws NoSuchAlgorithmException
+     *             No such algorithm exception.
+     * @throws InvalidAlgorithmParameterException
+     *             Invalid algorithm parameter exception.
+     * @throws InvalidKeyException
+     *             Invalid key exception.
+     * @throws BadPaddingException
+     *             Bad padding exception.
+     * @throws IllegalBlockSizeException
+     *             Illegal block size exception.
      */
     public byte[][] generateReport(final GXDateTime time,
             final List<Entry<GXDLMSObject, Integer>> list)
