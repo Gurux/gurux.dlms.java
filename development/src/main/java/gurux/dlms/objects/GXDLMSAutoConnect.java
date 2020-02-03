@@ -99,6 +99,7 @@ public class GXDLMSAutoConnect extends GXDLMSObject implements IGXDLMSBase {
         super(ObjectType.AUTO_CONNECT, ln, sn);
         callingWindow = new ArrayList<Entry<GXDateTime, GXDateTime>>();
         mode = AutoConnectMode.NO_AUTO_DIALLING;
+        setVersion(2);
     }
 
     public final AutoConnectMode getMode() {

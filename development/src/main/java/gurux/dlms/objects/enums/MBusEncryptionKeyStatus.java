@@ -32,15 +32,13 @@
 // Full text may be retrieved at http://www.gnu.org/licenses/gpl-2.0.txt
 //---------------------------------------------------------------------------
 
-package gurux.dlms.objects;
+package gurux.dlms.objects.enums;
 
 /**
- * Online help: <br>
- * https://www.gurux.fi/Gurux.DLMS.Objects.GXDLMSIECOpticalPortSetup
- * 
- * @deprecated use {@link #GXDLMSIECLocalPortSetup} instead.
+ * Online help:<br>
+ * https://www.gurux.fi/Gurux.DLMS.Objects.GXDLMSMBusClient
  */
-public class GXDLMSIECOpticalPortSetup extends GXDLMSIECLocalPortSetup
-        implements IGXDLMSBase {
-
+public enum MBusEncryptionKeyStatus {
+    NO_ENCRYPTION_KEY, ENCRYPTION_KEY_SET, ENCRYPTION_KEY_TRANSFERRED,
+    ENCRYPTION_KEY_SET_AND_TRANSFERRED, ENCRYPTION_KEY_INUSE
 }

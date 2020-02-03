@@ -68,7 +68,7 @@ public class GXDLMSLimits {
      */
     private boolean useFrameSize = false;
 
-    /**
+    /*
      * Constructor.
      */
     GXDLMSLimits(GXDLMSSettings parent) {

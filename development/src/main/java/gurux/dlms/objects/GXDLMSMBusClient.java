@@ -49,6 +49,7 @@ import gurux.dlms.enums.DataType;
 import gurux.dlms.enums.ErrorCode;
 import gurux.dlms.enums.ObjectType;
 import gurux.dlms.internal.GXCommon;
+import gurux.dlms.objects.enums.MBusEncryptionKeyStatus;
 
 /**
  * Online help: <br>
@@ -66,14 +67,14 @@ public class GXDLMSMBusClient extends GXDLMSObject implements IGXDLMSBase {
     private int accessNumber;
     private int status;
     private int alarm;
+    private int configuration;
+    private MBusEncryptionKeyStatus encryptionKeyStatus;
 
     /**
      * Constructor.
      */
     public GXDLMSMBusClient() {
-        super(ObjectType.MBUS_CLIENT);
-        captureDefinition =
-                new java.util.ArrayList<java.util.Map.Entry<String, String>>();
+        this(null, 0);
     }
 
     /**
@@ -83,9 +84,7 @@ public class GXDLMSMBusClient extends GXDLMSObject implements IGXDLMSBase {
      *            Logical Name of the object.
      */
     public GXDLMSMBusClient(final String ln) {
-        super(ObjectType.MBUS_CLIENT, ln, 0);
-        captureDefinition =
-                new java.util.ArrayList<java.util.Map.Entry<String, String>>();
+        this(ln, 0);
     }
 
     /**
@@ -202,12 +201,35 @@ public class GXDLMSMBusClient extends GXDLMSObject implements IGXDLMSBase {
         alarm = value;
     }
 
+    public int getConfiguration() {
+        return configuration;
+    }
+
+    public void setConfiguration(final int value) {
+        configuration = value;
+    }
+
+    public MBusEncryptionKeyStatus getEncryptionKeyStatus() {
+        return encryptionKeyStatus;
+    }
+
+    public void setEncryptionKeyStatus(final MBusEncryptionKeyStatus value) {
+        encryptionKeyStatus = value;
+    }
+
     @Override
     public final Object[] getValues() {
+        if (getVersion() == 0) {
+            return new Object[] { getLogicalName(), mBusPortReference,
+                    captureDefinition, capturePeriod, primaryAddress,
+                    identificationNumber, manufacturerID, dataHeaderVersion,
+                    deviceType, accessNumber, status, alarm };
+        }
         return new Object[] { getLogicalName(), mBusPortReference,
                 captureDefinition, capturePeriod, primaryAddress,
                 identificationNumber, manufacturerID, dataHeaderVersion,
-                deviceType, accessNumber, status, alarm };
+                deviceType, accessNumber, status, alarm, configuration,
+                encryptionKeyStatus };
     }
 
     /*
@@ -267,6 +289,16 @@ public class GXDLMSMBusClient extends GXDLMSObject implements IGXDLMSBase {
         if (all || canRead(12)) {
             attributes.add(12);
         }
+        if (getVersion() > 0) {
+            // Configuration
+            if (all || canRead(13)) {
+                attributes.add(13);
+            }
+            // EncryptionKeyStatus
+            if (all || canRead(14)) {
+                attributes.add(14);
+            }
+        }
         return GXDLMSObjectHelpers.toIntArray(attributes);
     }
 
@@ -275,7 +307,10 @@ public class GXDLMSMBusClient extends GXDLMSObject implements IGXDLMSBase {
      */
     @Override
     public final int getAttributeCount() {
-        return 12;
+        if (getVersion() == 0) {
+            return 12;
+        }
+        return 14;
     }
 
     /*
@@ -323,6 +358,14 @@ public class GXDLMSMBusClient extends GXDLMSObject implements IGXDLMSBase {
         }
         if (index == 12) {
             return DataType.UINT8;
+        }
+        if (getVersion() > 0) {
+            if (index == 13) {
+                return DataType.UINT16;
+            }
+            if (index == 14) {
+                return DataType.ENUM;
+            }
         }
         throw new IllegalArgumentException(
                 "getDataType failed. Invalid attribute index.");
@@ -385,6 +428,14 @@ public class GXDLMSMBusClient extends GXDLMSObject implements IGXDLMSBase {
         if (e.getIndex() == 12) {
             return alarm;
         }
+        if (getVersion() > 0) {
+            if (e.getIndex() == 13) {
+                return configuration;
+            }
+            if (e.getIndex() == 14) {
+                return encryptionKeyStatus.ordinal();
+            }
+        }
         e.setError(ErrorCode.READ_WRITE_DENIED);
         return null;
     }
@@ -437,6 +488,15 @@ public class GXDLMSMBusClient extends GXDLMSObject implements IGXDLMSBase {
             status = ((Number) e.getValue()).intValue();
         } else if (e.getIndex() == 12) {
             alarm = ((Number) e.getValue()).intValue();
+        } else if (getVersion() > 0) {
+            if (e.getIndex() == 13) {
+                configuration = ((Number) e.getValue()).intValue();
+            } else if (e.getIndex() == 14) {
+                encryptionKeyStatus = MBusEncryptionKeyStatus
+                        .values()[((Number) e.getValue()).intValue()];
+            } else {
+                e.setError(ErrorCode.READ_WRITE_DENIED);
+            }
         } else {
             e.setError(ErrorCode.READ_WRITE_DENIED);
         }
@@ -463,6 +523,14 @@ public class GXDLMSMBusClient extends GXDLMSObject implements IGXDLMSBase {
         dataHeaderVersion = reader.readElementContentAsInt("DataHeaderVersion");
         deviceType = reader.readElementContentAsInt("DeviceType");
         accessNumber = reader.readElementContentAsInt("AccessNumber");
+
+        status = reader.readElementContentAsInt("Status");
+        alarm = reader.readElementContentAsInt("Alarm");
+        if (getVersion() > 0) {
+            configuration = reader.readElementContentAsInt("Configuration");
+            encryptionKeyStatus = MBusEncryptionKeyStatus.values()[reader
+                    .readElementContentAsInt("EncryptionKeyStatus")];
+        }
     }
 
     @Override
@@ -485,6 +553,13 @@ public class GXDLMSMBusClient extends GXDLMSObject implements IGXDLMSBase {
         writer.writeElementString("DataHeaderVersion", dataHeaderVersion);
         writer.writeElementString("DeviceType", deviceType);
         writer.writeElementString("AccessNumber", accessNumber);
+        writer.writeElementString("Status", status);
+        writer.writeElementString("Alarm", alarm);
+        if (getVersion() > 0) {
+            writer.writeElementString("Configuration", configuration);
+            writer.writeElementString("EncryptionKeyStatus",
+                    encryptionKeyStatus.ordinal());
+        }
     }
 
     @Override

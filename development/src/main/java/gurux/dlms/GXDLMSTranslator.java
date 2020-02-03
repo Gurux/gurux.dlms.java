@@ -503,8 +503,8 @@ public class GXDLMSTranslator {
         return data.getData().array();
     }
 
-    private GXCiphering getCiphering() {
-        if (security != Security.NONE) {
+    private GXCiphering getCiphering(final boolean force) {
+        if (force || security != Security.NONE) {
             GXCiphering c = new GXCiphering(systemTitle);
             c.setSecurity(security);
             c.setSystemTitle(systemTitle);
@@ -588,7 +588,7 @@ public class GXDLMSTranslator {
             data.setXml(xml);
             int offset = value.position();
             GXDLMSSettings settings = new GXDLMSSettings(true);
-            settings.setCipher(getCiphering());
+            settings.setCipher(getCiphering(true));
             // If HDLC framing.
             if (value.getUInt8(value.position()) == 0x7e) {
                 settings.setInterfaceType(InterfaceType.HDLC);
@@ -881,7 +881,7 @@ public class GXDLMSTranslator {
         }
         try {
             GXDLMSSettings settings = new GXDLMSSettings(true);
-            settings.setCipher(getCiphering());
+            settings.setCipher(getCiphering(false));
             GXReplyData data = new GXReplyData();
             short cmd = value.getUInt8();
             String str;
@@ -899,7 +899,7 @@ public class GXDLMSTranslator {
             case Command.INITIATE_RESPONSE:
                 value.position(0);
                 settings = new GXDLMSSettings(false);
-                settings.setCipher(getCiphering());
+                settings.setCipher(getCiphering(true));
                 GXAPDU.parseInitiate(true, settings, settings.getCipher(),
                         value, xml);
                 break;
@@ -910,7 +910,7 @@ public class GXDLMSTranslator {
             case Command.AARE:
                 value.position(0);
                 settings = new GXDLMSSettings(false);
-                settings.setCipher(getCiphering());
+                settings.setCipher(getCiphering(true));
                 GXAPDU.parsePDU(settings, settings.getCipher(), value, xml);
                 break;
             case Command.GET_REQUEST:
