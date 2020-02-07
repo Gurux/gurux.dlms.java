@@ -212,7 +212,7 @@ public final class GXSecure {
                     for (int k = 1; t != 0; k++) {
                         byte v = (byte) t;
                         buf[IV.length - k] ^= v;
-                        t = (int) ((int) t >> 8);
+                        t = t >> 8;
                     }
                     buf = cipher.doFinal(buf);
                     System.arraycopy(buf, 0, a, 0, 8);

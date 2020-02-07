@@ -131,6 +131,17 @@ public class GXDLMSTranslator {
      * System title.
      */
     private byte[] systemTitle;
+
+    /**
+     * Server system title.
+     */
+    private byte[] serverSystemTitle;
+
+    /**
+     * Dedicated key.
+     */
+    private byte[] dedicatedKey;
+
     /**
      * Block cipher key.
      */
@@ -207,6 +218,36 @@ public class GXDLMSTranslator {
      */
     public final void setSystemTitle(final byte[] value) {
         systemTitle = value;
+    }
+
+    /**
+     * @return Server system title.
+     */
+    public byte[] getServerSystemTitle() {
+        return serverSystemTitle;
+    }
+
+    /**
+     * @param value
+     *            Server system title.
+     */
+    public void setServerSystemTitle(final byte[] value) {
+        serverSystemTitle = value;
+    }
+
+    /**
+     * @return Dedicated key.
+     */
+    public byte[] getDedicatedKey() {
+        return dedicatedKey;
+    }
+
+    /**
+     * @param value
+     *            Dedicated key.
+     */
+    public void setDedicatedKey(final byte[] value) {
+        dedicatedKey = value;
     }
 
     /**
@@ -515,7 +556,8 @@ public class GXDLMSTranslator {
         return data.getData().array();
     }
 
-    private GXCiphering getCiphering(final boolean force) {
+    private void getCiphering(final GXDLMSSettings settings,
+            final boolean force) {
         if (force || security != Security.NONE) {
             GXCiphering c = new GXCiphering(systemTitle);
             c.setSecurity(security);
@@ -523,9 +565,11 @@ public class GXDLMSTranslator {
             c.setBlockCipherKey(blockCipherKey);
             c.setAuthenticationKey(authenticationKey);
             c.setInvocationCounter(invocationCounter);
-            return c;
+            c.setDedicatedKey(dedicatedKey);
+            settings.setSourceSystemTitle(serverSystemTitle);
+            settings.setCipher(c);
         }
-        return null;
+        settings.setCipher(null);
     }
 
     /**
@@ -624,7 +668,7 @@ public class GXDLMSTranslator {
             data.setXml(xml);
             int offset = value.position();
             GXDLMSSettings settings = new GXDLMSSettings(true);
-            settings.setCipher(getCiphering(true));
+            getCiphering(settings, true);
             // If HDLC framing.
             if (value.getUInt8(value.position()) == 0x7e) {
                 settings.setInterfaceType(InterfaceType.HDLC);
@@ -917,7 +961,7 @@ public class GXDLMSTranslator {
         }
         try {
             GXDLMSSettings settings = new GXDLMSSettings(true);
-            settings.setCipher(getCiphering(false));
+            getCiphering(settings, false);
             GXReplyData data = new GXReplyData();
             short cmd = value.getUInt8();
             String str;
@@ -935,7 +979,7 @@ public class GXDLMSTranslator {
             case Command.INITIATE_RESPONSE:
                 value.position(0);
                 settings = new GXDLMSSettings(false);
-                settings.setCipher(getCiphering(true));
+                getCiphering(settings, true);
                 GXAPDU.parseInitiate(true, settings, settings.getCipher(),
                         value, xml);
                 break;
@@ -946,7 +990,7 @@ public class GXDLMSTranslator {
             case Command.AARE:
                 value.position(0);
                 settings = new GXDLMSSettings(false);
-                settings.setCipher(getCiphering(true));
+                getCiphering(settings, true);
                 GXAPDU.parsePDU(settings, settings.getCipher(), value, xml);
                 break;
             case Command.GET_REQUEST:

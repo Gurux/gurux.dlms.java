@@ -1241,10 +1241,9 @@ abstract class GXDLMS {
         java.util.ArrayList<byte[]> messages =
                 new java.util.ArrayList<byte[]>();
         byte frame = 0x0;
-        if (p.getCommand() == Command.INFORMATION_REPORT) {
+        if (p.getCommand() == Command.INFORMATION_REPORT
+                || p.getCommand() == Command.DATA_NOTIFICATION) {
             frame = 0x13;
-        } else if (p.getCommand() == Command.NONE) {
-            frame = p.getSettings().getNextSend(true);
         }
         do {
             getSNPdu(p, reply);

@@ -99,6 +99,7 @@ public class GXDLMSMBusClient extends GXDLMSObject implements IGXDLMSBase {
         super(ObjectType.MBUS_CLIENT, ln, sn);
         captureDefinition =
                 new java.util.ArrayList<java.util.Map.Entry<String, String>>();
+        setVersion(1);
     }
 
     /**

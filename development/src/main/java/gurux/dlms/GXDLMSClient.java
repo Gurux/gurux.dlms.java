@@ -1756,8 +1756,9 @@ public class GXDLMSClient {
      *             Bad padding exception.
      * @throws IllegalBlockSizeException
      *             Illegal block size exception.
+     * @deprecated use {@link writeList} instead.
      */
-    public final byte[][] writeList(final List<GXWriteItem> list)
+    public final byte[][] writeList2(final List<GXWriteItem> list)
             throws InvalidKeyException, NoSuchAlgorithmException,
             NoSuchPaddingException, InvalidAlgorithmParameterException,
             IllegalBlockSizeException, BadPaddingException {
@@ -1806,6 +1807,97 @@ public class GXDLMSClient {
                         throw new GXDLMSException("Invalid parameter. "
                                 + " In java value type must give.");
                     }
+                }
+            }
+            GXCommon.setData(settings, data, type, value);
+        }
+        if (this.getUseLogicalNameReferencing()) {
+            GXDLMSLNParameters p = new GXDLMSLNParameters(settings, 0,
+                    Command.SET_REQUEST, SetRequestType.WITH_LIST, bb, data,
+                    0xff, Command.NONE);
+            reply = GXDLMS.getLnMessages(p);
+        } else {
+            GXDLMSSNParameters p = new GXDLMSSNParameters(settings,
+                    Command.WRITE_REQUEST, list.size(), 4, bb, data);
+            reply = GXDLMS.getSnMessages(p);
+        }
+        return reply.toArray(new byte[0][0]);
+    }
+
+    /**
+     * Write list of COSEM objects.
+     * 
+     * @param list
+     *            DLMS objects to write.
+     * @return Write request as byte array.
+     * @throws NoSuchPaddingException
+     *             No such padding exception.
+     * @throws NoSuchAlgorithmException
+     *             No such algorithm exception.
+     * @throws InvalidAlgorithmParameterException
+     *             Invalid algorithm parameter exception.
+     * @throws InvalidKeyException
+     *             Invalid key exception.
+     * @throws BadPaddingException
+     *             Bad padding exception.
+     * @throws IllegalBlockSizeException
+     *             Illegal block size exception.
+     */
+    public final byte[][]
+            writeList(final List<Entry<GXDLMSObject, Integer>> list)
+                    throws InvalidKeyException, NoSuchAlgorithmException,
+                    NoSuchPaddingException, InvalidAlgorithmParameterException,
+                    IllegalBlockSizeException, BadPaddingException {
+        if (!getNegotiatedConformance()
+                .contains(Conformance.MULTIPLE_REFERENCES)) {
+            throw new IllegalArgumentException(
+                    "Meter doesn't support multiple objects writing with one request.");
+        }
+        if (list == null || list.isEmpty()) {
+            throw new IllegalArgumentException("Invalid parameter.");
+        }
+        Object value;
+        List<byte[]> reply;
+        settings.resetBlockIndex();
+        if (autoIncreaseInvokeID) {
+            settings.setInvokeID((byte) ((settings.getInvokeID() + 1) & 0xF));
+        }
+        GXByteBuffer data = new GXByteBuffer();
+        GXByteBuffer bb = new GXByteBuffer();
+        if (this.getUseLogicalNameReferencing()) {
+            // Add length.
+            bb.setUInt8(list.size());
+            for (Entry<GXDLMSObject, Integer> it : list) {
+                // CI.
+                bb.setUInt16(it.getKey().getObjectType().getValue());
+                bb.set(GXCommon
+                        .logicalNameToBytes(it.getKey().getLogicalName()));
+                // Attribute ID.
+                bb.setUInt8(it.getValue());
+                // Attribute selector is not used.
+                bb.setUInt8(0);
+            }
+        } else {
+            for (Entry<GXDLMSObject, Integer> it : list) {
+                // Add variable type.
+                bb.setUInt8(2);
+                int sn = GXCommon.intValue(it.getKey().getShortName());
+                sn += (it.getValue() - 1) * 8;
+                bb.setUInt16(sn);
+            }
+        }
+        // Write values.
+        GXCommon.setObjectCount(list.size(), bb);
+        for (Entry<GXDLMSObject, Integer> it : list) {
+            ValueEventArgs e = new ValueEventArgs(settings, it.getKey(),
+                    it.getValue(), 0, null);
+            value = it.getKey().getValue(settings, e);
+            DataType type = it.getKey().getDataType(it.getValue());
+            if ((type == null || type == DataType.NONE) && value != null) {
+                type = GXDLMSConverter.getDLMSDataType(value);
+                if (type == DataType.NONE) {
+                    throw new GXDLMSException("Invalid parameter. "
+                            + " In java value type must give.");
                 }
             }
             GXCommon.setData(settings, data, type, value);

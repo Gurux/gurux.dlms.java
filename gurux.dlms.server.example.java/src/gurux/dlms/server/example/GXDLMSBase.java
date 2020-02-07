@@ -544,8 +544,7 @@ public class GXDLMSBase extends GXDLMSSecureServer2
         GXDLMSIp4Setup ip4 = new GXDLMSIp4Setup();
         // Get FIRST local IP address.
         try {
-            ip4.setIPAddress(
-                    InetAddress.getLocalHost().getHostAddress().toString());
+            ip4.setIPAddress(InetAddress.getLocalHost());
         } catch (UnknownHostException e) {
             throw new RuntimeException(e.getMessage());
         }
