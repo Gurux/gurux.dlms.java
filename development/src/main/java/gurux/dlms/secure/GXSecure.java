@@ -617,10 +617,10 @@ public final class GXSecure {
     }
 
     /*
-     * Decrypt data using Aes Gcm.
+     * Decrypts data using Aes Gcm.
      * @param c Cipher settings.
      * @param p GMAC Parameter.
-     * @return Encrypted data.
+     * @return Decrypted data.
      */
     static byte[] decryptAesGcm(final GXICipher c, final AesGcmParameter p,
             final GXByteBuffer data)
