@@ -47,7 +47,7 @@ class GXStandardObisCode {
      * Constructor.
      */
     GXStandardObisCode() {
-
+        setDataType("");
     }
 
     /*

@@ -93,7 +93,7 @@ public class GXDLMSConverter {
      */
     public final String[] getDescription(final String logicalName,
             final ObjectType type, final String description) {
-        if (codes.size() == 0) {
+        if (codes.isEmpty()) {
             readStandardObisInfo(standard, codes);
         }
         List<String> list = new ArrayList<String>();
@@ -226,7 +226,7 @@ public class GXDLMSConverter {
      */
     public final void updateOBISCodeInformation(final GXDLMSObject object) {
         synchronized (codes) {
-            if (codes.size() == 0) {
+            if (codes.isEmpty()) {
                 readStandardObisInfo(standard, codes);
             }
             updateOBISCodeInfo(codes, object);
@@ -242,7 +242,7 @@ public class GXDLMSConverter {
     public final void
             updateOBISCodeInformation(final GXDLMSObjectCollection objects) {
         synchronized (codes) {
-            if (codes.size() == 0) {
+            if (codes.isEmpty()) {
                 readStandardObisInfo(standard, codes);
             }
             for (GXDLMSObject it : objects) {
@@ -287,18 +287,21 @@ public class GXDLMSConverter {
         str = str.replace("\r", " ");
         List<String> rows = GXCommon.split(str, '\n');
         for (String it : rows) {
-            List<String> items = GXCommon.split(it, ';');
-            // Skip empty lines.
-            if (items.size() > 1) {
-                ObjectType ot =
-                        ObjectType.forValue(Integer.parseInt(items.get(0)));
-                String ln = GXCommon.toLogicalName(
-                        GXCommon.logicalNameToBytes(items.get(1)));
-                int version = Integer.parseInt(items.get(2));
-                String desc = items.get(3);
-                GXObisCode code = new GXObisCode(ln, ot, desc);
-                code.setVersion(version);
-                codes.add(code);
+            // Comments start with #.
+            if (!it.startsWith("#")) {
+                List<String> items = GXCommon.split(it, ';');
+                // Skip empty lines.
+                if (items.size() > 1) {
+                    ObjectType ot =
+                            ObjectType.forValue(Integer.parseInt(items.get(0)));
+                    String ln = GXCommon.toLogicalName(
+                            GXCommon.logicalNameToBytes(items.get(1)));
+                    int version = Integer.parseInt(items.get(2));
+                    String desc = items.get(3);
+                    GXObisCode code = new GXObisCode(ln, ot, desc);
+                    code.setVersion(version);
+                    codes.add(code);
+                }
             }
         }
         return codes.toArray(new GXObisCode[0]);

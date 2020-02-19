@@ -1585,12 +1585,6 @@ public class GXDLMSClient {
                     attributeDescriptor, data, 0xff, Command.NONE);
             reply = GXDLMS.getLnMessages(p);
         } else {
-            int requestType;
-            if (type == DataType.NONE) {
-                requestType = VariableAccessSpecification.VARIABLE_NAME;
-            } else {
-                requestType = VariableAccessSpecification.PARAMETERISED_ACCESS;
-            }
             int[] ind = new int[1], count = new int[1];
             GXDLMS.getActionInfo(objectType, ind, count);
             if (index > count[0]) {
@@ -1609,8 +1603,9 @@ public class GXDLMSClient {
                 attributeDescriptor.setUInt8(0);
             }
             GXDLMSSNParameters p =
-                    new GXDLMSSNParameters(settings, Command.READ_REQUEST, 1,
-                            requestType, attributeDescriptor, data);
+                    new GXDLMSSNParameters(settings, Command.WRITE_REQUEST, 1,
+                            VariableAccessSpecification.VARIABLE_NAME,
+                            attributeDescriptor, data);
             reply = GXDLMS.getSnMessages(p);
         }
         return reply.toArray(new byte[][] {});

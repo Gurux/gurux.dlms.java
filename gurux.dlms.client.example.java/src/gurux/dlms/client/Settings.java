@@ -72,7 +72,8 @@ public class Settings {
         System.out.println(" -p \t port number or name (Example: 1000).");
         System.out.println(" -S \t serial port.");
         System.out.println(" -i IEC is a start protocol.");
-        System.out.println(" -a \t Authentication (None, Low, High).");
+        System.out.println(
+                " -a \t Authentication (None, Low, High, HighMd5, HighSha1, HighGMac, HighSha256).");
         System.out.println(" -P \t Password for authentication.");
         System.out.println(" -c \t Client address. (Default: 16)");
         System.out.println(" -s \t Server address. (Default: 1)");

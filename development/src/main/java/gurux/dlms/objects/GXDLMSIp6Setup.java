@@ -460,7 +460,7 @@ public class GXDLMSIp6Setup extends GXDLMSObject implements IGXDLMSBase {
             return GXCommon.logicalNameToBytes(dataLinkLayerReference);
         }
         if (e.getIndex() == 3) {
-            return addressConfigMode;
+            return addressConfigMode.ordinal();
         }
         if (e.getIndex() == 4) {
             GXByteBuffer data = new GXByteBuffer();

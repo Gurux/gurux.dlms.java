@@ -49,40 +49,45 @@ final class GXDLMSLNCommandHandler {
         // Get invoke ID and priority.
         short invokeID = data.getUInt8();
         settings.updateInvokeId(invokeID);
-        if (xml != null) {
-            xml.appendStartTag(Command.GET_REQUEST);
-            xml.appendStartTag(Command.GET_REQUEST, type);
-            xml.appendInvokeId(invokeID);
-        }
+        try {
+            if (xml != null) {
+                xml.appendStartTag(Command.GET_REQUEST);
+                xml.appendStartTag(Command.GET_REQUEST, type);
+                xml.appendInvokeId(invokeID);
+            }
 
-        // GetRequest normal
-        if (type == GetCommandType.NORMAL) {
-            getRequestNormal(settings, invokeID, server, data, replyData, xml,
-                    cipheredCommand);
-        } else if (type == GetCommandType.NEXT_DATA_BLOCK) {
-            // Get request for next data block
-            getRequestNextDataBlock(settings, invokeID, server, data, replyData,
-                    xml, false, cipheredCommand);
-        } else if (type == GetCommandType.WITH_LIST) {
-            // Get request with a list.
-            getRequestWithList(settings, invokeID, server, data, replyData, xml,
-                    cipheredCommand);
-        } else {
-            LOGGER.log(Level.INFO,
-                    "HandleGetRequest failed. Invalid command type.");
-            GXByteBuffer bb = new GXByteBuffer();
-            settings.resetBlockIndex();
-            // Access Error : Device reports a hardware fault.
-            bb.setUInt8(ErrorCode.HARDWARE_FAULT.getValue());
-            GXDLMS.getLNPdu(
-                    new GXDLMSLNParameters(settings, invokeID,
-                            Command.GET_RESPONSE, type, null, bb,
-                            ErrorCode.OK.getValue(), cipheredCommand),
+            // GetRequest normal
+            if (type == GetCommandType.NORMAL) {
+                getRequestNormal(settings, invokeID, server, data, replyData,
+                        xml, cipheredCommand);
+            } else if (type == GetCommandType.NEXT_DATA_BLOCK) {
+                // Get request for next data block
+                getRequestNextDataBlock(settings, invokeID, server, data,
+                        replyData, xml, false, cipheredCommand);
+            } else if (type == GetCommandType.WITH_LIST) {
+                // Get request with a list.
+                getRequestWithList(settings, invokeID, server, data, replyData,
+                        xml, cipheredCommand);
+            } else {
+                LOGGER.log(Level.INFO,
+                        "HandleGetRequest failed. Invalid command type.");
+                GXDLMS.getLNPdu(new GXDLMSLNParameters(settings, invokeID,
+                        Command.GET_RESPONSE, type, null, null,
+                        ErrorCode.HARDWARE_FAULT.getValue(), cipheredCommand),
+                        replyData);
+                settings.resetBlockIndex();
+            }
+            if (xml != null) {
+                xml.appendEndTag(Command.GET_REQUEST, type);
+                xml.appendEndTag(Command.GET_REQUEST);
+            }
+        } catch (Exception ex) {
+            LOGGER.log(Level.SEVERE, ex.getMessage());
+            GXDLMS.getLNPdu(new GXDLMSLNParameters(settings, invokeID,
+                    Command.GET_RESPONSE, type, null, null,
+                    ErrorCode.HARDWARE_FAULT.getValue(), cipheredCommand),
                     replyData);
-        }
-        if (xml != null) {
-            xml.appendEndTag(Command.GET_REQUEST, type);
-            xml.appendEndTag(Command.GET_REQUEST);
+            settings.resetBlockIndex();
         }
     }
 
