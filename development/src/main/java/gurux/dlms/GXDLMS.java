@@ -2581,7 +2581,7 @@ abstract class GXDLMS {
             data.getXml().appendStartTag(Command.METHOD_RESPONSE);
             data.getXml().appendStartTag(Command.METHOD_RESPONSE, type);
             // InvokeIdAndPriority
-            data.getXml().appendInvokeId((byte) data.getInvokeId());
+            data.getXml().appendInvokeId((short) data.getInvokeId());
         }
         if (type == 1) {
             handleActionResponseNormal(settings, data);
@@ -2794,7 +2794,7 @@ abstract class GXDLMS {
             data.getXml().appendStartTag(Command.SET_RESPONSE);
             data.getXml().appendStartTag(Command.SET_RESPONSE, type);
             // InvokeIdAndPriority
-            data.getXml().appendInvokeId((byte) data.getInvokeId());
+            data.getXml().appendInvokeId((short) data.getInvokeId());
         }
 
         // SetResponseNormal
@@ -2941,7 +2941,7 @@ abstract class GXDLMS {
 
     private static void verifyInvokeId(GXDLMSSettings settings,
             GXReplyData reply) {
-        if (reply.getXml() == null
+        if (reply.getXml() == null && settings.getAutoIncreaseInvokeID()
                 && (byte) reply.getInvokeId() != getInvokeIDPriority(settings,
                         false)) {
             throw new RuntimeException(
@@ -2974,7 +2974,7 @@ abstract class GXDLMS {
             reply.getXml().appendStartTag(Command.GET_RESPONSE);
             reply.getXml().appendStartTag(Command.GET_RESPONSE, type);
             // InvokeIdAndPriority
-            reply.getXml().appendInvokeId((byte) reply.getInvokeId());
+            reply.getXml().appendInvokeId((int) reply.getInvokeId());
         }
         // Response normal
         if (type == GetCommandType.NORMAL) {
