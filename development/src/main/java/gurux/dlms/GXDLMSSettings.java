@@ -303,6 +303,11 @@ public class GXDLMSSettings {
      */
     private String protocolVersion = null;
 
+    /**
+     * Auto increase Invoke ID.
+     */
+    private boolean autoIncreaseInvokeID = false;
+
     /*
      * Constructor.
      */
@@ -1192,5 +1197,20 @@ public class GXDLMSSettings {
      */
     public void setQualityOfService(final byte value) {
         qualityOfService = value;
+    }
+
+    /**
+     * @return Auto increase Invoke ID.
+     */
+    public final boolean getAutoIncreaseInvokeID() {
+        return autoIncreaseInvokeID;
+    }
+
+    /**
+     * @param value
+     *            Auto increase Invoke ID.
+     */
+    public final void setAutoIncreaseInvokeID(final boolean value) {
+        autoIncreaseInvokeID = value;
     }
 }

@@ -108,11 +108,6 @@ public class GXDLMSClient {
     private boolean isAuthenticationRequired = false;
 
     /**
-     * Auto increase Invoke ID.
-     */
-    private boolean autoIncreaseInvokeID = false;
-
-    /**
      * Constructor.
      */
     public GXDLMSClient() {
@@ -538,7 +533,7 @@ public class GXDLMSClient {
      * @return Auto increase Invoke ID.
      */
     public final boolean getAutoIncreaseInvokeID() {
-        return autoIncreaseInvokeID;
+        return settings.getAutoIncreaseInvokeID();
     }
 
     /**
@@ -546,7 +541,7 @@ public class GXDLMSClient {
      *            Auto increase Invoke ID.
      */
     public final void setAutoIncreaseInvokeID(final boolean value) {
-        autoIncreaseInvokeID = value;
+        settings.setAutoIncreaseInvokeID(value);
     }
 
     /**
@@ -723,7 +718,7 @@ public class GXDLMSClient {
         settings.resetBlockIndex();
         GXDLMS.checkInit(settings);
         settings.setStoCChallenge(null);
-        if (autoIncreaseInvokeID) {
+        if (getAutoIncreaseInvokeID()) {
             settings.setInvokeID(0);
         } else {
             settings.setInvokeID(1);
@@ -1550,9 +1545,6 @@ public class GXDLMSClient {
             throw new IllegalArgumentException("Invalid parameter");
         }
         settings.resetBlockIndex();
-        if (autoIncreaseInvokeID) {
-            settings.setInvokeID((byte) ((settings.getInvokeID() + 1) & 0xF));
-        }
         int index = methodIndex;
         DataType type = dataType;
         if (type == DataType.NONE && value != null) {
@@ -1686,9 +1678,6 @@ public class GXDLMSClient {
             throw new GXDLMSException("Invalid parameter");
         }
         settings.resetBlockIndex();
-        if (autoIncreaseInvokeID) {
-            settings.setInvokeID((byte) ((settings.getInvokeID() + 1) & 0xF));
-        }
         DataType type = dataType;
         if (type == DataType.NONE && value != null) {
             type = GXDLMSConverter.getDLMSDataType(value);
@@ -1854,9 +1843,6 @@ public class GXDLMSClient {
         Object value;
         List<byte[]> reply;
         settings.resetBlockIndex();
-        if (autoIncreaseInvokeID) {
-            settings.setInvokeID((byte) ((settings.getInvokeID() + 1) & 0xF));
-        }
         GXByteBuffer data = new GXByteBuffer();
         GXByteBuffer bb = new GXByteBuffer();
         if (this.getUseLogicalNameReferencing()) {
@@ -1965,9 +1951,6 @@ public class GXDLMSClient {
         GXByteBuffer attributeDescriptor = new GXByteBuffer();
         List<byte[]> reply;
         settings.resetBlockIndex();
-        if (autoIncreaseInvokeID) {
-            settings.setInvokeID((byte) ((settings.getInvokeID() + 1) & 0xF));
-        }
         if (this.getUseLogicalNameReferencing()) {
             // CI
             attributeDescriptor.setUInt16(objectType.getValue());

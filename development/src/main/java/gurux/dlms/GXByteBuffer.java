@@ -507,7 +507,8 @@ public class GXByteBuffer {
             throw new IllegalArgumentException("getString");
         }
         try {
-            return new String(getData(), index, count, charsetName);
+            return new String(getData(), index, count, charsetName)
+                    .replaceAll("[\\x00]", "");
         } catch (UnsupportedEncodingException e) {
             throw new RuntimeException(e.getMessage());
         }

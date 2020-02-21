@@ -89,6 +89,7 @@ public class Settings {
                 " -C \t Security Level. (None, Authentication, Encrypted, AuthenticationEncryption)");
         System.out.println(
                 " -v \t Invocation counter data object Logical Name. Ex. 0.0.43.1.1.255");
+        System.out.println(" -I \t Auto increase invoke ID");
         System.out.println("Example:");
         System.out.println("Read LG device using TCP/IP connection.");
         System.out.println(
@@ -103,7 +104,7 @@ public class Settings {
 
     static int getParameters(String[] args, Settings settings) {
         ArrayList<GXCmdParameter> parameters =
-                GXCommon.getParameters(args, "h:p:c:s:r:it:a:p:wP:g:S:n:C:v:");
+                GXCommon.getParameters(args, "h:p:c:s:r:iIt:a:p:wP:g:S:n:C:v:");
         GXNet net = null;
         for (GXCmdParameter it : parameters) {
             switch (it.getTag()) {
@@ -159,6 +160,10 @@ public class Settings {
             case 'i':
                 // IEC.
                 settings.iec = true;
+                break;
+            case 'I':
+                // AutoIncreaseInvokeID.
+                settings.client.setAutoIncreaseInvokeID(true);
                 break;
             case 'C':
                 if ("None".compareTo(it.getValue()) == 0) {

@@ -573,7 +573,7 @@
 1.0-64.1-10,13,14,16-20,21-30,33,34,36-40,41-50,53,54,56-60,61-70,73,74,76-80,82,84-89.41.0-63.0-99,255;3,4;5,6,9,10,13,15,16,17,18,20,21,23,24;Ch. $B;$1;Missing duration;Rate $E (0 is total);Billing period  $F (255 is current)
 1.0-64.1-10,13,14,16-20,21-30,33,34,36-40,41-50,53,54,56-60,61-70,73,74,76-80,82,84-89.42.0-63.0-99,255;3,4;5,6,9,10,13,15,16,17,18,20,21,23,24;Ch. $B;$1;Missing magnitude;Rate $E (0 is total);Billing period  $F (255 is current)
 1.0-64.1-10,13,14,16-20,21-30,33,34,36-40,41-50,53,54,56-60,61-70,73,74,76-80,82,84-89.43.0-63.0-99,255;1,3,4;6,15,17,18;Ch. $B;$1;Time threshold for under limit;Rate $E (0 is total);Billing period  $F (255 is current)
-1.0-64.1-10,13,14,16-20,21-30,33,34,36-40,41-50,53,54,56-60,61-70,73,74,76-80,82,84-89.44.0-63.0-99,255;1,3,4;6,15,17,18;Ch. $B;$1;Time threshold for over limut;Rate $E (0 is total);Billing period  $F (255 is current)
+1.0-64.1-10,13,14,16-20,21-30,33,34,36-40,41-50,53,54,56-60,61-70,73,74,76-80,82,84-89.44.0-63.0-99,255;1,3,4;6,15,17,18;Ch. $B;$1;Time threshold for over limit;Rate $E (0 is total);Billing period  $F (255 is current)
 1.0-64.1-10,13,14,16-20,21-30,33,34,36-40,41-50,53,54,56-60,61-70,73,74,76-80,82,84-89.45.0-63.0-99,255;1,3,4;6,15,17,18;Ch. $B;$1;Time threshold of missing magnitude;Rate $E (0 is total);Billing period  $F (255 is current)
 1.0-64.11,12,15,31,32,35,51,52,55,71,72,75,90-92.31.0-120,124-127.0-99,255;3,4;5,6,9,10,13,15,16,17,18,20,21,23,24;Ch. $B;$1;Under limit threshold;Harmonic / Distortion factor $E;Threshold $F
 1.0-64.11,12,15,31,32,35,51,52,55,71,72,75,90-92.33.0-120,124-127.0-99,255;3,4;5,6,9,10,13,15,16,17,18,20,21,23,24;Ch. $B;$1;Under limit duration;Harmonic / Distortion factor $E;Billing period  $F (255 is current)
@@ -587,7 +587,7 @@
 1.0-64.11,12,15,31,32,35,51,52,55,71,72,75,90-92.41.0-120,124-127.0-99,255;3,4;5,6,9,10,13,15,16,17,18,20,21,23,24;Ch. $B;$1;Missing duration;Harmonic / Distortion factor $E;Billing period  $F (255 is current)
 1.0-64.11,12,15,31,32,35,51,52,55,71,72,75,90-92.42.0-120,124-127.0-99,255;3,4;5,6,9,10,13,15,16,17,18,20,21,23,24;Ch. $B;$1;Missing magnitude;Harmonic / Distortion factor $E;Billing period  $F (255 is current)
 1.0-64.11,12,15,31,32,35,51,52,55,71,72,75,90-92.43.0-120,124-127.0-99,255;1,3,4;6,15,17,18;Ch. $B;$1;Time threshold for under limit;Harmonic / Distortion factor $E;Billing period  $F (255 is current)
-1.0-64.11,12,15,31,32,35,51,52,55,71,72,75,90-92.44.0-120,124-127.0-99,255;1,3,4;6,15,17,18;Ch. $B;$1;Time threshold for over limut;Harmonic / Distortion factor $E;Billing period  $F (255 is current)
+1.0-64.11,12,15,31,32,35,51,52,55,71,72,75,90-92.44.0-120,124-127.0-99,255;1,3,4;6,15,17,18;Ch. $B;$1;Time threshold for over limit;Harmonic / Distortion factor $E;Billing period  $F (255 is current)
 1.0-64.11,12,15,31,32,35,51,52,55,71,72,75,90-92.45.0-120,124-127.0-99,255;1,3,4;6,15,17,18;Ch. $B;$1;Time threshold of missing magnitude;Harmonic / Distortion factor $E;Billing period  $F (255 is current)
 1.0-64.1-10,13,14,16-20,21-30,33,34,36-40,41-50,53,54,56-60,61-70,73,74,76-80,82,84-89.31.0-63.0-99,255;21;;Ch. $B;$1;Inst. value, under limit threshold;Rate $E (0 is total);
 1.0-64.1-10,13,14,16-20,21-30,33,34,36-40,41-50,53,54,56-60,61-70,73,74,76-80,82,84-89.35.0-63.0-99,255;21;;Ch. $B;$1;Inst. value, over limit threshold;Rate $E (0 is total);

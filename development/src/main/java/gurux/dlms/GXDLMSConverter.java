@@ -468,6 +468,9 @@ public class GXDLMSConverter {
         if (value instanceof GXStructure) {
             return DataType.STRUCTURE;
         }
+        if (value instanceof GXBitString) {
+            return DataType.BITSTRING;
+        }
         throw new IllegalArgumentException("Invalid value.");
     }
 

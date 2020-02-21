@@ -698,7 +698,7 @@ public class GXDLMSIp6Setup extends GXDLMSObject implements IGXDLMSBase {
         if (list != null) {
             writer.writeStartElement(name);
             for (InetAddress it : list) {
-                writer.writeElementString("Value", it.toString());
+                writer.writeElementString("Value", it.getHostAddress());
             }
             writer.writeEndElement();
         }
@@ -732,11 +732,11 @@ public class GXDLMSIp6Setup extends GXDLMSObject implements IGXDLMSBase {
         saveIPAddress(writer, gatewayIPAddress, "GatewayIPAddress");
         if (primaryDNSAddress != null) {
             writer.writeElementString("PrimaryDNSAddress",
-                    primaryDNSAddress.toString());
+                    primaryDNSAddress.getHostAddress());
         }
         if (secondaryDNSAddress != null) {
             writer.writeElementString("SecondaryDNSAddress",
-                    secondaryDNSAddress.toString());
+                    secondaryDNSAddress.getHostAddress());
         }
         writer.writeElementString("TrafficClass", trafficClass);
         saveNeighborDiscoverySetup(writer, neighborDiscoverySetup,

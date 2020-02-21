@@ -446,7 +446,7 @@ public enum Unit {
             str = "ActiveEnergy";
             break;
         case 31: // APPARENT_ENERGY
-            str = "ApparentEnenergy";
+            str = "ApparentEnergy";
             break;
         case 32: // REACTIVE_ENERGY
             str = "ReactiveEnergy";

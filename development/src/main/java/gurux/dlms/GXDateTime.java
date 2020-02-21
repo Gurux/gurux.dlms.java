@@ -334,8 +334,8 @@ public class GXDateTime {
             }
             if (value.indexOf('*') != -1) {
                 int lastFormatIndex = -1;
-                for (int pos = 0; pos < value.length(); ++pos) {
-                    char c = value.charAt(pos);
+                for (int pos = 0; pos < v.length(); ++pos) {
+                    char c = v.charAt(pos);
                     if (!isNumeric(c)) {
                         if (c == '*') {
                             int end = lastFormatIndex + 1;
@@ -364,6 +364,8 @@ public class GXDateTime {
                                 }
                             } else if (tmp.equals("mm") || tmp.equals("m")) {
                                 skip.add(DateTimeSkips.MINUTE);
+                            } else if (tmp.equals("ss") || tmp.equals("s")) {
+                                skip.add(DateTimeSkips.SECOND);
                             } else if (!tmp.isEmpty() && !tmp.equals("G")) {
                                 throw new IllegalArgumentException(
                                         "Invalid date time format.");
@@ -623,22 +625,23 @@ public class GXDateTime {
         } else {
             sd = new SimpleDateFormat();
         }
+        // GyMdkHmsSEDFwWahKzZYuXL
         if (!getSkip().isEmpty()) {
             // Separate date and time parts.
             format.append(sd.toPattern());
             remove(format);
             if (extra.contains(DateTimeExtraInfo.DST_BEGIN)) {
-                replace(format, "MM", "BEGIN");
-                replace(format, "M", "BEGIN");
+                replace(format, "MM", "!");
+                replace(format, "M", "!");
             } else if (extra.contains(DateTimeExtraInfo.DST_END)) {
-                replace(format, "MM", "END");
-                replace(format, "M", "END");
+                replace(format, "MM", "#");
+                replace(format, "M", "#");
             } else if (extra.contains(DateTimeExtraInfo.LAST_DAY)) {
-                replace(format, "dd", "LASTDAY");
-                replace(format, "d", "LASTDAY");
+                replace(format, "dd", "%");
+                replace(format, "d", "%");
             } else if (extra.contains(DateTimeExtraInfo.LAST_DAY2)) {
-                replace(format, "dd", "LASTDAY2");
-                replace(format, "d", "LASTDAY2");
+                replace(format, "dd", "?");
+                replace(format, "d", "?");
             }
             if (getSkip().contains(DateTimeSkips.YEAR)) {
                 replace(format, "yyyy");
@@ -687,8 +690,9 @@ public class GXDateTime {
             } else {
                 sd = new SimpleDateFormat(format.toString().trim());
             }
-            return sd.format(getLocalCalendar().getTime())
-                    .replace("-3", "BEGIN").replace("-4", "END");
+            return sd.format(getLocalCalendar().getTime()).replace("!", "BEGIN")
+                    .replace("#", "END").replace("%", "LASTDAY")
+                    .replace("?", "LASTDAY2");
         }
         return sd.format(getLocalCalendar().getTime());
     }

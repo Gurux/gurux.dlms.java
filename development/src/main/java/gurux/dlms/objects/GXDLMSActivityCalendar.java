@@ -436,9 +436,7 @@ public class GXDLMSActivityCalendar extends GXDLMSObject
             for (final Object item : (List<?>) value) {
                 List<?> arr = (List<?>) item;
                 final GXDLMSSeasonProfile it = new GXDLMSSeasonProfile();
-                it.setName(GXDLMSClient
-                        .changeType((byte[]) arr.get(0), DataType.STRING)
-                        .toString());
+                it.setName((byte[]) arr.get(0));
                 it.setStart((GXDateTime) GXDLMSClient
                         .changeType((byte[]) arr.get(1), DataType.DATETIME));
                 byte[] weekName = (byte[]) arr.get(2);
@@ -447,8 +445,7 @@ public class GXDLMSActivityCalendar extends GXDLMSObject
                         && weekName[0] == 0xFF) {
                     it.setWeekName("");
                 } else {
-                    it.setWeekName(GXDLMSClient
-                            .changeType(weekName, DataType.STRING).toString());
+                    it.setWeekName(weekName);
                 }
 
                 items.add(it);
@@ -464,9 +461,7 @@ public class GXDLMSActivityCalendar extends GXDLMSObject
             for (final Object item : (List<?>) value) {
                 List<?> arr = (List<?>) item;
                 final GXDLMSWeekProfile it = new GXDLMSWeekProfile();
-                it.setName(GXDLMSClient
-                        .changeType((byte[]) arr.get(0), DataType.STRING)
-                        .toString());
+                it.setName((byte[]) arr.get(0));
                 it.setMonday(((Number) arr.get(1)).intValue());
                 it.setTuesday(((Number) arr.get(2)).intValue());
                 it.setWednesday(((Number) arr.get(3)).intValue());

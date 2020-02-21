@@ -114,7 +114,7 @@ public class GXDate extends GXDateTime {
      *            Used locale.
      */
     public GXDate(final String value, final Locale locale) {
-        super(value);
+        super(value, locale);
         getSkip().add(DateTimeSkips.HOUR);
         getSkip().add(DateTimeSkips.MINUTE);
         getSkip().add(DateTimeSkips.SECOND);

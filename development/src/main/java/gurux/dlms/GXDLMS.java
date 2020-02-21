@@ -130,13 +130,17 @@ abstract class GXDLMS {
 
     }
 
-    static byte getInvokeIDPriority(final GXDLMSSettings settings) {
+    static byte getInvokeIDPriority(final GXDLMSSettings settings,
+            final boolean increase) {
         byte value = 0;
         if (settings.getPriority() == Priority.HIGH) {
             value |= 0x80;
         }
         if (settings.getServiceClass() == ServiceClass.CONFIRMED) {
             value |= 0x40;
+        }
+        if (increase) {
+            settings.setInvokeID(((settings.getInvokeID() + 1) & 0xF));
         }
         value |= settings.getInvokeID();
         return value;
@@ -744,7 +748,8 @@ abstract class GXDLMS {
                     if (p.getInvokeId() != 0) {
                         reply.setUInt8((byte) p.getInvokeId());
                     } else {
-                        reply.setUInt8(getInvokeIDPriority(p.getSettings()));
+                        reply.setUInt8(getInvokeIDPriority(p.getSettings(),
+                                p.getSettings().getAutoIncreaseInvokeID()));
                     }
                 }
             }
@@ -2570,12 +2575,13 @@ abstract class GXDLMS {
         // Get type.
         byte type = (byte) data.getData().getUInt8();
         // Get invoke ID and priority.
-        short invoke = data.getData().getUInt8();
+        data.setInvokeId(data.getData().getUInt8());
+        verifyInvokeId(settings, data);
         if (data.getXml() != null) {
             data.getXml().appendStartTag(Command.METHOD_RESPONSE);
             data.getXml().appendStartTag(Command.METHOD_RESPONSE, type);
             // InvokeIdAndPriority
-            data.getXml().appendInvokeId(invoke);
+            data.getXml().appendInvokeId((byte) data.getInvokeId());
         }
         if (type == 1) {
             handleActionResponseNormal(settings, data);
@@ -2775,17 +2781,20 @@ abstract class GXDLMS {
 
     /*
      * Handle set response and update error status.
+     * @param settings DLMS settings.
      * @param reply Received data from the client.
      */
-    static void handleSetResponse(final GXReplyData data) {
+    static void handleSetResponse(final GXDLMSSettings settings,
+            final GXReplyData data) {
         byte type = (byte) data.getData().getUInt8();
         // Invoke ID and priority.
-        short invokeId = data.getData().getUInt8();
+        data.setInvokeId(data.getData().getUInt8());
+        verifyInvokeId(settings, data);
         if (data.getXml() != null) {
             data.getXml().appendStartTag(Command.SET_RESPONSE);
             data.getXml().appendStartTag(Command.SET_RESPONSE, type);
             // InvokeIdAndPriority
-            data.getXml().appendInvokeId(invokeId);
+            data.getXml().appendInvokeId((byte) data.getInvokeId());
         }
 
         // SetResponseNormal
@@ -2930,6 +2939,19 @@ abstract class GXDLMS {
         reply.setValue(values);
     }
 
+    private static void verifyInvokeId(GXDLMSSettings settings,
+            GXReplyData reply) {
+        if (reply.getXml() == null
+                && (byte) reply.getInvokeId() != getInvokeIDPriority(settings,
+                        false)) {
+            throw new RuntimeException(
+                    String.format("Invalid invoke ID. Expected: %s Actual: %s",
+                            Integer.toHexString(
+                                    getInvokeIDPriority(settings, false)),
+                            Long.toHexString(reply.getInvokeId())));
+        }
+    }
+
     /*
      * Handle get response and get data from block and/or update error status.
      * @param settings DLMS settings.
@@ -2943,17 +2965,16 @@ abstract class GXDLMS {
         boolean ret = true;
         short ch = 0;
         GXByteBuffer data = reply.getData();
-
         // Get type.
         byte type = (byte) data.getUInt8();
         // Get invoke ID and priority.
-        ch = data.getUInt8();
-
+        reply.setInvokeId(data.getUInt8());
+        verifyInvokeId(settings, reply);
         if (reply.getXml() != null) {
             reply.getXml().appendStartTag(Command.GET_RESPONSE);
             reply.getXml().appendStartTag(Command.GET_RESPONSE, type);
             // InvokeIdAndPriority
-            reply.getXml().appendInvokeId(ch);
+            reply.getXml().appendInvokeId((byte) reply.getInvokeId());
         }
         // Response normal
         if (type == GetCommandType.NORMAL) {
@@ -3237,7 +3258,7 @@ abstract class GXDLMS {
                 }
                 break;
             case Command.SET_RESPONSE:
-                handleSetResponse(data);
+                handleSetResponse(settings, data);
                 break;
             case Command.WRITE_RESPONSE:
                 handleWriteResponse(data);

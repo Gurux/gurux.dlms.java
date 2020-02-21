@@ -39,15 +39,18 @@ import java.io.FileOutputStream;
 import java.io.OutputStream;
 import java.text.SimpleDateFormat;
 import java.util.Date;
+import java.util.List;
 import java.util.Locale;
 
 import javax.xml.stream.XMLOutputFactory;
 import javax.xml.stream.XMLStreamException;
 import javax.xml.stream.XMLStreamWriter;
 
+import gurux.dlms.GXArray;
 import gurux.dlms.GXDLMSConverter;
 import gurux.dlms.GXDLMSTranslator;
 import gurux.dlms.GXDateTime;
+import gurux.dlms.GXStructure;
 import gurux.dlms.enums.DataType;
 import gurux.dlms.internal.GXCommon;
 
@@ -150,7 +153,7 @@ public class GXXmlWriter implements AutoCloseable {
     public final void writeElementString(final String name, final Date value)
             throws XMLStreamException {
         if (value != null && value.compareTo(new Date(0)) != 0) {
-            SimpleDateFormat sd = new SimpleDateFormat();
+            SimpleDateFormat sd = new SimpleDateFormat("", Locale.US);
             writeElementString(name, sd.format(value));
         }
     }
@@ -208,15 +211,21 @@ public class GXXmlWriter implements AutoCloseable {
     }
 
     private void writeArray(final Object data) throws XMLStreamException {
-        if (data instanceof Object[]) {
-            Object[] arr = (Object[]) data;
-            for (int pos = 0; pos != arr.length; ++pos) {
-                Object tmp = arr[pos];
+        if (data instanceof List<?>) {
+            writer.writeCharacters(System.getProperty("line.separator"));
+            List<?> arr = (List<?>) data;
+            for (Object tmp : arr) {
                 if (tmp instanceof byte[]) {
                     writeElementObject("Item", tmp, false);
-                } else if (tmp instanceof Object[]) {
+                } else if (tmp instanceof GXArray) {
                     writeStartElement("Item", "Type",
                             String.valueOf(DataType.ARRAY.getValue()), true);
+                    writeArray(tmp);
+                    writeEndElement();
+                } else if (tmp instanceof GXStructure) {
+                    writeStartElement("Item", "Type",
+                            String.valueOf(DataType.STRUCTURE.getValue()),
+                            true);
                     writeArray(tmp);
                     writeEndElement();
                 } else {
@@ -250,7 +259,12 @@ public class GXXmlWriter implements AutoCloseable {
                 return;
             }
         }
-        if (type != DataType.NONE) {
+        // If value is shown as string it's serialized as a string.
+        if (value instanceof Double) {
+            writeElementObject(name, value, true, DataType.FLOAT64);
+        } else if (value instanceof Float) {
+            writeElementObject(name, value, true, DataType.FLOAT32);
+        } else if (type != DataType.NONE) {
             writeElementObject(name, value, true, type);
         } else {
             writeElementObject(name, value, true);
@@ -282,7 +296,7 @@ public class GXXmlWriter implements AutoCloseable {
             }
             writeStartElement(name, "Type", String.valueOf(dt.getValue()),
                     false);
-            if (dt == DataType.ARRAY) {
+            if (dt == DataType.ARRAY || dt == DataType.STRUCTURE) {
                 writeArray(value);
             } else {
                 if (value instanceof GXDateTime) {

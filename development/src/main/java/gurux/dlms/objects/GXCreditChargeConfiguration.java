@@ -131,6 +131,9 @@ public class GXCreditChargeConfiguration {
      */
     public final void setCollectionConfiguration(
             final CreditCollectionConfiguration value) {
+        if (value == null) {
+            throw new IllegalArgumentException("CollectionConfiguration");
+        }
         collectionConfiguration = value;
     }
 }

@@ -367,8 +367,7 @@ public class GXDLMSSpecialDaysTable extends GXDLMSObject
             while (reader.isStartElement("Entry", true)) {
                 GXDLMSSpecialDay it = new GXDLMSSpecialDay();
                 it.setIndex(reader.readElementContentAsInt("Index"));
-                it.setDate(
-                        new GXDate(reader.readElementContentAsString("Date")));
+                it.setDate(reader.readElementContentAsDate("Date"));
                 it.setDayId(reader.readElementContentAsInt("DayId"));
                 list.add(it);
             }
