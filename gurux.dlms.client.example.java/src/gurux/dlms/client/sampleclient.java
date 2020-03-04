@@ -101,7 +101,7 @@ public class sampleclient {
                     reader.showValue(it.getValue(), val);
                 }
             } else {
-                reader.readAll();
+                reader.readAll(settings.outputFile);
             }
         } catch (Exception ex) {
             System.out.println(ex.getMessage());

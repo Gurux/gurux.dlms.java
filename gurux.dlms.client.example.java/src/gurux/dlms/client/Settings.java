@@ -60,6 +60,9 @@ public class Settings {
     public List<Map.Entry<String, Integer>> readObjects =
             new ArrayList<Map.Entry<String, Integer>>();
 
+    // Cache file.
+    String outputFile;
+
     /**
      * Show help.
      */
@@ -90,6 +93,8 @@ public class Settings {
         System.out.println(
                 " -v \t Invocation counter data object Logical Name. Ex. 0.0.43.1.1.255");
         System.out.println(" -I \t Auto increase invoke ID");
+        System.out.println(
+                " -o \t Cache association view to make reading faster. Ex. -o C:\\device.xml");
         System.out.println("Example:");
         System.out.println("Read LG device using TCP/IP connection.");
         System.out.println(
@@ -103,8 +108,8 @@ public class Settings {
     }
 
     static int getParameters(String[] args, Settings settings) {
-        ArrayList<GXCmdParameter> parameters =
-                GXCommon.getParameters(args, "h:p:c:s:r:iIt:a:p:wP:g:S:n:C:v:");
+        ArrayList<GXCmdParameter> parameters = GXCommon.getParameters(args,
+                "h:p:c:s:r:iIt:a:p:wP:g:S:n:C:v:o:");
         GXNet net = null;
         for (GXCmdParameter it : parameters) {
             switch (it.getTag()) {
@@ -184,6 +189,9 @@ public class Settings {
                                     + "'. (None, Authentication, Encryption, AuthenticationEncryption)");
                 }
                 break;
+            case 'o':
+                settings.outputFile = it.getValue();
+                break;
             case 'v':
                 settings.invocationCounter = it.getValue();
                 // TODO:
@@ -215,8 +223,6 @@ public class Settings {
                             "Invalid Authentication option: '" + it.getValue()
                                     + "'. (None, Low, High, HighMd5, HighSha1, HighGmac, HighSha256)");
                 }
-                break;
-            case 'o':
                 break;
             case 'c':
                 settings.client

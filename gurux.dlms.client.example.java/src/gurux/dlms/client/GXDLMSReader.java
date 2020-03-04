@@ -34,6 +34,7 @@
 package gurux.dlms.client;
 
 import java.io.BufferedWriter;
+import java.io.File;
 import java.io.FileWriter;
 import java.io.IOException;
 import java.io.PrintWriter;
@@ -87,7 +88,7 @@ public class GXDLMSReader {
     GXDLMSSecureClient dlms;
     boolean iec;
     java.nio.ByteBuffer replyBuff;
-    int WaitTime = 60000;
+    int waitTime = 60000;
     final PrintWriter logFile;
     // Invocation counter (frame counter).
     String invocationCounter = null;
@@ -258,7 +259,7 @@ public class GXDLMSReader {
         } else {
             p.setCount(5);
         }
-        p.setWaitTime(WaitTime);
+        p.setWaitTime(waitTime);
         GXByteBuffer rd = new GXByteBuffer();
         synchronized (Media.getSynchronous()) {
             while (!succeeded) {
@@ -443,7 +444,7 @@ public class GXDLMSReader {
                     new ReceiveParameters<byte[]>(byte[].class);
             p.setAllData(false);
             p.setEop((byte) '\n');
-            p.setWaitTime(WaitTime);
+            p.setWaitTime(waitTime);
             String data;
             String replyStr;
             synchronized (Media.getSynchronous()) {
@@ -984,20 +985,34 @@ public class GXDLMSReader {
      * Read all objects from the meter. This is only example. Usually there is
      * no need to read all data from the meter.
      */
-    void readAll() throws Exception {
+    void readAll(String outputFile) throws Exception {
         try {
             initializeConnection();
-            getAssociationView();
-            // Read Scalers and units from the register objects.
-            readScalerAndUnits();
-            // Read Profile Generic columns.
-            getProfileGenericColumns();
+            if (outputFile != null && new File(outputFile).exists()) {
+                try {
+                    GXDLMSObjectCollection c =
+                            GXDLMSObjectCollection.load(outputFile);
+                    dlms.getObjects().addAll(c);
+                } catch (Exception ex) {
+                    // It's OK if this fails.
+                    System.out.print(ex.getMessage());
+                }
+            } else {
+                getAssociationView();
+                // Read Scalers and units from the register objects.
+                readScalerAndUnits();
+                // Read Profile Generic columns.
+                getProfileGenericColumns();
+            }
             // Read all attributes from all objects.
             getReadOut();
             // Read historical data.
             getProfileGenerics();
         } finally {
             close();
+        }
+        if (outputFile != null) {
+            dlms.getObjects().save(outputFile, null);
         }
 
     }
