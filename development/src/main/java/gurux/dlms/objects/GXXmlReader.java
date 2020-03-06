@@ -269,7 +269,7 @@ public class GXXmlReader implements AutoCloseable {
             String str = getAttribute(0);
             DataType tp = DataType.forValue(Integer.parseInt(str));
             dt[0] = tp;
-            if (tp == DataType.ARRAY) {
+            if (tp == DataType.ARRAY || tp == DataType.STRUCTURE) {
                 read();
                 getNext();
                 ret = readArray();
