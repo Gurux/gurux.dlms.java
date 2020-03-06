@@ -37,71 +37,70 @@ final class TranslatorStandardTags {
         GXDLMSTranslator.addTag(list, Command.DISCONNECT_MODE,
                 "DisconnectMode");
         GXDLMSTranslator.addTag(list, Command.UA, "Ua");
-        GXDLMSTranslator.addTag(list, Command.AARQ, "x:aarq");
-        GXDLMSTranslator.addTag(list, Command.AARE, "x:aare");
+        GXDLMSTranslator.addTag(list, Command.AARQ, "aarq");
+        GXDLMSTranslator.addTag(list, Command.AARE, "aare");
         GXDLMSTranslator.addTag(list,
                 TranslatorGeneralTags.APPLICATION_CONTEXT_NAME,
-                "x:application-context-name");
+                "application-context-name");
         GXDLMSTranslator.addTag(list, Command.INITIATE_RESPONSE,
-                "x:initiateResponse");
+                "initiateResponse");
         GXDLMSTranslator.addTag(list, Command.INITIATE_REQUEST,
-                "x:initiateRequest");
+                "initiateRequest");
         GXDLMSTranslator.addTag(list,
                 TranslatorGeneralTags.NEGOTIATED_QUALITY_OF_SERVICE,
-                "x:negotiated-quality-of-service");
+                "negotiated-quality-of-service");
         GXDLMSTranslator.addTag(list,
                 TranslatorGeneralTags.PROPOSED_QUALITY_OF_SERVICE,
-                "x:proposed-quality-of-service");
+                "proposed-quality-of-service");
         GXDLMSTranslator.addTag(list,
                 TranslatorGeneralTags.PROPOSED_DLMS_VERSION_NUMBER,
-                "x:proposed-dlms-version-number");
+                "proposed-dlms-version-number");
         GXDLMSTranslator.addTag(list,
                 TranslatorGeneralTags.PROPOSED_MAX_PDU_SIZE,
-                "x:client-max-receive-pdu-size");
+                "client-max-receive-pdu-size");
         GXDLMSTranslator.addTag(list,
                 TranslatorGeneralTags.PROPOSED_CONFORMANCE,
-                "x:proposed-conformance");
+                "proposed-conformance");
         GXDLMSTranslator.addTag(list, TranslatorGeneralTags.VAA_NAME,
-                "x:vaa-name");
+                "vaa-name");
         GXDLMSTranslator.addTag(list,
                 TranslatorGeneralTags.NEGOTIATED_CONFORMANCE,
-                "x:negotiated-conformance");
+                "negotiated-conformance");
         GXDLMSTranslator.addTag(list,
                 TranslatorGeneralTags.NEGOTIATED_DLMS_VERSION_NUMBER,
-                "x:negotiated-dlms-version-number");
+                "negotiated-dlms-version-number");
         GXDLMSTranslator.addTag(list,
                 TranslatorGeneralTags.NEGOTIATED_MAX_PDU_SIZE,
-                "x:server-max-receive-pdu-size");
+                "server-max-receive-pdu-size");
         GXDLMSTranslator.addTag(list, TranslatorGeneralTags.CONFORMANCE_BIT,
                 "ConformanceBit");
         GXDLMSTranslator.addTag(list,
                 TranslatorGeneralTags.SENDER_ACSE_REQUIREMENTS,
-                "x:sender-acse-requirements");
+                "sender-acse-requirements");
         GXDLMSTranslator.addTag(list,
                 TranslatorGeneralTags.RESPONDER_ACSE_REQUIREMENT,
-                "x:responder-acse-requirements");
+                "responder-acse-requirements");
         GXDLMSTranslator.addTag(list,
                 TranslatorGeneralTags.RESPONDING_MECHANISM_NAME,
-                "x:mechanism-name");
+                "mechanism-name");
         GXDLMSTranslator.addTag(list,
-                TranslatorGeneralTags.CALLING_MECHANISM_NAME,
-                "x:mechanism-name");
+                TranslatorGeneralTags.CALLING_MECHANISM_NAME, "mechanism-name");
         GXDLMSTranslator.addTag(list,
                 TranslatorGeneralTags.CALLING_AUTHENTICATION,
-                "x:calling-authentication-value");
+                "calling-authentication-value");
         GXDLMSTranslator.addTag(list,
                 TranslatorGeneralTags.RESPONDING_AUTHENTICATION,
-                "x:responding-authentication-value");
-        GXDLMSTranslator.addTag(list, Command.RELEASE_REQUEST, "x:rlrq");
-        GXDLMSTranslator.addTag(list, Command.RELEASE_RESPONSE, "x:rlre");
+                "responding-authentication-value");
+        GXDLMSTranslator.addTag(list, Command.RELEASE_REQUEST, "rlrq");
+        GXDLMSTranslator.addTag(list, Command.RELEASE_RESPONSE, "rlre");
         GXDLMSTranslator.addTag(list, Command.DISCONNECT_REQUEST, "Disc");
         GXDLMSTranslator.addTag(list, TranslatorGeneralTags.ASSOCIATION_RESULT,
-                "x:result");
+                "result");
         GXDLMSTranslator.addTag(list,
                 TranslatorGeneralTags.RESULT_SOURCE_DIAGNOSTIC,
-                "x:result-source-diagnostic");
+                "result-source-diagnostic");
         GXDLMSTranslator.addTag(list, TranslatorGeneralTags.ACSE_SERVICE_USER,
-                "x:acse-service-user");
+                "acse-service-user");
         GXDLMSTranslator.addTag(list,
                 TranslatorGeneralTags.ACSE_SERVICE_PROVIDER,
                 "acse-service-provider");
@@ -110,28 +109,28 @@ final class TranslatorStandardTags {
         GXDLMSTranslator.addTag(list, TranslatorGeneralTags.RESPONDING_AP_TITLE,
                 "RespondingAPTitle");
         GXDLMSTranslator.addTag(list, TranslatorGeneralTags.CHAR_STRING,
-                "x:charstring");
+                "charstring");
         GXDLMSTranslator.addTag(list, TranslatorGeneralTags.DEDICATED_KEY,
-                "x:dedicated-key");
+                "dedicated-key");
         GXDLMSTranslator.addTag(list, TranslatorTags.RESPONSE_ALLOWED,
-                "x:response-allowed");
+                "response-allowed");
         GXDLMSTranslator.addTag(list, TranslatorGeneralTags.USER_INFORMATION,
-                "x:user-information");
+                "user-information");
         GXDLMSTranslator.addTag(list, Command.CONFIRMED_SERVICE_ERROR,
-                "x:confirmedServiceError");
+                "confirmedServiceError");
         GXDLMSTranslator.addTag(list, Command.INFORMATION_REPORT,
-                "x:informationReportRequest");
+                "informationReportRequest");
         GXDLMSTranslator.addTag(list, Command.EVENT_NOTIFICATION,
-                "x:event-notification-request");
+                "event-notification-request");
         GXDLMSTranslator.addTag(list,
                 TranslatorGeneralTags.CALLING_AE_INVOCATION_ID,
-                "x:calling-AE-invocation-id");
+                "calling-AE-invocation-id");
         GXDLMSTranslator.addTag(list,
                 TranslatorGeneralTags.CALLED_AE_INVOCATION_ID,
-                "x:called-AE-invocation-id");
+                "called-AE-invocation-id");
         GXDLMSTranslator.addTag(list,
                 TranslatorGeneralTags.RESPONDING_AE_INVOCATION_ID,
-                "x:responding-AE-invocation-id");
+                "responding-AE-invocation-id");
     }
 
     /*
@@ -139,19 +138,18 @@ final class TranslatorStandardTags {
      */
     static void getSnTags(final TranslatorOutputType type,
             final HashMap<Integer, String> list) {
-        list.put(Command.READ_REQUEST, "x:readRequest");
-        list.put(Command.WRITE_REQUEST, "x:writeRequest");
-        list.put(Command.WRITE_RESPONSE, "x:writeResponse");
-        list.put(Command.WRITE_REQUEST << 8 | SingleReadResponse.DATA,
-                "x:Data");
+        list.put(Command.READ_REQUEST, "readRequest");
+        list.put(Command.WRITE_REQUEST, "writeRequest");
+        list.put(Command.WRITE_RESPONSE, "writeResponse");
+        list.put(Command.WRITE_REQUEST << 8 | SingleReadResponse.DATA, "Data");
         list.put(
                 Command.READ_REQUEST << 8
                         | VariableAccessSpecification.VARIABLE_NAME,
-                "x:variable-name");
+                "variable-name");
         list.put(
                 Command.READ_REQUEST << 8
                         | VariableAccessSpecification.PARAMETERISED_ACCESS,
-                "x:parameterized-access");
+                "parameterized-access");
         list.put(
                 Command.READ_REQUEST << 8
                         | VariableAccessSpecification.BLOCK_NUMBER_ACCESS,
@@ -159,21 +157,19 @@ final class TranslatorStandardTags {
         list.put(
                 Command.WRITE_REQUEST << 8
                         | VariableAccessSpecification.VARIABLE_NAME,
-                "x:variable-name");
+                "variable-name");
 
-        list.put(Command.READ_RESPONSE, "x:readResponse");
+        list.put(Command.READ_RESPONSE, "readResponse");
         list.put(
                 Command.READ_RESPONSE << 8
                         | SingleReadResponse.DATA_BLOCK_RESULT,
                 "DataBlockResult");
-        list.put(Command.READ_RESPONSE << 8 | SingleReadResponse.DATA,
-                "x:data");
-        list.put(Command.WRITE_RESPONSE << 8 | SingleReadResponse.DATA,
-                "x:data");
+        list.put(Command.READ_RESPONSE << 8 | SingleReadResponse.DATA, "data");
+        list.put(Command.WRITE_RESPONSE << 8 | SingleReadResponse.DATA, "data");
         list.put(
                 Command.READ_RESPONSE << 8
                         | SingleReadResponse.DATA_ACCESS_ERROR,
-                "x:data-access-error");
+                "data-access-error");
     }
 
     /*
@@ -181,102 +177,100 @@ final class TranslatorStandardTags {
      */
     static void getLnTags(final TranslatorOutputType type,
             final HashMap<Integer, String> list) {
-        GXDLMSTranslator.addTag(list, Command.GET_REQUEST, "x:get-request");
+        GXDLMSTranslator.addTag(list, Command.GET_REQUEST, "get-request");
         list.put(Command.GET_REQUEST << 8 | GetCommandType.NORMAL,
-                "x:get-request-normal");
+                "get-request-normal");
         list.put(Command.GET_REQUEST << 8 | GetCommandType.NEXT_DATA_BLOCK,
-                "x:get-request-next");
+                "get-request-next");
         list.put(Command.GET_REQUEST << 8 | GetCommandType.WITH_LIST,
-                "x:get-request-with-list");
-        GXDLMSTranslator.addTag(list, Command.SET_REQUEST, "x:set-request");
+                "get-request-with-list");
+        GXDLMSTranslator.addTag(list, Command.SET_REQUEST, "set-request");
         list.put(Command.SET_REQUEST << 8 | SetRequestType.NORMAL,
-                "x:set-request-normal");
+                "set-request-normal");
         list.put(Command.SET_REQUEST << 8 | SetRequestType.FIRST_DATA_BLOCK,
-                "x:set-request-first-data-block");
+                "set-request-first-data-block");
         list.put(Command.SET_REQUEST << 8 | SetRequestType.WITH_DATA_BLOCK,
-                "x:set-request-with-datablock");
+                "set-request-with-datablock");
         list.put(Command.SET_REQUEST << 8 | SetRequestType.WITH_LIST,
-                "x:set-request-with-list");
-        GXDLMSTranslator.addTag(list, Command.METHOD_REQUEST,
-                "x:action-request");
+                "set-request-with-list");
+        GXDLMSTranslator.addTag(list, Command.METHOD_REQUEST, "action-request");
         list.put(Command.METHOD_REQUEST << 8 | ActionRequestType.NORMAL,
-                "x:action-request-normal");
+                "action-request-normal");
         list.put(Command.METHOD_REQUEST << 8 | ActionRequestType.NEXT_BLOCK,
                 "ActionRequestForNextDataBlock");
         list.put(Command.METHOD_REQUEST << 8 | ActionRequestType.WITH_LIST,
-                "x:action-request-with-list");
+                "action-request-with-list");
         GXDLMSTranslator.addTag(list, Command.METHOD_RESPONSE,
-                "x:action-response");
+                "action-response");
         list.put(Command.METHOD_RESPONSE << 8 | ActionResponseType.NORMAL,
-                "x:action-response-normal");
+                "action-response-normal");
         list.put(
                 Command.METHOD_RESPONSE << 8
                         | ActionResponseType.WITH_FIRST_BLOCK,
-                "x:action-response-with-first-block");
+                "action-response-with-first-block");
         list.put(Command.METHOD_RESPONSE << 8 | ActionResponseType.WITH_LIST,
-                "x:action-response-with-list");
-        list.put(TranslatorTags.SINGLE_RESPONSE, "x:single-response");
+                "action-response-with-list");
+        list.put(TranslatorTags.SINGLE_RESPONSE, "single-response");
 
-        list.put((int) Command.DATA_NOTIFICATION, "x:data-notification");
-        GXDLMSTranslator.addTag(list, Command.GET_RESPONSE, "x:get-response");
+        list.put((int) Command.DATA_NOTIFICATION, "data-notification");
+        GXDLMSTranslator.addTag(list, Command.GET_RESPONSE, "get-response");
         list.put(Command.GET_RESPONSE << 8 | GetCommandType.NORMAL,
-                "x:get-response-normal");
+                "get-response-normal");
         list.put(Command.GET_RESPONSE << 8 | GetCommandType.NEXT_DATA_BLOCK,
-                "x:get-response-with-data-block");
+                "get-response-with-data-block");
         list.put(Command.GET_RESPONSE << 8 | GetCommandType.WITH_LIST,
-                "x:get-response-with-list");
-        GXDLMSTranslator.addTag(list, Command.SET_RESPONSE, "x:set-response");
+                "get-response-with-list");
+        GXDLMSTranslator.addTag(list, Command.SET_RESPONSE, "set-response");
         list.put(Command.SET_RESPONSE << 8 | SetResponseType.NORMAL,
-                "x:set-response-normal");
+                "set-response-normal");
         list.put(Command.SET_RESPONSE << 8 | SetResponseType.DATA_BLOCK,
-                "x:set-response-data-block");
+                "set-response-datablock");
         list.put(Command.SET_RESPONSE << 8 | SetResponseType.LAST_DATA_BLOCK,
-                "x:set-response-with-last-data-block");
+                "set-response-with-last-data-block");
         list.put(Command.SET_RESPONSE << 8 | SetResponseType.WITH_LIST,
-                "x:set-response-with-list");
+                "set-response-with-list");
 
-        GXDLMSTranslator.addTag(list, Command.ACCESS_REQUEST,
-                "x:access-request");
+        GXDLMSTranslator.addTag(list, Command.ACCESS_REQUEST, "access-request");
         list.put((Command.ACCESS_REQUEST) << 8 | AccessServiceCommandType.GET,
-                "x:access-request-get");
+                "access-request-get");
         list.put((Command.ACCESS_REQUEST) << 8 | AccessServiceCommandType.SET,
-                "x:access-request-set");
+                "access-request-set");
         list.put(
                 (Command.ACCESS_REQUEST) << 8 | AccessServiceCommandType.ACTION,
-                "x:access-request-action");
+                "access-request-action");
         GXDLMSTranslator.addTag(list, Command.ACCESS_RESPONSE,
-                "x:access-response");
+                "access-response");
         list.put((Command.ACCESS_RESPONSE) << 8 | AccessServiceCommandType.GET,
-                "x:access-response-get");
+                "access-response-get");
         list.put((Command.ACCESS_RESPONSE) << 8 | AccessServiceCommandType.SET,
-                "x:access-response-set");
+                "access-response-set");
         list.put(
                 (Command.ACCESS_RESPONSE) << 8
                         | AccessServiceCommandType.ACTION,
-                "x:access-response-action");
+                "access-response-action");
 
-        list.put(TranslatorTags.ACCESS_REQUEST_BODY, "x:access-request-body");
+        list.put(TranslatorTags.ACCESS_REQUEST_BODY, "access-request-body");
         list.put(TranslatorTags.LIST_OF_ACCESS_REQUEST_SPECIFICATION,
-                "x:access-request-specification");
+                "access-request-specification");
         list.put(TranslatorTags.ACCESS_REQUEST_SPECIFICATION,
-                "x:Access-Request-Specification");
+                "Access-Request-Specification");
         list.put(TranslatorTags.ACCESS_REQUEST_LIST_OF_DATA,
-                "x:access-request-list-of-data");
+                "access-request-list-of-data");
 
-        list.put(TranslatorTags.ACCESS_RESPONSE_BODY, "x:access-response-body");
+        list.put(TranslatorTags.ACCESS_RESPONSE_BODY, "access-response-body");
         list.put(TranslatorTags.LIST_OF_ACCESS_RESPONSE_SPECIFICATION,
-                "x:access-response-specification");
+                "access-response-specification");
         list.put(TranslatorTags.ACCESS_RESPONSE_SPECIFICATION,
-                "x:Access-Response-Specification");
+                "Access-Response-Specification");
         list.put(TranslatorTags.ACCESS_RESPONSE_LIST_OF_DATA,
-                "x:access-response-list-of-data");
-        list.put(TranslatorTags.SERVICE, "x:service");
-        list.put(TranslatorTags.SERVICE_ERROR, "x:service-error");
-        list.put(Command.GENERAL_BLOCK_TRANSFER, "x:general-block-transfer");
+                "access-response-list-of-data");
+        list.put(TranslatorTags.SERVICE, "service");
+        list.put(TranslatorTags.SERVICE_ERROR, "service-error");
+        list.put(Command.GENERAL_BLOCK_TRANSFER, "general-block-transfer");
         GXDLMSTranslator.addTag(list, Command.GATEWAY_REQUEST,
-                "x:gateway-request");
+                "gateway-request");
         GXDLMSTranslator.addTag(list, Command.GATEWAY_RESPONSE,
-                "x:gateway-response");
+                "gateway-response");
     }
 
     /*
@@ -285,33 +279,33 @@ final class TranslatorStandardTags {
     static void getGloTags(final TranslatorOutputType type,
             final HashMap<Integer, String> list) {
         GXDLMSTranslator.addTag(list, Command.GLO_INITIATE_REQUEST,
-                "x:glo-initiate-request");
+                "glo-initiate-request");
         GXDLMSTranslator.addTag(list, Command.GLO_INITIATE_RESPONSE,
-                "x:glo-initiate-response");
+                "glo-initiate-response");
         GXDLMSTranslator.addTag(list, Command.GLO_GET_REQUEST,
-                "x:glo-get-request");
+                "glo-get-request");
         GXDLMSTranslator.addTag(list, Command.GLO_GET_RESPONSE,
-                "x:glo-get-response");
+                "glo-get-response");
         GXDLMSTranslator.addTag(list, Command.GLO_SET_REQUEST,
-                "x:glo-set-request");
+                "glo-set-request");
         GXDLMSTranslator.addTag(list, Command.GLO_SET_RESPONSE,
-                "x:glo-set-response");
+                "glo-set-response");
         GXDLMSTranslator.addTag(list, Command.GLO_METHOD_REQUEST,
-                "x:glo-action-request");
+                "glo-action-request");
         GXDLMSTranslator.addTag(list, Command.GLO_METHOD_RESPONSE,
-                "x:glo-action-response");
+                "glo-action-response");
         GXDLMSTranslator.addTag(list, Command.GLO_READ_REQUEST,
-                "x:glo-read-request");
+                "glo-read-request");
         GXDLMSTranslator.addTag(list, Command.GLO_READ_RESPONSE,
-                "x:glo-read-response");
+                "glo-read-response");
         GXDLMSTranslator.addTag(list, Command.GLO_WRITE_REQUEST,
-                "x:glo-write-request");
+                "glo-write-request");
         GXDLMSTranslator.addTag(list, Command.GLO_WRITE_RESPONSE,
-                "x:glo-write-response");
+                "glo-write-response");
         GXDLMSTranslator.addTag(list, Command.GENERAL_GLO_CIPHERING,
-                "x:general-glo-ciphering");
+                "general-glo-ciphering");
         GXDLMSTranslator.addTag(list, Command.GENERAL_CIPHERING,
-                "x:general-ciphering");
+                "general-ciphering");
     }
 
     /*
@@ -320,23 +314,23 @@ final class TranslatorStandardTags {
     static void getDedTags(final TranslatorOutputType type,
             final HashMap<Integer, String> list) {
         GXDLMSTranslator.addTag(list, Command.DED_INITIATE_REQUEST,
-                "x:ded-initiate-request");
+                "ded-initiate-request");
         GXDLMSTranslator.addTag(list, Command.DED_INITIATE_RESPONSE,
-                "x:ded-initiate-response");
+                "ded-initiate-response");
         GXDLMSTranslator.addTag(list, Command.DED_GET_REQUEST,
-                "x:ded-get-request");
+                "ded-get-request");
         GXDLMSTranslator.addTag(list, Command.DED_GET_RESPONSE,
-                "x:ded-get-response");
+                "ded-get-response");
         GXDLMSTranslator.addTag(list, Command.DED_SET_REQUEST,
-                "x:ded-set-request");
+                "ded-set-request");
         GXDLMSTranslator.addTag(list, Command.DED_SET_RESPONSE,
-                "x:ded-set-response");
+                "ded-set-response");
         GXDLMSTranslator.addTag(list, Command.DED_METHOD_REQUEST,
-                "x:ded-action-request");
+                "ded-action-request");
         GXDLMSTranslator.addTag(list, Command.DED_METHOD_RESPONSE,
-                "x:ded-action-response");
+                "ded-action-response");
         GXDLMSTranslator.addTag(list, Command.GENERAL_DED_CIPHERING,
-                "x:general-ded-ciphering");
+                "general-ded-ciphering");
     }
 
     /*
@@ -346,8 +340,8 @@ final class TranslatorStandardTags {
             final HashMap<Integer, String> list) {
         GXDLMSTranslator.addTag(list, TranslatorTags.WRAPPER, "Wrapper");
         GXDLMSTranslator.addTag(list, TranslatorTags.HDLC, "Hdlc");
-        GXDLMSTranslator.addTag(list, TranslatorTags.PDU_DLMS, "x:xDLMS-APDU");
-        GXDLMSTranslator.addTag(list, TranslatorTags.PDU_CSE, "x:aCSE-APDU");
+        GXDLMSTranslator.addTag(list, TranslatorTags.PDU_DLMS, "xDLMS-APDU");
+        GXDLMSTranslator.addTag(list, TranslatorTags.PDU_CSE, "aCSE-APDU");
         GXDLMSTranslator.addTag(list, TranslatorTags.TARGET_ADDRESS,
                 "TargetAddress");
         GXDLMSTranslator.addTag(list, TranslatorTags.SOURCE_ADDRESS,
@@ -355,121 +349,115 @@ final class TranslatorStandardTags {
         GXDLMSTranslator.addTag(list, TranslatorTags.FRAME_TYPE, "FrameType");
         GXDLMSTranslator.addTag(list,
                 TranslatorTags.LIST_OF_VARIABLE_ACCESS_SPECIFICATION,
-                "x:variable-access-specification");
+                "variable-access-specification");
         GXDLMSTranslator.addTag(list, TranslatorTags.LIST_OF_DATA,
-                "x:list-of-data");
+                "list-of-data");
         GXDLMSTranslator.addTag(list, TranslatorTags.SUCCESS, "Success");
         GXDLMSTranslator.addTag(list, TranslatorTags.DATA_ACCESS_ERROR,
-                "x:data-access-result");
+                "data-access-result");
         GXDLMSTranslator.addTag(list, TranslatorTags.ATTRIBUTE_DESCRIPTOR,
-                "x:cosem-attribute-descriptor");
-        GXDLMSTranslator.addTag(list, TranslatorTags.CLASS_ID, "x:class-id");
+                "cosem-attribute-descriptor");
+        GXDLMSTranslator.addTag(list, TranslatorTags.CLASS_ID, "class-id");
         GXDLMSTranslator.addTag(list, TranslatorTags.INSTANCE_ID,
-                "x:instance-id");
+                "instance-id");
         GXDLMSTranslator.addTag(list, TranslatorTags.ATTRIBUTE_ID,
-                "x:attribute-id");
+                "attribute-id");
         GXDLMSTranslator.addTag(list,
                 TranslatorTags.METHOD_INVOCATION_PARAMETERS,
-                "x:method-invocation-parameters");
-        GXDLMSTranslator.addTag(list, TranslatorTags.SELECTOR, "x:selector");
-        GXDLMSTranslator.addTag(list, TranslatorTags.PARAMETER, "x:parameter");
-        GXDLMSTranslator.addTag(list, TranslatorTags.LAST_BLOCK,
-                "x:last-block");
+                "method-invocation-parameters");
+        GXDLMSTranslator.addTag(list, TranslatorTags.SELECTOR, "selector");
+        GXDLMSTranslator.addTag(list, TranslatorTags.PARAMETER, "parameter");
+        GXDLMSTranslator.addTag(list, TranslatorTags.LAST_BLOCK, "last-block");
         GXDLMSTranslator.addTag(list, TranslatorTags.BLOCK_NUMBER,
-                "x:block-number");
-        GXDLMSTranslator.addTag(list, TranslatorTags.RAW_DATA, "x:raw-data");
+                "block-number");
+        GXDLMSTranslator.addTag(list, TranslatorTags.RAW_DATA, "raw-data");
         GXDLMSTranslator.addTag(list, TranslatorTags.METHOD_DESCRIPTOR,
-                "x:cosem-method-descriptor");
-        GXDLMSTranslator.addTag(list, TranslatorTags.METHOD_ID, "x:method-id");
-        GXDLMSTranslator.addTag(list, TranslatorTags.RESULT, "x:result");
+                "cosem-method-descriptor");
+        GXDLMSTranslator.addTag(list, TranslatorTags.METHOD_ID, "method-id");
+        GXDLMSTranslator.addTag(list, TranslatorTags.RESULT, "result");
         GXDLMSTranslator.addTag(list, TranslatorTags.RETURN_PARAMETERS,
-                "x:return-parameters");
+                "return-parameters");
         GXDLMSTranslator.addTag(list, TranslatorTags.ACCESS_SELECTION,
-                "x:access-selection");
-        GXDLMSTranslator.addTag(list, TranslatorTags.VALUE, "x:value");
+                "access-selection");
+        GXDLMSTranslator.addTag(list, TranslatorTags.VALUE, "value");
         GXDLMSTranslator.addTag(list, TranslatorTags.ACCESS_SELECTOR,
-                "x:access-selector");
+                "access-selector");
         GXDLMSTranslator.addTag(list, TranslatorTags.ACCESS_PARAMETERS,
-                "x:access-parameters");
+                "access-parameters");
         GXDLMSTranslator.addTag(list, TranslatorTags.ATTRIBUTE_DESCRIPTOR_LIST,
-                "x:attribute-descriptor-list");
+                "attribute-descriptor-list");
         GXDLMSTranslator.addTag(list,
                 TranslatorTags.ATTRIBUTE_DESCRIPTOR_WITH_SELECTION,
-                "x:Cosem-Attribute-Descriptor-With-Selection");
+                "Cosem-Attribute-Descriptor-With-Selection");
         GXDLMSTranslator.addTag(list, TranslatorTags.READ_DATA_BLOCK_ACCESS,
                 "ReadDataBlockAccess");
         GXDLMSTranslator.addTag(list, TranslatorTags.WRITE_DATA_BLOCK_ACCESS,
-                "WriteDataBlockAccess");
-        GXDLMSTranslator.addTag(list, TranslatorTags.DATA, "x:data");
+                "write-data-block-access");
+        GXDLMSTranslator.addTag(list, TranslatorTags.DATA, "data");
         GXDLMSTranslator.addTag(list, TranslatorTags.INVOKE_ID,
-                "x:invoke-id-and-priority");
+                "invoke-id-and-priority");
         GXDLMSTranslator.addTag(list, TranslatorTags.LONG_INVOKE_ID,
-                "x:long-invoke-id-and-priority");
-        GXDLMSTranslator.addTag(list, TranslatorTags.DATE_TIME, "x:date-time");
+                "long-invoke-id-and-priority");
+        GXDLMSTranslator.addTag(list, TranslatorTags.DATE_TIME, "date-time");
         GXDLMSTranslator.addTag(list, TranslatorTags.CURRENT_TIME,
-                "x:current-time");
-        GXDLMSTranslator.addTag(list, TranslatorTags.TIME, "x:time");
-        GXDLMSTranslator.addTag(list, TranslatorTags.REASON, "x:reason");
+                "current-time");
+        GXDLMSTranslator.addTag(list, TranslatorTags.TIME, "time");
+        GXDLMSTranslator.addTag(list, TranslatorTags.REASON, "reason");
         GXDLMSTranslator.addTag(list,
                 TranslatorTags.VARIABLE_ACCESS_SPECIFICATION,
-                "x:Variable-Access-Specification");
-        GXDLMSTranslator.addTag(list, TranslatorTags.CHOICE, "x:CHOICE");
+                "Variable-Access-Specification");
+        GXDLMSTranslator.addTag(list, TranslatorTags.CHOICE, "CHOICE");
         GXDLMSTranslator.addTag(list, TranslatorTags.NOTIFICATION_BODY,
-                "x:notification-body");
-        GXDLMSTranslator.addTag(list, TranslatorTags.DATA_VALUE,
-                "x:data-value");
+                "notification-body");
+        GXDLMSTranslator.addTag(list, TranslatorTags.DATA_VALUE, "data-value");
         GXDLMSTranslator.addTag(list, TranslatorTags.INITIATE_ERROR,
-                "x:initiateError");
+                "initiateError");
         GXDLMSTranslator.addTag(list, TranslatorTags.CIPHERED_SERVICE,
-                "x:ciphered-content");
+                "ciphered-content");
         GXDLMSTranslator.addTag(list, TranslatorTags.SYSTEM_TITLE,
-                "x:system-title");
-        GXDLMSTranslator.addTag(list, TranslatorTags.DATA_BLOCK, "x:datablock");
+                "system-title");
+        GXDLMSTranslator.addTag(list, TranslatorTags.DATA_BLOCK, "datablock");
         GXDLMSTranslator.addTag(list, TranslatorTags.TRANSACTION_ID,
-                "x:transaction-id");
+                "transaction-id");
         GXDLMSTranslator.addTag(list, TranslatorTags.ORIGINATOR_SYSTEM_TITLE,
-                "x:originator-system-title");
+                "originator-system-title");
         GXDLMSTranslator.addTag(list, TranslatorTags.RECIPIENT_SYSTEM_TITLE,
-                "x:recipient-system-title");
+                "recipient-system-title");
         GXDLMSTranslator.addTag(list, TranslatorTags.OTHER_INFORMATION,
-                "x:other-information");
-        GXDLMSTranslator.addTag(list, TranslatorTags.KEY_INFO, "x:key-info");
+                "other-information");
+        GXDLMSTranslator.addTag(list, TranslatorTags.KEY_INFO, "key-info");
         GXDLMSTranslator.addTag(list, TranslatorTags.CIPHERED_CONTENT,
-                "x:ciphered-content");
-        GXDLMSTranslator.addTag(list, TranslatorTags.AGREED_KEY,
-                "x:agreed-key");
+                "ciphered-content");
+        GXDLMSTranslator.addTag(list, TranslatorTags.AGREED_KEY, "agreed-key");
         GXDLMSTranslator.addTag(list, TranslatorTags.KEY_PARAMETERS,
-                "x:key-parameters");
+                "key-parameters");
         GXDLMSTranslator.addTag(list, TranslatorTags.KEY_CIPHERED_DATA,
-                "x:key-ciphered-data");
+                "key-ciphered-data");
         GXDLMSTranslator.addTag(list, TranslatorTags.ATTRIBUTE_VALUE,
-                "x:attribute-value");
+                "attribute-value");
         GXDLMSTranslator.addTag(list, TranslatorTags.MAX_INFO_RX, "MaxInfoRX");
         GXDLMSTranslator.addTag(list, TranslatorTags.MAX_INFO_TX, "MaxInfoTX");
         GXDLMSTranslator.addTag(list, TranslatorTags.WINDOW_SIZE_RX,
                 "WindowSizeRX");
         GXDLMSTranslator.addTag(list, TranslatorTags.WINDOW_SIZE_TX,
                 "WindowSizeTX");
-        GXDLMSTranslator.addTag(list, TranslatorTags.VALUE_LIST,
-                "x:value-list");
+        GXDLMSTranslator.addTag(list, TranslatorTags.VALUE_LIST, "value-list");
         GXDLMSTranslator.addTag(list, TranslatorTags.DATA_ACCESS_RESULT,
-                "x:data-access-result");
+                "data-access-result");
         GXDLMSTranslator.addTag(list, TranslatorTags.BLOCK_CONTROL,
-                "x:block-control");
+                "block-control");
         GXDLMSTranslator.addTag(list, TranslatorTags.BLOCK_NUMBER_ACK,
-                "x:block-number-ack");
-        GXDLMSTranslator.addTag(list, TranslatorTags.BLOCK_DATA,
-                "x:block-data");
+                "block-number-ack");
+        GXDLMSTranslator.addTag(list, TranslatorTags.BLOCK_DATA, "block-data");
         GXDLMSTranslator.addTag(list, TranslatorTags.CONTENTS_DESCRIPTION,
-                "x:contents-description");
+                "contents-description");
         GXDLMSTranslator.addTag(list, TranslatorTags.ARRAY_CONTENTS,
-                "x:array-contents");
-        GXDLMSTranslator.addTag(list, TranslatorTags.NETWORK_ID,
-                "x:network-id");
+                "array-contents");
+        GXDLMSTranslator.addTag(list, TranslatorTags.NETWORK_ID, "network-id");
         GXDLMSTranslator.addTag(list, TranslatorTags.PHYSICAL_DEVICE_ADDRESS,
-                "x:physical-device-address");
+                "physical-device-address");
         GXDLMSTranslator.addTag(list, TranslatorTags.PROTOCOL_VERSION,
-                "x:protocol-version");
+                "protocol-version");
         GXDLMSTranslator.addTag(list, TranslatorTags.CALLED_AP_TITLE,
                 "called-ap-title");
         GXDLMSTranslator.addTag(list, TranslatorTags.CALLED_AP_INVOCATION_ID,
@@ -484,48 +472,45 @@ final class TranslatorStandardTags {
 
     static void getDataTypeTags(final HashMap<Integer, String> list) {
         list.put(GXDLMS.DATA_TYPE_OFFSET + DataType.NONE.getValue(),
-                "x:null-data");
-        list.put(GXDLMS.DATA_TYPE_OFFSET + DataType.ARRAY.getValue(),
-                "x:array");
-        list.put(GXDLMS.DATA_TYPE_OFFSET + DataType.BCD.getValue(), "x:bcd");
+                "null-data");
+        list.put(GXDLMS.DATA_TYPE_OFFSET + DataType.ARRAY.getValue(), "array");
+        list.put(GXDLMS.DATA_TYPE_OFFSET + DataType.BCD.getValue(), "bcd");
         list.put(GXDLMS.DATA_TYPE_OFFSET + DataType.BITSTRING.getValue(),
-                "x:bit-string");
+                "bit-string");
         list.put(GXDLMS.DATA_TYPE_OFFSET + DataType.BOOLEAN.getValue(),
-                "x:boolean");
+                "boolean");
         list.put(GXDLMS.DATA_TYPE_OFFSET + DataType.COMPACT_ARRAY.getValue(),
-                "x:compact-array");
-        list.put(GXDLMS.DATA_TYPE_OFFSET + DataType.DATE.getValue(), "x:date");
+                "compact-array");
+        list.put(GXDLMS.DATA_TYPE_OFFSET + DataType.DATE.getValue(), "date");
         list.put(GXDLMS.DATA_TYPE_OFFSET + DataType.DATETIME.getValue(),
-                "x:date-time");
-        list.put(GXDLMS.DATA_TYPE_OFFSET + DataType.ENUM.getValue(), "x:enum");
+                "date-time");
+        list.put(GXDLMS.DATA_TYPE_OFFSET + DataType.ENUM.getValue(), "enum");
         list.put(GXDLMS.DATA_TYPE_OFFSET + DataType.FLOAT32.getValue(),
-                "x:float32");
+                "float32");
         list.put(GXDLMS.DATA_TYPE_OFFSET + DataType.FLOAT64.getValue(),
-                "x:float64,");
-        list.put(GXDLMS.DATA_TYPE_OFFSET + DataType.INT16.getValue(), "x:long");
+                "float64,");
+        list.put(GXDLMS.DATA_TYPE_OFFSET + DataType.INT16.getValue(), "long");
         list.put(GXDLMS.DATA_TYPE_OFFSET + DataType.INT32.getValue(),
-                "x:double-long");
-        list.put(GXDLMS.DATA_TYPE_OFFSET + DataType.INT64.getValue(),
-                "x:long64");
-        list.put(GXDLMS.DATA_TYPE_OFFSET + DataType.INT8.getValue(),
-                "x:integer");
+                "double-long");
+        list.put(GXDLMS.DATA_TYPE_OFFSET + DataType.INT64.getValue(), "long64");
+        list.put(GXDLMS.DATA_TYPE_OFFSET + DataType.INT8.getValue(), "integer");
         list.put(GXDLMS.DATA_TYPE_OFFSET + DataType.OCTET_STRING.getValue(),
-                "x:octet-string");
+                "octet-string");
         list.put(GXDLMS.DATA_TYPE_OFFSET + DataType.STRING.getValue(),
-                "x:visible-string");
+                "visible-string");
         list.put(GXDLMS.DATA_TYPE_OFFSET + DataType.STRING_UTF8.getValue(),
-                "x:utf8-string");
+                "utf8-string");
         list.put(GXDLMS.DATA_TYPE_OFFSET + DataType.STRUCTURE.getValue(),
-                "x:structure");
-        list.put(GXDLMS.DATA_TYPE_OFFSET + DataType.TIME.getValue(), "x:time");
+                "structure");
+        list.put(GXDLMS.DATA_TYPE_OFFSET + DataType.TIME.getValue(), "time");
         list.put(GXDLMS.DATA_TYPE_OFFSET + DataType.UINT16.getValue(),
-                "x:long-unsigned");
+                "long-unsigned");
         list.put(GXDLMS.DATA_TYPE_OFFSET + DataType.UINT32.getValue(),
-                "x:double-long-unsigned");
+                "double-long-unsigned");
         list.put(GXDLMS.DATA_TYPE_OFFSET + DataType.UINT64.getValue(),
-                "x:long64-unsigned");
+                "long64-unsigned");
         list.put(GXDLMS.DATA_TYPE_OFFSET + DataType.UINT8.getValue(),
-                "x:unsigned");
+                "unsigned");
     }
 
     static String errorCodeToString(final ErrorCode value) {

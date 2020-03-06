@@ -215,15 +215,16 @@ final class GXAPDU {
      *            Received data.
      */
     static void getInitiateRequest(final GXDLMSSettings settings,
-            final GXByteBuffer data) {
+            final GXByteBuffer data, final boolean xml) {
         // Tag for xDLMS-Initiate request
         data.setUInt8(Command.INITIATE_REQUEST);
         // Usage field for the response allowed component.
 
         // Usage field for dedicated-key component.
-        if (settings.getCipher() == null
+        if ((settings.getCipher() == null
                 || settings.getCipher().getDedicatedKey() == null
-                || settings.getCipher().getSecurity() == Security.NONE) {
+                || settings.getCipher().getSecurity() == Security.NONE)
+                && !xml) {
             // Not used
             data.setUInt8(0x00);
         } else {
@@ -275,7 +276,7 @@ final class GXAPDU {
             // Length
             data.setUInt8(0);
             int offset = data.size();
-            getInitiateRequest(settings, data);
+            getInitiateRequest(settings, data, false);
             data.setUInt8(offset - 1, data.size() - offset);
         } else {
             if (encryptedData != null && encryptedData.size() != 0) {
@@ -289,7 +290,7 @@ final class GXAPDU {
                 data.set(encryptedData);
             } else {
                 GXByteBuffer tmp = new GXByteBuffer();
-                getInitiateRequest(settings, tmp);
+                getInitiateRequest(settings, tmp, false);
                 AesGcmParameter p = new AesGcmParameter(
                         Command.GLO_INITIATE_REQUEST, cipher.getSecurity(),
                         cipher.getInvocationCounter(), cipher.getSystemTitle(),
@@ -674,11 +675,16 @@ final class GXAPDU {
                 originalPos = data.position();
                 byte[] st;
                 int cnt;
+                if (xml.getOutputType() == TranslatorOutputType.STANDARD_XML) {
+                    xml.appendStartTag(tag);
+                }
                 if (tag == Command.GENERAL_GLO_CIPHERING
                         || tag == Command.GENERAL_DED_CIPHERING) {
                     cnt = GXCommon.getObjectCount(data);
                     st = new byte[cnt];
                     data.get(st);
+                    xml.appendLine(TranslatorTags.SYSTEM_TITLE, null,
+                            GXCommon.toHex(st, false));
                 } else {
                     st = settings.getSourceSystemTitle();
                 }
@@ -711,7 +717,14 @@ final class GXAPDU {
                         xml.setXmlLength(pos);
                     }
                 }
-                xml.appendLine(tag, "Value", GXCommon.toHex(encrypted, false));
+                if (xml.getOutputType() == TranslatorOutputType.SIMPLE_XML) {
+                    xml.appendLine(tag, "Value",
+                            GXCommon.toHex(encrypted, false));
+                } else {
+                    xml.appendLine(TranslatorTags.CIPHERED_SERVICE, null,
+                            GXCommon.toHex(encrypted, false));
+                    xml.appendEndTag(tag);
+                }
                 return;
             }
             data.position(data.position() - 1);

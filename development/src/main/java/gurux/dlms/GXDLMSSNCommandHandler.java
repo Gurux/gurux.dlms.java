@@ -259,10 +259,15 @@ final class GXDLMSSNCommandHandler {
             } else {
                 xml.appendStartTag(TranslatorTags.READ_DATA_BLOCK_ACCESS);
             }
-            xml.appendLine("<LastBlock Value=\""
-                    + xml.integerToHex(lastBlock, 2) + "\" />");
-            xml.appendLine("<BlockNumber Value=\""
-                    + xml.integerToHex(blockNumber, 4) + "\" />");
+            if (xml.getOutputType() == TranslatorOutputType.SIMPLE_XML) {
+                xml.appendLine(TranslatorTags.LAST_BLOCK, null,
+                        xml.integerToHex(lastBlock, 2));
+            } else {
+                xml.appendLine(TranslatorTags.LAST_BLOCK, null,
+                        lastBlock != 0 ? "true" : "false");
+            }
+            xml.appendLine(TranslatorTags.BLOCK_NUMBER, null,
+                    xml.integerToHex(blockNumber, 4));
             if (command == Command.WRITE_RESPONSE) {
                 xml.appendEndTag(TranslatorTags.WRITE_DATA_BLOCK_ACCESS);
             } else {

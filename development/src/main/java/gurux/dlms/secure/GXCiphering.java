@@ -410,6 +410,7 @@ public class GXCiphering implements GXICipher {
         AesGcmParameter p = new AesGcmParameter(0x10, Security.AUTHENTICATION,
                 invocationCounter, systemTitle, blockCipherKey,
                 authenticationKey);
+        p.setType(CountType.TAG);
         GXByteBuffer bb = new GXByteBuffer();
         bb.setUInt8(0x10);
         bb.setUInt32(invocationCounter);

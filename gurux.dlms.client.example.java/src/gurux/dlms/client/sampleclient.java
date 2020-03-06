@@ -33,12 +33,14 @@
 //---------------------------------------------------------------------------
 package gurux.dlms.client;
 
+import java.io.File;
 import java.io.IOException;
 import java.util.Map;
 
 import javax.xml.stream.XMLStreamException;
 
 import gurux.dlms.enums.ObjectType;
+import gurux.dlms.objects.GXDLMSObjectCollection;
 import gurux.io.BaudRate;
 import gurux.io.Parity;
 import gurux.io.StopBits;
@@ -92,7 +94,23 @@ public class sampleclient {
             settings.media.open();
             if (!settings.readObjects.isEmpty()) {
                 reader.initializeConnection();
-                reader.getAssociationView();
+                if (settings.outputFile != null
+                        && new File(settings.outputFile).exists()) {
+                    try {
+                        GXDLMSObjectCollection c = GXDLMSObjectCollection
+                                .load(settings.outputFile);
+                        settings.client.getObjects().addAll(c);
+                    } catch (Exception ex) {
+                        // It's OK if this fails.
+                        System.out.print(ex.getMessage());
+                    }
+                } else {
+                    reader.getAssociationView();
+                    if (settings.outputFile != null) {
+                        settings.client.getObjects().save(settings.outputFile,
+                                null);
+                    }
+                }
                 for (Map.Entry<String, Integer> it : settings.readObjects) {
                     Object val = reader.read(
                             settings.client.getObjects()

@@ -114,6 +114,8 @@ final class TranslatorSimpleTags {
                 "RespondingAPTitle");
         GXDLMSTranslator.addTag(list, TranslatorGeneralTags.DEDICATED_KEY,
                 "DedicatedKey");
+        GXDLMSTranslator.addTag(list, TranslatorGeneralTags.USER_INFORMATION,
+                "UserInformation");
         GXDLMSTranslator.addTag(list, Command.CONFIRMED_SERVICE_ERROR,
                 "ConfirmedServiceError");
         GXDLMSTranslator.addTag(list, Command.INFORMATION_REPORT,
@@ -858,7 +860,7 @@ final class TranslatorSimpleTags {
         return ret;
     }
 
-    private static int getInitiate(final String value) {
+    static int getInitiate(final String value) {
         int ret = -1;
         for (Entry<Initiate, String> it : getInitiate().entrySet()) {
             if (value.compareTo(it.getValue()) == 0) {

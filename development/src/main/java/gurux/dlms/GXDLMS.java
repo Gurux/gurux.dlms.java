@@ -2864,6 +2864,8 @@ abstract class GXDLMS {
      */
     static void handleWriteResponse(final GXReplyData data) {
         int cnt = GXCommon.getObjectCount(data.getData());
+        boolean standardXml = data.getXml() != null && data.getXml()
+                .getOutputType() == TranslatorOutputType.STANDARD_XML;
         short ret;
         if (data.getXml() != null) {
             data.getXml().appendStartTag(Command.WRITE_RESPONSE, "Qty",
@@ -2871,22 +2873,37 @@ abstract class GXDLMS {
         }
         for (int pos = 0; pos != cnt; ++pos) {
             ret = data.getData().getUInt8();
-            if (ret != 0) {
-                data.setError(data.getData().getUInt8());
+            if (standardXml) {
+                data.getXml().appendStartTag(TranslatorTags.CHOICE);
             }
-            if (data.getXml() != null) {
-                if (ret == 0) {
+            if (ret == SingleWriteResponse.SUCCESS) {
+                if (data.getXml() != null) {
                     data.getXml().appendLine("<" + GXDLMSTranslator
                             .errorCodeToString(data.getXml().getOutputType(),
                                     ErrorCode.forValue(ret))
                             + " />");
-                } else {
+                }
+            } else if (ret == SingleWriteResponse.DATA_ACCESS_ERROR) {
+                ret = data.getData().getUInt8();
+                if (data.getXml() != null) {
                     data.getXml().appendLine(TranslatorTags.DATA_ACCESS_ERROR,
                             null,
                             GXDLMSTranslator.errorCodeToString(
                                     data.getXml().getOutputType(),
-                                    ErrorCode.forValue(data.getError())));
+                                    ErrorCode.forValue(ret)));
+                } else {
+                    data.setError(ret);
                 }
+            } else if (ret == SingleWriteResponse.BLOCK_NUMBER) {
+                data.setBlockNumber(data.getData().getUInt16());
+                if (data.getXml() != null) {
+                    data.getXml().appendLine(TranslatorTags.BLOCK_NUMBER, null,
+                            data.getXml().integerToHex(data.getBlockNumber(),
+                                    4));
+                }
+            }
+            if (standardXml) {
+                data.getXml().appendEndTag(TranslatorTags.CHOICE);
             }
         }
         if (data.getXml() != null) {

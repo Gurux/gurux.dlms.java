@@ -808,6 +808,8 @@ public class GXDLMSSecuritySetup extends GXDLMSObject implements IGXDLMSBase {
                 }
             }
         } else if (e.getIndex() == 2) {
+            // if settings.Cipher is null non secure server is used.
+            // Keys are take in action after reply is generated.
             try {
                 for (Object tmp : (List<?>) e.getParameters()) {
                     List<?> item = (List<?>) tmp;
@@ -815,24 +817,14 @@ public class GXDLMSSecuritySetup extends GXDLMSObject implements IGXDLMSBase {
                             .values()[((Number) item.get(0)).intValue()];
                     byte[] data = (byte[]) item.get(1);
                     switch (type) {
-                    case UNICAST_ENCRYPTION:
-                        settings.getCipher()
-                                .setBlockCipherKey(GXDLMSSecureClient
-                                        .decrypt(settings.getKek(), data));
-                        break;
                     case BROADCAST_ENCRYPTION:
                         // Invalid type
                         e.setError(ErrorCode.READ_WRITE_DENIED);
                         break;
+                    case UNICAST_ENCRYPTION:
                     case AUTHENTICATION:
-                        // if settings.Cipher is null non secure server is used.
-                        settings.getCipher()
-                                .setAuthenticationKey(GXDLMSSecureClient
-                                        .decrypt(settings.getKek(), data));
-                        break;
                     case KEK:
-                        settings.setKek(GXDLMSSecureClient
-                                .decrypt(settings.getKek(), data));
+                        GXDLMSSecureClient.decrypt(settings.getKek(), data);
                         break;
                     default:
                         e.setError(ErrorCode.READ_WRITE_DENIED);
@@ -1019,6 +1011,42 @@ public class GXDLMSSecuritySetup extends GXDLMSObject implements IGXDLMSBase {
         }
         // Return standard reply.
         return null;
+    }
+
+    /*
+     * Server uses this method to apply new keys.
+     */
+    public final void applyKeys(final GXDLMSSettings settings,
+            final ValueEventArgs e) {
+        try {
+            for (Object tmp : (List<?>) e.getParameters()) {
+                List<?> item = (List<?>) tmp;
+                GlobalKeyType type = GlobalKeyType
+                        .values()[((Number) item.get(0)).intValue()];
+                byte[] data = (byte[]) item.get(1);
+                data = GXDLMSSecureClient.decrypt(settings.getKek(), data);
+                switch (type) {
+                case UNICAST_ENCRYPTION:
+                    settings.getCipher().setBlockCipherKey(data);
+                    break;
+                case BROADCAST_ENCRYPTION:
+                    // Invalid type
+                    e.setError(ErrorCode.READ_WRITE_DENIED);
+                    break;
+                case AUTHENTICATION:
+                    // if settings.Cipher is null non secure server is used.
+                    settings.getCipher().setAuthenticationKey(data);
+                    break;
+                case KEK:
+                    settings.setKek(data);
+                    break;
+                default:
+                    e.setError(ErrorCode.READ_WRITE_DENIED);
+                }
+            }
+        } catch (Exception ex) {
+            e.setError(ErrorCode.READ_WRITE_DENIED);
+        }
     }
 
     private static KeyUsage

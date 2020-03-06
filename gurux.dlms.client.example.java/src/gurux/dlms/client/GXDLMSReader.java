@@ -988,16 +988,19 @@ public class GXDLMSReader {
     void readAll(String outputFile) throws Exception {
         try {
             initializeConnection();
+            boolean read = false;
             if (outputFile != null && new File(outputFile).exists()) {
                 try {
                     GXDLMSObjectCollection c =
                             GXDLMSObjectCollection.load(outputFile);
                     dlms.getObjects().addAll(c);
+                    read = true;
                 } catch (Exception ex) {
                     // It's OK if this fails.
                     System.out.print(ex.getMessage());
                 }
-            } else {
+            }
+            if (!read) {
                 getAssociationView();
                 // Read Scalers and units from the register objects.
                 readScalerAndUnits();

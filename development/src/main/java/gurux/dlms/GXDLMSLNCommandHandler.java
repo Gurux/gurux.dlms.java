@@ -19,6 +19,7 @@ import gurux.dlms.objects.GXDLMSAssociationLogicalName;
 import gurux.dlms.objects.GXDLMSCaptureObject;
 import gurux.dlms.objects.GXDLMSObject;
 import gurux.dlms.objects.GXDLMSProfileGeneric;
+import gurux.dlms.objects.GXDLMSSecuritySetup;
 import gurux.dlms.objects.enums.AssociationStatus;
 
 final class GXDLMSLNCommandHandler {
@@ -649,8 +650,14 @@ final class GXDLMSLNCommandHandler {
             }
             if (xml != null) {
                 xml.appendStartTag(TranslatorTags.DATA_BLOCK);
-                xml.appendLine(TranslatorTags.LAST_BLOCK, "Value",
-                        xml.integerToHex(lastBlock, 2));
+                if (xml.getOutputType() == TranslatorOutputType.SIMPLE_XML) {
+                    xml.appendLine(TranslatorTags.LAST_BLOCK, "Value",
+                            xml.integerToHex(lastBlock, 2));
+
+                } else {
+                    xml.appendLine(TranslatorTags.LAST_BLOCK, "Value",
+                            lastBlock != 0 ? "true" : "false");
+                }
                 xml.appendLine(TranslatorTags.BLOCK_NUMBER, "Value",
                         xml.integerToHex(blockNumber, 8));
                 xml.appendLine(TranslatorTags.RAW_DATA, "Value",
@@ -811,6 +818,7 @@ final class GXDLMSLNCommandHandler {
             final GXByteBuffer replyData, final GXDLMSTranslatorStructure xml,
             final int cipheredCommand) throws Exception {
         ErrorCode error = ErrorCode.OK;
+        ValueEventArgs e = null;
         GXByteBuffer bb = new GXByteBuffer();
         // Get type.
         short type = data.getUInt8();
@@ -872,8 +880,7 @@ final class GXDLMSLNCommandHandler {
             // Device reports a undefined object.
             error = ErrorCode.UNDEFINED_OBJECT;
         } else {
-            ValueEventArgs e =
-                    new ValueEventArgs(server, obj, id, 0, parameters);
+            e = new ValueEventArgs(server, obj, id, 0, parameters);
             e.setInvokeId(invokeId);
             if (server.notifyGetMethodAccess(e) == MethodAccessMode.NO_ACCESS) {
                 error = ErrorCode.READ_WRITE_DENIED;
@@ -932,6 +939,11 @@ final class GXDLMSLNCommandHandler {
                 settings.setConnected(
                         settings.getConnected() & ~ConnectionState.DLMS);
             }
+        }
+        // Start to use new keys.
+        if (e != null && error == ErrorCode.OK
+                && obj instanceof GXDLMSSecuritySetup && id == 2) {
+            ((GXDLMSSecuritySetup) obj).applyKeys(settings, e);
         }
     }
 
