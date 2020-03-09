@@ -2075,11 +2075,14 @@ abstract class GXDLMS {
                 // Get length.
                 value = buff.getUInt16();
                 boolean compleate = !((buff.size() - buff.position()) < value);
-                if (compleate && (buff.size() - buff.position()) != value) {
-                    System.out.println("Data length is " + String.valueOf(value)
-                            + "and there are "
-                            + String.valueOf(buff.size() - buff.position())
-                            + " bytes.");
+                if (compleate && (buff.size() - buff.position()) != value
+                        && data.getXml() != null) {
+                    data.getXml()
+                            .appendComment("Data length is "
+                                    + String.valueOf(value) + " and there are "
+                                    + String.valueOf(
+                                            buff.size() - buff.position())
+                                    + " bytes.");
                 }
                 target.setComplete(compleate);
                 if (!compleate) {
@@ -3177,7 +3180,7 @@ abstract class GXDLMS {
             if ((data.getData().size() - data.getData().position()) != len) {
                 data.getXml()
                         .appendComment("Data length is " + String.valueOf(len)
-                                + "and there are "
+                                + " and there are "
                                 + String.valueOf(data.getData().size()
                                         - data.getData().position())
                                 + " bytes.");

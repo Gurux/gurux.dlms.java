@@ -37,6 +37,8 @@ package gurux.dlms.objects;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.InputStream;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Locale;
 
 import javax.xml.stream.XMLInputFactory;
@@ -44,10 +46,12 @@ import javax.xml.stream.XMLStreamConstants;
 import javax.xml.stream.XMLStreamException;
 import javax.xml.stream.XMLStreamReader;
 
+import gurux.dlms.GXArray;
 import gurux.dlms.GXDLMSConverter;
 import gurux.dlms.GXDLMSTranslator;
 import gurux.dlms.GXDate;
 import gurux.dlms.GXDateTime;
+import gurux.dlms.GXStructure;
 import gurux.dlms.GXTime;
 import gurux.dlms.enums.DataType;
 
@@ -250,13 +254,21 @@ public class GXXmlReader implements AutoCloseable {
         return defaultValue;
     }
 
-    private Object[] readArray() throws XMLStreamException {
-        DataType[] dt = new DataType[1];
-        java.util.ArrayList<Object> list = new java.util.ArrayList<Object>();
-        while (isStartElement("Item", false)) {
-            list.add(readElementContentAsObject("Item", null, dt));
+    private List<Object> readArray(final DataType dt)
+            throws XMLStreamException {
+        DataType[] tmp = new DataType[1];
+        java.util.ArrayList<Object> list;
+        if (dt == DataType.ARRAY) {
+            list = new GXArray();
+        } else if (dt == DataType.STRUCTURE) {
+            list = new GXStructure();
+        } else {
+            list = new ArrayList<Object>();
         }
-        return list.toArray(new Object[0]);
+        while (isStartElement("Item", false)) {
+            list.add(readElementContentAsObject("Item", null, tmp));
+        }
+        return list;
     }
 
     public final Object readElementContentAsObject(final String name,
@@ -269,23 +281,32 @@ public class GXXmlReader implements AutoCloseable {
             String str = getAttribute(0);
             DataType tp = DataType.forValue(Integer.parseInt(str));
             dt[0] = tp;
+            if (reader.getAttributeCount() > 1) {
+                str = getAttribute(1);
+                tp = DataType.forValue(Integer.parseInt(str));
+            }
             if (tp == DataType.ARRAY || tp == DataType.STRUCTURE) {
                 read();
                 getNext();
-                ret = readArray();
+                ret = readArray(tp);
                 readEndElement(name);
                 return ret;
             } else {
                 str = getText();
-                if (tp == DataType.OCTET_STRING) {
+                switch (tp) {
+                case OCTET_STRING:
                     ret = GXDLMSTranslator.hexToBytes(str);
-                } else if (tp == DataType.DATETIME) {
+                    break;
+                case DATETIME:
                     ret = new GXDateTime(str, Locale.ROOT);
-                } else if (tp == DataType.DATE) {
+                    break;
+                case DATE:
                     ret = new GXDate(str, Locale.ROOT);
-                } else if (tp == DataType.TIME) {
+                    break;
+                case TIME:
                     ret = new GXTime(str, Locale.ROOT);
-                } else {
+                    break;
+                default:
                     ret = GXDLMSConverter.changeType(str, tp);
                 }
             }

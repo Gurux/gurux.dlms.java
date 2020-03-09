@@ -38,9 +38,11 @@ import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.OutputStream;
 import java.text.SimpleDateFormat;
+import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 import java.util.Locale;
+import java.util.Map;
 
 import javax.xml.stream.XMLOutputFactory;
 import javax.xml.stream.XMLStreamException;
@@ -50,6 +52,7 @@ import gurux.dlms.GXArray;
 import gurux.dlms.GXDLMSConverter;
 import gurux.dlms.GXDLMSTranslator;
 import gurux.dlms.GXDateTime;
+import gurux.dlms.GXSimpleEntry;
 import gurux.dlms.GXStructure;
 import gurux.dlms.enums.DataType;
 import gurux.dlms.internal.GXCommon;
@@ -144,6 +147,20 @@ public class GXXmlWriter implements AutoCloseable {
         appendSpaces();
         writer.writeStartElement(elementName);
         writer.writeAttribute(attributeName, value);
+        if (newLine) {
+            writer.writeCharacters(newline);
+        }
+        ++indenting;
+    }
+
+    public final void writeStartElement(final String elementName,
+            final List<Map.Entry<String, String>> attributes,
+            final boolean newLine) throws XMLStreamException {
+        appendSpaces();
+        writer.writeStartElement(elementName);
+        for (Map.Entry<String, String> it : attributes) {
+            writer.writeAttribute(it.getKey(), it.getValue());
+        }
         if (newLine) {
             writer.writeCharacters(newline);
         }
@@ -259,13 +276,13 @@ public class GXXmlWriter implements AutoCloseable {
                 return;
             }
         }
-        // If value is shown as string it's serialized as a string.
-        if (value instanceof Double) {
-            writeElementObject(name, value, true, DataType.FLOAT64);
-        } else if (value instanceof Float) {
-            writeElementObject(name, value, true, DataType.FLOAT32);
-        } else if (type != DataType.NONE) {
-            writeElementObject(name, value, true, type);
+        if (type != DataType.NONE) {
+            if (uiType == DataType.NONE
+                    && (value instanceof Float || value instanceof Double)) {
+                writeElementObject(name, value, true, type, DataType.FLOAT64);
+            } else {
+                writeElementObject(name, value, true, type, uiType);
+            }
         } else {
             writeElementObject(name, value, true);
         }
@@ -286,16 +303,26 @@ public class GXXmlWriter implements AutoCloseable {
      *             Invalid XML stream.
      */
     public final void writeElementObject(final String name, final Object value,
-            final boolean skipDefaultValue, final DataType dt)
-            throws XMLStreamException {
+            final boolean skipDefaultValue, final DataType dt,
+            final DataType uiType) throws XMLStreamException {
         if (value != null) {
             if (skipDefaultValue && value instanceof java.util.Date
                     && (((java.util.Date) value)
                             .compareTo(new java.util.Date(0))) == 0) {
                 return;
             }
-            writeStartElement(name, "Type", String.valueOf(dt.getValue()),
-                    false);
+            if (uiType != DataType.NONE && uiType != DataType.STRING) {
+                List<Map.Entry<String, String>> list =
+                        new ArrayList<Map.Entry<String, String>>();
+                list.add(new GXSimpleEntry<String, String>("Type",
+                        String.valueOf(dt.getValue())));
+                list.add(new GXSimpleEntry<String, String>("UIType",
+                        String.valueOf(uiType.getValue())));
+                writeStartElement(name, list, false);
+            } else {
+                writeStartElement(name, "Type", String.valueOf(dt.getValue()),
+                        false);
+            }
             if (dt == DataType.ARRAY || dt == DataType.STRUCTURE) {
                 writeArray(value);
             } else {
@@ -333,7 +360,8 @@ public class GXXmlWriter implements AutoCloseable {
                 return;
             }
             DataType dt = GXDLMSConverter.getDLMSDataType(value);
-            writeElementObject(name, value, skipDefaultValue, dt);
+            writeElementObject(name, value, skipDefaultValue, dt,
+                    DataType.NONE);
         }
     }
 
