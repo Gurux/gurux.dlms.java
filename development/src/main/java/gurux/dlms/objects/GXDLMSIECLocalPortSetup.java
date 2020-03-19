@@ -324,19 +324,19 @@ public class GXDLMSIECLocalPortSetup extends GXDLMSObject
                     .values()[((Number) e.getValue()).intValue()]);
         } else if (e.getIndex() == 6) {
             setDeviceAddress(GXDLMSClient
-                    .changeType((byte[]) e.getValue(), DataType.STRING)
+                    .changeType((byte[]) e.getValue(), DataType.STRING, false)
                     .toString());
         } else if (e.getIndex() == 7) {
             setPassword1(GXDLMSClient
-                    .changeType((byte[]) e.getValue(), DataType.STRING)
+                    .changeType((byte[]) e.getValue(), DataType.STRING, false)
                     .toString());
         } else if (e.getIndex() == 8) {
             setPassword2(GXDLMSClient
-                    .changeType((byte[]) e.getValue(), DataType.STRING)
+                    .changeType((byte[]) e.getValue(), DataType.STRING, false)
                     .toString());
         } else if (e.getIndex() == 9) {
             setPassword5(GXDLMSClient
-                    .changeType((byte[]) e.getValue(), DataType.STRING)
+                    .changeType((byte[]) e.getValue(), DataType.STRING, false)
                     .toString());
         } else {
             e.setError(ErrorCode.READ_WRITE_DENIED);

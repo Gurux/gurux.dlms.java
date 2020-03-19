@@ -489,6 +489,12 @@ public class GXDLMSNotify {
                     }
                 }
             }
+            boolean useUtc;
+            if (settings != null) {
+                useUtc = settings.getUseUtc2NormalTime();
+            } else {
+                useUtc = false;
+            }
             for (int pos = 0; pos < data.size(); ++pos) {
                 obj = items.get(pos).getKey();
                 value = data.get(pos);
@@ -496,7 +502,8 @@ public class GXDLMSNotify {
                 if (value instanceof byte[]) {
                     dt = obj.getUIDataType(index);
                     if (dt != DataType.NONE) {
-                        value = GXDLMSClient.changeType((byte[]) value, dt);
+                        value = GXDLMSClient.changeType((byte[]) value, dt,
+                                useUtc);
                     }
                 }
                 ValueEventArgs e =
@@ -542,7 +549,8 @@ public class GXDLMSNotify {
             if (value instanceof byte[]) {
                 dt = obj.getUIDataType(index);
                 if (dt != DataType.NONE) {
-                    value = GXDLMSClient.changeType((byte[]) value, dt);
+                    value = GXDLMSClient.changeType((byte[]) value, dt,
+                            settings.getUseUtc2NormalTime());
                 }
             }
             ValueEventArgs e =

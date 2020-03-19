@@ -196,13 +196,18 @@ public class GXDLMSSapAssignment extends GXDLMSObject implements IGXDLMSBase {
         } else if (e.getIndex() == 2) {
             sapAssignmentList.clear();
             if (e.getValue() != null) {
+                boolean useUtc;
+                if (e.getSettings() != null) {
+                    useUtc = e.getSettings().getUseUtc2NormalTime();
+                } else {
+                    useUtc = false;
+                }
                 for (Object item : (List<?>) e.getValue()) {
                     String str;
                     Object tmp = ((List<?>) item).get(1);
                     if (tmp instanceof byte[]) {
-                        str = GXDLMSClient
-                                .changeType((byte[]) tmp, DataType.STRING)
-                                .toString();
+                        str = GXDLMSClient.changeType((byte[]) tmp,
+                                DataType.STRING, useUtc).toString();
                     } else {
                         str = tmp.toString();
                     }

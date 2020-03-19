@@ -50,8 +50,6 @@ import gurux.dlms.internal.GXCommon;
 public class GXDLMSUtilityTables extends GXDLMSObject implements IGXDLMSBase {
     /**
      * Table Id.<br>
-     * Online help:<br>
-     * https://www.gurux.fi/Gurux.DLMS.Objects.GXDLMSUtilityTables
      */
     private int tableId;
 
@@ -64,7 +62,7 @@ public class GXDLMSUtilityTables extends GXDLMSObject implements IGXDLMSBase {
      * Constructor.
      */
     public GXDLMSUtilityTables() {
-        this(null, 0);
+        this("0.0.65.0.0.255", 0);
     }
 
     /**

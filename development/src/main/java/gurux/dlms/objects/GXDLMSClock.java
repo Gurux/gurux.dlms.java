@@ -335,14 +335,22 @@ public class GXDLMSClock extends GXDLMSObject implements IGXDLMSBase {
 
         } else if (e.getIndex() == 5) {
             List<?> arr = (List<?>) e.getParameters();
+            boolean useUtc;
+            if (e.getSettings() != null) {
+                useUtc = e.getSettings().getUseUtc2NormalTime();
+            } else {
+                useUtc = false;
+            }
             // Presets the time to a new value (preset_time) and defines
             // avalidity_interval within which the new time can be activated.
             GXDateTime presetTime = (GXDateTime) GXDLMSClient
-                    .changeType((byte[]) arr.get(0), DataType.DATETIME);
+                    .changeType((byte[]) arr.get(0), DataType.DATETIME, useUtc);
             // GXDateTime validityIntervalStart = (GXDateTime)
-            GXDLMSClient.changeType((byte[]) arr.get(1), DataType.DATETIME);
+            GXDLMSClient.changeType((byte[]) arr.get(1), DataType.DATETIME,
+                    useUtc);
             // GXDateTime validityIntervalEnd = (GXDateTime)
-            GXDLMSClient.changeType((byte[]) arr.get(2), DataType.DATETIME);
+            GXDLMSClient.changeType((byte[]) arr.get(2), DataType.DATETIME,
+                    useUtc);
             setTime(presetTime);
         } else if (e.getIndex() == 6) {
             // Shifts the time.
@@ -580,8 +588,14 @@ public class GXDLMSClock extends GXDLMSObject implements IGXDLMSBase {
             } else {
                 GXDateTime tmp;
                 if (e.getValue() instanceof byte[]) {
+                    boolean useUtc;
+                    if (e.getSettings() != null) {
+                        useUtc = e.getSettings().getUseUtc2NormalTime();
+                    } else {
+                        useUtc = false;
+                    }
                     tmp = (GXDateTime) GXDLMSClient.changeType(
-                            (byte[]) e.getValue(), DataType.DATETIME);
+                            (byte[]) e.getValue(), DataType.DATETIME, useUtc);
                 } else {
                     tmp = (GXDateTime) e.getValue();
                 }
@@ -610,8 +624,14 @@ public class GXDLMSClock extends GXDLMSObject implements IGXDLMSBase {
                 setBegin(new GXDateTime());
             } else if (e.getValue() instanceof byte[]) {
                 GXDateTime tmp;
-                tmp = (GXDateTime) GXDLMSClient
-                        .changeType((byte[]) e.getValue(), DataType.DATETIME);
+                boolean useUtc;
+                if (e.getSettings() != null) {
+                    useUtc = e.getSettings().getUseUtc2NormalTime();
+                } else {
+                    useUtc = false;
+                }
+                tmp = (GXDateTime) GXDLMSClient.changeType(
+                        (byte[]) e.getValue(), DataType.DATETIME, useUtc);
                 setBegin(tmp);
             } else {
                 setBegin((GXDateTime) e.getValue());
@@ -621,9 +641,15 @@ public class GXDLMSClock extends GXDLMSObject implements IGXDLMSBase {
             if (e.getValue() == null) {
                 setEnd(new GXDateTime());
             } else if (e.getValue() instanceof byte[]) {
+                boolean useUtc;
+                if (e.getSettings() != null) {
+                    useUtc = e.getSettings().getUseUtc2NormalTime();
+                } else {
+                    useUtc = false;
+                }
                 GXDateTime tmp;
-                tmp = (GXDateTime) GXDLMSClient
-                        .changeType((byte[]) e.getValue(), DataType.DATETIME);
+                tmp = (GXDateTime) GXDLMSClient.changeType(
+                        (byte[]) e.getValue(), DataType.DATETIME, useUtc);
                 setEnd(tmp);
             } else {
                 setEnd((GXDateTime) e.getValue());

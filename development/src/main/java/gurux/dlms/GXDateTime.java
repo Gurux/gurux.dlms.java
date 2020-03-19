@@ -733,6 +733,7 @@ public class GXDateTime {
             if (getSkip().contains(DateTimeSkips.YEAR)) {
                 remove(format, "yyyy", true);
                 remove(format, "yy", true);
+                remove(format, "y", true);
             }
             if (getSkip().contains(DateTimeSkips.MONTH)) {
                 remove(format, "M", true);
@@ -910,8 +911,8 @@ public class GXDateTime {
         }
         String str;
         DecimalFormat df = new DecimalFormat("00");
-        String tmp =
-                df.format(deviation / 60) + ":" + df.format(deviation % 60);
+        String tmp = df.format(deviation / 60) + ":"
+                + df.format(Math.abs(deviation) % 60);
         if (deviation == 0) {
             str = "GMT";
         } else if (deviation > 0) {

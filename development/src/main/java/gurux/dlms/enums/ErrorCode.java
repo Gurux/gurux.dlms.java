@@ -37,9 +37,8 @@ package gurux.dlms.enums;
 import java.util.HashMap;
 
 /**
- * Enumerated DLMS error codes.
- * 
- * @author Gurux Ltd.
+ * Enumerated all DLMS error codes. <br>
+ * https://www.gurux.fi/Gurux.DLMS.ErrorCodes
  */
 public enum ErrorCode {
 

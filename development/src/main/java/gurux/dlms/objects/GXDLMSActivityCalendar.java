@@ -429,16 +429,23 @@ public class GXDLMSActivityCalendar extends GXDLMSObject
         }
     }
 
-    static GXDLMSSeasonProfile[] getSeasonProfile(final Object value) {
+    static GXDLMSSeasonProfile[] getSeasonProfile(final ValueEventArgs e,
+            final Object value) {
         final List<GXDLMSSeasonProfile> items =
                 new ArrayList<GXDLMSSeasonProfile>();
         if (value != null) {
+            boolean useUtc;
+            if (e.getSettings() != null) {
+                useUtc = e.getSettings().getUseUtc2NormalTime();
+            } else {
+                useUtc = false;
+            }
             for (final Object item : (List<?>) value) {
                 List<?> arr = (List<?>) item;
                 final GXDLMSSeasonProfile it = new GXDLMSSeasonProfile();
                 it.setName((byte[]) arr.get(0));
-                it.setStart((GXDateTime) GXDLMSClient
-                        .changeType((byte[]) arr.get(1), DataType.DATETIME));
+                it.setStart((GXDateTime) GXDLMSClient.changeType(
+                        (byte[]) arr.get(1), DataType.DATETIME, useUtc));
                 byte[] weekName = (byte[]) arr.get(2);
                 // If week name is ignored.
                 if (weekName != null && weekName.length == 1
@@ -475,9 +482,16 @@ public class GXDLMSActivityCalendar extends GXDLMSObject
         return items.toArray(new GXDLMSWeekProfile[items.size()]);
     }
 
-    static GXDLMSDayProfile[] getDayProfileTable(final Object value) {
+    static GXDLMSDayProfile[] getDayProfileTable(final ValueEventArgs e,
+            final Object value) {
         final List<GXDLMSDayProfile> items = new ArrayList<GXDLMSDayProfile>();
         if (value != null) {
+            boolean useUtc;
+            if (e.getSettings() != null) {
+                useUtc = e.getSettings().getUseUtc2NormalTime();
+            } else {
+                useUtc = false;
+            }
             for (final Object item : (List<?>) value) {
                 List<?> arr = (List<?>) item;
                 final GXDLMSDayProfile it = new GXDLMSDayProfile();
@@ -488,8 +502,8 @@ public class GXDLMSActivityCalendar extends GXDLMSObject
                     List<?> arr1 = (List<?>) it2;
                     final GXDLMSDayProfileAction ac =
                             new GXDLMSDayProfileAction();
-                    ac.setStartTime((GXTime) GXDLMSClient
-                            .changeType((byte[]) arr1.get(0), DataType.TIME));
+                    ac.setStartTime((GXTime) GXDLMSClient.changeType(
+                            (byte[]) arr1.get(0), DataType.TIME, useUtc));
                     ac.setScriptLogicalName(
                             GXCommon.toLogicalName(arr1.get(1)));
                     ac.setScriptSelector(((Number) arr1.get(2)).intValue());
@@ -528,13 +542,13 @@ public class GXDLMSActivityCalendar extends GXDLMSObject
             }
             break;
         case 3:
-            setSeasonProfileActive(getSeasonProfile(e.getValue()));
+            setSeasonProfileActive(getSeasonProfile(e, e.getValue()));
             break;
         case 4:
             setWeekProfileTableActive(getWeekProfileTable(e.getValue()));
             break;
         case 5:
-            setDayProfileTableActive(getDayProfileTable(e.getValue()));
+            setDayProfileTableActive(getDayProfileTable(e, e.getValue()));
             break;
         case 6:
             if (e.getValue() == null) {
@@ -550,20 +564,27 @@ public class GXDLMSActivityCalendar extends GXDLMSObject
             }
             break;
         case 7:
-            setSeasonProfilePassive(getSeasonProfile(e.getValue()));
+            setSeasonProfilePassive(getSeasonProfile(e, e.getValue()));
             break;
         case 8:
             setWeekProfileTablePassive(getWeekProfileTable(e.getValue()));
             break;
         case 9:
-            setDayProfileTablePassive(getDayProfileTable(e.getValue()));
+            setDayProfileTablePassive(getDayProfileTable(e, e.getValue()));
             break;
         case 10:
             if (e.getValue() instanceof GXDateTime) {
                 setTime((GXDateTime) e.getValue());
             } else {
-                setTime((GXDateTime) GXDLMSClient
-                        .changeType((byte[]) e.getValue(), DataType.DATETIME));
+                boolean useUtc;
+                if (e.getSettings() != null) {
+                    useUtc = e.getSettings().getUseUtc2NormalTime();
+                } else {
+                    useUtc = false;
+                }
+
+                setTime((GXDateTime) GXDLMSClient.changeType(
+                        (byte[]) e.getValue(), DataType.DATETIME, useUtc));
             }
             break;
         default:

@@ -454,21 +454,21 @@ public class GXDLMSMBusClient extends GXDLMSObject implements IGXDLMSBase {
         } else if (e.getIndex() == 3) {
             captureDefinition.clear();
             if (e.getValue() != null) {
+                boolean useUtc;
+                if (e.getSettings() != null) {
+                    useUtc = e.getSettings().getUseUtc2NormalTime();
+                } else {
+                    useUtc = false;
+                }
                 for (Object it : (List<?>) e.getValue()) {
-                    captureDefinition
-                            .add(new GXSimpleEntry<String, String>(
-                                    GXDLMSClient
-                                            .changeType(
-                                                    (byte[]) ((List<?>) it)
-                                                            .get(0),
-                                                    DataType.OCTET_STRING)
-                                            .toString(),
-                                    GXDLMSClient
-                                            .changeType(
-                                                    (byte[]) ((List<?>) it)
-                                                            .get(1),
-                                                    DataType.OCTET_STRING)
-                                            .toString()));
+                    captureDefinition.add(new GXSimpleEntry<String, String>(
+                            GXDLMSClient.changeType(
+                                    (byte[]) ((List<?>) it).get(0),
+                                    DataType.OCTET_STRING, useUtc).toString(),
+                            GXDLMSClient
+                                    .changeType((byte[]) ((List<?>) it).get(1),
+                                            DataType.OCTET_STRING, useUtc)
+                                    .toString()));
                 }
             }
         } else if (e.getIndex() == 4) {

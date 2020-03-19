@@ -337,14 +337,20 @@ public class GXDLMSAutoConnect extends GXDLMSObject implements IGXDLMSBase {
             setRepetitionDelay(((Number) e.getValue()).intValue());
         } else if (e.getIndex() == 5) {
             getCallingWindow().clear();
+            boolean useUtc;
+            if (e.getSettings() != null) {
+                useUtc = e.getSettings().getUseUtc2NormalTime();
+            } else {
+                useUtc = false;
+            }
             if (e.getValue() != null) {
                 for (Object item : (List<?>) e.getValue()) {
                     GXDateTime start = (GXDateTime) GXDLMSClient.changeType(
-                            (byte[]) ((List<?>) item).get(0),
-                            DataType.DATETIME);
+                            (byte[]) ((List<?>) item).get(0), DataType.DATETIME,
+                            useUtc);
                     GXDateTime end = (GXDateTime) GXDLMSClient.changeType(
-                            (byte[]) ((List<?>) item).get(1),
-                            DataType.DATETIME);
+                            (byte[]) ((List<?>) item).get(1), DataType.DATETIME,
+                            useUtc);
                     getCallingWindow().add(
                             new GXSimpleEntry<GXDateTime, GXDateTime>(start,
                                     end));
@@ -356,7 +362,7 @@ public class GXDLMSAutoConnect extends GXDLMSObject implements IGXDLMSBase {
                 List<String> items = new ArrayList<String>();
                 for (Object item : (List<?>) e.getValue()) {
                     String it = GXDLMSClient
-                            .changeType((byte[]) item, DataType.STRING)
+                            .changeType((byte[]) item, DataType.STRING, false)
                             .toString();
                     items.add(it);
                 }

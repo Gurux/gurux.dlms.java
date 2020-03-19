@@ -2572,7 +2572,14 @@ public class GXDLMSTranslator {
                 } else if (tmp.length == 4) {
                     dt = DataType.TIME;
                 }
-                s.setTime((GXDateTime) GXDLMSClient.changeType(tmp, dt));
+                boolean useUtc;
+                if (s.getSettings() != null) {
+                    useUtc = s.getSettings().getUseUtc2NormalTime();
+                } else {
+                    useUtc = false;
+                }
+                s.setTime(
+                        (GXDateTime) GXDLMSClient.changeType(tmp, dt, useUtc));
             }
         }
         return bb;
@@ -2582,6 +2589,7 @@ public class GXDLMSTranslator {
             final GXDLMSXmlSettings s, final int tag) {
         GXByteBuffer preData = null;
         String v = getValue(node, s);
+        boolean useUtc;
         if (s.isTemplate() || v.equals("*")) {
             s.setTemplate(true);
             return preData;
@@ -2609,7 +2617,7 @@ public class GXDLMSTranslator {
             GXCommon.setData(null, s.getData(), DataType.DATE,
                     GXDLMSClient.changeType(
                             GXCommon.hexToBytes(getValue(node, s)),
-                            DataType.DATE));
+                            DataType.DATE, false));
             break;
         case DATETIME:
             byte[] tmp = GXCommon.hexToBytes(getValue(node, s));
@@ -2618,8 +2626,13 @@ public class GXDLMSTranslator {
             } else if (tmp.length == 4) {
                 dt = DataType.TIME;
             }
+            if (s.getSettings() != null) {
+                useUtc = s.getSettings().getUseUtc2NormalTime();
+            } else {
+                useUtc = false;
+            }
             GXCommon.setData(null, s.getData(), dt,
-                    GXDLMSClient.changeType(tmp, dt));
+                    GXDLMSClient.changeType(tmp, dt, useUtc));
             break;
         case ENUM:
             GXCommon.setData(null, s.getData(), DataType.ENUM,
@@ -2677,10 +2690,16 @@ public class GXDLMSTranslator {
             s.getData().size(0);
             break;
         case TIME:
+            if (s.getSettings() != null) {
+                useUtc = s.getSettings().getUseUtc2NormalTime();
+            } else {
+                useUtc = false;
+            }
+
             GXCommon.setData(null, s.getData(), DataType.TIME,
                     GXDLMSClient.changeType(
                             GXCommon.hexToBytes(getValue(node, s)),
-                            DataType.TIME));
+                            DataType.TIME, useUtc));
             break;
         case UINT16:
             GXCommon.setData(null, s.getData(), DataType.UINT16,

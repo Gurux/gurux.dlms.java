@@ -449,8 +449,14 @@ public class GXDLMSGSMDiagnostic extends GXDLMSObject implements IGXDLMSBase {
             break;
         case 8:
             if (e.getValue() instanceof byte[]) {
-                captureTime = (GXDateTime) GXDLMSClient
-                        .changeType((byte[]) e.getValue(), DataType.DATETIME);
+                boolean useUtc;
+                if (e.getSettings() != null) {
+                    useUtc = e.getSettings().getUseUtc2NormalTime();
+                } else {
+                    useUtc = false;
+                }
+                captureTime = (GXDateTime) GXDLMSClient.changeType(
+                        (byte[]) e.getValue(), DataType.DATETIME, useUtc);
             } else {
                 captureTime = (GXDateTime) e.getValue();
             }

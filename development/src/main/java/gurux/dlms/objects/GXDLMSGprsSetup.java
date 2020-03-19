@@ -248,9 +248,8 @@ public class GXDLMSGprsSetup extends GXDLMSObject implements IGXDLMSBase {
             if (e.getValue() instanceof String) {
                 setAPN(e.getValue().toString());
             } else {
-                setAPN(GXDLMSClient
-                        .changeType((byte[]) e.getValue(), DataType.STRING)
-                        .toString());
+                setAPN(GXDLMSClient.changeType((byte[]) e.getValue(),
+                        DataType.STRING, false).toString());
             }
         } else if (e.getIndex() == 3) {
             setPINCode(((Number) e.getValue()).intValue());

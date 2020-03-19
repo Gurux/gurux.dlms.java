@@ -421,12 +421,18 @@ public class GXDLMSPushSetup extends GXDLMSObject implements IGXDLMSBase {
         } else if (e.getIndex() == 4) {
             communicationWindow.clear();
             if (e.getValue() instanceof List<?>) {
+                boolean useUtc;
+                if (e.getSettings() != null) {
+                    useUtc = e.getSettings().getUseUtc2NormalTime();
+                } else {
+                    useUtc = false;
+                }
                 for (Object it : (List<?>) e.getValue()) {
                     List<?> tmp = (List<?>) it;
-                    GXDateTime start = (GXDateTime) GXDLMSClient
-                            .changeType((byte[]) tmp.get(0), DataType.DATETIME);
-                    GXDateTime end = (GXDateTime) GXDLMSClient
-                            .changeType((byte[]) tmp.get(1), DataType.DATETIME);
+                    GXDateTime start = (GXDateTime) GXDLMSClient.changeType(
+                            (byte[]) tmp.get(0), DataType.DATETIME, useUtc);
+                    GXDateTime end = (GXDateTime) GXDLMSClient.changeType(
+                            (byte[]) tmp.get(1), DataType.DATETIME, useUtc);
                     communicationWindow.add(
                             new GXSimpleEntry<GXDateTime, GXDateTime>(start,
                                     end));

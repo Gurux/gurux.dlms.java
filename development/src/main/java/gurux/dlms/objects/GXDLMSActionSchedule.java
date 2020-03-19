@@ -312,11 +312,18 @@ public class GXDLMSActionSchedule extends GXDLMSObject implements IGXDLMSBase {
         } else if (e.getIndex() == 4) {
             setExecutionTime(null);
             if (e.getValue() != null) {
+                boolean useUtc;
+                if (e.getSettings() != null) {
+                    useUtc = e.getSettings().getUseUtc2NormalTime();
+                } else {
+                    useUtc = false;
+                }
                 java.util.ArrayList<GXDateTime> items =
                         new java.util.ArrayList<GXDateTime>();
                 for (Object it : (List<?>) e.getValue()) {
                     GXDateTime time = (GXDateTime) GXDLMSClient.changeType(
-                            (byte[]) ((List<?>) it).get(0), DataType.TIME);
+                            (byte[]) ((List<?>) it).get(0), DataType.TIME,
+                            useUtc);
                     time.setSkip(DateTimeSkips.forValue(DateTimeSkips
                             .toInteger(time.getSkip())
                             & ~(DateTimeSkips.YEAR.getValue()
@@ -324,7 +331,8 @@ public class GXDLMSActionSchedule extends GXDLMSObject implements IGXDLMSBase {
                                     | DateTimeSkips.DAY.getValue()
                                     | DateTimeSkips.DAY_OF_WEEK.getValue())));
                     GXDateTime date = (GXDateTime) GXDLMSClient.changeType(
-                            (byte[]) ((List<?>) it).get(1), DataType.DATE);
+                            (byte[]) ((List<?>) it).get(1), DataType.DATE,
+                            useUtc);
                     date.setSkip(DateTimeSkips.forValue(DateTimeSkips
                             .toInteger(date.getSkip())
                             & ~(DateTimeSkips.HOUR.getValue()

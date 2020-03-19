@@ -599,9 +599,16 @@ final class GXDLMSLNCommandHandler {
                 try {
                     if (value instanceof byte[]) {
                         DataType dt = obj.getDataType(index);
+                        boolean useUtc;
+                        if (settings != null) {
+                            useUtc = settings.getUseUtc2NormalTime();
+                        } else {
+                            useUtc = false;
+                        }
                         if (dt != DataType.NONE
                                 && dt != DataType.OCTET_STRING) {
-                            value = GXDLMSClient.changeType((byte[]) value, dt);
+                            value = GXDLMSClient.changeType((byte[]) value, dt,
+                                    useUtc);
                         }
                     }
                     e.setValue(value);
@@ -678,7 +685,14 @@ final class GXDLMSLNCommandHandler {
                                                 .getIndex());
                         if (dt != DataType.NONE
                                 && dt != DataType.OCTET_STRING) {
-                            value = GXDLMSClient.changeType((byte[]) value, dt);
+                            boolean useUtc;
+                            if (settings != null) {
+                                useUtc = settings.getUseUtc2NormalTime();
+                            } else {
+                                useUtc = false;
+                            }
+                            value = GXDLMSClient.changeType((byte[]) value, dt,
+                                    useUtc);
                         }
                     }
                     server.getTransaction().getTargets()[0].setValue(value);
@@ -1077,11 +1091,17 @@ final class GXDLMSLNCommandHandler {
         byte[] tmp = null;
         // If date time is given.
         if (len != 0) {
+            boolean useUtc;
+            if (settings != null) {
+                useUtc = settings.getUseUtc2NormalTime();
+            } else {
+                useUtc = false;
+            }
             len = reply.getData().getUInt8();
             tmp = new byte[len];
             reply.getData().get(tmp);
             reply.setTime((GXDateTime) GXDLMSClient.changeType(tmp,
-                    DataType.DATETIME));
+                    DataType.DATETIME, useUtc));
         }
         if (reply.getXml() != null) {
             reply.getXml().appendStartTag(Command.EVENT_NOTIFICATION);

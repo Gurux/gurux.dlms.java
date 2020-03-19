@@ -2654,8 +2654,14 @@ abstract class GXDLMS {
         if (len != 0) {
             tmp = new byte[len];
             reply.getData().get(tmp);
+            boolean useUtc;
+            if (settings != null) {
+                useUtc = settings.getUseUtc2NormalTime();
+            } else {
+                useUtc = false;
+            }
             reply.setTime(((GXDateTime) GXDLMSClient.changeType(tmp,
-                    DataType.DATETIME)));
+                    DataType.DATETIME, useUtc)));
         }
         if (reply.getXml() != null) {
             reply.getXml().appendStartTag(Command.ACCESS_RESPONSE);

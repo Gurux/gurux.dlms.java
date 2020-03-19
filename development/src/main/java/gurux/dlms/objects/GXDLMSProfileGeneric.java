@@ -911,6 +911,13 @@ public class GXDLMSProfileGeneric extends GXDLMSObject implements IGXDLMSBase {
                 types[++colIndex] = it.getKey()
                         .getUIDataType(it.getValue().getAttributeIndex());
             }
+            boolean useUtc;
+            if (e.getSettings() != null) {
+                useUtc = e.getSettings().getUseUtc2NormalTime();
+            } else {
+                useUtc = false;
+            }
+
             for (Object it : (List<?>) e.getValue()) {
                 List<Object> row = (List<Object>) it;
                 if (row.size() != cols.size()) {
@@ -922,7 +929,8 @@ public class GXDLMSProfileGeneric extends GXDLMSObject implements IGXDLMSBase {
                     DataType type = types[colIndex];
                     if (type != DataType.NONE && type != null
                             && data instanceof byte[]) {
-                        data = GXDLMSClient.changeType((byte[]) data, type);
+                        data = GXDLMSClient.changeType((byte[]) data, type,
+                                useUtc);
                         if (data instanceof GXDateTime) {
                             GXDateTime dt = (GXDateTime) data;
                             lastDate.setTime(dt.getMeterCalendar().getTime());

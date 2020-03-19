@@ -304,13 +304,19 @@ public class GXDLMSAutoAnswer extends GXDLMSObject implements IGXDLMSBase {
         } else if (e.getIndex() == 3) {
             getListeningWindow().clear();
             if (e.getValue() != null) {
+                boolean useUtc;
+                if (e.getSettings() != null) {
+                    useUtc = e.getSettings().getUseUtc2NormalTime();
+                } else {
+                    useUtc = false;
+                }
                 for (Object item : (List<?>) e.getValue()) {
                     GXDateTime start = (GXDateTime) GXDLMSClient.changeType(
-                            (byte[]) ((List<?>) item).get(0),
-                            DataType.DATETIME);
+                            (byte[]) ((List<?>) item).get(0), DataType.DATETIME,
+                            useUtc);
                     GXDateTime end = (GXDateTime) GXDLMSClient.changeType(
-                            (byte[]) ((List<?>) item).get(1),
-                            DataType.DATETIME);
+                            (byte[]) ((List<?>) item).get(1), DataType.DATETIME,
+                            useUtc);
                     getListeningWindow().add(
                             new GXSimpleEntry<GXDateTime, GXDateTime>(start,
                                     end));

@@ -690,8 +690,14 @@ public class GXDLMSCharge extends GXDLMSObject implements IGXDLMSBase {
             if (e.getValue() instanceof GXDateTime) {
                 unitChargeActivationTime = (GXDateTime) e.getValue();
             } else {
-                unitChargeActivationTime = (GXDateTime) GXDLMSClient
-                        .changeType((byte[]) e.getValue(), DataType.DATETIME);
+                boolean useUtc;
+                if (e.getSettings() != null) {
+                    useUtc = e.getSettings().getUseUtc2NormalTime();
+                } else {
+                    useUtc = false;
+                }
+                unitChargeActivationTime = (GXDateTime) GXDLMSClient.changeType(
+                        (byte[]) e.getValue(), DataType.DATETIME, useUtc);
             }
             break;
         case 8:
@@ -704,8 +710,14 @@ public class GXDLMSCharge extends GXDLMSObject implements IGXDLMSBase {
             if (e.getValue() instanceof GXDateTime) {
                 lastCollectionTime = (GXDateTime) e.getValue();
             } else {
-                lastCollectionTime = (GXDateTime) GXDLMSClient
-                        .changeType((byte[]) e.getValue(), DataType.DATETIME);
+                boolean useUtc;
+                if (e.getSettings() != null) {
+                    useUtc = e.getSettings().getUseUtc2NormalTime();
+                } else {
+                    useUtc = false;
+                }
+                lastCollectionTime = (GXDateTime) GXDLMSClient.changeType(
+                        (byte[]) e.getValue(), DataType.DATETIME, useUtc);
             }
             break;
         case 11:

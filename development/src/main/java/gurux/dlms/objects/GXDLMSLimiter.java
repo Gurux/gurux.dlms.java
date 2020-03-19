@@ -502,10 +502,17 @@ public class GXDLMSLimiter extends GXDLMSObject implements IGXDLMSBase {
         } else if (e.getIndex() == 7) {
             minUnderThresholdDuration = ((Number) e.getValue()).longValue();
         } else if (e.getIndex() == 8) {
+            boolean useUtc;
+            if (e.getSettings() != null) {
+                useUtc = e.getSettings().getUseUtc2NormalTime();
+            } else {
+                useUtc = false;
+            }
             List<?> tmp = (List<?>) e.getValue();
             emergencyProfile.setID(((Number) tmp.get(0)).intValue());
-            emergencyProfile.setActivationTime((GXDateTime) GXDLMSClient
-                    .changeType((byte[]) tmp.get(1), DataType.DATETIME));
+            emergencyProfile.setActivationTime(
+                    (GXDateTime) GXDLMSClient.changeType((byte[]) tmp.get(1),
+                            DataType.DATETIME, useUtc));
             emergencyProfile.setDuration(((Long) tmp.get(2)).longValue());
         } else if (e.getIndex() == 9) {
             java.util.ArrayList<Integer> list =

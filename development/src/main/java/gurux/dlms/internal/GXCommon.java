@@ -556,7 +556,7 @@ public final class GXCommon {
             value = getUtfString(data, info, knownType);
             break;
         case OCTET_STRING:
-            value = getOctetString(data, info, knownType);
+            value = getOctetString(settings, data, info, knownType);
             break;
         case BCD:
             value = getBcd(data, info);
@@ -1194,7 +1194,7 @@ public final class GXCommon {
             while (buff.position() - start < len) {
                 tmp.clear();
                 tmp.setType(dt);
-                list.add(getOctetString(buff, tmp, false));
+                list.add(getOctetString(settings, buff, tmp, false));
                 if (!tmp.isComplete()) {
                     break;
                 }
@@ -1568,8 +1568,9 @@ public final class GXCommon {
      *            Data info.
      * @return parsed octet string value.
      */
-    private static Object getOctetString(final GXByteBuffer buff,
-            final GXDataInfo info, final boolean knownType) {
+    private static Object getOctetString(final GXDLMSSettings settings,
+            final GXByteBuffer buff, final GXDataInfo info,
+            final boolean knownType) {
         Object value;
         int len;
         if (knownType) {
@@ -1604,8 +1605,14 @@ public final class GXCommon {
                             } else {
                                 type = DataType.TIME;
                             }
+                            boolean useUtc;
+                            if (settings != null) {
+                                useUtc = settings.getUseUtc2NormalTime();
+                            } else {
+                                useUtc = false;
+                            }
                             GXDateTime dt = (GXDateTime) GXDLMSClient
-                                    .changeType(tmp, type);
+                                    .changeType(tmp, type, useUtc);
                             int year = dt.getMeterCalendar().get(Calendar.YEAR);
                             if (year > 1970 && year < 2100) {
                                 info.getXml().appendComment(dt.toString());

@@ -394,8 +394,14 @@ public class GXDLMSTokenGateway extends GXDLMSObject implements IGXDLMSBase {
             token = (byte[]) e.getValue();
             break;
         case 3:
+            boolean useUtc;
+            if (e.getSettings() != null) {
+                useUtc = e.getSettings().getUseUtc2NormalTime();
+            } else {
+                useUtc = false;
+            }
             time = (GXDateTime) GXDLMSClient.changeType((byte[]) e.getValue(),
-                    DataType.DATETIME);
+                    DataType.DATETIME, useUtc);
             break;
         case 4:
             descriptions.clear();

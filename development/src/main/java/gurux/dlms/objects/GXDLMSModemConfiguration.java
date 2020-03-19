@@ -270,16 +270,26 @@ public class GXDLMSModemConfiguration extends GXDLMSObject
             if (e.getValue() != null) {
                 List<GXDLMSModemInitialisation> items =
                         new ArrayList<GXDLMSModemInitialisation>();
+                boolean useUtc;
+                if (e.getSettings() != null) {
+                    useUtc = e.getSettings().getUseUtc2NormalTime();
+                } else {
+                    useUtc = false;
+                }
                 for (Object it : (List<?>) e.getValue()) {
                     List<?> arr = (List<?>) it;
                     GXDLMSModemInitialisation item =
                             new GXDLMSModemInitialisation();
-                    item.setRequest(GXDLMSClient
-                            .changeType((byte[]) arr.get(0), DataType.STRING)
-                            .toString());
-                    item.setResponse(GXDLMSClient
-                            .changeType((byte[]) arr.get(1), DataType.STRING)
-                            .toString());
+                    item.setRequest(
+                            GXDLMSClient
+                                    .changeType((byte[]) arr.get(0),
+                                            DataType.STRING, useUtc)
+                                    .toString());
+                    item.setResponse(
+                            GXDLMSClient
+                                    .changeType((byte[]) arr.get(1),
+                                            DataType.STRING, useUtc)
+                                    .toString());
                     if (arr.size() > 2) {
                         item.setDelay(((Number) arr.get(2)).intValue());
                     }
@@ -291,10 +301,16 @@ public class GXDLMSModemConfiguration extends GXDLMSObject
         } else if (e.getIndex() == 4) {
             modemProfile = null;
             if (e.getValue() != null) {
+                boolean useUtc;
+                if (e.getSettings() != null) {
+                    useUtc = e.getSettings().getUseUtc2NormalTime();
+                } else {
+                    useUtc = false;
+                }
                 List<String> items = new ArrayList<String>();
                 for (Object it : (List<?>) e.getValue()) {
                     items.add(GXDLMSClient
-                            .changeType((byte[]) it, DataType.STRING)
+                            .changeType((byte[]) it, DataType.STRING, useUtc)
                             .toString());
                 }
                 modemProfile = items.toArray(new String[items.size()]);

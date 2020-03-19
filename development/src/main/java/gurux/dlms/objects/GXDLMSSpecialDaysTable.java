@@ -310,8 +310,8 @@ public class GXDLMSSpecialDaysTable extends GXDLMSObject
                     List<?> item = (List<?>) i;
                     GXDLMSSpecialDay it = new GXDLMSSpecialDay();
                     it.setIndex(((Number) item.get(0)).intValue());
-                    it.setDate((GXDateTime) GXDLMSClient
-                            .changeType((byte[]) item.get(1), DataType.DATE));
+                    it.setDate((GXDateTime) GXDLMSClient.changeType(
+                            (byte[]) item.get(1), DataType.DATE, false));
                     it.setDayId(((Number) item.get(2)).intValue());
                     items.add(it);
                 }
@@ -337,7 +337,7 @@ public class GXDLMSSpecialDaysTable extends GXDLMSObject
                 GXDLMSSpecialDay it = new GXDLMSSpecialDay();
                 it.setIndex(((Number) tmp.get(0)).intValue());
                 it.setDate((GXDate) GXDLMSClient.changeType((byte[]) tmp.get(1),
-                        DataType.DATE));
+                        DataType.DATE, false));
                 it.setDayId(((Number) tmp.get(2)).intValue());
                 for (GXDLMSSpecialDay item2 : items) {
                     if (item2.getIndex() == it.getIndex()) {

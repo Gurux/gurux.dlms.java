@@ -8,7 +8,8 @@ import java.util.Set;
  * Client is using conformance to tell what kind of services it's interested and
  * server is using conformance to tell what kind of services it can offer. All
  * services enumerated here are not necessary supported by the client or the
- * server.
+ * server. <br>
+ * https://www.gurux.fi/Gurux.DLMS.Conformance
  */
 public enum Conformance {
     /**
