@@ -363,7 +363,6 @@ public class GXDLMSPppSetup extends GXDLMSObject implements IGXDLMSBase {
 
     @Override
     public final void load(final GXXmlReader reader) throws XMLStreamException {
-        DataType[] dt = new DataType[1];
         phyReference = reader.readElementContentAsString("PHYReference");
         List<GXDLMSPppSetupLcpOption> options =
                 new ArrayList<GXDLMSPppSetupLcpOption>();
@@ -373,7 +372,8 @@ public class GXDLMSPppSetup extends GXDLMSObject implements IGXDLMSBase {
                 it.setType(PppSetupLcpOptionType
                         .forValue(reader.readElementContentAsInt("Type")));
                 it.setLength(reader.readElementContentAsInt("Length"));
-                it.setData(reader.readElementContentAsObject("Data", null, dt));
+                it.setData(reader.readElementContentAsObject("Data", null, null,
+                        0));
             }
             reader.readEndElement("LCPOptions");
         }
@@ -388,7 +388,8 @@ public class GXDLMSPppSetup extends GXDLMSObject implements IGXDLMSBase {
                 it.setType(PppSetupIPCPOptionType
                         .forValue(reader.readElementContentAsInt("Type")));
                 it.setLength(reader.readElementContentAsInt("Length"));
-                it.setData(reader.readElementContentAsObject("Data", null, dt));
+                it.setData(reader.readElementContentAsObject("Data", null, null,
+                        0));
             }
             reader.readEndElement("IPCPOptions");
         }

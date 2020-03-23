@@ -108,7 +108,7 @@ public class GXDLMSProfileGeneric extends GXDLMSObject implements IGXDLMSBase {
     public GXDLMSProfileGeneric(final String ln, final int sn) {
         super(ObjectType.PROFILE_GENERIC, ln, sn);
         setVersion(1);
-        sortMethod = SortMethod.LIFO;
+        sortMethod = SortMethod.FIFO;
         captureObjects =
                 new ArrayList<Entry<GXDLMSObject, GXDLMSCaptureObject>>();
     }
@@ -136,7 +136,6 @@ public class GXDLMSProfileGeneric extends GXDLMSObject implements IGXDLMSBase {
      */
     public final void addRow(final Object[] value) {
         buffer.add(value);
-        entriesInUse = buffer.size();
     }
 
     /**
@@ -145,7 +144,6 @@ public class GXDLMSProfileGeneric extends GXDLMSObject implements IGXDLMSBase {
      */
     public final void addBuffer(final Object[][] value) {
         buffer.addAll(Arrays.asList(value));
-        entriesInUse = buffer.size();
     }
 
     /**
@@ -154,7 +152,6 @@ public class GXDLMSProfileGeneric extends GXDLMSObject implements IGXDLMSBase {
      */
     public final void addBuffer(final List<Object[]> value) {
         buffer.addAll(value);
-        entriesInUse = buffer.size();
     }
 
     /**
@@ -390,10 +387,6 @@ public class GXDLMSProfileGeneric extends GXDLMSObject implements IGXDLMSBase {
                 || getLogicalName().compareTo("") == 0) {
             attributes.add(1);
         }
-        // Buffer
-        if (all || !isRead(2)) {
-            attributes.add(2);
-        }
         // CaptureObjects
         if (all || !isRead(3)) {
             attributes.add(3);
@@ -401,6 +394,10 @@ public class GXDLMSProfileGeneric extends GXDLMSObject implements IGXDLMSBase {
         // CapturePeriod
         if (all || !isRead(4)) {
             attributes.add(4);
+        }
+        // Buffer
+        if (all || !isRead(2)) {
+            attributes.add(2);
         }
         // SortMethod
         if (all || !isRead(5)) {
@@ -822,12 +819,15 @@ public class GXDLMSProfileGeneric extends GXDLMSObject implements IGXDLMSBase {
             if (settings != null && settings.isServer()) {
                 reset();
             }
-
             if (e.getValue() == null) {
                 sortMethod = SortMethod.FIFO;
             } else {
                 sortMethod =
                         SortMethod.forValue(((Number) e.getValue()).intValue());
+                if (sortMethod == null) {
+                    sortMethod = SortMethod.LIFO;
+                    throw new IllegalArgumentException("Invalid sort method.");
+                }
             }
 
         } else if (e.getIndex() == 6) {
@@ -848,16 +848,22 @@ public class GXDLMSProfileGeneric extends GXDLMSObject implements IGXDLMSBase {
                 }
                 ObjectType type =
                         ObjectType.forValue(((Number) tmp.get(0)).intValue());
-                String ln = GXCommon.toLogicalName((byte[]) tmp.get(1));
-                int attributeIndex = ((Number) tmp.get(2)).intValue();
-                int dataIndex = ((Number) tmp.get(3)).intValue();
-                sortObject = settings.getObjects().findByLN(type, ln);
-                if (sortObject == null) {
-                    sortObject = gurux.dlms.GXDLMSClient.createObject(type);
-                    sortObject.setLogicalName(ln);
+                if (type == ObjectType.NONE) {
+                    sortObject = null;
+                    sortObjectAttributeIndex = 0;
+                    sortObjectDataIndex = 0;
+                } else {
+                    String ln = GXCommon.toLogicalName((byte[]) tmp.get(1));
+                    int attributeIndex = ((Number) tmp.get(2)).intValue();
+                    int dataIndex = ((Number) tmp.get(3)).intValue();
+                    sortObject = settings.getObjects().findByLN(type, ln);
+                    if (sortObject == null) {
+                        sortObject = gurux.dlms.GXDLMSClient.createObject(type);
+                        sortObject.setLogicalName(ln);
+                    }
+                    sortObjectAttributeIndex = attributeIndex;
+                    sortObjectDataIndex = dataIndex;
                 }
-                sortObjectAttributeIndex = attributeIndex;
-                sortObjectDataIndex = dataIndex;
             }
         } else if (e.getIndex() == 7) {
             if (e.getValue() == null) {
@@ -894,7 +900,6 @@ public class GXDLMSProfileGeneric extends GXDLMSObject implements IGXDLMSBase {
         List<Entry<GXDLMSObject, GXDLMSCaptureObject>> cols =
                 (List<Entry<GXDLMSObject, GXDLMSCaptureObject>>) e
                         .getParameters();
-
         if (cols == null) {
             cols = captureObjects;
         }
@@ -991,7 +996,9 @@ public class GXDLMSProfileGeneric extends GXDLMSObject implements IGXDLMSBase {
                 }
                 buffer.add(row.toArray(new Object[0]));
             }
-            entriesInUse = buffer.size();
+            if (e.getSettings().isServer()) {
+                entriesInUse = buffer.size();
+            }
         }
     }
 
@@ -1061,14 +1068,13 @@ public class GXDLMSProfileGeneric extends GXDLMSObject implements IGXDLMSBase {
 
     @Override
     public final void load(final GXXmlReader reader) throws XMLStreamException {
-        DataType[] dt = new DataType[1];
         buffer.clear();
         if (reader.isStartElement("Buffer", true)) {
             while (reader.isStartElement("Row", true)) {
                 List<Object> row = new ArrayList<Object>();
                 while (reader.isStartElement("Cell", false)) {
                     row.add(reader.readElementContentAsObject("Cell", null,
-                            dt));
+                            null, 0));
                 }
                 this.addRow(row.toArray(new Object[row.size()]));
             }

@@ -544,7 +544,6 @@ public class GXDLMSLimiter extends GXDLMSObject implements IGXDLMSBase {
 
     @Override
     public final void load(final GXXmlReader reader) throws XMLStreamException {
-        DataType[] dt = new DataType[1];
         if (reader.isStartElement("MonitoredValue", true)) {
             ObjectType ot = ObjectType
                     .forValue(reader.readElementContentAsInt("ObjectType"));
@@ -559,15 +558,12 @@ public class GXDLMSLimiter extends GXDLMSObject implements IGXDLMSBase {
             }
             reader.readEndElement("MonitoredValue");
         }
-        thresholdActive =
-                reader.readElementContentAsObject("ThresholdActive", null, dt);
-        setDataType(3, dt[0]);
-        thresholdNormal =
-                reader.readElementContentAsObject("ThresholdNormal", null, dt);
-        setDataType(4, dt[0]);
-        thresholdEmergency = reader
-                .readElementContentAsObject("ThresholdEmergency", null, dt);
-        setDataType(5, dt[0]);
+        thresholdActive = reader.readElementContentAsObject("ThresholdActive",
+                null, this, 3);
+        thresholdNormal = reader.readElementContentAsObject("ThresholdNormal",
+                null, this, 4);
+        thresholdEmergency = reader.readElementContentAsObject(
+                "ThresholdEmergency", null, this, 5);
         minOverThresholdDuration =
                 reader.readElementContentAsInt("MinOverThresholdDuration");
         minUnderThresholdDuration =
@@ -614,9 +610,12 @@ public class GXDLMSLimiter extends GXDLMSObject implements IGXDLMSBase {
             writer.writeElementString("LN", monitoredValue.getLogicalName());
             writer.writeEndElement();
         }
-        writer.writeElementObject("ThresholdActive", thresholdActive);
-        writer.writeElementObject("ThresholdNormal", thresholdNormal);
-        writer.writeElementObject("ThresholdEmergency", thresholdEmergency);
+        writer.writeElementObject("ThresholdActive", thresholdActive,
+                getDataType(3), getUIDataType(3));
+        writer.writeElementObject("ThresholdNormal", thresholdNormal,
+                getDataType(4), getUIDataType(4));
+        writer.writeElementObject("ThresholdEmergency", thresholdEmergency,
+                getDataType(5), getUIDataType(5));
         writer.writeElementString("MinOverThresholdDuration",
                 minOverThresholdDuration);
         writer.writeElementString("MinUnderThresholdDuration",
@@ -624,7 +623,7 @@ public class GXDLMSLimiter extends GXDLMSObject implements IGXDLMSBase {
         if (emergencyProfile != null) {
             writer.writeStartElement("EmergencyProfile");
             writer.writeElementString("ID", emergencyProfile.getID());
-            writer.writeElementObject("Time",
+            writer.writeElementString("Time",
                     emergencyProfile.getActivationTime());
             writer.writeElementString("Duration",
                     emergencyProfile.getDuration());

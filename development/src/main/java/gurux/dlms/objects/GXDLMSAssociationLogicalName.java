@@ -1221,7 +1221,7 @@ public class GXDLMSAssociationLogicalName extends GXDLMSObject
             writer.writeEndElement();
         }
         if (authenticationMechanismName != null) {
-            writer.writeStartElement("XDLMSContextInfo");
+            writer.writeStartElement("AuthenticationMechanismName");
             writer.writeElementString("JointIsoCtt",
                     authenticationMechanismName.getJointIsoCtt());
             writer.writeElementString("Country",

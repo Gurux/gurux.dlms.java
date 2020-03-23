@@ -519,17 +519,13 @@ public class GXDLMSDemandRegister extends GXDLMSObject implements IGXDLMSBase {
 
     @Override
     public final void load(final GXXmlReader reader) throws XMLStreamException {
-        DataType[] dt = new DataType[1];
-        currentAverageValue = reader
-                .readElementContentAsObject("CurrentAverageValue", null, dt);
-        this.setDataType(2, dt[0]);
-        lastAverageValue =
-                reader.readElementContentAsObject("LastAverageValue", null, dt);
-        this.setDataType(3, dt[0]);
+        currentAverageValue = reader.readElementContentAsObject(
+                "CurrentAverageValue", null, this, 2);
+        lastAverageValue = reader.readElementContentAsObject("LastAverageValue",
+                null, this, 3);
         setScaler(reader.readElementContentAsDouble("Scaler", 1));
         unit = reader.readElementContentAsInt("Unit");
-        status = reader.readElementContentAsObject("Status", null, dt);
-        this.setDataType(5, dt[0]);
+        status = reader.readElementContentAsObject("Status", null, this, 5);
         captureTime = reader.readElementContentAsDateTime("CaptureTime");
         startTimeCurrent =
                 reader.readElementContentAsDateTime("StartTimeCurrent");

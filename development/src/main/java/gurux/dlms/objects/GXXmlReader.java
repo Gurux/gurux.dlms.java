@@ -256,7 +256,6 @@ public class GXXmlReader implements AutoCloseable {
 
     private List<Object> readArray(final DataType dt)
             throws XMLStreamException {
-        DataType[] tmp = new DataType[1];
         java.util.ArrayList<Object> list;
         if (dt == DataType.ARRAY) {
             list = new GXArray();
@@ -266,34 +265,46 @@ public class GXXmlReader implements AutoCloseable {
             list = new ArrayList<Object>();
         }
         while (isStartElement("Item", false)) {
-            list.add(readElementContentAsObject("Item", null, tmp));
+            list.add(readElementContentAsObject("Item", null, null, 0));
         }
         return list;
     }
 
     public final Object readElementContentAsObject(final String name,
-            final Object defaultValue, final DataType dt[])
+            final Object defaultValue, final GXDLMSObject obj, final int index)
             throws XMLStreamException {
         getNext();
-        dt[0] = DataType.NONE;
         if (name.compareToIgnoreCase(getName()) == 0) {
             Object ret = null;
             String str = getAttribute(0);
-            DataType tp = DataType.forValue(Integer.parseInt(str));
-            dt[0] = tp;
+            DataType uiType;
+            DataType dt;
+            if (str == null || str.isEmpty()) {
+                dt = DataType.NONE;
+            } else {
+                dt = DataType.forValue(Integer.parseInt(str));
+                if (obj != null) {
+                    obj.setDataType(index, dt);
+                }
+            }
             if (reader.getAttributeCount() > 1) {
                 str = getAttribute(1);
-                tp = DataType.forValue(Integer.parseInt(str));
+                uiType = DataType.forValue(Integer.parseInt(str));
+                if (obj != null) {
+                    obj.setUIDataType(index, uiType);
+                }
+            } else {
+                uiType = dt;
             }
-            if (tp == DataType.ARRAY || tp == DataType.STRUCTURE) {
+            if (dt == DataType.ARRAY || dt == DataType.STRUCTURE) {
                 read();
                 getNext();
-                ret = readArray(tp);
+                ret = readArray(dt);
                 readEndElement(name);
                 return ret;
             } else {
                 str = getText();
-                switch (tp) {
+                switch (uiType) {
                 case OCTET_STRING:
                     ret = GXDLMSTranslator.hexToBytes(str);
                     break;
@@ -306,8 +317,11 @@ public class GXXmlReader implements AutoCloseable {
                 case TIME:
                     ret = new GXTime(str, Locale.ROOT);
                     break;
+                case NONE:
+                    ret = defaultValue;
+                    break;
                 default:
-                    ret = GXDLMSConverter.changeType(str, tp);
+                    ret = GXDLMSConverter.changeType(str, uiType);
                 }
             }
             int type = reader.getEventType();

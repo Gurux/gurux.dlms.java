@@ -302,8 +302,12 @@ public class GXDLMSActionSchedule extends GXDLMSObject implements IGXDLMSBase {
         if (e.getIndex() == 1) {
             setLogicalName(GXCommon.toLogicalName(e.getValue()));
         } else if (e.getIndex() == 2) {
-            setExecutedScriptLogicalName(
-                    GXCommon.toLogicalName(((List<?>) e.getValue()).get(0)));
+            String ln = GXCommon.toLogicalName(((List<?>) e.getValue()).get(0));
+            target = (GXDLMSScriptTable) settings.getObjects()
+                    .findByLN(ObjectType.SCRIPT_TABLE, ln);
+            if (target == null) {
+                target = new GXDLMSScriptTable(ln);
+            }
             setExecutedScriptSelector(
                     ((Number) ((List<?>) e.getValue()).get(1)).intValue());
         } else if (e.getIndex() == 3) {

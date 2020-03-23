@@ -109,7 +109,7 @@ public class Settings {
 
     static int getParameters(String[] args, Settings settings) {
         ArrayList<GXCmdParameter> parameters = GXCommon.getParameters(args,
-                "h:p:c:s:r:iIt:a:p:wP:g:S:n:C:v:o:");
+                "h:p:c:s:r:iIt:a:p:wP:g:S:n:C:v:o:T:A:B:D:");
         GXNet net = null;
         for (GXCmdParameter it : parameters) {
             switch (it.getTag()) {
@@ -189,6 +189,22 @@ public class Settings {
                                     + "'. (None, Authentication, Encryption, AuthenticationEncryption)");
                 }
                 break;
+            case 'T':
+                settings.client.getCiphering()
+                        .setSystemTitle(GXCommon.hexToBytes(it.getValue()));
+                break;
+            case 'A':
+                settings.client.getCiphering().setAuthenticationKey(
+                        GXCommon.hexToBytes(it.getValue()));
+                break;
+            case 'B':
+                settings.client.getCiphering()
+                        .setBlockCipherKey(GXCommon.hexToBytes(it.getValue()));
+                break;
+            case 'D':
+                settings.client.getCiphering()
+                        .setDedicatedKey(GXCommon.hexToBytes(it.getValue()));
+                break;
             case 'o':
                 settings.outputFile = it.getValue();
                 break;
@@ -262,6 +278,27 @@ public class Settings {
                 case 't':
                     throw new IllegalArgumentException(
                             "Missing mandatory trace option.\n");
+                case 'g':
+                    throw new IllegalArgumentException(
+                            "Missing mandatory OBIS code option.");
+                case 'C':
+                    throw new IllegalArgumentException(
+                            "Missing mandatory Ciphering option.");
+                case 'v':
+                    throw new IllegalArgumentException(
+                            "Missing mandatory invocation counter logical name option.");
+                case 'T':
+                    throw new IllegalArgumentException(
+                            "Missing mandatory system title option.");
+                case 'A':
+                    throw new IllegalArgumentException(
+                            "Missing mandatory authentication key option.");
+                case 'B':
+                    throw new IllegalArgumentException(
+                            "Missing mandatory block cipher key option.");
+                case 'D':
+                    throw new IllegalArgumentException(
+                            "Missing mandatory dedicated key option.");
                 default:
                     showHelp();
                     return 1;

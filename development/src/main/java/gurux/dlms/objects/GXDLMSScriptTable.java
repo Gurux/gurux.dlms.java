@@ -351,7 +351,6 @@ public class GXDLMSScriptTable extends GXDLMSObject implements IGXDLMSBase {
 
     @Override
     public final void load(final GXXmlReader reader) throws XMLStreamException {
-        DataType[] dt = new DataType[1];
         scripts.clear();
         if (reader.isStartElement("Scripts", true)) {
             while (reader.isStartElement("Script", true)) {
@@ -376,7 +375,7 @@ public class GXDLMSScriptTable extends GXDLMSObject implements IGXDLMSBase {
                         DataType dt2 = DataType.forValue(reader
                                 .readElementContentAsInt("ParameterDataType"));
                         a.setParameter(reader.readElementContentAsObject(
-                                "Parameter", null, dt), dt2);
+                                "Parameter", null, null, 0), dt2);
                         it.getActions().add(a);
                     }
                     reader.readEndElement("Actions");
@@ -411,6 +410,8 @@ public class GXDLMSScriptTable extends GXDLMSObject implements IGXDLMSBase {
                         writer.writeElementString("LN",
                                 a.getTarget().getLogicalName());
                         writer.writeElementString("Index", a.getIndex());
+                        writer.writeElementString("ParameterDataType",
+                                a.getParameterType().getValue());
                         writer.writeElementObject("Parameter",
                                 a.getParameter());
                     }

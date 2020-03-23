@@ -191,9 +191,7 @@ public class GXDLMSData extends GXDLMSObject implements IGXDLMSBase {
 
     @Override
     public final void load(final GXXmlReader reader) throws XMLStreamException {
-        DataType[] dt = new DataType[1];
-        value = reader.readElementContentAsObject("Value", null, dt);
-        this.setDataType(2, dt[0]);
+        value = reader.readElementContentAsObject("Value", null, this, 2);
     }
 
     @Override

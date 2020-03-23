@@ -492,7 +492,6 @@ public class GXDLMSParameterMonitor extends GXDLMSObject
 
     @Override
     public final void load(final GXXmlReader reader) throws XMLStreamException {
-        DataType[] dt = new DataType[1];
         changedParameter = new GXDLMSTarget();
         if (reader.isStartElement("ChangedParameter", true)) {
             ObjectType ot =
@@ -506,7 +505,7 @@ public class GXDLMSParameterMonitor extends GXDLMSObject
             changedParameter
                     .setAttributeIndex(reader.readElementContentAsInt("Index"));
             changedParameter.setValue(
-                    reader.readElementContentAsObject("Value", null, dt));
+                    reader.readElementContentAsObject("Value", null, null, 0));
             reader.readEndElement("ChangedParameter");
         }
         GXDateTime tmp = reader.readElementContentAsDateTime("Time");

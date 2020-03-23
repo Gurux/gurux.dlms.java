@@ -74,6 +74,7 @@ import gurux.dlms.objects.GXDLMSObject;
 import gurux.dlms.objects.GXDLMSObjectCollection;
 import gurux.dlms.objects.GXDLMSProfileGeneric;
 import gurux.dlms.objects.GXDLMSRegister;
+import gurux.dlms.objects.GXXmlWriterSettings;
 import gurux.dlms.objects.IGXDLMSBase;
 import gurux.dlms.secure.GXDLMSSecureClient;
 import gurux.io.BaudRate;
@@ -561,6 +562,20 @@ public class GXDLMSReader {
             serial.setDtrEnable(true);
             serial.setRtsEnable(true);
         }
+        if (dlms.getCiphering().getSecurity() != Security.NONE) {
+            System.out
+                    .println("Security: " + dlms.getCiphering().getSecurity());
+            System.out.println("System title: " + GXCommon
+                    .bytesToHex(dlms.getCiphering().getSystemTitle()));
+            System.out.println("Authentication key: " + GXCommon
+                    .bytesToHex(dlms.getCiphering().getAuthenticationKey()));
+            System.out.println("Block cipher key " + GXCommon
+                    .bytesToHex(dlms.getCiphering().getBlockCipherKey()));
+            if (dlms.getCiphering().getDedicatedKey() != null) {
+                System.out.println("Dedicated key: " + GXCommon
+                        .bytesToHex(dlms.getCiphering().getDedicatedKey()));
+            }
+        }
         updateFrameCounter();
         initializeOpticalHead();
         GXReplyData reply = new GXReplyData();
@@ -977,7 +992,7 @@ public class GXDLMSReader {
         GXDLMSObjectCollection objects =
                 dlms.parseObjects(reply.getData(), true);
         // Get description of the objects.
-        GXDLMSConverter converter = new GXDLMSConverter();
+        GXDLMSConverter converter = new GXDLMSConverter(dlms.getStandard());
         converter.updateOBISCodeInformation(objects);
     }
 
@@ -991,9 +1006,11 @@ public class GXDLMSReader {
             boolean read = false;
             if (outputFile != null && new File(outputFile).exists()) {
                 try {
-                    GXDLMSObjectCollection c =
+                    GXDLMSObjectCollection list =
                             GXDLMSObjectCollection.load(outputFile);
-                    dlms.getObjects().addAll(c);
+                    dlms.getObjects().addAll(list);
+                    GXDLMSConverter c = new GXDLMSConverter(dlms.getStandard());
+                    c.updateOBISCodeInformation(dlms.getObjects());
                     read = true;
                 } catch (Exception ex) {
                     // It's OK if this fails.
@@ -1015,7 +1032,9 @@ public class GXDLMSReader {
             close();
         }
         if (outputFile != null) {
-            dlms.getObjects().save(outputFile, null);
+            GXXmlWriterSettings s = new GXXmlWriterSettings();
+            s.setIgnoreDefaultValues(false);
+            dlms.getObjects().save(outputFile, s);
         }
 
     }

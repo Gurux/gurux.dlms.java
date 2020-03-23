@@ -124,19 +124,19 @@ public class GXDLMSConverter {
      */
     private static void updateOBISCodeInfo(
             final GXStandardObisCodeCollection codes, final GXDLMSObject it) {
-        if (!(it.getDescription() == null || it.getDescription().equals(""))) {
-            return;
-        }
         String ln = it.getLogicalName();
         GXStandardObisCode code = codes.find(ln, it.getObjectType())[0];
         if (code != null) {
-            it.setDescription(code.getDescription());
+            if (it.getDescription() == null || it.getDescription().equals("")) {
+                it.setDescription(code.getDescription());
+            }
             // If string is used
             if (code.getDataType().contains("10")) {
-                code.setDataType("10");
+                code.setUIDataType("10");
             } else if (code.getDataType().contains("25")
                     || code.getDataType().contains("26")) {
                 // If date time is used.
+                code.setUIDataType("25");
                 code.setDataType("25");
             } else if (code.getDataType().contains("9")) {
                 // Time stamps of the billing periods objects (first
@@ -188,22 +188,45 @@ public class GXDLMSConverter {
                         // scheme)
                         || GXStandardObisCodeCollection
                                 .equalsMask("1.0-64.0.9.15.255", ln))) {
-                    code.setDataType("25");
+                    code.setUIDataType("25");
                 } else if (GXStandardObisCodeCollection
                         .equalsMask("1.0-64.0.9.1.255", ln)) {
                     // Local time
-                    code.setDataType("27");
+                    code.setUIDataType("27");
                 } else if (GXStandardObisCodeCollection
                         .equalsMask("1.0-64.0.9.2.255", ln)) {
                     // Local date
-                    code.setDataType("26");
+                    code.setUIDataType("26");
                 }
+                // Active firmware identifier
+                else if (GXStandardObisCodeCollection
+                        .equalsMask("1.0.0.2.0.255", ln)) {
+                    code.setUIDataType("10");
+                }
+            }
+            // Unix time
+            else if (it.getObjectType() == ObjectType.DATA
+                    && GXStandardObisCodeCollection.equalsMask("0.0.1.1.0.255",
+                            ln)) {
+                code.setUIDataType("25");
             }
             if (!code.getDataType().equals("*")
                     && !code.getDataType().equals("")
                     && !code.getDataType().contains(",")) {
                 DataType type =
                         DataType.forValue(Integer.parseInt(code.getDataType()));
+                ObjectType objectType = it.getObjectType();
+                if (objectType == ObjectType.DATA
+                        || objectType == ObjectType.REGISTER
+                        || objectType == ObjectType.REGISTER_ACTIVATION
+                        || objectType == ObjectType.EXTENDED_REGISTER) {
+                    it.setDataType(2, type);
+                }
+            }
+            if (code.getUIDataType() != null
+                    && !code.getUIDataType().isEmpty()) {
+                DataType type = DataType
+                        .forValue(Integer.parseInt(code.getUIDataType()));
                 ObjectType objectType = it.getObjectType();
                 if (objectType == ObjectType.DATA
                         || objectType == ObjectType.REGISTER

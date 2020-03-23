@@ -49,10 +49,16 @@ public class GXXmlWriterSettings {
     private boolean old;
 
     /**
+     * Are default values serialized.
+     */
+    private boolean ignoreDefaultValues;
+
+    /**
      * Constructor.
      */
     public GXXmlWriterSettings() {
         values = true;
+        ignoreDefaultValues = true;
     }
 
     /**
@@ -83,5 +89,20 @@ public class GXXmlWriterSettings {
      */
     public final void setOld(final boolean value) {
         old = value;
+    }
+
+    /**
+     * @return Are default values serialized.
+     */
+    public boolean isIgnoreDefaultValues() {
+        return ignoreDefaultValues;
+    }
+
+    /**
+     * @param value
+     *            Are default values serialized.
+     */
+    public void setIgnoreDefaultValues(final boolean value) {
+        ignoreDefaultValues = value;
     }
 }

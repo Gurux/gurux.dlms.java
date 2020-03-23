@@ -40,6 +40,7 @@ package gurux.dlms;
 class GXStandardObisCode {
     private String[] obis;
     private String dataType;
+    private String uiDataType;
     private String interfaces;
     private String description;
 
@@ -47,7 +48,8 @@ class GXStandardObisCode {
      * Constructor.
      */
     GXStandardObisCode() {
-        setDataType("");
+        dataType = "";
+        uiDataType = "";
     }
 
     /*
@@ -106,6 +108,17 @@ class GXStandardObisCode {
 
     public final void setDataType(final String value) {
         dataType = value;
+    }
+
+    /**
+     * @return Standard data types.
+     */
+    public final String getUIDataType() {
+        return uiDataType;
+    }
+
+    public final void setUIDataType(final String value) {
+        uiDataType = value;
     }
 
     /**

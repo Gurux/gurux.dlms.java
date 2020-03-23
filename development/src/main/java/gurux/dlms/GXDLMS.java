@@ -1143,8 +1143,10 @@ abstract class GXDLMS {
                     .contains(Conformance.GENERAL_PROTECTION)
                     && !p.getSettings().getNegotiatedConformance()
                             .contains(Conformance.GENERAL_PROTECTION)) {
-                if ((p.getSettings().getConnected() & ConnectionState.DLMS) != 0
-                        && cipher.getDedicatedKey() != null) {
+                if (cipher.getDedicatedKey() != null
+                        && (!p.getSettings().isServer()
+                                || (p.getSettings().getConnected()
+                                        & ConnectionState.DLMS) != 0)) {
                     cmd = getDedMessage(p.command);
                     key = cipher.getDedicatedKey();
                 } else {
@@ -3579,7 +3581,8 @@ abstract class GXDLMS {
 
                 AesGcmParameter p;
                 if (settings.getCipher().getDedicatedKey() != null
-                        && settings.getConnected() == ConnectionState.DLMS) {
+                        && (!settings.isServer() || settings
+                                .getConnected() == ConnectionState.DLMS)) {
                     p = new AesGcmParameter(settings.getSourceSystemTitle(),
                             settings.getCipher().getDedicatedKey(),
                             settings.getCipher().getAuthenticationKey());

@@ -402,7 +402,7 @@ public class GXDLMSIp4Setup extends GXDLMSObject implements IGXDLMSBase {
                 for (Object it : (List<?>) e.getValue()) {
                     bb.setUInt32(((Number) it).intValue());
                     try {
-                        setIPAddress(InetAddress.getByAddress(bb.array()));
+                        data.add(InetAddress.getByAddress(bb.array()));
                     } catch (UnknownHostException e1) {
                         throw new IllegalArgumentException(
                                 "Invalid IP address.");
@@ -514,13 +514,12 @@ public class GXDLMSIp4Setup extends GXDLMSObject implements IGXDLMSBase {
         writer.writeElementString("DataLinkLayerReference",
                 dataLinkLayerReference);
         if (ipAddress != null) {
-            writer.writeElementString("IPAddress",
-                    ipAddress.getCanonicalHostName());
+            writer.writeElementString("IPAddress", ipAddress.getHostAddress());
         }
         if (multicastIPAddress != null) {
             writer.writeStartElement("MulticastIPAddress");
             for (InetAddress it : multicastIPAddress) {
-                writer.writeElementString("Value", it.getCanonicalHostName());
+                writer.writeElementString("Value", it.getHostAddress());
             }
             writer.writeEndElement();
         }
@@ -539,16 +538,16 @@ public class GXDLMSIp4Setup extends GXDLMSObject implements IGXDLMSBase {
         writer.writeElementString("SubnetMask", subnetMask);
         if (gatewayIPAddress != null) {
             writer.writeElementString("GatewayIPAddress",
-                    gatewayIPAddress.getCanonicalHostName());
+                    gatewayIPAddress.getHostAddress());
         }
         writer.writeElementString("UseDHCP", useDHCP);
         if (primaryDNSAddress != null) {
             writer.writeElementString("PrimaryDNSAddress",
-                    primaryDNSAddress.getCanonicalHostName());
+                    primaryDNSAddress.getHostAddress());
         }
         if (secondaryDNSAddress != null) {
             writer.writeElementString("SecondaryDNSAddress",
-                    secondaryDNSAddress.getCanonicalHostName());
+                    secondaryDNSAddress.getHostAddress());
         }
     }
 

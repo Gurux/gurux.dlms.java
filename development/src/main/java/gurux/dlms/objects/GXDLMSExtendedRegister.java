@@ -237,13 +237,10 @@ public class GXDLMSExtendedRegister extends GXDLMSRegister {
 
     @Override
     public final void load(final GXXmlReader reader) throws XMLStreamException {
-        DataType[] dt = new DataType[1];
         setUnit(Unit.forValue(reader.readElementContentAsInt("Unit", 0)));
         setScaler(reader.readElementContentAsDouble("Scaler", 1));
-        setValue(reader.readElementContentAsObject("Value", null, dt));
-        setDataType(2, dt[0]);
-        status = reader.readElementContentAsObject("Status", null, dt);
-        setDataType(4, dt[0]);
+        setValue(reader.readElementContentAsObject("Value", null, this, 2));
+        status = reader.readElementContentAsObject("Status", null, this, 4);
         captureTime = reader.readElementContentAsDateTime("CaptureTime");
     }
 
@@ -251,9 +248,11 @@ public class GXDLMSExtendedRegister extends GXDLMSRegister {
     public final void save(final GXXmlWriter writer) throws XMLStreamException {
         writer.writeElementString("Unit", getUnit().getValue());
         writer.writeElementString("Scaler", getScaler(), 1);
-        writer.writeElementObject("Value", getValue());
-        writer.writeElementObject("Status", status);
-        writer.writeElementObject("CaptureTime", captureTime);
+        writer.writeElementObject("Value", getValue(), getDataType(2),
+                getUIDataType(2));
+        writer.writeElementObject("Status", status, getDataType(4),
+                getUIDataType(4));
+        writer.writeElementString("CaptureTime", captureTime);
     }
 
     @Override

@@ -334,11 +334,9 @@ public class GXDLMSRegister extends GXDLMSObject implements IGXDLMSBase {
 
     @Override
     public void load(final GXXmlReader reader) throws XMLStreamException {
-        DataType[] dt = new DataType[1];
         unit = reader.readElementContentAsInt("Unit", 0);
         setScaler(reader.readElementContentAsDouble("Scaler", 1));
-        setValue(reader.readElementContentAsObject("Value", null, dt));
-        setDataType(2, dt[0]);
+        setValue(reader.readElementContentAsObject("Value", null, this, 2));
     }
 
     @Override
