@@ -213,6 +213,8 @@ final class GXAPDU {
      *            DLMS settings.
      * @param data
      *            Received data.
+     * @param xml
+     *            Is XML used.
      */
     static void getInitiateRequest(final GXDLMSSettings settings,
             final GXByteBuffer data, final boolean xml) {

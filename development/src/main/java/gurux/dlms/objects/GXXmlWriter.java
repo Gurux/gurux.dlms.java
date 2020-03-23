@@ -279,10 +279,10 @@ public class GXXmlWriter implements AutoCloseable {
      *            Object name.
      * @param value
      *            Object value.
-     * @param skipDefaultValue
-     *            Is default value serialized.
      * @param dt
      *            Data type of serialized value.
+     * @param uiType
+     *            UI data type of serialized value.
      * @throws XMLStreamException
      *             Invalid XML stream.
      */
