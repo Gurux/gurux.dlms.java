@@ -70,6 +70,9 @@ public class GXUInt64 extends Number
 
     /**
      * Constructor.
+     * 
+     * @param val
+     *            Initial value.
      */
     public GXUInt64(final long val) {
         value = BigInteger.valueOf(val);

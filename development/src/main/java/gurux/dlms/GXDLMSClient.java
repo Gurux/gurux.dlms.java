@@ -161,7 +161,7 @@ public class GXDLMSClient {
     }
 
     /**
-     * @param version
+     * @param value
      *            The version can be used for backward compatibility.
      */
     public void setVersion(final int value) {

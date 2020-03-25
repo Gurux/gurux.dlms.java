@@ -55,6 +55,9 @@ public class GXEnum extends Number
 
     /**
      * Constructor.
+     * 
+     * @param val
+     *            Initial value.
      */
     public GXEnum(final int val) {
         value = val;

@@ -69,6 +69,9 @@ public class GXUInt16 extends Number
 
     /**
      * Constructor.
+     * 
+     * @param val
+     *            Initial value.
      */
     public GXUInt16(final int val) {
         value = val;

@@ -69,6 +69,9 @@ public class GXUInt8 extends Number
 
     /**
      * Constructor.
+     * 
+     * @param val
+     *            Initial value.
      */
     public GXUInt8(final short val) {
         value = val;
