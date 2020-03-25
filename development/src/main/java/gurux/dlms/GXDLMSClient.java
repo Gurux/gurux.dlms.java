@@ -154,6 +154,21 @@ public class GXDLMSClient {
     }
 
     /**
+     * @return The version can be used for backward compatibility.
+     */
+    public int getVersion() {
+        return settings.getVersion();
+    }
+
+    /**
+     * @param version
+     *            The version can be used for backward compatibility.
+     */
+    public void setVersion(final int value) {
+        settings.setVersion(value);
+    }
+
+    /**
      * @param value
      *            Cipher interface that is used to cipher PDU.
      */
@@ -1384,6 +1399,12 @@ public class GXDLMSClient {
         if (type == DataType.NONE) {
             return GXCommon.toHex(value, true);
         }
+        if (type == DataType.OCTET_STRING && value instanceof byte[]) {
+            return new GXByteBuffer(value);
+        }
+        if (type == DataType.STRING && !GXByteBuffer.isAsciiString(value)) {
+            return new GXByteBuffer(value);
+        }
         if (value.length == 0
                 && (type == DataType.STRING || type == DataType.OCTET_STRING)) {
             return "";
@@ -1406,9 +1427,6 @@ public class GXDLMSClient {
         if (!info.isComplete()) {
             throw new IllegalArgumentException(
                     "Change type failed. Not enought data.");
-        }
-        if (type == DataType.OCTET_STRING && ret instanceof byte[]) {
-            return GXCommon.toHex((byte[]) ret);
         }
         return ret;
     }
@@ -2274,6 +2292,7 @@ public class GXDLMSClient {
         if (columnEnd < 0) {
             throw new IllegalArgumentException("columnEnd");
         }
+        pg.clearBuffer();
         GXByteBuffer buff = new GXByteBuffer(19);
         // Add AccessSelector value
         buff.setUInt8(0x02);
@@ -2480,6 +2499,7 @@ public class GXDLMSClient {
             throws InvalidKeyException, NoSuchAlgorithmException,
             NoSuchPaddingException, InvalidAlgorithmParameterException,
             IllegalBlockSizeException, BadPaddingException {
+        pg.clearBuffer();
         settings.resetBlockIndex();
         GXDateTime s = GXCommon.getDateTime(start);
         GXDateTime e = GXCommon.getDateTime(end);
@@ -2488,7 +2508,9 @@ public class GXDLMSClient {
             sort = pg.getCaptureObjects().get(0).getKey();
         }
         // If sort object is not found or it is not clock object read all.
-        if (sort == null || sort.getObjectType() != ObjectType.CLOCK) {
+        if (sort == null || !(sort.getObjectType() == ObjectType.CLOCK
+                || (sort.getObjectType() == ObjectType.DATA
+                        && "0.0.1.1.0.255".equals(sort.getLogicalName())))) {
             return read(pg, 2);
         }
         GXByteBuffer buff = new GXByteBuffer(51);
@@ -2513,10 +2535,8 @@ public class GXDLMSClient {
         // Add version
         GXCommon.setData(settings, buff, DataType.UINT16, sort.getVersion());
         // If Unix time is used.
-        if (!pg.getCaptureObjects().isEmpty()
-                && pg.getCaptureObjects().get(0).getKey() instanceof GXDLMSData
-                && pg.getCaptureObjects().get(0).getKey().getLogicalName()
-                        .equals("0.0.1.1.0.255")) {
+        if (sort instanceof GXDLMSData
+                && sort.getLogicalName().equals("0.0.1.1.0.255")) {
             // Add start time
             GXCommon.setData(settings, buff, DataType.UINT32,
                     GXDateTime.toUnixTime(s));

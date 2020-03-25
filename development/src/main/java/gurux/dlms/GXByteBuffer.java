@@ -38,6 +38,7 @@ package gurux.dlms;
 
 import java.io.UnsupportedEncodingException;
 import java.math.BigInteger;
+import java.nio.charset.StandardCharsets;
 
 import gurux.dlms.internal.GXCommon;
 
@@ -473,6 +474,20 @@ public class GXByteBuffer {
     }
 
     /**
+     * Check is string ASCII string.
+     * 
+     * @param value
+     *            String value.
+     * @return Is ASCII string.
+     */
+    public static boolean isAsciiString(final String value) {
+        if (value != null) {
+            return StandardCharsets.US_ASCII.newEncoder().canEncode(value);
+        }
+        return true;
+    }
+
+    /**
      * Check is byte buffer ASCII string.
      * 
      * @param value
@@ -507,8 +522,18 @@ public class GXByteBuffer {
             throw new IllegalArgumentException("getString");
         }
         try {
-            return new String(getData(), index, count, charsetName)
-                    .replaceAll("[\\x00]", "");
+            byte[] tmp = subArray(index, count);
+            if (charsetName.equalsIgnoreCase("ASCII")) {
+                if (isAsciiString(tmp)) {
+                    return new String(getData(), index, count, charsetName)
+                            .replaceAll("[\\x00]", "");
+                } else {
+                    return GXCommon.toHex(tmp, true);
+                }
+            } else {
+                return new String(getData(), index, count, charsetName)
+                        .replaceAll("[\\x00]", "");
+            }
         } catch (UnsupportedEncodingException e) {
             throw new RuntimeException(e.getMessage());
         }
@@ -620,6 +645,12 @@ public class GXByteBuffer {
                 } else {
                     setUInt8(0);
                 }
+            } else if (value instanceof GXUInt8) {
+                setUInt16(((GXUInt8) value).shortValue());
+            } else if (value instanceof GXUInt16) {
+                setUInt16(((GXUInt16) value).shortValue());
+            } else if (value instanceof GXUInt32) {
+                setUInt32(((GXUInt32) value).longValue());
             } else {
                 throw new RuntimeException("Invalid object type.");
             }

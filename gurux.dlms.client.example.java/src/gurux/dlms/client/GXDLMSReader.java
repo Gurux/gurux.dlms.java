@@ -562,6 +562,7 @@ public class GXDLMSReader {
             serial.setDtrEnable(true);
             serial.setRtsEnable(true);
         }
+        System.out.println("Standard: " + dlms.getStandard().toString());
         if (dlms.getCiphering().getSecurity() != Security.NONE) {
             System.out
                     .println("Security: " + dlms.getCiphering().getSecurity());
@@ -906,7 +907,6 @@ public class GXDLMSReader {
             writeTrace("-------- Reading " + it.getClass().getSimpleName() + " "
                     + it.getName().toString() + " " + it.getDescription(),
                     TraceLevel.INFO);
-
             long entriesInUse = ((Number) read(it, 7)).longValue();
             long entries = ((Number) read(it, 8)).longValue();
             writeTrace("Entries: " + String.valueOf(entriesInUse) + "/"
@@ -922,15 +922,17 @@ public class GXDLMSReader {
                 cells = readRowsByEntry(pg, 1, 1);
                 if (Trace.ordinal() > TraceLevel.WARNING.ordinal()) {
                     for (Object rows : cells) {
+                        StringBuilder sb = new StringBuilder();
                         for (Object cell : (Object[]) rows) {
                             if (cell instanceof byte[]) {
-                                writeTrace(GXCommon.bytesToHex((byte[]) cell)
-                                        + " | ", TraceLevel.INFO);
+                                sb.append(GXCommon.bytesToHex((byte[]) cell));
+                                sb.append(" | ");
                             } else {
-                                writeTrace(cell + " | ", TraceLevel.INFO);
+                                sb.append(String.valueOf(cell));
+                                sb.append(" | ");
                             }
                         }
-                        writeTrace("", TraceLevel.INFO);
+                        writeTrace(sb.toString(), TraceLevel.INFO);
                     }
                 }
             } catch (Exception ex) {
@@ -962,15 +964,17 @@ public class GXDLMSReader {
                 GXDateTime e = new GXDateTime(end);
                 cells = readRowsByRange((GXDLMSProfileGeneric) it, s, e);
                 for (Object rows : cells) {
+                    StringBuilder sb = new StringBuilder();
                     for (Object cell : (Object[]) rows) {
                         if (cell instanceof byte[]) {
-                            System.out.print(
-                                    GXCommon.bytesToHex((byte[]) cell) + " | ");
+                            sb.append(GXCommon.bytesToHex((byte[]) cell));
+                            sb.append(" | ");
                         } else {
-                            writeTrace(cell + " | ", TraceLevel.INFO);
+                            sb.append(String.valueOf(cell));
+                            sb.append(" | ");
                         }
                     }
-                    writeTrace("", TraceLevel.INFO);
+                    writeTrace(sb.toString(), TraceLevel.INFO);
                 }
             } catch (Exception ex) {
                 writeTrace("Error! Failed to read last day: " + ex.getMessage(),

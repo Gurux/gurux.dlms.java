@@ -513,7 +513,7 @@ public class GXDLMSLimiter extends GXDLMSObject implements IGXDLMSBase {
             emergencyProfile.setActivationTime(
                     (GXDateTime) GXDLMSClient.changeType((byte[]) tmp.get(1),
                             DataType.DATETIME, useUtc));
-            emergencyProfile.setDuration(((Long) tmp.get(2)).longValue());
+            emergencyProfile.setDuration(((Number) tmp.get(2)).longValue());
         } else if (e.getIndex() == 9) {
             java.util.ArrayList<Integer> list =
                     new java.util.ArrayList<Integer>();

@@ -427,6 +427,7 @@ class GXStandardObisCodeCollection
                     && equalsObisCode(it.getOBIS(), obisCode)) {
                 tmp = new GXStandardObisCode(it.getOBIS(), it.getDescription(),
                         it.getInterfaces(), it.getDataType());
+                tmp.setUIDataType(it.getUIDataType());
                 list.add(tmp);
                 List<String> tmp2 = GXCommon.split(it.getDescription(), ';');
                 if (tmp2.size() > 1) {

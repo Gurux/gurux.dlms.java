@@ -35,6 +35,8 @@
 package gurux.dlms.objects.enums;
 
 import java.util.HashMap;
+import java.util.HashSet;
+import java.util.Set;
 
 /**
  * Defines behavior under specific conditions.
@@ -103,6 +105,11 @@ public enum CreditCollectionConfiguration {
         return intValue;
     }
 
+    static CreditCollectionConfiguration[] getEnumConstants() {
+        return new CreditCollectionConfiguration[] { DISCONNECTED,
+                LOAD_LIMITING, FRIENDLY_CREDIT };
+    }
+
     /**
      * Returns enumerator value from an integer value.
      * 
@@ -110,7 +117,34 @@ public enum CreditCollectionConfiguration {
      *            Integer value.
      * @return Enumeration value.
      */
-    public static CreditCollectionConfiguration forValue(final int value) {
-        return getMappings().get(value);
+    public static Set<CreditCollectionConfiguration> forValue(final int value) {
+        Set<CreditCollectionConfiguration> types =
+                new HashSet<CreditCollectionConfiguration>();
+        CreditCollectionConfiguration[] enums = getEnumConstants();
+        for (int pos = 0; pos != enums.length; ++pos) {
+            if ((enums[pos].intValue & value) == enums[pos].intValue) {
+                types.add(enums[pos]);
+            }
+        }
+        return types;
+    }
+
+    /**
+     * Converts the enumerated value to integer value.
+     * 
+     * @param value
+     *            The enumerated value.
+     * @return The integer value.
+     */
+    public static int
+            toInteger(final Set<CreditCollectionConfiguration> value) {
+        if (value == null) {
+            return 0;
+        }
+        int tmp = 0;
+        for (CreditCollectionConfiguration it : value) {
+            tmp |= it.getValue();
+        }
+        return tmp;
     }
 }

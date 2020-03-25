@@ -46,6 +46,7 @@ import gurux.dlms.GXSimpleEntry;
 import gurux.dlms.enums.Authentication;
 import gurux.dlms.enums.InterfaceType;
 import gurux.dlms.enums.Security;
+import gurux.dlms.enums.Standard;
 import gurux.dlms.secure.GXDLMSSecureClient;
 import gurux.net.GXNet;
 import gurux.serial.GXSerial;
@@ -95,6 +96,16 @@ public class Settings {
         System.out.println(" -I \t Auto increase invoke ID");
         System.out.println(
                 " -o \t Cache association view to make reading faster. Ex. -o C:\\device.xml");
+        System.out.println(
+                " -T \t System title that is used with chiphering. Ex -D 4775727578313233");
+        System.out.println(
+                " -A \t Authentication key that is used with chiphering. Ex -D D0D1D2D3D4D5D6D7D8D9DADBDCDDDEDF");
+        System.out.println(
+                " -B \t Block cipher key that is used with chiphering. Ex -D 000102030405060708090A0B0C0D0E0F");
+        System.out.println(
+                " -D \t Dedicated key that is used with chiphering. Ex -D 00112233445566778899AABBCCDDEEFF");
+        System.out.println(
+                " -d \t Used DLMS standard. Ex -d India (DLMS, India, Italy, SaudiArabia, IDIS)");
         System.out.println("Example:");
         System.out.println("Read LG device using TCP/IP connection.");
         System.out.println(
@@ -109,7 +120,7 @@ public class Settings {
 
     static int getParameters(String[] args, Settings settings) {
         ArrayList<GXCmdParameter> parameters = GXCommon.getParameters(args,
-                "h:p:c:s:r:iIt:a:p:wP:g:S:n:C:v:o:T:A:B:D:");
+                "h:p:c:s:r:iIt:a:p:wP:g:S:n:C:v:o:T:A:B:D:d:");
         GXNet net = null;
         for (GXCmdParameter it : parameters) {
             switch (it.getTag()) {
@@ -208,6 +219,16 @@ public class Settings {
             case 'o':
                 settings.outputFile = it.getValue();
                 break;
+            case 'd':
+                try {
+                    settings.client
+                            .setStandard(Standard.valueOfString(it.getValue()));
+                } catch (Exception e) {
+                    throw new IllegalArgumentException(
+                            "Invalid DLMS standard option: '" + it.getValue()
+                                    + "'. (DLMS, India, Italy, SaudiArabia, IDIS)");
+                }
+                break;
             case 'v':
                 settings.invocationCounter = it.getValue();
                 // TODO:
@@ -299,6 +320,9 @@ public class Settings {
                 case 'D':
                     throw new IllegalArgumentException(
                             "Missing mandatory dedicated key option.");
+                case 'd':
+                    throw new IllegalArgumentException(
+                            "Missing mandatory DLMS standard option.");
                 default:
                     showHelp();
                     return 1;

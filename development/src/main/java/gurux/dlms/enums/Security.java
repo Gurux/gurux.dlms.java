@@ -89,4 +89,43 @@ public enum Security {
         }
         return tmp;
     }
+
+    @Override
+    public String toString() {
+        String str;
+        Security value = Security.forValue(getValue());
+        switch (value) {
+        case NONE:
+            str = "NONE";
+            break;
+        case AUTHENTICATION:
+            str = "AUTHENTICATION";
+            break;
+        case ENCRYPTION:
+            str = "ENCRYPTION";
+            break;
+        case AUTHENTICATION_ENCRYPTION:
+            str = "AUTHENTICATION_ENCRYPTION";
+            break;
+        default:
+            throw new IllegalArgumentException("Security");
+        }
+        return str;
+    }
+
+    public static Security valueOfString(final String value) {
+        Security v;
+        if ("NONE".equalsIgnoreCase(value)) {
+            v = Security.NONE;
+        } else if ("AUTHENTICATION".equalsIgnoreCase(value)) {
+            v = Security.AUTHENTICATION;
+        } else if ("ENCRYPTION".equalsIgnoreCase(value)) {
+            v = Security.ENCRYPTION;
+        } else if ("AUTHENTICATION_ENCRYPTION".equalsIgnoreCase(value)) {
+            v = Security.AUTHENTICATION_ENCRYPTION;
+        } else {
+            throw new IllegalArgumentException(value);
+        }
+        return v;
+    }
 }

@@ -34,6 +34,7 @@
 
 package gurux.dlms.internal;
 
+import java.math.BigInteger;
 import java.nio.charset.StandardCharsets;
 import java.security.PrivateKey;
 import java.security.PublicKey;
@@ -59,9 +60,14 @@ import gurux.dlms.GXDLMSConverter;
 import gurux.dlms.GXDLMSSettings;
 import gurux.dlms.GXDate;
 import gurux.dlms.GXDateTime;
+import gurux.dlms.GXEnum;
 import gurux.dlms.GXICipher;
 import gurux.dlms.GXStructure;
 import gurux.dlms.GXTime;
+import gurux.dlms.GXUInt16;
+import gurux.dlms.GXUInt32;
+import gurux.dlms.GXUInt64;
+import gurux.dlms.GXUInt8;
 import gurux.dlms.TranslatorOutputType;
 import gurux.dlms.enums.ClockStatus;
 import gurux.dlms.enums.DataType;
@@ -547,7 +553,7 @@ public final class GXCommon {
             value = getInt32(data, info);
             break;
         case UINT32:
-            value = getUInt32(data, info);
+            value = getUInt32(settings, data, info);
             break;
         case STRING:
             value = getString(data, info, knownType);
@@ -568,10 +574,10 @@ public final class GXCommon {
             value = getInt16(data, info);
             break;
         case UINT8:
-            value = getUInt8(data, info);
+            value = getUInt8(settings, data, info);
             break;
         case UINT16:
-            value = getUInt16(data, info);
+            value = getUInt16(settings, data, info);
             break;
         case COMPACT_ARRAY:
             value = getCompactArray(settings, data, info);
@@ -580,7 +586,7 @@ public final class GXCommon {
             value = getInt64(data, info);
             break;
         case UINT64:
-            value = getUInt64(data, info);
+            value = getUInt64(settings, data, info);
             break;
         case ENUM:
             value = getEnum(data, info);
@@ -620,6 +626,12 @@ public final class GXCommon {
             tmp = ((Short) value).shortValue() & 0xFFFF;
         } else if (value instanceof Long) {
             tmp = ((Long) value).longValue() & 0xFFFFFFFF;
+        } else if (value instanceof GXUInt8) {
+            tmp = ((GXUInt8) value).byteValue() & 0xFF;
+        } else if (value instanceof GXUInt16) {
+            tmp = ((GXUInt16) value).shortValue() & 0xFFFF;
+        } else if (value instanceof GXUInt32) {
+            tmp = ((GXUInt32) value).longValue() & 0xFFFFFFFF;
         } else {
             tmp = ((Number) value).longValue();
         }
@@ -1082,7 +1094,7 @@ public final class GXCommon {
             info.getXml().appendLine(info.getXml().getDataType(info.getType()),
                     null, info.getXml().integerToHex(value, 2));
         }
-        return value;
+        return new GXEnum((short) value);
     }
 
     /**
@@ -1094,20 +1106,23 @@ public final class GXCommon {
      *            Data info.
      * @return parsed UInt64 value.
      */
-    private static Object getUInt64(final GXByteBuffer buff,
-            final GXDataInfo info) {
-        Object value;
+    private static Object getUInt64(final GXDLMSSettings settings,
+            final GXByteBuffer buff, final GXDataInfo info) {
         // If there is not enough data available.
         if (buff.size() - buff.position() < 8) {
             info.setComplete(false);
             return null;
         }
-        value = buff.getUInt64();
+        BigInteger value = buff.getUInt64();
         if (info.getXml() != null) {
             info.getXml().appendLine(info.getXml().getDataType(info.getType()),
                     null, info.getXml().integerToHex(value, 16));
         }
-        return value;
+        // Return old value.
+        if (settings == null || settings.getVersion() == 3) {
+            return value;
+        }
+        return new GXUInt64(value);
     }
 
     /**
@@ -1144,8 +1159,8 @@ public final class GXCommon {
      *            Data info.
      * @return parsed UInt16 value.
      */
-    private static Object getUInt16(final GXByteBuffer buff,
-            final GXDataInfo info) {
+    private static Object getUInt16(final GXDLMSSettings settings,
+            final GXByteBuffer buff, final GXDataInfo info) {
         Object value;
         // If there is not enough data available.
         if (buff.size() - buff.position() < 2) {
@@ -1158,7 +1173,11 @@ public final class GXCommon {
                     null, info.getXml().integerToHex(value, 4));
 
         }
-        return value;
+        // Return old value.
+        if (settings == null || settings.getVersion() == 3) {
+            return value;
+        }
+        return new GXUInt16((int) value);
     }
 
     @SuppressWarnings("squid:S1172")
@@ -1425,9 +1444,9 @@ public final class GXCommon {
      *            Data info.
      * @return parsed UInt8 value.
      */
-    private static Object getUInt8(final GXByteBuffer buff,
-            final GXDataInfo info) {
-        Object value;
+    private static Object getUInt8(final GXDLMSSettings settings,
+            final GXByteBuffer buff, final GXDataInfo info) {
+        int value;
         // If there is not enough data available.
         if (buff.size() - buff.position() < 1) {
             info.setComplete(false);
@@ -1439,7 +1458,11 @@ public final class GXCommon {
                     null, info.getXml().integerToHex(value, 2));
 
         }
-        return value;
+        // Return old value.
+        if (settings == null || settings.getVersion() == 3) {
+            return value;
+        }
+        return new GXUInt8((short) value);
     }
 
     /**
@@ -1692,8 +1715,8 @@ public final class GXCommon {
      *            Data info.
      * @return parsed UInt32 value.
      */
-    private static Object getUInt32(final GXByteBuffer buff,
-            final GXDataInfo info) {
+    private static Object getUInt32(final GXDLMSSettings settings,
+            final GXByteBuffer buff, final GXDataInfo info) {
         // If there is not enough data available.
         if (buff.size() - buff.position() < 4) {
             info.setComplete(false);
@@ -1704,7 +1727,11 @@ public final class GXCommon {
             info.getXml().appendLine(info.getXml().getDataType(info.getType()),
                     null, info.getXml().integerToHex(value, 8));
         }
-        return value;
+        // Return old value.
+        if (settings == null || settings.getVersion() == 3) {
+            return value;
+        }
+        return new GXUInt32(value);
     }
 
     /**

@@ -290,11 +290,11 @@ public class GXXmlReader implements AutoCloseable {
             if (reader.getAttributeCount() > 1) {
                 str = getAttribute(1);
                 uiType = DataType.forValue(Integer.parseInt(str));
-                if (obj != null) {
-                    obj.setUIDataType(index, uiType);
-                }
             } else {
                 uiType = dt;
+            }
+            if (obj != null && obj.getUIDataType(index) == DataType.NONE) {
+                obj.setUIDataType(index, uiType);
             }
             if (dt == DataType.ARRAY || dt == DataType.STRUCTURE) {
                 read();

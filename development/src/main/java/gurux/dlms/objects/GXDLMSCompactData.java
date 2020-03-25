@@ -418,7 +418,8 @@ public class GXDLMSCompactData extends GXDLMSObject implements IGXDLMSBase {
             templateDescription = (byte[]) e.getValue();
             break;
         case 6:
-            captureMethod = CaptureMethod.values()[(short) e.getValue()];
+            captureMethod = CaptureMethod.values()[((Number) e.getValue())
+                    .shortValue()];
             break;
         default:
             e.setError(ErrorCode.READ_WRITE_DENIED);

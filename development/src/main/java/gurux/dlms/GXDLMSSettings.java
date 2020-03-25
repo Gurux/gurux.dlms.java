@@ -56,6 +56,11 @@ import gurux.dlms.objects.GXDLMSTcpUdpSetup;
 public class GXDLMSSettings {
 
     /**
+     * The version can be used for backward compatibility.
+     */
+    private int version = 4;
+
+    /**
      * HDLC settings.
      */
     private GXDLMSHdlcSetup hdlc;
@@ -1212,5 +1217,23 @@ public class GXDLMSSettings {
      */
     public final void setAutoIncreaseInvokeID(final boolean value) {
         autoIncreaseInvokeID = value;
+    }
+
+    /**
+     * @return The version can be used for backward compatibility.
+     */
+    public int getVersion() {
+        return version;
+    }
+
+    /**
+     * @param value
+     *            The version can be used for backward compatibility.
+     */
+    public void setVersion(final int value) {
+        if (value != 3 && value != 4) {
+            throw new IllegalArgumentException("Invalid version.");
+        }
+        version = value;
     }
 }

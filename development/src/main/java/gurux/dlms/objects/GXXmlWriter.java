@@ -296,8 +296,9 @@ public class GXXmlWriter implements AutoCloseable {
                 return;
             }
             boolean addSpaces = false;
-            if (uiType != DataType.NONE && (uiType != DataType.STRING
-                    || dt == DataType.OCTET_STRING)) {
+            if (uiType != DataType.NONE && uiType != dt
+                    && (uiType != DataType.STRING
+                            || dt == DataType.OCTET_STRING)) {
                 List<Map.Entry<String, String>> list =
                         new ArrayList<Map.Entry<String, String>>();
                 list.add(new GXSimpleEntry<String, String>("Type",

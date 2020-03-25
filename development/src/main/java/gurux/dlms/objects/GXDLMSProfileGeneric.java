@@ -159,7 +159,6 @@ public class GXDLMSProfileGeneric extends GXDLMSObject implements IGXDLMSBase {
      */
     public final void clearBuffer() {
         buffer.clear();
-        entriesInUse = 0;
     }
 
     /**
@@ -395,10 +394,6 @@ public class GXDLMSProfileGeneric extends GXDLMSObject implements IGXDLMSBase {
         if (all || !isRead(4)) {
             attributes.add(4);
         }
-        // Buffer
-        if (all || !isRead(2)) {
-            attributes.add(2);
-        }
         // SortMethod
         if (all || !isRead(5)) {
             attributes.add(5);
@@ -406,6 +401,10 @@ public class GXDLMSProfileGeneric extends GXDLMSObject implements IGXDLMSBase {
         // SortObject
         if (all || !isRead(6)) {
             attributes.add(6);
+        }
+        // Buffer
+        if (all || !isRead(2)) {
+            attributes.add(2);
         }
         // EntriesInUse
         if (all || !isRead(7)) {

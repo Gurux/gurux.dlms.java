@@ -119,96 +119,108 @@ public class GXDLMSConverter {
     /**
      * Update OBIS code information.
      * 
+     * @param codes
+     *            COSEM objects.
      * @param it
      *            COSEM object.
+     * @param it
+     *            used DLMS standard.
      */
     private static void updateOBISCodeInfo(
-            final GXStandardObisCodeCollection codes, final GXDLMSObject it) {
+            final GXStandardObisCodeCollection codes, final GXDLMSObject it,
+            final Standard standard) {
         String ln = it.getLogicalName();
-        GXStandardObisCode code = codes.find(ln, it.getObjectType())[0];
+        GXStandardObisCode[] list = codes.find(ln, it.getObjectType());
+        GXStandardObisCode code = list[0];
         if (code != null) {
             if (it.getDescription() == null || it.getDescription().equals("")) {
                 it.setDescription(code.getDescription());
             }
-            // If string is used
-            if (code.getDataType().contains("10")) {
-                code.setUIDataType("10");
-            } else if (code.getDataType().contains("25")
-                    || code.getDataType().contains("26")) {
-                // If date time is used.
-                code.setUIDataType("25");
-                code.setDataType("25");
-            } else if (code.getDataType().contains("9")) {
-                // Time stamps of the billing periods objects (first
-                // scheme
-                // if there are two)
-                if ((GXStandardObisCodeCollection
-                        .equalsMask("0.0-64.96.7.10-14.255", ln)
-                        // Time stamps of the billing periods objects
-                        // (second scheme)
-                        || GXStandardObisCodeCollection
-                                .equalsMask("0.0-64.0.1.5.0-99,255", ln)
-                        // Time of power failure
-                        || GXStandardObisCodeCollection
-                                .equalsMask("0.0-64.0.1.2.0-99,255", ln)
-                        // Time stamps of the billing periods
-                        // objects (first
-                        // scheme if there are two)
-                        || GXStandardObisCodeCollection
-                                .equalsMask("1.0-64.0.1.2.0-99,255", ln)
-                        // Time stamps of the billing periods
-                        // objects
-                        // (second scheme)
-                        || GXStandardObisCodeCollection
-                                .equalsMask("1.0-64.0.1.5.0-99,255", ln)
-                        // Time expired since last end of
-                        // billing
-                        // period
-                        || GXStandardObisCodeCollection
-                                .equalsMask("1.0-64.0.9.0.255", ln)
-                        // Time of last reset
-                        || GXStandardObisCodeCollection
-                                .equalsMask("1.0-64.0.9.6.255", ln)
-                        // Date of last reset
-                        || GXStandardObisCodeCollection
-                                .equalsMask("1.0-64.0.9.7.255", ln)
-                        // Time expired since last end of
-                        // billing
-                        // period
-                        // (Second billing period scheme)
-                        || GXStandardObisCodeCollection
-                                .equalsMask("1.0-64.0.9.13.255", ln)
-                        // Time of last reset (Second billing
-                        // period
-                        // scheme)
-                        || GXStandardObisCodeCollection
-                                .equalsMask("1.0-64.0.9.14.255", ln)
-                        // Date of last reset (Second billing
-                        // period
-                        // scheme)
-                        || GXStandardObisCodeCollection
-                                .equalsMask("1.0-64.0.9.15.255", ln))) {
-                    code.setUIDataType("25");
-                } else if (GXStandardObisCodeCollection
-                        .equalsMask("1.0-64.0.9.1.255", ln)) {
-                    // Local time
-                    code.setUIDataType("27");
-                } else if (GXStandardObisCodeCollection
-                        .equalsMask("1.0-64.0.9.2.255", ln)) {
-                    // Local date
-                    code.setUIDataType("26");
-                }
-                // Active firmware identifier
-                else if (GXStandardObisCodeCollection
-                        .equalsMask("1.0.0.2.0.255", ln)) {
-                    code.setUIDataType("10");
-                }
+            // Update data type from DLMS standard.
+            if (standard != Standard.DLMS) {
+                GXStandardObisCode d = list[list.length - 1];
+                code.setDataType(d.getDataType());
             }
-            // Unix time
-            else if (it.getObjectType() == ObjectType.DATA
-                    && GXStandardObisCodeCollection.equalsMask("0.0.1.1.0.255",
-                            ln)) {
-                code.setUIDataType("25");
+            if (code.getUIDataType() == null) {
+                // If string is used
+                if (code.getDataType().contains("10")) {
+                    code.setUIDataType("10");
+                } else if (code.getDataType().contains("25")
+                        || code.getDataType().contains("26")) {
+                    // If date time is used.
+                    code.setUIDataType("25");
+                } else if (code.getDataType().contains("9")) {
+                    // Time stamps of the billing periods objects (first
+                    // scheme
+                    // if there are two)
+                    if ((GXStandardObisCodeCollection
+                            .equalsMask("0.0-64.96.7.10-14.255", ln)
+                            // Time stamps of the billing periods objects
+                            // (second scheme)
+                            || GXStandardObisCodeCollection
+                                    .equalsMask("0.0-64.0.1.5.0-99,255", ln)
+                            // Time of power failure
+                            || GXStandardObisCodeCollection
+                                    .equalsMask("0.0-64.0.1.2.0-99,255", ln)
+                            // Time stamps of the billing periods
+                            // objects (first
+                            // scheme if there are two)
+                            || GXStandardObisCodeCollection
+                                    .equalsMask("1.0-64.0.1.2.0-99,255", ln)
+                            // Time stamps of the billing periods
+                            // objects
+                            // (second scheme)
+                            || GXStandardObisCodeCollection
+                                    .equalsMask("1.0-64.0.1.5.0-99,255", ln)
+                            // Time expired since last end of
+                            // billing
+                            // period
+                            || GXStandardObisCodeCollection
+                                    .equalsMask("1.0-64.0.9.0.255", ln)
+                            // Time of last reset
+                            || GXStandardObisCodeCollection
+                                    .equalsMask("1.0-64.0.9.6.255", ln)
+                            // Date of last reset
+                            || GXStandardObisCodeCollection
+                                    .equalsMask("1.0-64.0.9.7.255", ln)
+                            // Time expired since last end of
+                            // billing
+                            // period
+                            // (Second billing period scheme)
+                            || GXStandardObisCodeCollection
+                                    .equalsMask("1.0-64.0.9.13.255", ln)
+                            // Time of last reset (Second billing
+                            // period
+                            // scheme)
+                            || GXStandardObisCodeCollection
+                                    .equalsMask("1.0-64.0.9.14.255", ln)
+                            // Date of last reset (Second billing
+                            // period
+                            // scheme)
+                            || GXStandardObisCodeCollection
+                                    .equalsMask("1.0-64.0.9.15.255", ln))) {
+                        code.setUIDataType("25");
+                    } else if (GXStandardObisCodeCollection
+                            .equalsMask("1.0-64.0.9.1.255", ln)) {
+                        // Local time
+                        code.setUIDataType("27");
+                    } else if (GXStandardObisCodeCollection
+                            .equalsMask("1.0-64.0.9.2.255", ln)) {
+                        // Local date
+                        code.setUIDataType("26");
+                    }
+                    // Active firmware identifier
+                    else if (GXStandardObisCodeCollection
+                            .equalsMask("1.0.0.2.0.255", ln)) {
+                        code.setUIDataType("10");
+                    }
+                }
+                // Unix time
+                else if (it.getObjectType() == ObjectType.DATA
+                        && GXStandardObisCodeCollection
+                                .equalsMask("0.0.1.1.0.255", ln)) {
+                    code.setUIDataType("25");
+                }
             }
             if (!code.getDataType().equals("*")
                     && !code.getDataType().equals("")
@@ -252,7 +264,7 @@ public class GXDLMSConverter {
             if (codes.isEmpty()) {
                 readStandardObisInfo(standard, codes);
             }
-            updateOBISCodeInfo(codes, object);
+            updateOBISCodeInfo(codes, object, standard);
         }
     }
 
@@ -269,7 +281,7 @@ public class GXDLMSConverter {
                 readStandardObisInfo(standard, codes);
             }
             for (GXDLMSObject it : objects) {
-                updateOBISCodeInfo(codes, it);
+                updateOBISCodeInfo(codes, it, standard);
             }
         }
     }
@@ -322,6 +334,9 @@ public class GXDLMSConverter {
                     int version = Integer.parseInt(items.get(2));
                     String desc = items.get(3);
                     GXObisCode code = new GXObisCode(ln, ot, desc);
+                    if (items.size() > 4) {
+                        code.setUIDataType(items.get(4));
+                    }
                     code.setVersion(version);
                     codes.add(code);
                 }
@@ -348,6 +363,7 @@ public class GXDLMSConverter {
                 tmp.setOBIS(GXCommon.split(it.getLogicalName(), '.')
                         .toArray(new String[0]));
                 tmp.setDescription(it.getDescription());
+                tmp.setUIDataType(it.getUIDataType());
                 codes.add(tmp);
             }
         }
@@ -432,6 +448,9 @@ public class GXDLMSConverter {
         if (value == DataType.FLOAT64) {
             return Double.class;
         }
+        if (value == DataType.ENUM) {
+            return GXEnum.class;
+        }
         throw new IllegalArgumentException("Invalid value.");
     }
 
@@ -494,6 +513,21 @@ public class GXDLMSConverter {
         if (value instanceof GXBitString) {
             return DataType.BITSTRING;
         }
+        if (value instanceof GXEnum) {
+            return DataType.ENUM;
+        }
+        if (value instanceof GXByteBuffer) {
+            return DataType.OCTET_STRING;
+        }
+        if (value instanceof GXUInt8) {
+            return DataType.UINT8;
+        }
+        if (value instanceof GXUInt16) {
+            return DataType.UINT16;
+        }
+        if (value instanceof GXUInt32) {
+            return DataType.UINT32;
+        }
         throw new IllegalArgumentException("Invalid value.");
     }
 
@@ -519,8 +553,10 @@ public class GXDLMSConverter {
         case DATETIME:
             return new GXDateTime((String) value);
         case ENUM:
-            throw new IllegalArgumentException(
-                    "Can't change enumeration types.");
+            if (value instanceof String) {
+                return new GXEnum(Short.parseShort((String) value));
+            }
+            return new GXEnum((byte) value);
         case FLOAT32:
             if (value instanceof String) {
                 try {
@@ -559,7 +595,7 @@ public class GXDLMSConverter {
             if (value instanceof String) {
                 return Byte.parseByte((String) value);
             }
-            return ((Number) value).byteValue();
+            return (char) ((Number) value).byteValue();
         case NONE:
             return null;
         case OCTET_STRING:
@@ -577,26 +613,26 @@ public class GXDLMSConverter {
             throw new IllegalArgumentException("Can't change structure types.");
         case TIME:
             return new GXTime((String) value);
-        case UINT16:
-            if (value instanceof String) {
-                return Integer.parseInt((String) value);
-            }
-            return ((Number) value).intValue();
-        case UINT32:
-            if (value instanceof String) {
-                return Long.parseLong((String) value);
-            }
-            return ((Number) value).longValue();
-        case UINT64:
-            if (value instanceof String) {
-                return Long.parseLong((String) value);
-            }
-            return ((Number) value).longValue();
         case UINT8:
             if (value instanceof String) {
-                return (short) (Short.parseShort((String) value) & 0xFF);
+                return new GXUInt8(Short.parseShort((String) value));
             }
-            return ((Number) value).byteValue();
+            return new GXUInt8(((Number) value).shortValue());
+        case UINT16:
+            if (value instanceof String) {
+                return new GXUInt16(Integer.parseInt((String) value));
+            }
+            return new GXUInt16(((Number) value).intValue());
+        case UINT32:
+            if (value instanceof String) {
+                return new GXUInt32(Long.parseLong((String) value));
+            }
+            return new GXUInt32(((Number) value).longValue());
+        case UINT64:
+            if (value instanceof String) {
+                return BigInteger.valueOf(Long.parseLong((String) value));
+            }
+            return BigInteger.valueOf(((Number) value).longValue());
         default:
             break;
         }

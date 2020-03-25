@@ -839,7 +839,7 @@ public class GXDLMSSecuritySetup extends GXDLMSObject implements IGXDLMSBase {
                 List<Object> tmp =
                         (List<Object>) ((List<Object>) e.getParameters())
                                 .get(0);
-                short keyId = (short) tmp.get(0);
+                short keyId = ((Number) tmp.get(0)).shortValue();
                 if (keyId != 0) {
                     e.setError(ErrorCode.READ_WRITE_DENIED);
                 } else {
@@ -961,14 +961,16 @@ public class GXDLMSSecuritySetup extends GXDLMSObject implements IGXDLMSBase {
         } else if (e.getIndex() == 7) {
             // export_certificate
             List<Object> tmp = (List<Object>) e.getParameters();
-            short type = (short) tmp.get(0);
+            short type = ((Number) tmp.get(0)).shortValue();
             GXx509Certificate cert = null;
             synchronized (settings.getCipher().getCertificates()) {
                 if (type == 0) {
                     tmp = (List<Object>) tmp.get(1);
                     cert = findCertificateByEntity(settings,
-                            CertificateEntity.forValue((short) tmp.get(0)),
-                            CertificateType.forValue((short) tmp.get(1)),
+                            CertificateEntity.forValue(
+                                    ((Number) tmp.get(0)).shortValue()),
+                            CertificateType.forValue(
+                                    ((Number) tmp.get(1)).shortValue()),
                             (byte[]) tmp.get(2));
                 } else if (type == 1) {
                     tmp = (List<Object>) tmp.get(1);
@@ -986,13 +988,15 @@ public class GXDLMSSecuritySetup extends GXDLMSObject implements IGXDLMSBase {
             // remove_certificate
             List<Object> tmp =
                     (List<Object>) ((List<?>) e.getParameters()).get(0);
-            short type = (short) tmp.get(0);
+            short type = ((Number) tmp.get(0)).shortValue();
             GXx509Certificate cert = null;
             synchronized (settings.getCipher().getCertificates()) {
                 if (type == 0) {
                     cert = findCertificateByEntity(settings,
-                            CertificateEntity.forValue((int) tmp.get(1)),
-                            CertificateType.forValue((int) tmp.get(2)),
+                            CertificateEntity
+                                    .forValue(((Number) tmp.get(1)).intValue()),
+                            CertificateType
+                                    .forValue(((Number) tmp.get(2)).intValue()),
                             (byte[]) tmp.get(3));
                 } else if (type == 1) {
                     cert = findCertificateBySerial(settings,
@@ -1296,11 +1300,11 @@ public class GXDLMSSecuritySetup extends GXDLMSObject implements IGXDLMSBase {
                 e.setError(ErrorCode.READ_WRITE_DENIED);
             } else {
                 if (getVersion() == 0) {
-                    securityPolicy0 =
-                            SecurityPolicy0.values()[(Short) e.getValue()];
+                    securityPolicy0 = SecurityPolicy0
+                            .values()[((Number) e.getValue()).intValue()];
                 } else {
-                    securityPolicy =
-                            SecurityPolicy.forValue((Short) e.getValue());
+                    securityPolicy = SecurityPolicy
+                            .forValue(((Number) e.getValue()).intValue());
                 }
             }
         } else if (e.getIndex() == 3) {

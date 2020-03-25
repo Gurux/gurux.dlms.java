@@ -1469,6 +1469,12 @@ abstract class GXDLMS {
             bb.setUInt16(((Short) tmp).intValue());
         } else if (tmp instanceof Integer) {
             bb.setUInt32(((Integer) tmp).intValue());
+        } else if (tmp instanceof GXUInt8) {
+            bb.setUInt8(((GXUInt8) tmp).byteValue());
+        } else if (tmp instanceof GXUInt16) {
+            bb.setUInt16(((GXUInt16) tmp).intValue());
+        } else if (tmp instanceof GXUInt32) {
+            bb.setUInt32(((GXUInt32) tmp).intValue());
         } else {
             throw new IllegalArgumentException("Invalid address type.");
         }

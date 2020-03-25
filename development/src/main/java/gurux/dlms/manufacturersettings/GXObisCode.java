@@ -43,6 +43,7 @@ public class GXObisCode {
     private String description;
     private ObjectType objectType = ObjectType.NONE;
     private GXAttributeCollection attributes;
+    private String uiDataType;
 
     /**
      * Constructor.
@@ -180,4 +181,16 @@ public class GXObisCode {
     public final void setAttributes(final GXAttributeCollection value) {
         attributes = value;
     }
+
+    /**
+     * @return Standard data types.
+     */
+    public final String getUIDataType() {
+        return uiDataType;
+    }
+
+    public final void setUIDataType(final String value) {
+        uiDataType = value;
+    }
+
 }

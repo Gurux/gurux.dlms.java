@@ -135,7 +135,7 @@ public class GXDLMSUtilityTables extends GXDLMSObject implements IGXDLMSBase {
         if (buffer != null) {
             len = buffer.length;
         }
-        return new Object[] { getLogicalName(), len, buffer };
+        return new Object[] { getLogicalName(), tableId, len, buffer };
     }
 
     /*

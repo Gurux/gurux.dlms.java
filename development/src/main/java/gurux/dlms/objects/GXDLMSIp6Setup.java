@@ -275,7 +275,8 @@ public class GXDLMSIp6Setup extends GXDLMSObject implements IGXDLMSBase {
     public final byte[] invoke(final GXDLMSSettings settings,
             final ValueEventArgs e) {
         GXStructure val = (GXStructure) e.getParameters();
-        IPv6AddressType type = IPv6AddressType.values()[(short) val.get(0)];
+        IPv6AddressType type =
+                IPv6AddressType.values()[((Number) val.get(0)).shortValue()];
         InetAddress address;
         try {
             address = InetAddress.getByAddress((byte[]) val.get(1));

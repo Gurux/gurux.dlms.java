@@ -34,6 +34,9 @@
 
 package gurux.dlms.objects;
 
+import java.util.HashSet;
+import java.util.Set;
+
 import gurux.dlms.objects.enums.CreditCollectionConfiguration;
 
 /**
@@ -61,13 +64,13 @@ public class GXCreditChargeConfiguration {
      * Online help:<br>
      * https://www.gurux.fi/Gurux.DLMS.Objects.GXDLMSAccount
      */
-    private CreditCollectionConfiguration collectionConfiguration;
+    private Set<CreditCollectionConfiguration> collectionConfiguration;
 
     /**
      * Constructor.
      */
     public GXCreditChargeConfiguration() {
-        collectionConfiguration = CreditCollectionConfiguration.NONE;
+        collectionConfiguration = new HashSet<CreditCollectionConfiguration>();
     }
 
     /**
@@ -118,7 +121,8 @@ public class GXCreditChargeConfiguration {
      * 
      * @return Collection configuration.
      */
-    public final CreditCollectionConfiguration getCollectionConfiguration() {
+    public final Set<CreditCollectionConfiguration>
+            getCollectionConfiguration() {
         return collectionConfiguration;
     }
 
@@ -130,10 +134,29 @@ public class GXCreditChargeConfiguration {
      *            Collection configuration.
      */
     public final void setCollectionConfiguration(
-            final CreditCollectionConfiguration value) {
+            final Set<CreditCollectionConfiguration> value) {
         if (value == null) {
             throw new IllegalArgumentException("CollectionConfiguration");
         }
         collectionConfiguration = value;
+    }
+
+    /**
+     * Converts the enumerated value to integer value.
+     * 
+     * @param value
+     *            The enumerated value.
+     * @return The integer value.
+     */
+    public static int
+            toInteger(final Set<CreditCollectionConfiguration> value) {
+        if (value == null) {
+            return 0;
+        }
+        int tmp = 0;
+        for (CreditCollectionConfiguration it : value) {
+            tmp |= it.getValue();
+        }
+        return tmp;
     }
 }
