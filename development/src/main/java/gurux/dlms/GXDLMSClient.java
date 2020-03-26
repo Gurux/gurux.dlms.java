@@ -1087,10 +1087,13 @@ public class GXDLMSClient {
      *            Byte stream where objects are parsed.
      * @param onlyKnownObjects
      *            Only known objects are parsed.
+     * @param ignoreInactiveObjects
+     *            Inactive objects are ignored.
      * @return Collection of COSEM objects.
      */
     private GXDLMSObjectCollection parseSNObjects(final GXByteBuffer buff,
-            final boolean onlyKnownObjects) {
+            final boolean onlyKnownObjects,
+            final boolean ignoreInactiveObjects) {
         // Get array tag.
         buff.position(0);
         short size = buff.getUInt8();
@@ -1120,7 +1123,15 @@ public class GXDLMSClient {
                         baseName, objects.get(3), null);
                 if (!onlyKnownObjects
                         || comp.getClass() != GXDLMSObject.class) {
-                    items.add(comp);
+                    if ((!ignoreInactiveObjects || !"0.0.127.0.0.0"
+                            .equals(comp.getLogicalName()))) {
+                        items.add(comp);
+                    } else {
+                        String str =
+                                "Inactive object : " + String.valueOf(classID)
+                                        + " " + String.valueOf(baseName);
+                        LOGGER.log(Level.INFO, str);
+                    }
                 } else {
                     String str = "Unknown object : " + String.valueOf(classID)
                             + " " + String.valueOf(baseName);
@@ -1198,16 +1209,38 @@ public class GXDLMSClient {
      */
     public final GXDLMSObjectCollection parseObjects(final GXByteBuffer data,
             final boolean onlyKnownObjects) {
+        return parseObjects(data, onlyKnownObjects, true);
+    }
+
+    /**
+     * Parses the COSEM objects of the received data.
+     * 
+     * @param data
+     *            Received data, from the device, as byte array.
+     * @param onlyKnownObjects
+     *            Only known objects are parsed.
+     * @param ignoreInactiveObjects
+     *            Inactive objects are ignored.
+     * @return Collection of COSEM objects.
+     */
+    public final GXDLMSObjectCollection parseObjects(final GXByteBuffer data,
+            final boolean onlyKnownObjects,
+            final boolean ignoreInactiveObjects) {
         if (data == null) {
             throw new GXDLMSException("Invalid parameter.");
         }
         GXDLMSObjectCollection objects;
         if (getUseLogicalNameReferencing()) {
-            objects = parseLNObjects(data, onlyKnownObjects);
+            objects = parseLNObjects(data, onlyKnownObjects,
+                    ignoreInactiveObjects);
         } else {
-            objects = parseSNObjects(data, onlyKnownObjects);
+            objects = parseSNObjects(data, onlyKnownObjects,
+                    ignoreInactiveObjects);
         }
         settings.getObjects().addAll(objects);
+        // Get description of the objects.
+        GXDLMSConverter converter = new GXDLMSConverter(getStandard());
+        converter.updateOBISCodeInformation(objects);
         return objects;
     }
 
@@ -1218,10 +1251,13 @@ public class GXDLMSClient {
      *            Byte stream where objects are parsed.
      * @param onlyKnownObjects
      *            Only known objects are parsed.
+     * @param ignoreInactiveObjects
+     *            Inactive objects are ignored.
      * @return Collection of COSEM objects.
      */
     private GXDLMSObjectCollection parseLNObjects(final GXByteBuffer buff,
-            final boolean onlyKnownObjects) {
+            final boolean onlyKnownObjects,
+            final boolean ignoreInactiveObjects) {
         // Get array tag.
         byte size = buff.getInt8();
         // Check that data is in the array
@@ -1250,7 +1286,15 @@ public class GXDLMSClient {
                         objects.get(2), objects.get(3));
                 if (!onlyKnownObjects
                         || comp.getClass() != GXDLMSObject.class) {
-                    items.add(comp);
+                    if ((!ignoreInactiveObjects || !"0.0.127.0.0.0"
+                            .equals(comp.getLogicalName()))) {
+                        items.add(comp);
+                    } else {
+                        String str =
+                                "Inactive object : " + String.valueOf(classID)
+                                        + " " + comp.getLogicalName();
+                        LOGGER.log(Level.INFO, str);
+                    }
                 } else {
                     String str = "Unknown object : " + String.valueOf(classID)
                             + " "

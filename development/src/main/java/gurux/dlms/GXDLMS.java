@@ -2365,7 +2365,7 @@ abstract class GXDLMS {
             final GXReplyData reply, final int index) {
         int pos, cnt = reply.getTotalCount();
         // If we are reading value first time or block is handed.
-        boolean first = reply.getTotalCount() == 0 || reply
+        boolean first = cnt == 0 || reply
                 .getCommandType() == SingleReadResponse.DATA_BLOCK_RESULT;
         if (first) {
             cnt = GXCommon.getObjectCount(reply.getData());
@@ -2374,6 +2374,15 @@ abstract class GXDLMS {
         int type;
         List<Object> values = null;
         if (cnt != 1) {
+            // Parse data after all data is received when readlist is used.
+            if (reply.isMoreData()) {
+                getDataFromBlock(reply.getData(), 0);
+                // reply.setCommandType(SingleReadResponse.DATA_BLOCK_RESULT);
+                return false;
+            }
+            if (!first) {
+                reply.getData().position(0);
+            }
             values = new ArrayList<Object>();
             if (reply.getValue() instanceof List<?>) {
                 values.addAll((List<?>) reply.getValue());
@@ -2386,22 +2395,13 @@ abstract class GXDLMS {
                     reply.getXml().integerToHex(cnt, 2));
         }
         for (pos = 0; pos != cnt; ++pos) {
-            if (reply.getData().available() == 0) {
-                if (cnt != 1) {
-                    getDataFromBlock(reply.getData(), 0);
-                    reply.setValue(values.toArray());
-                    reply.setReadPosition(reply.getData().position());
-                }
-                return false;
-            }
-            // Get status code. Status code is begin of each PDU.
+            // Get response type code.
             if (first) {
                 type = reply.getData().getUInt8();
                 reply.setCommandType(type);
             } else {
                 type = reply.getCommandType();
             }
-
             boolean standardXml = reply.getXml() != null && reply.getXml()
                     .getOutputType() == TranslatorOutputType.STANDARD_XML;
             switch (type) {
@@ -2428,21 +2428,6 @@ abstract class GXDLMS {
                     // If read multiple items.
                     reply.setReadPosition(reply.getData().position());
                     getValueFromData(settings, reply);
-                    if (reply.getData().position() == reply.getReadPosition()) {
-                        int index2 = index;
-                        // If multiple values remove command.
-                        if (cnt != 1 && reply.getTotalCount() == 0) {
-                            ++index2;
-                        }
-                        reply.setTotalCount(0);
-                        reply.getData().position(index2);
-                        getDataFromBlock(reply.getData(), 0);
-                        reply.setValue(null);
-                        // Ask that data is parsed after last block is received.
-                        reply.setCommandType(
-                                SingleReadResponse.DATA_BLOCK_RESULT);
-                        return false;
-                    }
                     reply.getData().position(reply.getReadPosition());
                     values.add(reply.getValue());
                     reply.setValue(null);
@@ -3446,6 +3431,11 @@ abstract class GXDLMS {
                     break;
                 default:
                     break;
+                }
+                if (cmd == Command.READ_RESPONSE && data.getTotalCount() > 1) {
+                    if (!handleReadResponse(settings, data, 0)) {
+                        return;
+                    }
                 }
             }
         }

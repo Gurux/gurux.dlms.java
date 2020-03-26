@@ -986,7 +986,9 @@ public final class GXCommon {
                 tm = Calendar.getInstance(tz);
             }
             tm.set(year, month, day, hour, minute, second);
-            if (ms != 0xFF) {
+            if (skip.contains(DateTimeSkips.MILLISECOND)) {
+                tm.set(Calendar.MILLISECOND, 0);
+            } else {
                 tm.set(Calendar.MILLISECOND, ms);
             }
             dt.setMeterCalendar(tm);

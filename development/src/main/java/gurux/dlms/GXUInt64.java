@@ -80,6 +80,9 @@ public class GXUInt64 extends Number
 
     /**
      * Constructor.
+     * 
+     * @param val
+     *            Initial value.
      */
     public GXUInt64(final BigInteger val) {
         value = val;

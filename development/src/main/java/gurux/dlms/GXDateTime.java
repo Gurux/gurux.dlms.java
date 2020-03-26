@@ -458,23 +458,23 @@ public class GXDateTime {
      * @return Used local calendar.
      */
     public final Calendar getLocalCalendar() {
-        long meterTime = meterCalendar.getTime().getTime();
+        long meterTime = meterCalendar.getTimeInMillis();
         Calendar local = Calendar.getInstance();
-        int diff = meterCalendar.getTimeZone().getRawOffset()
-                - local.getTimeZone().getRawOffset();
-        long localtime = meterTime + diff;
-        local.setTimeInMillis(localtime);
-        // If meter is not use daylight saving time and client is.
-        if (!meterCalendar.getTimeZone()
-                .inDaylightTime(meterCalendar.getTime())) {
-            if (local.getTimeZone().inDaylightTime(local.getTime())) {
-                local.add(Calendar.HOUR_OF_DAY, -1);
-            }
-        } else {
-            if (!local.getTimeZone().inDaylightTime(local.getTime())) {
-                local.add(Calendar.HOUR_OF_DAY, 1);
-            }
-        }
+        local.setTimeInMillis(meterTime);
+        return local;
+    }
+
+    /**
+     * Used local calendar.
+     * 
+     * @param tz
+     *            Used time zone.
+     * @return local calendar with given time zone.
+     */
+    public final Calendar getLocalCalendar(final TimeZone tz) {
+        long meterTime = meterCalendar.getTimeInMillis();
+        Calendar local = Calendar.getInstance(tz);
+        local.setTimeInMillis(meterTime);
         return local;
     }
 

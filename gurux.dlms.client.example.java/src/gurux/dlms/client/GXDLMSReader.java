@@ -67,6 +67,7 @@ import gurux.dlms.enums.ErrorCode;
 import gurux.dlms.enums.InterfaceType;
 import gurux.dlms.enums.ObjectType;
 import gurux.dlms.enums.Security;
+import gurux.dlms.objects.GXDLMSAssociationShortName;
 import gurux.dlms.objects.GXDLMSCaptureObject;
 import gurux.dlms.objects.GXDLMSData;
 import gurux.dlms.objects.GXDLMSDemandRegister;
@@ -633,7 +634,7 @@ public class GXDLMSReader {
      */
     public void readList(List<Entry<GXDLMSObject, Integer>> list)
             throws Exception {
-        if (list.size() != 0) {
+        if (!list.isEmpty()) {
             byte[][] data = dlms.readList(list);
             GXReplyData reply = new GXReplyData();
             List<Object> values = new ArrayList<Object>(list.size());
@@ -993,11 +994,16 @@ public class GXDLMSReader {
         GXReplyData reply = new GXReplyData();
         // Get Association view from the meter.
         readDataBlock(dlms.getObjectsRequest(), reply);
-        GXDLMSObjectCollection objects =
-                dlms.parseObjects(reply.getData(), true);
-        // Get description of the objects.
-        GXDLMSConverter converter = new GXDLMSConverter(dlms.getStandard());
-        converter.updateOBISCodeInformation(objects);
+        dlms.parseObjects(reply.getData(), true);
+        // Access rights must read differently when short Name referencing is
+        // used.
+        if (!dlms.getUseLogicalNameReferencing()) {
+            GXDLMSAssociationShortName sn = (GXDLMSAssociationShortName) dlms
+                    .getObjects().findBySN(0xFA00);
+            if (sn != null && sn.getVersion() > 0) {
+                read(sn, 3);
+            }
+        }
     }
 
     /*
