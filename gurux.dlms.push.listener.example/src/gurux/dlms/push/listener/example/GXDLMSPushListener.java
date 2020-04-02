@@ -34,6 +34,9 @@
 
 package gurux.dlms.push.listener.example;
 
+import java.util.List;
+import java.util.Map.Entry;
+
 import gurux.common.GXCommon;
 import gurux.common.IGXMediaListener;
 import gurux.common.MediaStateEventArgs;
@@ -47,6 +50,7 @@ import gurux.dlms.GXReplyData;
 import gurux.dlms.TranslatorOutputType;
 import gurux.dlms.enums.Authentication;
 import gurux.dlms.enums.InterfaceType;
+import gurux.dlms.objects.GXDLMSObject;
 import gurux.dlms.secure.GXDLMSSecureClient;
 import gurux.net.GXNet;
 import gurux.net.enums.NetworkType;
@@ -125,6 +129,13 @@ public class GXDLMSPushListener
         }
     }
 
+    private static void printValue(Entry<GXDLMSObject, Integer> it) {
+        // Print value
+        System.out.println(it.getKey().getObjectType() + " "
+                + it.getKey().getLogicalName() + " " + it.getValue() + ":"
+                + it.getKey().getValues()[it.getValue() - 1]);
+    }
+
     /*
      * Client has send data.
      */
@@ -139,18 +150,41 @@ public class GXDLMSPushListener
                 reply.set((byte[]) e.getData());
                 client.getData(reply, data);
                 // If all data is received.
-                if (data.isComplete() && !data.isMoreData()) {
-                    try {
-                        // Show data as XML.
-                        GXDLMSTranslator t = new GXDLMSTranslator(
-                                TranslatorOutputType.SIMPLE_XML);
-                        String xml = t.dataToXml(data.getData());
-                        System.out.println(xml);
-                        printData(data.getValue());
-                    } catch (Exception ex) {
-                        System.out.println(ex.getMessage());
-                    } finally {
-                        data.clear();
+                if (data.isComplete()) {
+                    reply.clear();
+                    if (!data.isMoreData()) {
+                        try {
+                            // Show data as XML.
+                            GXDLMSTranslator t = new GXDLMSTranslator(
+                                    TranslatorOutputType.SIMPLE_XML);
+                            String xml = t.dataToXml(data.getData());
+                            System.out.println(xml);
+                            printData(data.getValue());
+                            // Example is sending list of push messages in first
+                            // parameter.
+                            if (data.getValue() instanceof List<?>) {
+                                List<Object> tmp =
+                                        (List<Object>) data.getValue();
+                                List<Entry<GXDLMSObject, Integer>> objects =
+                                        client.parsePushObjects(
+                                                (List<?>) tmp.get(0));
+                                // Remove first item because it's not needed
+                                // anymore.
+                                objects.remove(0);
+                                // Update clock.
+                                int valueindex = 1;
+                                for (Entry<GXDLMSObject, Integer> it : objects) {
+                                    client.updateValue(it.getKey(),
+                                            it.getValue(), tmp.get(valueindex));
+                                    ++valueindex;
+                                    printValue(it);
+                                }
+                            }
+                        } catch (Exception ex) {
+                            System.out.println(ex.getMessage());
+                        } finally {
+                            data.clear();
+                        }
                     }
                 }
             }

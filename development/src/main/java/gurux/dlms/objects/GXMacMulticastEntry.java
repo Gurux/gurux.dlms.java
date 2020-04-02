@@ -34,34 +34,43 @@
 
 package gurux.dlms.objects;
 
-import gurux.dlms.GXDate;
+public class GXMacMulticastEntry {
+    /**
+     * LCID of multicast group
+     */
+    private byte id;
+    /**
+     * Number of child nodes.
+     */
+    private short members;
 
-public class GXDLMSSpecialDay {
-    private int index;
-    private GXDate date;
-    private int dayId;
-
-    public final int getIndex() {
-        return index;
+    /**
+     * @return LCID of multicast group
+     */
+    public final byte getId() {
+        return id;
     }
 
-    public final void setIndex(final int value) {
-        index = value;
+    /**
+     * @param value
+     *            LCID of multicast group
+     */
+    public final void setId(final byte value) {
+        id = value;
     }
 
-    public final GXDate getDate() {
-        return date;
+    /**
+     * @return Number of child nodes.
+     */
+    public final short getMembers() {
+        return members;
     }
 
-    public final void setDate(final GXDate value) {
-        date = value;
-    }
-
-    public final int getDayId() {
-        return dayId;
-    }
-
-    public final void setDayId(final int value) {
-        dayId = value;
+    /**
+     * @param value
+     *            Number of child nodes.
+     */
+    public final void setMembers(final short value) {
+        members = value;
     }
 }

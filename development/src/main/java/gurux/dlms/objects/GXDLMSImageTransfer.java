@@ -347,6 +347,29 @@ public class GXDLMSImageTransfer extends GXDLMSObject implements IGXDLMSBase {
                 "getDataType failed. Invalid attribute index.");
     }
 
+    private Object getImageActivateInfo(GXDLMSSettings settings) {
+        GXByteBuffer data = new GXByteBuffer();
+        data.setUInt8((byte) DataType.ARRAY.getValue());
+        // ImageActivateInfo is returned only after verification is succeeded.
+        if (imageTransferStatus != ImageTransferStatus.IMAGE_VERIFICATION_SUCCESSFUL
+                || imageActivateInfo == null) {
+            data.setUInt8(0); // Count
+        } else {
+            data.setUInt8((byte) imageActivateInfo.length); // Count
+            for (GXDLMSImageActivateInfo it : imageActivateInfo) {
+                data.setUInt8((byte) DataType.STRUCTURE.getValue());
+                // Item count.
+                data.setUInt8((byte) 3);
+                GXCommon.setData(settings, data, DataType.UINT32, it.getSize());
+                GXCommon.setData(settings, data, DataType.OCTET_STRING,
+                        it.getIdentification());
+                GXCommon.setData(settings, data, DataType.OCTET_STRING,
+                        it.getSignature());
+            }
+        }
+        return data.array();
+    }
+
     /*
      * Returns value of given attribute.
      */
@@ -372,20 +395,7 @@ public class GXDLMSImageTransfer extends GXDLMSObject implements IGXDLMSBase {
             return getImageTransferStatus().ordinal();
         }
         if (e.getIndex() == 7) {
-            GXByteBuffer data = new GXByteBuffer();
-            data.setUInt8((byte) DataType.ARRAY.getValue());
-            data.setUInt8((byte) imageActivateInfo.length); // Count
-            for (GXDLMSImageActivateInfo it : imageActivateInfo) {
-                data.setUInt8((byte) DataType.STRUCTURE.getValue());
-                // Item count.
-                data.setUInt8((byte) 3);
-                GXCommon.setData(settings, data, DataType.UINT32, it.getSize());
-                GXCommon.setData(settings, data, DataType.OCTET_STRING,
-                        it.getIdentification());
-                GXCommon.setData(settings, data, DataType.OCTET_STRING,
-                        it.getSignature());
-            }
-            return data.array();
+            return getImageActivateInfo(settings);
         }
         e.setError(ErrorCode.READ_WRITE_DENIED);
         return null;

@@ -2626,6 +2626,23 @@ public final class GXCommon {
         return ret;
     }
 
+    /**
+     * Convert short list to array.
+     * 
+     * @param list
+     *            Integer list to convert.
+     * @return Integer array.
+     */
+    public static short[] toShortArray(final List<Short> list) {
+        short[] ret = new short[list.size()];
+        int pos = 0;
+        for (Short it : list) {
+            ret[pos] = it.shortValue();
+            ++pos;
+        }
+        return ret;
+    }
+
     public static Date getGeneralizedTime(final String dateString) {
         int year, month, day, hour, minute, second = 0;
         Calendar calendar;

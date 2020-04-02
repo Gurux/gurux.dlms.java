@@ -871,7 +871,8 @@ public class GXDLMSAccount extends GXDLMSObject implements IGXDLMSBase {
                     bb.set(GXCommon
                             .logicalNameToBytes(it.getChargeReference()));
                     GXCommon.setData(settings, bb, DataType.BITSTRING,
-                            it.getCollectionConfiguration());
+                            (byte) CreditCollectionConfiguration.toInteger(
+                                    it.getCollectionConfiguration()));
                 }
             }
             return bb.array();

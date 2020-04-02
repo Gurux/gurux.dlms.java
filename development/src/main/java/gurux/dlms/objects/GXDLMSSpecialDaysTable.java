@@ -50,7 +50,6 @@ import gurux.dlms.GXByteBuffer;
 import gurux.dlms.GXDLMSClient;
 import gurux.dlms.GXDLMSSettings;
 import gurux.dlms.GXDate;
-import gurux.dlms.GXDateTime;
 import gurux.dlms.ValueEventArgs;
 import gurux.dlms.enums.DataType;
 import gurux.dlms.enums.ErrorCode;
@@ -310,7 +309,7 @@ public class GXDLMSSpecialDaysTable extends GXDLMSObject
                     List<?> item = (List<?>) i;
                     GXDLMSSpecialDay it = new GXDLMSSpecialDay();
                     it.setIndex(((Number) item.get(0)).intValue());
-                    it.setDate((GXDateTime) GXDLMSClient.changeType(
+                    it.setDate((GXDate) GXDLMSClient.changeType(
                             (byte[]) item.get(1), DataType.DATE, false));
                     it.setDayId(((Number) item.get(2)).intValue());
                     items.add(it);

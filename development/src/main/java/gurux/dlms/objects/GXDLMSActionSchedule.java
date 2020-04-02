@@ -64,8 +64,6 @@ public class GXDLMSActionSchedule extends GXDLMSObject implements IGXDLMSBase {
      * Script to execute.
      */
     private GXDLMSScriptTable target;
-
-    private String executedScriptLogicalName;
     private int executedScriptSelector;
     private SingleActionScheduleType type;
     private GXDateTime[] executionTime;
@@ -115,35 +113,6 @@ public class GXDLMSActionSchedule extends GXDLMSObject implements IGXDLMSBase {
         target = value;
     }
 
-    /**
-     * @return Executed script logical name.
-     * @deprecated use {@link #getTarget} instead.
-     */
-    @Deprecated
-    public final String getExecutedScriptLogicalName() {
-        return executedScriptLogicalName;
-    }
-
-    /**
-     * @param value
-     *            Executed script logical name.
-     * @deprecated use {@link #setTarget} instead.
-     */
-    @Deprecated
-    public final void setExecutedScriptLogicalName(final String value) {
-        executedScriptLogicalName = value;
-    }
-
-    /**
-     * @param value
-     *            Executed script logical name.
-     * @deprecated use {@link #getTarget} instead.
-     */
-    @Deprecated
-    public final void setTarget(final String value) {
-        executedScriptLogicalName = value;
-    }
-
     public final int getExecutedScriptSelector() {
         return executedScriptSelector;
     }
@@ -170,9 +139,15 @@ public class GXDLMSActionSchedule extends GXDLMSObject implements IGXDLMSBase {
 
     @Override
     public final Object[] getValues() {
+        String str;
+        if (target != null) {
+            str = target.getLogicalName();
+        } else {
+            str = "0.0.0.0.0.0";
+        }
         return new Object[] { getLogicalName(),
-                executedScriptLogicalName + " " + executedScriptSelector,
-                getType(), getExecutionTime() };
+                str + " " + executedScriptSelector, getType(),
+                getExecutionTime() };
     }
 
     /*
@@ -247,11 +222,17 @@ public class GXDLMSActionSchedule extends GXDLMSObject implements IGXDLMSBase {
             return GXCommon.logicalNameToBytes(getLogicalName());
         }
         if (e.getIndex() == 2) {
+            String str;
+            if (target == null) {
+                str = "0.0.0.0.0.0";
+            } else {
+                str = target.getLogicalName();
+            }
             GXByteBuffer stream = new GXByteBuffer();
             stream.setUInt8(DataType.STRUCTURE.getValue());
             stream.setUInt8(2);
             GXCommon.setData(settings, stream, DataType.OCTET_STRING,
-                    GXCommon.logicalNameToBytes(executedScriptLogicalName));
+                    GXCommon.logicalNameToBytes(str));
             GXCommon.setData(settings, stream, DataType.UINT16,
                     executedScriptSelector);
             return stream.array();

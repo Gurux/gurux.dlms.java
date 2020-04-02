@@ -59,7 +59,7 @@ public class GuruxDlmsPushListenerExample {
      *            the command line arguments
      */
     public static void main(String[] args) {
-        int port = 4061;
+        int port = 4059;
         GXNet media = new GXNet(NetworkType.TCP, "localhost", port);
         GXDLMSSecureNotify cl =
                 new GXDLMSSecureNotify(true, 1, 1, InterfaceType.WRAPPER);

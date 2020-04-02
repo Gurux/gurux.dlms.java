@@ -80,16 +80,7 @@ public class GXDLMSClock extends GXDLMSObject implements IGXDLMSBase {
      * Constructor.
      */
     public GXDLMSClock() {
-        super(ObjectType.CLOCK, "0.0.1.0.0.255", 0);
-        status = new HashSet<ClockStatus>();
-        status.add(ClockStatus.OK);
-        deviation = 0;
-        java.util.Set<DateTimeSkips> value = new HashSet<DateTimeSkips>();
-        value.add(DateTimeSkips.MONTH);
-        value.add(DateTimeSkips.DAY);
-        begin.setSkip(value);
-        end.setSkip(begin.getSkip());
-        clockBase = ClockBase.NONE;
+        this("0.0.1.0.0.255", 0);
     }
 
     /**
@@ -99,16 +90,7 @@ public class GXDLMSClock extends GXDLMSObject implements IGXDLMSBase {
      *            Logical Name of the object.
      */
     public GXDLMSClock(final String ln) {
-        super(ObjectType.CLOCK, ln, 0);
-        status = new HashSet<ClockStatus>();
-        status.add(ClockStatus.OK);
-        deviation = 0;
-        java.util.Set<DateTimeSkips> value = new HashSet<DateTimeSkips>();
-        value.add(DateTimeSkips.MONTH);
-        value.add(DateTimeSkips.DAY);
-        begin.setSkip(value);
-        end.setSkip(begin.getSkip());
-        clockBase = ClockBase.NONE;
+        this(ln, 0);
     }
 
     /**

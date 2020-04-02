@@ -32,36 +32,26 @@
 // Full text may be retrieved at http://www.gnu.org/licenses/gpl-2.0.txt
 //---------------------------------------------------------------------------
 
-package gurux.dlms.objects;
+package gurux.dlms.objects.enums;
 
-import gurux.dlms.GXDate;
-
-public class GXDLMSSpecialDay {
-    private int index;
-    private GXDate date;
-    private int dayId;
-
-    public final int getIndex() {
-        return index;
-    }
-
-    public final void setIndex(final int value) {
-        index = value;
-    }
-
-    public final GXDate getDate() {
-        return date;
-    }
-
-    public final void setDate(final GXDate value) {
-        date = value;
-    }
-
-    public final int getDayId() {
-        return dayId;
-    }
-
-    public final void setDayId(final int value) {
-        dayId = value;
-    }
+/**
+ * Present functional state of the node.
+ */
+public enum MacState {
+    /**
+     * Disconnected.
+     */
+    DISCONNECTED,
+    /**
+     * Terminal.
+     */
+    TERMINAL,
+    /**
+     * Switch.
+     */
+    SWITCH,
+    /**
+     * Base.
+     */
+    BASE
 }

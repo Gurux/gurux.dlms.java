@@ -84,6 +84,7 @@ import gurux.dlms.objects.GXDLMSImageTransfer;
 import gurux.dlms.objects.GXDLMSIp4Setup;
 import gurux.dlms.objects.GXDLMSIp6Setup;
 import gurux.dlms.objects.GXDLMSLimiter;
+import gurux.dlms.objects.GXDLMSLlcSscsSetup;
 import gurux.dlms.objects.GXDLMSMBusClient;
 import gurux.dlms.objects.GXDLMSMBusMasterPortSetup;
 import gurux.dlms.objects.GXDLMSMBusSlavePortSetup;
@@ -92,6 +93,12 @@ import gurux.dlms.objects.GXDLMSModemConfiguration;
 import gurux.dlms.objects.GXDLMSObject;
 import gurux.dlms.objects.GXDLMSParameterMonitor;
 import gurux.dlms.objects.GXDLMSPppSetup;
+import gurux.dlms.objects.GXDLMSPrimeNbOfdmPlcApplicationsIdentification;
+import gurux.dlms.objects.GXDLMSPrimeNbOfdmPlcMacCounters;
+import gurux.dlms.objects.GXDLMSPrimeNbOfdmPlcMacFunctionalParameters;
+import gurux.dlms.objects.GXDLMSPrimeNbOfdmPlcMacNetworkAdministrationData;
+import gurux.dlms.objects.GXDLMSPrimeNbOfdmPlcMacSetup;
+import gurux.dlms.objects.GXDLMSPrimeNbOfdmPlcPhysicalLayerCounters;
 import gurux.dlms.objects.GXDLMSProfileGeneric;
 import gurux.dlms.objects.GXDLMSPushSetup;
 import gurux.dlms.objects.GXDLMSRegister;
@@ -270,6 +277,20 @@ abstract class GXDLMS {
             return new GXDLMSParameterMonitor();
         case COMPACT_DATA:
             return new GXDLMSCompactData();
+        case LLC_SSCS_SETUP:
+            return new GXDLMSLlcSscsSetup();
+        case PRIME_NB_OFDM_PLC_PHYSICAL_LAYER_COUNTERS:
+            return new GXDLMSPrimeNbOfdmPlcPhysicalLayerCounters();
+        case PRIME_NB_OFDM_PLC_MAC_SETUP:
+            return new GXDLMSPrimeNbOfdmPlcMacSetup();
+        case PRIME_NB_OFDM_PLC_MAC_FUNCTIONAL_PARAMETERS:
+            return new GXDLMSPrimeNbOfdmPlcMacFunctionalParameters();
+        case PRIME_NB_OFDM_PLC_MAC_COUNTERS:
+            return new GXDLMSPrimeNbOfdmPlcMacCounters();
+        case PRIME_NB_OFDM_PLC_MAC_NETWORK_ADMINISTRATION_DATA:
+            return new GXDLMSPrimeNbOfdmPlcMacNetworkAdministrationData();
+        case PRIME_NB_OFDM_PLC_APPLICATIONS_IDENTIFICATION:
+            return new GXDLMSPrimeNbOfdmPlcApplicationsIdentification();
         default:
             return new GXDLMSObject();
         }
@@ -3160,13 +3181,23 @@ abstract class GXDLMS {
         // GBT Window size.
         byte windowSize = (byte) (bc & 0x3F);
         // Block number.
-        data.setBlockNumber(data.getData().getUInt16());
+        int bn = data.getData().getUInt16();
         // Block number acknowledged.
-        data.setBlockNumberAck(data.getData().getUInt16());
-        if (data.getXml() == null
-                && data.getBlockNumberAck() != settings.getBlockIndex() - 1) {
-            System.out.println("Invalid GBT ACK.");
+        int bna = data.getData().getUInt16();
+        if (data.getXml() == null) {
+            // Remove existing data when first block is received.
+            if (bn == 1) {
+                index = 0;
+            } else if (bna != settings.getBlockIndex() - 1) {
+                // If this block is already received.
+                data.getData().size(index);
+                data.setCommand(Command.NONE);
+                return;
+            }
         }
+        data.setBlockNumber(bn);
+        // Block number acknowledged.
+        data.setBlockNumberAck(bna);
         settings.setBlockNumberAck(data.getBlockNumber());
         data.setCommand(Command.NONE);
         int len = GXCommon.getObjectCount(data.getData());
@@ -3752,8 +3783,10 @@ abstract class GXDLMS {
             target.setFrameId(frame);
         } else if (settings.getInterfaceType() == InterfaceType.WRAPPER) {
             if (!getTcpData(settings, reply, target, notify)) {
-                target = notify;
-                isNotify = true;
+                if (notify != null) {
+                    target = notify;
+                    isNotify = true;
+                }
             }
         } else if (settings.getInterfaceType() == InterfaceType.WIRELESS_MBUS) {
             getMBusData(settings, reply, target);
@@ -3776,7 +3809,7 @@ abstract class GXDLMS {
             return true;
         }
         getPdu(settings, target);
-        if (!isNotify) {
+        if (notify != null && !isNotify) {
             // Check command to make sure it's not notify message.
             switch (target.getCommand()) {
             case Command.DATA_NOTIFICATION:
@@ -3785,6 +3818,12 @@ abstract class GXDLMS {
             case Command.EVENT_NOTIFICATION:
             case Command.DED_EVENT_NOTIFICATION:
                 isNotify = true;
+                notify.setCommand(data.getCommand());
+                data.setCommand(Command.NONE);
+                notify.setTime(data.getTime());
+                data.setTime(null);
+                notify.getData().set(data.getData());
+                data.getData().trim();
                 break;
             default:
                 break;
