@@ -139,9 +139,24 @@ public class GXDLMSDisconnectControl extends GXDLMSObject
         controlMode = value;
     }
 
-    /*
+    /**
      * Forces the disconnect control object into 'disconnected' state if remote
-     * disconnection is enabled.
+     * disconnection is enabled. 
+     * @param client DLMS client.
+     * 
+     * @return Action bytes.
+     * @throws InvalidKeyException
+     *             Invalid key exception.
+     * @throws NoSuchAlgorithmException
+     *             No such algorithm exception.
+     * @throws NoSuchPaddingException
+     *             No such padding exception.
+     * @throws InvalidAlgorithmParameterException
+     *             Invalid algorithm parameter exception.
+     * @throws IllegalBlockSizeException
+     *             Illegal block size exception.
+     * @throws BadPaddingException
+     *             Bad padding exception.
      */
     public final byte[][] remoteDisconnect(final GXDLMSClient client)
             throws InvalidKeyException, NoSuchAlgorithmException,

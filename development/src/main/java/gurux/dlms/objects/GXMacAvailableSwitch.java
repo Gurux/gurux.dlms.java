@@ -54,7 +54,7 @@ public class GXMacAvailableSwitch {
     private short level;
 
     /**
-     * The received signal level for this switch;
+     * The received signal level for this switch.
      */
     private short rxLevel;
     /**

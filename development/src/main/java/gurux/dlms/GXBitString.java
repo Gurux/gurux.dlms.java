@@ -36,6 +36,8 @@
 // --------------------------------------------------------------------------
 package gurux.dlms;
 
+import gurux.dlms.internal.GXCommon;
+
 /**
  * BitString class is used with Bit strings.
  * 
@@ -66,6 +68,24 @@ public class GXBitString {
     }
 
     /**
+     * Constructor.
+     * 
+     * @param val
+     *            Byte value.
+     * @param count
+     *            Bit count.
+     */
+    public GXBitString(final byte val, final int count) {
+        StringBuilder sb = new StringBuilder();
+        GXCommon.toBitString(sb, val, 8);
+        if (count != 8) {
+            value = sb.toString().substring(0, count);
+        } else {
+            value = sb.toString();
+        }
+    }
+
+    /**
      * @return Bit string value.
      */
     public String getValue() {
@@ -85,4 +105,22 @@ public class GXBitString {
         return value;
     }
 
+    /**
+     * @return Bit string value.
+     */
+    public short toByte() {
+        short val = 0;
+        if (value != null) {
+            int index = 7;
+            for (int pos = 0; pos != value.length(); ++pos) {
+                if (value.charAt(pos) == '1') {
+                    val |= (1 << index);
+                } else if (value.charAt(pos) != '0') {
+                    throw new IllegalArgumentException("Invalid parameter");
+                }
+                --index;
+            }
+        }
+        return val;
+    }
 }

@@ -34,7 +34,12 @@
 
 package gurux.dlms.objects;
 
-import gurux.dlms.GXDateTime;
+import java.util.HashSet;
+import java.util.Set;
+
+import gurux.dlms.GXDate;
+import gurux.dlms.GXTime;
+import gurux.dlms.objects.enums.Weekdays;
 
 /**
  * Executed scripts.
@@ -42,6 +47,10 @@ import gurux.dlms.GXDateTime;
  * @author Gurux Ltd.
  */
 public class GXDLMSScheduleEntry {
+
+    public GXDLMSScheduleEntry() {
+        execWeekdays = new HashSet<Weekdays>();
+    }
 
     /**
      * Schedule entry index.
@@ -66,7 +75,7 @@ public class GXDLMSScheduleEntry {
     /**
     *
     */
-    private GXDateTime switchTime;
+    private GXTime switchTime;
 
     /**
      * Defines a period in minutes, in which an entry shall be processed after
@@ -77,7 +86,7 @@ public class GXDLMSScheduleEntry {
     /**
      * Days of the week on which the entry is valid.
      */
-    private String execWeekdays;
+    private Set<Weekdays> execWeekdays;
 
     /**
      * Perform the link to the IC Special days table, day_id.
@@ -87,12 +96,12 @@ public class GXDLMSScheduleEntry {
     /**
      * Date starting period in which the entry is valid.
      */
-    private GXDateTime beginDate;
+    private GXDate beginDate;
 
     /**
      * Date starting period in which the entry is valid.
      */
-    private GXDateTime endDate;
+    private GXDate endDate;
 
     /**
      * Get schedule entry index.
@@ -167,7 +176,7 @@ public class GXDLMSScheduleEntry {
     /**
      * @return Switch time.
      */
-    public final GXDateTime getSwitchTime() {
+    public final GXTime getSwitchTime() {
         return switchTime;
     }
 
@@ -175,7 +184,7 @@ public class GXDLMSScheduleEntry {
      * @param value
      *            Switch time.
      */
-    public final void setSwitchTime(final GXDateTime value) {
+    public final void setSwitchTime(final GXTime value) {
         switchTime = value;
     }
 
@@ -203,9 +212,9 @@ public class GXDLMSScheduleEntry {
     /**
      * Get days of the week on which the entry is valid.
      * 
-     * @return Bit array of valid week days.
+     * @return Days of the week on which the entry is valid.
      */
-    public final String getExecWeekdays() {
+    public final Set<Weekdays> getExecWeekdays() {
         return execWeekdays;
     }
 
@@ -213,9 +222,9 @@ public class GXDLMSScheduleEntry {
      * Set days of the week on which the entry is valid.
      * 
      * @param value
-     *            Bit array of valid week days.
+     *            Days of the week on which the entry is valid.
      */
-    public final void setExecWeekdays(final String value) {
+    public final void setExecWeekdays(final Set<Weekdays> value) {
         execWeekdays = value;
     }
 
@@ -243,7 +252,7 @@ public class GXDLMSScheduleEntry {
      * 
      * @return Begin date.
      */
-    public final GXDateTime getBeginDate() {
+    public final GXDate getBeginDate() {
         return beginDate;
     }
 
@@ -253,7 +262,7 @@ public class GXDLMSScheduleEntry {
      * @param value
      *            Begin date.
      */
-    public final void setBeginDate(final GXDateTime value) {
+    public final void setBeginDate(final GXDate value) {
         beginDate = value;
     }
 
@@ -262,7 +271,7 @@ public class GXDLMSScheduleEntry {
      * 
      * @return End date.
      */
-    public final GXDateTime getEndDate() {
+    public final GXDate getEndDate() {
         return endDate;
     }
 
@@ -272,7 +281,7 @@ public class GXDLMSScheduleEntry {
      * @param value
      *            End date.
      */
-    public final void setEndDate(final GXDateTime value) {
+    public final void setEndDate(final GXDate value) {
         endDate = value;
     }
 }
