@@ -442,11 +442,11 @@ public class GXDLMSPrimeNbOfdmPlcMacNetworkAdministrationData
         return null;
     }
 
-    private GXMacMulticastEntry[] setMulticastEntry(final List<Object> value) {
+    private GXMacMulticastEntry[] setMulticastEntry(final List<?> value) {
         List<GXMacMulticastEntry> data = new ArrayList<GXMacMulticastEntry>();
         if (value != null) {
             for (Object tmp : value) {
-                List<Object> it = (List<Object>) tmp;
+                List<?> it = (List<?>) tmp;
                 GXMacMulticastEntry v = new GXMacMulticastEntry();
                 v.setId((byte) (it.get(0)));
                 v.setMembers((short) it.get(1));
@@ -456,7 +456,7 @@ public class GXDLMSPrimeNbOfdmPlcMacNetworkAdministrationData
         return data.toArray(new GXMacMulticastEntry[data.size()]);
     }
 
-    private short[] setSwitchTable(final List<Object> value) {
+    private short[] setSwitchTable(final List<?> value) {
         List<Short> data = new ArrayList<Short>();
         if (value != null) {
             for (Object it : value) {
@@ -466,11 +466,11 @@ public class GXDLMSPrimeNbOfdmPlcMacNetworkAdministrationData
         return GXCommon.toShortArray(data);
     }
 
-    private GXMacDirectTable[] setDirectTable(final List<Object> value) {
+    private GXMacDirectTable[] setDirectTable(final List<?> value) {
         List<GXMacDirectTable> data = new ArrayList<GXMacDirectTable>();
         if (value != null) {
             for (Object tmp : value) {
-                List<Object> it = (List<Object>) tmp;
+                List<?> it = (List<?>) tmp;
                 GXMacDirectTable v = new GXMacDirectTable();
                 v.setSourceSId((short) it.get(0));
                 v.setSourceLnId((short) it.get(1));
@@ -485,31 +485,29 @@ public class GXDLMSPrimeNbOfdmPlcMacNetworkAdministrationData
         return data.toArray(new GXMacDirectTable[data.size()]);
     }
 
-    private GXMacAvailableSwitch[]
-            setAvailableSwitches(final List<Object> value) {
+    private GXMacAvailableSwitch[] setAvailableSwitches(final List<?> value) {
         List<GXMacAvailableSwitch> data = new ArrayList<GXMacAvailableSwitch>();
         if (value != null) {
             for (Object tmp : value) {
-                List<Object> it = (List<Object>) tmp;
+                List<?> it = (List<?>) tmp;
                 GXMacAvailableSwitch v = new GXMacAvailableSwitch();
                 v.setSna((byte[]) it.get(0));
-                v.setLsId((int) (it.get(1)));
-                v.setLevel((short) it.get(2));
-                v.setRxLevel((short) it.get(3));
-                v.setRxSnr((short) it.get(4));
+                v.setLsId((short) (it.get(1)));
+                v.setLevel((byte) it.get(2));
+                v.setRxLevel((byte) it.get(3));
+                v.setRxSnr((byte) it.get(4));
                 data.add(v);
             }
         }
         return data.toArray(new GXMacAvailableSwitch[data.size()]);
     }
 
-    private GXMacPhyCommunication[]
-            setCommunications(final List<Object> value) {
+    private GXMacPhyCommunication[] setCommunications(final List<?> value) {
         List<GXMacPhyCommunication> data =
                 new ArrayList<GXMacPhyCommunication>();
         if (value != null) {
             for (Object tmp : value) {
-                List<Object> it = (List<Object>) tmp;
+                List<?> it = (List<?>) tmp;
                 GXMacPhyCommunication v = new GXMacPhyCommunication();
                 v.setEui((byte[]) it.get(0));
                 v.setTxPower(((Number) it.get(1)).byteValue());
@@ -537,20 +535,19 @@ public class GXDLMSPrimeNbOfdmPlcMacNetworkAdministrationData
             setLogicalName(GXCommon.toLogicalName(e.getValue()));
             break;
         case 2:
-            multicastEntries = setMulticastEntry((List<Object>) e.getValue());
+            multicastEntries = setMulticastEntry((List<?>) e.getValue());
             break;
         case 3:
-            switchTable = setSwitchTable((List<Object>) e.getValue());
+            switchTable = setSwitchTable((List<?>) e.getValue());
             break;
         case 4:
-            directTable = setDirectTable((List<Object>) e.getValue());
+            directTable = setDirectTable((List<?>) e.getValue());
             break;
         case 5:
-            availableSwitches =
-                    setAvailableSwitches((List<Object>) e.getValue());
+            availableSwitches = setAvailableSwitches((List<?>) e.getValue());
             break;
         case 6:
-            communications = setCommunications((List<Object>) e.getValue());
+            communications = setCommunications((List<?>) e.getValue());
             break;
         default:
             e.setError(ErrorCode.READ_WRITE_DENIED);
@@ -622,11 +619,10 @@ public class GXDLMSPrimeNbOfdmPlcMacNetworkAdministrationData
                 list.add(it);
                 it.setSna(GXCommon
                         .hexToBytes(reader.readElementContentAsString("Sna")));
-                it.setLsId(reader.readElementContentAsInt("LsId"));
-                it.setLevel((short) reader.readElementContentAsInt("Level"));
-                it.setRxLevel(
-                        (short) reader.readElementContentAsInt("RxLevel"));
-                it.setRxSnr((short) reader.readElementContentAsInt("RxSnr"));
+                it.setLsId((short) reader.readElementContentAsInt("LsId"));
+                it.setLevel((byte) reader.readElementContentAsInt("Level"));
+                it.setRxLevel((byte) reader.readElementContentAsInt("RxLevel"));
+                it.setRxSnr((byte) reader.readElementContentAsInt("RxSnr"));
             }
             reader.readEndElement("AvailableSwitches");
         }
@@ -643,19 +639,18 @@ public class GXDLMSPrimeNbOfdmPlcMacNetworkAdministrationData
                 list.add(it);
                 it.setEui(GXCommon
                         .hexToBytes(reader.readElementContentAsString("Eui")));
-                it.setTxPower(
-                        (short) reader.readElementContentAsInt("TxPower"));
+                it.setTxPower((byte) reader.readElementContentAsInt("TxPower"));
                 it.setTxCoding(
-                        (short) reader.readElementContentAsInt("TxCoding"));
+                        (byte) reader.readElementContentAsInt("TxCoding"));
                 it.setRxCoding(
-                        (short) reader.readElementContentAsInt("RxCoding"));
-                it.setRxLvl((short) reader.readElementContentAsInt("RxLvl"));
-                it.setSnr((short) reader.readElementContentAsInt("Snr"));
-                it.setTxPowerModified((short) reader
+                        (byte) reader.readElementContentAsInt("RxCoding"));
+                it.setRxLvl((byte) reader.readElementContentAsInt("RxLvl"));
+                it.setSnr((byte) reader.readElementContentAsInt("Snr"));
+                it.setTxPowerModified((byte) reader
                         .readElementContentAsInt("TxPowerModified"));
-                it.setTxCodingModified((short) reader
+                it.setTxCodingModified((byte) reader
                         .readElementContentAsInt("TxCodingModified"));
-                it.setRxCodingModified((short) reader
+                it.setRxCodingModified((byte) reader
                         .readElementContentAsInt("RxCodingModified"));
             }
             reader.readEndElement("Communications");
