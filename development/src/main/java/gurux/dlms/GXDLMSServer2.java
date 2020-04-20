@@ -169,6 +169,23 @@ public abstract class GXDLMSServer2 {
     }
 
     /**
+     * @return Server is using push client address when sending push messages.
+     *         Client address is used if PushAddress is zero.
+     */
+    public int getPushClientAddress() {
+        return getSettings().getPushClientAddress();
+    }
+
+    /**
+     * @param value
+     *            Server is using push client address when sending push
+     *            messages. Client address is used if PushAddress is zero.
+     */
+    public void setPushClientAddress(final int value) {
+        getSettings().setPushClientAddress(value);
+    }
+
+    /**
      * @return List of objects that meter supports.
      */
     public final GXDLMSObjectCollection getItems() {

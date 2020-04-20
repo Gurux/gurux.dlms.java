@@ -153,6 +153,7 @@ public class GXDLMSBase extends GXDLMSSecureServer2
     public GXDLMSBase(final GXDLMSAssociationLogicalName ln,
             final GXDLMSHdlcSetup hdlc) {
         super(ln, hdlc);
+        setPushClientAddress(64);
         this.setMaxReceivePDUSize(1024);
         byte[] secret = "Gurux".getBytes();
         ln.setSecret(secret);
@@ -174,6 +175,7 @@ public class GXDLMSBase extends GXDLMSSecureServer2
     public GXDLMSBase(GXDLMSAssociationShortName sn,
             final GXDLMSHdlcSetup hdlc) {
         super(sn, hdlc);
+        setPushClientAddress(64);
         this.setMaxReceivePDUSize(1024);
         byte[] secret = "Gurux".getBytes();
         sn.setSecret(secret);
@@ -195,6 +197,7 @@ public class GXDLMSBase extends GXDLMSSecureServer2
     public GXDLMSBase(final GXDLMSAssociationLogicalName ln,
             final GXDLMSTcpUdpSetup wrapper) {
         super(ln, wrapper);
+        setPushClientAddress(64);
         this.setMaxReceivePDUSize(1024);
         byte[] secret = "Gurux".getBytes();
         ln.setSecret(secret);
@@ -216,6 +219,7 @@ public class GXDLMSBase extends GXDLMSSecureServer2
     public GXDLMSBase(GXDLMSAssociationShortName sn,
             final GXDLMSTcpUdpSetup wrapper) {
         super(sn, wrapper);
+        setPushClientAddress(64);
         this.setMaxReceivePDUSize(1024);
         byte[] secret = "Gurux".getBytes();
         sn.setSecret(secret);
@@ -557,6 +561,10 @@ public class GXDLMSBase extends GXDLMSSecureServer2
     void addPushSetup() {
         GXDLMSPushSetup push = new GXDLMSPushSetup();
         getItems().add(push);
+        GXDLMSIp4Setup ip4 = (GXDLMSIp4Setup) getItems()
+                .findByLN(ObjectType.IP4_SETUP, "0.0.25.1.0.255");
+        // Send Push messages to this address as default.
+        push.setDestination(ip4.getIPAddress().getHostAddress() + ":7000");
         // Add push object itself. This is needed to tell structure of data to
         // the Push listener.
         push.getPushObjectList()
@@ -569,8 +577,6 @@ public class GXDLMSBase extends GXDLMSSecureServer2
                 .add(new GXSimpleEntry<GXDLMSObject, GXDLMSCaptureObject>(ldn,
                         new GXDLMSCaptureObject(2, 0)));
         // Add .0.0.25.1.0.255 Ch. 0 IPv4 setup IP address.
-        GXDLMSObject ip4 =
-                getItems().findByLN(ObjectType.IP4_SETUP, "0.0.25.1.0.255");
         push.getPushObjectList()
                 .add(new GXSimpleEntry<GXDLMSObject, GXDLMSCaptureObject>(ip4,
                         new GXDLMSCaptureObject(3, 0)));
@@ -937,9 +943,34 @@ public class GXDLMSBase extends GXDLMSSecureServer2
     public void onPostWrite(ValueEventArgs[] args) {
     }
 
-    @Override
-    public void onPreAction(ValueEventArgs[] args) {
+    void sendPush(GXDLMSPushSetup target) throws Exception {
+        int pos = target.getDestination().indexOf(':');
+        if (pos == -1) {
+            throw new IllegalArgumentException("Invalid destination.");
+        }
+        byte[][] data = this.generatePushSetupMessages(null, target);
+        String host = target.getDestination().substring(0, pos);
+        int port = Integer.parseInt(target.getDestination().substring(pos + 1));
+        GXNet net = new GXNet(NetworkType.TCP, host, port);
+        try {
+            net.open();
+            for (byte[] it : data) {
+                net.send(it, null);
+            }
+        } finally {
+            net.close();
+        }
+    }
 
+    @Override
+    public void onPreAction(ValueEventArgs[] args) throws Exception {
+        for (ValueEventArgs e : args) {
+            if (e.getIndex() == 1
+                    && e.getTarget().getObjectType() == ObjectType.PUSH_SETUP) {
+                sendPush((GXDLMSPushSetup) e.getTarget());
+                e.setHandled(true);
+            }
+        }
     }
 
     private void capture(GXDLMSProfileGeneric pg) throws IOException {

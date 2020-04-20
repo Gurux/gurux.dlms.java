@@ -46,37 +46,37 @@ public class GXMacPhyCommunication {
     /**
      * The tx power of GPDU packets sent to the device.
      */
-    private short txPower;
+    private byte txPower;
 
     /**
      * The Tx coding of GPDU packets sent to the device.
      */
-    private short txCoding;
+    private byte txCoding;
 
     /**
      * The Rx coding of GPDU packets received from the device.
      */
-    private short rxCoding;
+    private byte rxCoding;
     /**
      * The Rx power level of GPDU packets received from the device.
      */
-    private short rxLvl;
+    private byte rxLvl;
     /**
      * SNR of GPDU packets received from the device.
      */
-    private short snr;
+    private byte snr;
     /**
      * The number of times the Tx power was modified.
      */
-    private short txPowerModified;
+    private byte txPowerModified;
     /**
      * The number of times the Tx coding was modified.
      */
-    private short txCodingModified;
+    private byte txCodingModified;
     /**
      * The number of times the Rx coding was modified.
      */
-    private short rxCodingModified;
+    private byte rxCodingModified;
 
     /**
      * @return EUI is the EUI-48 of the other device.
@@ -96,7 +96,7 @@ public class GXMacPhyCommunication {
     /**
      * @return The tx power of GPDU packets sent to the device.
      */
-    public final short getTxPower() {
+    public final byte getTxPower() {
         return txPower;
     }
 
@@ -104,14 +104,14 @@ public class GXMacPhyCommunication {
      * @param value
      *            The tx power of GPDU packets sent to the device.
      */
-    public final void setTxPower(final short value) {
+    public final void setTxPower(final byte value) {
         txPower = value;
     }
 
     /**
      * @return The Tx coding of GPDU packets sent to the device.
      */
-    public final short getTxCoding() {
+    public final byte getTxCoding() {
         return txCoding;
     }
 
@@ -119,14 +119,14 @@ public class GXMacPhyCommunication {
      * @param value
      *            The Tx coding of GPDU packets sent to the device.
      */
-    public final void setTxCoding(final short value) {
+    public final void setTxCoding(final byte value) {
         txCoding = value;
     }
 
     /**
      * @return The Rx coding of GPDU packets received from the device.
      */
-    public final short getRxCoding() {
+    public final byte getRxCoding() {
         return rxCoding;
     }
 
@@ -134,14 +134,14 @@ public class GXMacPhyCommunication {
      * @param value
      *            The Rx coding of GPDU packets received from the device.
      */
-    public final void setRxCoding(final short value) {
+    public final void setRxCoding(final byte value) {
         rxCoding = value;
     }
 
     /**
      * @return The Rx power level of GPDU packets received from the device.
      */
-    public final short getRxLvl() {
+    public final byte getRxLvl() {
         return rxLvl;
     }
 
@@ -149,14 +149,14 @@ public class GXMacPhyCommunication {
      * @param value
      *            The Rx power level of GPDU packets received from the device.
      */
-    public final void setRxLvl(final short value) {
+    public final void setRxLvl(final byte value) {
         rxLvl = value;
     }
 
     /**
      * @return SNR of GPDU packets received from the device.
      */
-    public final short getSnr() {
+    public final byte getSnr() {
         return snr;
     }
 
@@ -164,14 +164,14 @@ public class GXMacPhyCommunication {
      * @param value
      *            SNR of GPDU packets received from the device.
      */
-    public final void setSnr(final short value) {
+    public final void setSnr(final byte value) {
         snr = value;
     }
 
     /**
      * @return The number of times the Tx power was modified.
      */
-    public final short getTxPowerModified() {
+    public final byte getTxPowerModified() {
         return txPowerModified;
     }
 
@@ -179,14 +179,14 @@ public class GXMacPhyCommunication {
      * @param value
      *            The number of times the Tx power was modified.
      */
-    public final void setTxPowerModified(final short value) {
+    public final void setTxPowerModified(final byte value) {
         txPowerModified = value;
     }
 
     /**
      * @return The number of times the Tx coding was modified.
      */
-    public final short getTxCodingModified() {
+    public final byte getTxCodingModified() {
         return txCodingModified;
     }
 
@@ -194,14 +194,14 @@ public class GXMacPhyCommunication {
      * @param value
      *            The number of times the Tx coding was modified.
      */
-    public final void setTxCodingModified(final short value) {
+    public final void setTxCodingModified(final byte value) {
         txCodingModified = value;
     }
 
     /**
      * @return The number of times the Rx coding was modified.
      */
-    public final short getRxCodingModified() {
+    public final byte getRxCodingModified() {
         return rxCodingModified;
     }
 
@@ -209,7 +209,7 @@ public class GXMacPhyCommunication {
      * @param value
      *            The number of times the Rx coding was modified.
      */
-    public final void setRxCodingModified(final short value) {
+    public final void setRxCodingModified(final byte value) {
         rxCodingModified = value;
     }
 

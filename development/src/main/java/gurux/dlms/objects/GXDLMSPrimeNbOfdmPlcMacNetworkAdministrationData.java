@@ -378,10 +378,10 @@ public class GXDLMSPrimeNbOfdmPlcMacNetworkAdministrationData
                 bb.setUInt8(5);
                 GXCommon.setData(settings, bb, DataType.OCTET_STRING,
                         it.getSna());
-                GXCommon.setData(settings, bb, DataType.INT32, it.getLsId());
-                GXCommon.setData(settings, bb, DataType.INT16, it.getLevel());
-                GXCommon.setData(settings, bb, DataType.INT16, it.getRxLevel());
-                GXCommon.setData(settings, bb, DataType.INT16, it.getRxSnr());
+                GXCommon.setData(settings, bb, DataType.INT16, it.getLsId());
+                GXCommon.setData(settings, bb, DataType.INT8, it.getLevel());
+                GXCommon.setData(settings, bb, DataType.INT8, it.getRxLevel());
+                GXCommon.setData(settings, bb, DataType.INT8, it.getRxSnr());
             }
         }
 
@@ -400,18 +400,16 @@ public class GXDLMSPrimeNbOfdmPlcMacNetworkAdministrationData
                 bb.setUInt8(9);
                 GXCommon.setData(settings, bb, DataType.OCTET_STRING,
                         it.getEui());
-                GXCommon.setData(settings, bb, DataType.INT16, it.getTxPower());
-                GXCommon.setData(settings, bb, DataType.INT16,
-                        it.getTxCoding());
-                GXCommon.setData(settings, bb, DataType.INT16,
-                        it.getRxCoding());
-                GXCommon.setData(settings, bb, DataType.INT16, it.getRxLvl());
-                GXCommon.setData(settings, bb, DataType.INT16, it.getSnr());
-                GXCommon.setData(settings, bb, DataType.INT16,
+                GXCommon.setData(settings, bb, DataType.INT8, it.getTxPower());
+                GXCommon.setData(settings, bb, DataType.INT8, it.getTxCoding());
+                GXCommon.setData(settings, bb, DataType.INT8, it.getRxCoding());
+                GXCommon.setData(settings, bb, DataType.INT8, it.getRxLvl());
+                GXCommon.setData(settings, bb, DataType.INT8, it.getSnr());
+                GXCommon.setData(settings, bb, DataType.INT8,
                         it.getTxPowerModified());
-                GXCommon.setData(settings, bb, DataType.INT16,
+                GXCommon.setData(settings, bb, DataType.INT8,
                         it.getTxCodingModified());
-                GXCommon.setData(settings, bb, DataType.INT16,
+                GXCommon.setData(settings, bb, DataType.INT8,
                         it.getRxCodingModified());
             }
         }

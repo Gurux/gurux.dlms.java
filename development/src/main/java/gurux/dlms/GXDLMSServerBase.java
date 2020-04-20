@@ -868,7 +868,8 @@ public class GXDLMSServerBase {
         replyData.setUInt8(e.getServiceError().getValue());
         replyData.setUInt8(e.getServiceErrorValue());
         if (settings.getInterfaceType() == InterfaceType.WRAPPER) {
-            return GXDLMS.getWrapperFrame(settings, replyData);
+            return GXDLMS.getWrapperFrame(settings,
+                    Command.CONFIRMED_SERVICE_ERROR, replyData);
         } else {
             return GXDLMS.getHdlcFrame(settings, (byte) 0, replyData);
         }
@@ -912,7 +913,7 @@ public class GXDLMSServerBase {
             GXDLMS.getSNPdu(p, replyData);
         }
         if (settings.getInterfaceType() == InterfaceType.WRAPPER) {
-            return GXDLMS.getWrapperFrame(settings, replyData);
+            return GXDLMS.getWrapperFrame(settings, cmd, replyData);
         } else {
             return GXDLMS.getHdlcFrame(settings, (byte) 0, replyData);
         }
@@ -1012,7 +1013,7 @@ public class GXDLMSServerBase {
         }
         byte[] reply;
         if (settings.getInterfaceType() == InterfaceType.WRAPPER) {
-            reply = GXDLMS.getWrapperFrame(settings, replyData);
+            reply = GXDLMS.getWrapperFrame(settings, cmd, replyData);
         } else {
             reply = GXDLMS.getHdlcFrame(settings, frame, replyData);
         }

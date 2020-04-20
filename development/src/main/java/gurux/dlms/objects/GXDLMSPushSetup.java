@@ -70,7 +70,6 @@ public class GXDLMSPushSetup extends GXDLMSObject implements IGXDLMSBase {
     private MessageType message;
 
     private List<Entry<GXDLMSObject, GXDLMSCaptureObject>> pushObjectList;
-    private GXSendDestinationAndMethod sendDestinationAndMethod;
     private List<Map.Entry<GXDateTime, GXDateTime>> communicationWindow;
     private int randomisationStartInterval;
     private int numberOfRetries;
@@ -105,7 +104,6 @@ public class GXDLMSPushSetup extends GXDLMSObject implements IGXDLMSBase {
         super(ObjectType.PUSH_SETUP, ln, sn);
         pushObjectList =
                 new ArrayList<Entry<GXDLMSObject, GXDLMSCaptureObject>>();
-        sendDestinationAndMethod = new GXSendDestinationAndMethod();
         communicationWindow =
                 new ArrayList<Map.Entry<GXDateTime, GXDateTime>>();
         service = ServiceType.TCP;
@@ -144,10 +142,6 @@ public class GXDLMSPushSetup extends GXDLMSObject implements IGXDLMSBase {
     public final List<Entry<GXDLMSObject, GXDLMSCaptureObject>>
             getPushObjectList() {
         return pushObjectList;
-    }
-
-    public final GXSendDestinationAndMethod getSendDestinationAndMethod() {
-        return sendDestinationAndMethod;
     }
 
     /**
@@ -208,8 +202,9 @@ public class GXDLMSPushSetup extends GXDLMSObject implements IGXDLMSBase {
     @Override
     public final Object[] getValues() {
         return new Object[] { getLogicalName(), pushObjectList,
-                sendDestinationAndMethod, communicationWindow,
-                randomisationStartInterval, numberOfRetries, repetitionDelay };
+                service + " " + destination + " " + message,
+                communicationWindow, randomisationStartInterval,
+                numberOfRetries, repetitionDelay };
     }
 
     @Override
@@ -341,15 +336,15 @@ public class GXDLMSPushSetup extends GXDLMSObject implements IGXDLMSBase {
             buff.setUInt8(DataType.STRUCTURE.getValue());
             buff.setUInt8(3);
             GXCommon.setData(settings, buff, DataType.ENUM,
-                    sendDestinationAndMethod.getService().getValue());
-            if (sendDestinationAndMethod.getDestination() != null) {
+                    getService().getValue());
+            if (getDestination() != null) {
                 GXCommon.setData(settings, buff, DataType.OCTET_STRING,
-                        sendDestinationAndMethod.getDestination().getBytes());
+                        getDestination().getBytes());
             } else {
                 GXCommon.setData(settings, buff, DataType.OCTET_STRING, null);
             }
             GXCommon.setData(settings, buff, DataType.ENUM,
-                    sendDestinationAndMethod.getMessage().getValue());
+                    getMessage().getValue());
             return buff.array();
         }
         if (e.getIndex() == 4) {
@@ -411,11 +406,10 @@ public class GXDLMSPushSetup extends GXDLMSObject implements IGXDLMSBase {
         } else if (e.getIndex() == 3) {
             List<?> tmp = (List<?>) e.getValue();
             if (tmp != null) {
-                sendDestinationAndMethod.setService(
+                setService(
                         ServiceType.forValue(((Number) tmp.get(0)).intValue()));
-                sendDestinationAndMethod
-                        .setDestination(new String((byte[]) tmp.get(1)));
-                sendDestinationAndMethod.setMessage(
+                setDestination(new String((byte[]) tmp.get(1)));
+                setMessage(
                         MessageType.forValue(((Number) tmp.get(2)).intValue()));
             }
         } else if (e.getIndex() == 4) {

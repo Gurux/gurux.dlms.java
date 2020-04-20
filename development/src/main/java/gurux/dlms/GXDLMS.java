@@ -1233,7 +1233,8 @@ abstract class GXDLMS {
             while (reply.position() != reply.size()) {
                 if (p.getSettings()
                         .getInterfaceType() == InterfaceType.WRAPPER) {
-                    messages.add(getWrapperFrame(p.getSettings(), reply));
+                    messages.add(getWrapperFrame(p.getSettings(),
+                            p.getCommand(), reply));
                 } else if (p.getSettings()
                         .getInterfaceType() == InterfaceType.HDLC) {
                     messages.add(
@@ -1279,7 +1280,8 @@ abstract class GXDLMS {
             while (reply.position() != reply.size()) {
                 if (p.getSettings()
                         .getInterfaceType() == InterfaceType.WRAPPER) {
-                    messages.add(getWrapperFrame(p.getSettings(), reply));
+                    messages.add(getWrapperFrame(p.getSettings(),
+                            p.getCommand(), reply));
                 } else if (p.getSettings()
                         .getInterfaceType() == InterfaceType.HDLC) {
                     messages.add(getHdlcFrame(p.getSettings(), frame, reply));
@@ -1507,18 +1509,26 @@ abstract class GXDLMS {
      * 
      * @param settings
      *            DLMS settings.
+     * @param command
+     *            DLMS command.
      * @param data
      *            Wrapped data.
      * @return Wrapper frames.
      */
     static byte[] getWrapperFrame(final GXDLMSSettings settings,
-            final GXByteBuffer data) {
+            final int command, final GXByteBuffer data) {
         GXByteBuffer bb = new GXByteBuffer();
         // Add version.
         bb.setUInt16(1);
         if (settings.isServer()) {
             bb.setUInt16(settings.getServerAddress());
-            bb.setUInt16(settings.getClientAddress());
+            if (settings.getPushClientAddress() != 0
+                    && (command == Command.DATA_NOTIFICATION
+                            || command == Command.EVENT_NOTIFICATION)) {
+                bb.setUInt16(settings.getPushClientAddress());
+            } else {
+                bb.setUInt16(settings.getClientAddress());
+            }
         } else {
             bb.setUInt16(settings.getClientAddress());
             bb.setUInt16(settings.getServerAddress());
@@ -1561,7 +1571,13 @@ abstract class GXDLMS {
         int frameSize, len = 0;
         byte[] primaryAddress, secondaryAddress;
         if (settings.isServer()) {
-            primaryAddress = getAddressBytes(settings.getClientAddress(), 0);
+            if (frame == 0x13 && settings.getPushClientAddress() != 0) {
+                primaryAddress =
+                        getAddressBytes(settings.getPushClientAddress(), 0);
+            } else {
+                primaryAddress =
+                        getAddressBytes(settings.getClientAddress(), 0);
+            }
             secondaryAddress = getAddressBytes(settings.getServerAddress(),
                     settings.getServerAddressSize());
             len = secondaryAddress.length;
@@ -1805,7 +1821,17 @@ abstract class GXDLMS {
         }
 
         // Is there more data available.
-        if ((frame & 0x8) != 0) {
+        boolean moreData = (frame & 0x8) != 0;
+        // Get frame type.
+        frame = reply.getUInt8();
+        // If server is using same client and server address for notifications.
+        if (frame == 0x13 && !isNotify && notify != null) {
+            isNotify = true;
+            notify.setClientAddress(addresses[1]);
+            notify.setServerAddress(addresses[0]);
+        }
+        // Is there more data available.
+        if (moreData) {
             if (isNotify) {
                 notify.getMoreData().add(RequestTypes.FRAME);
             } else {
@@ -1818,8 +1844,6 @@ abstract class GXDLMS {
                 data.getMoreData().remove(RequestTypes.FRAME);
             }
         }
-        // Get frame type.
-        frame = reply.getUInt8();
         if (data.getXml() == null && !settings.checkFrame(frame)) {
             reply.position(eopPos + 1);
             return getHdlcData(server, settings, reply, data, notify);

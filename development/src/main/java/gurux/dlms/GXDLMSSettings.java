@@ -151,6 +151,11 @@ public class GXDLMSSettings {
      * Server address.
      */
     private int serverAddress;
+    /**
+     * Server is using push client address when sending push messages. Client
+     * address is used if PushAddress is zero.
+     */
+    private int pushClientAddress;
 
     /**
      * Server address side.
@@ -1235,5 +1240,22 @@ public class GXDLMSSettings {
             throw new IllegalArgumentException("Invalid version.");
         }
         version = value;
+    }
+
+    /**
+     * @return Server is using push client address when sending push messages.
+     *         Client address is used if PushAddress is zero.
+     */
+    public int getPushClientAddress() {
+        return pushClientAddress;
+    }
+
+    /**
+     * @param value
+     *            Server is using push client address when sending push
+     *            messages. Client address is used if PushAddress is zero.
+     */
+    public void setPushClientAddress(final int value) {
+        pushClientAddress = value;
     }
 }

@@ -46,21 +46,21 @@ public class GXMacAvailableSwitch {
     /**
      * SID of this switch.
      */
-    private int lsId;
+    private short lsId;
 
     /**
      * Level of this switch in subnetwork hierarchy.
      */
-    private short level;
+    private byte level;
 
     /**
      * The received signal level for this switch.
      */
-    private short rxLevel;
+    private byte rxLevel;
     /**
      * The signal to noise ratio for this switch.
      */
-    private short rxSnr;
+    private byte rxSnr;
 
     /**
      * @return EUI-48 of the subnetwork.
@@ -80,7 +80,7 @@ public class GXMacAvailableSwitch {
     /**
      * @return SID of this switch.
      */
-    public final int getLsId() {
+    public final short getLsId() {
         return lsId;
     }
 
@@ -88,14 +88,14 @@ public class GXMacAvailableSwitch {
      * @param value
      *            SID of this switch.
      */
-    public final void setLsId(int value) {
+    public final void setLsId(short value) {
         lsId = value;
     }
 
     /**
      * @return Level of this switch in subnetwork hierarchy.
      */
-    public final short getLevel() {
+    public final byte getLevel() {
         return level;
     }
 
@@ -103,14 +103,14 @@ public class GXMacAvailableSwitch {
      * @param value
      *            Level of this switch in subnetwork hierarchy.
      */
-    public final void setLevel(final short value) {
+    public final void setLevel(final byte value) {
         level = value;
     }
 
     /**
      * @return The received signal level for this switch;
      */
-    public final short getRxLevel() {
+    public final byte getRxLevel() {
         return rxLevel;
     }
 
@@ -118,14 +118,14 @@ public class GXMacAvailableSwitch {
      * @param value
      *            The received signal level for this switch;
      */
-    public final void setRxLevel(final short value) {
+    public final void setRxLevel(final byte value) {
         rxLevel = value;
     }
 
     /**
      * @return The signal to noise ratio for this switch.
      */
-    public final short getRxSnr() {
+    public final byte getRxSnr() {
         return rxSnr;
     }
 
@@ -133,7 +133,7 @@ public class GXMacAvailableSwitch {
      * @param value
      *            The signal to noise ratio for this switch.
      */
-    public final void setRxSnr(final short value) {
+    public final void setRxSnr(final byte value) {
         rxSnr = value;
     }
 

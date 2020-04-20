@@ -439,7 +439,8 @@ public class GXDLMSXmlClient extends GXDLMSSecureClient {
             byte frame = 0;
             while (reply.position() != reply.size()) {
                 if (settings.getInterfaceType() == InterfaceType.WRAPPER) {
-                    messages.add(GXDLMS.getWrapperFrame(settings, reply));
+                    messages.add(GXDLMS.getWrapperFrame(settings,
+                            pdu.getCommand(), reply));
                 } else if (settings.getInterfaceType() == InterfaceType.HDLC) {
                     if (pdu.getCommand() == Command.AARQ) {
                         frame = 0x10;
