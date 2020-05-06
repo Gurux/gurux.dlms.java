@@ -43,6 +43,8 @@ import gurux.dlms.internal.GXCommon;
  * This class is used internally in GXDLMSTranslator to save generated XML.
  */
 public class GXDLMSTranslatorStructure {
+    // Is comment added already. Nested comments are not allowed in a XML.
+    int commentsIndex = 0;
     private StringBuilder sb = new StringBuilder();
     private HashMap<Integer, String> tags;
 
@@ -221,9 +223,14 @@ public class GXDLMSTranslatorStructure {
     public final void appendComment(final String comment) {
         if (comments) {
             appendSpaces(sb, 2 * offset);
-            sb.append("<!--");
-            sb.append(comment);
-            sb.append("-->");
+            if (commentsIndex == 0) {
+                sb.append("<!-- ");
+                sb.append(comment);
+                sb.append(" -->");
+            } else {
+                sb.append("# ");
+                sb.append(comment);
+            }
             sb.append('\r');
             sb.append('\n');
         }
@@ -238,7 +245,12 @@ public class GXDLMSTranslatorStructure {
     public void startComment(final String comment) {
         if (comments) {
             appendSpaces(sb, 2 * offset);
-            sb.append("<!--");
+            if (commentsIndex == 0) {
+                sb.append("<!-- ");
+            } else {
+                sb.append("# ");
+            }
+            ++commentsIndex;
             sb.append(comment);
             sb.append('\r');
             sb.append('\n');
@@ -252,8 +264,11 @@ public class GXDLMSTranslatorStructure {
     public final void endComment() {
         if (comments) {
             --offset;
-            appendSpaces(sb, 2 * offset);
-            sb.append("-->");
+            --commentsIndex;
+            if (commentsIndex == 0) {
+                appendSpaces(sb, 2 * offset);
+                sb.append("-->");
+            }
             sb.append('\r');
             sb.append('\n');
         }

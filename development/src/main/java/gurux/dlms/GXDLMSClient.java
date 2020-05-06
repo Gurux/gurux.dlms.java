@@ -628,6 +628,28 @@ public class GXDLMSClient {
      * @return SNRM request as byte array.
      */
     public final byte[] snrmRequest() {
+        return snrmRequest(false);
+    }
+
+    /**
+     * Generates SNRM request. his method is used to generate send SNRMRequest.
+     * Before the SNRM request can be generated, at least the following
+     * properties must be set:
+     * <ul>
+     * <li>ClientAddress</li>
+     * <li>ServerAddress</li>
+     * </ul>
+     * <b>Note! </b>According to IEC 62056-47: when communicating using TCP/IP,
+     * the SNRM request is not send.
+     * 
+     * @param forceParameters
+     *            Are HDLC parameters forced. Some meters require this.
+     * @see GXDLMSClient#getClientAddress
+     * @see GXDLMSClient#getServerAddress
+     * @see GXDLMSClient#parseUAResponse
+     * @return SNRM request as byte array.
+     */
+    public final byte[] snrmRequest(final boolean forceParameters) {
         settings.setConnected(ConnectionState.NONE);
         isAuthenticationRequired = false;
         // SNRM request is not used in network connections.
@@ -652,7 +674,9 @@ public class GXDLMSClient {
         }
 
         // If custom HDLC parameters are used.
-        if (GXDLMSLimits.DEFAULT_MAX_INFO_TX != getLimits().getMaxInfoTX()
+        if (forceParameters
+                || GXDLMSLimits.DEFAULT_MAX_INFO_TX != getLimits()
+                        .getMaxInfoTX()
                 || GXDLMSLimits.DEFAULT_MAX_INFO_RX != getLimits()
                         .getMaxInfoRX()
                 || GXDLMSLimits.DEFAULT_WINDOWS_SIZE_TX != getLimits()

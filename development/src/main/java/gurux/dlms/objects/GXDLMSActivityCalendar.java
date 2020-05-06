@@ -82,7 +82,7 @@ public class GXDLMSActivityCalendar extends GXDLMSObject
      *            Logical Name of the object.
      */
     public GXDLMSActivityCalendar(final String ln) {
-        this(ln, (short) 0);
+        this(ln, 0);
     }
 
     /**

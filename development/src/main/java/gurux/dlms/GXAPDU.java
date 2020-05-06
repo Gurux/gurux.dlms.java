@@ -695,6 +695,7 @@ final class GXAPDU {
                 data.get(encrypted);
                 if (cipher != null && xml.isComments()) {
                     int pos = xml.getXmlLength();
+                    int pos2 = data.position();
                     try {
                         data.position(originalPos - 1);
                         p = new AesGcmParameter(st,
@@ -717,6 +718,7 @@ final class GXAPDU {
                     } catch (Exception ex) {
                         // It's OK if this fails.
                         xml.setXmlLength(pos);
+                        data.position(pos2);
                     }
                 }
                 if (xml.getOutputType() == TranslatorOutputType.SIMPLE_XML) {

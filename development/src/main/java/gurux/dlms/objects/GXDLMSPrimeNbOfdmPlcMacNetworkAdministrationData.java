@@ -448,8 +448,8 @@ public class GXDLMSPrimeNbOfdmPlcMacNetworkAdministrationData
             for (Object tmp : value) {
                 List<?> it = (List<?>) tmp;
                 GXMacMulticastEntry v = new GXMacMulticastEntry();
-                v.setId((byte) (it.get(0)));
-                v.setMembers((short) it.get(1));
+                v.setId(((Number) it.get(1)).byteValue());
+                v.setMembers(((Number) it.get(1)).shortValue());
                 data.add(v);
             }
         }
@@ -460,7 +460,7 @@ public class GXDLMSPrimeNbOfdmPlcMacNetworkAdministrationData
         List<Short> data = new ArrayList<Short>();
         if (value != null) {
             for (Object it : value) {
-                data.add((Short) it);
+                data.add(((Number) it).shortValue());
             }
         }
         return GXCommon.toShortArray(data);
@@ -472,12 +472,12 @@ public class GXDLMSPrimeNbOfdmPlcMacNetworkAdministrationData
             for (Object tmp : value) {
                 List<?> it = (List<?>) tmp;
                 GXMacDirectTable v = new GXMacDirectTable();
-                v.setSourceSId((short) it.get(0));
-                v.setSourceLnId((short) it.get(1));
-                v.setSourceLcId((short) it.get(2));
-                v.setDestinationSId((short) it.get(3));
-                v.setDestinationLnId((short) it.get(4));
-                v.setDestinationLcId((short) it.get(5));
+                v.setSourceSId(((Number) it.get(0)).shortValue());
+                v.setSourceLnId(((Number) it.get(1)).shortValue());
+                v.setSourceLcId(((Number) it.get(2)).shortValue());
+                v.setDestinationSId(((Number) it.get(3)).shortValue());
+                v.setDestinationLnId(((Number) it.get(4)).shortValue());
+                v.setDestinationLcId(((Number) it.get(5)).shortValue());
                 v.setDid((byte[]) it.get(6));
                 data.add(v);
             }
@@ -492,10 +492,10 @@ public class GXDLMSPrimeNbOfdmPlcMacNetworkAdministrationData
                 List<?> it = (List<?>) tmp;
                 GXMacAvailableSwitch v = new GXMacAvailableSwitch();
                 v.setSna((byte[]) it.get(0));
-                v.setLsId((short) (it.get(1)));
-                v.setLevel((byte) it.get(2));
-                v.setRxLevel((byte) it.get(3));
-                v.setRxSnr((byte) it.get(4));
+                v.setLsId(((Number) it.get(1)).shortValue());
+                v.setLevel(((Number) it.get(2)).byteValue());
+                v.setRxLevel(((Number) it.get(3)).byteValue());
+                v.setRxSnr(((Number) it.get(4)).byteValue());
                 data.add(v);
             }
         }

@@ -613,7 +613,28 @@ public final class GXSecure {
         data2.setUInt8(p.getSecurity().getValue());
         data2.set(p.getAuthenticationKey());
         c.updateAAD(data2.array());
-        return c.doFinal(data);
+        try {
+            return c.doFinal(data);
+        } catch (Exception ex) {
+            if (p.getXml() == null) {
+                throw ex;
+            }
+            if (ex instanceof javax.crypto.AEADBadTagException) {
+                p.getXml().appendComment("Authentication tag is invalid.");
+                p.setSecurity(Security.ENCRYPTION);
+                c = getCipher(p, true);
+                // Remove tag and encrypt the data.
+                bb.set(data);
+                bb.size(bb.size() - 12);
+                byte[] tmp2 = c.doFinal(bb.array());
+                // Remove tag.
+                byte[] tmp = new byte[tmp2.length - 12];
+                System.arraycopy(tmp2, 0, tmp, 0, tmp.length);
+                return tmp;
+            } else {
+                throw ex;
+            }
+        }
     }
 
     /*

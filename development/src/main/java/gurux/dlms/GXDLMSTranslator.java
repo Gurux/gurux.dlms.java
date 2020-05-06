@@ -158,6 +158,11 @@ public class GXDLMSTranslator {
     private int invocationCounter;
 
     /**
+     * Is General Protection used.
+     */
+    private boolean useGeneralProtection;
+
+    /**
      * Constructor.
      * 
      * @param type
@@ -566,8 +571,23 @@ public class GXDLMSTranslator {
             c.setBlockCipherKey(blockCipherKey);
             c.setAuthenticationKey(authenticationKey);
             c.setInvocationCounter(invocationCounter);
-            c.setDedicatedKey(dedicatedKey);
-            settings.setSourceSystemTitle(serverSystemTitle);
+            if (dedicatedKey != null && dedicatedKey.length != 0) {
+                c.setDedicatedKey(dedicatedKey);
+            }
+            if (serverSystemTitle != null && serverSystemTitle.length != 0) {
+                settings.setSourceSystemTitle(serverSystemTitle);
+            }
+            if (useGeneralProtection) {
+                settings.getProposedConformance()
+                        .add(Conformance.GENERAL_PROTECTION);
+                settings.getNegotiatedConformance()
+                        .add(Conformance.GENERAL_PROTECTION);
+            } else {
+                settings.getProposedConformance()
+                        .remove(Conformance.GENERAL_PROTECTION);
+                settings.getNegotiatedConformance()
+                        .remove(Conformance.GENERAL_PROTECTION);
+            }
             settings.setCipher(c);
         } else {
             settings.setCipher(null);
@@ -970,6 +990,8 @@ public class GXDLMSTranslator {
         case Command.DED_METHOD_RESPONSE:
         case Command.GENERAL_GLO_CIPHERING:
         case Command.GENERAL_DED_CIPHERING:
+        case Command.AARE:
+        case Command.AARQ:
             return true;
         default:
             return false;
@@ -1208,11 +1230,13 @@ public class GXDLMSTranslator {
                                                 .getAuthenticationKey());
                             }
                             if (p.getBlockCipherKey() != null) {
+                                p.setXml(xml);
                                 GXByteBuffer data2 =
                                         new GXByteBuffer(GXCiphering.decrypt(
                                                 settings.getCipher(), p,
                                                 value));
-                                xml.startComment("Decrypt data:");
+                                xml.startComment(
+                                        "Decrypt data: " + data2.toString());
                                 pduToXml(xml, data2, omitDeclaration,
                                         omitNameSpace, false);
                                 xml.endComment();
@@ -1239,6 +1263,7 @@ public class GXDLMSTranslator {
             case Command.GENERAL_DED_CIPHERING:
                 if (settings.getCipher() != null && comments) {
                     int len = xml.getXmlLength();
+                    int originalPosition = value.position();
                     try {
                         GXByteBuffer tmp = new GXByteBuffer();
                         tmp.set(value.getData(), value.position() - 1,
@@ -1252,7 +1277,7 @@ public class GXDLMSTranslator {
                         tmp = new GXByteBuffer(GXCiphering
                                 .decrypt(settings.getCipher(), p, tmp));
                         len = xml.getXmlLength();
-                        xml.startComment("Decrypt data:");
+                        xml.startComment("Decrypt data: " + tmp.toString());
                         pduToXml(xml, tmp, omitDeclaration, omitNameSpace,
                                 false);
                         xml.endComment();
@@ -1260,6 +1285,33 @@ public class GXDLMSTranslator {
                         // It's OK if this fails. Ciphering settings are not
                         // correct.
                         xml.setXmlLength(len);
+                        value.position(originalPosition);
+                        value.position(value.position() - 1);
+                        // Check is this server msg.
+                        try {
+                            byte[] st;
+                            st = settings.getSourceSystemTitle();
+                            if (st != null) {
+                                AesGcmParameter p = new AesGcmParameter(st,
+                                        settings.getCipher()
+                                                .getBlockCipherKey(),
+                                        settings.getCipher()
+                                                .getAuthenticationKey());
+                                GXByteBuffer data2 =
+                                        new GXByteBuffer(GXCiphering.decrypt(
+                                                settings.getCipher(), p,
+                                                value));
+                                xml.startComment(
+                                        "Decrypt data: " + data2.toString());
+                                pduToXml(xml, data2, omitDeclaration,
+                                        omitNameSpace, false);
+                                xml.endComment();
+                            }
+                        } catch (Exception ex) {
+                            // It's OK if this fails. Ciphering settings are not
+                            // correct.
+                            xml.setXmlLength(len);
+                        }
                     }
                 }
                 int len = GXCommon.getObjectCount(value);
@@ -3158,5 +3210,20 @@ public class GXDLMSTranslator {
 
         getAllDataNodes(doc.getDocumentElement().getChildNodes(), s);
         return s.getData().array();
+    }
+
+    /**
+     * @return Is General Protection used.
+     */
+    public boolean getUseGeneralProtection() {
+        return useGeneralProtection;
+    }
+
+    /**
+     * @param value
+     *            Is General Protection used.
+     */
+    public void setUseGeneralProtection(final boolean value) {
+        useGeneralProtection = value;
     }
 }

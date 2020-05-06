@@ -2114,10 +2114,18 @@ abstract class GXDLMS {
         boolean isData = true;
         int pos = buff.position();
         int value;
+        target.setComplete(false);
+        if (notify != null) {
+            notify.setComplete(false);
+        }
         while (buff.position() < buff.size() - 1) {
             // Get version
             value = buff.getUInt16();
             if (value == 1) {
+                if (buff.available() < 6) {
+                    isData = false;
+                    break;
+                }
                 // Check TCP/IP addresses.
                 if (!checkWrapperAddress(settings, buff, target)) {
                     if (notify != null) {
@@ -2127,8 +2135,8 @@ abstract class GXDLMS {
                 }
                 // Get length.
                 value = buff.getUInt16();
-                boolean compleate = !((buff.size() - buff.position()) < value);
-                if (compleate && (buff.size() - buff.position()) != value
+                boolean complete = !((buff.size() - buff.position()) < value);
+                if (complete && (buff.size() - buff.position()) != value
                         && data.getXml() != null) {
                     data.getXml()
                             .appendComment("Data length is "
@@ -2137,8 +2145,8 @@ abstract class GXDLMS {
                                             buff.size() - buff.position())
                                     + " bytes.");
                 }
-                target.setComplete(compleate);
-                if (!compleate) {
+                target.setComplete(complete);
+                if (!complete) {
                     buff.position(pos);
                 } else {
                     target.setPacketLength(buff.position() + value);

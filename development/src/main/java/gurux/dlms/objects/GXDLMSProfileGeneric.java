@@ -84,7 +84,7 @@ public class GXDLMSProfileGeneric extends GXDLMSObject implements IGXDLMSBase {
      * Constructor.
      */
     public GXDLMSProfileGeneric() {
-        this(null, (short) 0);
+        this(null);
     }
 
     /**
@@ -94,7 +94,7 @@ public class GXDLMSProfileGeneric extends GXDLMSObject implements IGXDLMSBase {
      *            Logical Name of the object.
      */
     public GXDLMSProfileGeneric(final String ln) {
-        this(ln, (short) 0);
+        this(ln, 0);
     }
 
     /**

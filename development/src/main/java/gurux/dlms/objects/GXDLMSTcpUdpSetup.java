@@ -58,7 +58,7 @@ public class GXDLMSTcpUdpSetup extends GXDLMSObject implements IGXDLMSBase {
      * Constructor.
      */
     public GXDLMSTcpUdpSetup() {
-        this("0.0.25.0.0.255", (short) 0);
+        this("0.0.25.0.0.255");
     }
 
     /**
@@ -68,7 +68,7 @@ public class GXDLMSTcpUdpSetup extends GXDLMSObject implements IGXDLMSBase {
      *            Logical Name of the object.
      */
     public GXDLMSTcpUdpSetup(final String ln) {
-        this(ln, (short) 0);
+        this(ln, 0);
     }
 
     /**

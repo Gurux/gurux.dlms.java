@@ -1566,6 +1566,7 @@ public final class GXCommon {
         }
         if (len > 0) {
             value = buff.getString(buff.position(), len, "UTF-8");
+            buff.position(buff.position() + len);
         } else {
             value = "";
         }

@@ -35,13 +35,8 @@
 package gurux.dlms;
 
 import java.lang.annotation.Native;
-import java.lang.constant.Constable;
-import java.lang.constant.ConstantDesc;
-import java.lang.invoke.MethodHandles.Lookup;
-import java.util.Optional;
 
-public class GXUInt32 extends Number
-        implements Comparable<GXUInt32>, Constable, ConstantDesc {
+public class GXUInt32 extends Number implements Comparable<GXUInt32> {
     /**
      * 
      */
@@ -100,17 +95,6 @@ public class GXUInt32 extends Number
     @Override
     public double doubleValue() {
         return value;
-    }
-
-    @Override
-    public Object resolveConstantDesc(Lookup lookup)
-            throws ReflectiveOperationException {
-        return this;
-    }
-
-    @Override
-    public Optional<? extends ConstantDesc> describeConstable() {
-        return Optional.of(this);
     }
 
     @Override

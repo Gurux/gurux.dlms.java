@@ -63,6 +63,7 @@ import gurux.dlms.GXDateTime;
 import gurux.dlms.GXServerReply;
 import gurux.dlms.GXSimpleEntry;
 import gurux.dlms.GXTime;
+import gurux.dlms.GXUInt32;
 import gurux.dlms.ValueEventArgs;
 import gurux.dlms.enums.AccessMode;
 import gurux.dlms.enums.Authentication;
@@ -856,9 +857,10 @@ public class GXDLMSBase extends GXDLMSSecureServer2
                         } else if (e.getSelector() == 2) {
                             // Read by range.
                             List<?> arr = (List<?>) e.getParameters();
-                            e.setRowBeginIndex(((long) arr.get(0)));
+                            e.setRowBeginIndex(
+                                    ((GXUInt32) arr.get(0)).longValue());
                             e.setRowEndIndex(
-                                    e.getRowBeginIndex() + (long) arr.get(1));
+                                    ((GXUInt32) arr.get(1)).longValue());
                             // If client wants to read more data what we have.
                             int cnt = getProfileGenericDataCount();
                             if (e.getRowEndIndex() - e.getRowBeginIndex() > cnt
