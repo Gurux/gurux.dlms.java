@@ -196,6 +196,8 @@ public class GXDLMSObjectCollection extends ArrayList<GXDLMSObject>
                 } else if ("Description".equalsIgnoreCase(target)) {
                     obj.setDescription(
                             reader.readElementContentAsString("Description"));
+                } else if ("Version".equalsIgnoreCase(target)) {
+                    obj.setVersion(reader.readElementContentAsInt("Version"));
                 } else {
                     ((IGXDLMSBase) obj).load(reader);
                     obj = null;
@@ -281,6 +283,10 @@ public class GXDLMSObjectCollection extends ArrayList<GXDLMSObject>
                 }
                 // Add LN
                 writer.writeElementString("LN", it.getLogicalName());
+                // Add Version
+                if (it.getVersion() != 0) {
+                    writer.WriteElementString("Version", it.getVersion());
+                }
                 // Add description if given.
                 String d = it.getDescription();
                 if (d != null && d.length() != 0) {
