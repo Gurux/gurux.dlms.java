@@ -285,7 +285,7 @@ public class GXDLMSObjectCollection extends ArrayList<GXDLMSObject>
                 writer.writeElementString("LN", it.getLogicalName());
                 // Add Version
                 if (it.getVersion() != 0) {
-                    writer.WriteElementString("Version", it.getVersion());
+                    writer.writeElementString("Version", it.getVersion());
                 }
                 // Add description if given.
                 String d = it.getDescription();
