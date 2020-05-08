@@ -126,6 +126,10 @@ public class GXDLMSActionSchedule extends GXDLMSObject implements IGXDLMSBase {
     }
 
     public final void setType(final SingleActionScheduleType value) {
+        if (value == null) {
+            throw new IllegalArgumentException(
+                    "Invalid SingleActionScheduleType");
+        }
         type = value;
     }
 
