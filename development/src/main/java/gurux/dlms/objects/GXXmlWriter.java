@@ -100,8 +100,8 @@ public class GXXmlWriter implements AutoCloseable {
      * 
      * @param filename
      *            File name.
-     * @param skipDefaultValues
-     *            Are default values serialized.
+     * @param wSettings
+     *            Writer settings.
      * @throws XMLStreamException
      *             Invalid XML stream.
      * @throws FileNotFoundException
@@ -121,8 +121,8 @@ public class GXXmlWriter implements AutoCloseable {
      * 
      * @param s
      *            Stream.
-     * @param skipDefaultValues
-     *            Are default values serialized.
+     * @param wSettings
+     *            Writer settings.
      * @throws XMLStreamException
      *             Invalid XML stream.
      */

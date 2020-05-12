@@ -736,8 +736,12 @@ public class GXDateTime {
             replace(format, "m");
             remove(format, "XXX", false);
         }
-        SimpleDateFormat sd =
-                new SimpleDateFormat(format.toString().trim(), locale);
+        SimpleDateFormat sd;
+        if (locale != null && locale != Locale.ROOT) {
+            sd = new SimpleDateFormat(format.toString().trim(), locale);
+        } else {
+            sd = new SimpleDateFormat(format.toString().trim());
+        }
         if (useLocalTime) {
             return sd.format(getLocalCalendar().getTime()).replace("!", "BEGIN")
                     .replace("#", "END").replace("%", "LASTDAY")
