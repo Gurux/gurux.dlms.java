@@ -365,7 +365,8 @@ public class GXDateTime {
                 extra.add(DateTimeExtraInfo.LAST_DAY);
                 v = v.replace("LASTDAY", "01");
             }
-            boolean addTimeZone = true;
+            boolean addTimeZone =
+                    !(this instanceof GXDate || this instanceof GXTime);
             if (value.indexOf('*') != -1) {
                 int lastFormatIndex = -1;
                 for (int pos = 0; pos < v.length(); ++pos) {
