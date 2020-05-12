@@ -36,6 +36,7 @@ package gurux.dlms.objects;
 
 import javax.xml.stream.XMLStreamException;
 
+import gurux.dlms.GXDLMSConverter;
 import gurux.dlms.GXDLMSSettings;
 import gurux.dlms.ValueEventArgs;
 import gurux.dlms.enums.DataType;
@@ -196,8 +197,11 @@ public class GXDLMSData extends GXDLMSObject implements IGXDLMSBase {
 
     @Override
     public final void save(final GXXmlWriter writer) throws XMLStreamException {
-        writer.writeElementObject("Value", value, getDataType(2),
-                getUIDataType(2));
+        DataType dt = getDataType(2);
+        if (value != null && dt == DataType.NONE) {
+            dt = GXDLMSConverter.getDLMSDataType(value);
+        }
+        writer.writeElementObject("Value", value, dt, getUIDataType(2));
     }
 
     @Override

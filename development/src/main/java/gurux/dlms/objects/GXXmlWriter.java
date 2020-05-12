@@ -64,14 +64,25 @@ public class GXXmlWriter implements AutoCloseable {
     private String newline = System.getProperty("line.separator");
     private int indenting = 0;
     char[] spaces = null;
-    private boolean skipDefaults;
+
+    private GXXmlWriterSettings settings;
 
     public boolean isSkipDefaults() {
-        return skipDefaults;
+        if (settings == null) {
+            return false;
+        }
+        return settings.isIgnoreDefaultValues();
     }
 
-    public void setSkipDefaults(final boolean value) {
-        this.skipDefaults = value;
+    /**
+     * @return GXDateTime values are serialised using meter time, not local
+     *         time.
+     */
+    public boolean isUseMeterTime() {
+        if (settings == null) {
+            return false;
+        }
+        return settings.isUseMeterTime();
     }
 
     /**
@@ -96,9 +107,10 @@ public class GXXmlWriter implements AutoCloseable {
      * @throws FileNotFoundException
      *             File not found.
      */
-    public GXXmlWriter(final String filename, boolean skipDefaultValues)
+    public GXXmlWriter(final String filename,
+            final GXXmlWriterSettings wSettings)
             throws FileNotFoundException, XMLStreamException {
-        skipDefaults = skipDefaultValues;
+        settings = wSettings;
         XMLOutputFactory outputFactory = XMLOutputFactory.newInstance();
         writer = outputFactory
                 .createXMLStreamWriter(new FileOutputStream(filename));
@@ -114,9 +126,9 @@ public class GXXmlWriter implements AutoCloseable {
      * @throws XMLStreamException
      *             Invalid XML stream.
      */
-    public GXXmlWriter(final OutputStream s, boolean skipDefaultValues)
-            throws XMLStreamException {
-        skipDefaults = skipDefaultValues;
+    public GXXmlWriter(final OutputStream s,
+            final GXXmlWriterSettings wSettings) throws XMLStreamException {
+        settings = wSettings;
         XMLOutputFactory outputFactory = XMLOutputFactory.newInstance();
         writer = outputFactory.createXMLStreamWriter(s);
     }
@@ -192,7 +204,7 @@ public class GXXmlWriter implements AutoCloseable {
 
     public final void writeElementString(final String name, final long value)
             throws XMLStreamException {
-        if (!skipDefaults || value != 0) {
+        if (!isSkipDefaults() || value != 0) {
             writeElementString(name, String.valueOf(value));
         }
     }
@@ -204,24 +216,26 @@ public class GXXmlWriter implements AutoCloseable {
 
     public final void writeElementString(final String name, final double value,
             final double defaultValue) throws XMLStreamException {
-        if (!skipDefaults || value != defaultValue) {
+        if (!isSkipDefaults() || value != defaultValue) {
             writeElementString(name, String.format(Locale.US, "%f", value));
         }
     }
 
     public final void writeElementString(final String name, final int value)
             throws XMLStreamException {
-        if (!skipDefaults || value != 0) {
+        if (!isSkipDefaults() || value != 0) {
             writeElementString(name, String.valueOf(value));
         }
     }
 
     public final void writeElementString(final String name, final String value)
             throws XMLStreamException {
-        if (!skipDefaults || (value != null && value.length() != 0)) {
+        if (!isSkipDefaults() || (value != null && value.length() != 0)) {
             appendSpaces();
             writer.writeStartElement(name);
-            writer.writeCharacters(value);
+            if (value != null) {
+                writer.writeCharacters(value.replaceAll("[\\x00]", ""));
+            }
             writer.writeEndElement();
             writer.writeCharacters(newline);
         }
@@ -229,7 +243,7 @@ public class GXXmlWriter implements AutoCloseable {
 
     public final void writeElementString(final String name, final boolean value)
             throws XMLStreamException {
-        if (!skipDefaults || value) {
+        if (!isSkipDefaults() || value) {
             writeElementString(name, value ? "1" : "0");
         }
     }
@@ -238,7 +252,12 @@ public class GXXmlWriter implements AutoCloseable {
             final GXDateTime value) throws XMLStreamException {
         if (value != null && value.getMeterCalendar()
                 .getTime() != new java.util.Date(0)) {
-            writeElementString(name, value.toFormatString(Locale.ROOT));
+            if (isUseMeterTime()) {
+                writeElementString(name,
+                        value.toFormatMeterString(Locale.ROOT));
+            } else {
+                writeElementString(name, value.toFormatString(Locale.ROOT));
+            }
         }
     }
 
@@ -269,7 +288,7 @@ public class GXXmlWriter implements AutoCloseable {
 
     public final void writeElementObject(final String name, final Object value)
             throws XMLStreamException {
-        writeElementObject(name, value, skipDefaults);
+        writeElementObject(name, value, isSkipDefaults());
     }
 
     /**
@@ -290,7 +309,7 @@ public class GXXmlWriter implements AutoCloseable {
             final DataType dt, final DataType uiType)
             throws XMLStreamException {
         if (value != null) {
-            if (skipDefaults && value instanceof java.util.Date
+            if (isSkipDefaults() && value instanceof java.util.Date
                     && (((java.util.Date) value)
                             .compareTo(new java.util.Date(0))) == 0) {
                 return;
@@ -332,8 +351,14 @@ public class GXXmlWriter implements AutoCloseable {
                 writeArray(value);
             } else {
                 if (value instanceof GXDateTime) {
-                    writer.writeCharacters(
-                            ((GXDateTime) value).toFormatString(Locale.ROOT));
+                    String str;
+                    if (isUseMeterTime()) {
+                        str = ((GXDateTime) value)
+                                .toFormatMeterString(Locale.ROOT);
+                    } else {
+                        str = ((GXDateTime) value).toFormatString(Locale.ROOT);
+                    }
+                    writer.writeCharacters(str);
                 } else if (value instanceof byte[]) {
                     writer.writeCharacters(GXCommon.toHex((byte[]) value));
                 } else if (value != null) {
@@ -341,9 +366,7 @@ public class GXXmlWriter implements AutoCloseable {
                 }
             }
             writeEndElement(addSpaces);
-        } else if (!skipDefaults)
-
-        {
+        } else if (!isSkipDefaults()) {
             writeStartElement(name);
             writeEndElement(false);
         }

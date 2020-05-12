@@ -243,8 +243,6 @@ public class GXDLMSClock extends GXDLMSObject implements IGXDLMSBase {
     public GXDateTime now() {
         Calendar now = Calendar.getInstance();
         GXDateTime tm = new GXDateTime(now);
-        // -32768 == 0x8000
-        int tzOffset = -deviation;
         if (timeZone == -1 || timeZone == -32768 || timeZone == 0x8000) {
             tm.getSkip().add(DateTimeSkips.DEVITATION);
         } else {
@@ -257,11 +255,7 @@ public class GXDLMSClock extends GXDLMSObject implements IGXDLMSBase {
                 } else {
                     // Use current time zone if time zone is not found.
                     now = Calendar.getInstance();
-                    tzOffset = -(timeZone
-                            + (now.getTimeZone().getRawOffset() / 60000))
-                            + -deviation;
                 }
-
                 tm.setMeterCalendar(now);
             }
         }

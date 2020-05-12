@@ -528,6 +528,9 @@ public class GXDLMSConverter {
         if (value instanceof GXUInt32) {
             return DataType.UINT32;
         }
+        if (value instanceof GXUInt64) {
+            return DataType.UINT64;
+        }
         throw new IllegalArgumentException("Invalid value.");
     }
 

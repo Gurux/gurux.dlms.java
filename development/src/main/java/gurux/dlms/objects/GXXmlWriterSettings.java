@@ -54,6 +54,11 @@ public class GXXmlWriterSettings {
     private boolean ignoreDefaultValues;
 
     /**
+     * GXDateTime values are serialised using meter time, not local time.
+     */
+    private boolean useMeterTime;
+
+    /**
      * Constructor.
      */
     public GXXmlWriterSettings() {
@@ -104,5 +109,22 @@ public class GXXmlWriterSettings {
      */
     public void setIgnoreDefaultValues(final boolean value) {
         ignoreDefaultValues = value;
+    }
+
+    /**
+     * @return GXDateTime values are serialised using meter time, not local
+     *         time.
+     */
+    public boolean isUseMeterTime() {
+        return useMeterTime;
+    }
+
+    /**
+     * @param value
+     *            GXDateTime values are serialised using meter time, not local
+     *            time.
+     */
+    public void setUseMeterTime(final boolean value) {
+        useMeterTime = value;
     }
 }

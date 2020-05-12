@@ -260,11 +260,7 @@ public class GXDLMSObjectCollection extends ArrayList<GXDLMSObject>
      */
     public final void save(final OutputStream stream,
             final GXXmlWriterSettings settings) throws XMLStreamException {
-        boolean skipDefaultValues = false;
-        if (settings != null) {
-            skipDefaultValues = settings.isIgnoreDefaultValues();
-        }
-        GXXmlWriter writer = new GXXmlWriter(stream, skipDefaultValues);
+        GXXmlWriter writer = new GXXmlWriter(stream, settings);
         try {
             writer.writeStartDocument();
             writer.writeStartElement("Objects");

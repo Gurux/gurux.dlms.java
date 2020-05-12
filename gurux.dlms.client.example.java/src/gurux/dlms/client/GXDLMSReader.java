@@ -1044,6 +1044,7 @@ public class GXDLMSReader {
         if (outputFile != null) {
             GXXmlWriterSettings s = new GXXmlWriterSettings();
             s.setIgnoreDefaultValues(false);
+            s.setUseMeterTime(true);
             dlms.getObjects().save(outputFile, s);
         }
 
