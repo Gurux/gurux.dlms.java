@@ -2189,9 +2189,9 @@ public final class GXCommon {
             int deviation = (dt.getMeterCalendar().get(Calendar.ZONE_OFFSET)
                     + dt.getMeterCalendar().get(Calendar.DST_OFFSET)) / 60000;
             if (settings != null && settings.getUseUtc2NormalTime()) {
-                buff.setUInt16(-deviation);
-            } else {
                 buff.setUInt16(deviation);
+            } else {
+                buff.setUInt16(-deviation);
             }
         }
         // Add clock_status
