@@ -76,6 +76,11 @@ public enum MBusCommand {
      * @return Enumeration value.
      */
     public static MBusCommand forValue(final int value) {
-        return getMappings().get(value);
+        MBusCommand ret = getMappings().get(value);
+        if (ret == null) {
+            throw new IllegalArgumentException(
+                    "Invalid MBus command enum value.");
+        }
+        return ret;
     }
 }

@@ -135,6 +135,11 @@ public enum AccountCreditStatus {
      * @return Enumeration value.
      */
     public static AccountCreditStatus forValue(final int value) {
-        return getMappings().get(value);
+        AccountCreditStatus ret = getMappings().get(value);
+        if (ret == null) {
+            throw new IllegalArgumentException(
+                    "Invalid account credit status enum value.");
+        }
+        return ret;
     }
 }

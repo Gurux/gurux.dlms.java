@@ -945,8 +945,7 @@ public class GXDLMSReader {
             ///////////////////////////////////////////////////////////////////
             // Read last day.
             try {
-                java.util.Calendar start = java.util.Calendar
-                        .getInstance(java.util.TimeZone.getTimeZone("UTC"));
+                java.util.Calendar start = java.util.Calendar.getInstance();
                 start.set(java.util.Calendar.HOUR_OF_DAY, 0); // set hour to
                                                               // midnight
                 start.set(java.util.Calendar.MINUTE, 0); // set minute in

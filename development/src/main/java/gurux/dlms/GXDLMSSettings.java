@@ -1116,19 +1116,15 @@ public class GXDLMSSettings {
     }
 
     /**
-     * Used standard.
-     * 
-     * @return True, if UTC time is used.
+     * @return Used standard.
      */
     public Standard getStandard() {
         return standard;
     }
 
     /**
-     * Used standard.
-     * 
      * @param value
-     *            True, if UTC time is used.
+     *            Used standard.
      */
     public void setStandard(final Standard value) {
         standard = value;

@@ -107,6 +107,11 @@ public enum AccountStatus {
      * @return Enumeration value.
      */
     public static AccountStatus forValue(final int value) {
-        return getMappings().get(value);
+        AccountStatus ret = getMappings().get(value);
+        if (ret == null) {
+            throw new IllegalArgumentException(
+                    "Invalid account status enum value.");
+        }
+        return ret;
     }
 }

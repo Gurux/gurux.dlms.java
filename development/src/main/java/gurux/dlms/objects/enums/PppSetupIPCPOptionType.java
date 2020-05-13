@@ -61,8 +61,7 @@ public enum PppSetupIPCPOptionType {
     private int intValue;
     private static HashMap<Integer, PppSetupIPCPOptionType> mappings;
 
-    private static HashMap<Integer, PppSetupIPCPOptionType>
-            getMappings() {
+    private static HashMap<Integer, PppSetupIPCPOptionType> getMappings() {
         if (mappings == null) {
             synchronized (PppSetupIPCPOptionType.class) {
                 mappings = new HashMap<Integer, PppSetupIPCPOptionType>();
@@ -81,6 +80,11 @@ public enum PppSetupIPCPOptionType {
     }
 
     public static PppSetupIPCPOptionType forValue(final int value) {
-        return getMappings().get(value);
+        PppSetupIPCPOptionType ret = getMappings().get(value);
+        if (ret == null) {
+            throw new IllegalArgumentException(
+                    "Invalid PPP setup IP CP option type enum value.");
+        }
+        return ret;
     }
 }

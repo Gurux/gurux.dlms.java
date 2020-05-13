@@ -47,7 +47,8 @@ public class GXDLMSIp4SetupIpOption {
 
     public final void setType(final Ip4SetupIpOptionType value) {
         if (value == null) {
-            throw new IllegalArgumentException("Invalid Ip4SetupIpOptionType.");
+            throw new IllegalArgumentException(
+                    "Invalid Ip4 setup IP option type.");
         }
         type = value;
     }

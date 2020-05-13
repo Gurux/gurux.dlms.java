@@ -84,6 +84,11 @@ public enum MBusMeterType {
      * @return Enumeration value.
      */
     public static MBusMeterType forValue(final int value) {
-        return getMappings().get(value);
+        MBusMeterType ret = getMappings().get(value);
+        if (ret == null) {
+            throw new IllegalArgumentException(
+                    "Invalid MBus meter type enum value.");
+        }
+        return ret;
     }
 }

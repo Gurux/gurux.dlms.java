@@ -111,6 +111,11 @@ public enum CertificateEntity {
      * @return Enumerator value.
      */
     public static CertificateEntity forValue(final int value) {
-        return getMappings().get(value);
+        CertificateEntity ret = getMappings().get(value);
+        if (ret == null) {
+            throw new IllegalArgumentException(
+                    "Invalid certificate entity enum value.");
+        }
+        return ret;
     }
 }

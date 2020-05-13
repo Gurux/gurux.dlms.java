@@ -223,6 +223,12 @@ public class Settings {
                 try {
                     settings.client
                             .setStandard(Standard.valueOfString(it.getValue()));
+                    if (settings.client.getStandard() == Standard.ITALY
+                            || settings.client.getStandard() == Standard.INDIA
+                            || settings.client
+                                    .getStandard() == Standard.SAUDI_ARABIA) {
+                        settings.client.setUseUtc2NormalTime(true);
+                    }
                 } catch (Exception e) {
                     throw new IllegalArgumentException(
                             "Invalid DLMS standard option: '" + it.getValue()

@@ -106,6 +106,11 @@ public enum CertificateIdentificationType {
      * @return Enumerator value.
      */
     public static CertificateIdentificationType forValue(final int value) {
-        return getMappings().get(value);
+        CertificateIdentificationType ret = getMappings().get(value);
+        if (ret == null) {
+            throw new IllegalArgumentException(
+                    "Invalid certificate identification type enum value.");
+        }
+        return ret;
     }
 }

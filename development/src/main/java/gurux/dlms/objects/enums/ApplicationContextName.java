@@ -110,6 +110,11 @@ public enum ApplicationContextName {
      * @return Enumeration value.
      */
     public static ApplicationContextName forValue(final int value) {
-        return getMappings().get(value);
+        ApplicationContextName ret = getMappings().get(value);
+        if (ret == null) {
+            throw new IllegalArgumentException(
+                    "Invalid application context name enum value.");
+        }
+        return ret;
     }
 }

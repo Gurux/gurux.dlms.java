@@ -932,7 +932,6 @@ public final class GXCommon {
             }
             int deviation = buff.getInt16();
             if (deviation == -32768) {
-                deviation = 0x8000;
                 skip.add(DateTimeSkips.DEVITATION);
             }
             int status = buff.getUInt8();
@@ -978,7 +977,7 @@ public final class GXCommon {
                 deviation = -deviation;
             }
             java.util.Calendar tm;
-            if (deviation == 0x8000) {
+            if (deviation == -32768) {
                 tm = Calendar.getInstance();
             } else {
                 TimeZone tz = GXDateTime.getTimeZone(-deviation, dt.getStatus()
@@ -2187,8 +2186,8 @@ public final class GXCommon {
         if (dt.getSkip().contains(DateTimeSkips.DEVITATION)) {
             buff.setUInt16(0x8000);
         } else {
-            // Add devitation.
-            int deviation = dt.getDeviation();
+            int deviation = (dt.getMeterCalendar().get(Calendar.ZONE_OFFSET)
+                    + dt.getMeterCalendar().get(Calendar.DST_OFFSET)) / 60000;
             if (settings != null && settings.getUseUtc2NormalTime()) {
                 buff.setUInt16(-deviation);
             } else {
@@ -2678,13 +2677,8 @@ public final class GXCommon {
     }
 
     public static String generalizedTime(final GXDateTime date) {
-        Calendar calendar = date.getMeterCalendar();
-        calendar.add(Calendar.MINUTE, date.getDeviation());
-        // If summer time
-        if (date.getMeterCalendar().getTimeZone()
-                .inDaylightTime(date.getMeterCalendar().getTime())) {
-            calendar.add(Calendar.MINUTE, -60);
-        }
+        Calendar calendar = Calendar.getInstance(TimeZone.getTimeZone("UTC"));
+        calendar.setTimeInMillis(date.getMeterCalendar().getTimeInMillis());
         StringBuilder sb = new StringBuilder();
         sb.append(GXCommon.integerString(calendar.get(Calendar.YEAR), 4));
         sb.append(GXCommon.integerString(1 + calendar.get(Calendar.MONTH), 2));

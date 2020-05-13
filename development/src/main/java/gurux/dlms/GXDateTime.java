@@ -429,6 +429,9 @@ public class GXDateTime {
                 meterCalendar =
                         Calendar.getInstance(TimeZone.getTimeZone("GMT"));
             } else {
+                if (addTimeZone) {
+                    getSkip().add(DateTimeSkips.DEVITATION);
+                }
                 meterCalendar = Calendar.getInstance();
             }
             SimpleDateFormat sd = null;
@@ -787,7 +790,7 @@ public class GXDateTime {
         } else {
             sd = new SimpleDateFormat();
         }
-        if (!useLocalTime) {
+        if (!useLocalTime && !skip.contains(DateTimeSkips.DEVITATION)) {
             sd.applyPattern(sd.toPattern() + "XXX");
         }
 
@@ -864,7 +867,7 @@ public class GXDateTime {
         } else {
             sd = new SimpleDateFormat();
         }
-        if (!useLocalTime) {
+        if (!useLocalTime && !skip.contains(DateTimeSkips.DEVITATION)) {
             sd.applyPattern(sd.toPattern() + "XXX");
         }
         if (!getSkip().isEmpty()) {

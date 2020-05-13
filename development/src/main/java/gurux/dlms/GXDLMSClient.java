@@ -408,19 +408,15 @@ public class GXDLMSClient {
     }
 
     /**
-     * Used standard.
-     * 
-     * @return True, if UTC time is used.
+     * @return Used standard.
      */
     public Standard getStandard() {
         return settings.getStandard();
     }
 
     /**
-     * Used standard.
-     * 
      * @param value
-     *            True, if UTC time is used.
+     *            Used standard.
      */
     public void setStandard(final Standard value) {
         settings.setStandard(value);

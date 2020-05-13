@@ -106,6 +106,11 @@ public enum ConfirmedServiceError {
      * @return Enumeration value.
      */
     public static ConfirmedServiceError forValue(final int value) {
-        return getMappings().get(value);
+        ConfirmedServiceError ret = getMappings().get(value);
+        if (ret == null) {
+            throw new IllegalArgumentException(
+                    "Invalid confirmed service error enum value.");
+        }
+        return ret;
     }
 }

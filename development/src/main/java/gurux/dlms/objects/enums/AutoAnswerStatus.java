@@ -65,6 +65,11 @@ public enum AutoAnswerStatus {
      * Convert integer for enum value.
      */
     public static AutoAnswerStatus forValue(final int value) {
-        return getMappings().get(value);
+        AutoAnswerStatus ret = getMappings().get(value);
+        if (ret == null) {
+            throw new IllegalArgumentException(
+                    "Invalid auto answer status enum value.");
+        }
+        return ret;
     }
 }

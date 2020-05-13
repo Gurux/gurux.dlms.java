@@ -483,6 +483,17 @@ public class GXDLMSIp4Setup extends GXDLMSObject implements IGXDLMSBase {
             List<GXDLMSIp4SetupIpOption> tmp =
                     new ArrayList<GXDLMSIp4SetupIpOption>();
             if (reader.isStartElement("IPOptions", true)) {
+                while (reader.isStartElement("IPOption", true)) {
+                    GXDLMSIp4SetupIpOption it = new GXDLMSIp4SetupIpOption();
+                    it.setType(Ip4SetupIpOptionType
+                            .forValue(reader.readElementContentAsInt("Type")));
+                    it.setLength(
+                            (short) reader.readElementContentAsInt("Length"));
+                    it.setData(GXDLMSTranslator.hexToBytes(
+                            reader.readElementContentAsString("Data")));
+                    tmp.add(it);
+                }
+                // OLD. This can remove in the future.
                 while (reader.isStartElement("IPOptions", true)) {
                     GXDLMSIp4SetupIpOption it = new GXDLMSIp4SetupIpOption();
                     it.setType(Ip4SetupIpOptionType
@@ -526,7 +537,7 @@ public class GXDLMSIp4Setup extends GXDLMSObject implements IGXDLMSBase {
         if (ipOptions != null) {
             writer.writeStartElement("IPOptions");
             for (GXDLMSIp4SetupIpOption it : ipOptions) {
-                writer.writeStartElement("IPOptions");
+                writer.writeStartElement("IPOption");
                 writer.writeElementString("Type", it.getType().ordinal());
                 writer.writeElementString("Length", it.getLength());
                 writer.writeElementString("Data",

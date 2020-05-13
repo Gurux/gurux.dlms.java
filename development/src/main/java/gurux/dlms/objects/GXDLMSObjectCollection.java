@@ -181,6 +181,7 @@ public class GXDLMSObjectCollection extends ArrayList<GXDLMSObject>
                     }
                     reader.read();
                     obj = GXDLMSClient.createObject(type);
+                    obj.setVersion(0);
                     reader.getObjects().add(obj);
                 } else if ("Object".equalsIgnoreCase(target)) {
                     // Old format.

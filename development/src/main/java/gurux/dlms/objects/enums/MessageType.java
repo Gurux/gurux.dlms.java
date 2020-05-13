@@ -62,6 +62,11 @@ public enum MessageType {
     }
 
     public static MessageType forValue(final int value) {
-        return getMappings().get(value);
+        MessageType ret = getMappings().get(value);
+        if (ret == null) {
+            throw new IllegalArgumentException(
+                    "Invalid message type enum value.");
+        }
+        return ret;
     }
 }

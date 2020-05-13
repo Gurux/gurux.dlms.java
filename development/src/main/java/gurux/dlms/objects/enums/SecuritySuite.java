@@ -60,6 +60,12 @@ public enum SecuritySuite {
     }
 
     public static SecuritySuite forValue(final int value) {
-        return values()[value];
+        SecuritySuite ret = values()[value];
+        if (ret == null) {
+            throw new IllegalArgumentException(
+                    "Invalid security suite enum value.");
+        }
+        return ret;
+
     }
 }

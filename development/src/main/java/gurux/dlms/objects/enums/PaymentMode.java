@@ -103,6 +103,11 @@ public enum PaymentMode {
      * @return Enumeration value.
      */
     public static PaymentMode forValue(final int value) {
-        return getMappings().get(value);
+        PaymentMode ret = getMappings().get(value);
+        if (ret == null) {
+            throw new IllegalArgumentException(
+                    "Invalid payment mode enum value.");
+        }
+        return ret;
     }
 }

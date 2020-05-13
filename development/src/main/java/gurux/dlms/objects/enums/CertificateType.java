@@ -111,7 +111,12 @@ public enum CertificateType {
      * @return Enumerator value.
      */
     public static CertificateType forValue(final int value) {
-        return getMappings().get(value);
+        CertificateType ret = getMappings().get(value);
+        if (ret == null) {
+            throw new IllegalArgumentException(
+                    "Invalid certificate type enum value.");
+        }
+        return ret;
     }
 
 }

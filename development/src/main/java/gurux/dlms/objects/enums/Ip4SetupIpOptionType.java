@@ -103,6 +103,11 @@ public enum Ip4SetupIpOptionType {
     }
 
     public static Ip4SetupIpOptionType forValue(final int value) {
-        return getMappings().get(value);
+        Ip4SetupIpOptionType ret = getMappings().get(value);
+        if (ret == null) {
+            throw new IllegalArgumentException(
+                    "Invalid Ip4 setup IP option type.");
+        }
+        return ret;
     }
 }

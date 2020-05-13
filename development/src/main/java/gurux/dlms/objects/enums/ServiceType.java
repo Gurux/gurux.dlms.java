@@ -97,6 +97,11 @@ public enum ServiceType {
     }
 
     public static ServiceType forValue(final int value) {
-        return getMappings().get(value);
+        ServiceType ret = getMappings().get(value);
+        if (ret == null) {
+            throw new IllegalArgumentException(
+                    "Invalid service type enum value.");
+        }
+        return ret;
     }
 }
