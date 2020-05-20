@@ -190,7 +190,7 @@ public class GXDLMSRegister extends GXDLMSObject implements IGXDLMSBase {
     // CHECKSTYLE:ON
 
     @Override
-    public final byte[] invoke(final GXDLMSSettings settings,
+    public byte[] invoke(final GXDLMSSettings settings,
             final ValueEventArgs e) {
         // Resets the value to the default value.
         // The default value is an instance specific constant.

@@ -86,6 +86,8 @@ import gurux.dlms.secure.GXSecure;
  */
 public class GXDLMSClient {
 
+    private boolean useProtectedRelease = false;
+
     protected GXDLMSTranslator translator;
 
     /**
@@ -985,18 +987,26 @@ public class GXDLMSClient {
             return null;
         }
         GXByteBuffer buff = new GXByteBuffer();
-        // Length.
-        buff.setUInt8(0);
-        buff.setUInt8(0x80);
-        buff.setUInt8(01);
-        buff.setUInt8(00);
-        if (settings.getCipher() != null && settings.getCipher().isCiphered()) {
-            settings.getCipher().setInvocationCounter(
-                    settings.getCipher().getInvocationCounter() + 1);
+        if (!useProtectedRelease) {
+            buff.setUInt8(3);
+            buff.setUInt8(0x80);
+            buff.setUInt8(1);
+            buff.setUInt8(0);
+        } else {
+            // Length.
+            buff.setUInt8(0);
+            buff.setUInt8(0x80);
+            buff.setUInt8(01);
+            buff.setUInt8(00);
+            if (settings.getCipher() != null
+                    && settings.getCipher().isCiphered()) {
+                settings.getCipher().setInvocationCounter(
+                        settings.getCipher().getInvocationCounter() + 1);
+            }
+            GXAPDU.generateUserInformation(settings, settings.getCipher(), null,
+                    buff);
+            buff.setUInt8(0, (byte) (buff.size() - 1));
         }
-        GXAPDU.generateUserInformation(settings, settings.getCipher(), null,
-                buff);
-        buff.setUInt8(0, (byte) (buff.size() - 1));
         List<byte[]> reply;
         if (getUseLogicalNameReferencing()) {
             GXDLMSLNParameters p = new GXDLMSLNParameters(settings, 0,
@@ -3229,5 +3239,24 @@ public class GXDLMSClient {
     public static void getHdlcAddressInfo(final GXByteBuffer reply,
             final int[] target, final int[] source, final short[] type) {
         GXDLMS.getHdlcAddressInfo(reply, target, source, type);
+    }
+
+    /**
+     * If protected release is used, release is including a ciphered xDLMS
+     * Initiate request.
+     *
+     * @param protectedRelease
+     *            Use Protected Release
+     */
+    public void setUseProtectedRelease(boolean protectedRelease) {
+        useProtectedRelease = protectedRelease;
+    }
+
+    /**
+     * @return If protected release is used, release is including a ciphered
+     *         xDLMS Initiate request.
+     */
+    public boolean getUseProtectedRelease() {
+        return useProtectedRelease;
     }
 }

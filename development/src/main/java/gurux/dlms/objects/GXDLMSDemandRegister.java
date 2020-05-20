@@ -34,8 +34,15 @@
 
 package gurux.dlms.objects;
 
+import java.security.InvalidAlgorithmParameterException;
+import java.security.InvalidKeyException;
+import java.security.NoSuchAlgorithmException;
+import java.util.Calendar;
 import java.util.List;
 
+import javax.crypto.BadPaddingException;
+import javax.crypto.IllegalBlockSizeException;
+import javax.crypto.NoSuchPaddingException;
 import javax.xml.stream.XMLStreamException;
 
 import gurux.dlms.GXByteBuffer;
@@ -218,16 +225,54 @@ public class GXDLMSDemandRegister extends GXDLMSObject implements IGXDLMSBase {
 
     /**
      * Reset value.
+     * 
+     * @param client
+     *            DLMS client.
+     * @return Action bytes.
+     * @throws NoSuchPaddingException
+     *             No such padding exception.
+     * @throws NoSuchAlgorithmException
+     *             No such algorithm exception.
+     * @throws InvalidAlgorithmParameterException
+     *             Invalid algorithm parameter exception.
+     * @throws InvalidKeyException
+     *             Invalid key exception.
+     * @throws BadPaddingException
+     *             Bad padding exception.
+     * @throws IllegalBlockSizeException
+     *             Illegal block size exception.
      */
-    void reset() {
-
+    public final byte[][] reset(final GXDLMSClient client)
+            throws InvalidKeyException, NoSuchAlgorithmException,
+            NoSuchPaddingException, InvalidAlgorithmParameterException,
+            IllegalBlockSizeException, BadPaddingException {
+        return client.method(getName(), getObjectType(), 1, 0, DataType.INT8);
     }
 
     /**
      * Next period.
+     * 
+     * @param client
+     *            DLMS client.
+     * @return Action bytes.
+     * @throws NoSuchPaddingException
+     *             No such padding exception.
+     * @throws NoSuchAlgorithmException
+     *             No such algorithm exception.
+     * @throws InvalidAlgorithmParameterException
+     *             Invalid algorithm parameter exception.
+     * @throws InvalidKeyException
+     *             Invalid key exception.
+     * @throws BadPaddingException
+     *             Bad padding exception.
+     * @throws IllegalBlockSizeException
+     *             Illegal block size exception.
      */
-    void nextPeriod() {
-
+    public final byte[][] nextPeriod(final GXDLMSClient client)
+            throws InvalidKeyException, NoSuchAlgorithmException,
+            NoSuchPaddingException, InvalidAlgorithmParameterException,
+            IllegalBlockSizeException, BadPaddingException {
+        return client.method(getName(), getObjectType(), 2, 0, DataType.INT8);
     }
 
     @Override
@@ -245,6 +290,26 @@ public class GXDLMSDemandRegister extends GXDLMSObject implements IGXDLMSBase {
             return unit != 0;
         }
         return super.isRead(index);
+    }
+
+    @Override
+    public final byte[] invoke(final GXDLMSSettings settings,
+            final ValueEventArgs e) {
+        // Resets the value to the default value.
+        // The default value is an instance specific constant.
+        if (e.getIndex() == 1) {
+            currentAverageValue = lastAverageValue = null;
+            captureTime = new GXDateTime(Calendar.getInstance());
+            startTimeCurrent = new GXDateTime(Calendar.getInstance());
+        } else if (e.getIndex() == 2) {
+            lastAverageValue = currentAverageValue;
+            currentAverageValue = null;
+            captureTime = new GXDateTime(Calendar.getInstance());
+            startTimeCurrent = new GXDateTime(Calendar.getInstance());
+        } else {
+            e.setError(ErrorCode.READ_WRITE_DENIED);
+        }
+        return null;
     }
 
     /*

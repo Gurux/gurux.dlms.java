@@ -189,6 +189,7 @@ public class GXDLMSObjectCollection extends ArrayList<GXDLMSObject>
                             .forValue(Integer.parseInt(reader.getAttribute(0)));
                     reader.read();
                     obj = GXDLMSClient.createObject(type);
+                    obj.setVersion(0);
                     reader.getObjects().add(obj);
                 } else if ("SN".equalsIgnoreCase(target)) {
                     obj.setShortName(reader.readElementContentAsInt("SN"));

@@ -233,3 +233,4 @@ gurux.dlms.xmlClient/logFile.txt
 development/pom.xml.releaseBackup
 development/release.properties
 gurux.dlms.server.example.java/dependency-reduced-pom.xml
+gurux.dlms.client.example.java/dependency-reduced-pom.xml

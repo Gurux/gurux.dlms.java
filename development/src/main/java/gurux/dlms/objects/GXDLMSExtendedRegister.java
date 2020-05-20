@@ -35,6 +35,7 @@
 package gurux.dlms.objects;
 
 import java.text.NumberFormat;
+import java.util.Calendar;
 
 import javax.xml.stream.XMLStreamException;
 
@@ -43,6 +44,7 @@ import gurux.dlms.GXDLMSSettings;
 import gurux.dlms.GXDateTime;
 import gurux.dlms.ValueEventArgs;
 import gurux.dlms.enums.DataType;
+import gurux.dlms.enums.ErrorCode;
 import gurux.dlms.enums.ObjectType;
 import gurux.dlms.enums.Unit;
 
@@ -125,6 +127,20 @@ public class GXDLMSExtendedRegister extends GXDLMSRegister {
         str += getUnit().toString();
         return new Object[] { getLogicalName(), getValue(), str, getStatus(),
                 getCaptureTime() };
+    }
+
+    @Override
+    public final byte[] invoke(final GXDLMSSettings settings,
+            final ValueEventArgs e) {
+        // Resets the value to the default value.
+        // The default value is an instance specific constant.
+        if (e.getIndex() == 1) {
+            setValue(null);
+            captureTime = new GXDateTime(Calendar.getInstance());
+        } else {
+            e.setError(ErrorCode.READ_WRITE_DENIED);
+        }
+        return null;
     }
 
     /*
