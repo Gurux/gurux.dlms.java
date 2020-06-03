@@ -206,6 +206,24 @@ final class GXAPDU {
         }
     }
 
+    // Reserved for internal use.
+    private static int getConformanceFromArray(GXByteBuffer data) {
+        int ret = GXCommon.swapBits(data.getUInt8());
+        ret |= GXCommon.swapBits(data.getUInt8()) << 8;
+        ret |= GXCommon.swapBits(data.getUInt8()) << 16;
+        return ret;
+    }
+
+    /*
+     * Reserved for internal use.
+     */
+    private static void setConformanceToArray(final int value,
+            final GXByteBuffer data) {
+        data.setUInt8(GXCommon.swapBits((byte) (value & 0xFF)));
+        data.setUInt8(GXCommon.swapBits((byte) ((value >> 8) & 0xFF)));
+        data.setUInt8(GXCommon.swapBits((byte) ((value >> 16) & 0xFF)));
+    }
+
     /**
      * Generate User information initiate request.
      * 
@@ -250,9 +268,8 @@ final class GXAPDU {
         data.setUInt8(0x04);
         // encoding the number of unused bits in the bit string
         data.setUInt8(0x00);
-        GXByteBuffer bb = new GXByteBuffer(4);
-        bb.setUInt32(Conformance.toInteger(settings.getProposedConformance()));
-        data.set(bb.subArray(1, 3));
+        setConformanceToArray(
+                Conformance.toInteger(settings.getProposedConformance()), data);
         data.setUInt16(settings.getMaxPduSize());
     }
 
@@ -546,12 +563,7 @@ final class GXAPDU {
         // The number of unused bits in the bit string.
         // tag =
         data.getUInt8();
-        byte[] tmp = new byte[3];
-        GXByteBuffer bb = new GXByteBuffer(4);
-        data.get(tmp);
-        bb.setUInt8(0);
-        bb.set(tmp);
-        int v = bb.getInt32();
+        int v = getConformanceFromArray(data);
         if (settings.isServer()) {
             settings.setNegotiatedConformance(
                     Conformance.forValue(v & Conformance

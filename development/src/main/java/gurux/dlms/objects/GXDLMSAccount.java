@@ -45,6 +45,7 @@ import javax.crypto.IllegalBlockSizeException;
 import javax.crypto.NoSuchPaddingException;
 import javax.xml.stream.XMLStreamException;
 
+import gurux.dlms.GXBitString;
 import gurux.dlms.GXByteBuffer;
 import gurux.dlms.GXDLMSClient;
 import gurux.dlms.GXDLMSSettings;
@@ -916,7 +917,7 @@ public class GXDLMSAccount extends GXDLMSObject implements IGXDLMSBase {
         case 3:
             return currentCreditInUse;
         case 4:
-            return (byte) currentCreditStatus.getValue();
+            return GXBitString.toBitString(currentCreditStatus.getValue(), 8);
         case 5:
             return availableCredit;
         case 6:
@@ -972,8 +973,10 @@ public class GXDLMSAccount extends GXDLMSObject implements IGXDLMSBase {
                     bb.set(GXCommon
                             .logicalNameToBytes(it.getChargeReference()));
                     GXCommon.setData(settings, bb, DataType.BITSTRING,
-                            (byte) CreditCollectionConfiguration.toInteger(
-                                    it.getCollectionConfiguration()));
+                            GXBitString.toBitString(
+                                    CreditCollectionConfiguration.toInteger(
+                                            it.getCollectionConfiguration()),
+                                    3));
                 }
             }
             return bb.array();
@@ -1045,9 +1048,8 @@ public class GXDLMSAccount extends GXDLMSObject implements IGXDLMSBase {
             currentCreditInUse = ((Number) e.getValue()).byteValue();
             break;
         case 4:
-            GXByteBuffer bb = new GXByteBuffer();
-            GXCommon.setBitString(bb, e.getValue(), false);
-            currentCreditStatus = AccountCreditStatus.forValue(bb.getUInt8(0));
+            currentCreditStatus = AccountCreditStatus
+                    .forValue(((GXBitString) e.getValue()).toInteger());
             break;
         case 5:
             availableCredit = ((Number) e.getValue()).intValue();
@@ -1086,11 +1088,9 @@ public class GXDLMSAccount extends GXDLMSObject implements IGXDLMSBase {
                             new GXCreditChargeConfiguration();
                     item.setCreditReference(GXCommon.toLogicalName(it.get(0)));
                     item.setChargeReference(GXCommon.toLogicalName(it.get(1)));
-                    GXByteBuffer bs = new GXByteBuffer();
-                    GXCommon.setBitString(bs, String.valueOf(it.get(2)), false);
                     item.setCollectionConfiguration(
-                            CreditCollectionConfiguration
-                                    .forValue(bs.getUInt8(0)));
+                            CreditCollectionConfiguration.forValue(
+                                    ((GXBitString) it.get(2)).toInteger()));
                     creditChargeConfigurations.add(item);
                 }
             }

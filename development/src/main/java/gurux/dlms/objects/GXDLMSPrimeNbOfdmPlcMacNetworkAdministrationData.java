@@ -448,7 +448,7 @@ public class GXDLMSPrimeNbOfdmPlcMacNetworkAdministrationData
             for (Object tmp : value) {
                 List<?> it = (List<?>) tmp;
                 GXMacMulticastEntry v = new GXMacMulticastEntry();
-                v.setId(((Number) it.get(1)).byteValue());
+                v.setId(((Number) it.get(0)).byteValue());
                 v.setMembers(((Number) it.get(1)).shortValue());
                 data.add(v);
             }

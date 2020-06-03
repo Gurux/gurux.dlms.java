@@ -43,40 +43,35 @@ import java.util.Set;
  * with security suite. This enumeration is used for version 1.
  */
 public enum SecurityPolicy {
-
-    /**
-     * Security is not used.
-     */
-    NOTHING(0),
     /**
      * Request is authenticated.
      */
-    AUTHENTICATED_REQUEST(0x20),
+    AUTHENTICATED_REQUEST(0x4),
 
     /**
      * Request is encrypted.
      */
-    ENCRYPTED_REQUEST(0x10),
+    ENCRYPTED_REQUEST(0x8),
 
     /**
      * Request is digitally signed.
      */
-    DIGITALLY_SIGNED_REQUEST(0x8),
+    DIGITALLY_SIGNED_REQUEST(0x10),
 
     /**
      * Response authenticated.
      */
-    AUTHENTICATED_RESPONSE(0x4),
+    AUTHENTICATED_RESPONSE(0x20),
 
     /**
      * Response encrypted.
      */
-    ENCRYPTED_RESPONSE(0x2),
+    ENCRYPTED_RESPONSE(0x40),
 
     /**
      * Response is digitally signed.
      */
-    DIGITALLY_SIGNED_RESPONSE(0x1);
+    DIGITALLY_SIGNED_RESPONSE(0x80);
 
     /**
      * Integer value of enumeration.

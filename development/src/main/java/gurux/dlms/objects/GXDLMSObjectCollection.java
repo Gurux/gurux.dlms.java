@@ -207,6 +207,9 @@ public class GXDLMSObjectCollection extends ArrayList<GXDLMSObject>
             } else {
                 reader.read();
             }
+            for (GXDLMSObject it : reader.getObjects()) {
+                ((IGXDLMSBase) it).postLoad(reader);
+            }
         }
         return reader.getObjects();
 

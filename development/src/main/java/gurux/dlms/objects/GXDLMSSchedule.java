@@ -420,9 +420,8 @@ public class GXDLMSSchedule extends GXDLMSObject implements IGXDLMSBase {
         data.setUInt8(DataType.UINT16.getValue());
         data.setUInt16(it.getValidityWindow());
         // Add exec week days.
-        GXBitString bs = new GXBitString(
-                (byte) Weekdays.toInteger(it.getExecWeekdays()), 7);
-        GXCommon.setData(settings, data, DataType.BITSTRING, bs);
+        GXCommon.setData(settings, data, DataType.BITSTRING, GXBitString
+                .toBitString(Weekdays.toInteger(it.getExecWeekdays()), 7));
         // Add exec spec days.
         GXCommon.setData(settings, data, DataType.BITSTRING,
                 it.getExecSpecDays());
@@ -470,7 +469,7 @@ public class GXDLMSSchedule extends GXDLMSObject implements IGXDLMSBase {
                 DataType.TIME, useUtc));
         item.setValidityWindow(((Number) tmp.get(5)).intValue());
         item.setExecWeekdays(
-                Weekdays.forValue(((GXBitString) tmp.get(6)).toByte()));
+                Weekdays.forValue(((GXBitString) tmp.get(6)).toInteger()));
         item.setExecSpecDays(tmp.get(7).toString());
         item.setBeginDate((GXDate) GXDLMSClient.changeType((byte[]) tmp.get(8),
                 DataType.DATE, useUtc));

@@ -44,31 +44,31 @@ public enum Weekdays {
     /**
      * Indicates Monday.
      */
-    MONDAY(0x80),
+    MONDAY(0x1),
     /**
      * Indicates Tuesday.
      */
-    TUESDAY(0x40),
+    TUESDAY(0x2),
     /**
      * Indicates Wednesday.
      */
-    WEDNESDAY(0x20),
+    WEDNESDAY(0x4),
     /**
      * Indicates Thursday.
      */
-    THURSDAY(0x10),
+    THURSDAY(0x8),
     /**
      * Indicates Friday.
      */
-    FRIDAY(0x8),
+    FRIDAY(0x10),
     /**
      * Indicates Saturday.
      */
-    SATURDAY(0x4),
+    SATURDAY(0x20),
     /**
      * Indicates Sunday.
      */
-    SUNDAY(0x2);
+    SUNDAY(0x40);
 
     private int value;
 

@@ -36,24 +36,20 @@ package gurux.dlms.objects.enums;
 
 import java.util.HashMap;
 import java.util.HashSet;
-import java.util.Set;
 
 /**
- * Defines behavior under specific conditions.
+ * Charge configuration enumeration types.
  */
-public enum CreditCollectionConfiguration {
+public enum ChargeConfiguration {
+
     /**
-     * Collect when supply disconnected.
+     * Percentage based collection.
      */
-    DISCONNECTED(0x1),
+    PERCENTAGE_BASED_COLLECTION(0x1),
     /**
-     * Collect in load limiting periods.
+     * Continuous collection.
      */
-    LOAD_LIMITING(0x2),
-    /**
-     * Collect in friendly credit periods.
-     */
-    FRIENDLY_CREDIT(0x4);
+    CONTINUOUS_COLLECTION(0x2);
 
     /**
      * Integer value of enumerator.
@@ -63,19 +59,17 @@ public enum CreditCollectionConfiguration {
     /**
      * Collection of enumerator values.
      */
-    private static java.util.HashMap<Integer, CreditCollectionConfiguration> mappings;
+    private static java.util.HashMap<Integer, ChargeConfiguration> mappings;
 
     /**
      * Returns collection of enumerator values.
      * 
      * @return Enumerator values.
      */
-    private static HashMap<Integer, CreditCollectionConfiguration>
-            getMappings() {
-        synchronized (CreditCollectionConfiguration.class) {
+    private static HashMap<Integer, ChargeConfiguration> getMappings() {
+        synchronized (ChargeConfiguration.class) {
             if (mappings == null) {
-                mappings =
-                        new HashMap<Integer, CreditCollectionConfiguration>();
+                mappings = new HashMap<Integer, ChargeConfiguration>();
             }
         }
         return mappings;
@@ -87,7 +81,7 @@ public enum CreditCollectionConfiguration {
      * @param value
      *            Integer value of enumerator.
      */
-    CreditCollectionConfiguration(final int value) {
+    ChargeConfiguration(final int value) {
         intValue = value;
         getMappings().put(value, this);
     }
@@ -101,9 +95,13 @@ public enum CreditCollectionConfiguration {
         return intValue;
     }
 
-    static CreditCollectionConfiguration[] getEnumConstants() {
-        return new CreditCollectionConfiguration[] { DISCONNECTED,
-                LOAD_LIMITING, FRIENDLY_CREDIT };
+    /**
+     * @return Get enumeration constant values.
+     */
+    private static ChargeConfiguration[] getEnumConstants() {
+        return new ChargeConfiguration[] { PERCENTAGE_BASED_COLLECTION,
+                CONTINUOUS_COLLECTION };
+
     }
 
     /**
@@ -113,13 +111,16 @@ public enum CreditCollectionConfiguration {
      *            Integer value.
      * @return Enumeration value.
      */
-    public static Set<CreditCollectionConfiguration> forValue(final int value) {
-        Set<CreditCollectionConfiguration> types =
-                new HashSet<CreditCollectionConfiguration>();
-        CreditCollectionConfiguration[] enums = getEnumConstants();
-        for (int pos = 0; pos != enums.length; ++pos) {
-            if ((enums[pos].intValue & value) == enums[pos].intValue) {
-                types.add(enums[pos]);
+    public static java.util.Set<ChargeConfiguration> forValue(final int value) {
+        java.util.Set<ChargeConfiguration> types =
+                new HashSet<ChargeConfiguration>();
+        if (value != 0) {
+            types = new HashSet<ChargeConfiguration>();
+            ChargeConfiguration[] enums = getEnumConstants();
+            for (int pos = 0; pos != enums.length; ++pos) {
+                if ((enums[pos].intValue & value) == enums[pos].intValue) {
+                    types.add(enums[pos]);
+                }
             }
         }
         return types;
@@ -133,12 +134,9 @@ public enum CreditCollectionConfiguration {
      * @return The integer value.
      */
     public static int
-            toInteger(final Set<CreditCollectionConfiguration> value) {
-        if (value == null) {
-            return 0;
-        }
+            toInteger(final java.util.Set<ChargeConfiguration> value) {
         int tmp = 0;
-        for (CreditCollectionConfiguration it : value) {
+        for (ChargeConfiguration it : value) {
             tmp |= it.getValue();
         }
         return tmp;

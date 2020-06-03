@@ -50,6 +50,7 @@ import javax.crypto.IllegalBlockSizeException;
 import javax.crypto.NoSuchPaddingException;
 import javax.xml.stream.XMLStreamException;
 
+import gurux.dlms.GXBitString;
 import gurux.dlms.GXByteBuffer;
 import gurux.dlms.GXDLMSClient;
 import gurux.dlms.GXDLMSServerBase;
@@ -772,11 +773,9 @@ public class GXDLMSAssociationLogicalName extends GXDLMSObject
             GXByteBuffer data = new GXByteBuffer();
             data.setUInt8(DataType.STRUCTURE.getValue());
             data.setUInt8(6);
-            GXByteBuffer bb = new GXByteBuffer();
-            bb.setUInt32(
-                    Conformance.toInteger(xDLMSContextInfo.getConformance()));
             GXCommon.setData(settings, data, DataType.BITSTRING,
-                    bb.subArray(1, 3));
+                    GXBitString.toBitString(Conformance
+                            .toInteger(xDLMSContextInfo.getConformance()), 24));
             GXCommon.setData(settings, data, DataType.UINT16,
                     xDLMSContextInfo.getMaxReceivePduSize());
             GXCommon.setData(settings, data, DataType.UINT16,
@@ -1054,13 +1053,9 @@ public class GXDLMSAssociationLogicalName extends GXDLMSObject
             break;
         case 5:
             if (e.getValue() != null) {
-
-                GXByteBuffer bb = new GXByteBuffer();
                 List<?> arr = (List<?>) e.getValue();
-                GXCommon.setBitString(bb, arr.get(0), true);
-                bb.setUInt8(0, 0);
-                xDLMSContextInfo
-                        .setConformance(Conformance.forValue(bb.getInt32()));
+                xDLMSContextInfo.setConformance(Conformance
+                        .forValue(((GXBitString) arr.get(0)).toInteger()));
                 xDLMSContextInfo
                         .setMaxReceivePduSize(((Number) arr.get(1)).intValue());
                 xDLMSContextInfo

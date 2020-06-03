@@ -410,7 +410,7 @@ public class GXDLMSConverter {
             return byte[].class;
         }
         if (value == DataType.ENUM) {
-            return Enum.class;
+            return GXEnum.class;
         }
         if (value == DataType.INT8) {
             return Byte.class;
@@ -423,6 +423,18 @@ public class GXDLMSConverter {
         }
         if (value == DataType.INT64) {
             return Long.class;
+        }
+        if (value == DataType.UINT8) {
+            return GXUInt8.class;
+        }
+        if (value == DataType.UINT16) {
+            return GXUInt16.class;
+        }
+        if (value == DataType.UINT32) {
+            return GXUInt32.class;
+        }
+        if (value == DataType.UINT64) {
+            return GXUInt64.class;
         }
         if (value == DataType.TIME) {
             return GXTime.class;
@@ -450,6 +462,9 @@ public class GXDLMSConverter {
         }
         if (value == DataType.ENUM) {
             return GXEnum.class;
+        }
+        if (value == DataType.BITSTRING) {
+            return GXBitString.class;
         }
         throw new IllegalArgumentException("Invalid value.");
     }

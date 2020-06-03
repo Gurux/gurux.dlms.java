@@ -465,6 +465,15 @@ public class GXDLMSImageTransfer extends GXDLMSObject implements IGXDLMSBase {
             throws InvalidKeyException, NoSuchAlgorithmException,
             NoSuchPaddingException, InvalidAlgorithmParameterException,
             IllegalBlockSizeException, BadPaddingException {
+        return imageTransferInitiate(client, GXCommon.getBytes(imageIdentifier),
+                forImageSize);
+    }
+
+    public final byte[][] imageTransferInitiate(final GXDLMSClient client,
+            final byte[] imageIdentifier, final long forImageSize)
+            throws InvalidKeyException, NoSuchAlgorithmException,
+            NoSuchPaddingException, InvalidAlgorithmParameterException,
+            IllegalBlockSizeException, BadPaddingException {
         if (imageBlockSize == 0) {
             throw new IllegalArgumentException("Invalid image block size.");
         }
@@ -475,8 +484,7 @@ public class GXDLMSImageTransfer extends GXDLMSObject implements IGXDLMSBase {
         GXByteBuffer data = new GXByteBuffer();
         data.setUInt8(DataType.STRUCTURE.getValue());
         data.setUInt8(2);
-        GXCommon.setData(null, data, DataType.OCTET_STRING,
-                GXCommon.getBytes(imageIdentifier));
+        GXCommon.setData(null, data, DataType.OCTET_STRING, imageIdentifier);
         GXCommon.setData(null, data, DataType.UINT32, forImageSize);
         return client.method(this, 1, data.array(), DataType.ARRAY);
     }

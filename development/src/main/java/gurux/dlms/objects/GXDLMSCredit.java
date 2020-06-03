@@ -38,7 +38,7 @@ import java.util.HashSet;
 
 import javax.xml.stream.XMLStreamException;
 
-import gurux.dlms.GXByteBuffer;
+import gurux.dlms.GXBitString;
 import gurux.dlms.GXDLMSClient;
 import gurux.dlms.GXDLMSSettings;
 import gurux.dlms.GXDateTime;
@@ -432,7 +432,8 @@ public class GXDLMSCredit extends GXDLMSObject implements IGXDLMSBase {
         case 6:
             return limit;
         case 7:
-            return (byte) CreditConfiguration.toInteger(creditConfiguration);
+            return GXBitString.toBitString(
+                    CreditConfiguration.toInteger(creditConfiguration), 5);
         case 8:
             return status.getValue();
         case 9:
@@ -474,9 +475,8 @@ public class GXDLMSCredit extends GXDLMSObject implements IGXDLMSBase {
             limit = ((Number) e.getValue()).intValue();
             break;
         case 7:
-            GXByteBuffer bb = new GXByteBuffer();
-            GXCommon.setBitString(bb, e.getValue(), true);
-            creditConfiguration = CreditConfiguration.forValue(bb.getUInt8(1));
+            creditConfiguration = CreditConfiguration
+                    .forValue(((GXBitString) e.getValue()).toInteger());
             break;
         case 8:
             status = CreditStatus.forValue(((Number) e.getValue()).intValue());

@@ -398,7 +398,7 @@ public class GXDLMSActionSchedule extends GXDLMSObject implements IGXDLMSBase {
         if (target != null) {
             GXDLMSScriptTable t = (GXDLMSScriptTable) reader.getObjects()
                     .findByLN(ObjectType.SCRIPT_TABLE, target.getLogicalName());
-            if (target != t) {
+            if (t != null && target != t) {
                 target = t;
             }
         }

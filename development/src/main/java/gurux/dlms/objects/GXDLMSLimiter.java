@@ -664,7 +664,7 @@ public class GXDLMSLimiter extends GXDLMSObject implements IGXDLMSBase {
             GXDLMSObject target =
                     reader.getObjects().findByLN(monitoredValue.getObjectType(),
                             monitoredValue.getLogicalName());
-            if (target != monitoredValue) {
+            if (target != null && target != monitoredValue) {
                 monitoredValue = target;
             }
         }

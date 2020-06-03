@@ -46,11 +46,11 @@ public enum CreditConfiguration {
     /**
      * Requires visual indication,
      */
-    VISUAL(0x10),
+    VISUAL(0x1),
     /**
      * Requires confirmation before it can be selected/invoked
      */
-    CONFIRMATION(0x8),
+    CONFIRMATION(0x2),
     /**
      * Requires the credit amount to be paid back.
      */
@@ -59,12 +59,12 @@ public enum CreditConfiguration {
      * Resettable.
      */
 
-    RESETTABLE(0x2),
+    RESETTABLE(0x8),
     /**
      * Able to receive credit amounts from tokens.
      */
 
-    TOKENS(0x1);
+    TOKENS(0x10);
 
     /**
      * Integer value of enumerator.
@@ -125,10 +125,9 @@ public enum CreditConfiguration {
      * @return The enumerated value, which represents the integer.
      */
     public static java.util.Set<CreditConfiguration> forValue(final int value) {
-        java.util.Set<CreditConfiguration> types;
-        if (value == 0) {
-            types = new HashSet<CreditConfiguration>();
-        } else {
+        java.util.Set<CreditConfiguration> types =
+                new HashSet<CreditConfiguration>();
+        if (value != 0) {
             types = new HashSet<CreditConfiguration>();
             CreditConfiguration[] enums = getEnumConstants();
             for (int pos = 0; pos != enums.length; ++pos) {

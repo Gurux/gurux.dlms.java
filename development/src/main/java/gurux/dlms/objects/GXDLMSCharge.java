@@ -35,10 +35,12 @@
 package gurux.dlms.objects;
 
 import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.List;
 
 import javax.xml.stream.XMLStreamException;
 
+import gurux.dlms.GXBitString;
 import gurux.dlms.GXByteBuffer;
 import gurux.dlms.GXDLMSClient;
 import gurux.dlms.GXDLMSSettings;
@@ -48,6 +50,7 @@ import gurux.dlms.enums.DataType;
 import gurux.dlms.enums.ErrorCode;
 import gurux.dlms.enums.ObjectType;
 import gurux.dlms.internal.GXCommon;
+import gurux.dlms.objects.enums.ChargeConfiguration;
 import gurux.dlms.objects.enums.ChargeType;
 
 /**
@@ -103,7 +106,7 @@ public class GXDLMSCharge extends GXDLMSObject implements IGXDLMSBase {
      * Online help:<br>
      * https://www.gurux.fi/Gurux.DLMS.Objects.GXDLMSCharge
      */
-    private String chargeConfiguration;
+    private java.util.Set<ChargeConfiguration> chargeConfiguration;
     /**
      * Last collection time.<br>
      * Online help:<br>
@@ -160,6 +163,7 @@ public class GXDLMSCharge extends GXDLMSObject implements IGXDLMSBase {
         unitChargeActive = new GXUnitCharge();
         unitChargePassive = new GXUnitCharge();
         chargeType = ChargeType.CONSUMPTION_BASED_COLLECTION;
+        chargeConfiguration = new HashSet<ChargeConfiguration>();
     }
 
     /**
@@ -315,7 +319,7 @@ public class GXDLMSCharge extends GXDLMSObject implements IGXDLMSBase {
      * 
      * @return Charge configuration.
      */
-    public final String getChargeConfiguration() {
+    public final java.util.Set<ChargeConfiguration> getChargeConfiguration() {
         return chargeConfiguration;
     }
 
@@ -326,7 +330,8 @@ public class GXDLMSCharge extends GXDLMSObject implements IGXDLMSBase {
      * @param value
      *            Charge configuration.
      */
-    public final void setChargeConfiguration(final String value) {
+    public final void setChargeConfiguration(
+            final java.util.Set<ChargeConfiguration> value) {
         chargeConfiguration = value;
     }
 
@@ -619,7 +624,8 @@ public class GXDLMSCharge extends GXDLMSObject implements IGXDLMSBase {
         case 8:
             return period;
         case 9:
-            return chargeConfiguration;
+            return GXBitString.toBitString(
+                    ChargeConfiguration.toInteger(chargeConfiguration), 2);
         case 10:
             return lastCollectionTime;
         case 11:
@@ -704,7 +710,8 @@ public class GXDLMSCharge extends GXDLMSObject implements IGXDLMSBase {
             period = ((Number) e.getValue()).intValue();
             break;
         case 9:
-            chargeConfiguration = String.valueOf(e.getValue());
+            chargeConfiguration = ChargeConfiguration
+                    .forValue(((GXBitString) e.getValue()).toInteger());
             break;
         case 10:
             if (e.getValue() instanceof GXDateTime) {
@@ -751,8 +758,8 @@ public class GXDLMSCharge extends GXDLMSObject implements IGXDLMSBase {
         unitChargeActivationTime =
                 reader.readElementContentAsDateTime("UnitChargeActivationTime");
         period = reader.readElementContentAsInt("Period");
-        chargeConfiguration =
-                reader.readElementContentAsString("ChargeConfiguration");
+        chargeConfiguration = ChargeConfiguration.forValue(
+                reader.readElementContentAsInt("ChargeConfiguration"));
         lastCollectionTime =
                 reader.readElementContentAsDateTime("LastCollectionTime");
         lastCollectionAmount =
@@ -779,7 +786,8 @@ public class GXDLMSCharge extends GXDLMSObject implements IGXDLMSBase {
         writer.writeElementString("UnitChargeActivationTime",
                 unitChargeActivationTime);
         writer.writeElementString("Period", period);
-        writer.writeElementString("ChargeConfiguration", chargeConfiguration);
+        writer.writeElementString("ChargeConfiguration",
+                ChargeConfiguration.toInteger(chargeConfiguration));
         writer.writeElementString("LastCollectionTime", lastCollectionTime);
         writer.writeElementString("LastCollectionAmount", lastCollectionAmount);
         writer.writeElementString("TotalAmountRemaining", totalAmountRemaining);

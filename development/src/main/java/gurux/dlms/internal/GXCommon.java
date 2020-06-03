@@ -2703,4 +2703,14 @@ public final class GXCommon {
     public static boolean isAscii(final String value) {
         return StandardCharsets.US_ASCII.newEncoder().canEncode(value);
     }
+
+    // Reserved for internal use.
+    public static short swapBits(short value) {
+        short ret = 0;
+        for (int pos = 0; pos != 8; ++pos) {
+            ret = (byte) ((ret << 1) | (value & 0x01));
+            value = (byte) (value >> 1);
+        }
+        return ret;
+    }
 }
