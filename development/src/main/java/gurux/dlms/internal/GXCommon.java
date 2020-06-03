@@ -2708,8 +2708,8 @@ public final class GXCommon {
     public static short swapBits(short value) {
         short ret = 0;
         for (int pos = 0; pos != 8; ++pos) {
-            ret = (byte) ((ret << 1) | (value & 0x01));
-            value = (byte) (value >> 1);
+            ret = (short) ((ret << 1) | (value & 0x01));
+            value = (short) (value >> 1);
         }
         return ret;
     }

@@ -219,9 +219,9 @@ final class GXAPDU {
      */
     private static void setConformanceToArray(final int value,
             final GXByteBuffer data) {
-        data.setUInt8(GXCommon.swapBits((byte) (value & 0xFF)));
-        data.setUInt8(GXCommon.swapBits((byte) ((value >> 8) & 0xFF)));
-        data.setUInt8(GXCommon.swapBits((byte) ((value >> 16) & 0xFF)));
+        data.setUInt8(GXCommon.swapBits((short) (value & 0xFF)));
+        data.setUInt8(GXCommon.swapBits((short) ((value >> 8) & 0xFF)));
+        data.setUInt8(GXCommon.swapBits((short) ((value >> 16) & 0xFF)));
     }
 
     /**
@@ -1445,12 +1445,9 @@ final class GXAPDU {
         data.setUInt8(0x04);
         // encoding the number of unused bits in the bit string
         data.setUInt8(0x00);
-
-        GXByteBuffer bb = new GXByteBuffer(4);
-        bb.setUInt32(
-                Conformance.toInteger(settings.getNegotiatedConformance()));
-        data.set(bb.subArray(1, 3));
-
+        setConformanceToArray(
+                Conformance.toInteger(settings.getNegotiatedConformance()),
+                data);
         data.setUInt16(settings.getMaxPduSize());
         // VAA Name VAA name (0x0007 for LN referencing and 0xFA00 for SN)
         if (settings.getUseLogicalNameReferencing()) {
