@@ -91,7 +91,25 @@ public class sampleclient {
             ////////////////////////////////////////
             reader = new GXDLMSReader(settings.client, settings.media,
                     settings.trace, settings.iec, settings.invocationCounter);
-            settings.media.open();
+            try {
+                settings.media.open();
+            } catch (Exception ex) {
+                if (settings.media instanceof GXSerial) {
+                    System.out.println(
+                            "----------------------------------------------------------");
+                    System.out.println(ex.getMessage());
+                    System.out.println("Available ports:");
+                    StringBuilder sb = new StringBuilder();
+                    for (String it : GXSerial.getPortNames()) {
+                        if (sb.length() != 0) {
+                            sb.append(", ");
+                        }
+                        sb.append(it);
+                    }
+                    System.out.println(sb.toString());
+                }
+                throw ex;
+            }
             if (!settings.readObjects.isEmpty()) {
                 reader.initializeConnection();
                 if (settings.outputFile != null

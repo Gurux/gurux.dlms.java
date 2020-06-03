@@ -119,7 +119,7 @@ public class Settings {
     }
 
     static int getParameters(String[] args, Settings settings) {
-        ArrayList<GXCmdParameter> parameters = GXCommon.getParameters(args,
+        List<GXCmdParameter> parameters = GXCommon.getParameters(args,
                 "h:p:c:s:r:iIt:a:p:wP:g:S:n:C:v:o:T:A:B:D:d:");
         GXNet net = null;
         for (GXCmdParameter it : parameters) {
