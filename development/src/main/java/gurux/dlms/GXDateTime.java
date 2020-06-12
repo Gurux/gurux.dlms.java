@@ -776,6 +776,15 @@ public class GXDateTime {
         return toFormatString(locale, false);
     }
 
+    /**
+     * @param pattern
+     *            Used date time string pattern.
+     * @return Returns Meter time as formatted string.
+     */
+    public String toFormatMeterString(final String pattern) {
+        return toFormatString(pattern, false, null);
+    }
+
     private String toFormatString(final Locale locale,
             final boolean useLocalTime) {
         SimpleDateFormat sd;
