@@ -125,7 +125,7 @@ public class GXBitString {
      *            Value to convert.
      * @param count
      *            Amount of the bits.
-     * @return
+     * @return Bitstring
      */
     public static String toBitString(long value, int count) {
         StringBuilder sb = new StringBuilder();

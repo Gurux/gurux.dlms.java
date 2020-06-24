@@ -1618,7 +1618,7 @@ public final class GXCommon {
                     info.getXml().appendComment(toLogicalName(tmp));
                 } else {
                     boolean isString = true;
-                    // Try to move octect string to DateTie, Date or time.
+                    // Try to move octet string to DateTime, Date or time.
                     if (tmp.length == 12 || tmp.length == 5
                             || tmp.length == 4) {
                         try {
@@ -1918,11 +1918,11 @@ public final class GXCommon {
             if (value instanceof GXDate) {
                 // Add size
                 buff.setUInt8(5);
-                setDate(buff, value);
+                setDate(settings, buff, value);
             } else if (value instanceof GXTime) {
                 // Add size
                 buff.setUInt8(4);
-                setTime(buff, value);
+                setTime(settings, buff, value);
             } else if (value instanceof GXDateTime
                     || value instanceof java.util.Date
                     || value instanceof java.util.Calendar) {
@@ -1948,10 +1948,10 @@ public final class GXCommon {
             setDateTime(settings, buff, value);
             break;
         case DATE:
-            setDate(buff, value);
+            setDate(settings, buff, value);
             break;
         case TIME:
-            setTime(buff, value);
+            setTime(settings, buff, value);
             break;
         default:
             throw new IllegalArgumentException("Invalid data type.");
@@ -1961,12 +1961,15 @@ public final class GXCommon {
     /**
      * Convert time to DLMS bytes.
      * 
+     * @param settings
+     *            DLMS settings.
      * @param buff
      *            Byte buffer where data is write.
      * @param value
      *            Added value.
      */
-    private static void setTime(final GXByteBuffer buff, final Object value) {
+    private static void setTime(final GXDLMSSettings settings,
+            final GXByteBuffer buff, final Object value) {
         java.util.Set<DateTimeSkips> skip = new HashSet<DateTimeSkips>();
         java.util.Calendar tm = java.util.Calendar.getInstance();
         if (value instanceof GXDateTime) {
@@ -1987,6 +1990,10 @@ public final class GXCommon {
             }
         } else {
             throw new IllegalArgumentException("Invalid date format.");
+        }
+        // Add additional date time skips.
+        if (settings != null && !settings.getDateTimeSkips().isEmpty()) {
+            skip.addAll(settings.getDateTimeSkips());
         }
         // Add time.
         if (skip.contains(DateTimeSkips.HOUR)) {
@@ -2015,12 +2022,15 @@ public final class GXCommon {
     /**
      * Convert date to DLMS bytes.
      * 
+     * @param settings
+     *            DLMS settings.
      * @param buff
      *            Byte buffer where data is write.
      * @param value
      *            Added value.
      */
-    private static void setDate(final GXByteBuffer buff, final Object value) {
+    private static void setDate(final GXDLMSSettings settings,
+            final GXByteBuffer buff, final Object value) {
         GXDateTime dt;
         if (value instanceof GXDateTime) {
             dt = (GXDateTime) value;
@@ -2040,6 +2050,10 @@ public final class GXCommon {
         }
         java.util.Calendar tm = java.util.Calendar.getInstance();
         tm.setTime(dt.getMeterCalendar().getTime());
+        // Add additional date time skips.
+        if (settings != null && !settings.getDateTimeSkips().isEmpty()) {
+            dt.getSkip().addAll(settings.getDateTimeSkips());
+        }
         // Add year.
         if (dt.getSkip().contains(DateTimeSkips.YEAR)) {
             buff.setUInt16(0xFFFF);
@@ -2115,6 +2129,10 @@ public final class GXCommon {
             final GXByteBuffer buff, final Object value) {
         GXDateTime dt = getDateTime(value);
         java.util.Calendar tm = dt.getMeterCalendar();
+        // Add additional date time skips.
+        if (settings != null && !settings.getDateTimeSkips().isEmpty()) {
+            dt.getSkip().addAll(settings.getDateTimeSkips());
+        }
         // Add year.
         if (dt.getSkip().contains(DateTimeSkips.YEAR)) {
             buff.setUInt16(0xFFFF);

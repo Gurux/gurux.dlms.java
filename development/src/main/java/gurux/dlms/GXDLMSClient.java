@@ -61,6 +61,7 @@ import gurux.dlms.enums.Authentication;
 import gurux.dlms.enums.Command;
 import gurux.dlms.enums.Conformance;
 import gurux.dlms.enums.DataType;
+import gurux.dlms.enums.DateTimeSkips;
 import gurux.dlms.enums.ErrorCode;
 import gurux.dlms.enums.InterfaceType;
 import gurux.dlms.enums.MethodAccessMode;
@@ -407,6 +408,23 @@ public class GXDLMSClient {
      */
     public void setUseUtc2NormalTime(final boolean value) {
         settings.setUseUtc2NormalTime(value);
+    }
+
+    /**
+     * @return Skipped date time fields. This value can be used if meter can't
+     *         handle deviation or status.
+     */
+    public java.util.Set<DateTimeSkips> getDateTimeSkips() {
+        return settings.getDateTimeSkips();
+    }
+
+    /**
+     * @param value
+     *            Skipped date time fields. This value can be used if meter
+     *            can't handle deviation or status.
+     */
+    public void setDateTimeSkips(final java.util.Set<DateTimeSkips> value) {
+        settings.setDateTimeSkips(value);
     }
 
     /**

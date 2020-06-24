@@ -50,9 +50,12 @@ import gurux.dlms.GXArray;
 import gurux.dlms.GXDLMSConverter;
 import gurux.dlms.GXDLMSTranslator;
 import gurux.dlms.GXDate;
+import gurux.dlms.GXDateOS;
 import gurux.dlms.GXDateTime;
+import gurux.dlms.GXDateTimeOS;
 import gurux.dlms.GXStructure;
 import gurux.dlms.GXTime;
+import gurux.dlms.GXTimeOS;
 import gurux.dlms.enums.DataType;
 
 /**
@@ -309,13 +312,25 @@ public class GXXmlReader implements AutoCloseable {
                     ret = GXDLMSTranslator.hexToBytes(str);
                     break;
                 case DATETIME:
-                    ret = new GXDateTime(str, Locale.ROOT);
+                    if (dt == DataType.OCTET_STRING) {
+                        ret = new GXDateTimeOS(str, Locale.ROOT);
+                    } else {
+                        ret = new GXDateTime(str, Locale.ROOT);
+                    }
                     break;
                 case DATE:
-                    ret = new GXDate(str, Locale.ROOT);
+                    if (dt == DataType.OCTET_STRING) {
+                        ret = new GXDateOS(str, Locale.ROOT);
+                    } else {
+                        ret = new GXDate(str, Locale.ROOT);
+                    }
                     break;
                 case TIME:
-                    ret = new GXTime(str, Locale.ROOT);
+                    if (dt == DataType.OCTET_STRING) {
+                        ret = new GXTimeOS(str, Locale.ROOT);
+                    } else {
+                        ret = new GXTime(str, Locale.ROOT);
+                    }
                     break;
                 case NONE:
                     ret = defaultValue;

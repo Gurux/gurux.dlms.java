@@ -50,6 +50,7 @@ import gurux.dlms.enums.Authentication;
 import gurux.dlms.enums.Command;
 import gurux.dlms.enums.Conformance;
 import gurux.dlms.enums.DataType;
+import gurux.dlms.enums.DateTimeSkips;
 import gurux.dlms.enums.InterfaceType;
 import gurux.dlms.enums.MethodAccessMode;
 import gurux.dlms.enums.ObjectType;
@@ -226,6 +227,46 @@ public abstract class GXDLMSServer2 {
      */
     public final GXDLMSLimits getLimits() {
         return base.getLimits();
+    }
+
+    /**
+     * Standard says that Time zone is from normal time to UTC in minutes. If
+     * meter is configured to use UTC time (UTC to normal time) set this to
+     * true.
+     * 
+     * @return True, if UTC time is used.
+     */
+    public boolean getUseUtc2NormalTime() {
+        return base.getUseUtc2NormalTime();
+    }
+
+    /**
+     * Standard says that Time zone is from normal time to UTC in minutes. If
+     * meter is configured to use UTC time (UTC to normal time) set this to
+     * true.
+     * 
+     * @param value
+     *            True, if UTC time is used.
+     */
+    public void setUseUtc2NormalTime(final boolean value) {
+        base.setUseUtc2NormalTime(value);
+    }
+
+    /**
+     * @return Skipped date time fields. This value can be used if meter can't
+     *         handle deviation or status.
+     */
+    public java.util.Set<DateTimeSkips> getDateTimeSkips() {
+        return base.getDateTimeSkips();
+    }
+
+    /**
+     * @param value
+     *            Skipped date time fields. This value can be used if meter
+     *            can't handle deviation or status.
+     */
+    public void setDateTimeSkips(final java.util.Set<DateTimeSkips> value) {
+        base.setDateTimeSkips(value);
     }
 
     /**

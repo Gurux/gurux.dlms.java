@@ -317,6 +317,21 @@ public class GXDateTime {
         init(value, pattern, null);
     }
 
+    /**
+     * Constructor
+     * 
+     * @param value
+     *            Date time value as a string.
+     * @param pattern
+     *            Used date time string pattern.
+     * @param locale
+     *            Used locale.
+     */
+    public GXDateTime(final String value, final String pattern,
+            final Locale locale) {
+        init(value, pattern, locale);
+    }
+
     /*
      * Check is time zone included and return index of time zone.
      */
@@ -420,7 +435,9 @@ public class GXDateTime {
             // If time zone is used.
             int pos;
             if (addTimeZone && (pos = timeZonePosition(value)) != -1) {
-                format.append("XXX");
+                if (format.indexOf("XXX") == -1) {
+                    format.append("XXX");
+                }
                 String zone = "GMT" + value.substring(pos);
                 meterCalendar =
                         Calendar.getInstance(TimeZone.getTimeZone(zone));

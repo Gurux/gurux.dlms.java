@@ -50,9 +50,12 @@ import javax.xml.stream.XMLStreamWriter;
 
 import gurux.dlms.GXArray;
 import gurux.dlms.GXDLMSConverter;
+import gurux.dlms.GXDateOS;
 import gurux.dlms.GXDateTime;
+import gurux.dlms.GXDateTimeOS;
 import gurux.dlms.GXSimpleEntry;
 import gurux.dlms.GXStructure;
+import gurux.dlms.GXTimeOS;
 import gurux.dlms.enums.DataType;
 import gurux.dlms.internal.GXCommon;
 
@@ -392,8 +395,19 @@ public class GXXmlWriter implements AutoCloseable {
                             .compareTo(new java.util.Date(0))) == 0) {
                 return;
             }
-            DataType dt = GXDLMSConverter.getDLMSDataType(value);
-            writeElementObject(name, value, dt, DataType.NONE);
+            if (value instanceof GXDateTimeOS) {
+                writeElementObject(name, value, DataType.OCTET_STRING,
+                        DataType.DATETIME);
+            } else if (value instanceof GXDateOS) {
+                writeElementObject(name, value, DataType.OCTET_STRING,
+                        DataType.DATE);
+            } else if (value instanceof GXTimeOS) {
+                writeElementObject(name, value, DataType.OCTET_STRING,
+                        DataType.TIME);
+            } else {
+                DataType dt = GXDLMSConverter.getDLMSDataType(value);
+                writeElementObject(name, value, dt, DataType.NONE);
+            }
         }
     }
 

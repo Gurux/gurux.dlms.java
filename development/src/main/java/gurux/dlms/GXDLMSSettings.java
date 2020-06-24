@@ -40,6 +40,7 @@ import java.util.Set;
 
 import gurux.dlms.enums.Authentication;
 import gurux.dlms.enums.Conformance;
+import gurux.dlms.enums.DateTimeSkips;
 import gurux.dlms.enums.InterfaceType;
 import gurux.dlms.enums.Priority;
 import gurux.dlms.enums.ServiceClass;
@@ -295,6 +296,12 @@ public class GXDLMSSettings {
      * true.
      */
     private boolean useUtc2NormalTime;
+
+    /**
+     * Skipped fields.
+     */
+    private java.util.Set<DateTimeSkips> dateTimeSkips =
+            new HashSet<DateTimeSkips>();
 
     private Standard standard;
 
@@ -1113,6 +1120,23 @@ public class GXDLMSSettings {
      */
     public void setUseUtc2NormalTime(final boolean value) {
         useUtc2NormalTime = value;
+    }
+
+    /**
+     * @return Skipped date time fields. This value can be used if meter can't
+     *         handle deviation or status.
+     */
+    public java.util.Set<DateTimeSkips> getDateTimeSkips() {
+        return dateTimeSkips;
+    }
+
+    /**
+     * @param value
+     *            Skipped date time fields. This value can be used if meter
+     *            can't handle deviation or status.
+     */
+    public void setDateTimeSkips(final java.util.Set<DateTimeSkips> value) {
+        dateTimeSkips = value;
     }
 
     /**

@@ -58,7 +58,6 @@ public class sampleclient {
     public static void main(String[] args)
             throws XMLStreamException, IOException {
         Settings settings = new Settings();
-
         GXDLMSReader reader = null;
         try {
             ////////////////////////////////////////

@@ -44,6 +44,8 @@ import java.util.ArrayList;
 import javax.xml.stream.XMLStreamException;
 
 import gurux.dlms.GXDLMSClient;
+import gurux.dlms.enums.AccessMode;
+import gurux.dlms.enums.MethodAccessMode;
 import gurux.dlms.enums.ObjectType;
 
 /**
@@ -145,10 +147,8 @@ public class GXDLMSObjectCollection extends ArrayList<GXDLMSObject>
         try {
             return load(stream);
         } finally {
-            if (stream != null) {
-                stream.close();
-                stream = null;
-            }
+            stream.close();
+            stream = null;
         }
     }
 
@@ -200,6 +200,22 @@ public class GXDLMSObjectCollection extends ArrayList<GXDLMSObject>
                             reader.readElementContentAsString("Description"));
                 } else if ("Version".equalsIgnoreCase(target)) {
                     obj.setVersion(reader.readElementContentAsInt("Version"));
+                } else if ("Access".equalsIgnoreCase(target)) {
+                    int pos = 0;
+                    for (byte it : reader.readElementContentAsString("Access")
+                            .getBytes()) {
+                        ++pos;
+                        obj.setAccess(pos, AccessMode.forValue(it - 0x30));
+                    }
+                } else if ("MethodAccess".equalsIgnoreCase(target)) {
+                    int pos = 0;
+                    for (byte it : reader
+                            .readElementContentAsString("MethodAccess")
+                            .getBytes()) {
+                        ++pos;
+                        obj.setMethodAccess(pos,
+                                MethodAccessMode.forValue(it - 0x30));
+                    }
                 } else {
                     ((IGXDLMSBase) obj).load(reader);
                     obj = null;
@@ -207,12 +223,11 @@ public class GXDLMSObjectCollection extends ArrayList<GXDLMSObject>
             } else {
                 reader.read();
             }
-            for (GXDLMSObject it : reader.getObjects()) {
-                ((IGXDLMSBase) it).postLoad(reader);
-            }
+        }
+        for (GXDLMSObject it : reader.getObjects()) {
+            ((IGXDLMSBase) it).postLoad(reader);
         }
         return reader.getObjects();
-
     }
 
     /**
@@ -293,6 +308,19 @@ public class GXDLMSObjectCollection extends ArrayList<GXDLMSObject>
                 if (d != null && d.length() != 0) {
                     writer.writeElementString("Description", d);
                 }
+                // Add access rights.
+                StringBuilder sb = new StringBuilder();
+                for (int pos = 1; pos != it.getAttributeCount() + 1; ++pos) {
+                    sb.append(String.valueOf(it.getAccess(pos).getValue()));
+                }
+                writer.writeElementString("Access", sb.toString());
+                sb.setLength(0);
+                for (int pos = 1; pos != it.getMethodCount() + 1; ++pos) {
+                    sb.append(
+                            String.valueOf(it.getMethodAccess(pos).getValue()));
+                }
+                writer.writeElementString("MethodAccess", sb.toString());
+
                 if (settings == null || settings.getValues()) {
                     ((IGXDLMSBase) it).save(writer);
                 }

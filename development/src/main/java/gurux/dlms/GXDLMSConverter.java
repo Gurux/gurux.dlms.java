@@ -497,7 +497,6 @@ public class GXDLMSConverter {
         if (value instanceof GXDate) {
             return DataType.DATE;
         }
-
         if (value instanceof java.util.Date || value instanceof GXDateTime) {
             return DataType.DATETIME;
         }
@@ -621,10 +620,11 @@ public class GXDLMSConverter {
                 return GXCommon.hexToBytes((String) value);
             }
             throw new IllegalArgumentException(
-                    "Can't change octect string type.");
+                    "Can't change octet string type.");
         case STRING:
-        case BITSTRING:
             return String.valueOf(value);
+        case BITSTRING:
+            return new GXBitString((String) value);
         case STRING_UTF8:
             return String.valueOf(value);
         case STRUCTURE:

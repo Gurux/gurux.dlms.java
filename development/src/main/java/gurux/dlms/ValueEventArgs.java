@@ -89,7 +89,7 @@ public class ValueEventArgs {
     private boolean skipMaxPduSize;
 
     /**
-     * Is reply handled as byte array or octect string.
+     * Is reply handled as byte array or octet string.
      */
     private boolean byteArray = false;
 
@@ -339,7 +339,7 @@ public class ValueEventArgs {
     }
 
     /**
-     * @return Is reply handled as byte array or octect string.
+     * @return Is reply handled as byte array or octet string.
      */
     public boolean isByteArray() {
         return byteArray;
@@ -347,7 +347,7 @@ public class ValueEventArgs {
 
     /**
      * @param value
-     *            Is reply handled as byte array or octect string.
+     *            Is reply handled as byte array or octet string.
      */
     public void setByteArray(final boolean value) {
         byteArray = value;
