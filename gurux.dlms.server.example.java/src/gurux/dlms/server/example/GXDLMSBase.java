@@ -46,6 +46,7 @@ import java.util.AbstractMap;
 import java.util.Calendar;
 import java.util.Date;
 import java.util.List;
+import java.util.Map;
 import java.util.Map.Entry;
 
 import gurux.common.GXCommon;
@@ -128,6 +129,9 @@ import gurux.serial.GXSerial;
  */
 public class GXDLMSBase extends GXDLMSSecureServer2
         implements IGXMediaListener, gurux.net.IGXNetListener {
+
+    // Serial number of the meter.
+    final long SERIAL_NUMBER = 123456;
 
     TraceLevel Trace = TraceLevel.INFO;
     private IGXMedia media;
@@ -236,7 +240,7 @@ public class GXDLMSBase extends GXDLMSSecureServer2
      */
     void addLogicalDeviceName() {
         GXDLMSData d = new GXDLMSData("0.0.42.0.0.255");
-        d.setValue("Gurux123456");
+        d.setValue("GRX" + String.valueOf(SERIAL_NUMBER));
         // Set access right. Client can't change Device name.
         d.setAccess(2, AccessMode.READ);
         d.setDataType(2, DataType.OCTET_STRING);
@@ -1150,7 +1154,28 @@ public class GXDLMSBase extends GXDLMSSecureServer2
     @Override
     public final boolean isTarget(final int serverAddress,
             final int clientAddress) {
-        return true;
+        // Check server address using serial number.
+        if ((serverAddress & 0x3FFF) == SERIAL_NUMBER % 10000 + 1000) {
+            return true;
+        }
+        // Find address from the SAP table.
+        for (GXDLMSObject it : this.getItems()
+                .getObjects(ObjectType.SAP_ASSIGNMENT)) {
+            GXDLMSSapAssignment sap = (GXDLMSSapAssignment) it;
+            for (Map.Entry<Integer, String> e : sap.getSapAssignmentList()) {
+                // Check server address with two bytes.
+                if ((serverAddress & 0xFFFF0000) == 0
+                        && (serverAddress & 0x7FFF) == e.getKey()) {
+                    return true;
+                }
+                // Check server address with one byte.
+                if ((serverAddress & 0xFFFFFF00) == 0
+                        && (serverAddress & 0x7F) == e.getKey()) {
+                    return true;
+                }
+            }
+        }
+        return false;
     }
 
     @Override

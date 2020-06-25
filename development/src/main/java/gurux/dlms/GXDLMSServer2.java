@@ -77,6 +77,20 @@ public abstract class GXDLMSServer2 {
     /**
      * Constructor for logical name referencing.
      * 
+     * @param logicalNameReferencing
+     *            Is logical name referencing used.
+     * @param type
+     *            Interface type.
+     */
+    public GXDLMSServer2(final boolean logicalNameReferencing,
+            final InterfaceType type) {
+        base = new GXDLMSServerBase(this, true, type);
+        getSettings().setUseLogicalNameReferencing(logicalNameReferencing);
+    }
+
+    /**
+     * Constructor for logical name referencing.
+     * 
      * @param ln
      *            Association logical name.
      * @param type
@@ -191,6 +205,13 @@ public abstract class GXDLMSServer2 {
      */
     public final GXDLMSObjectCollection getItems() {
         return base.getItems();
+    }
+
+    /**
+     * @return Used authentication.
+     */
+    public final Authentication getAuthentication() {
+        return getSettings().getAuthentication();
     }
 
     /**

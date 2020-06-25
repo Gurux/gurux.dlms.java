@@ -333,10 +333,16 @@ public class GXDLMSServerBase {
                     ln.getObjectList().addAll(getItems());
                 }
                 associationObject = it;
-                ln.getXDLMSContextInfo()
-                        .setMaxReceivePduSize(settings.getMaxServerPDUSize());
-                ln.getXDLMSContextInfo()
-                        .setMaxSendPduSize(settings.getMaxServerPDUSize());
+                if (settings.getMaxServerPDUSize() != 0) {
+                    ln.getXDLMSContextInfo().setMaxReceivePduSize(
+                            settings.getMaxServerPDUSize());
+                    ln.getXDLMSContextInfo()
+                            .setMaxSendPduSize(settings.getMaxServerPDUSize());
+                }
+                if (!settings.getProposedConformance().isEmpty()) {
+                    ln.getXDLMSContextInfo()
+                            .setConformance(settings.getProposedConformance());
+                }
 
             } else if (!(it instanceof IGXDLMSBase)) {
                 // Remove unsupported items.
@@ -768,6 +774,23 @@ public class GXDLMSServerBase {
                 receivedData.clear();
                 if (info.getCommand() == Command.DISCONNECT_REQUEST
                         && (settings.getConnected() == ConnectionState.NONE)) {
+                    if (owner instanceof GXDLMSServer) {
+                        GXDLMSServer b = (GXDLMSServer) owner;
+                        // Check is data send to this server.
+                        if (!b.isTarget(settings.getServerAddress(),
+                                settings.getClientAddress())) {
+                            info.clear();
+                            return;
+                        }
+                    } else {
+                        GXDLMSServer2 b = (GXDLMSServer2) owner;
+                        // Check is data send to this server.
+                        if (!b.isTarget(settings.getServerAddress(),
+                                settings.getClientAddress())) {
+                            info.clear();
+                            return;
+                        }
+                    }
                     sr.setReply(GXDLMS.getHdlcFrame(settings,
                             Command.DISCONNECT_MODE, replyData));
                     info.clear();

@@ -55,6 +55,21 @@ public abstract class GXDLMSSecureServer2 extends GXDLMSServer2 {
     /**
      * Constructor.
      * 
+     * @param logicalNameReferencing
+     *            Is logical name referencing used.
+     * @param type
+     *            Interface type.
+     */
+    public GXDLMSSecureServer2(final boolean logicalNameReferencing,
+            final InterfaceType type) {
+        super(logicalNameReferencing, type);
+        ciphering = new GXCiphering("ABCDEFGH".getBytes());
+        setCipher(ciphering);
+    }
+
+    /**
+     * Constructor.
+     * 
      * @param ln
      *            Association logical name.
      * @param type

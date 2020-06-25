@@ -1,10 +1,9 @@
 <project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
   <modelVersion>4.0.0</modelVersion>
   <groupId>org.gurux</groupId>
-  <artifactId>gurux.dlms.server.example.java</artifactId>
+  <artifactId>gurux.dlms.simulator.java</artifactId>
   <version>0.0.1-SNAPSHOT</version>
   <properties>
-    <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
     <maven.compiler.source>7</maven.compiler.source>
     <maven.compiler.target>1.7</maven.compiler.target>
   </properties>
@@ -25,7 +24,7 @@
             <configuration>
               <transformers>
                 <transformer implementation="org.apache.maven.plugins.shade.resource.ManifestResourceTransformer">
-                  <mainClass>gurux.dlms.server.example.GuruxDlmsServerExample</mainClass>
+                  <mainClass>gurux.dlms.simulator.Simulator</mainClass>
                 </transformer>
               </transformers>
             </configuration>
@@ -37,13 +36,18 @@
   <dependencies>
     <dependency>
       <groupId>org.gurux</groupId>
-      <artifactId>gurux.net</artifactId>
-      <version>1.0.19</version>
+      <artifactId>gurux.serial</artifactId>
+      <version>1.0.21</version>
     </dependency>
     <dependency>
       <groupId>org.gurux</groupId>
-      <artifactId>gurux.serial</artifactId>
-      <version>1.0.21</version>
+      <artifactId>gurux.net</artifactId>
+      <version>1.0.16</version>
+    </dependency>
+    <dependency>
+      <groupId>org.gurux</groupId>
+      <artifactId>gurux.terminal</artifactId>
+      <version>1.0.15</version>
     </dependency>
     <dependency>
       <groupId>org.gurux</groupId>

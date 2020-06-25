@@ -393,7 +393,7 @@ public class GXDLMSSettings {
     }
 
     /**
-     * @return Gets used authentication.
+     * @return Used authentication.
      */
     public final Authentication getAuthentication() {
         return authentication;
