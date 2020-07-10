@@ -67,7 +67,7 @@ public class GXDLMSEmergencyProfile {
 
     @Override
     public final String toString() {
-        return String.valueOf(id) + " " + activationTime.toString() + " "
+        return String.valueOf(id) + " " + String.valueOf(activationTime) + " "
                 + String.valueOf(duration);
     }
 }
