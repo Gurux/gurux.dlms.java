@@ -1351,6 +1351,11 @@ public class GXDLMSTranslator {
                         omitDeclaration, omitNameSpace, allowUnknownCommand);
                 xml.appendEndTag(cmd);
                 break;
+            case Command.EXCEPTION_RESPONSE:
+                data.setXml(xml);
+                data.setData(value);
+                GXDLMS.handleExceptionResponse(data);
+                break;
             default:
                 if (!allowUnknownCommand) {
                     throw new IllegalArgumentException("Invalid command.");
@@ -1426,6 +1431,7 @@ public class GXDLMSTranslator {
         case Command.ACCESS_REQUEST:
         case Command.INITIATE_REQUEST:
         case Command.CONFIRMED_SERVICE_ERROR:
+        case Command.EXCEPTION_RESPONSE:
             s.getSettings().setServer(false);
             break;
         case Command.GLO_INITIATE_REQUEST:
@@ -2522,6 +2528,26 @@ public class GXDLMSTranslator {
                         GXCommon.hexToBytes(getValue(node, s)));
                 s.setCommand(Command.NONE);
                 break;
+            case TranslatorTags.STATE_ERROR:
+                if (s.getOutputType() == TranslatorOutputType.SIMPLE_XML) {
+                    s.getAttributeDescriptor().setUInt8(TranslatorSimpleTags
+                            .valueofStateError(getValue(node, s)).getValue());
+                } else {
+                    s.getAttributeDescriptor().setUInt8(TranslatorStandardTags
+                            .valueofStateError(getValue(node, s)).getValue());
+                }
+                break;
+            case TranslatorTags.SERVICE_ERROR:
+                if (s.getOutputType() == TranslatorOutputType.SIMPLE_XML) {
+                    s.getAttributeDescriptor().setUInt8(TranslatorSimpleTags
+                            .valueOfExceptionServiceError(getValue(node, s))
+                            .getValue());
+                } else {
+                    s.getAttributeDescriptor().setUInt8(TranslatorStandardTags
+                            .valueOfExceptionServiceError(getValue(node, s))
+                            .getValue());
+                }
+                break;
             default:
                 throw new IllegalArgumentException(
                         "Invalid node: " + node.getNodeName());
@@ -3023,10 +3049,9 @@ public class GXDLMSTranslator {
             bb.setUInt8(s.getReason());
             break;
         case Command.CONFIRMED_SERVICE_ERROR:
+        case Command.EXCEPTION_RESPONSE:
             bb.setUInt8(s.getCommand());
             bb.set(s.getAttributeDescriptor());
-            break;
-        case Command.EXCEPTION_RESPONSE:
             break;
         case Command.GENERAL_BLOCK_TRANSFER:
             break;

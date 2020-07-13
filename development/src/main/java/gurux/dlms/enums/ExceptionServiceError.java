@@ -55,7 +55,22 @@ public enum ExceptionServiceError {
     /**
      * Other reason.
      */
-    OTHER_REASON(3);
+    OTHER_REASON(3),
+
+    /**
+     * PDU is too long.
+     */
+    PDU_TOO_LONG(4),
+
+    /**
+     * Ciphering failed.
+     */
+    DECIPHERING_ERROR(5),
+
+    /**
+     * Invocation counter is invalid.
+     */
+    INVOCATION_COUNTER_ERROR(6);
 
     /**
      * Integer value of enumerator.

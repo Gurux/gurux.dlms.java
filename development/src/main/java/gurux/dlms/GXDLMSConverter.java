@@ -319,7 +319,7 @@ public class GXDLMSConverter {
             throw new RuntimeException(e.getMessage());
         }
         String str = buffer.toString();
-        str = str.replace("\r", " ");
+        str = str.replace("\r", "");
         List<String> rows = GXCommon.split(str, '\n');
         for (String it : rows) {
             // Comments start with #.

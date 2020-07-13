@@ -12,9 +12,11 @@ import gurux.dlms.enums.Conformance;
 import gurux.dlms.enums.DataType;
 import gurux.dlms.enums.Definition;
 import gurux.dlms.enums.ErrorCode;
+import gurux.dlms.enums.ExceptionServiceError;
 import gurux.dlms.enums.HardwareResource;
 import gurux.dlms.enums.Initiate;
 import gurux.dlms.enums.LoadDataSet;
+import gurux.dlms.enums.StateError;
 import gurux.dlms.enums.Task;
 import gurux.dlms.enums.VdeStateError;
 
@@ -122,6 +124,11 @@ final class TranslatorSimpleTags {
                 "InformationReportRequest");
         GXDLMSTranslator.addTag(list, Command.EVENT_NOTIFICATION,
                 "EventNotificationRequest");
+        GXDLMSTranslator.addTag(list, Command.EXCEPTION_RESPONSE,
+                "ExceptionResponse");
+        GXDLMSTranslator.addTag(list, TranslatorTags.STATE_ERROR, "StateError");
+        GXDLMSTranslator.addTag(list, TranslatorTags.SERVICE_ERROR,
+                "ServiceError");
     }
 
     /*
@@ -753,6 +760,80 @@ final class TranslatorSimpleTags {
      */
     static String serviceErrorToString(final ServiceError error) {
         return getServiceErrors().get(error);
+    }
+
+    /**
+     * Gets state error description.
+     * 
+     * @param error
+     *            State error enumerator value.
+     * @return State error as an string.
+     */
+    static String stateErrorToString(final StateError error) {
+        switch (error) {
+        case SERVICE_NOT_ALLOWED:
+            return "ServiceNotAllowed";
+        case SERVICE_UNKNOWN:
+            return "ServiceUnknown";
+        default:
+            throw new IllegalArgumentException();
+        }
+    }
+
+    /**
+     * Gets service error description.
+     * 
+     * @param error
+     *            Service error enumerator value.
+     * @return Service error as an string.
+     */
+    static String
+            exceptionServiceErrorToString(final ExceptionServiceError error) {
+        switch (error) {
+        case OPERATION_NOT_POSSIBLE:
+            return "OperationNotPossible";
+        case SERVICE_NOT_SUPPORTED:
+            return "ServiceNotSupported";
+        case OTHER_REASON:
+            return "OtherReason";
+        default:
+            throw new IllegalArgumentException();
+        }
+    }
+
+    /**
+     * @param value
+     *            State error string value.
+     * @return State error enum value.
+     */
+    static StateError valueofStateError(final String value) {
+        if ("ServiceNotAllowed".equalsIgnoreCase(value)) {
+            return StateError.SERVICE_NOT_ALLOWED;
+        }
+        if ("ServiceUnknown".equalsIgnoreCase(value)) {
+            return StateError.SERVICE_UNKNOWN;
+        }
+        throw new IllegalArgumentException();
+    }
+
+    /**
+     * @param value
+     *            Service error string value.
+     * @return Service error enum value.
+     */
+    static ExceptionServiceError
+            valueOfExceptionServiceError(final String value) {
+
+        if ("OperationNotPossible".equalsIgnoreCase(value)) {
+            return ExceptionServiceError.OPERATION_NOT_POSSIBLE;
+        }
+        if ("ServiceNotSupported".equalsIgnoreCase(value)) {
+            return ExceptionServiceError.SERVICE_NOT_SUPPORTED;
+        }
+        if ("OtherReason".equalsIgnoreCase(value)) {
+            return ExceptionServiceError.OTHER_REASON;
+        }
+        throw new IllegalArgumentException();
     }
 
     /**

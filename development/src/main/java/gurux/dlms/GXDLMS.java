@@ -3519,12 +3519,6 @@ abstract class GXDLMS {
         }
     }
 
-    private static void handleExceptionResponse(final GXReplyData data) {
-        throw new GXDLMSException(
-                StateError.values()[data.getData().getUInt8() - 1],
-                ExceptionServiceError.values()[data.getData().getUInt8() - 1]);
-    }
-
     static void handleConfirmedServiceError(final GXReplyData data) {
         if (data.getXml() != null) {
             data.getXml().appendStartTag(Command.CONFIRMED_SERVICE_ERROR);
@@ -3560,6 +3554,37 @@ abstract class GXDLMS {
                     ServiceError.forValue(data.getData().getUInt8());
             throw new GXDLMSConfirmedServiceError(service, type,
                     data.getData().getUInt8());
+        }
+    }
+
+    static void handleExceptionResponse(final GXReplyData data) {
+        StateError state = StateError.forValue(data.getData().getUInt8());
+        ExceptionServiceError error =
+                ExceptionServiceError.forValue(data.getData().getUInt8());
+        Object value = null;
+        if (error == ExceptionServiceError.INVOCATION_COUNTER_ERROR
+                && data.getData().available() > 3) {
+            value = data.getData().getUInt32();
+        }
+        if (data.getXml() != null) {
+            data.getXml().appendStartTag(Command.EXCEPTION_RESPONSE);
+            if (data.getXml()
+                    .getOutputType() == TranslatorOutputType.STANDARD_XML) {
+                data.getXml().appendLine(TranslatorTags.STATE_ERROR, null,
+                        TranslatorStandardTags.stateErrorToString(state));
+                data.getXml().appendLine(TranslatorTags.SERVICE_ERROR, null,
+                        TranslatorStandardTags
+                                .exceptionServiceErrorToString(error));
+            } else {
+                data.getXml().appendLine(TranslatorTags.STATE_ERROR, null,
+                        TranslatorSimpleTags.stateErrorToString(state));
+                data.getXml().appendLine(TranslatorTags.SERVICE_ERROR, null,
+                        TranslatorSimpleTags
+                                .exceptionServiceErrorToString(error));
+            }
+            data.getXml().appendEndTag(Command.EXCEPTION_RESPONSE);
+        } else {
+            throw new GXDLMSExceptionResponse(state, error, value);
         }
     }
 
