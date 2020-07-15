@@ -318,7 +318,23 @@ public class GXXmlWriter implements AutoCloseable {
                 return;
             }
             boolean addSpaces = false;
-            if (uiType != DataType.NONE && uiType != dt
+            if (value instanceof GXDateTimeOS) {
+                List<Map.Entry<String, String>> list =
+                        new ArrayList<Map.Entry<String, String>>();
+                list.add(new GXSimpleEntry<String, String>("Type",
+                        String.valueOf(DataType.OCTET_STRING.getValue())));
+                if (value instanceof GXTimeOS) {
+                    list.add(new GXSimpleEntry<String, String>("UIType",
+                            String.valueOf(DataType.TIME.getValue())));
+                } else if (value instanceof GXDateOS) {
+                    list.add(new GXSimpleEntry<String, String>("UIType",
+                            String.valueOf(DataType.DATE.getValue())));
+                } else {
+                    list.add(new GXSimpleEntry<String, String>("UIType",
+                            String.valueOf(DataType.DATETIME.getValue())));
+                }
+                writeStartElement(name, list, false);
+            } else if (uiType != DataType.NONE && uiType != dt
                     && (uiType != DataType.STRING
                             || dt == DataType.OCTET_STRING)) {
                 List<Map.Entry<String, String>> list =

@@ -491,6 +491,9 @@ public class GXDLMSConverter {
         if (value instanceof Long) {
             return DataType.INT64;
         }
+        if (value instanceof GXDateTimeOS) {
+            return DataType.OCTET_STRING;
+        }
         if (value instanceof GXTime) {
             return DataType.TIME;
         }
