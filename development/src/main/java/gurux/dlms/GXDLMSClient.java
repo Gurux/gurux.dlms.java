@@ -2372,6 +2372,9 @@ public class GXDLMSClient {
             throws InvalidKeyException, NoSuchAlgorithmException,
             NoSuchPaddingException, InvalidAlgorithmParameterException,
             IllegalBlockSizeException, BadPaddingException {
+        if (pg.getCaptureObjects().isEmpty()) {
+            throw new RuntimeException("Capture objects not read.");
+        }
         if (index < 0) {
             throw new IllegalArgumentException("index");
         }
@@ -2591,19 +2594,17 @@ public class GXDLMSClient {
             throws InvalidKeyException, NoSuchAlgorithmException,
             NoSuchPaddingException, InvalidAlgorithmParameterException,
             IllegalBlockSizeException, BadPaddingException {
+
+        if (pg.getCaptureObjects().isEmpty()) {
+            throw new RuntimeException("Capture objects not read.");
+        }
         pg.clearBuffer();
         settings.resetBlockIndex();
         GXDateTime s = GXCommon.getDateTime(start);
         GXDateTime e = GXCommon.getDateTime(end);
         GXDLMSObject sort = pg.getSortObject();
-        if (sort == null && !pg.getCaptureObjects().isEmpty()) {
+        if (sort == null) {
             sort = pg.getCaptureObjects().get(0).getKey();
-        }
-        // If sort object is not found or it is not clock object read all.
-        if (sort == null || !(sort.getObjectType() == ObjectType.CLOCK
-                || (sort.getObjectType() == ObjectType.DATA
-                        && "0.0.1.1.0.255".equals(sort.getLogicalName())))) {
-            return read(pg, 2);
         }
         GXByteBuffer buff = new GXByteBuffer(51);
         // Add AccessSelector value.

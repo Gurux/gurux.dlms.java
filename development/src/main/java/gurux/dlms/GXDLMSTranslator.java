@@ -3054,6 +3054,10 @@ public class GXDLMSTranslator {
             bb.set(s.getAttributeDescriptor());
             break;
         case Command.GENERAL_BLOCK_TRANSFER:
+            ln = new GXDLMSLNParameters(s.getSettings(), 0, s.getCommand(),
+                    s.getRequestType(), s.getAttributeDescriptor(), s.getData(),
+                    0xff, Command.NONE);
+            GXDLMS.getLNPdu(ln, bb);
             break;
         case Command.ACCESS_REQUEST:
             ln = new GXDLMSLNParameters(s.getSettings(), 0, s.getCommand(),

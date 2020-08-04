@@ -36,9 +36,7 @@ package gurux.dlms;
 
 import gurux.dlms.enums.AcseServiceProvider;
 import gurux.dlms.enums.AssociationResult;
-import gurux.dlms.enums.ExceptionServiceError;
 import gurux.dlms.enums.SourceDiagnostic;
-import gurux.dlms.enums.StateError;
 
 /**
  * DLMS specific exception class that has error description available from
@@ -52,8 +50,6 @@ public class GXDLMSException extends RuntimeException {
     private AssociationResult result = AssociationResult.ACCEPTED;
     private int diagnostic = 0;
     private int errorCode;
-    private StateError stateError;
-    private ExceptionServiceError exceptionServiceError;
 
     public GXDLMSException(final int errCode) {
         super(GXDLMS.getDescription(errCode));
@@ -181,19 +177,5 @@ public class GXDLMSException extends RuntimeException {
      */
     public final int getDiagnostic() {
         return diagnostic;
-    }
-
-    /**
-     * @return State error.
-     */
-    public final StateError getStateError() {
-        return stateError;
-    }
-
-    /**
-     * @return Service error.
-     */
-    public final ExceptionServiceError getExceptionServiceError() {
-        return exceptionServiceError;
     }
 }
