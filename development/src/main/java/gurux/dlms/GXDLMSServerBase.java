@@ -806,6 +806,8 @@ public class GXDLMSServerBase {
                         if (!b.isTarget(settings.getServerAddress(),
                                 settings.getClientAddress())) {
                             info.clear();
+                            settings.setClientAddress(0);
+                            settings.setServerAddress(0);
                             return;
                         }
                     } else {
@@ -814,6 +816,8 @@ public class GXDLMSServerBase {
                         if (!b.isTarget(settings.getServerAddress(),
                                 settings.getClientAddress())) {
                             info.clear();
+                            settings.setClientAddress(0);
+                            settings.setServerAddress(0);
                             return;
                         }
                     }

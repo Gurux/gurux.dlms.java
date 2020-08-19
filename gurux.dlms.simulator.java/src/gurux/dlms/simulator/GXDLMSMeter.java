@@ -47,6 +47,7 @@ import gurux.common.PropertyChangedEventArgs;
 import gurux.common.ReceiveEventArgs;
 import gurux.common.TraceEventArgs;
 import gurux.common.enums.TraceLevel;
+import gurux.dlms.ConnectionState;
 import gurux.dlms.GXDLMSConnectionEventArgs;
 import gurux.dlms.GXServerReply;
 import gurux.dlms.ValueEventArgs;
@@ -247,7 +248,8 @@ public class GXDLMSMeter extends GXDLMSSecureServer2
     public void onReceived(Object sender, ReceiveEventArgs e) {
         try {
             synchronized (this) {
-                if (Trace == TraceLevel.VERBOSE) {
+                if (Trace == TraceLevel.VERBOSE
+                        && this.getConnectionState() != ConnectionState.NONE) {
                     System.out.println("RX:\t" + gurux.common.GXCommon
                             .bytesToHex((byte[]) e.getData()));
                 }
@@ -286,7 +288,7 @@ public class GXDLMSMeter extends GXDLMSSecureServer2
             gurux.net.ConnectionEventArgs e) {
         if (Trace.ordinal() > TraceLevel.OFF.ordinal()
                 && (!Exclusive || serialNumber == 1)) {
-            System.out.println("Client Connected.");
+            System.out.println("TCP/IP connection established.");
         }
     }
 
@@ -298,7 +300,7 @@ public class GXDLMSMeter extends GXDLMSSecureServer2
             gurux.net.ConnectionEventArgs e) {
         if (Trace.ordinal() > TraceLevel.OFF.ordinal()
                 && (!Exclusive || serialNumber == 1)) {
-            System.out.println("Client Disconnected.");
+            System.out.println("TCP/IP connection closed.");
         }
     }
 
@@ -459,6 +461,10 @@ public class GXDLMSMeter extends GXDLMSSecureServer2
      */
     @Override
     protected void onConnected(GXDLMSConnectionEventArgs connectionInfo) {
+        // Show trace only for one meter.
+        if (Trace.ordinal() > TraceLevel.WARNING.ordinal()) {
+            System.out.println("Client Connected");
+        }
     }
 
     /**
@@ -476,7 +482,11 @@ public class GXDLMSMeter extends GXDLMSSecureServer2
 
     @Override
     protected void onDisconnected(GXDLMSConnectionEventArgs connectionInfo) {
-
+        // Show trace only for one meter.
+        if (Trace.ordinal() > TraceLevel.WARNING.ordinal()
+                && getConnectionState() != ConnectionState.NONE) {
+            System.out.println("Client Disconnected");
+        }
     }
 
     /**

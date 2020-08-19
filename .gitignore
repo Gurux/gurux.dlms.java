@@ -234,3 +234,6 @@ development/pom.xml.releaseBackup
 development/release.properties
 gurux.dlms.server.example.java/dependency-reduced-pom.xml
 gurux.dlms.client.example.java/dependency-reduced-pom.xml
+gurux.dlms.simulator.java/trace.txt
+gurux.dlms.simulator.java/logFile.txt
+gurux.dlms.simulator.java/dependency-reduced-pom.xml

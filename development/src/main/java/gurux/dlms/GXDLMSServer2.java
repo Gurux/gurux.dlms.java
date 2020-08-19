@@ -201,6 +201,13 @@ public abstract class GXDLMSServer2 {
     }
 
     /**
+     * @return Client connection state.
+     */
+    public byte getConnectionState() {
+        return getSettings().getConnected();
+    }
+
+    /**
      * @return List of objects that meter supports.
      */
     public final GXDLMSObjectCollection getItems() {

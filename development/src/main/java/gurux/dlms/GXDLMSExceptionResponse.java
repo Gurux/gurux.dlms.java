@@ -55,8 +55,7 @@ public class GXDLMSExceptionResponse extends RuntimeException {
      */
     GXDLMSExceptionResponse(final StateError error,
             final ExceptionServiceError type, final Object value) {
-        super("ServiceError " + getStateError(error) + " exception. "
-                + getServiceError(type));
+        super(getStateError(error) + ". " + getServiceError(type));
         exceptionStateError = error;
         exceptionServiceError = type;
         exceptionResponseValue = value;
@@ -117,6 +116,12 @@ public class GXDLMSExceptionResponse extends RuntimeException {
             return "Service not supported";
         case OTHER_REASON:
             return "Other reason";
+        case PDU_TOO_LONG:
+            return "PDU is too long";
+        case DECIPHERING_ERROR:
+            return "Ciphering failed";
+        case INVOCATION_COUNTER_ERROR:
+            return "Invocation counter is invalid.";
         default:
         }
         return "";
