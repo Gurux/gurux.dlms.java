@@ -172,7 +172,7 @@ public class Settings {
                     settings.trace = TraceLevel.OFF;
                 else
                     throw new IllegalArgumentException(
-                            "Invalid Authentication option '" + it.getValue()
+                            "Invalid Trace level option '" + it.getValue()
                                     + "'. (Error, Warning, Info, Verbose, Off).");
                 break;
             case 'p':
