@@ -1202,6 +1202,12 @@ final class TranslatorStandardTags {
             return "service-not-supported";
         case OTHER_REASON:
             return "other-reason";
+        case PDU_TOO_LONG:
+            return "pdu-too-long";
+        case DECIPHERING_ERROR:
+            return "deciphering-error";
+        case INVOCATION_COUNTER_ERROR:
+            return "invocation-counter-error";
         default:
             throw new IllegalArgumentException();
         }
@@ -1237,6 +1243,15 @@ final class TranslatorStandardTags {
         }
         if ("other-reason".equalsIgnoreCase(value)) {
             return ExceptionServiceError.OTHER_REASON;
+        }
+        if ("pdu-too-long".equalsIgnoreCase(value)) {
+            return ExceptionServiceError.PDU_TOO_LONG;
+        }
+        if ("deciphering-error".equalsIgnoreCase(value)) {
+            return ExceptionServiceError.DECIPHERING_ERROR;
+        }
+        if ("invocation-counter-error".equalsIgnoreCase(value)) {
+            return ExceptionServiceError.INVOCATION_COUNTER_ERROR;
         }
         throw new IllegalArgumentException();
     }

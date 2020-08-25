@@ -992,6 +992,8 @@ public class GXDLMSTranslator {
         case Command.GENERAL_DED_CIPHERING:
         case Command.AARE:
         case Command.AARQ:
+        case Command.GLO_CONFIRMED_SERVICE_ERROR:
+        case Command.DED_CONFIRMED_SERVICE_ERROR:
             return true;
         default:
             return false;
@@ -1185,6 +1187,8 @@ public class GXDLMSTranslator {
             case Command.DED_SET_RESPONSE:
             case Command.DED_METHOD_REQUEST:
             case Command.DED_METHOD_RESPONSE:
+            case Command.GLO_CONFIRMED_SERVICE_ERROR:
+            case Command.DED_CONFIRMED_SERVICE_ERROR:
                 if (settings.getCipher() != null && comments) {
                     int originalPosition = value.position();
                     int len = xml.getXmlLength();

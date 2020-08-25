@@ -246,6 +246,11 @@ public final class Command {
     public static final int GLO_WRITE_RESPONSE = 45;
 
     /**
+     * Glo confirmed service error.
+     */
+    public static final int GLO_CONFIRMED_SERVICE_ERROR = 46;
+
+    /**
      * General GLO ciphering.
      */
     public static final int GENERAL_GLO_CIPHERING = 0xDB;

@@ -298,6 +298,12 @@ public class GXDLMSSettings {
     private boolean useUtc2NormalTime;
 
     /**
+     * Some meters expect that Invocation Counter is increased for
+     * Authentication when connection is established.
+     */
+    private boolean increaseInvocationCounterForGMacAuthentication;
+
+    /**
      * Skipped fields.
      */
     private java.util.Set<DateTimeSkips> dateTimeSkips =
@@ -1120,6 +1126,24 @@ public class GXDLMSSettings {
      */
     public void setUseUtc2NormalTime(final boolean value) {
         useUtc2NormalTime = value;
+    }
+
+    /**
+     * @return Some meters expect that Invocation Counter is increased for
+     *         Authentication when connection is established.
+     */
+    public boolean getIncreaseInvocationCounterForGMacAuthentication() {
+        return increaseInvocationCounterForGMacAuthentication;
+    }
+
+    /**
+     * @param value
+     *            Some meters expect that Invocation Counter is increased for
+     *            Authentication when connection is established.
+     */
+    public void setIncreaseInvocationCounterForGMacAuthentication(
+            final boolean value) {
+        increaseInvocationCounterForGMacAuthentication = value;
     }
 
     /**

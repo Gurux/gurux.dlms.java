@@ -307,9 +307,10 @@ final class TranslatorSimpleTags {
                 "glo_WriteResponse");
         GXDLMSTranslator.addTag(list, Command.GENERAL_GLO_CIPHERING,
                 "GeneralGloCiphering");
-
         GXDLMSTranslator.addTag(list, Command.GENERAL_CIPHERING,
                 "GeneralCiphering");
+        GXDLMSTranslator.addTag(list, Command.GLO_CONFIRMED_SERVICE_ERROR,
+                "glo_ConfirmedServiceError");
     }
 
     /*
@@ -335,6 +336,8 @@ final class TranslatorSimpleTags {
                 "ded_ActionResponse");
         GXDLMSTranslator.addTag(list, Command.GENERAL_DED_CIPHERING,
                 "GeneralDedCiphering");
+        GXDLMSTranslator.addTag(list, Command.DED_CONFIRMED_SERVICE_ERROR,
+                "ded_ConfirmedServiceError");
     }
 
     /*
@@ -796,6 +799,12 @@ final class TranslatorSimpleTags {
             return "ServiceNotSupported";
         case OTHER_REASON:
             return "OtherReason";
+        case PDU_TOO_LONG:
+            return "PduTooLong";
+        case DECIPHERING_ERROR:
+            return "DecipheringError";
+        case INVOCATION_COUNTER_ERROR:
+            return "InvocationCounterError";
         default:
             throw new IllegalArgumentException();
         }
@@ -832,6 +841,15 @@ final class TranslatorSimpleTags {
         }
         if ("OtherReason".equalsIgnoreCase(value)) {
             return ExceptionServiceError.OTHER_REASON;
+        }
+        if ("PduTooLong".equalsIgnoreCase(value)) {
+            return ExceptionServiceError.PDU_TOO_LONG;
+        }
+        if ("DecipheringError".equalsIgnoreCase(value)) {
+            return ExceptionServiceError.DECIPHERING_ERROR;
+        }
+        if ("InvocationCounterError".equalsIgnoreCase(value)) {
+            return ExceptionServiceError.INVOCATION_COUNTER_ERROR;
         }
         throw new IllegalArgumentException();
     }

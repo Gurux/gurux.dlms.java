@@ -1160,8 +1160,9 @@ abstract class GXDLMS {
         GXICipher cipher = p.getSettings().getCipher();
         // If client.
         if (p.getCipheredCommand() == Command.NONE) {
-            if (!p.getSettings().getNegotiatedConformance()
-                    .contains(Conformance.GENERAL_PROTECTION)
+            if (((p.getSettings().getConnected() & ConnectionState.DLMS) == 0
+                    || !p.getSettings().getNegotiatedConformance()
+                            .contains(Conformance.GENERAL_PROTECTION))
                     // General protection can be used with pre-established
                     // connections.
                     && ((p.getSettings().getPreEstablishedSystemTitle() == null

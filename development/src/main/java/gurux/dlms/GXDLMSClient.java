@@ -879,9 +879,11 @@ public class GXDLMSClient {
         } else {
             pw = settings.getPassword();
         }
-        long ic = 0;
-        if (settings.getCipher() != null) {
-            ic = settings.getCipher().getInvocationCounter();
+        long ic = settings.getCipher().getInvocationCounter();
+        if (settings.getCipher() != null && settings
+                .getIncreaseInvocationCounterForGMacAuthentication()) {
+            ++ic;
+            settings.getCipher().setInvocationCounter(ic);
         }
         byte[] challenge = GXSecure.secure(settings, settings.getCipher(), ic,
                 settings.getStoCChallenge(), pw);

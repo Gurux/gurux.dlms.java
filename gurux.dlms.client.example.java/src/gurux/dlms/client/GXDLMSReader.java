@@ -422,7 +422,8 @@ public class GXDLMSReader {
                     GXDLMSData d = new GXDLMSData(invocationCounter);
                     read(d, 2);
                     long iv = ((Number) d.getValue()).longValue();
-                    dlms.getCiphering().setInvocationCounter(1 + iv);
+                    iv += 1;
+                    dlms.getCiphering().setInvocationCounter(iv);
                     writeTrace("Invocation counter: " + String.valueOf(iv),
                             TraceLevel.INFO);
                     reply.clear();

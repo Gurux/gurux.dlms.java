@@ -321,7 +321,6 @@ final class GXAPDU {
                 data.setUInt8(BerType.OCTET_STRING);
                 data.setUInt8(crypted.length);
                 data.set(crypted);
-                cipher.setInvocationCounter(1 + cipher.getInvocationCounter());
             }
         }
     }
