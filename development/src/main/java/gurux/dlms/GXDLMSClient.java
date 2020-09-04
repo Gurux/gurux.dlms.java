@@ -1276,6 +1276,27 @@ public class GXDLMSClient {
     public final GXDLMSObjectCollection parseObjects(final GXByteBuffer data,
             final boolean onlyKnownObjects,
             final boolean ignoreInactiveObjects) {
+        GXDLMSConverter converter = new GXDLMSConverter(getStandard());
+        return parseObjects(data, onlyKnownObjects, ignoreInactiveObjects,
+                converter);
+    }
+
+    /**
+     * Parses the COSEM objects of the received data.
+     * 
+     * @param data
+     *            Received data, from the device, as byte array.
+     * @param onlyKnownObjects
+     *            Only known objects are parsed.
+     * @param ignoreInactiveObjects
+     *            Inactive objects are ignored.
+     * @param converter
+     *            Converter used to update OBIS code descriptions.
+     * @return Collection of COSEM objects.
+     */
+    public final GXDLMSObjectCollection parseObjects(final GXByteBuffer data,
+            final boolean onlyKnownObjects, final boolean ignoreInactiveObjects,
+            final GXDLMSConverter converter) {
         if (data == null) {
             throw new GXDLMSException("Invalid parameter.");
         }
@@ -1288,9 +1309,10 @@ public class GXDLMSClient {
                     ignoreInactiveObjects);
         }
         settings.getObjects().addAll(objects);
-        // Get description of the objects.
-        GXDLMSConverter converter = new GXDLMSConverter(getStandard());
-        converter.updateOBISCodeInformation(objects);
+        // Update description of the objects.
+        if (converter != null) {
+            converter.updateOBISCodeInformation(objects);
+        }
         return objects;
     }
 

@@ -386,8 +386,20 @@ public class GXXmlWriter implements AutoCloseable {
             }
             writeEndElement(addSpaces);
         } else if (!isSkipDefaults()) {
-            writeStartElement(name);
-            writeEndElement(false);
+            if (dt != DataType.NONE || uiType != DataType.NONE) {
+                List<Map.Entry<String, String>> list =
+                        new ArrayList<Map.Entry<String, String>>();
+                list.add(new GXSimpleEntry<String, String>("Type",
+                        String.valueOf(dt.getValue())));
+                list.add(new GXSimpleEntry<String, String>("UIType",
+                        String.valueOf(uiType.getValue())));
+                writeStartElement(name, list, false);
+                writeEndElement(false);
+            } else {
+                writeStartElement(name);
+                writeEndElement(false);
+            }
+
         }
     }
 

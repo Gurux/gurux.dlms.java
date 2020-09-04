@@ -73,11 +73,12 @@ public final class BerType {
      */
     public static final short SEQUENCE = 0x10;
 
-    public static final short SET = 0x11;
     /**
      * Utf8 String.
      */
     public static final short UTF8STRING = 12;
+
+    public static final short SET = 0x11;
 
     /**
      * Numeric string.

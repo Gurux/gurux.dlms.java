@@ -309,27 +309,35 @@ public class GXXmlReader implements AutoCloseable {
                 str = getText();
                 switch (uiType) {
                 case OCTET_STRING:
-                    ret = GXDLMSTranslator.hexToBytes(str);
+                    if (!str.isEmpty()) {
+                        ret = GXDLMSTranslator.hexToBytes(str);
+                    }
                     break;
                 case DATETIME:
-                    if (dt == DataType.OCTET_STRING) {
-                        ret = new GXDateTimeOS(str, Locale.ROOT);
-                    } else {
-                        ret = new GXDateTime(str, Locale.ROOT);
+                    if (!str.isEmpty()) {
+                        if (dt == DataType.OCTET_STRING) {
+                            ret = new GXDateTimeOS(str, Locale.ROOT);
+                        } else {
+                            ret = new GXDateTime(str, Locale.ROOT);
+                        }
                     }
                     break;
                 case DATE:
-                    if (dt == DataType.OCTET_STRING) {
-                        ret = new GXDateOS(str, Locale.ROOT);
-                    } else {
-                        ret = new GXDate(str, Locale.ROOT);
+                    if (!str.isEmpty()) {
+                        if (dt == DataType.OCTET_STRING) {
+                            ret = new GXDateOS(str, Locale.ROOT);
+                        } else {
+                            ret = new GXDate(str, Locale.ROOT);
+                        }
                     }
                     break;
                 case TIME:
-                    if (dt == DataType.OCTET_STRING) {
-                        ret = new GXTimeOS(str, Locale.ROOT);
-                    } else {
-                        ret = new GXTime(str, Locale.ROOT);
+                    if (!str.isEmpty()) {
+                        if (dt == DataType.OCTET_STRING) {
+                            ret = new GXTimeOS(str, Locale.ROOT);
+                        } else {
+                            ret = new GXTime(str, Locale.ROOT);
+                        }
                     }
                     break;
                 case NONE:
