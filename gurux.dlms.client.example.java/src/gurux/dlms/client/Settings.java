@@ -33,6 +33,9 @@
 //---------------------------------------------------------------------------
 package gurux.dlms.client;
 
+import java.io.File;
+import java.io.IOException;
+import java.security.KeyPair;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
@@ -42,7 +45,12 @@ import gurux.common.GXCommon;
 import gurux.common.IGXMedia;
 import gurux.common.enums.TraceLevel;
 import gurux.dlms.GXDLMSClient;
+import gurux.dlms.GXDLMSTranslator;
 import gurux.dlms.GXSimpleEntry;
+import gurux.dlms.asn.GXAsn1Converter;
+import gurux.dlms.asn.GXPkcs8;
+import gurux.dlms.asn.GXx509Certificate;
+import gurux.dlms.asn.enums.KeyUsage;
 import gurux.dlms.enums.Authentication;
 import gurux.dlms.enums.InterfaceType;
 import gurux.dlms.enums.Security;
@@ -82,6 +90,7 @@ public class Settings {
         System.out.println(" -c \t Client address. (Default: 16)");
         System.out.println(" -s \t Server address. (Default: 1)");
         System.out.println(" -n \t Server address as serial number.");
+        System.out.println(" -l \t Logical Server address.");
         System.out.println(
                 " -r [sn, ln]\t Short name or Logical Name (default) referencing is used.");
         System.out.println(" -w WRAPPER profile is used. HDLC is default.");
@@ -106,6 +115,9 @@ public class Settings {
                 " -D \t Dedicated key that is used with chiphering. Ex -D 00112233445566778899AABBCCDDEEFF");
         System.out.println(
                 " -d \t Used DLMS standard. Ex -d India (DLMS, India, Italy, SaudiArabia, IDIS)");
+        System.out.println(" -K \t Private key File. Ex. -k C:\\priv.pem");
+        System.out.println(" -k \t Public key File. Ex. -k C:\\pub.pem");
+
         System.out.println("Example:");
         System.out.println("Read LG device using TCP/IP connection.");
         System.out.println(
@@ -118,9 +130,10 @@ public class Settings {
 
     }
 
-    static int getParameters(String[] args, Settings settings) {
+    static int getParameters(String[] args, Settings settings)
+            throws IOException {
         List<GXCmdParameter> parameters = GXCommon.getParameters(args,
-                "h:p:c:s:r:iIt:a:p:wP:g:S:n:C:v:o:T:A:B:D:d:");
+                "h:p:c:s:r:iIt:a:p:wP:g:S:n:C:v:o:T:A:B:D:d:l:K:k:");
         GXNet net = null;
         for (GXCmdParameter it : parameters) {
             switch (it.getTag()) {
@@ -216,6 +229,53 @@ public class Settings {
                 settings.client.getCiphering()
                         .setDedicatedKey(GXCommon.hexToBytes(it.getValue()));
                 break;
+            case 'K':
+                GXPkcs8 cert1 = GXPkcs8.load(new File(it.getValue()).toPath());
+                settings.client.getCiphering().setSigningKeyPair(new KeyPair(
+                        cert1.getPublicKey(), cert1.getPrivateKey()));
+                System.out.println("Client Private key: " + GXDLMSTranslator
+                        .toHex(cert1.getPrivateKey().getEncoded()));
+                System.out.println("Client Public key: " + GXDLMSTranslator
+                        .toHex(GXAsn1Converter.toUIn64(cert1.getPublicKey())));
+                break;
+            case 'k':
+                GXx509Certificate cert = GXx509Certificate
+                        .load(new File(it.getValue()).toPath());
+                if (!cert.getKeyUsage().contains(KeyUsage.DIGITAL_SIGNATURE)
+                        && !cert.getKeyUsage()
+                                .contains(KeyUsage.KEY_AGREEMENT)) {
+                    throw new IllegalArgumentException(
+                            "This certificate is not used for digital signature or key agreement.");
+                }
+                settings.client.getCiphering().getCertificates().add(cert);
+
+                String[] sn = cert.getSubject().split("=");
+                if (sn.length != 2) {
+                    throw new IllegalArgumentException(
+                            "Invalid public key subject.");
+                }
+                settings.client.getCiphering()
+                        .setSystemTitle(GXDLMSTranslator.hexToBytes(sn[1]));
+                System.out.println("Server Public key: " + GXDLMSTranslator
+                        .toHex(GXAsn1Converter.toUIn64(cert.getPublicKey())));
+                settings.client.getCiphering()
+                        .setSigningKeyPair(new KeyPair(cert.getPublicKey(),
+                                settings.client.getCiphering()
+                                        .getSigningKeyPair().getPrivate()));
+
+                // if (cert.getKeyUsage().contains(KeyUsage.KEY_AGREEMENT)) {
+                // settings.client.getCiphering()
+                // .setKeyAgreementKeyPair(new KeyPair(
+                // cert.getPublicKey(),
+                // settings.privateKey.getPrivateKey()));
+                // }
+                // if (cert.getKeyUsage().contains(KeyUsage.DIGITAL_SIGNATURE))
+                // {
+                // settings.client.getCiphering()
+                // .setSigningKeyPair(new KeyPair(cert.getPublicKey(),
+                // settings.privateKey.getPrivateKey()));
+                // }
+                break;
             case 'o':
                 settings.outputFile = it.getValue();
                 break;
@@ -264,7 +324,7 @@ public class Settings {
                 } catch (Exception e) {
                     throw new IllegalArgumentException(
                             "Invalid Authentication option: '" + it.getValue()
-                                    + "'. (None, Low, High, HighMd5, HighSha1, HighGmac, HighSha256)");
+                                    + "'. (None, Low, High, HighMd5, HighSha1, HighGmac, HighSha256, HighECDSA)");
                 }
                 break;
             case 'c':
@@ -272,8 +332,20 @@ public class Settings {
                         .setClientAddress(Integer.parseInt(it.getValue()));
                 break;
             case 's':
-                settings.client
-                        .setServerAddress(Integer.parseInt(it.getValue()));
+                if (settings.client.getServerAddress() != 1) {
+                    settings.client
+                            .setServerAddress(GXDLMSClient.getServerAddress(
+                                    settings.client.getServerAddress(),
+                                    Integer.parseInt(it.getValue())));
+                } else {
+                    settings.client
+                            .setServerAddress(Integer.parseInt(it.getValue()));
+                }
+                break;
+            case 'l':
+                settings.client.setServerAddress(GXDLMSClient.getServerAddress(
+                        Integer.parseInt(it.getValue()),
+                        settings.client.getServerAddress()));
                 break;
             case 'n':
                 settings.client.setServerAddress(GXDLMSClient
@@ -329,6 +401,15 @@ public class Settings {
                 case 'd':
                     throw new IllegalArgumentException(
                             "Missing mandatory DLMS standard option.");
+                case 'K':
+                    throw new IllegalArgumentException(
+                            "Missing mandatory private key file option.");
+                case 'k':
+                    throw new IllegalArgumentException(
+                            "Missing mandatory public key file option.");
+                case 'l':
+                    throw new IllegalArgumentException(
+                            "Missing mandatory logical server address option.");
                 default:
                     showHelp();
                     return 1;
