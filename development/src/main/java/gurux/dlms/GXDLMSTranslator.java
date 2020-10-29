@@ -1467,6 +1467,8 @@ public class GXDLMSTranslator {
         case Command.INITIATE_RESPONSE:
         case (int) Command.INFORMATION_REPORT:
         case (int) Command.EVENT_NOTIFICATION:
+        case (int) Command.DISCONNECT_REQUEST:
+        case (int) Command.GENERAL_BLOCK_TRANSFER:
             break;
         case Command.GLO_INITIATE_RESPONSE:
         case Command.GLO_GET_RESPONSE:

@@ -136,7 +136,7 @@ public class Program {
                     System.out.println(name);
                 }
                 List<GXDLMSXmlPdu> actions = settings.client.load(file);
-                if (actions.size() == 0) {
+                if (actions.isEmpty()) {
                     continue;
                 }
                 try {
