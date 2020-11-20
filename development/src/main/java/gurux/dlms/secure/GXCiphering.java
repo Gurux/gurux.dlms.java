@@ -49,7 +49,7 @@ import javax.crypto.NoSuchPaddingException;
 
 import gurux.dlms.GXByteBuffer;
 import gurux.dlms.GXICipher;
-import gurux.dlms.asn.GXx509Certificate;
+import gurux.dlms.asn.GXx509CertificateCollection;
 import gurux.dlms.enums.Security;
 import gurux.dlms.objects.enums.CertificateType;
 import gurux.dlms.objects.enums.SecuritySuite;
@@ -68,7 +68,7 @@ public class GXCiphering implements GXICipher {
     /**
      * Certificates.
      */
-    private List<GXx509Certificate> certificates;
+    private GXx509CertificateCollection certificates;
 
     /**
      * Ephemeral key pair.
@@ -127,7 +127,7 @@ public class GXCiphering implements GXICipher {
      */
     public GXCiphering(final byte[] title) {
         publicKeys = new ArrayList<Map.Entry<CertificateType, PublicKey>>();
-        certificates = new ArrayList<GXx509Certificate>();
+        certificates = new GXx509CertificateCollection();
         setSecurity(Security.NONE);
         setSystemTitle(title);
         setBlockCipherKey(new byte[] { 0x00, 0x01, 0x02, 0x03, 0x04, 0x05, 0x06,
@@ -298,7 +298,7 @@ public class GXCiphering implements GXICipher {
     /**
      * @return Available certificates.
      */
-    public final List<GXx509Certificate> getCertificates() {
+    public final GXx509CertificateCollection getCertificates() {
         return certificates;
     }
 

@@ -204,6 +204,22 @@ public enum ObjectType {
      * also ScriptTable needs to be instantiated in the same logical device.
      */
     REGISTER_MONITOR(21),
+
+    /**
+     * ISO/IEC 8802-2 LLC Type 1 setup.
+     */
+    IEC_8802_LLC_TYPE1_SETUP(57),
+
+    /**
+     * ISO/IEC 8802-2 LLC Type 2 setup.
+     */
+    IEC_8802_LLC_TYPE2_SETUP(58),
+
+    /**
+     * ISO/IEC 8802-2 LLC Type 3 setup.
+     */
+    IEC_8802_LLC_TYPE3_SETUP(59),
+
     /*
      * Instances of the Disconnect control IC manage an internal or external
      * disconnect unit of the meter (e.g. electricity breaker, gas valve) in
@@ -371,6 +387,21 @@ public enum ObjectType {
      * S-FSK MAC Counters.
      */
     SFSK_MAC_COUNTERS(53),
+
+    /**
+     * IEC 61334-4-32 LLC setup.
+     */
+    IEC_61334_4_32_LLC_SETUP(55),
+
+    /**
+     * S-FSK Reporting system list.
+     */
+    SFSK_REPORTING_SYSTEM_LIST(56),
+
+    /**
+     * Arbitrator
+     */
+    ARBITRATOR(68),
 
     /*
      * G3-PLC MAC layer counters

@@ -46,7 +46,7 @@ public enum IecTwistedPairSetupMode {
     INACTIVE,
 
     /**
-     * Active.
+     * Always active.
      */
     ACTIVE
 }

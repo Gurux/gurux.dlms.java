@@ -34,9 +34,15 @@
 
 package gurux.dlms.objects;
 
+import java.security.InvalidAlgorithmParameterException;
+import java.security.InvalidKeyException;
+import java.security.NoSuchAlgorithmException;
 import java.util.ArrayList;
 import java.util.List;
 
+import javax.crypto.BadPaddingException;
+import javax.crypto.IllegalBlockSizeException;
+import javax.crypto.NoSuchPaddingException;
 import javax.xml.stream.XMLStreamException;
 
 import gurux.dlms.GXByteBuffer;
@@ -172,6 +178,32 @@ public class GXDLMSActivityCalendar extends GXDLMSObject
 
     public final void setTime(final GXDateTime value) {
         time = value;
+    }
+
+    /**
+     * This method copies all passive properties to the active.
+     * 
+     * @param client
+     *            DLMS client.
+     * @return Action bytes.
+     * @throws InvalidKeyException
+     *             Invalid key exception.
+     * @throws NoSuchAlgorithmException
+     *             No such algorithm exception.
+     * @throws NoSuchPaddingException
+     *             No such padding exception.
+     * @throws InvalidAlgorithmParameterException
+     *             Invalid algorithm parameter exception.
+     * @throws IllegalBlockSizeException
+     *             Illegal block size exception.
+     * @throws BadPaddingException
+     *             Bad padding exception.
+     */
+    public final byte[][] activatePassiveCalendar(final GXDLMSClient client)
+            throws InvalidKeyException, NoSuchAlgorithmException,
+            NoSuchPaddingException, InvalidAlgorithmParameterException,
+            IllegalBlockSizeException, BadPaddingException {
+        return client.method(this, 1, 0, DataType.INT8);
     }
 
     @Override

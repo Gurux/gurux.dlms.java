@@ -40,6 +40,7 @@ import java.io.UnsupportedEncodingException;
 import java.math.BigInteger;
 import java.nio.charset.StandardCharsets;
 
+import gurux.dlms.enums.DataType;
 import gurux.dlms.internal.GXCommon;
 
 /**
@@ -266,6 +267,17 @@ public class GXByteBuffer {
 
         setUInt8(size, item);
         ++size;
+    }
+
+    /**
+     * Push the given data type into this buffer at the current position, and
+     * then increments the position.
+     * 
+     * @param item
+     *            The byte to be added.
+     */
+    public final void setUInt8(final DataType item) {
+        setUInt8(item.getValue());
     }
 
     public final void setUInt8(final int index, final int item) {

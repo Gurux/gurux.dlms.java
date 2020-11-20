@@ -39,7 +39,7 @@ import java.security.PublicKey;
 import java.util.List;
 import java.util.Map;
 
-import gurux.dlms.asn.GXx509Certificate;
+import gurux.dlms.asn.GXx509CertificateCollection;
 import gurux.dlms.enums.Security;
 import gurux.dlms.objects.enums.CertificateType;
 import gurux.dlms.objects.enums.SecuritySuite;
@@ -82,6 +82,12 @@ public interface GXICipher {
      * @return System title.
      */
     byte[] getSystemTitle();
+
+    /**
+     * @param value
+     *            System title.
+     */
+    void setSystemTitle(byte[] value);
 
     /**
      * @return Recipient system Title.
@@ -151,7 +157,7 @@ public interface GXICipher {
     /**
      * @return Available certificates.
      */
-    List<GXx509Certificate> getCertificates();
+    GXx509CertificateCollection getCertificates();
 
     /**
      * @return Signing key pair.

@@ -335,7 +335,7 @@ public final class GXCommon {
      * @return Converted byte array.
      */
     public static byte[] fromBase64(final String input) {
-        String tmp = input.replace("\r\n", "");
+        String tmp = input.replace("\r\n", "").replace("\n", "");
         if (tmp.length() % 4 != 0) {
             throw new IllegalArgumentException("Invalid base64 input");
         }

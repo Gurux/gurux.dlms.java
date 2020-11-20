@@ -244,14 +244,19 @@ public class GXDLMSSettings {
     private boolean server;
 
     /**
-     * Information from the connection size that server can handle.
+     * HDLC framing settings.
      */
-    private GXDLMSLimits limits;
+    private GXHdlcSettings hdlcSettings;
 
     /**
      * Gateway settings.
      */
     private GXDLMSGateway gateway;
+
+    /**
+     * PLC settings.
+     */
+    private GXPlcSettings plc;
 
     private int startingPacketIndex = 1;
 
@@ -337,7 +342,8 @@ public class GXDLMSSettings {
     GXDLMSSettings(final boolean isServer) {
         server = isServer;
         objects = new GXDLMSObjectCollection();
-        limits = new GXDLMSLimits(this);
+        hdlcSettings = new GXDLMSLimits(this);
+        plc = new GXPlcSettings(this);
         gateway = null;
         proposedConformance.addAll(GXDLMSClient.getInitialConformance(false));
         if (isServer) {
@@ -659,8 +665,8 @@ public class GXDLMSSettings {
     /**
      * @return Information from the frame size that server can handle.
      */
-    public final GXDLMSLimits getLimits() {
-        return limits;
+    public final GXHdlcSettings getHdlcSettings() {
+        return hdlcSettings;
     }
 
     /**
@@ -679,11 +685,26 @@ public class GXDLMSSettings {
     }
 
     /**
-     * @param value
-     *            Information from the frame size that server can handle.
+     * @return PLC settings.
      */
-    public final void setLimits(final GXDLMSLimits value) {
-        limits = value;
+    public final GXPlcSettings getPlc() {
+        return plc;
+    }
+
+    /**
+     * @param value
+     *            PLC settings.
+     */
+    public final void setPlc(GXPlcSettings value) {
+        plc = value;
+    }
+
+    /**
+     * @param value
+     *            HDLC connection settings.
+     */
+    public final void setLimits(final GXHdlcSettings value) {
+        hdlcSettings = value;
     }
 
     /**

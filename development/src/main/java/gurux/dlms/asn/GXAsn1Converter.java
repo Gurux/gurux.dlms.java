@@ -133,6 +133,25 @@ public final class GXAsn1Converter {
     }
 
     /**
+     * Convert private key to UInt 64.
+     * 
+     * @param key
+     *            Public key.
+     * @return Private key in byte array.
+     */
+    public static byte[] toUIn64(final PrivateKey key) {
+        if (key == null) {
+            throw new IllegalArgumentException("Invalid private key.");
+        }
+        byte[] tmp =
+                (byte[]) ((GXAsn1Sequence) ((GXAsn1Sequence) GXAsn1Converter
+                        .fromByteArray(key.getEncoded())).get(2)).get(1);
+        GXByteBuffer bb = new GXByteBuffer();
+        bb.set(tmp);
+        return bb.array();
+    }
+
+    /**
      * Generates new key pair.
      * 
      * @return New Key pair.
@@ -285,6 +304,7 @@ public final class GXAsn1Converter {
             }
             break;
         case BerType.OBJECT_IDENTIFIER:
+        case BerType.CONTEXT | BerType.OBJECT_IDENTIFIER:
             GXAsn1ObjectIdentifier oi = new GXAsn1ObjectIdentifier(bb, len);
             objects.add(oi);
             if (s != null) {

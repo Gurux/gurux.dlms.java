@@ -55,6 +55,8 @@ import javax.crypto.BadPaddingException;
 import javax.crypto.IllegalBlockSizeException;
 import javax.crypto.NoSuchPaddingException;
 
+import gurux.dlms.asn.GXAsn1Converter;
+import gurux.dlms.asn.GXAsn1Integer;
 import gurux.dlms.enums.AccessMode;
 import gurux.dlms.enums.AccessServiceCommandType;
 import gurux.dlms.enums.Authentication;
@@ -154,6 +156,7 @@ public class GXDLMSClient {
         setAuthentication(forAuthentication);
         setPassword(GXCommon.getBytes(password));
         setInterfaceType(interfaceType);
+        settings.getPlc().reset();
     }
 
     /**
@@ -591,10 +594,25 @@ public class GXDLMSClient {
     }
 
     /**
-     * @return Information from the connection size that server can handle.
+     * @return HDLC connection settings.
+     * @deprecated use {@link getHdlcSettings} instead.
      */
     public final GXDLMSLimits getLimits() {
-        return settings.getLimits();
+        return (GXDLMSLimits) settings.getHdlcSettings();
+    }
+
+    /**
+     * @return HDLC connection settings.
+     */
+    public final GXHdlcSettings getHdlcSettings() {
+        return settings.getHdlcSettings();
+    }
+
+    /**
+     * @return PLC settings.
+     */
+    public final GXPlcSettings getPlc() {
+        return settings.getPlc();
     }
 
     /**
@@ -668,17 +686,22 @@ public class GXDLMSClient {
     public final byte[] snrmRequest(final boolean forceParameters) {
         settings.setConnected(ConnectionState.NONE);
         isAuthenticationRequired = false;
-        // SNRM request is not used in network connections.
-        if (this.getInterfaceType() == InterfaceType.WRAPPER) {
+        settings.resetFrameSequence();
+        // SNRM request is not used for all communication channels.
+        if (getInterfaceType() == InterfaceType.PLC_HDLC) {
+            return GXDLMS.getMacHdlcFrame(settings, Command.SNRM, 0, null);
+        }
+        if (getInterfaceType() != InterfaceType.HDLC
+                && getInterfaceType() != InterfaceType.HDLC_WITH_MODE_E) {
             return new byte[0];
         }
         GXByteBuffer data = new GXByteBuffer(25);
         data.setUInt8(0x81); // FromatID
         data.setUInt8(0x80); // GroupID
         data.setUInt8(0); // Length.
-        int maxInfoTX = getLimits().getMaxInfoTX(),
-                maxInfoRX = getLimits().getMaxInfoRX();
-        if (getLimits().isUseFrameSize()) {
+        int maxInfoTX = getHdlcSettings().getMaxInfoTX(),
+                maxInfoRX = getHdlcSettings().getMaxInfoRX();
+        if (getHdlcSettings().isUseFrameSize()) {
             byte[] primaryAddress, secondaryAddress;
             primaryAddress =
                     GXDLMS.getHdlcAddressBytes(settings.getServerAddress(),
@@ -691,13 +714,13 @@ public class GXDLMSClient {
 
         // If custom HDLC parameters are used.
         if (forceParameters
-                || GXDLMSLimits.DEFAULT_MAX_INFO_TX != getLimits()
+                || GXDLMSLimits.DEFAULT_MAX_INFO_TX != getHdlcSettings()
                         .getMaxInfoTX()
-                || GXDLMSLimits.DEFAULT_MAX_INFO_RX != getLimits()
+                || GXDLMSLimits.DEFAULT_MAX_INFO_RX != getHdlcSettings()
                         .getMaxInfoRX()
-                || GXDLMSLimits.DEFAULT_WINDOWS_SIZE_TX != getLimits()
+                || GXDLMSLimits.DEFAULT_WINDOWS_SIZE_TX != getHdlcSettings()
                         .getWindowSizeTX()
-                || GXDLMSLimits.DEFAULT_WINDOWS_SIZE_RX != getLimits()
+                || GXDLMSLimits.DEFAULT_WINDOWS_SIZE_RX != getHdlcSettings()
                         .getWindowSizeRX()) {
             data.setUInt8(HDLCInfo.MAX_INFO_TX);
             GXDLMS.appendHdlcParameter(data, maxInfoTX);
@@ -705,10 +728,10 @@ public class GXDLMSClient {
             GXDLMS.appendHdlcParameter(data, maxInfoRX);
             data.setUInt8(HDLCInfo.WINDOW_SIZE_TX);
             data.setUInt8(4);
-            data.setUInt32(getLimits().getWindowSizeTX());
+            data.setUInt32(getHdlcSettings().getWindowSizeTX());
             data.setUInt8(HDLCInfo.WINDOW_SIZE_RX);
             data.setUInt8(4);
-            data.setUInt32(getLimits().getWindowSizeRX());
+            data.setUInt32(getHdlcSettings().getWindowSizeRX());
         }
         // If default HDLC parameters are not used.
         if (data.size() != 3) {
@@ -717,7 +740,6 @@ public class GXDLMSClient {
         } else {
             data = null;
         }
-        settings.resetFrameSequence();
         return GXDLMS.getHdlcFrame(settings, (byte) Command.SNRM, data);
     }
 
@@ -935,6 +957,11 @@ public class GXDLMSClient {
                     bb.set(settings.getCtoSChallenge());
                     bb.set(settings.getStoCChallenge());
                     ver.update(bb.array());
+                    bb.size(0);
+                    bb.set(value);
+                    value = GXAsn1Converter.toByteArray(new Object[] {
+                            new GXAsn1Integer(bb.subArray(0, 32)),
+                            new GXAsn1Integer(bb.subArray(32, 32)) });
                     equals = ver.verify(value);
 
                 } catch (Exception ex) {
@@ -1091,10 +1118,14 @@ public class GXDLMSClient {
         // DisconnectRequest.
         byte[] reply = null;
         if (force || settings.getConnected() != ConnectionState.NONE) {
-            if (this.getInterfaceType() == InterfaceType.HDLC) {
-                settings.setConnected(ConnectionState.NONE);
-                reply = GXDLMS.getHdlcFrame(settings,
-                        Command.DISCONNECT_REQUEST, null);
+            if (GXDLMS.useHdlc(getInterfaceType())) {
+                if (settings.getInterfaceType() == InterfaceType.PLC_HDLC) {
+                    reply = GXDLMS.getMacHdlcFrame(settings,
+                            Command.DISCONNECT_REQUEST, 0, null);
+                } else {
+                    reply = GXDLMS.getHdlcFrame(settings,
+                            Command.DISCONNECT_REQUEST, null);
+                }
             } else if ((settings.getConnected() & ConnectionState.DLMS) != 0) {
                 reply = releaseRequest()[0];
             }
@@ -2630,6 +2661,23 @@ public class GXDLMSClient {
         if (sort == null) {
             sort = pg.getCaptureObjects().get(0).getKey();
         }
+        String ln = "0.0.1.0.0.255";
+        ObjectType type = ObjectType.CLOCK;
+        ClockType clockType = ClockType.CLOCK;
+        // If Unix time is used.
+        if (sort instanceof GXDLMSData) {
+            if ("0.0.1.1.0.255".equals(sort.getLogicalName())) {
+                clockType = ClockType.UNIX;
+                ln = "0.0.1.1.0.255";
+                type = ObjectType.DATA;
+            }
+            // If high resolution time is used.
+            else if ("0.0.1.2.0.255".equals(sort.getLogicalName())) {
+                clockType = ClockType.HIGH_RESOLUTION;
+                ln = "0.0.1.2.0.255";
+                type = ObjectType.DATA;
+            }
+        }
         GXByteBuffer buff = new GXByteBuffer(51);
         // Add AccessSelector value.
         buff.setUInt8(0x01);
@@ -2642,29 +2690,34 @@ public class GXDLMSClient {
         // Add item count
         buff.setUInt8(0x04);
         // CI
-        GXCommon.setData(settings, buff, DataType.UINT16,
-                sort.getObjectType().getValue());
+        GXCommon.setData(settings, buff, DataType.UINT16, type.getValue());
         // LN
         GXCommon.setData(settings, buff, DataType.OCTET_STRING,
-                GXCommon.logicalNameToBytes(sort.getLogicalName()));
+                GXCommon.logicalNameToBytes(ln));
         // Add attribute index.
         GXCommon.setData(settings, buff, DataType.INT8, 2);
         // Add version
-        GXCommon.setData(settings, buff, DataType.UINT16, sort.getVersion());
-        // If Unix time is used.
-        if (sort instanceof GXDLMSData
-                && sort.getLogicalName().equals("0.0.1.1.0.255")) {
+        GXCommon.setData(settings, buff, DataType.UINT16, 0);
+        if (clockType == ClockType.CLOCK) {
+            // Add start time
+            GXCommon.setData(settings, buff, DataType.OCTET_STRING, s);
+            // Add end time
+            GXCommon.setData(settings, buff, DataType.OCTET_STRING, e);
+
+        } else if (clockType == ClockType.UNIX) {
             // Add start time
             GXCommon.setData(settings, buff, DataType.UINT32,
                     GXDateTime.toUnixTime(s));
             // Add end time
             GXCommon.setData(settings, buff, DataType.UINT32,
                     GXDateTime.toUnixTime(e));
-        } else {
+        } else if (clockType == ClockType.HIGH_RESOLUTION) {
             // Add start time
-            GXCommon.setData(settings, buff, DataType.OCTET_STRING, s);
+            GXCommon.setData(settings, buff, DataType.UINT64,
+                    GXDateTime.toHighResolutionTime(s));
             // Add end time
-            GXCommon.setData(settings, buff, DataType.OCTET_STRING, e);
+            GXCommon.setData(settings, buff, DataType.UINT64,
+                    GXDateTime.toHighResolutionTime(e));
         }
 
         // Add array of read columns.
@@ -2920,14 +2973,14 @@ public class GXDLMSClient {
                     if (data.getData().size() != 0) {
                         translator.pduToXml(data.getXml(), data.getData(),
                                 translator.isOmitXmlDeclaration(),
-                                translator.isOmitXmlNameSpace(), true);
+                                translator.isOmitXmlNameSpace(), true, null);
                     }
                     data.getXml().appendEndTag(data.getCommand());
                 } else {
                     if (data.getData().size() != 0) {
                         translator.pduToXml(data.getXml(), data.getData(),
                                 translator.isOmitXmlDeclaration(),
-                                translator.isOmitXmlNameSpace(), true);
+                                translator.isOmitXmlNameSpace(), true, null);
                     }
                     data.setData(data2);
                 }
@@ -3044,13 +3097,8 @@ public class GXDLMSClient {
             bb.setUInt8(it.getCommand());
             bb.setUInt16(it.getTarget().getObjectType().getValue());
             // LN
-            String[] items = it.getTarget().getLogicalName().split("[.]");
-            if (items.length != 6) {
-                throw new IllegalArgumentException("Invalid Logical Name.");
-            }
-            for (String it2 : items) {
-                bb.setUInt8(Integer.valueOf(it2).byteValue());
-            }
+            bb.set(GXCommon
+                    .logicalNameToBytes(it.getTarget().getLogicalName()));
             // Attribute ID.
             bb.setUInt8(it.getIndex());
         }
@@ -3241,13 +3289,64 @@ public class GXDLMSClient {
      * @return Size of received bytes on the frame.
      */
     public final int getFrameSize(final GXByteBuffer data) {
-        if (getInterfaceType() == InterfaceType.WRAPPER) {
-            if (data.available() < 8 || data.getUInt16(data.position()) != 1) {
-                return 8 - data.available();
+        int ret;
+        switch (getInterfaceType()) {
+        case HDLC:
+        case HDLC_WITH_MODE_E: {
+            ret = 0;
+            short ch;
+            int pos, index = data.position();
+            try {
+                // If whole frame is not received yet.
+                if (data.available() > 8) {
+                    // Find start of HDLC frame.
+                    for (pos = data.position(); pos < data.size(); ++pos) {
+                        ch = data.getUInt8();
+                        if (ch == GXDLMS.HDLC_FRAME_START_END) {
+                            break;
+                        }
+                    }
+                    short frame = data.getUInt8();
+                    // Check frame length.
+                    if ((frame & 0x7) != 0) {
+                        ret = ((frame & 0x7) << 8);
+                    }
+                    ret += data.getUInt8();
+                }
+            } finally {
+                data.position(index);
             }
-            return data.getUInt16(data.position() + 6);
         }
-        return 1;
+            break;
+        case WRAPPER:
+            if (data.available() < 8 || data.getUInt16(data.position()) != 1) {
+                ret = 8 - data.available();
+            } else {
+                ret = 8 + data.getUInt16(data.position() + 6)
+                        - data.available();
+            }
+            break;
+        case PLC:
+            if (data.available() < 2 || data.getUInt8(data.position()) != 2) {
+                ret = 2 - data.available();
+            } else {
+                ret = 2 + data.getUInt8(data.position() + 1) - data.available();
+            }
+            break;
+        case PLC_HDLC:
+            ret = GXDLMS.getPlcSfskFrameSize(data) - data.available();
+            if (ret < 2) {
+                ret = 36 - data.available() % 36;
+            }
+            break;
+        default:
+            ret = 1;
+            break;
+        }
+        if (ret < 1) {
+            ret = 1;
+        }
+        return ret;
     }
 
     /**

@@ -910,9 +910,9 @@ public class GXDLMSAccount extends GXDLMSObject implements IGXDLMSBase {
             bb.setUInt8(DataType.STRUCTURE.getValue());
             bb.setUInt8(2);
             bb.setUInt8(DataType.ENUM.getValue());
-            bb.setUInt8(accountStatus.getValue());
-            bb.setUInt8(DataType.ENUM.getValue());
             bb.setUInt8(paymentMode.getValue());
+            bb.setUInt8(DataType.ENUM.getValue());
+            bb.setUInt8(accountStatus.getValue());
             return bb.array();
         case 3:
             return currentCreditInUse;
@@ -1039,9 +1039,9 @@ public class GXDLMSAccount extends GXDLMSObject implements IGXDLMSBase {
             setLogicalName(GXCommon.toLogicalName(e.getValue()));
             break;
         case 2:
-            accountStatus = AccountStatus.forValue(
-                    ((Number) ((List<?>) e.getValue()).get(0)).intValue());
             paymentMode = PaymentMode.forValue(
+                    ((Number) ((List<?>) e.getValue()).get(0)).intValue());
+            accountStatus = AccountStatus.forValue(
                     ((Number) ((List<?>) e.getValue()).get(1)).intValue());
             break;
         case 3:

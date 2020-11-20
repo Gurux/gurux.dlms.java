@@ -58,6 +58,8 @@ import gurux.dlms.GXDLMSSettings;
 import gurux.dlms.GXDLMSTranslator;
 import gurux.dlms.GXSimpleEntry;
 import gurux.dlms.ValueEventArgs;
+import gurux.dlms.asn.GXAsn1Converter;
+import gurux.dlms.asn.GXAsn1Integer;
 import gurux.dlms.enums.AccessMode;
 import gurux.dlms.enums.Authentication;
 import gurux.dlms.enums.Conformance;
@@ -342,8 +344,18 @@ public class GXDLMSAssociationLogicalName extends GXDLMSObject
             boolean accept;
             if (settings.getAuthentication() == Authentication.HIGH_ECDSA) {
                 try {
+                    if (settings.getSourceSystemTitle() == null
+                            || settings.getSourceSystemTitle().length != 8) {
+                        throw new IllegalArgumentException(
+                                "SourceSystemTitle is invalid.");
+                    }
                     GXByteBuffer signature =
                             new GXByteBuffer((byte[]) e.getParameters());
+                    byte[] tmp = GXAsn1Converter.toByteArray(new Object[] {
+                            new GXAsn1Integer(signature.subArray(0, 32)),
+                            new GXAsn1Integer(signature.subArray(32, 32)) });
+                    signature.size(0);
+                    signature.set(tmp);
                     Signature ver = Signature.getInstance("SHA256withECDSA");
                     ver.initVerify(settings.getCipher().getCertificates().get(0)
                             .getPublicKey());

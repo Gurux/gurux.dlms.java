@@ -41,9 +41,6 @@ import javax.xml.stream.XMLStreamException;
 
 import gurux.dlms.enums.ObjectType;
 import gurux.dlms.objects.GXDLMSObjectCollection;
-import gurux.io.BaudRate;
-import gurux.io.Parity;
-import gurux.io.StopBits;
 import gurux.net.GXNet;
 import gurux.serial.GXSerial;
 
@@ -71,25 +68,17 @@ public class sampleclient {
             ////////////////////////////////////////
             // Initialize connection settings.
             if (settings.media instanceof GXSerial) {
-                GXSerial serial = (GXSerial) settings.media;
-                if (settings.iec) {
-                    serial.setBaudRate(BaudRate.BAUD_RATE_300);
-                    serial.setDataBits(7);
-                    serial.setParity(Parity.EVEN);
-                    serial.setStopBits(StopBits.ONE);
-                } else {
-                    serial.setBaudRate(BaudRate.BAUD_RATE_9600);
-                    serial.setDataBits(8);
-                    serial.setParity(Parity.NONE);
-                    serial.setStopBits(StopBits.ONE);
-                }
+                System.out.println("Connect using serial port connection "
+                        + settings.media.toString());
             } else if (settings.media instanceof GXNet) {
+                System.out.println("Connect using network connection "
+                        + settings.media.toString());
             } else {
                 throw new Exception("Unknown media type.");
             }
             ////////////////////////////////////////
             reader = new GXDLMSReader(settings.client, settings.media,
-                    settings.trace, settings.iec, settings.invocationCounter);
+                    settings.trace, settings.invocationCounter);
             try {
                 settings.media.open();
             } catch (Exception ex) {

@@ -414,38 +414,43 @@ public class GXDLMSIp6Setup extends GXDLMSObject implements IGXDLMSBase {
 
     @Override
     public final DataType getDataType(final int index) {
-        if (index == 1) {
-            return DataType.OCTET_STRING;
+        DataType ret;
+        switch (index) {
+        case 1:
+            ret = DataType.OCTET_STRING;
+            break;
+        case 2:
+            ret = DataType.OCTET_STRING;
+            break;
+        case 3:
+            ret = DataType.ENUM;
+            break;
+        case 4:
+            ret = DataType.ARRAY;
+            break;
+        case 5:
+            ret = DataType.ARRAY;
+            break;
+        case 6:
+            ret = DataType.ARRAY;
+            break;
+        case 7:
+            ret = DataType.OCTET_STRING;
+            break;
+        case 8:
+            ret = DataType.OCTET_STRING;
+            break;
+        case 9:
+            ret = DataType.UINT8;
+            break;
+        case 10:
+            ret = DataType.ARRAY;
+            break;
+        default:
+            throw new IllegalArgumentException(
+                    "getDataType failed. Invalid attribute index.");
         }
-        if (index == 2) {
-            return DataType.OCTET_STRING;
-        }
-        if (index == 3) {
-            return DataType.ENUM;
-        }
-        if (index == 4) {
-            return DataType.ARRAY;
-        }
-        if (index == 5) {
-            return DataType.ARRAY;
-        }
-        if (index == 6) {
-            return DataType.ARRAY;
-        }
-        if (index == 7) {
-            return DataType.OCTET_STRING;
-        }
-        if (index == 8) {
-            return DataType.OCTET_STRING;
-        }
-        if (index == 9) {
-            return DataType.UINT8;
-        }
-        if (index == 10) {
-            return DataType.ARRAY;
-        }
-        throw new IllegalArgumentException(
-                "getDataType failed. Invalid attribute index.");
+        return ret;
     }
 
     /*

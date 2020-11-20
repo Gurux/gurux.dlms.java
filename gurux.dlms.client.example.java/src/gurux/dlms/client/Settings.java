@@ -56,13 +56,15 @@ import gurux.dlms.enums.InterfaceType;
 import gurux.dlms.enums.Security;
 import gurux.dlms.enums.Standard;
 import gurux.dlms.secure.GXDLMSSecureClient;
+import gurux.io.BaudRate;
+import gurux.io.Parity;
+import gurux.io.StopBits;
 import gurux.net.GXNet;
 import gurux.serial.GXSerial;
 
 public class Settings {
     public IGXMedia media = null;
     public TraceLevel trace = TraceLevel.INFO;
-    public boolean iec = false;
     public GXDLMSSecureClient client = new GXDLMSSecureClient(true);
     String invocationCounter;
     // Objects to read.
@@ -83,7 +85,6 @@ public class Settings {
         System.out.println(" -h \t host name or IP address.");
         System.out.println(" -p \t port number or name (Example: 1000).");
         System.out.println(" -S \t serial port.");
-        System.out.println(" -i IEC is a start protocol.");
         System.out.println(
                 " -a \t Authentication (None, Low, High, HighMd5, HighSha1, HighGMac, HighSha256).");
         System.out.println(" -P \t Password for authentication.");
@@ -93,7 +94,6 @@ public class Settings {
         System.out.println(" -l \t Logical Server address.");
         System.out.println(
                 " -r [sn, ln]\t Short name or Logical Name (default) referencing is used.");
-        System.out.println(" -w WRAPPER profile is used. HDLC is default.");
         System.out
                 .println(" -t [Error, Warning, Info, Verbose] Trace messages.");
         System.out.println(
@@ -115,9 +115,13 @@ public class Settings {
                 " -D \t Dedicated key that is used with chiphering. Ex -D 00112233445566778899AABBCCDDEEFF");
         System.out.println(
                 " -d \t Used DLMS standard. Ex -d India (DLMS, India, Italy, SaudiArabia, IDIS)");
-        System.out.println(" -K \t Private key File. Ex. -k C:\\priv.pem");
-        System.out.println(" -k \t Public key File. Ex. -k C:\\pub.pem");
-
+        System.out.println(
+                " -K \t Meter's private key File. Ex. -k C:\\priv.pem");
+        System.out
+                .println(" -k \t Client's public key File. Ex. -k C:\\pub.pem");
+        System.out.println(
+                " -i \t Used communication interface. Ex. -i WRAPPER.");
+        System.out.println(" -m \t Used PLC MAC address. Ex. -m 1.");
         System.out.println("Example:");
         System.out.println("Read LG device using TCP/IP connection.");
         System.out.println(
@@ -133,13 +137,13 @@ public class Settings {
     static int getParameters(String[] args, Settings settings)
             throws IOException {
         List<GXCmdParameter> parameters = GXCommon.getParameters(args,
-                "h:p:c:s:r:iIt:a:p:wP:g:S:n:C:v:o:T:A:B:D:d:l:K:k:");
+                "h:p:c:s:r:i:It:a:pP:g:S:n:C:v:o:T:A:B:D:d:l:K:k:");
         GXNet net = null;
+        // Has user give the custom serial port settings or are the default
+        // values used in mode E.
+        boolean modeEDefaultValues = true;
         for (GXCmdParameter it : parameters) {
             switch (it.getTag()) {
-            case 'w':
-                settings.client.setInterfaceType(InterfaceType.WRAPPER);
-                break;
             case 'r':
                 if ("sn".compareTo(it.getValue()) == 0) {
                     settings.client.setUseLogicalNameReferencing(false);
@@ -186,9 +190,32 @@ public class Settings {
             case 'P':// Password
                 settings.client.setPassword(it.getValue().getBytes());
                 break;
-            case 'i':
-                // IEC.
-                settings.iec = true;
+            case 'i':// Interface type.
+                if ("HDLC".equalsIgnoreCase(it.getValue()))
+                    settings.client.setInterfaceType(InterfaceType.HDLC);
+                else if ("WRAPPER".equalsIgnoreCase(it.getValue()))
+                    settings.client.setInterfaceType(InterfaceType.WRAPPER);
+                else if ("HdlcWithModeE".equalsIgnoreCase(it.getValue()))
+                    settings.client
+                            .setInterfaceType(InterfaceType.HDLC_WITH_MODE_E);
+                else if ("Plc".equalsIgnoreCase(it.getValue()))
+                    settings.client.setInterfaceType(InterfaceType.PLC);
+                else if ("PlcHdlc".equalsIgnoreCase(it.getValue()))
+                    settings.client.setInterfaceType(InterfaceType.PLC_HDLC);
+                else
+                    throw new IllegalArgumentException(
+                            "Invalid interface type option." + it.getValue()
+                                    + " (HDLC, WRAPPER, HdlcWithModeE, Plc, PlcHdlc)");
+
+                if (modeEDefaultValues && settings.client
+                        .getInterfaceType() == InterfaceType.HDLC_WITH_MODE_E) {
+                    GXSerial serial = (GXSerial) settings.media;
+                    serial.setBaudRate(BaudRate.BAUD_RATE_300);
+                    serial.setDataBits(7);
+                    serial.setParity(Parity.EVEN);
+                    serial.setStopBits(StopBits.ONE);
+                }
+                settings.client.getPlc().reset();
                 break;
             case 'I':
                 // AutoIncreaseInvokeID.
@@ -262,19 +289,6 @@ public class Settings {
                         .setSigningKeyPair(new KeyPair(cert.getPublicKey(),
                                 settings.client.getCiphering()
                                         .getSigningKeyPair().getPrivate()));
-
-                // if (cert.getKeyUsage().contains(KeyUsage.KEY_AGREEMENT)) {
-                // settings.client.getCiphering()
-                // .setKeyAgreementKeyPair(new KeyPair(
-                // cert.getPublicKey(),
-                // settings.privateKey.getPrivateKey()));
-                // }
-                // if (cert.getKeyUsage().contains(KeyUsage.DIGITAL_SIGNATURE))
-                // {
-                // settings.client.getCiphering()
-                // .setSigningKeyPair(new KeyPair(cert.getPublicKey(),
-                // settings.privateKey.getPrivateKey()));
-                // }
                 break;
             case 'o':
                 settings.outputFile = it.getValue();
@@ -315,7 +329,43 @@ public class Settings {
             case 'S':// Serial Port
                 settings.media = new GXSerial();
                 GXSerial serial = (GXSerial) settings.media;
-                serial.setPortName(it.getValue());
+                String[] tmp = it.getValue().split("[:]");
+                serial.setPortName(tmp[0]);
+                if (tmp.length > 1) {
+                    modeEDefaultValues = false;
+                    serial.setBaudRate(
+                            BaudRate.forValue(Integer.parseInt(tmp[1])));
+                    serial.setDataBits(
+                            Integer.parseInt(tmp[2].substring(0, 1)));
+                    String parity = tmp[2].substring(1, tmp[2].length() - 1);
+                    if ("NONE".equalsIgnoreCase(parity)) {
+                        serial.setParity(Parity.NONE);
+                    } else if ("ODD".equalsIgnoreCase(parity)) {
+                        serial.setParity(Parity.ODD);
+                    } else if ("EVEN".equalsIgnoreCase(parity)) {
+                        serial.setParity(Parity.EVEN);
+                    } else if ("MARK".equalsIgnoreCase(parity)) {
+                        serial.setParity(Parity.MARK);
+                    } else if ("SPACE".equalsIgnoreCase(parity)) {
+                        serial.setParity(Parity.SPACE);
+                    }
+                    serial.setStopBits(StopBits.values()[Integer.parseInt(
+                            tmp[2].substring(tmp[2].length() - 1)) - 1]);
+
+                } else {
+                    if (settings.client
+                            .getInterfaceType() == InterfaceType.HDLC_WITH_MODE_E) {
+                        serial.setBaudRate(BaudRate.BAUD_RATE_300);
+                        serial.setDataBits(7);
+                        serial.setParity(Parity.EVEN);
+                        serial.setStopBits(StopBits.ONE);
+                    } else {
+                        serial.setBaudRate(BaudRate.BAUD_RATE_9600);
+                        serial.setDataBits(8);
+                        serial.setParity(Parity.NONE);
+                        serial.setStopBits(StopBits.ONE);
+                    }
+                }
                 break;
             case 'a':
                 try {
@@ -419,7 +469,9 @@ public class Settings {
                 return 1;
             }
         }
-        if (settings.media == null) {
+        if (settings.media == null)
+
+        {
             showHelp();
             return 1;
         }

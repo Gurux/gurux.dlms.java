@@ -41,7 +41,6 @@ import java.security.NoSuchAlgorithmException;
 import java.security.PublicKey;
 import java.security.SignatureException;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
@@ -69,6 +68,7 @@ import gurux.dlms.enums.ErrorCode;
 import gurux.dlms.enums.ObjectType;
 import gurux.dlms.enums.Security;
 import gurux.dlms.internal.GXCommon;
+import gurux.dlms.internal.GXDataInfo;
 import gurux.dlms.objects.enums.CertificateEntity;
 import gurux.dlms.objects.enums.CertificateType;
 import gurux.dlms.objects.enums.GlobalKeyType;
@@ -299,6 +299,19 @@ public class GXDLMSSecuritySetup extends GXDLMSObject implements IGXDLMSBase {
             IllegalBlockSizeException, BadPaddingException {
         return client.method(this, 1, SecurityPolicy.toInteger(security),
                 DataType.ENUM);
+    }
+
+    /**
+     * Parse GXx509Certificate from data that meter sends.
+     * 
+     * @param data
+     *            Meter data.
+     * @return Generated GXx509Certificate.
+     */
+    public static GXPkcs10 parseCertificate(final GXByteBuffer data) {
+        GXDataInfo info = new GXDataInfo();
+        byte[] value = (byte[]) GXCommon.getData(null, data, info);
+        return new GXPkcs10(value);
     }
 
     /**
@@ -765,12 +778,7 @@ public class GXDLMSSecuritySetup extends GXDLMSObject implements IGXDLMSBase {
      */
     public static String systemTitleToSubject(final byte[] systemTitle) {
         GXByteBuffer bb = new GXByteBuffer(systemTitle);
-        bb.getData()[0] = 0;
-        bb.getData()[1] = 0;
-        bb.getData()[2] = 0;
-        String subject = "CN=" + new String(systemTitle, 0, 3);
-        subject += String.valueOf(bb.getUInt64());
-        return subject;
+        return "CN=" + bb.toString();
     }
 
     @SuppressWarnings("unchecked")
@@ -974,9 +982,9 @@ public class GXDLMSSecuritySetup extends GXDLMSObject implements IGXDLMSBase {
                             (byte[]) tmp.get(2));
                 } else if (type == 1) {
                     tmp = (List<Object>) tmp.get(1);
-                    cert = findCertificateBySerial(settings,
-                            (byte[]) tmp.get(1),
-                            new String((byte[]) tmp.get(2)));
+                    cert = settings.getCipher().getCertificates()
+                            .findCertificateBySerial((byte[]) tmp.get(1),
+                                    new String((byte[]) tmp.get(2)));
                 }
                 if (cert == null) {
                     e.setError(ErrorCode.HARDWARE_FAULT);
@@ -999,9 +1007,9 @@ public class GXDLMSSecuritySetup extends GXDLMSObject implements IGXDLMSBase {
                                     .forValue(((Number) tmp.get(2)).intValue()),
                             (byte[]) tmp.get(3));
                 } else if (type == 1) {
-                    cert = findCertificateBySerial(settings,
-                            (byte[]) tmp.get(1),
-                            new String((byte[]) tmp.get(2)));
+                    cert = settings.getCipher().getCertificates()
+                            .findCertificateBySerial((byte[]) tmp.get(1),
+                                    new String((byte[]) tmp.get(2)));
                 }
                 if (cert == null) {
                     e.setError(ErrorCode.HARDWARE_FAULT);
@@ -1097,29 +1105,6 @@ public class GXDLMSSecuritySetup extends GXDLMSObject implements IGXDLMSBase {
         for (GXx509Certificate it : settings.getCipher().getCertificates()) {
             if (it.getKeyUsage().contains(k)
                     && it.getSubject().equalsIgnoreCase(subject)) {
-                return it;
-            }
-        }
-        return null;
-    }
-
-    /**
-     * Find certificate using serial information.
-     * 
-     * @param settings
-     *            DLMS Settings.
-     * @param serialNumber
-     *            Serial number.
-     * @param issuer
-     *            Issuer.
-     * @return
-     */
-    private static GXx509Certificate findCertificateBySerial(
-            final GXDLMSSettings settings, final byte[] serialNumber,
-            final String issuer) {
-        for (GXx509Certificate it : settings.getCipher().getCertificates()) {
-            if (Arrays.equals(it.getSerialNumber().getByteArray(), serialNumber)
-                    && it.getIssuer().equalsIgnoreCase(issuer)) {
                 return it;
             }
         }
@@ -1228,7 +1213,7 @@ public class GXDLMSSecuritySetup extends GXDLMSObject implements IGXDLMSBase {
             bb.setUInt8((byte) DataType.ENUM.getValue());
             // TODO: digital signature
             bb.setUInt8((byte) CertificateType.DIGITAL_SIGNATURE.getValue());
-            GXCommon.addString(it.getSerialNumber().toString(), bb);
+            GXCommon.addString(String.valueOf(it.getSerialNumber()), bb);
             GXCommon.addString(it.getIssuer(), bb);
             GXCommon.addString(it.getSubject(), bb);
             GXCommon.addString("", bb);

@@ -129,6 +129,7 @@ public class GXDLMSReader {
                 readDLMSPacket(dlms.disconnectRequest(), reply);
                 Media.close();
             } catch (java.lang.Exception e) {
+                // It's OK if this fails.
             }
             Media = null;
             dlms = null;
@@ -240,7 +241,7 @@ public class GXDLMSReader {
             p.setCount(5);
         }
         p.setWaitTime(WaitTime);
-        GXByteBuffer rd = new GXByteBuffer();
+        GXByteBuffer rd;
         synchronized (Media.getSynchronous()) {
             while (!succeeded) {
                 if (!reply.isStreaming()) {
@@ -293,7 +294,7 @@ public class GXDLMSReader {
                         }
                         // Try to read again...
                         if (++pos == 3) {
-                            throw new Exception(
+                            throw new RuntimeException(
                                     "Failed to receive reply from the device in given time.");
                         }
                         System.out.println("Data send failed. Try to resend "
@@ -399,7 +400,8 @@ public class GXDLMSReader {
                     }
                 }
                 if (replyStr.length() == 0 || replyStr.charAt(0) != '/') {
-                    throw new Exception("Invalid responce : " + replyStr);
+                    throw new RuntimeException(
+                            "Invalid responce : " + replyStr);
                 }
                 int bitrate = 0;
                 char baudrate = replyStr.charAt(4);
@@ -521,7 +523,7 @@ public class GXDLMSReader {
      */
     public void readList(List<Entry<GXDLMSObject, Integer>> list)
             throws Exception {
-        if (list.size() != 0) {
+        if (!list.isEmpty()) {
             byte[][] data = dlms.readList(list);
             GXReplyData reply = new GXReplyData();
             List<Object> values = new ArrayList<Object>(list.size());
@@ -770,7 +772,7 @@ public class GXDLMSReader {
                     + String.valueOf(entries), TraceLevel.INFO);
             GXDLMSProfileGeneric pg = (GXDLMSProfileGeneric) it;
             // If there are no columns.
-            if (entriesInUse == 0 || pg.getCaptureObjects().size() == 0) {
+            if (entriesInUse == 0 || pg.getCaptureObjects().isEmpty()) {
                 continue;
             }
             ///////////////////////////////////////////////////////////////////

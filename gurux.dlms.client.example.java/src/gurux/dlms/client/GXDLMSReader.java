@@ -81,14 +81,12 @@ import gurux.dlms.secure.GXDLMSSecureClient;
 import gurux.io.BaudRate;
 import gurux.io.Parity;
 import gurux.io.StopBits;
-import gurux.net.GXNet;
 import gurux.serial.GXSerial;
 
 public class GXDLMSReader {
     IGXMedia Media;
     TraceLevel Trace;
     GXDLMSSecureClient dlms;
-    boolean iec;
     java.nio.ByteBuffer replyBuff;
     int waitTime = 60000;
     final PrintWriter logFile;
@@ -96,13 +94,10 @@ public class GXDLMSReader {
     String invocationCounter = null;
 
     public GXDLMSReader(GXDLMSSecureClient client, IGXMedia media,
-            TraceLevel trace, final boolean useIec, final String frameCounter)
-            throws Exception {
+            TraceLevel trace, final String frameCounter) throws Exception {
         Files.deleteIfExists(Paths.get("trace.txt"));
         logFile = new PrintWriter(
                 new BufferedWriter(new FileWriter("logFile.txt")));
-
-        iec = useIec;
         Trace = trace;
         Media = media;
         dlms = client;
@@ -247,22 +242,18 @@ public class GXDLMSReader {
         reply.setError((short) 0);
         Object eop = (byte) 0x7E;
         // In network connection terminator is not used.
-        if (dlms.getInterfaceType() == InterfaceType.WRAPPER
-                && Media instanceof GXNet) {
+        if (dlms.getInterfaceType() != InterfaceType.HDLC
+                && dlms.getInterfaceType() != InterfaceType.HDLC_WITH_MODE_E) {
             eop = null;
         }
-        Integer pos = 0;
+        GXByteBuffer rd = new GXByteBuffer();
+        int pos = 0;
         boolean succeeded = false;
         ReceiveParameters<byte[]> p =
                 new ReceiveParameters<byte[]>(byte[].class);
         p.setEop(eop);
-        if (dlms.getInterfaceType() == InterfaceType.WRAPPER) {
-            p.setCount(8);
-        } else {
-            p.setCount(5);
-        }
+        p.setCount(dlms.getFrameSize(rd));
         p.setWaitTime(waitTime);
-        GXByteBuffer rd = new GXByteBuffer();
         synchronized (Media.getSynchronous()) {
             while (!succeeded) {
                 if (!reply.isStreaming()) {
@@ -270,9 +261,6 @@ public class GXDLMSReader {
                             "TX: " + now() + "\t" + GXCommon.bytesToHex(data),
                             TraceLevel.VERBOSE);
                     Media.send(data, null);
-                }
-                if (p.getEop() == null) {
-                    p.setCount(1);
                 }
                 succeeded = Media.receive(p);
                 if (!succeeded) {
@@ -285,7 +273,7 @@ public class GXDLMSReader {
                                 "Failed to receive reply from the device in given time.");
                     }
                     System.out.println("Data send failed. Try to resend "
-                            + pos.toString() + "/3");
+                            + String.valueOf(pos) + "/3");
                 }
             }
             rd = new GXByteBuffer(p.getReply());
@@ -322,7 +310,7 @@ public class GXDLMSReader {
                                     "Failed to receive reply from the device in given time.");
                         }
                         System.out.println("Data send failed. Try to resend "
-                                + pos.toString() + "/3");
+                                + String.valueOf(pos) + "/3");
                     }
                     rd.position(msgPos);
                     rd.set(p.getReply());
@@ -405,9 +393,8 @@ public class GXDLMSReader {
                     // Allocate buffer to same size as transmit buffer of the
                     // meter.
                     // Size of replyBuff is payload and frame (Bop, EOP, crc).
-                    int size =
-                            (int) ((((Number) dlms.getLimits().getMaxInfoTX())
-                                    .intValue() & 0xFFFFFFFFL) + 40);
+                    int size = (int) ((((Number) dlms.getHdlcSettings()
+                            .getMaxInfoTX()).intValue() & 0xFFFFFFFFL) + 40);
                     replyBuff = java.nio.ByteBuffer.allocate(size);
                 }
                 // Generate AARQ request.
@@ -442,21 +429,34 @@ public class GXDLMSReader {
     }
 
     void initializeOpticalHead() throws Exception {
-        if (iec) {
-            ReceiveParameters<byte[]> p =
-                    new ReceiveParameters<byte[]>(byte[].class);
-            p.setAllData(false);
-            p.setEop((byte) '\n');
-            p.setWaitTime(waitTime);
-            String data;
-            String replyStr;
-            synchronized (Media.getSynchronous()) {
-                data = "/?!\r\n";
-                writeTrace(
-                        "TX: " + now() + "\t"
-                                + GXCommon.bytesToHex(data.getBytes("ASCII")),
-                        TraceLevel.VERBOSE);
-                Media.send(data, null);
+        if (dlms.getInterfaceType() != InterfaceType.HDLC_WITH_MODE_E) {
+            return;
+        }
+        ReceiveParameters<byte[]> p =
+                new ReceiveParameters<byte[]>(byte[].class);
+        p.setAllData(false);
+        p.setEop((byte) '\n');
+        p.setWaitTime(waitTime);
+        String data;
+        String replyStr;
+        synchronized (Media.getSynchronous()) {
+            data = "/?!\r\n";
+            writeTrace(
+                    "TX: " + now() + "\t"
+                            + GXCommon.bytesToHex(data.getBytes("ASCII")),
+                    TraceLevel.VERBOSE);
+            Media.send(data, null);
+            if (!Media.receive(p)) {
+                throw new RuntimeException(
+                        "Failed to received reply from the media.");
+            }
+            writeTrace(
+                    "RX: " + now() + "\t" + GXCommon.bytesToHex(p.getReply()),
+                    TraceLevel.VERBOSE);
+            // If echo is used.
+            replyStr = new String(p.getReply());
+            if (data.equals(replyStr)) {
+                p.setReply(null);
                 if (!Media.receive(p)) {
                     throw new Exception(
                             "Failed to received reply from the media.");
@@ -465,89 +465,76 @@ public class GXDLMSReader {
                         "RX: " + now() + "\t"
                                 + GXCommon.bytesToHex(p.getReply()),
                         TraceLevel.VERBOSE);
-                // If echo is used.
                 replyStr = new String(p.getReply());
-                if (data.equals(replyStr)) {
-                    p.setReply(null);
-                    if (!Media.receive(p)) {
-                        throw new Exception(
-                                "Failed to received reply from the media.");
-                    }
-                    writeTrace(
-                            "RX: " + now() + "\t"
-                                    + GXCommon.bytesToHex(p.getReply()),
-                            TraceLevel.VERBOSE);
-                    replyStr = new String(p.getReply());
-                }
             }
-            if (replyStr.length() == 0 || replyStr.charAt(0) != '/') {
-                throw new Exception("Invalid responce : " + replyStr);
-            }
-            int bitrate = 0;
-            char baudrate = replyStr.charAt(4);
-            switch (baudrate) {
-            case '0':
-                bitrate = 300;
-                break;
-            case '1':
-                bitrate = 600;
-                break;
-            case '2':
-                bitrate = 1200;
-                break;
-            case '3':
-                bitrate = 2400;
-                break;
-            case '4':
-                bitrate = 4800;
-                break;
-            case '5':
-                bitrate = 9600;
-                break;
-            case '6':
-                bitrate = 19200;
-                break;
-            default:
-                throw new Exception("Unknown baud rate.");
-            }
-            System.out.println("Bitrate is : " + bitrate);
-            // Send ACK
-            // Send Protocol control character
-            byte controlCharacter = (byte) '2';// "2" HDLC protocol
-                                               // procedure (Mode E)
-            // Send Baudrate character
-            // Mode control character
-            byte ModeControlCharacter = (byte) '2';// "2" //(HDLC protocol
-                                                   // procedure) (Binary
-                                                   // mode)
-            // Set mode E.
-            byte[] tmp = new byte[] { 0x06, controlCharacter, (byte) baudrate,
-                    ModeControlCharacter, 13, 10 };
-            p.setReply(null);
-            synchronized (Media.getSynchronous()) {
-                Media.send(tmp, null);
-                writeTrace("RX: " + now() + "\t" + GXCommon.bytesToHex(tmp),
+        }
+        if (replyStr.length() == 0 || replyStr.charAt(0) != '/') {
+            throw new Exception("Invalid responce : " + replyStr);
+        }
+        int bitrate = 0;
+        char baudrate = replyStr.charAt(4);
+        switch (baudrate) {
+        case '0':
+            bitrate = 300;
+            break;
+        case '1':
+            bitrate = 600;
+            break;
+        case '2':
+            bitrate = 1200;
+            break;
+        case '3':
+            bitrate = 2400;
+            break;
+        case '4':
+            bitrate = 4800;
+            break;
+        case '5':
+            bitrate = 9600;
+            break;
+        case '6':
+            bitrate = 19200;
+            break;
+        default:
+            throw new Exception("Unknown baud rate.");
+        }
+        System.out.println("Bitrate is : " + bitrate);
+        // Send ACK
+        // Send Protocol control character
+        byte controlCharacter = (byte) '2';// "2" HDLC protocol
+                                           // procedure (Mode E)
+        // Send Baudrate character
+        // Mode control character
+        byte ModeControlCharacter = (byte) '2';// "2" //(HDLC protocol
+                                               // procedure) (Binary
+                                               // mode)
+        // Set mode E.
+        byte[] tmp = new byte[] { 0x06, controlCharacter, (byte) baudrate,
+                ModeControlCharacter, 13, 10 };
+        p.setReply(null);
+        synchronized (Media.getSynchronous()) {
+            Media.send(tmp, null);
+            writeTrace("RX: " + now() + "\t" + GXCommon.bytesToHex(tmp),
+                    TraceLevel.VERBOSE);
+            p.setWaitTime(100);
+            if (Media.receive(p)) {
+                writeTrace(
+                        "RX: " + now() + "\t"
+                                + GXCommon.bytesToHex(p.getReply()),
                         TraceLevel.VERBOSE);
-                p.setWaitTime(100);
-                if (Media.receive(p)) {
-                    writeTrace(
-                            "RX: " + now() + "\t"
-                                    + GXCommon.bytesToHex(p.getReply()),
-                            TraceLevel.VERBOSE);
-                }
-                Media.close();
-                // This sleep make sure that all meters can be read.
-                Thread.sleep(400);
-                GXSerial serial = (GXSerial) Media;
-                serial.setDataBits(8);
-                serial.setParity(Parity.NONE);
-                serial.setStopBits(StopBits.ONE);
-                serial.setBaudRate(BaudRate.forValue(bitrate));
-                Media.open();
-                serial.setDtrEnable(true);
-                serial.setRtsEnable(true);
-                Thread.sleep(400);
             }
+            Media.close();
+            // This sleep make sure that all meters can be read.
+            Thread.sleep(400);
+            GXSerial serial = (GXSerial) Media;
+            serial.setDataBits(8);
+            serial.setParity(Parity.NONE);
+            serial.setStopBits(StopBits.ONE);
+            serial.setBaudRate(BaudRate.forValue(bitrate));
+            Media.open();
+            serial.setDtrEnable(true);
+            serial.setRtsEnable(true);
+            Thread.sleep(400);
         }
     }
 
@@ -590,7 +577,7 @@ public class GXDLMSReader {
 
             // Allocate buffer to same size as transmit buffer of the meter.
             // Size of replyBuff is payload and frame (Bop, EOP, crc).
-            int size = (int) ((((Number) dlms.getLimits().getMaxInfoTX())
+            int size = (int) ((((Number) dlms.getHdlcSettings().getMaxInfoTX())
                     .intValue() & 0xFFFFFFFFL) + 40);
             replyBuff = java.nio.ByteBuffer.allocate(size);
         }
@@ -915,7 +902,7 @@ public class GXDLMSReader {
                     + String.valueOf(entries), TraceLevel.INFO);
             GXDLMSProfileGeneric pg = (GXDLMSProfileGeneric) it;
             // If there are no columns.
-            if (entriesInUse == 0 || pg.getCaptureObjects().size() == 0) {
+            if (entriesInUse == 0 || pg.getCaptureObjects().isEmpty()) {
                 continue;
             }
             ///////////////////////////////////////////////////////////////////

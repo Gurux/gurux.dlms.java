@@ -55,6 +55,7 @@ import gurux.dlms.GXDLMSServerBase;
 import gurux.dlms.GXDLMSSettings;
 import gurux.dlms.GXDateTime;
 import gurux.dlms.GXSimpleEntry;
+import gurux.dlms.GXUInt64;
 import gurux.dlms.ValueEventArgs;
 import gurux.dlms.enums.DataType;
 import gurux.dlms.enums.ErrorCode;
@@ -956,8 +957,13 @@ public class GXDLMSProfileGeneric extends GXDLMSObject implements IGXDLMSBase {
                         }
                     } else if (type == DataType.DATETIME
                             && row.get(colIndex) instanceof Number) {
-                        row.set(colIndex, GXDateTime.fromUnixTime(
-                                ((Number) row.get(colIndex)).longValue()));
+                        if (row.get(colIndex) instanceof GXUInt64) {
+                            row.set(colIndex, GXDateTime.fromHighResolutionTime(
+                                    ((Number) row.get(colIndex)).longValue()));
+                        } else {
+                            row.set(colIndex, GXDateTime.fromUnixTime(
+                                    ((Number) row.get(colIndex)).longValue()));
+                        }
                     }
 
                     Entry<GXDLMSObject, GXDLMSCaptureObject> item =

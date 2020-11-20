@@ -489,15 +489,17 @@ public class GXDLMSSchedule extends GXDLMSObject implements IGXDLMSBase {
         } else if (e.getIndex() == 2) {
             entries.clear();
             List<?> arr = (List<?>) e.getValue();
-            boolean useUtc;
-            if (e.getSettings() != null) {
-                useUtc = e.getSettings().getUseUtc2NormalTime();
-            } else {
-                useUtc = false;
-            }
-            for (Object it : arr) {
-                List<?> tmp = (List<?>) it;
-                entries.add(createEntry(settings, tmp, useUtc));
+            if (arr != null) {
+                boolean useUtc;
+                if (e.getSettings() != null) {
+                    useUtc = e.getSettings().getUseUtc2NormalTime();
+                } else {
+                    useUtc = false;
+                }
+                for (Object it : arr) {
+                    List<?> tmp = (List<?>) it;
+                    entries.add(createEntry(settings, tmp, useUtc));
+                }
             }
         } else {
             e.setError(ErrorCode.READ_WRITE_DENIED);

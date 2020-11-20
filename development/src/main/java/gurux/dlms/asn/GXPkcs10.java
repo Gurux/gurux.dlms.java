@@ -399,7 +399,7 @@ public class GXPkcs10 {
     }
 
     /**
-     * Load public key from the PEM file.
+     * Load Certificate Signing Request from the PEM file.
      * 
      * @param path
      *            File path.
@@ -408,8 +408,7 @@ public class GXPkcs10 {
      *             IO exception.
      */
     public static GXPkcs10 load(final Path path) throws IOException {
-        byte[] encoded = Files.readAllBytes(path);
-        return new GXPkcs10(new String(encoded));
+        return new GXPkcs10(Files.readString(path));
     }
 
     /**
@@ -424,8 +423,15 @@ public class GXPkcs10 {
         StringBuilder sb = new StringBuilder();
         sb.append(
                 "-----BEGIN CERTIFICATE REQUEST-----" + System.lineSeparator());
-        sb.append(GXCommon.toBase64(getEncoded()));
+        sb.append(toPem());
         sb.append(System.lineSeparator() + "-----END CERTIFICATE REQUEST-----");
         Files.write(path, sb.toString().getBytes(), StandardOpenOption.CREATE);
+    }
+
+    /**
+     * @return Public key in PEM format.
+     */
+    public String toPem() {
+        return GXCommon.toBase64(getEncoded());
     }
 }

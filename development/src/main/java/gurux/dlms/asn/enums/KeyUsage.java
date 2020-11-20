@@ -48,39 +48,39 @@ public enum KeyUsage {
     /**
      * Digital signature.
      */
-    DIGITAL_SIGNATURE(128),
+    DIGITAL_SIGNATURE(1),
     /**
      * Non Repudiation.
      */
-    NON_REPUDIATION(64),
+    NON_REPUDIATION(2),
     /**
      * Key encipherment.
      */
-    KEY_ENCIPHERMENT(32),
+    KEY_ENCIPHERMENT(4),
     /**
      * Data encipherment.
      */
-    DATA_ENCIPHERMENT(16),
+    DATA_ENCIPHERMENT(8),
     /**
      * Key agreement.
      */
-    KEY_AGREEMENT(8),
+    KEY_AGREEMENT(0x10),
     /**
      * Key cert sign.
      */
-    KEY_CERT_SIGN(4),
+    KEY_CERT_SIGN(0x20),
     /**
      * cRL sign.
      */
-    CRL_SIGN(2),
+    CRL_SIGN(0x40),
     /**
      * Encipher only.
      */
-    ENCIPHER_ONLY(1),
+    ENCIPHER_ONLY(0x80),
     /**
      * Decipher only.
      */
-    DECIPHER_ONLY(256);
+    DECIPHER_ONLY(0x100);
 
     private int value;
 

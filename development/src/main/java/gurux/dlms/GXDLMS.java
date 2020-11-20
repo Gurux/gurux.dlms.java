@@ -63,6 +63,7 @@ import gurux.dlms.internal.GXDataInfo;
 import gurux.dlms.objects.GXDLMSAccount;
 import gurux.dlms.objects.GXDLMSActionSchedule;
 import gurux.dlms.objects.GXDLMSActivityCalendar;
+import gurux.dlms.objects.GXDLMSArbitrator;
 import gurux.dlms.objects.GXDLMSAssociationLogicalName;
 import gurux.dlms.objects.GXDLMSAssociationShortName;
 import gurux.dlms.objects.GXDLMSAutoAnswer;
@@ -79,6 +80,9 @@ import gurux.dlms.objects.GXDLMSGSMDiagnostic;
 import gurux.dlms.objects.GXDLMSGprsSetup;
 import gurux.dlms.objects.GXDLMSHdlcSetup;
 import gurux.dlms.objects.GXDLMSIECLocalPortSetup;
+import gurux.dlms.objects.GXDLMSIec8802LlcType1Setup;
+import gurux.dlms.objects.GXDLMSIec8802LlcType2Setup;
+import gurux.dlms.objects.GXDLMSIec8802LlcType3Setup;
 import gurux.dlms.objects.GXDLMSIecTwistedPairSetup;
 import gurux.dlms.objects.GXDLMSImageTransfer;
 import gurux.dlms.objects.GXDLMSIp4Setup;
@@ -104,6 +108,11 @@ import gurux.dlms.objects.GXDLMSPushSetup;
 import gurux.dlms.objects.GXDLMSRegister;
 import gurux.dlms.objects.GXDLMSRegisterActivation;
 import gurux.dlms.objects.GXDLMSRegisterMonitor;
+import gurux.dlms.objects.GXDLMSSFSKActiveInitiator;
+import gurux.dlms.objects.GXDLMSSFSKMacCounters;
+import gurux.dlms.objects.GXDLMSSFSKMacSynchronizationTimeouts;
+import gurux.dlms.objects.GXDLMSSFSKPhyMacSetUp;
+import gurux.dlms.objects.GXDLMSSFSKReportingSystemList;
 import gurux.dlms.objects.GXDLMSSapAssignment;
 import gurux.dlms.objects.GXDLMSSchedule;
 import gurux.dlms.objects.GXDLMSScriptTable;
@@ -114,6 +123,11 @@ import gurux.dlms.objects.GXDLMSTokenGateway;
 import gurux.dlms.objects.GXDLMSUtilityTables;
 import gurux.dlms.objects.enums.CertificateType;
 import gurux.dlms.objects.enums.SecuritySuite;
+import gurux.dlms.plc.enums.PlcDataLinkData;
+import gurux.dlms.plc.enums.PlcDestinationAddress;
+import gurux.dlms.plc.enums.PlcHdlcSourceAddress;
+import gurux.dlms.plc.enums.PlcMacSubframes;
+import gurux.dlms.plc.enums.PlcSourceAddress;
 import gurux.dlms.secure.AesGcmParameter;
 import gurux.dlms.secure.CountType;
 import gurux.dlms.secure.GXCiphering;
@@ -126,9 +140,15 @@ abstract class GXDLMS {
     /*
      * HDLC frame start and end character.
      */
-    private static final byte HDLC_FRAME_START_END = 0x7E;
+    static final byte HDLC_FRAME_START_END = 0x7E;
     static final byte CIPHERING_HEADER_SIZE = 7 + 12 + 3;
     static final int DATA_TYPE_OFFSET = 0xFF0000;
+
+    static boolean useHdlc(InterfaceType type) {
+        return type == InterfaceType.HDLC
+                || type == InterfaceType.HDLC_WITH_MODE_E
+                || type == InterfaceType.PLC_HDLC;
+    }
 
     /**
      * Constructor.
@@ -291,6 +311,24 @@ abstract class GXDLMS {
             return new GXDLMSPrimeNbOfdmPlcMacNetworkAdministrationData();
         case PRIME_NB_OFDM_PLC_APPLICATIONS_IDENTIFICATION:
             return new GXDLMSPrimeNbOfdmPlcApplicationsIdentification();
+        case IEC_8802_LLC_TYPE1_SETUP:
+            return new GXDLMSIec8802LlcType1Setup();
+        case IEC_8802_LLC_TYPE2_SETUP:
+            return new GXDLMSIec8802LlcType2Setup();
+        case IEC_8802_LLC_TYPE3_SETUP:
+            return new GXDLMSIec8802LlcType3Setup();
+        case SFSK_REPORTING_SYSTEM_LIST:
+            return new GXDLMSSFSKReportingSystemList();
+        case ARBITRATOR:
+            return new GXDLMSArbitrator();
+        case SFSK_MAC_COUNTERS:
+            return new GXDLMSSFSKMacCounters();
+        case SFSK_MAC_SYNCHRONIZATION_TIMEOUTS:
+            return new GXDLMSSFSKMacSynchronizationTimeouts();
+        case SFSK_ACTIVE_INITIATOR:
+            return new GXDLMSSFSKActiveInitiator();
+        case SFSK_PHY_MAC_SETUP:
+            return new GXDLMSSFSKPhyMacSetUp();
         default:
             return new GXDLMSObject();
         }
@@ -360,6 +398,9 @@ abstract class GXDLMS {
         // Get next frame.
         if (reply.getMoreData().contains(RequestTypes.FRAME)) {
             byte id = settings.getReceiverReady();
+            if (settings.getInterfaceType() == InterfaceType.PLC_HDLC) {
+                return GXDLMS.getMacHdlcFrame(settings, id, (byte) 0, null);
+            }
             return getHdlcFrame(settings, id, null);
         }
         short cmd;
@@ -985,7 +1026,7 @@ abstract class GXDLMS {
                 reply.set(tmp);
             }
         }
-        if (p.getSettings().getInterfaceType() == InterfaceType.HDLC) {
+        if (useHdlc(p.getSettings().getInterfaceType())) {
             addLLCBytes(p.getSettings(), reply);
         }
     }
@@ -995,7 +1036,7 @@ abstract class GXDLMS {
      * 
      * @param p
      *            LN settings.
-     * @param reply
+     * @param data
      *            Data to encrypt.
      */
     private static byte[] cipher1(final GXDLMSLNParameters p, final byte[] data)
@@ -1237,22 +1278,32 @@ abstract class GXDLMS {
                 p.getSettings().increaseBlockIndex();
             }
             while (reply.position() != reply.size()) {
-                if (p.getSettings()
-                        .getInterfaceType() == InterfaceType.WRAPPER) {
+                switch (p.getSettings().getInterfaceType()) {
+                case WRAPPER:
                     messages.add(getWrapperFrame(p.getSettings(),
                             p.getCommand(), reply));
-                } else if (p.getSettings()
-                        .getInterfaceType() == InterfaceType.HDLC) {
+                    break;
+                case HDLC:
+                case HDLC_WITH_MODE_E:
                     messages.add(
                             GXDLMS.getHdlcFrame(p.getSettings(), frame, reply));
                     if (reply.position() != reply.size()) {
                         frame = p.getSettings().getNextSend(false);
                     }
-                } else if (p.getSettings()
-                        .getInterfaceType() == InterfaceType.PDU) {
-                    messages.add(reply.array());
                     break;
-                } else {
+                case PDU:
+                    messages.add(reply.array());
+                    reply.position(reply.size());
+                    break;
+                case PLC:
+                    messages.add(GXDLMS.getPlcFrame(p.getSettings(),
+                            (byte) 0x90, reply));
+                    break;
+                case PLC_HDLC:
+                    messages.add(GXDLMS.getMacHdlcFrame(p.getSettings(), frame,
+                            (byte) 0, reply));
+                    break;
+                default:
                     throw new IllegalArgumentException("InterfaceType");
                 }
             }
@@ -1323,7 +1374,7 @@ abstract class GXDLMS {
         int maxSize = p.getSettings().getMaxPduSize() - hSize;
         if (ciphering) {
             maxSize -= CIPHERING_HEADER_SIZE;
-            if (p.getSettings().getInterfaceType() == InterfaceType.HDLC) {
+            if (useHdlc(p.getSettings().getInterfaceType())) {
                 maxSize -= 3;
             }
         }
@@ -1363,7 +1414,7 @@ abstract class GXDLMS {
                 && p.getSettings().getCipher().getSecurity() != Security.NONE;
         if ((!ciphering || p.getCommand() == Command.AARQ
                 || p.getCommand() == Command.AARE)
-                && p.getSettings().getInterfaceType() == InterfaceType.HDLC) {
+                && useHdlc(p.getSettings().getInterfaceType())) {
             if (p.getSettings().isServer()) {
                 reply.set(GXCommon.LLC_REPLY_BYTES);
             } else if (reply.size() == 0) {
@@ -1409,8 +1460,8 @@ abstract class GXDLMS {
                 // If reply data is not fit to one PDU.
                 if (p.isMultipleBlocks()) {
                     reply.size(0);
-                    if (!ciphering && p.getSettings()
-                            .getInterfaceType() == InterfaceType.HDLC) {
+                    if (!ciphering
+                            && useHdlc(p.getSettings().getInterfaceType())) {
                         if (p.getSettings().isServer()) {
                             reply.set(GXCommon.LLC_REPLY_BYTES);
                         } else if (reply.size() == 0) {
@@ -1460,7 +1511,7 @@ abstract class GXDLMS {
                     cipher.getBlockCipherKey(), cipher.getAuthenticationKey());
             byte[] tmp = GXCiphering.encrypt(s, reply.array());
             reply.size(0);
-            if (p.getSettings().getInterfaceType() == InterfaceType.HDLC) {
+            if (useHdlc(p.getSettings().getInterfaceType())) {
                 if (p.getSettings().isServer()) {
                     reply.set(GXCommon.LLC_REPLY_BYTES);
                 } else if (reply.size() == 0) {
@@ -1487,7 +1538,7 @@ abstract class GXDLMS {
 
     /**
      * @param value
-     * @param bb
+     * @param size
      */
     private static byte[] getAddressBytes(final int value, final int size) {
         Object tmp = getAddress(value, size);
@@ -1595,11 +1646,11 @@ abstract class GXDLMS {
         }
         // Add BOP
         bb.setUInt8(HDLC_FRAME_START_END);
-        frameSize = settings.getLimits().getMaxInfoTX();
+        frameSize = settings.getHdlcSettings().getMaxInfoTX();
 
         // Remove BOP, type, len, primaryAddress, secondaryAddress, frame,
         // header CRC, data CRC and EOP from data length.
-        if (settings.getLimits().isUseFrameSize()) {
+        if (settings.getHdlcSettings().isUseFrameSize()) {
             frameSize -= (10 + len);
         } else {
             if (data != null && data.position() == 0) {
@@ -1662,6 +1713,155 @@ abstract class GXDLMS {
                 data.position(0);
             }
         }
+        return bb.array();
+    }
+
+    /**
+     * Get MAC LLC frame for data.
+     * 
+     * @param settings
+     *            DLMS settings.
+     * @param frame
+     *            HDLC frame sequence number.
+     * @param creditFields
+     *            Credit fields.
+     * @param data
+     *            Data to add.
+     * @return MAC frame.
+     */
+    public static byte[] getMacFrame(final GXDLMSSettings settings,
+            final byte frame, final byte creditFields,
+            final GXByteBuffer data) {
+        if (settings.getInterfaceType() == InterfaceType.PLC) {
+            return getPlcFrame(settings, creditFields, data);
+        }
+        return getMacHdlcFrame(settings, frame, creditFields, data);
+    }
+
+    /**
+     * Get MAC LLC frame for data.
+     * 
+     * @param settings
+     *            DLMS settings.
+     * @param data
+     *            Data to add.
+     * @return MAC frame.
+     */
+    private static byte[] getPlcFrame(final GXDLMSSettings settings,
+            final byte creditFields, final GXByteBuffer data) {
+        int frameSize = data.available();
+        // Max frame size is 124 bytes.
+        if (frameSize > 134) {
+            frameSize = 134;
+        }
+        // PAD Length.
+        int padLen = (36 - ((11 + frameSize) % 36)) % 36;
+        GXByteBuffer bb = new GXByteBuffer();
+        bb.capacity(15 + frameSize + padLen);
+        // Add STX
+        bb.setUInt8(2);
+        // Length.
+        bb.setUInt8((byte) (11 + frameSize));
+        // Length.
+        bb.setUInt8(0x50);
+        // Add Credit fields.
+        bb.setUInt8(creditFields);
+        // Add source and target MAC addresses.
+        bb.setUInt8((byte) (settings.getPlc().getMacSourceAddress() >> 4));
+        int val = settings.getPlc().getMacSourceAddress() << 12;
+        val |= settings.getPlc().getMacDestinationAddress() & 0xFFF;
+        bb.setUInt16(val);
+        bb.setUInt8((byte) padLen);
+        // Control byte.
+        bb.setUInt8(PlcDataLinkData.REQUEST.getValue());
+        bb.setUInt8(settings.getServerAddress());
+        bb.setUInt8(settings.getClientAddress());
+        bb.set(data, frameSize);
+        // Add padding.
+        while (padLen != 0) {
+            bb.setUInt8(0);
+            --padLen;
+        }
+        // Checksum.
+        int crc = GXFCS16.countFCS16(bb.getData(), 0, bb.size());
+        bb.setUInt16(crc);
+        // Remove sent data in server side.
+        if (settings.isServer()) {
+            if (data.size() == data.position()) {
+                data.clear();
+            } else {
+                data.move(data.position(), 0, data.available());
+                data.position(0);
+            }
+        }
+        return bb.array();
+    }
+
+    /**
+     * Get MAC HDLC frame for data.
+     * 
+     * @param settings
+     *            DLMS settings.
+     * @param frame
+     *            HDLC frame.
+     * @param creditFields
+     *            Credit fields.
+     * @param data
+     *            Data to add.
+     * @return MAC frame.
+     */
+
+    static byte[] getMacHdlcFrame(final GXDLMSSettings settings,
+            final int frame, final int creditFields, final GXByteBuffer data) {
+        if (settings.getHdlcSettings().getMaxInfoTX() > 126) {
+            settings.getHdlcSettings().setMaxInfoTX(86);
+        }
+        GXByteBuffer bb = new GXByteBuffer();
+        // Length is updated last.
+        bb.setUInt16(0);
+        // Add Credit fields.
+        bb.setUInt8(creditFields);
+        // Add source and target MAC addresses.
+        bb.setUInt8(settings.getPlc().getMacSourceAddress() >> 4);
+        int val = settings.getPlc().getMacSourceAddress() << 12;
+        val |= settings.getPlc().getMacDestinationAddress() & 0xFFF;
+        bb.setUInt16(val);
+        byte[] tmp = GXDLMS.getHdlcFrame(settings, frame, data);
+        int padLen = (36 - ((10 + tmp.length) % 36)) % 36;
+        bb.setUInt8((byte) padLen);
+        bb.set(tmp);
+        // Add padding.
+        while (padLen != 0) {
+            bb.setUInt8(0);
+            --padLen;
+        }
+        // Checksum.
+        int crc = GXFCS16.countFCS24(bb.getData(), 2, bb.size() - 2 - padLen);
+        bb.setUInt8((byte) (crc >> 16));
+        bb.setUInt16(crc);
+        // Add NC
+        val = bb.size() / 36;
+        if (bb.size() % 36 != 0) {
+            ++val;
+        }
+        if (val == 1) {
+            val = PlcMacSubframes.ONE;
+        } else if (val == 2) {
+            val = PlcMacSubframes.TWO;
+        } else if (val == 3) {
+            val = PlcMacSubframes.THREE;
+        } else if (val == 4) {
+            val = PlcMacSubframes.FOUR;
+        } else if (val == 5) {
+            val = PlcMacSubframes.FIVE;
+        } else if (val == 6) {
+            val = PlcMacSubframes.SIX;
+        } else if (val == 7) {
+            val = PlcMacSubframes.SEVEN;
+        } else {
+            throw new IllegalArgumentException("Data length is too high.");
+        }
+        bb.setUInt16(0, val);
         return bb.array();
     }
 
@@ -2278,6 +2478,229 @@ abstract class GXDLMS {
                 MBusCommand.forValue(buff.getUInt8(buff.position() + 1));
         return (cmd == MBusCommand.SND_NR || cmd == MBusCommand.SND_UD2
                 || cmd == MBusCommand.RSP_UD);
+    }
+
+    /**
+     * Check is this PLC S-FSK message.
+     * 
+     * @param buff
+     *            Received data.
+     * @return S-FSK frame size in bytes.
+     */
+    static short getPlcSfskFrameSize(final GXByteBuffer buff) {
+        short ret;
+        if (buff.available() < 2) {
+            ret = 0;
+        } else {
+            int len = buff.getUInt16(buff.position());
+            switch (len) {
+            case PlcMacSubframes.ONE:
+                ret = 36;
+                break;
+            case PlcMacSubframes.TWO:
+                ret = 2 * 36;
+                break;
+            case PlcMacSubframes.THREE:
+                ret = 3 * 36;
+                break;
+            case PlcMacSubframes.FOUR:
+                ret = 4 * 36;
+                break;
+            case PlcMacSubframes.FIVE:
+                ret = 5 * 36;
+                break;
+            case PlcMacSubframes.SIX:
+                ret = 6 * 36;
+                break;
+            case PlcMacSubframes.SEVEN:
+                ret = 7 * 36;
+                break;
+            default:
+                ret = 0;
+                break;
+            }
+        }
+        return ret;
+    }
+
+    /**
+     * Get data from S-FSK PLC frame.
+     * 
+     * @param settings
+     *            DLMS settings.
+     * @param buff
+     *            Received data.
+     * @param data
+     *            Reply information.
+     */
+    private static void getPlcData(final GXDLMSSettings settings,
+            final GXByteBuffer buff, final GXReplyData data) {
+        if (buff.available() < 9) {
+            data.setComplete(false);
+            return;
+        }
+        int pos;
+        int packetStartID = buff.position();
+        // Find STX.
+        short stx;
+        for (pos = buff.position(); pos < buff.size(); ++pos) {
+            stx = buff.getUInt8();
+            if (stx == 2) {
+                packetStartID = pos;
+                break;
+            }
+        }
+        // Not a PLC frame.
+        if (buff.position() == buff.size()) {
+            // Not enough data to parse;
+            data.setComplete(false);
+            buff.position(packetStartID);
+            return;
+        }
+        int len = buff.getUInt8();
+        int index = buff.position();
+        if (buff.available() < len) {
+            data.setComplete(false);
+            buff.position(buff.position() - 2);
+        } else {
+            buff.getUInt8();
+            short credit = buff.getUInt8();
+            // MAC Addresses.
+            int mac = buff.getUInt24();
+            short macSa = (short) (mac >> 12);
+            short macDa = (short) (mac & 0xFFF);
+            short padLen = buff.getUInt8();
+            if (buff.size() < len + padLen + 2) {
+                data.setComplete(false);
+                buff.position(buff.position() - 6);
+            } else {
+                // DL.Data.request
+                short ch = buff.getUInt8();
+                if (ch != PlcDataLinkData.REQUEST.getValue()) {
+                    throw new RuntimeException(
+                            "Parsing MAC LLC data failed. Invalid DataLink data request.");
+                }
+                short da = buff.getUInt8();
+                short sa = buff.getUInt8();
+                if (settings.isServer()) {
+                    data.setComplete(data.getXml() != null
+                            || ((macDa == (short) PlcDestinationAddress.ALL_PHYSICAL
+                                    .getValue()
+                                    || macDa == settings.getPlc()
+                                            .getMacSourceAddress())
+                                    && (macSa == (short) PlcSourceAddress.INITIATOR
+                                            .getValue()
+                                            || macSa == settings.getPlc()
+                                                    .getMacDestinationAddress())));
+                    data.setServerAddress(macDa);
+                    data.setClientAddress(macSa);
+                } else {
+                    data.setComplete(data.getXml() != null
+                            || (macDa == (short) PlcDestinationAddress.ALL_PHYSICAL
+                                    .getValue()
+                                    || macDa == (short) PlcSourceAddress.INITIATOR
+                                            .getValue()
+                                    || macDa == settings.getPlc()
+                                            .getMacDestinationAddress()));
+                    data.setClientAddress(macDa);
+                    data.setServerAddress(macSa);
+                }
+                // Skip padding.
+                if (data.isComplete()) {
+                    int crcCount =
+                            GXFCS16.countFCS16(buff.getData(), 0, len + padLen);
+                    int crc = buff.getUInt16(len + padLen);
+                    // Check CRC.
+                    if (crc != crcCount) {
+                        if (data.getXml() == null) {
+                            throw new RuntimeException(
+                                    "Invalid data checksum.");
+                        }
+                        data.getXml().appendComment("Invalid data checksum.");
+                    }
+                    data.setPacketLength(len);
+                } else {
+                    buff.position(packetStartID);
+                }
+            }
+        }
+    }
+
+    /**
+     * Get data from S-FSK PLC Hdlc frame.
+     * 
+     * @param settings
+     *            DLMS settings.
+     * @param buff
+     *            Received data.
+     * @param data
+     *            Reply information.
+     */
+    private static short getPlcHdlcData(final GXDLMSSettings settings,
+            final GXByteBuffer buff, final GXReplyData data) {
+        if (buff.available() < 2) {
+            data.setComplete(false);
+            return 0;
+        }
+        short frame = 0;
+        short frameLen = getPlcSfskFrameSize(buff);
+        if (frameLen == 0) {
+            throw new RuntimeException("Invalid PLC frame size.");
+        }
+        if (buff.available() < frameLen) {
+            data.setComplete(false);
+        } else {
+            buff.position(2 + buff.position());
+            int index = buff.position();
+            short credit = buff.getUInt8();
+            // Credit fields. IC, CC, DC
+            // MAC Addresses.
+            int mac = buff.getUInt24();
+            // SA.
+            short sa = (short) (mac >> 12);
+            // DA.
+            short da = (short) (mac & 0xFFF);
+            if (settings.isServer()) {
+                data.setComplete(data.getXml() != null
+                        || ((da == PlcDestinationAddress.ALL_PHYSICAL.getValue()
+                                || da == settings.getPlc()
+                                        .getMacSourceAddress())
+                                && (sa == (short) PlcHdlcSourceAddress.INITIATOR
+                                        .getValue()
+                                        || sa == settings.getPlc()
+                                                .getMacDestinationAddress())));
+                data.setServerAddress(da);
+                data.setClientAddress(sa);
+            } else {
+                data.setComplete(data.getXml() != null
+                        || (da == PlcHdlcSourceAddress.INITIATOR.getValue()
+                                || da == settings.getPlc()
+                                        .getMacDestinationAddress()));
+                data.setClientAddress(sa);
+                data.setServerAddress(da);
+            }
+            if (data.isComplete()) {
+                short padLen = buff.getUInt8();
+                frame = getHdlcData(settings.isServer(), settings, buff, data,
+                        null);
+                getDataFromFrame(buff, data, true);
+                buff.position(buff.position() + padLen);
+                int crcCount = GXFCS16.countFCS24(buff.getData(), index,
+                        buff.position() - index);
+                int crc = buff.getUInt24(buff.position());
+                // Check CRC.
+                if (crc != crcCount) {
+                    if (data.getXml() == null) {
+                        throw new RuntimeException("Invalid data checksum.");
+                    }
+                    data.getXml().appendComment("Invalid data checksum.");
+                }
+                data.setPacketLength(2 + buff.position() - index);
+            } else {
+                buff.position(buff.position() + frameLen - index - 4);
+            }
+        }
+        return frame;
     }
 
     private static boolean checkWrapperAddress(final GXDLMSSettings settings,
@@ -3440,6 +3863,11 @@ abstract class GXDLMS {
                 data.setCommand(Command.NONE);
                 getPdu(settings, data);
                 break;
+            case Command.PING_RESPONSE:
+            case Command.DISCOVER_REPORT:
+            case Command.DISCOVER_REQUEST:
+            case Command.REGISTER_REQUEST:
+                break;
             default:
                 throw new IllegalArgumentException("Invalid Command.");
             }
@@ -3835,7 +4263,9 @@ abstract class GXDLMS {
         boolean isNotify = false;
         GXReplyData target = data;
         // If DLMS frame is generated.
-        if (settings.getInterfaceType() == InterfaceType.HDLC) {
+        switch (settings.getInterfaceType()) {
+        case HDLC:
+        case HDLC_WITH_MODE_E:
             frame = getHdlcData(settings.isServer(), settings, reply, target,
                     notify);
             if (notify != null && frame == 0x13) {
@@ -3843,19 +4273,29 @@ abstract class GXDLMS {
                 isNotify = true;
             }
             target.setFrameId(frame);
-        } else if (settings.getInterfaceType() == InterfaceType.WRAPPER) {
+            break;
+        case WRAPPER:
             if (!getTcpData(settings, reply, target, notify)) {
                 if (notify != null) {
                     target = notify;
                     isNotify = true;
                 }
             }
-        } else if (settings.getInterfaceType() == InterfaceType.WIRELESS_MBUS) {
+            break;
+        case WIRELESS_MBUS:
             getMBusData(settings, reply, target);
-        } else if (settings.getInterfaceType() == InterfaceType.PDU) {
+            break;
+        case PDU:
             target.setPacketLength(reply.size());
-            target.setComplete(true);
-        } else {
+            target.setComplete(reply.size() != 0);
+            break;
+        case PLC:
+            getPlcData(settings, reply, data);
+            break;
+        case PLC_HDLC:
+            frame = getPlcHdlcData(settings, reply, data);
+            break;
+        default:
             throw new IllegalArgumentException("Invalid Interface type.");
         }
         // If all data is not read yet.
@@ -3863,8 +4303,10 @@ abstract class GXDLMS {
             return false;
         }
 
-        getDataFromFrame(reply, target,
-                settings.getInterfaceType() == InterfaceType.HDLC);
+        if (settings.getInterfaceType() != InterfaceType.PLC_HDLC) {
+            getDataFromFrame(reply, target,
+                    useHdlc(settings.getInterfaceType()));
+        }
 
         // If keepalive or get next frame request.
         if (target.getXml() != null || (frame != 0x13 && (frame & 0x1) != 0)) {
@@ -4072,7 +4514,7 @@ abstract class GXDLMS {
      */
     static void parseSnrmUaResponse(final GXByteBuffer data,
             final GXDLMSSettings settings) {
-        GXDLMSLimits limits = settings.getLimits();
+        GXHdlcSettings limits = settings.getHdlcSettings();
         // If default settings are used.
         if (data.available() == 0) {
             limits.setMaxInfoTX(GXDLMSLimits.DEFAULT_MAX_INFO_TX);

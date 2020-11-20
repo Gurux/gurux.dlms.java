@@ -282,6 +282,20 @@ final class TranslatorStandardTags {
     }
 
     /*
+     * Get PLC tags.
+     */
+    static void getPlcTags(final HashMap<Integer, String> list) {
+        GXDLMSTranslator.addTag(list, Command.DISCOVER_REQUEST,
+                "discover-request");
+        GXDLMSTranslator.addTag(list, Command.DISCOVER_REPORT,
+                "discover-report");
+        GXDLMSTranslator.addTag(list, Command.REGISTER_REQUEST,
+                "register-request");
+        GXDLMSTranslator.addTag(list, Command.PING_REQUEST, "ping-request");
+        GXDLMSTranslator.addTag(list, Command.PING_RESPONSE, "ping-response");
+    }
+
+    /*
      * Get glo tags.
      */
     static void getGloTags(final TranslatorOutputType type,

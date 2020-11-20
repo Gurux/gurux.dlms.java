@@ -202,11 +202,19 @@ public class GXDLMSServerBase {
         return settings.getObjects();
     }
 
-    /*
-     * @return Information from the connection size that server can handle.
+    /**
+     * @return HDLC connection settings.
+     * @deprecated use {@link getHdlcSettings} instead.
      */
     public final GXDLMSLimits getLimits() {
-        return settings.getLimits();
+        return (GXDLMSLimits) settings.getHdlcSettings();
+    }
+
+    /**
+     * @return HDLC connection settings.
+     */
+    public final GXHdlcSettings getHdlcSettings() {
+        return settings.getHdlcSettings();
     }
 
     /**
@@ -557,6 +565,9 @@ public class GXDLMSServerBase {
                     GXSecure.generateChallenge(settings.getAuthentication()));
         }
 
+        if (GXDLMS.useHdlc(settings.getInterfaceType())) {
+            replyData.set(GXCommon.LLC_REPLY_BYTES);
+        }
         // Generate AARE packet.
         GXAPDU.generateAARE(settings, replyData, result, ret,
                 settings.getCipher(), error, null);
@@ -583,7 +594,7 @@ public class GXDLMSServerBase {
                     Service.UNSUPPORTED.getValue()));
             return;
         }
-        if (getSettings().getInterfaceType() == InterfaceType.HDLC) {
+        if (GXDLMS.useHdlc(settings.getInterfaceType())) {
             replyData.set(0, GXCommon.LLC_REPLY_BYTES);
         }
         byte[] tmp = GXAPDU.getUserInformation(settings, settings.getCipher());
@@ -613,42 +624,42 @@ public class GXDLMSServerBase {
         replyData.setUInt8(0); // Length
         if (getHdlc() != null) {
             // If client wants send larger HDLC frames what meter accepts.
-            if (settings.getLimits().getMaxInfoTX() > getHdlc()
+            if (settings.getHdlcSettings().getMaxInfoTX() > getHdlc()
                     .getMaximumInfoLengthReceive()) {
-                settings.getLimits()
+                settings.getHdlcSettings()
                         .setMaxInfoTX(getHdlc().getMaximumInfoLengthReceive());
             }
             // If client wants receive larger HDLC frames what meter accepts.
-            if (settings.getLimits().getMaxInfoRX() > getHdlc()
+            if (settings.getHdlcSettings().getMaxInfoRX() > getHdlc()
                     .getMaximumInfoLengthTransmit()) {
-                settings.getLimits()
+                settings.getHdlcSettings()
                         .setMaxInfoRX(getHdlc().getMaximumInfoLengthTransmit());
             }
             // If client asks higher window size what meter accepts.
-            if (settings.getLimits().getMaxInfoRX() > getHdlc()
+            if (settings.getHdlcSettings().getMaxInfoRX() > getHdlc()
                     .getMaximumInfoLengthTransmit()) {
-                settings.getLimits()
+                settings.getHdlcSettings()
                         .setWindowSizeTX(getHdlc().getWindowSizeReceive());
             }
             // If client asks higher window size what meter accepts.
-            if (settings.getLimits().getMaxInfoRX() > getHdlc()
+            if (settings.getHdlcSettings().getMaxInfoRX() > getHdlc()
                     .getMaximumInfoLengthTransmit()) {
-                settings.getLimits()
+                settings.getHdlcSettings()
                         .setWindowSizeRX(getHdlc().getWindowSizeTransmit());
             }
         }
         replyData.setUInt8(HDLCInfo.MAX_INFO_TX);
-        GXDLMS.appendHdlcParameter(replyData, getLimits().getMaxInfoTX());
+        GXDLMS.appendHdlcParameter(replyData, getHdlcSettings().getMaxInfoTX());
 
         replyData.setUInt8(HDLCInfo.MAX_INFO_RX);
-        GXDLMS.appendHdlcParameter(replyData, getLimits().getMaxInfoRX());
+        GXDLMS.appendHdlcParameter(replyData, getHdlcSettings().getMaxInfoRX());
 
         replyData.setUInt8(HDLCInfo.WINDOW_SIZE_TX);
         replyData.setUInt8(4);
-        replyData.setUInt32(getLimits().getWindowSizeTX());
+        replyData.setUInt32(getHdlcSettings().getWindowSizeTX());
         replyData.setUInt8(HDLCInfo.WINDOW_SIZE_RX);
         replyData.setUInt8(4);
-        replyData.setUInt32(getLimits().getWindowSizeRX());
+        replyData.setUInt32(getHdlcSettings().getWindowSizeRX());
         int len = replyData.size() - 3;
         replyData.setUInt8(2, len); // Length
         settings.setConnected(ConnectionState.HDLC);
@@ -672,19 +683,19 @@ public class GXDLMSServerBase {
 
         replyData.setUInt8(HDLCInfo.MAX_INFO_TX);
         replyData.setUInt8(1);
-        replyData.setUInt8(getLimits().getMaxInfoTX());
+        replyData.setUInt8(getHdlcSettings().getMaxInfoTX());
 
         replyData.setUInt8(HDLCInfo.MAX_INFO_RX);
         replyData.setUInt8(1);
-        replyData.setUInt8(getLimits().getMaxInfoRX());
+        replyData.setUInt8(getHdlcSettings().getMaxInfoRX());
 
         replyData.setUInt8(HDLCInfo.WINDOW_SIZE_TX);
         replyData.setUInt8(4);
-        replyData.setUInt32(getLimits().getWindowSizeTX());
+        replyData.setUInt32(getHdlcSettings().getWindowSizeTX());
 
         replyData.setUInt8(HDLCInfo.WINDOW_SIZE_RX);
         replyData.setUInt8(4);
-        replyData.setUInt32(getLimits().getWindowSizeRX());
+        replyData.setUInt32(getHdlcSettings().getWindowSizeRX());
 
         int len = replyData.size() - 3;
         replyData.setUInt8(2, len); // Length.
@@ -999,7 +1010,8 @@ public class GXDLMSServerBase {
             final GXServerReply sr, final int cipheredCommand)
             throws Exception {
         byte frame = 0;
-        if (replyData.size() != 0) {
+        if (GXDLMS.useHdlc(settings.getInterfaceType())
+                && replyData.size() != 0) {
             // Get next frame.
             frame = settings.getNextSend(false);
         }
@@ -1071,6 +1083,18 @@ public class GXDLMSServerBase {
                     info.getCipheredCommand())) {
                 return null;
             }
+            break;
+        case Command.DISCOVER_REQUEST:
+            settings.getPlc().parseDiscoverRequest(data);
+            boolean newMeter = settings.getPlc().getMacSourceAddress() == 0xFFE
+                    && settings.getPlc().getMacDestinationAddress() == 0xFFF;
+            return settings.getPlc().discoverReport(
+                    settings.getPlc().getSystemTitle(), newMeter);
+        case Command.REGISTER_REQUEST:
+            settings.getPlc().parseRegisterRequest(data);
+            return settings.getPlc()
+                    .discoverReport(settings.getPlc().getSystemTitle(), false);
+        case Command.PING_REQUEST:
             break;
         case Command.NONE:
             // Client wants to get next block.

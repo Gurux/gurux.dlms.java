@@ -45,6 +45,7 @@ import java.util.List;
 
 import javax.xml.stream.XMLStreamException;
 
+import gurux.dlms.GXByteBuffer;
 import gurux.dlms.GXDLMSSettings;
 import gurux.dlms.GXDLMSTranslator;
 import gurux.dlms.ValueEventArgs;
@@ -87,7 +88,7 @@ public class GXDLMSIecTwistedPairSetup extends GXDLMSObject
      * Constructor.
      */
     public GXDLMSIecTwistedPairSetup() {
-        this(null, 0);
+        this("0.0.23.0.0.255", 0);
     }
 
     /**
@@ -246,23 +247,24 @@ public class GXDLMSIecTwistedPairSetup extends GXDLMSObject
 
     @Override
     public final DataType getDataType(final int index) {
-        if (index == 1) {
-            return DataType.OCTET_STRING;
+        DataType ret;
+        switch (index) {
+        case 1:
+            ret = DataType.OCTET_STRING;
+            break;
+        case 2:
+        case 3:
+            ret = DataType.ENUM;
+            break;
+        case 4:
+        case 5:
+            ret = DataType.ARRAY;
+            break;
+        default:
+            throw new IllegalArgumentException(
+                    "getDataType failed. Invalid attribute index.");
         }
-        if (index == 2) {
-            return DataType.ENUM;
-        }
-        if (index == 3) {
-            return DataType.ENUM;
-        }
-        if (index == 4) {
-            return DataType.ARRAY;
-        }
-        if (index == 5) {
-            return DataType.ARRAY;
-        }
-        throw new IllegalArgumentException(
-                "getDataType failed. Invalid attribute index.");
+        return ret;
     }
 
     /*
@@ -271,11 +273,54 @@ public class GXDLMSIecTwistedPairSetup extends GXDLMSObject
     @Override
     public final Object getValue(final GXDLMSSettings settings,
             final ValueEventArgs e) {
-        if (e.getIndex() == 1) {
-            return GXCommon.logicalNameToBytes(getLogicalName());
+        Object ret;
+        switch (e.getIndex()) {
+        case 1:
+            ret = GXCommon.logicalNameToBytes(getLogicalName());
+            break;
+        case 2:
+            ret = mode.ordinal();
+            break;
+        case 3:
+            ret = speed.ordinal();
+            break;
+        case 4: {
+            GXByteBuffer data = new GXByteBuffer();
+            data.setUInt8(DataType.ARRAY);
+            if (primaryAddresses == null) {
+                data.setUInt8(0);
+            } else {
+                data.setUInt8((byte) primaryAddresses.length);
+                for (byte it : primaryAddresses) {
+                    data.setUInt8(DataType.UINT8);
+                    data.setUInt8(it);
+                }
+            }
+            ret = data.array();
+            break;
         }
-        e.setError(ErrorCode.READ_WRITE_DENIED);
-        return null;
+
+        case 5: {
+            GXByteBuffer data = new GXByteBuffer();
+            data.setUInt8(DataType.ARRAY);
+            if (tabis == null) {
+                data.setUInt8(0);
+            } else {
+                data.setUInt8(tabis.length);
+                for (byte it : tabis) {
+                    data.setUInt8(DataType.INT8);
+                    data.setUInt8(it);
+                }
+            }
+            ret = data.array();
+            break;
+        }
+        default:
+            e.setError(ErrorCode.READ_WRITE_DENIED);
+            ret = null;
+            break;
+        }
+        return ret;
     }
 
     /*
@@ -323,10 +368,10 @@ public class GXDLMSIecTwistedPairSetup extends GXDLMSObject
     public final void save(final GXXmlWriter writer) throws XMLStreamException {
         writer.writeElementString("Mode", mode.ordinal());
         writer.writeElementString("Speed", speed.ordinal());
-        writer.writeElementString("LN",
+        writer.writeElementString("PrimaryAddresses",
                 GXDLMSTranslator.toHex(primaryAddresses));
         if (tabis != null) {
-            writer.writeElementString("LN", GXDLMSTranslator.toHex(tabis));
+            writer.writeElementString("Tabis", GXDLMSTranslator.toHex(tabis));
         }
     }
 

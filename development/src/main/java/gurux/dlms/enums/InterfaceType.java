@@ -54,7 +54,39 @@ public enum InterfaceType {
     /**
      * Wireless M-Bus frame.
      */
-    WIRELESS_MBUS;
+    WIRELESS_MBUS,
+    /**
+     * IEC 62056-21 E-Mode is used to initialize communication before moving to
+     * HDLC protocol.
+     */
+    HDLC_WITH_MODE_E,
+    /**
+     * PLC Logical link control (LLC) profile is used with IEC 61334-4-32
+     * connectionless LLC sublayer.
+     * <p>
+     * Blue Book: 10.4.4.3.3 The connectionless LLC sublayer.
+     * </p>
+     */
+    PLC,
+    /**
+     * PLC Logical link control (LLC) profile is used with HDLC.
+     * <p>
+     * Blue Book: 10.4.4.3.4 The HDLC based LLC sublayer.
+     * </p>
+     */
+    PLC_HDLC,
+    /**
+     * LowPower Wide Area Networks (LPWAN) profile is used.
+     */
+    LPWAN,
+    /**
+     * Wi-SUN FAN mesh network is used.
+     */
+    WI_SUN,
+    /**
+     * OFDM PLC PRIME is defined in IEC 62056-8-4.
+     */
+    PLC_PRIME;
     /**
      * @return Get integer value for enumeration.
      */

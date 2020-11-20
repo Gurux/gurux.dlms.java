@@ -41,7 +41,11 @@ import gurux.dlms.GXByteBuffer;
 /**
  * ASN1 bit string
  */
-public class GXAsn1Integer {
+public class GXAsn1Integer extends Number {
+    /**
+     * 
+     */
+    private static final long serialVersionUID = 1L;
     /**
      * Bit string.
      */
@@ -52,6 +56,18 @@ public class GXAsn1Integer {
      */
     public GXAsn1Integer() {
 
+    }
+
+    /**
+     * Constructor
+     * 
+     * @param data
+     *            Integer value.
+     */
+    public GXAsn1Integer(final long data) {
+        GXByteBuffer bb = new GXByteBuffer();
+        bb.setUInt32(data);
+        value = bb.array();
     }
 
     /**
@@ -121,22 +137,6 @@ public class GXAsn1Integer {
         return bb.getInt16();
     }
 
-    /**
-     * @return Get integer value as int.
-     */
-    public final int toInt() {
-        GXByteBuffer bb = new GXByteBuffer(value);
-        return bb.getInt32();
-    }
-
-    /**
-     * @return Get integer value as long.
-     */
-    public final long toLong() {
-        GXByteBuffer bb = new GXByteBuffer(value);
-        return bb.getInt64();
-    }
-
     @Override
     public final String toString() {
         String str;
@@ -148,14 +148,38 @@ public class GXAsn1Integer {
             str = String.valueOf(toShort());
             break;
         case 4:
-            str = String.valueOf(toInt());
+            str = String.valueOf(intValue());
             break;
         case 8:
-            str = String.valueOf(toLong());
+            str = String.valueOf(longValue());
             break;
         default:
             str = new BigInteger(value).toString();
         }
         return str;
+    }
+
+    @Override
+    public int intValue() {
+        GXByteBuffer bb = new GXByteBuffer(value);
+        return bb.getInt32();
+    }
+
+    @Override
+    public long longValue() {
+        GXByteBuffer bb = new GXByteBuffer(value);
+        return bb.getInt64();
+    }
+
+    @Override
+    public float floatValue() {
+        GXByteBuffer bb = new GXByteBuffer(value);
+        return (float) bb.getInt64();
+    }
+
+    @Override
+    public double doubleValue() {
+        GXByteBuffer bb = new GXByteBuffer(value);
+        return (double) bb.getInt64();
     }
 }

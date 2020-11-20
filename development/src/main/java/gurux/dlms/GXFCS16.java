@@ -89,11 +89,41 @@ class GXFCS16 {
             final int count) {
         int fcs16 = 0xFFFF;
         for (int pos = offset; pos < offset + count; ++pos) {
-            fcs16 = (int) (((fcs16 >> 8)
+            fcs16 = (((fcs16 >> 8)
                     ^ fcs16Table[(fcs16 ^ (int) buff[pos]) & 0xFF]) & 0xFFFF);
         }
         fcs16 = ~fcs16;
         fcs16 = ((fcs16 >> 8) & 0xFF) | (fcs16 << 8);
         return (fcs16 & 0xFFFF);
+    }
+
+    /**
+     * Reserved for internal use.
+     * 
+     * @param buff
+     * @param index
+     * @param count
+     * @return
+     */
+    private static final long CRCPOLY = 3551967744L;
+
+    public static int countFCS24(final byte[] buff, final int index,
+            final int count) {
+        byte i, j;
+        long crcreg = 0;
+        for (j = 0; j < count; ++j) {
+            int b = (buff[index + j] & 0xFF);
+            for (i = 0; i < 8; ++i) {
+                crcreg >>>= 1;
+                if ((b & 0x80) != 0) {
+                    crcreg |= 2147483648L;
+                }
+                if ((crcreg & 0x80) != 0) {
+                    crcreg = crcreg ^ CRCPOLY;
+                }
+                b <<= 1;
+            }
+        }
+        return (int) (crcreg >>> 8);
     }
 }

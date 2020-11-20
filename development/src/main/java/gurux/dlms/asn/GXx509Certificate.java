@@ -29,7 +29,7 @@ import gurux.dlms.internal.GXCommon;
 import gurux.dlms.objects.GXDLMSSecuritySetup;
 
 /**
- * x509 Certificate.
+ * x509 Certificate. https://tools.ietf.org/html/rfc5280
  */
 public class GXx509Certificate {
     /**
@@ -65,7 +65,7 @@ public class GXx509Certificate {
     /**
      * Algorithm.
      */
-    private HashAlgorithm algorithm;
+    private HashAlgorithm publicKeySignature;
 
     /**
      * Parameters.
@@ -140,7 +140,7 @@ public class GXx509Certificate {
     }
 
     /*
-     * https://tools.ietf.org/html/rfc5280#section-4.1
+     * 
      */
     @SuppressWarnings("squid:S106")
     private void init(final byte[] data) {
@@ -153,10 +153,19 @@ public class GXx509Certificate {
         GXAsn1Sequence reqInfo = (GXAsn1Sequence) seq.get(0);
         version = CertificateVersion.forValue(
                 ((Number) ((GXAsn1Context) reqInfo.get(0)).get(0)).byteValue());
-        serialNumber = (GXAsn1Integer) reqInfo.get(1);
+        if (reqInfo.get(1) instanceof GXAsn1Integer) {
+            serialNumber = (GXAsn1Integer) reqInfo.get(1);
+        } else {
+            serialNumber =
+                    new GXAsn1Integer(((Number) reqInfo.get(1)).longValue());
+        }
         String tmp = ((GXAsn1Sequence) reqInfo.get(2)).get(0).toString();
         // Signature Algorithm
-        algorithm = HashAlgorithm.forValue(tmp);
+        signatureAlgorithm = HashAlgorithm.forValue(tmp);
+        if (signatureAlgorithm != HashAlgorithm.SHA256withECDSA) {
+            throw new IllegalArgumentException(
+                    "DLMS certificate must be signed with ecdsa-with-SHA256.");
+        }
         // Optional.
         if (((GXAsn1Sequence) reqInfo.get(2)).size() > 1) {
             parameters = ((GXAsn1Sequence) reqInfo.get(2)).get(1);
@@ -179,7 +188,8 @@ public class GXx509Certificate {
                 X509Certificate t = X509Certificate.forValue(id.toString());
                 switch (t) {
                 case SUBJECT_KEY_IDENTIFIER:
-                    subjectKeyIdentifier = (byte[]) value;
+                    subjectKeyIdentifier = (byte[]) GXAsn1Converter
+                            .fromByteArray((byte[]) value);
                     break;
                 case AUTHORITY_KEY_IDENTIFIER:
                     authorityKeyIdentifier =
@@ -198,19 +208,28 @@ public class GXx509Certificate {
                         throw new IllegalStateException("Invalid key usage.");
                     }
                     break;
+                case BASIC_CONSTRAINTS:
+                    basicConstraints =
+                            (boolean) ((GXAsn1Sequence) value).get(0);
+                    break;
                 default:
                     System.out.println("Unknown extensions: " + t.toString());
                 }
             }
         }
+        if (keyUsage == null || keyUsage.isEmpty()) {
+            throw new IllegalArgumentException("Key usage not present.");
+        }
 
         // Make public key.
         KeyFactory eckf;
         try {
-            eckf = KeyFactory.getInstance(getAlgorithm(algorithm.toString()));
+            eckf = KeyFactory
+                    .getInstance(getAlgorithm(signatureAlgorithm.toString()));
         } catch (NoSuchAlgorithmException e) {
-            throw new IllegalStateException(algorithm.name().substring(0, 2)
-                    + "key factory not present in runtime");
+            throw new IllegalStateException(
+                    signatureAlgorithm.name().substring(0, 2)
+                            + "key factory not present in runtime");
         }
         try {
             byte[] encodedKey = GXAsn1Converter.toByteArray(subjectPKInfo);
@@ -219,7 +238,7 @@ public class GXx509Certificate {
         } catch (InvalidKeySpecException e) {
             throw new IllegalArgumentException(e.getMessage());
         }
-        signatureAlgorithm = HashAlgorithm
+        publicKeySignature = HashAlgorithm
                 .forValue(((GXAsn1Sequence) seq.get(1)).get(0).toString());
         // Optional.
         if (((GXAsn1Sequence) seq.get(1)).size() > 1) {
@@ -334,7 +353,7 @@ public class GXx509Certificate {
      * @return Algorithm
      */
     public final HashAlgorithm getAlgorithm() {
-        return algorithm;
+        return signatureAlgorithm;
     }
 
     /**
@@ -342,7 +361,7 @@ public class GXx509Certificate {
      *            Algorithm.
      */
     public final void setAlgorithm(final HashAlgorithm value) {
-        algorithm = value;
+        signatureAlgorithm = value;
     }
 
     /**
@@ -392,9 +411,9 @@ public class GXx509Certificate {
 
     private Object[] getdata() {
         GXAsn1ObjectIdentifier a =
-                new GXAsn1ObjectIdentifier(algorithm.getValue());
+                new GXAsn1ObjectIdentifier(signatureAlgorithm.getValue());
         GXAsn1Context p = new GXAsn1Context();
-        p.add((byte) version.getValue());
+        p.add(version.getValue());
         Object subjectPKInfo =
                 GXAsn1Converter.fromByteArray(publicKey.getEncoded());
         GXAsn1Sequence s = new GXAsn1Sequence();
@@ -427,28 +446,30 @@ public class GXx509Certificate {
             s1.add(GXAsn1Converter.toByteArray(seq));
             s.add(s1);
         }
-        if (keyUsage != null && !keyUsage.isEmpty()) {
-            GXAsn1Sequence s1 = new GXAsn1Sequence();
-            s1.add(new GXAsn1ObjectIdentifier(
-                    X509Certificate.KEY_USAGE.getValue()));
-            int value = 0;
-            int min = 128;
-            for (KeyUsage it : keyUsage) {
-                int val = it.getValue();
-                value |= val;
-                if (val < min) {
-                    min = val;
-                }
-            }
-            int offset = 7;
-            while ((min >>= 2) != 0) {
-                --offset;
-            }
-            byte[] tmp = GXAsn1Converter.toByteArray(new GXAsn1BitString(
-                    new byte[] { (byte) offset, (byte) value }));
-            s1.add(tmp);
-            s.add(s1);
+        if (keyUsage == null || keyUsage.isEmpty()) {
+            throw new IllegalArgumentException("Key usage not present.");
         }
+        GXAsn1Sequence s1 = new GXAsn1Sequence();
+        s1.add(new GXAsn1ObjectIdentifier(
+                X509Certificate.KEY_USAGE.getValue()));
+        int value = 0;
+        int min = 255;
+        for (KeyUsage it : keyUsage) {
+            int val = it.getValue();
+            value |= val;
+            if (val < min) {
+                min = val;
+            }
+        }
+        int offset = 0;
+        while ((min >>= 1) != 0) {
+            ++offset;
+        }
+        byte[] tmp2 = GXAsn1Converter.toByteArray(new GXAsn1BitString(
+                new byte[] { (byte) offset, (byte) value }));
+        s1.add(tmp2);
+        s.add(s1);
+
         GXAsn1Sequence valid = new GXAsn1Sequence();
         valid.add(validFrom);
         valid.add(validTo);
@@ -507,46 +528,50 @@ public class GXx509Certificate {
         StringBuilder bb = new StringBuilder();
         bb.append("Version: ");
         bb.append(version.toString());
-        bb.append("\r\n");
-        bb.append("Subject: ");
-        bb.append(subject);
-        bb.append("\r\n");
-
+        bb.append("\n");
+        bb.append("Serial Number: ");
+        bb.append(String.valueOf(serialNumber));
+        bb.append("\n");
         bb.append("Signature Algorithm: ");
-        if (algorithm != null) {
-            bb.append(algorithm.toString());
+        if (signatureAlgorithm != null) {
+            bb.append(signatureAlgorithm.toString());
             bb.append(", OID = ");
-            bb.append(algorithm.getValue());
+            bb.append(signatureAlgorithm.getValue());
         }
-        bb.append("\r\n");
-
-        bb.append("Key: ");
-        if (publicKey != null) {
-            bb.append(publicKey.toString());
-        }
-        bb.append("\r\n");
-        bb.append("Validity: [From: ");
-        bb.append(validFrom.toString());
-        bb.append(", \r\n");
-        bb.append("To: ");
-        bb.append(validTo.toString());
-        bb.append("]\r\n");
+        bb.append("\n");
 
         bb.append("Issuer: ");
         bb.append(issuer);
-        bb.append("\r\n");
-        bb.append("SerialNumber: ");
-        bb.append(serialNumber);
-        bb.append("\r\n");
-        bb.append("Algorithm: ");
+        bb.append("\n");
+        bb.append("Validity: [From: ");
+        bb.append(validFrom.toString());
+        bb.append(", \n");
+        bb.append("To: ");
+        bb.append(validTo.toString());
+        bb.append("]\n");
+        bb.append("Subject Public Key Info:\n");
+        bb.append("Public Key Algorythm: ");
+        bb.append(publicKey.getAlgorithm());
+        bb.append("\n");
+        bb.append(publicKey.toString());
+        bb.append("\n");
+        if (subjectKeyIdentifier != null) {
+            bb.append("X509v3 Subject Key Identifier:\n");
+            bb.append(GXCommon.toHex(subjectKeyIdentifier));
+            bb.append("\n");
+        }
+        if (authorityKeyIdentifier != null) {
+            bb.append("X509v3 Authority Key Identifier:\n");
+            bb.append(GXCommon.toHex(authorityKeyIdentifier));
+            bb.append("\n");
+        }
+        bb.append("Signature Algorithm: ");
         if (signatureAlgorithm != null) {
             bb.append(signatureAlgorithm.toString());
         }
-        bb.append("\r\n");
-
-        bb.append("Signature: ");
+        bb.append("\n");
         bb.append(GXCommon.toHex(signature));
-        bb.append("\r\n");
+        bb.append("\n");
         return bb.toString();
     }
 
@@ -565,14 +590,19 @@ public class GXx509Certificate {
      *            Issuer
      * @param keyUsage
      *            Key usage.
+     * @param serialNumber
+     *            Serial number.
      * @return Created x509Certificate.
      */
     public static GXx509Certificate createSelfSignedCertificate(
             final KeyPair keyPair, final Date from, final Date to,
             final String subject, final String issuer,
-            final Set<KeyUsage> keyUsage) {
+            final Set<KeyUsage> keyUsage, final long serialNumber) {
         GXx509Certificate cert = new GXx509Certificate();
         // Set Serial number and version
+        // cert.setSerialNumber(new GXAsn1Integer(
+        // new BigInteger(String.valueOf(serialNumber), 10)
+        // .toByteArray()));
         cert.setSerialNumber(new GXAsn1Integer(
                 new BigInteger(64, new SecureRandom()).toByteArray()));
         cert.setVersion(gurux.dlms.asn.CertificateVersion.V3);
@@ -605,16 +635,18 @@ public class GXx509Certificate {
      *            Issuer
      * @param keyUsage
      *            Key usage.
+     * @param serialNumber
+     *            Serial number.
      * @return Created x509Certificate.
      */
     public static GXx509Certificate createSelfSignedCertificate(
             final KeyPair keyPair, final Date from, final Date to,
             final byte[] systemTitle, final String issuer,
-            final Set<KeyUsage> keyUsage) {
+            final Set<KeyUsage> keyUsage, final long serialNumber) {
 
         return createSelfSignedCertificate(keyPair, from, to,
                 GXDLMSSecuritySetup.systemTitleToSubject(systemTitle), issuer,
-                keyUsage);
+                keyUsage, serialNumber);
     }
 
     /**
@@ -687,8 +719,7 @@ public class GXx509Certificate {
      *             IO exception.
      */
     public static GXx509Certificate load(final Path path) throws IOException {
-        String tmp = new String(Files.readAllBytes(path));
-        return new GXx509Certificate(tmp);
+        return new GXx509Certificate(Files.readString(path));
     }
 
     /**
@@ -710,5 +741,12 @@ public class GXx509Certificate {
                     "Public or private key is not set.");
         }
         Files.write(path, sb.toString().getBytes(), StandardOpenOption.CREATE);
+    }
+
+    /**
+     * @return Public key in PEM format.
+     */
+    public String toPem() {
+        return GXCommon.toBase64(getEncoded());
     }
 }

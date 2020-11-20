@@ -70,6 +70,8 @@ import gurux.dlms.enums.ServiceClass;
 import gurux.dlms.enums.SourceDiagnostic;
 import gurux.dlms.internal.GXCommon;
 import gurux.dlms.internal.GXDataInfo;
+import gurux.dlms.plc.enums.PlcDestinationAddress;
+import gurux.dlms.plc.enums.PlcSourceAddress;
 import gurux.dlms.secure.AesGcmParameter;
 import gurux.dlms.secure.GXCiphering;
 
@@ -495,6 +497,7 @@ public class GXDLMSTranslator {
             TranslatorSimpleTags.getDedTags(type, list);
             TranslatorSimpleTags.getTranslatorTags(type, list);
             TranslatorSimpleTags.getDataTypeTags(list);
+            TranslatorSimpleTags.getPlcTags(list);
         } else {
             TranslatorStandardTags.getGeneralTags(type, list);
             TranslatorStandardTags.getSnTags(type, list);
@@ -503,7 +506,7 @@ public class GXDLMSTranslator {
             TranslatorStandardTags.getDedTags(type, list);
             TranslatorStandardTags.getTranslatorTags(type, list);
             TranslatorStandardTags.getDataTypeTags(list);
-
+            TranslatorStandardTags.getPlcTags(list);
         }
         // Simple is not case sensitive.
         boolean lowercase = type == TranslatorOutputType.SIMPLE_XML;
@@ -679,7 +682,37 @@ public class GXDLMSTranslator {
             throws InvalidKeyException, NoSuchAlgorithmException,
             NoSuchPaddingException, InvalidAlgorithmParameterException,
             IllegalBlockSizeException, BadPaddingException {
-        if (value == null || value.size() == 0) {
+        GXDLMSTranslatorMessage msg = new GXDLMSTranslatorMessage();
+        msg.setMessage(value);
+        messageToXml(msg);
+        return msg.getXml();
+    }
+
+    /**
+     * Convert message to XML.
+     * 
+     * @param msg
+     *            Translator message data. {@link clear} {@link setPduOnly}
+     *            {@link setCompleatePdu}
+     * @throws NoSuchPaddingException
+     *             No such padding exception.
+     * @throws NoSuchAlgorithmException
+     *             No such algorithm exception.
+     * @throws InvalidAlgorithmParameterException
+     *             Invalid algorithm parameter exception.
+     * @throws InvalidKeyException
+     *             Invalid key exception.
+     * @throws BadPaddingException
+     *             Bad padding exception.
+     * @throws IllegalBlockSizeException
+     *             Illegal block size exception.
+     */
+    @SuppressWarnings("squid:S106")
+    public final void messageToXml(final GXDLMSTranslatorMessage msg)
+            throws InvalidKeyException, NoSuchAlgorithmException,
+            NoSuchPaddingException, InvalidAlgorithmParameterException,
+            IllegalBlockSizeException, BadPaddingException {
+        if (msg.getMessage() == null || msg.getMessage().size() == 0) {
             throw new IllegalArgumentException("value");
         }
         try {
@@ -688,6 +721,7 @@ public class GXDLMSTranslator {
                             hex, getShowStringAsHex(), comments, tags);
             GXReplyData data = new GXReplyData();
             data.setXml(xml);
+            GXByteBuffer value = msg.getMessage();
             int offset = value.position();
             GXDLMSSettings settings = new GXDLMSSettings(true);
             getCiphering(settings, true);
@@ -726,6 +760,7 @@ public class GXDLMSTranslator {
                             }
                             multipleFrames = true;
                         } else {
+                            msg.setCommand(data.getCommand());
                             xml.appendStartTag(data.getCommand());
                             xml.appendEndTag(data.getCommand());
                         }
@@ -734,8 +769,8 @@ public class GXDLMSTranslator {
                             if (getCompletePdu()) {
                                 pduFrames.set(data.getData().getData());
                                 if (data.getMoreData().isEmpty()) {
-                                    xml.appendLine(
-                                            pduToXml(pduFrames, true, true));
+                                    xml.appendLine(pduToXml(pduFrames, true,
+                                            true, msg));
                                     pduFrames.clear();
                                 }
                             } else {
@@ -757,19 +792,20 @@ public class GXDLMSTranslator {
                             }
                             if (pduFrames.size() != 0) {
                                 pduFrames.set(data.getData().getData());
-                                xml.appendLine(pduToXml(pduFrames, true, true));
+                                xml.appendLine(
+                                        pduToXml(pduFrames, true, true, msg));
                                 pduFrames.clear();
                             } else {
                                 if (data.getCommand() == Command.SNRM
                                         || data.getCommand() == Command.UA) {
                                     xml.appendStartTag(data.getCommand());
                                     pduToXml(xml, data.getData(), true, true,
-                                            true);
+                                            true, msg);
                                     xml.appendEndTag(data.getCommand());
                                     xml.setXmlLength(xml.getXmlLength() + 2);
                                 } else {
                                     xml.appendLine(pduToXml(data.getData(),
-                                            true, true));
+                                            true, true, msg));
                                 }
                             }
                             // Remove \r\n.
@@ -783,12 +819,18 @@ public class GXDLMSTranslator {
                         xml.appendLine("</HDLC>");
                     }
                 }
-                return xml.toString();
+                msg.setXml(xml.toString());
+                return;
             }
             // If wrapper.
-            if (value.getUInt16(value.position()) == 1) {
+            else if (value.getUInt16(value.position()) == 1) {
                 settings.setInterfaceType(InterfaceType.WRAPPER);
                 GXDLMS.getData(settings, value, data, null);
+                if (msg.getCommand() == Command.AARQ) {
+                    msg.setSystemTitle(settings.getCipher().getSystemTitle());
+                } else if (msg.getCommand() == Command.AARE) {
+                    msg.setSystemTitle(settings.getSourceSystemTitle());
+                }
                 if (!getPduOnly()) {
                     xml.appendLine("<WRAPPER len=\""
                             + xml.integerToHex(
@@ -808,7 +850,7 @@ public class GXDLMSTranslator {
                     if (!getPduOnly()) {
                         xml.appendLine("<PDU>");
                     }
-                    xml.appendLine(pduToXml(data.getData(), true, true));
+                    xml.appendLine(pduToXml(data.getData(), true, true, msg));
                     // Remove \r\n.
                     xml.trim();
                     if (!getPduOnly()) {
@@ -818,13 +860,135 @@ public class GXDLMSTranslator {
                 if (!getPduOnly()) {
                     xml.appendLine("</WRAPPER>");
                 }
-                return xml.toString();
+                msg.setXml(xml.toString());
+                return;
+            }
+            // If PLC.
+            else if (value.getUInt8(value.position()) == 2) {
+                msg.setInterfaceType(InterfaceType.PLC);
+                settings.setInterfaceType(InterfaceType.PLC);
+                GXDLMS.getData(settings, value, data, null);
+                if (msg.getCommand() == Command.AARQ) {
+                    msg.setSystemTitle(settings.getCipher().getSystemTitle());
+                } else if (msg.getCommand() == Command.AARE) {
+                    msg.setSystemTitle(settings.getSourceSystemTitle());
+                }
+                if (!pduOnly) {
+                    xml.appendLine("<Plc len=\""
+                            + xml.integerToHex(
+                                    (long) data.getPacketLength() - offset, 0)
+                            + "\" >");
+                    if (comments) {
+                        if (data.getClientAddress() == PlcSourceAddress.INITIATOR
+                                .getValue()) {
+                            xml.appendComment("Initiator");
+                        } else if (data
+                                .getClientAddress() == PlcSourceAddress.NEW
+                                        .getValue()) {
+                            xml.appendComment("New");
+                        }
+                    }
+                    xml.appendLine("<SourceAddress Value=\""
+                            + xml.integerToHex(data.getClientAddress(), 0)
+                            + "\" />");
+                    if (comments && data
+                            .getServerAddress() == PlcDestinationAddress.ALL_PHYSICAL
+                                    .getValue()) {
+                        xml.appendComment("AllPhysical");
+                    }
+                    xml.appendLine("<DestinationAddress Value=\""
+                            + xml.integerToHex(data.getServerAddress(), 0)
+                            + "\" />");
+                }
+                if (data.getData().size() == 0) {
+                    xml.appendLine("<Command Value=\""
+                            + Command.toString(data.getCommand()) + "\" />");
+                } else {
+                    if (!pduOnly) {
+                        xml.appendLine("<PDU>");
+                    }
+                    xml.appendLine(pduToXml(data.getData(), omitXmlDeclaration,
+                            omitXmlNameSpace, msg));
+                    // Remove \r\n.
+                    xml.trim();
+                    if (!pduOnly) {
+                        xml.appendLine("</PDU>");
+                    }
+                }
+                if (!pduOnly) {
+                    xml.appendLine("</Plc>");
+                }
+                msg.setXml(xml.toString());
+                return;
+            }
+            // If PLC.
+            else if (GXDLMS.getPlcSfskFrameSize(value) != 0) {
+                msg.setInterfaceType(InterfaceType.PLC_HDLC);
+                settings.setInterfaceType(InterfaceType.PLC_HDLC);
+                GXDLMS.getData(settings, value, data, null);
+                if (msg.getCommand() == Command.AARQ) {
+                    msg.setSystemTitle(settings.getCipher().getSystemTitle());
+                } else if (msg.getCommand() == Command.AARE) {
+                    msg.setSystemTitle(settings.getSourceSystemTitle());
+                }
+                if (!pduOnly) {
+                    xml.appendLine("<PlcSFsk len=\""
+                            + xml.integerToHex(
+                                    (long) data.getPacketLength() - offset, 0)
+                            + "\" >");
+                    if (comments) {
+                        if (data.getClientAddress() == PlcSourceAddress.INITIATOR
+                                .getValue()) {
+                            xml.appendComment("Initiator");
+                        } else if (data
+                                .getClientAddress() == PlcSourceAddress.NEW
+                                        .getValue()) {
+                            xml.appendComment("New");
+                        }
+                    }
+                    xml.appendLine("<SourceAddress Value=\""
+                            + xml.integerToHex(data.getClientAddress(), 0)
+                            + "\" />");
+                    if (comments && data
+                            .getServerAddress() == PlcDestinationAddress.ALL_PHYSICAL
+                                    .getValue()) {
+                        xml.appendComment("AllPhysical");
+                    }
+                    xml.appendLine("<DestinationAddress Value=\""
+                            + xml.integerToHex(data.getServerAddress(), 0)
+                            + "\" />");
+                }
+                if (data.getData().size() == 0) {
+                    xml.appendLine("<Command Value=\""
+                            + Command.toString(data.getCommand()) + "\" />");
+                } else {
+                    if (!pduOnly) {
+                        xml.appendLine("<PDU>");
+                    }
+                    xml.appendLine(pduToXml(data.getData(), omitXmlDeclaration,
+                            omitXmlNameSpace, msg));
+                    // Remove \r\n.
+                    xml.trim();
+                    if (!pduOnly) {
+                        xml.appendLine("</PDU>");
+                    }
+                }
+                if (!pduOnly) {
+                    xml.appendLine("</PlcSFsk>");
+                }
+                msg.setXml(xml.toString());
+                return;
             }
             // If Wireless M-Bus.
             else if (GXDLMS.isMBusData(value)) {
                 settings.setInterfaceType(InterfaceType.WIRELESS_MBUS);
                 int len = xml.getXmlLength();
                 GXDLMS.getData(settings, value, data, null);
+                if (msg.getCommand() == Command.AARQ) {
+                    msg.setSystemTitle(settings.getCipher().getSystemTitle());
+                } else if (msg.getCommand() == Command.AARE) {
+                    msg.setSystemTitle(settings.getSourceSystemTitle());
+                }
                 String tmp = xml.toString().substring(len);
                 xml.setXmlLength(len);
                 if (!getPduOnly()) {
@@ -847,7 +1011,7 @@ public class GXDLMSTranslator {
                     if (!getPduOnly()) {
                         xml.appendLine("<PDU>");
                     }
-                    xml.appendLine(pduToXml(data.getData(), true, true));
+                    xml.appendLine(pduToXml(data.getData(), true, true, msg));
                     // Remove \r\n.
                     xml.trim();
                     if (!getPduOnly()) {
@@ -857,7 +1021,7 @@ public class GXDLMSTranslator {
                 if (!getPduOnly()) {
                     xml.appendLine("</WRAPPER>");
                 }
-                return xml.toString();
+                return;
             }
 
         } catch (RuntimeException ex) {
@@ -936,7 +1100,7 @@ public class GXDLMSTranslator {
     }
 
     public final String pduToXml(final GXByteBuffer value) {
-        return pduToXml(value, omitXmlDeclaration, omitXmlNameSpace);
+        return pduToXml(value, omitXmlDeclaration, omitXmlNameSpace, null);
     }
 
     /**
@@ -959,14 +1123,19 @@ public class GXDLMSTranslator {
      * 
      * @param value
      *            Bytes to convert.
+     * @param omitNameSpace
+     *            Omit name space.
+     * @param arg
+     *            Translator arguments.
      * @return Converted XML.
      */
     private String pduToXml(final GXByteBuffer value,
-            final boolean omitDeclaration, final boolean omitNameSpace) {
+            final boolean omitDeclaration, final boolean omitNameSpace,
+            final GXDLMSTranslatorMessage arg) {
         GXDLMSTranslatorStructure xml =
                 new GXDLMSTranslatorStructure(outputType, omitXmlNameSpace, hex,
                         getShowStringAsHex(), comments, tags);
-        return pduToXml(xml, value, omitDeclaration, omitNameSpace, true);
+        return pduToXml(xml, value, omitDeclaration, omitNameSpace, true, arg);
     }
 
     private static boolean isCiphered(final short cmd) {
@@ -1000,6 +1169,70 @@ public class GXDLMSTranslator {
         }
     }
 
+    private void handleDiscoverRequest(final GXReplyData data) {
+        short responseProbability = data.getData().getUInt8();
+        short allowedTimeSlots = data.getData().getUInt8();
+        short discoverReportInitialCredit = data.getData().getUInt8();
+        short icEqualCredit = data.getData().getUInt8();
+        data.getXml().appendLine("<ResponseProbability Value=\""
+                + String.valueOf(responseProbability) + "\" />");
+        data.getXml().appendLine("<AllowedTimeSlots Value=\""
+                + String.valueOf(allowedTimeSlots) + "\" />");
+        data.getXml().appendLine("<DiscoverReportInitialCredit Value=\""
+                + String.valueOf(discoverReportInitialCredit) + "\" />");
+        data.getXml().appendLine("<ICEqualCredit Value=\""
+                + String.valueOf(icEqualCredit) + "\" />");
+    }
+
+    private void handleRegisterRequest(final InterfaceType interfaceType,
+            final GXReplyData data) {
+        // Get System title.
+        byte[] st;
+        if (interfaceType == InterfaceType.PLC_HDLC) {
+            st = new byte[8];
+        } else {
+            st = new byte[6];
+        }
+        data.getData().get(st);
+        data.getXml().appendLine("<ActiveInitiator Value=\""
+                + GXCommon.toHex(st, true) + "\" />");
+        short count = data.getData().getUInt8();
+        for (int pos = 0; pos != count; ++pos) {
+            // Get System title.
+            data.getData().get(st);
+            data.getXml().appendLine("<SystemTitle Value=\""
+                    + GXCommon.toHex(st, true) + "\" />");
+            // MAC address.
+            int address = data.getData().getUInt16();
+            data.getXml().appendLine(
+                    "<MacAddress Value=\"" + String.valueOf(address) + "\" />");
+        }
+    }
+
+    private void handleDiscoverResponse(final GXDLMSSettings settings,
+            final GXReplyData data) {
+        short count = data.getData().getUInt8();
+        for (int pos = 0; pos != count; ++pos) {
+            // Get System title.
+            byte[] st;
+            if (settings.getInterfaceType() == InterfaceType.PLC) {
+                st = new byte[6];
+            } else {
+                st = new byte[8];
+            }
+            data.getData().get(st);
+            data.getXml().appendLine("<SystemTitle Value=\""
+                    + GXCommon.toHex(st, true) + "\" />");
+        }
+        // Alarm-Descriptor presence flag
+        if (data.getData().getUInt8() != 0) {
+            // Alarm-Descriptor
+            short alarmDescriptor = data.getData().getUInt8();
+            data.getXml().appendLine("<AlarmDescriptor Value=\""
+                    + String.valueOf(alarmDescriptor) + "\" />");
+        }
+    }
+
     /*
      * Convert bytes to XML.
      * @param value Bytes to convert.
@@ -1008,13 +1241,17 @@ public class GXDLMSTranslator {
     @SuppressWarnings({ "squid:S00112", "squid:S1141", "squid:S1871" })
     String pduToXml(final GXDLMSTranslatorStructure xml,
             final GXByteBuffer value, final boolean omitDeclaration,
-            final boolean omitNameSpace, final boolean allowUnknownCommand) {
+            final boolean omitNameSpace, final boolean allowUnknownCommand,
+            final GXDLMSTranslatorMessage msg) {
         if (value == null || value.size() == 0) {
             throw new IllegalArgumentException("value");
         }
         try {
             GXDLMSSettings settings = new GXDLMSSettings(true);
             short cmd = value.getUInt8();
+            if (msg != null) {
+                msg.setCommand(cmd);
+            }
             getCiphering(settings, isCiphered(cmd));
             GXReplyData data = new GXReplyData();
             String str;
@@ -1022,6 +1259,15 @@ public class GXDLMSTranslator {
             case Command.AARQ:
                 value.position(0);
                 GXAPDU.parsePDU(settings, settings.getCipher(), value, xml);
+                // Update new dedicated key.
+                if (settings.getCipher() != null
+                        && settings.getCipher().getDedicatedKey() != null) {
+                    setDedicatedKey(settings.getCipher().getDedicatedKey());
+                }
+                if (msg != null) {
+                    msg.setSystemTitle(settings.getSourceSystemTitle());
+                    msg.setDedicatedKey(settings.getCipher().getDedicatedKey());
+                }
                 break;
             case Command.INITIATE_REQUEST:
                 value.position(0);
@@ -1037,6 +1283,9 @@ public class GXDLMSTranslator {
                         value, xml);
                 break;
             case 0x81: // Ua
+                if (msg != null) {
+                    msg.setCommand(Command.UA);
+                }
                 value.position(0);
                 getUa(value, xml);
                 break;
@@ -1045,6 +1294,9 @@ public class GXDLMSTranslator {
                 settings = new GXDLMSSettings(false);
                 getCiphering(settings, true);
                 GXAPDU.parsePDU(settings, settings.getCipher(), value, xml);
+                if (msg != null) {
+                    msg.setSystemTitle(settings.getSourceSystemTitle());
+                }
                 break;
             case Command.GET_REQUEST:
                 GXDLMSLNCommandHandler.handleGetRequest(settings, null, value,
@@ -1242,13 +1494,16 @@ public class GXDLMSTranslator {
                                 xml.startComment(
                                         "Decrypt data: " + data2.toString());
                                 pduToXml(xml, data2, omitDeclaration,
-                                        omitNameSpace, false);
+                                        omitNameSpace, false, msg);
                                 xml.endComment();
                             }
                         }
                     } catch (Exception e) {
                         // It's OK if this fails. Ciphering settings are not
                         // correct.
+                        if (msg != null) {
+                            msg.setCommand(cmd);
+                        }
                         xml.setXmlLength(len);
                     }
                     value.position(originalPosition);
@@ -1283,7 +1538,7 @@ public class GXDLMSTranslator {
                         len = xml.getXmlLength();
                         xml.startComment("Decrypt data: " + tmp.toString());
                         pduToXml(xml, tmp, omitDeclaration, omitNameSpace,
-                                false);
+                                false, msg);
                         xml.endComment();
                     } catch (Exception e) {
                         // It's OK if this fails. Ciphering settings are not
@@ -1308,12 +1563,15 @@ public class GXDLMSTranslator {
                                 xml.startComment(
                                         "Decrypt data: " + data2.toString());
                                 pduToXml(xml, data2, omitDeclaration,
-                                        omitNameSpace, false);
+                                        omitNameSpace, false, msg);
                                 xml.endComment();
                             }
                         } catch (Exception ex) {
                             // It's OK if this fails. Ciphering settings are not
                             // correct.
+                            if (msg != null) {
+                                msg.setCommand(cmd);
+                            }
                             xml.setXmlLength(len);
                         }
                     }
@@ -1352,13 +1610,49 @@ public class GXDLMSTranslator {
                 xml.appendLine(TranslatorTags.PHYSICAL_DEVICE_ADDRESS, null,
                         GXCommon.toHex(tmp, false, 0, len));
                 pduToXml(xml, new GXByteBuffer(value.remaining()),
-                        omitDeclaration, omitNameSpace, allowUnknownCommand);
+                        omitDeclaration, omitNameSpace, allowUnknownCommand,
+                        msg);
                 xml.appendEndTag(cmd);
                 break;
             case Command.EXCEPTION_RESPONSE:
                 data.setXml(xml);
                 data.setData(value);
                 GXDLMS.handleExceptionResponse(data);
+                break;
+            case Command.DISCOVER_REQUEST:
+                data.setXml(xml);
+                data.setData(value);
+                xml.appendStartTag(cmd);
+                handleDiscoverRequest(data);
+                xml.appendEndTag(cmd);
+                break;
+            case Command.DISCOVER_REPORT:
+                data.setXml(xml);
+                data.setData(value);
+                xml.appendStartTag(cmd);
+                handleDiscoverResponse(settings, data);
+                xml.appendEndTag(cmd);
+                break;
+            case Command.REGISTER_REQUEST:
+                data.setXml(xml);
+                data.setData(value);
+                xml.appendStartTag(cmd);
+                handleRegisterRequest(msg.getInterfaceType(), data);
+                xml.appendEndTag(cmd);
+                break;
+            case Command.PING_RESPONSE:
+                data.setXml(xml);
+                data.setData(value);
+                xml.appendStartTag(cmd);
+                GXDLMS.handleExceptionResponse(data);
+                xml.appendEndTag(cmd);
+                break;
+            case Command.REPEAT_CALL_REQUEST:
+                data.setXml(xml);
+                data.setData(value);
+                xml.appendStartTag(cmd);
+                GXDLMS.handleExceptionResponse(data);
+                xml.appendEndTag(cmd);
                 break;
             default:
                 if (!allowUnknownCommand) {
@@ -2447,7 +2741,7 @@ public class GXDLMSTranslator {
                         && !s.getSettings().isServer())
                         || (s.getCommand() == Command.UA
                                 && s.getSettings().isServer())) {
-                    s.getSettings().getLimits().setMaxInfoRX((int) value);
+                    s.getSettings().getHdlcSettings().setMaxInfoRX((int) value);
                 }
                 s.getData().setUInt8(HDLCInfo.MAX_INFO_RX);
                 s.getData().setUInt8(1);
@@ -2459,7 +2753,7 @@ public class GXDLMSTranslator {
                         && !s.getSettings().isServer())
                         || (s.getCommand() == Command.UA
                                 && s.getSettings().isServer())) {
-                    s.getSettings().getLimits().setMaxInfoTX((int) value);
+                    s.getSettings().getHdlcSettings().setMaxInfoTX((int) value);
                 }
                 s.getData().setUInt8(HDLCInfo.MAX_INFO_TX);
                 s.getData().setUInt8(1);
@@ -2471,7 +2765,8 @@ public class GXDLMSTranslator {
                         && !s.getSettings().isServer())
                         || (s.getCommand() == Command.UA
                                 && s.getSettings().isServer())) {
-                    s.getSettings().getLimits().setWindowSizeRX((byte) value);
+                    s.getSettings().getHdlcSettings()
+                            .setWindowSizeRX((byte) value);
                 }
                 s.getData().setUInt8((byte) HDLCInfo.WINDOW_SIZE_RX);
                 s.getData().setUInt8(4);
@@ -2483,7 +2778,8 @@ public class GXDLMSTranslator {
                         && !s.getSettings().isServer())
                         || (s.getCommand() == Command.UA
                                 && s.getSettings().isServer())) {
-                    s.getSettings().getLimits().setWindowSizeTX((byte) value);
+                    s.getSettings().getHdlcSettings()
+                            .setWindowSizeTX((byte) value);
                 }
                 s.getData().setUInt8(HDLCInfo.WINDOW_SIZE_TX);
                 s.getData().setUInt8(4);

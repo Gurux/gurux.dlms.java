@@ -125,10 +125,18 @@ public class GXDLMSNotify {
     }
 
     /**
-     * @return Information from the connection size that server can handle.
+     * @return HDLC connection settings.
+     * @deprecated use {@link getHdlcSettings} instead.
      */
     public final GXDLMSLimits getLimits() {
-        return settings.getLimits();
+        return (GXDLMSLimits) settings.getHdlcSettings();
+    }
+
+    /**
+     * @return HDLC connection settings.
+     */
+    public final GXHdlcSettings getHdlcSettings() {
+        return settings.getHdlcSettings();
     }
 
     /**

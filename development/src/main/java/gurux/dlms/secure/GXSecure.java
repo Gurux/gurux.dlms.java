@@ -290,7 +290,11 @@ public final class GXSecure {
                 break;
             case HIGH_ECDSA:
                 Signature sig = Signature.getInstance("SHA256withECDSA");
-                sig.initSign(cipher.getKeyAgreementKeyPair().getPrivate());
+                if (cipher.getSigningKeyPair() == null) {
+                    throw new IllegalArgumentException(
+                            "SigningKeyPair is empty.");
+                }
+                sig.initSign(cipher.getSigningKeyPair().getPrivate());
                 GXByteBuffer bb = new GXByteBuffer();
                 bb.set(settings.getCipher().getSystemTitle());
                 bb.set(settings.getSourceSystemTitle());
@@ -303,6 +307,18 @@ public final class GXSecure {
                 }
                 sig.update(bb.array());
                 d = sig.sign();
+                GXAsn1Sequence seq =
+                        (GXAsn1Sequence) GXAsn1Converter.fromByteArray(d);
+                bb.size(0);
+                bb.set(((GXAsn1Integer) seq.get(0)).getByteArray());
+                if (bb.size() != 32) {
+                    bb.move(1, 0, 32);
+                }
+                bb.set(((GXAsn1Integer) seq.get(1)).getByteArray());
+                if (bb.size() != 64) {
+                    bb.move(33, 32, 32);
+                }
+                d = bb.array();
                 break;
             default:
             }

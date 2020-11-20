@@ -81,9 +81,17 @@ public abstract class GXDLMSServer {
 
     /**
      * @return Information from the connection size that server can handle.
+     * @deprecated use {@link getHdlcSettings} instead.
      */
     public final GXDLMSLimits getLimits() {
         return base.getLimits();
+    }
+
+    /**
+     * @return HDLC connection settings.
+     */
+    public final GXHdlcSettings getHdlcSettings() {
+        return base.getHdlcSettings();
     }
 
     /**

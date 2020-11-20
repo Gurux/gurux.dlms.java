@@ -34,8 +34,6 @@
 
 package gurux.dlms.asn;
 
-import java.security.PublicKey;
-
 import gurux.dlms.internal.GXCommon;
 
 /**
@@ -59,30 +57,6 @@ public class GXAsn1PublicKey {
      * Constructor.
      */
     public GXAsn1PublicKey() {
-
-    }
-
-    /**
-     * Constructor
-     * 
-     * @param key
-     *            Public key.
-     */
-    public GXAsn1PublicKey(final PublicKey key) {
-        if (key == null) {
-            throw new IllegalArgumentException("key");
-        }
-        @SuppressWarnings({ "unused", "squid:S1481" })
-        Object[] data =
-                (Object[]) GXAsn1Converter.fromByteArray(key.getEncoded());
-        /*
-         * GXByteBuffer bb = new GXByteBuffer(); bb.set(((GXAsn1BitString)
-         * GXAsn1Converter.getDerValue(data[1])) .getValue());
-         * init((GXAsn1BitString) GXAsn1Converter.getDerValue(data[1])); //
-         * init(GXAsn1Converter.toByteArray( // new Object[] {
-         * GXAsn1Converter.getDerValue(data[0]), //
-         * GXAsn1Converter.getDerValue(data[1]) }));
-         */
 
     }
 

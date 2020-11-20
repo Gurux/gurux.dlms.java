@@ -343,14 +343,18 @@ public class GXDLMSXmlClient extends GXDLMSSecureClient {
                                 && !s.getSettings().isServer())
                                 || (s.getCommand() == Command.UA
                                         && s.getSettings().isServer())) {
-                            settings.getLimits().setMaxInfoTX(
-                                    s.getSettings().getLimits().getMaxInfoTX());
-                            settings.getLimits().setMaxInfoRX(
-                                    s.getSettings().getLimits().getMaxInfoRX());
-                            settings.getLimits().setWindowSizeRX(s.getSettings()
-                                    .getLimits().getWindowSizeRX());
-                            settings.getLimits().setWindowSizeTX(s.getSettings()
-                                    .getLimits().getWindowSizeTX());
+                            settings.getHdlcSettings()
+                                    .setMaxInfoTX(s.getSettings()
+                                            .getHdlcSettings().getMaxInfoTX());
+                            settings.getHdlcSettings()
+                                    .setMaxInfoRX(s.getSettings()
+                                            .getHdlcSettings().getMaxInfoRX());
+                            settings.getHdlcSettings().setWindowSizeRX(
+                                    s.getSettings().getHdlcSettings()
+                                            .getWindowSizeRX());
+                            settings.getHdlcSettings().setWindowSizeTX(
+                                    s.getSettings().getHdlcSettings()
+                                            .getWindowSizeTX());
                         }
                         if (s.isTemplate()) {
                             reply = null;
@@ -441,7 +445,7 @@ public class GXDLMSXmlClient extends GXDLMSSecureClient {
                 if (settings.getInterfaceType() == InterfaceType.WRAPPER) {
                     messages.add(GXDLMS.getWrapperFrame(settings,
                             pdu.getCommand(), reply));
-                } else if (settings.getInterfaceType() == InterfaceType.HDLC) {
+                } else if (GXDLMS.useHdlc(settings.getInterfaceType())) {
                     if (pdu.getCommand() == Command.AARQ) {
                         frame = 0x10;
                     } else if (pdu.getCommand() == Command.AARE) {

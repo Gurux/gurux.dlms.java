@@ -1222,6 +1222,40 @@ public class GXDateTime {
     }
 
     /**
+     * Get date time from high resolution clock time.
+     * 
+     * @param highResolution
+     *            High resolution clock time is milliseconds since 1970-01-01
+     *            00:00:00.
+     * @return Date and time.
+     */
+    public static GXDateTime fromHighResolutionTime(final long highResolution) {
+        return new GXDateTime(new Date(highResolution));
+    }
+
+    /**
+     * Convert date time to high resolution time.
+     * 
+     * @param date
+     *            Date and time.
+     * @return High resolution time.
+     */
+    public static GXUInt64 toHighResolutionTime(final java.util.Date date) {
+        return new GXUInt64(date.getTime());
+    }
+
+    /**
+     * Convert date time to high resolution time.
+     * 
+     * @param date
+     *            Date and time.
+     * @return High resolution time.
+     */
+    public static GXUInt64 toHighResolutionTime(final GXDateTime date) {
+        return new GXUInt64(date.getLocalCalendar().getTime().getTime());
+    }
+
+    /**
      * @return Date time extra information.
      */
     public java.util.Set<DateTimeExtraInfo> getExtra() {

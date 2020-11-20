@@ -34,8 +34,14 @@
 
 package gurux.dlms.objects;
 
+import java.security.InvalidAlgorithmParameterException;
+import java.security.InvalidKeyException;
+import java.security.NoSuchAlgorithmException;
 import java.util.HashSet;
 
+import javax.crypto.BadPaddingException;
+import javax.crypto.IllegalBlockSizeException;
+import javax.crypto.NoSuchPaddingException;
 import javax.xml.stream.XMLStreamException;
 
 import gurux.dlms.GXBitString;
@@ -307,6 +313,116 @@ public class GXDLMSCredit extends GXDLMSObject implements IGXDLMSBase {
         return new Object[] { getLogicalName(), currentCreditAmount, type,
                 priority, warningThreshold, limit, creditConfiguration, status,
                 presetCreditAmount, creditAvailableThreshold, period };
+    }
+
+    /**
+     * Adjusts the value of the current credit amount attribute.
+     * 
+     * @param client
+     *            DLMS client.
+     * @param value
+     *            Current credit amount
+     * @return Action bytes.
+     * @throws InvalidKeyException
+     *             Invalid key exception.
+     * @throws NoSuchAlgorithmException
+     *             No such algorithm exception.
+     * @throws NoSuchPaddingException
+     *             No such padding exception.
+     * @throws InvalidAlgorithmParameterException
+     *             Invalid algorithm parameter exception.
+     * @throws IllegalBlockSizeException
+     *             Illegal block size exception.
+     * @throws BadPaddingException
+     *             Bad padding exception.
+     */
+    public final byte[][] updateAmount(final GXDLMSClient client,
+            final int value)
+            throws InvalidKeyException, NoSuchAlgorithmException,
+            NoSuchPaddingException, InvalidAlgorithmParameterException,
+            IllegalBlockSizeException, BadPaddingException {
+        return client.method(this, 1, value, DataType.INT32);
+    }
+
+    /**
+     * Sets the value of the current credit amount attribute.
+     * 
+     * @param client
+     *            DLMS client.
+     * @param value
+     *            Current credit amount
+     * @return Action bytes.
+     * @throws InvalidKeyException
+     *             Invalid key exception.
+     * @throws NoSuchAlgorithmException
+     *             No such algorithm exception.
+     * @throws NoSuchPaddingException
+     *             No such padding exception.
+     * @throws InvalidAlgorithmParameterException
+     *             Invalid algorithm parameter exception.
+     * @throws IllegalBlockSizeException
+     *             Illegal block size exception.
+     * @throws BadPaddingException
+     *             Bad padding exception.
+     */
+    public final byte[][] setAmountToValue(final GXDLMSClient client,
+            final int value)
+            throws InvalidKeyException, NoSuchAlgorithmException,
+            NoSuchPaddingException, InvalidAlgorithmParameterException,
+            IllegalBlockSizeException, BadPaddingException {
+        return client.method(this, 2, value, DataType.INT32);
+    }
+
+    /**
+     * Sets the value of the current credit amount attribute.
+     * 
+     * @param client
+     *            DLMS client.
+     * @param value
+     *            Current credit amount
+     * @return Action bytes.
+     * @throws InvalidKeyException
+     *             Invalid key exception.
+     * @throws NoSuchAlgorithmException
+     *             No such algorithm exception.
+     * @throws NoSuchPaddingException
+     *             No such padding exception.
+     * @throws InvalidAlgorithmParameterException
+     *             Invalid algorithm parameter exception.
+     * @throws IllegalBlockSizeException
+     *             Illegal block size exception.
+     * @throws BadPaddingException
+     *             Bad padding exception.
+     */
+    public final byte[][] invokeCredit(final GXDLMSClient client,
+            final CreditStatus value)
+            throws InvalidKeyException, NoSuchAlgorithmException,
+            NoSuchPaddingException, InvalidAlgorithmParameterException,
+            IllegalBlockSizeException, BadPaddingException {
+        return client.method(this, 3, value.getValue(), DataType.UINT8);
+    }
+
+    @Override
+    public byte[] invoke(final GXDLMSSettings settings,
+            final ValueEventArgs e) {
+        switch (e.getIndex()) {
+        case 1:
+            currentCreditAmount += ((Number) e.getValue()).intValue();
+            break;
+        case 2:
+            currentCreditAmount = ((Number) e.getValue()).intValue();
+            break;
+        case 3:
+            if (creditConfiguration.contains(CreditConfiguration.CONFIRMATION)
+                    && status == CreditStatus.SELECTABLE) {
+                status = CreditStatus.INVOKED;
+            }
+            break;
+        default:
+            e.setError(ErrorCode.READ_WRITE_DENIED);
+            break;
+        }
+        return null;
     }
 
     /*

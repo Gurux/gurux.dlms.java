@@ -46,6 +46,10 @@ public enum AccountCreditStatus {
     /**
      * In credit.
      */
+    NONE(0x0),
+    /**
+     * In credit.
+     */
     IN_CREDIT(0x1),
 
     /**

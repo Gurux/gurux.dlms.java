@@ -249,10 +249,8 @@ public class GXDLMSObjectCollection extends ArrayList<GXDLMSObject>
         try {
             save(stream, settings);
         } finally {
-            if (stream != null) {
-                stream.close();
-                stream = null;
-            }
+            stream.close();
+            stream = null;
         }
     }
 
