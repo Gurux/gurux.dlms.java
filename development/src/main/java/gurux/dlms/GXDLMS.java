@@ -1340,7 +1340,9 @@ abstract class GXDLMS {
                     messages.add(getWrapperFrame(p.getSettings(),
                             p.getCommand(), reply));
                 } else if (p.getSettings()
-                        .getInterfaceType() == InterfaceType.HDLC) {
+                            .getInterfaceType() == InterfaceType.HDLC ||                          
+                           p.getSettings()
+                            .getInterfaceType() == InterfaceType.HDLC_WITH_MODE_E) {
                     messages.add(getHdlcFrame(p.getSettings(), frame, reply));
                     if (reply.position() != reply.size()) {
                         frame = p.getSettings().getNextSend(false);
