@@ -34,6 +34,10 @@
 
 package gurux.dlms.server.example;
 
+import java.io.IOException;
+
+import javax.xml.stream.XMLStreamException;
+
 import gurux.dlms.objects.GXDLMSAssociationShortName;
 import gurux.dlms.objects.GXDLMSHdlcSetup;
 
@@ -42,7 +46,8 @@ import gurux.dlms.objects.GXDLMSHdlcSetup;
  * layer using HDLC protocol. Example Landis+Gyr uses this.
  */
 public class GXDLMSServerSN extends GXDLMSBase {
-    public GXDLMSServerSN() {
-        super(new GXDLMSAssociationShortName(), new GXDLMSHdlcSetup());
+    public GXDLMSServerSN(final String port)
+            throws XMLStreamException, IOException {
+        super(new GXDLMSAssociationShortName(), new GXDLMSHdlcSetup(), port);
     }
 }

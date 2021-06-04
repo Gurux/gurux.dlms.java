@@ -34,14 +34,21 @@
 
 package gurux.dlms.objects;
 
+import java.security.InvalidAlgorithmParameterException;
+import java.security.InvalidKeyException;
+import java.security.NoSuchAlgorithmException;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
 
+import javax.crypto.BadPaddingException;
+import javax.crypto.IllegalBlockSizeException;
+import javax.crypto.NoSuchPaddingException;
 import javax.xml.stream.XMLStreamException;
 
 import gurux.dlms.GXByteBuffer;
 import gurux.dlms.GXDLMSClient;
+import gurux.dlms.GXDLMSConverter;
 import gurux.dlms.GXDLMSSettings;
 import gurux.dlms.GXSimpleEntry;
 import gurux.dlms.ValueEventArgs;
@@ -216,6 +223,259 @@ public class GXDLMSMBusClient extends GXDLMSObject implements IGXDLMSBase {
 
     public void setEncryptionKeyStatus(final MBusEncryptionKeyStatus value) {
         encryptionKeyStatus = value;
+    }
+
+    /**
+     * Installs a slave device.
+     * 
+     * @param client
+     *            DLMS client settings.
+     * @param primaryAddress
+     *            Primary address.
+     * @return Generated DLMS data.
+     * @throws NoSuchPaddingException
+     *             No such padding exception.
+     * @throws NoSuchAlgorithmException
+     *             No such algorithm exception.
+     * @throws InvalidAlgorithmParameterException
+     *             Invalid algorithm parameter exception.
+     * @throws InvalidKeyException
+     *             Invalid key exception.
+     * @throws BadPaddingException
+     *             Bad padding exception.
+     * @throws IllegalBlockSizeException
+     *             Illegal block size exception.
+     */
+    public final byte[][] slaveInstall(final GXDLMSClient client,
+            byte primaryAddress)
+            throws InvalidKeyException, NoSuchAlgorithmException,
+            NoSuchPaddingException, InvalidAlgorithmParameterException,
+            IllegalBlockSizeException, BadPaddingException {
+        return client.method(this, 1, primaryAddress, DataType.INT8);
+    }
+
+    /**
+     * De-installs a slave device.
+     * 
+     * @param client
+     *            DLMS client settings.
+     * @return Generated DLMS data.
+     * @throws NoSuchPaddingException
+     *             No such padding exception.
+     * @throws NoSuchAlgorithmException
+     *             No such algorithm exception.
+     * @throws InvalidAlgorithmParameterException
+     *             Invalid algorithm parameter exception.
+     * @throws InvalidKeyException
+     *             Invalid key exception.
+     * @throws BadPaddingException
+     *             Bad padding exception.
+     * @throws IllegalBlockSizeException
+     *             Illegal block size exception.
+     */
+    public final byte[][] slaveDeInstall(final GXDLMSClient client)
+            throws InvalidKeyException, NoSuchAlgorithmException,
+            NoSuchPaddingException, InvalidAlgorithmParameterException,
+            IllegalBlockSizeException, BadPaddingException {
+        return client.method(this, 2, 0, DataType.INT8);
+    }
+
+    /**
+     * Captures values.
+     * 
+     * @param client
+     *            DLMS client settings.
+     * @return Generated DLMS data.
+     * @throws NoSuchPaddingException
+     *             No such padding exception.
+     * @throws NoSuchAlgorithmException
+     *             No such algorithm exception.
+     * @throws InvalidAlgorithmParameterException
+     *             Invalid algorithm parameter exception.
+     * @throws InvalidKeyException
+     *             Invalid key exception.
+     * @throws BadPaddingException
+     *             Bad padding exception.
+     * @throws IllegalBlockSizeException
+     *             Illegal block size exception.
+     */
+    public final byte[][] capture(final GXDLMSClient client)
+            throws InvalidKeyException, NoSuchAlgorithmException,
+            NoSuchPaddingException, InvalidAlgorithmParameterException,
+            IllegalBlockSizeException, BadPaddingException {
+        return client.method(this, 3, 0, DataType.INT8);
+    }
+
+    /**
+     * Resets alarm state of the M-Bus slave device.
+     * 
+     * @param client
+     *            DLMS client settings.
+     * @return Generated DLMS data.
+     * @throws NoSuchPaddingException
+     *             No such padding exception.
+     * @throws NoSuchAlgorithmException
+     *             No such algorithm exception.
+     * @throws InvalidAlgorithmParameterException
+     *             Invalid algorithm parameter exception.
+     * @throws InvalidKeyException
+     *             Invalid key exception.
+     * @throws BadPaddingException
+     *             Bad padding exception.
+     * @throws IllegalBlockSizeException
+     *             Illegal block size exception.
+     */
+    public final byte[][] resetAlarm(final GXDLMSClient client)
+            throws InvalidKeyException, NoSuchAlgorithmException,
+            NoSuchPaddingException, InvalidAlgorithmParameterException,
+            IllegalBlockSizeException, BadPaddingException {
+        return client.method(this, 4, 0, DataType.INT8);
+    }
+
+    /**
+     * Synchronize the clock.
+     * 
+     * @param client
+     *            DLMS client settings.
+     * @return Generated DLMS data.
+     * @throws NoSuchPaddingException
+     *             No such padding exception.
+     * @throws NoSuchAlgorithmException
+     *             No such algorithm exception.
+     * @throws InvalidAlgorithmParameterException
+     *             Invalid algorithm parameter exception.
+     * @throws InvalidKeyException
+     *             Invalid key exception.
+     * @throws BadPaddingException
+     *             Bad padding exception.
+     * @throws IllegalBlockSizeException
+     *             Illegal block size exception.
+     */
+    public final byte[][] synchronizeClock(final GXDLMSClient client)
+            throws InvalidKeyException, NoSuchAlgorithmException,
+            NoSuchPaddingException, InvalidAlgorithmParameterException,
+            IllegalBlockSizeException, BadPaddingException {
+        return client.method(this, 5, 0, DataType.INT8);
+    }
+
+    /**
+     * Sends data to the M-Bus slave device.
+     * 
+     * @param client
+     *            DLMS client settings.
+     * @param data
+     *            data to send
+     * @return Generated DLMS data.
+     * @throws NoSuchPaddingException
+     *             No such padding exception.
+     * @throws NoSuchAlgorithmException
+     *             No such algorithm exception.
+     * @throws InvalidAlgorithmParameterException
+     *             Invalid algorithm parameter exception.
+     * @throws InvalidKeyException
+     *             Invalid key exception.
+     * @throws BadPaddingException
+     *             Bad padding exception.
+     * @throws IllegalBlockSizeException
+     *             Illegal block size exception.
+     */
+    public final byte[][] sendData(final GXDLMSClient client,
+            final GXMBusClientData[] data)
+            throws InvalidKeyException, NoSuchAlgorithmException,
+            NoSuchPaddingException, InvalidAlgorithmParameterException,
+            IllegalBlockSizeException, BadPaddingException {
+        GXByteBuffer bb = new GXByteBuffer();
+        bb.setUInt8(DataType.ARRAY);
+        bb.setUInt8(DataType.STRUCTURE);
+        GXCommon.setObjectCount(data.length, bb);
+        for (GXMBusClientData it : data) {
+            bb.setUInt8(DataType.STRUCTURE);
+            bb.setUInt8(3);
+            bb.setUInt8(DataType.OCTET_STRING);
+            GXCommon.setObjectCount(it.getDataInformation().length, bb);
+            bb.set(it.getDataInformation());
+            bb.setUInt8(DataType.OCTET_STRING);
+            GXCommon.setObjectCount(it.getValueInformation().length, bb);
+            bb.set(it.getValueInformation());
+            GXCommon.setData(null, bb,
+                    GXDLMSConverter.getDLMSDataType(it.getData()),
+                    it.getData());
+        }
+        return client.method(this, 6, bb.array(), DataType.ARRAY);
+    }
+
+    /**
+     * Sets the encryption key in the M-Bus client and enables encrypted
+     * communication with the M-Bus slave device.
+     * 
+     * @param client
+     *            DLMS client settings.
+     * @param encryptionKey
+     *            encryption key
+     * @return Generated DLMS data.
+     * @throws NoSuchPaddingException
+     *             No such padding exception.
+     * @throws NoSuchAlgorithmException
+     *             No such algorithm exception.
+     * @throws InvalidAlgorithmParameterException
+     *             Invalid algorithm parameter exception.
+     * @throws InvalidKeyException
+     *             Invalid key exception.
+     * @throws BadPaddingException
+     *             Bad padding exception.
+     * @throws IllegalBlockSizeException
+     *             Illegal block size exception.
+     */
+    public final byte[][] setEncryptionKey(GXDLMSClient client,
+            byte[] encryptionKey)
+            throws InvalidKeyException, NoSuchAlgorithmException,
+            NoSuchPaddingException, InvalidAlgorithmParameterException,
+            IllegalBlockSizeException, BadPaddingException {
+        GXByteBuffer bb = new GXByteBuffer();
+        bb.setUInt8(DataType.OCTET_STRING);
+        if (encryptionKey == null) {
+            bb.setUInt8(0);
+        } else {
+            GXCommon.setObjectCount(encryptionKey.length, bb);
+            bb.set(encryptionKey);
+        }
+        return client.method(this, 7, bb.array(), DataType.ARRAY);
+    }
+
+    /**
+     * Transfers an encryption key to the M-Bus slave device.
+     * 
+     * @param client
+     *            DLMS client settings.
+     * @param encryptionKey
+     *            encryption key
+     * @return Generated DLMS data.
+     * @throws NoSuchPaddingException
+     *             No such padding exception.
+     * @throws NoSuchAlgorithmException
+     *             No such algorithm exception.
+     * @throws InvalidAlgorithmParameterException
+     *             Invalid algorithm parameter exception.
+     * @throws InvalidKeyException
+     *             Invalid key exception.
+     * @throws BadPaddingException
+     *             Bad padding exception.
+     * @throws IllegalBlockSizeException
+     *             Illegal block size exception.
+     */
+    public final byte[][] transferKey(GXDLMSClient client, byte[] encryptionKey)
+            throws InvalidKeyException, NoSuchAlgorithmException,
+            NoSuchPaddingException, InvalidAlgorithmParameterException,
+            IllegalBlockSizeException, BadPaddingException {
+        GXByteBuffer bb = new GXByteBuffer();
+        bb.setUInt8(DataType.OCTET_STRING);
+        if (encryptionKey == null) {
+            bb.setUInt8(0);
+        } else {
+            GXCommon.setObjectCount(encryptionKey.length, bb);
+            bb.set(encryptionKey);
+        }
+        return client.method(this, 8, bb.array(), DataType.ARRAY);
     }
 
     @Override

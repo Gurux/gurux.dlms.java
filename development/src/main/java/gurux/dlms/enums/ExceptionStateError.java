@@ -39,7 +39,7 @@ package gurux.dlms.enums;
  * 
  * @author Gurux Ltd.
  */
-public enum StateError {
+public enum ExceptionStateError {
     /**
      * Service is not allowed.
      */
@@ -58,17 +58,17 @@ public enum StateError {
     /**
      * Collection of enumerator values.
      */
-    private static java.util.HashMap<Integer, StateError> mappings;
+    private static java.util.HashMap<Integer, ExceptionStateError> mappings;
 
     /**
      * Returns collection of enumerator values.
      * 
      * @return Enumerator values.
      */
-    private static java.util.HashMap<Integer, StateError> getMappings() {
-        synchronized (StateError.class) {
+    private static java.util.HashMap<Integer, ExceptionStateError> getMappings() {
+        synchronized (ExceptionStateError.class) {
             if (mappings == null) {
-                mappings = new java.util.HashMap<Integer, StateError>();
+                mappings = new java.util.HashMap<Integer, ExceptionStateError>();
             }
         }
         return mappings;
@@ -80,7 +80,7 @@ public enum StateError {
      * @param value
      *            Integer value of enumerator.
      */
-    StateError(final int value) {
+    ExceptionStateError(final int value) {
         intValue = value;
         getMappings().put(value, this);
     }
@@ -101,7 +101,7 @@ public enum StateError {
      *            Integer value.
      * @return Enumeration value.
      */
-    public static StateError forValue(final int value) {
+    public static ExceptionStateError forValue(final int value) {
         return getMappings().get(value);
     }
 }

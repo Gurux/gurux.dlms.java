@@ -4,11 +4,11 @@
 // 
 //
 //
-// Filename:        $HeadURL:  $
+// Filename:        $HeadURL$
 //
-// Version:         $Revision: $,
-//                  $Date:  $
-//                  $Author: $
+// Version:         $Revision$,
+//                  $Date$
+//                  $Author$
 //
 // Copyright (c) Gurux Ltd
 //
@@ -26,23 +26,29 @@
 // MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. 
 // See the GNU General Public License for more details.
 //
-// More information of Gurux DLMS/COSEM Director: http://www.gurux.org/GXDLMSDirector
+// More information of Gurux products: https://www.gurux.org
 //
 // This code is licensed under the GNU General Public License v2. 
 // Full text may be retrieved at http://www.gnu.org/licenses/gpl-2.0.txt
 //---------------------------------------------------------------------------
-
-package gurux.dlms.server.example;
-
-import gurux.dlms.enums.InterfaceType;
-import gurux.dlms.objects.GXDLMSAssociationShortName;
+package gurux.dlms.enums;
 
 /**
- * DLMS Server that uses Short Name referencing with IEC 62056-46 Data link
- * layer using HDLC protocol. Example Landis+Gyr uses this.
+ * Key agreement scheme.
  */
-public class GXDLMSServerSN extends GXDLMSBase {
-    public GXDLMSServerSN() {
-        super(new GXDLMSAssociationShortName(), InterfaceType.HDLC);
-    }
+public enum KeyAgreementScheme {
+    /**
+     * The Ephemeral Unified Model scheme.
+     */
+    EPHEMERAL_UNIFIED_MODEL,
+
+    /**
+     * The One-Pass Diffie-Hellman scheme.
+     */
+    ONE_PASS_DIFFIE_HELLMAN,
+
+    /**
+     * the Static Unified Model scheme.
+     */
+    STATIC_UNIFIED_MODEL
 }

@@ -43,139 +43,139 @@ import gurux.dlms.enums.SourceDiagnostic;
  * GetDescription method.
  */
 public class GXDLMSException extends RuntimeException {
-    /**
-     * Serial version UID.
-     */
-    private static final long serialVersionUID = 1L;
-    private AssociationResult result = AssociationResult.ACCEPTED;
-    private int diagnostic = 0;
-    private int errorCode;
+	/**
+	 * Serial version UID.
+	 */
+	private static final long serialVersionUID = 1L;
+	private AssociationResult result = AssociationResult.ACCEPTED;
+	private int diagnostic = 0;
+	private int errorCode;
 
-    public GXDLMSException(final int errCode) {
-        super(GXDLMS.getDescription(errCode));
-        setErrorCode(errCode);
-    }
+	public GXDLMSException(final int errCode) {
+		super(GXDLMS.getDescription(errCode));
+		setErrorCode(errCode);
+	}
 
-    public GXDLMSException(final String message) {
-        super(message);
-    }
+	public GXDLMSException(final String message) {
+		super(message);
+	}
 
-    /*
-     * Constructor for AARE error.
-     */
-    GXDLMSException(final AssociationResult forResult,
-            final SourceDiagnostic forDiagnostic) {
-        super("Connection is " + getResult(forResult) + "\r\n"
-                + getDiagnostic(forDiagnostic));
-        result = forResult;
-        diagnostic = forDiagnostic.getValue();
-    }
+	/*
+	 * Constructor for AARE error.
+	 */
+	GXDLMSException(final AssociationResult forResult, final SourceDiagnostic forDiagnostic) {
+		this(forResult, forDiagnostic, "");
+	}
 
-    /*
-     * Constructor for AARE error.
-     */
-    GXDLMSException(final AssociationResult forResult,
-            final AcseServiceProvider forDiagnostic) {
-        super("Connection is " + getResult(forResult) + "\r\n"
-                + getDiagnostic(forDiagnostic));
-        result = forResult;
-        diagnostic = forDiagnostic.getValue();
-    }
+	/*
+	 * Constructor for AARE error.
+	 */
+	GXDLMSException(final AssociationResult forResult, final SourceDiagnostic forDiagnostic, final String extra) {
+		super("Connection is " + getResult(forResult) + "\r\n" + getDiagnostic(forDiagnostic) + extra);
+		result = forResult;
+		diagnostic = forDiagnostic.getValue();
+	}
 
-    /**
-     * Get result as a string.
-     * 
-     * @param result
-     *            Enumeration value of AssociationResult.
-     * @return String description of AssociationResult.
-     */
-    private static String getResult(final AssociationResult result) {
-        if (result == AssociationResult.PERMANENT_REJECTED) {
-            return "permanently rejected";
-        }
-        if (result == AssociationResult.TRANSIENT_REJECTED) {
-            return "transient rejected";
-        }
-        throw new UnsupportedOperationException();
-    }
+	/*
+	 * Constructor for AARE error.
+	 */
+	GXDLMSException(final AssociationResult forResult, final AcseServiceProvider forDiagnostic) {
+		super("Connection is " + getResult(forResult) + "\r\n" + getDiagnostic(forDiagnostic));
+		result = forResult;
+		diagnostic = forDiagnostic.getValue();
+	}
 
-    /*
-     * Get diagnostic as a string.
-     */
-    private static String getDiagnostic(AcseServiceProvider diagnostic) {
-        String str;
-        switch (diagnostic) {
-        case NONE:
-            str = "None.";
-            break;
-        case NO_REASON_GIVEN:
-            str = "No reason given.";
-            break;
-        case NO_COMMON_ACSE_VERSION:
-            str = "No Common Acse version.";
-            break;
-        default:
-            str = "Unknown diagnostic error.";
-            break;
-        }
-        return str;
-    }
+	/**
+	 * Get result as a string.
+	 * 
+	 * @param result Enumeration value of AssociationResult.
+	 * @return String description of AssociationResult.
+	 */
+	private static String getResult(final AssociationResult result) {
+		if (result == AssociationResult.PERMANENT_REJECTED) {
+			return "permanently rejected";
+		}
+		if (result == AssociationResult.TRANSIENT_REJECTED) {
+			return "transient rejected";
+		}
+		throw new UnsupportedOperationException();
+	}
 
-    /**
-     * Get diagnostic as a string.
-     * 
-     * @param value
-     *            Enumeration value of SourceDiagnostic.
-     * @return String description of SourceDiagnostic.
-     */
-    private static String getDiagnostic(final SourceDiagnostic value) {
-        if (value == SourceDiagnostic.NO_REASON_GIVEN) {
-            return "No reason is given.";
-        }
-        if (value == SourceDiagnostic.NOT_SUPPORTED) {
-            return "The application context name is not supported.";
-        }
-        if (value == SourceDiagnostic.NOT_RECOGNISED) {
-            return "The authentication mechanism name is not recognized.";
-        }
-        if (value == SourceDiagnostic.MECHANISM_NAME_REGUIRED) {
-            return "Authentication mechanism name is required.";
-        }
-        if (value == SourceDiagnostic.AUTHENTICATION_FAILURE) {
-            return "Authentication failure.";
-        }
-        if (value == SourceDiagnostic.AUTHENTICATION_REQUIRED) {
-            return "Authentication is required.";
-        }
-        throw new UnsupportedOperationException();
-    }
+	/*
+	 * Get diagnostic as a string.
+	 */
+	private static String getDiagnostic(AcseServiceProvider diagnostic) {
+		String str;
+		switch (diagnostic) {
+		case NONE:
+			str = "None.";
+			break;
+		case NO_REASON_GIVEN:
+			str = "No reason given.";
+			break;
+		case NO_COMMON_ACSE_VERSION:
+			str = "No Common Acse version.";
+			break;
+		default:
+			str = "Unknown diagnostic error.";
+			break;
+		}
+		return str;
+	}
 
-    /**
-     * @return Error code.
-     */
-    public final int getErrorCode() {
-        return errorCode;
-    }
+	/**
+	 * Get diagnostic as a string.
+	 * 
+	 * @param value Enumeration value of SourceDiagnostic.
+	 * @return String description of SourceDiagnostic.
+	 */
+	private static String getDiagnostic(final SourceDiagnostic value) {
+		if (value == SourceDiagnostic.NO_REASON_GIVEN) {
+			return "No reason is given.";
+		}
+		if (value == SourceDiagnostic.NOT_SUPPORTED) {
+			return "The application context name is not supported.";
+		}
+		if (value == SourceDiagnostic.NOT_RECOGNISED) {
+			return "The authentication mechanism name is not recognized.";
+		}
+		if (value == SourceDiagnostic.MECHANISM_NAME_REGUIRED) {
+			return "Authentication mechanism name is required.";
+		}
+		if (value == SourceDiagnostic.AUTHENTICATION_FAILURE) {
+			return "Authentication failure.";
+		}
+		if (value == SourceDiagnostic.AUTHENTICATION_REQUIRED) {
+			return "Authentication is required.";
+		}
+		throw new UnsupportedOperationException();
+	}
 
-    /**
-     * @param value
-     *            Error code.
-     */
-    public final void setErrorCode(final int value) {
-        errorCode = value;
-    }
+	/**
+	 * @return Error code.
+	 */
+	public final int getErrorCode() {
+		return errorCode;
+	}
 
-    /**
-     * @return Association Result in AARE message.
-     */
-    public final AssociationResult getResult() {
-        return result;
-    }
+	/**
+	 * @param value Error code.
+	 */
+	public final void setErrorCode(final int value) {
+		errorCode = value;
+	}
 
-    /**
-     * @return Diagnostic code in AARE message.
-     */
-    public final int getDiagnostic() {
-        return diagnostic;
-    }
+	/**
+	 * @return Association Result in AARE message.
+	 */
+	public final AssociationResult getResult() {
+		return result;
+	}
+
+	/**
+	 * @return Diagnostic code in AARE message.
+	 */
+	public final int getDiagnostic() {
+		return diagnostic;
+	}
 }

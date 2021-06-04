@@ -32,29 +32,32 @@
 // Full text may be retrieved at http://www.gnu.org/licenses/gpl-2.0.txt
 //---------------------------------------------------------------------------
 
-package gurux.dlms.objects.enums;
+package gurux.dlms;
 
 /**
- * Security policy Enforces authentication and/or encryption algorithm provided
- * with security suite. This enumeration is used for version 0.
+ *
  */
-public enum SecurityPolicy0 {
-    /**
-     * Security is not used.
-     */
-    NOTHING,
-    /**
-     * All messages are authenticated.
-     */
-    AUTHENTICATED,
+public interface IGXCryptoNotifier {
+	/**
+	 * Called when the public or private key is needed and it's unknown.
+	 * 
+	 * @param sender Sender
+	 * @param args   Arguments
+	 */
 
-    /**
-     * All messages are encrypted.
-     */
-    ENCRYPTED,
+	/**
+	 * Called when the public or private key is needed and it's unknown.
+	 * 
+	 * @param sender Sender
+	 * @param args   Arguments
+	 */
+	void OnKey(Object sender, GXCryptoKeyParameter args);
 
-    /**
-     * All messages are authenticated and encrypted.
-     */
-    AUTHENTICATED_ENCRYPTED
-}
+	/**
+	 * Called to encrypt or decrypt the ciphered data.
+	 * 
+	 * @param sender Sender
+	 * @param args   Arguments
+	 */
+	void OnCrypto(Object sender, GXCryptoKeyParameter args);
+};

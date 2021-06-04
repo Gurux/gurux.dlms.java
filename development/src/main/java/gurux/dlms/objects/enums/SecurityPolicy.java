@@ -44,6 +44,15 @@ import java.util.Set;
  */
 public enum SecurityPolicy {
     /**
+     * All messages are authenticated using Security Suite 0.
+     */
+    AUTHENTICATED(1),
+
+    /**
+     * All messages are encrypted using Security Suite 0.
+     */
+    ENCRYPTED(2),
+    /**
      * Request is authenticated.
      */
     AUTHENTICATED_REQUEST(0x4),
@@ -123,7 +132,8 @@ public enum SecurityPolicy {
      * @return Get enumeration constant values.
      */
     private static SecurityPolicy[] getEnumConstants() {
-        return new SecurityPolicy[] { AUTHENTICATED_REQUEST, ENCRYPTED_REQUEST,
+        return new SecurityPolicy[] { AUTHENTICATED, ENCRYPTED,
+                AUTHENTICATED_REQUEST, ENCRYPTED_REQUEST,
                 DIGITALLY_SIGNED_REQUEST, AUTHENTICATED_RESPONSE,
                 ENCRYPTED_RESPONSE, DIGITALLY_SIGNED_RESPONSE };
 
@@ -138,6 +148,7 @@ public enum SecurityPolicy {
      */
     public static java.util.Set<SecurityPolicy> forValue(final int value) {
         Set<SecurityPolicy> values = new HashSet<SecurityPolicy>();
+        // Version 1.
         SecurityPolicy[] enums = getEnumConstants();
         for (int pos = 0; pos != enums.length; ++pos) {
             if ((enums[pos].intValue & value) == enums[pos].intValue) {

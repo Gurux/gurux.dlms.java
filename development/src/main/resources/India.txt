@@ -43,7 +43,7 @@
 1;0.0.96.15.5.255;0;EventLog Seq:Non-Roll Over
 1;0.0.96.15.6.255;0;EventLog Seq:Control
 1;0.0.96.15.128.255;0;Tamper Count for Billing Period
-1;0.0.97.98.0.255;0;Alarm register object?
+1;0.0.97.98.0.255;0;Alarm register object
 1;1.0.0.2.0.255;0;Firmware Version For Meter;10
 1;1.0.0.4.2.255;0;CTR
 1;1.0.0.4.3.255;0;PTR
@@ -66,7 +66,7 @@
 3;1.0.1.8.6.255;0;Cum. Energy-Wh(Imp)-TZ6
 3;1.0.1.8.7.255;0;Cum. Energy-Wh(Imp)-TZ7
 3;1.0.1.8.8.255;0;Cum. Energy-Wh(Imp)-TZ8
-3;1.0.1.9.0.255;0;Cum. Energy-Wh Total?
+3;1.0.1.9.0.255;0;Cum. Energy-Wh Total
 3;1.0.1.29.0.255;0;Block Energy-Wh(Imp)
 3;1.0.2.8.0.255;0;Cum. Energy-Wh(Exp)
 3;1.0.2.8.1.255;0;Cum. Energy-Wh(Exp)-TZ1

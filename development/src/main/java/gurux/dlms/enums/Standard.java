@@ -56,7 +56,11 @@ public enum Standard {
     /**
      * Meter uses IDIS DLMS standard. https://www.idis-association.com/
      */
-    IDIS(4);
+    IDIS(4),
+    /**
+     * Meter uses Spain DLMS standard.
+     */
+    SPAIN(5);
 
     private int value;
     private static java.util.HashMap<Integer, Standard> mappings;

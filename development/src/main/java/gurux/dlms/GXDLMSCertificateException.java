@@ -4,11 +4,11 @@
 // 
 //
 //
-// Filename:        $HeadURL:  $
+// Filename:        $HeadURL$
 //
-// Version:         $Revision: $,
-//                  $Date:  $
-//                  $Author: $
+// Version:         $Revision$,
+//                  $Date$
+//                  $Author$
 //
 // Copyright (c) Gurux Ltd
 //
@@ -26,24 +26,27 @@
 // MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. 
 // See the GNU General Public License for more details.
 //
-// More information of Gurux DLMS/COSEM Director: http://www.gurux.org/GXDLMSDirector
+// More information of Gurux products: https://www.gurux.org
 //
 // This code is licensed under the GNU General Public License v2. 
 // Full text may be retrieved at http://www.gnu.org/licenses/gpl-2.0.txt
 //---------------------------------------------------------------------------
 
-package gurux.dlms.server.example;
-
-import gurux.dlms.enums.InterfaceType;
-import gurux.dlms.objects.GXDLMSAssociationShortName;
+package gurux.dlms;
 
 /**
- * DLMS Server that uses Short Same referencing with IEC 62056-47 COSEM
- * transport layers for IPv4 networks. Example Iskraemeco uses this. Note! For
- * serial port communication is used GXDLMSServerSN.
+ * DLMS specific exception class for certificate exceptions.
+ * <p>
+ * https://www.gurux.fi/Gurux.DLMS.Secure
+ * </p>
  */
-public class GXDLMSServerSN_47 extends GXDLMSBase {
-    public GXDLMSServerSN_47() {
-        super(new GXDLMSAssociationShortName(), InterfaceType.WRAPPER);
+public class GXDLMSCertificateException extends RuntimeException {
+    /**
+     * Serial version UID.
+     */
+    private static final long serialVersionUID = 1L;
+
+    public GXDLMSCertificateException(final String message) {
+        super(message);
     }
 }

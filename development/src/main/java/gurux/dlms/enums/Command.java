@@ -266,6 +266,11 @@ public final class Command {
     public static final int GENERAL_CIPHERING = 0xDD;
 
     /**
+     * General signing.
+     */
+    public static final int GENERAL_SIGNING = 0xDF;
+
+    /**
      * Information Report request.
      */
     public static final int INFORMATION_REPORT = 0x18;

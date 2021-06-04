@@ -34,6 +34,10 @@
 
 package gurux.dlms.objects;
 
+import java.util.logging.Level;
+import java.util.logging.Logger;
+
+import gurux.dlms.GXDLMSServer;
 import gurux.dlms.GXDLMSServerBase;
 import gurux.dlms.internal.AutoResetEvent;
 
@@ -65,7 +69,8 @@ final class GXProfileGenericUpdater extends Thread {
             try {
                 target.capture(server);
             } catch (Exception ex) {
-                System.out.printf(ex.getMessage());
+                Logger.getLogger(GXDLMSServer.class.getName()).log(Level.SEVERE,
+                        ex.getMessage());
             }
         } while (!receivedEvent.waitOne(target.getCapturePeriod() * 1000));
     }

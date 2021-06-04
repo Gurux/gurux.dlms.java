@@ -991,52 +991,49 @@ public class GXDateTime {
     public final String toString() {
         StringBuilder format = new StringBuilder();
         SimpleDateFormat sd = new SimpleDateFormat();
-        if (!getSkip().isEmpty()) {
-            // Separate date and time parts.
-            format.append(sd.toPattern());
-            remove(format);
-            if (getSkip().contains(DateTimeSkips.YEAR)) {
-                remove(format, "yyyy", true);
-                remove(format, "yy", true);
-                remove(format, "y", true);
-            }
-            if (getSkip().contains(DateTimeSkips.MONTH)) {
-                remove(format, "M", true);
-            }
-            if (getSkip().contains(DateTimeSkips.DAY)) {
-                remove(format, "d", true);
-            }
-            if (getSkip().contains(DateTimeSkips.HOUR)) {
-                remove(format, "HH", true);
-                remove(format, "H", true);
-                remove(format, "h", true);
-                remove(format, "a", true);
-            }
-            if (getSkip().contains(DateTimeSkips.MILLISECOND)) {
-                remove(format, "SSS", true);
-            } else {
-                int index = format.indexOf("ss");
-                if (index != -1) {
-                    String sep = format.substring(index - 1, index);
-                    format.replace(index, index + 2, "ss" + sep + "SSS");
-                }
-            }
-            if (getSkip().contains(DateTimeSkips.SECOND)) {
-                remove(format, "ss", true);
-            } else {
-                int index = format.indexOf("mm");
-                if (index != -1) {
-                    String sep = format.substring(index - 1, index);
-                    format.replace(index, index + 2, "mm" + sep + "ss");
-                }
-            }
-            if (getSkip().contains(DateTimeSkips.MINUTE)) {
-                remove(format, "mm", true);
-                remove(format, "m", true);
-            }
-            sd = new SimpleDateFormat(format.toString().trim());
-            return sd.format(getLocalCalendar().getTime());
+        // Separate date and time parts.
+        format.append(sd.toPattern());
+        remove(format);
+        if (getSkip().contains(DateTimeSkips.YEAR)) {
+            remove(format, "yyyy", true);
+            remove(format, "yy", true);
+            remove(format, "y", true);
         }
+        if (getSkip().contains(DateTimeSkips.MONTH)) {
+            remove(format, "M", true);
+        }
+        if (getSkip().contains(DateTimeSkips.DAY)) {
+            remove(format, "d", true);
+        }
+        if (getSkip().contains(DateTimeSkips.HOUR)) {
+            remove(format, "HH", true);
+            remove(format, "H", true);
+            remove(format, "h", true);
+            remove(format, "a", true);
+        }
+        if (getSkip().contains(DateTimeSkips.MILLISECOND)) {
+            remove(format, "SSS", true);
+        } else {
+            int index = format.indexOf("ss");
+            if (index != -1) {
+                String sep = format.substring(index - 1, index);
+                format.replace(index, index + 2, "ss" + sep + "SSS");
+            }
+        }
+        if (getSkip().contains(DateTimeSkips.SECOND)) {
+            remove(format, "ss", true);
+        } else {
+            int index = format.indexOf("mm");
+            if (index != -1) {
+                String sep = format.substring(index - 1, index);
+                format.replace(index, index + 2, "mm" + sep + "ss");
+            }
+        }
+        if (getSkip().contains(DateTimeSkips.MINUTE)) {
+            remove(format, "mm", true);
+            remove(format, "m", true);
+        }
+        sd = new SimpleDateFormat(format.toString().trim());
         return sd.format(getLocalCalendar().getTime());
     }
 

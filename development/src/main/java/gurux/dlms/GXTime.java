@@ -96,6 +96,7 @@ public class GXTime extends GXDateTime {
     public GXTime(final int hour, final int minute, final int second,
             final int millisecond) {
         super(-1, -1, -1, hour, minute, second, millisecond);
+        getSkip().add(DateTimeSkips.DAY_OF_WEEK);
     }
 
     /**

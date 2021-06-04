@@ -34,6 +34,10 @@
 
 package gurux.dlms.server.example;
 
+import java.io.IOException;
+
+import javax.xml.stream.XMLStreamException;
+
 import gurux.dlms.objects.GXDLMSAssociationShortName;
 import gurux.dlms.objects.GXDLMSTcpUdpSetup;
 
@@ -43,7 +47,8 @@ import gurux.dlms.objects.GXDLMSTcpUdpSetup;
  * serial port communication is used GXDLMSServerSN.
  */
 public class GXDLMSServerSN_47 extends GXDLMSBase {
-    public GXDLMSServerSN_47() {
-        super(new GXDLMSAssociationShortName(), new GXDLMSTcpUdpSetup());
+    public GXDLMSServerSN_47(final String port)
+            throws XMLStreamException, IOException {
+        super(new GXDLMSAssociationShortName(), new GXDLMSTcpUdpSetup(), port);
     }
 }

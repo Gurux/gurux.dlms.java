@@ -38,34 +38,35 @@ package gurux.dlms.objects.enums;
  * algorithm.
  */
 public enum SecuritySuite {
-    /**
-     * AES-GCM-128 for authenticated encryption and AES-128 for key wrapping.
-     * <br>
-     * A.K.A Security Suite 0.
-     */
-    AES_GCM_128,
-    /**
-     * ECDH-ECDSAAES-GCM-128SHA-256. <br>
-     * A.K.A Security Suite 1.
-     */
-    ECDH_ECDSA_AES_GCM_128_SHA_256,
-    /**
-     * ECDH-ECDSAAES-GCM-256SHA-384. <br>
-     * A.K.A Security Suite 2.
-     */
-    ECDHE_CDSA_AES_GCM_256_SHA_384;
+	/**
+	 * GMAC ciphering is used.<br>
+	 * AES-GCM-128 for authenticated encryption and AES-128 for key wrapping. <br>
+	 * A.K.A Security Suite 0.
+	 */
+	SUITE_0,
+	/**
+	 * ECDSA P-256 ciphering is used. <br>
+	 * ECDH-ECDSAAES-GCM-128SHA-256. <br>
+	 * A.K.A Security Suite 1.
+	 */
+	SUITE_1,
+	/**
+	 * ECDSA P-384 ciphering is used.<br>
+	 * ECDH-ECDSAAES-GCM-256SHA-384. <br>
+	 * A.K.A Security Suite 2.
+	 */
+	SUITE_2;
 
-    public int getValue() {
-        return this.ordinal();
-    }
+	public int getValue() {
+		return this.ordinal();
+	}
 
-    public static SecuritySuite forValue(final int value) {
-        SecuritySuite ret = values()[value];
-        if (ret == null) {
-            throw new IllegalArgumentException(
-                    "Invalid security suite enum value.");
-        }
-        return ret;
+	public static SecuritySuite forValue(final int value) {
+		SecuritySuite ret = values()[value];
+		if (ret == null) {
+			throw new IllegalArgumentException("Invalid security suite enum value.");
+		}
+		return ret;
 
-    }
+	}
 }

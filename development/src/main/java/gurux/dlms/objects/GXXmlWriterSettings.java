@@ -34,97 +34,118 @@
 
 package gurux.dlms.objects;
 
+import java.util.ArrayList;
+import java.util.List;
+
 /**
  * XML write settings.
  */
 public class GXXmlWriterSettings {
-    /**
-     * Are attribute values also serialized.
-     */
-    private boolean values;
 
-    /**
-     * Are values saved in old way.
-     */
-    private boolean old;
+	/**
+	 * Are attribute values also serialized.
+	 */
+	private boolean values;
 
-    /**
-     * Are default values serialized.
-     */
-    private boolean ignoreDefaultValues;
+	/**
+	 * Are values saved in old way.
+	 */
+	private boolean old;
 
-    /**
-     * GXDateTime values are serialised using meter time, not local time.
-     */
-    private boolean useMeterTime;
+	/**
+	 * Are default values serialized.
+	 */
+	private boolean ignoreDefaultValues;
 
-    /**
-     * Constructor.
-     */
-    public GXXmlWriterSettings() {
-        values = true;
-        ignoreDefaultValues = true;
-    }
+	/**
+	 * GXDateTime values are serialised using meter time, not local time.
+	 */
+	private boolean useMeterTime;
 
-    /**
-     * @return Are attribute values also serialized.
-     */
-    public final boolean getValues() {
-        return values;
-    }
+	/**
+	 * List of attributes that are not serialized.
+	 */
+	private List<GXIgnoreSerialize> ignored;
 
-    /**
-     * @param value
-     *            Are attribute values also serialized.
-     */
-    public final void setValues(final boolean value) {
-        values = value;
-    }
+	/**
+	 * Constructor.
+	 */
+	public GXXmlWriterSettings() {
+		values = true;
+		ignoreDefaultValues = true;
+		ignored = new ArrayList<GXIgnoreSerialize>();
+	}
 
-    /**
-     * @return Are values saved in old way.
-     */
-    public final boolean getOld() {
-        return old;
-    }
+	/**
+	 * @return Are attribute values also serialized.
+	 */
+	public final boolean getValues() {
+		return values;
+	}
 
-    /**
-     * @param value
-     *            Are Are values saved in old way.
-     */
-    public final void setOld(final boolean value) {
-        old = value;
-    }
+	/**
+	 * @param value Are attribute values also serialized.
+	 */
+	public final void setValues(final boolean value) {
+		values = value;
+	}
 
-    /**
-     * @return Are default values serialized.
-     */
-    public boolean isIgnoreDefaultValues() {
-        return ignoreDefaultValues;
-    }
+	/**
+	 * @return Are values saved in old way.
+	 */
+	public final boolean getOld() {
+		return old;
+	}
 
-    /**
-     * @param value
-     *            Are default values serialized.
-     */
-    public void setIgnoreDefaultValues(final boolean value) {
-        ignoreDefaultValues = value;
-    }
+	/**
+	 * @param value Are Are values saved in old way.
+	 */
+	public final void setOld(final boolean value) {
+		old = value;
+	}
 
-    /**
-     * @return GXDateTime values are serialised using meter time, not local
-     *         time.
-     */
-    public boolean isUseMeterTime() {
-        return useMeterTime;
-    }
+	/**
+	 * @return Are default values serialized.
+	 */
+	public boolean isIgnoreDefaultValues() {
+		return ignoreDefaultValues;
+	}
 
-    /**
-     * @param value
-     *            GXDateTime values are serialised using meter time, not local
-     *            time.
-     */
-    public void setUseMeterTime(final boolean value) {
-        useMeterTime = value;
-    }
+	/**
+	 * @param value Are default values serialized.
+	 */
+	public void setIgnoreDefaultValues(final boolean value) {
+		ignoreDefaultValues = value;
+	}
+
+	/**
+	 * @return GXDateTime values are serialised using meter time, not local time.
+	 */
+	public boolean isUseMeterTime() {
+		return useMeterTime;
+	}
+
+	/**
+	 * @param value GXDateTime values are serialised using meter time, not local
+	 *              time.
+	 */
+	public void setUseMeterTime(final boolean value) {
+		useMeterTime = value;
+	}
+
+	/**
+	 * 
+	 * @return List of attributes that are not serialized.
+	 */
+	public List<GXIgnoreSerialize> getIgnored() {
+		return ignored;
+	}
+
+	/**
+	 * 
+	 * @param value List of attributes that are not serialized.
+	 */
+	public void setIgnored(List<GXIgnoreSerialize> value) {
+		ignored = value;
+	}
 }

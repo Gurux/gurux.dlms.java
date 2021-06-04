@@ -35,160 +35,162 @@
 package gurux.dlms;
 
 import java.security.KeyPair;
-import java.security.PublicKey;
-import java.util.List;
-import java.util.Map;
 
 import gurux.dlms.asn.GXx509CertificateCollection;
+import gurux.dlms.enums.KeyAgreementScheme;
 import gurux.dlms.enums.Security;
-import gurux.dlms.objects.enums.CertificateType;
+import gurux.dlms.objects.enums.SecurityPolicy;
 import gurux.dlms.objects.enums.SecuritySuite;
 
 public interface GXICipher {
 
-    /**
-     * Reset encrypt settings.
-     */
-    void reset();
+	/**
+	 * Reset encrypt settings.
+	 */
+	void reset();
 
-    /**
-     * @return Is ciphering used.
-     */
-    boolean isCiphered();
+	/**
+	 * @return Is ciphering used.
+	 */
+	boolean isCiphered();
 
-    /**
-     * @return Used security.
-     */
-    Security getSecurity();
+	/**
+	 * @return Used security.
+	 */
+	Security getSecurity();
 
-    /**
-     * @param value
-     *            Used security.
-     */
-    void setSecurity(Security value);
+	/**
+	 * @param value Used security policy.
+	 */
+	void setSecurityPolicy(java.util.Set<SecurityPolicy> value);
 
-    /**
-     * @return Used security suite.
-     */
-    SecuritySuite getSecuritySuite();
+	/**
+	 * @return Used security policy.
+	 */
+	java.util.Set<SecurityPolicy> getSecurityPolicy();
 
-    /**
-     * @param value
-     *            Used security suite.
-     */
-    void setSecuritySuite(final SecuritySuite value);
+	/**
+	 * @param value Used security.
+	 */
+	void setSecurity(Security value);
 
-    /**
-     * @return System title.
-     */
-    byte[] getSystemTitle();
+	/**
+	 * @return Used security suite.
+	 */
+	SecuritySuite getSecuritySuite();
 
-    /**
-     * @param value
-     *            System title.
-     */
-    void setSystemTitle(byte[] value);
+	/**
+	 * @param value Used security suite.
+	 */
+	void setSecuritySuite(final SecuritySuite value);
 
-    /**
-     * @return Recipient system Title.
-     */
-    byte[] getRecipientSystemTitle();
+	/**
+	 * @return System title.
+	 */
+	byte[] getSystemTitle();
 
-    /**
-     * @param value
-     *            Block cipher key.
-     */
-    void setBlockCipherKey(byte[] value);
+	/**
+	 * @param value System title.
+	 */
+	void setSystemTitle(byte[] value);
 
-    /**
-     * @return Block cipher key.
-     */
-    byte[] getBlockCipherKey();
+	/**
+	 * @return Recipient system Title.
+	 */
+	byte[] getRecipientSystemTitle();
 
-    /**
-     * @return Authentication key.
-     */
-    byte[] getAuthenticationKey();
+	/**
+	 * @param value Block cipher key.
+	 */
+	void setBlockCipherKey(byte[] value);
 
-    /**
-     * @param value
-     *            Authentication key.
-     */
-    void setAuthenticationKey(byte[] value);
+	/**
+	 * @return Block cipher key.
+	 */
+	byte[] getBlockCipherKey();
 
-    /**
-     * @return Invocation counter.
-     */
-    long getInvocationCounter();
+	/**
+	 * @return Authentication key.
+	 */
+	byte[] getAuthenticationKey();
 
-    /**
-     * @param value
-     *            Invocation counter.
-     */
-    void setInvocationCounter(long value);
+	/**
+	 * @param value Authentication key.
+	 */
+	void setAuthenticationKey(byte[] value);
 
-    /**
-     * @return Ephemeral key pair.
-     */
-    KeyPair getEphemeralKeyPair();
+	/**
+	 * @param value Broadcast block cipher key.
+	 */
+	void setBroadcastBlockCipherKey(byte[] value);
 
-    /**
-     * @param value
-     *            Ephemeral key pair.
-     */
-    void setEphemeralKeyPair(KeyPair value);
+	/**
+	 * @return Broadcast block cipher key.
+	 */
+	byte[] getBroadcastBlockCipherKey();
 
-    /**
-     * @return Client's key agreement key pair.
-     */
-    KeyPair getKeyAgreementKeyPair();
+	/**
+	 * @return Invocation counter.
+	 */
+	long getInvocationCounter();
 
-    /**
-     * @param value
-     *            Client's key agreement key pair.
-     */
-    void setKeyAgreementKeyPair(KeyPair value);
+	/**
+	 * @param value Invocation counter.
+	 */
+	void setInvocationCounter(long value);
 
-    /**
-     * @return Target (Server or client) Public key.
-     */
-    List<Map.Entry<CertificateType, PublicKey>> getPublicKeys();
+	/**
+	 * @return Ephemeral key pair.
+	 */
+	KeyPair getEphemeralKeyPair();
 
-    /**
-     * @return Available certificates.
-     */
-    GXx509CertificateCollection getCertificates();
+	/**
+	 * @param value Ephemeral key pair.
+	 */
+	void setEphemeralKeyPair(KeyPair value);
 
-    /**
-     * @return Signing key pair.
-     */
-    KeyPair getSigningKeyPair();
+	/**
+	 * @return Client's key agreement key pair.
+	 */
+	KeyPair getKeyAgreementKeyPair();
 
-    /**
-     * @param value
-     *            Signing key pair.
-     */
-    void setSigningKeyPair(KeyPair value);
+	/**
+	 * @param value Client's key agreement key pair.
+	 */
+	void setKeyAgreementKeyPair(KeyPair value);
 
-    /**
-     * @return Shared secret is generated when connection is made.
-     */
-    byte[] getSharedSecret();
+	/**
+	 * @return Available certificates.
+	 */
+	GXx509CertificateCollection getCertificates();
 
-    /**
-     * @param value
-     *            Shared secret is generated when connection is made.
-     */
-    void setSharedSecret(byte[] value);
+	/**
+	 * @return Signing key pair.
+	 */
+	KeyPair getSigningKeyPair();
 
-    /**
-     * @return Dedicated key.
-     */
-    byte[] getDedicatedKey();
+	/**
+	 * @param value Signing key pair.
+	 */
+	void setSigningKeyPair(KeyPair value);
 
-    /**
-     * @param value
-     *            Dedicated key.
-     */
-    void setDedicatedKey(byte[] value);
+	/**
+	 * @return Dedicated key.
+	 */
+	byte[] getDedicatedKey();
+
+	/**
+	 * @param value Dedicated key.
+	 */
+	void setDedicatedKey(byte[] value);
+
+	/**
+	 * @return Used key agreement scheme.
+	 */
+	public KeyAgreementScheme getKeyAgreementScheme();
+
+	/**
+	 * @param value Used key agreement scheme.
+	 */
+	public void setKeyAgreementScheme(final KeyAgreementScheme value);
 }

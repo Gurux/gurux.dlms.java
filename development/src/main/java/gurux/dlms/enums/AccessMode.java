@@ -33,58 +33,84 @@
 //---------------------------------------------------------------------------
 package gurux.dlms.enums;
 
+/**
+ * 
+ * The AccessMode enumerates the access modes for Logical Name Association
+ * version 3.
+ *
+ */
 public enum AccessMode {
-    /**
-     * No access.
-     */
-    NO_ACCESS(0),
-    /*
-     * The client is allowed only reading from the server.
-     */
-    READ(1),
-    /*
-     * The client is allowed only writing to the server.
-     */
-    WRITE(2),
-    /*
-     * The client is allowed both reading from the server and writing to it.
-     */
-    READ_WRITE(3),
+	/**
+	 * No access.
+	 */
+	NO_ACCESS(0),
+	/*
+	 * The client is allowed only reading from the server. <p> This is used in
+	 * version 1. </p>
+	 */
+	READ(1),
+	/*
+	 * The client is allowed only writing to the server.
+	 */
+	WRITE(2),
+	/*
+	 * The client is allowed both reading from the server and writing to it. <p>
+	 * This is used in version 1. </p>
+	 */
+	READ_WRITE(3),
 
-    AUTHENTICATED_READ(4),
+	/**
+	 * Authenticated read is used.
+	 * <p>
+	 * This is used in version 2.
+	 * </p>
+	 */
+	AUTHENTICATED_READ(4),
 
-    AUTHENTICATED_WRITE(5),
+	/**
+	 * Authenticated write is used
+	 * <p>
+	 * This is used in version 2.
+	 * </p>
+	 */
+	AUTHENTICATED_WRITE(5),
 
-    AUTHENTICATED_READ_WRITE(6);
+	/**
+	 * Authenticated Read Write is used.
+	 * <p>
+	 * This is used in version 2.
+	 * </p>
+	 */
+	AUTHENTICATED_READ_WRITE(6);
 
-    private int value;
-    private static java.util.HashMap<Integer, AccessMode> mappings;
+	private int value;
+	private static java.util.HashMap<Integer, AccessMode> mappings;
 
-    private static java.util.HashMap<Integer, AccessMode> getMappings() {
-        synchronized (AccessMode.class) {
-            if (mappings == null) {
-                mappings = new java.util.HashMap<Integer, AccessMode>();
-            }
-        }
-        return mappings;
-    }
+	private static java.util.HashMap<Integer, AccessMode> getMappings() {
+		synchronized (AccessMode3.class) {
+			if (mappings == null) {
+				mappings = new java.util.HashMap<Integer, AccessMode>();
+			}
+		}
+		return mappings;
+	}
 
-    AccessMode(final int mode) {
-        this.value = mode;
-        getMappings().put(mode, this);
-    }
+	AccessMode(final int mode) {
+		this.value = mode;
+		getMappings().put(mode, this);
+	}
 
-    /*
-     * Get integer value for enum.
-     */
-    public final int getValue() {
-        return value;
-    }
+	/*
+	 * Get integer value for enum.
+	 */
+	public final int getValue() {
+		return value;
+	}
 
-    /*
-     * Convert integer for enum value.
-     */
-    public static AccessMode forValue(final int value) {
-        return getMappings().get(value);
-    }
+	/*
+	 * Convert integer for enum value.
+	 */
+	public static AccessMode forValue(final int value) {
+		return getMappings().get(value);
+	}
 }

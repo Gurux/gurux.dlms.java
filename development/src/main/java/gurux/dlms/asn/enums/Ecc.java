@@ -4,11 +4,11 @@
 // 
 //
 //
-// Filename:        $HeadURL:  $
+// Filename:        $HeadURL$
 //
-// Version:         $Revision: $,
-//                  $Date:  $
-//                  $Author: $
+// Version:         $Revision$,
+//                  $Date$
+//                  $Author$
 //
 // Copyright (c) Gurux Ltd
 //
@@ -26,24 +26,24 @@
 // MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. 
 // See the GNU General Public License for more details.
 //
-// More information of Gurux DLMS/COSEM Director: http://www.gurux.org/GXDLMSDirector
+// More information of Gurux products: https://www.gurux.org
 //
 // This code is licensed under the GNU General Public License v2. 
 // Full text may be retrieved at http://www.gnu.org/licenses/gpl-2.0.txt
 //---------------------------------------------------------------------------
 
-package gurux.dlms.server.example;
-
-import gurux.dlms.enums.InterfaceType;
-import gurux.dlms.objects.GXDLMSAssociationLogicalName;
+package gurux.dlms.asn.enums;
 
 /**
- * DLMS Server that uses Logical Name referencing with IEC 62056-47 COSEM
- * transport layers for IPv4 networks. Example Iskraemeco uses this. Note! For
- * serial port communication is used GXDLMSServerLN.
+ * Used ECC scheme.
  */
-public class GXDLMSServerLN_47 extends GXDLMSBase {
-    public GXDLMSServerLN_47() {
-        super(new GXDLMSAssociationLogicalName(), InterfaceType.WRAPPER);
-    }
+public enum Ecc {
+	/**
+	 * ECC-P256 domain parameters are used.
+	 */
+	P256,
+	/**
+	 * ECC-384 domain parameters are used.
+	 */
+	P384
 }

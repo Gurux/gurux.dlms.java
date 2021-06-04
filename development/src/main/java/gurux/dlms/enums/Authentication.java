@@ -115,6 +115,9 @@ public enum Authentication {
         case HIGH_SHA1:
             str = "HighSha1";
             break;
+        case HIGH_ECDSA:
+            str = "HighECDSA";
+            break;
         case HIGH_SHA256:
             str = "HighSha256";
             break;

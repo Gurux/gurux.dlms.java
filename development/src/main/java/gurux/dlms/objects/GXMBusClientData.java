@@ -31,24 +31,69 @@
 // This code is licensed under the GNU General Public License v2. 
 // Full text may be retrieved at http://www.gnu.org/licenses/gpl-2.0.txt
 //---------------------------------------------------------------------------
-package gurux.dlms.enums;
+
+package gurux.dlms.objects;
 
 /**
- * Key agreement.
+ * M-Bus data definition element.
  */
-public enum KeyAgreement {
+public class GXMBusClientData {
     /**
-     * The Ephemeral Unified Model C(2e, 0s, ECC CDH) scheme.
+     * Data information block.
      */
-    EPHEMERAL_UNIFIED_MODEL,
+    private byte[] dataInformation;
+    /**
+     * Value information block.
+     */
+    private byte[] valueInformation;
 
     /**
-     * The One-Pass Diffie-Hellman C(1e, 1s, ECC CDH) scheme.
+     * Data.
      */
-    ONE_PASS_DIFFIE_HELLMAN,
+    private Object data;
 
     /**
-     * the Static Unified Model C(0e, 2s, ECC CDH) scheme.
+     * @return Data information block.
      */
-    STATIC_UNIFIED_MODEL
+    public final byte[] getDataInformation() {
+        return dataInformation;
+    }
+
+    /**
+     * @param value
+     *            Data information block.
+     */
+    public final void setDataInformation(final byte[] value) {
+        dataInformation = value;
+    }
+
+    /**
+     * @return Value information block.
+     */
+    public final byte[] getValueInformation() {
+        return valueInformation;
+    }
+
+    /**
+     * @param value
+     *            Value information block.
+     */
+    public final void setValueInformation(final byte[] value) {
+        valueInformation = value;
+    }
+
+    /**
+     * @return Data.
+     */
+    public final Object getData() {
+        return data;
+    }
+
+    /**
+     * @param value
+     *            Data.
+     */
+    public final void setData(final Object value) {
+        data = value;
+    }
 }

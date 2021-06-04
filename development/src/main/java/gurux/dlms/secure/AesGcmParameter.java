@@ -34,6 +34,7 @@
 
 package gurux.dlms.secure;
 
+import gurux.dlms.GXDLMSSettings;
 import gurux.dlms.GXDLMSTranslatorStructure;
 import gurux.dlms.enums.Security;
 import gurux.dlms.internal.GXCommon;
@@ -41,361 +42,334 @@ import gurux.dlms.objects.enums.SecuritySuite;
 
 public class AesGcmParameter {
 
-    private int tag;
-    private Security security;
+	private int tag;
 
-    /**
-     * Invocation counter.
-     */
-    private long invocationCounter;
+	/*
+	 * DLMS settings.
+	 */
+	private GXDLMSSettings settings;
 
-    /**
-     * System title.
-     */
-    private byte[] systemTitle;
-    /**
-     * Block cipher key.
-     */
-    private byte[] blockCipherKey;
-    /**
-     * Authentication key.
-     */
-    private byte[] authenticationKey;
-    /**
-     * Count type.
-     */
-    private int type;
+	private Security security;
 
-    /**
-     * Recipient system title.
-     */
-    private byte[] recipientSystemTitle;
-    /**
-     * Date time.
-     */
-    private byte[] dateTime;
-    /**
-     * Other information.
-     */
-    private byte[] otherInformation;
+	/**
+	 * Invocation counter.
+	 */
+	private long invocationCounter;
 
-    /**
-     * Key parameters.
-     */
-    private int keyParameters;
+	/**
+	 * System title.
+	 */
+	private byte[] systemTitle;
+	/**
+	 * Block cipher key.
+	 */
+	private byte[] blockCipherKey;
+	/**
+	 * Authentication key.
+	 */
+	private byte[] authenticationKey;
+	/**
+	 * Count type.
+	 */
+	private int type;
 
-    /**
-     * Key ciphered data.
-     */
-    private byte[] keyCipheredData;
+	/**
+	 * Recipient system title.
+	 */
+	private byte[] recipientSystemTitle;
+	/**
+	 * Date time.
+	 */
+	private byte[] dateTime;
+	/**
+	 * Other information.
+	 */
+	private byte[] otherInformation;
 
-    /**
-     * Ciphered content.
-     */
-    private byte[] cipheredContent;
+	/**
+	 * Key parameters.
+	 */
+	private int keyParameters;
 
-    /**
-     * Shared secret is generated when connection is made.
-     */
-    private byte[] sharedSecret;
+	/**
+	 * Key ciphered data.
+	 */
+	private byte[] keyCipheredData;
 
-    /**
-     * Used security suite.
-     */
-    private SecuritySuite securitySuite = SecuritySuite.AES_GCM_128;
+	/**
+	 * Ciphered content.
+	 */
+	private byte[] cipheredContent;
 
-    private GXDLMSTranslatorStructure xml;
+	/**
+	 * Used security suite.
+	 */
+	private SecuritySuite securitySuite = SecuritySuite.SUITE_0;
 
-    /**
-     * Constructor.
-     * 
-     * @param forTag
-     *            Tag.
-     * @param forSecurity
-     *            Security level.
-     * @param forInvocationCounter
-     *            Invocation counter.
-     * @param forSystemTitle
-     *            System title.
-     * @param forBlockCipherKey
-     *            Block cipher key. A.k.a EK.
-     * @param forAuthenticationKey
-     *            Authentication key.
-     */
-    public AesGcmParameter(final int forTag, final Security forSecurity,
-            final long forInvocationCounter, final byte[] forSystemTitle,
-            final byte[] forBlockCipherKey, final byte[] forAuthenticationKey) {
-        tag = forTag;
-        security = forSecurity;
-        invocationCounter = forInvocationCounter;
-        systemTitle = forSystemTitle;
-        blockCipherKey = forBlockCipherKey;
-        authenticationKey = forAuthenticationKey;
-        type = CountType.PACKET;
-    }
+	private GXDLMSTranslatorStructure xml;
 
-    /**
-     * Constructor.
-     * 
-     * @param forTag
-     *            Tag.
-     * @param forSecurity
-     *            Security level.
-     * @param forSecuritySuite
-     *            Security suite.
-     * @param forInvocationCounter
-     *            Invocation counter.
-     * @param kdf
-     *            KDF.
-     * @param forAuthenticationKey
-     *            Authentication key.
-     * @param forOriginatorSystemTitle
-     *            Originator system title.
-     * @param forRecipientSystemTitle
-     *            Recipient system title.
-     * @param forDateTime
-     *            Date and time.
-     * @param forOtherInformation
-     *            Other information.
-     */
-    public AesGcmParameter(final int forTag, final Security forSecurity,
-            final SecuritySuite forSecuritySuite,
-            final long forInvocationCounter, final byte[] kdf,
-            final byte[] forAuthenticationKey,
-            final byte[] forOriginatorSystemTitle,
-            final byte[] forRecipientSystemTitle, final byte[] forDateTime,
-            final byte[] forOtherInformation) {
-        tag = forTag;
-        security = forSecurity;
-        invocationCounter = forInvocationCounter;
-        securitySuite = forSecuritySuite;
-        blockCipherKey = kdf;
-        authenticationKey = forAuthenticationKey;
-        systemTitle = forOriginatorSystemTitle;
-        recipientSystemTitle = forRecipientSystemTitle;
-        type = CountType.PACKET;
-        dateTime = forDateTime;
-        otherInformation = forOtherInformation;
-    }
+	/**
+	 * Constructor.
+	 * 
+	 * @param forTag               Tag.
+	 * @param forSecurity          Security level.
+	 * @param forSecuritySuite     Security suite.
+	 * @param forInvocationCounter Invocation counter.
+	 * @param forSystemTitle       System title.
+	 * @param forBlockCipherKey    Block cipher key. A.k.a EK.
+	 * @param forAuthenticationKey Authentication key.
+	 */
+	public AesGcmParameter(final int forTag, final Security forSecurity, final SecuritySuite forSecuritySuite,
+			final long forInvocationCounter, final byte[] forSystemTitle, final byte[] forBlockCipherKey,
+			final byte[] forAuthenticationKey) {
+		tag = forTag;
+		if (forSecurity == Security.DIGITALLY_SIGNED) {
+			security = Security.AUTHENTICATION_ENCRYPTION;
+		} else {
+			security = forSecurity;
+		}
+		securitySuite = forSecuritySuite;
+		invocationCounter = forInvocationCounter;
+		systemTitle = forSystemTitle;
+		blockCipherKey = forBlockCipherKey;
+		authenticationKey = forAuthenticationKey;
+		type = CountType.PACKET;
+	}
 
-    /**
-     * Constructor.
-     * 
-     * @param forsystemTitle
-     *            System title.
-     * @param forblockCipherKey
-     *            Block cipher key.
-     * @param forauthenticationKey
-     *            Authentication key.
-     */
-    public AesGcmParameter(final byte[] forsystemTitle,
-            final byte[] forblockCipherKey, final byte[] forauthenticationKey) {
-        systemTitle = forsystemTitle;
-        blockCipherKey = forblockCipherKey;
-        authenticationKey = forauthenticationKey;
-        type = CountType.PACKET;
-    }
+	/**
+	 * Constructor.
+	 * 
+	 * @param forTag                   Tag.
+	 * @param forSettings              DLMS settings.
+	 * @param forSecurity              Security level.
+	 * @param forSecuritySuite         Security suite.
+	 * @param forInvocationCounter     Invocation counter.
+	 * @param kdf                      KDF.
+	 * @param forAuthenticationKey     Authentication key.
+	 * @param forOriginatorSystemTitle Originator system title.
+	 * @param forRecipientSystemTitle  Recipient system title.
+	 * @param forDateTime              Date and time.
+	 * @param forOtherInformation      Other information.
+	 */
+	public AesGcmParameter(final int forTag, GXDLMSSettings forSettings, final Security forSecurity,
+			final SecuritySuite forSecuritySuite, final long forInvocationCounter, final byte[] kdf,
+			final byte[] forAuthenticationKey, final byte[] forOriginatorSystemTitle,
+			final byte[] forRecipientSystemTitle, final byte[] forDateTime, final byte[] forOtherInformation) {
+		settings = forSettings;
+		tag = forTag;
+		security = forSecurity;
+		invocationCounter = forInvocationCounter;
+		securitySuite = forSecuritySuite;
+		blockCipherKey = kdf;
+		authenticationKey = forAuthenticationKey;
+		systemTitle = forOriginatorSystemTitle;
+		recipientSystemTitle = forRecipientSystemTitle;
+		type = CountType.PACKET;
+		dateTime = forDateTime;
+		otherInformation = forOtherInformation;
+	}
 
-    public final int getTag() {
-        return tag;
-    }
+	/**
+	 * Constructor.
+	 * 
+	 * @param forSettings          DLMS settings.
+	 * @param forsystemTitle       System title.
+	 * @param forblockCipherKey    Block cipher key.
+	 * @param forauthenticationKey Authentication key.
+	 */
+	public AesGcmParameter(final GXDLMSSettings forSettings, final byte[] forsystemTitle,
+			final byte[] forblockCipherKey, final byte[] forauthenticationKey) {
+		systemTitle = forsystemTitle;
+		blockCipherKey = forblockCipherKey;
+		authenticationKey = forauthenticationKey;
+		type = CountType.PACKET;
+		settings = forSettings;
+	}
 
-    public final Security getSecurity() {
-        return security;
-    }
+	public final int getTag() {
+		return tag;
+	}
 
-    public final void setSecurity(final Security value) {
-        security = value;
-    }
+	public final Security getSecurity() {
+		return security;
+	}
 
-    /**
-     * @return Invocation counter.
-     */
-    public final long getInvocationCounter() {
-        return invocationCounter;
-    }
+	public final void setSecurity(final Security value) {
+		security = value;
+	}
 
-    /**
-     * @param value
-     *            Invocation counter.
-     */
-    public final void setInvocationCounter(final long value) {
-        invocationCounter = value;
-    }
+	/**
+	 * @return Invocation counter.
+	 */
+	public final long getInvocationCounter() {
+		return invocationCounter;
+	}
 
-    public final byte[] getSystemTitle() {
-        return systemTitle;
-    }
+	/**
+	 * @param value Invocation counter.
+	 */
+	public final void setInvocationCounter(final long value) {
+		invocationCounter = value;
+	}
 
-    public final void setSystemTitle(final byte[] value) {
-        systemTitle = value;
-    }
+	public final byte[] getSystemTitle() {
+		return systemTitle;
+	}
 
-    public final byte[] getBlockCipherKey() {
-        return blockCipherKey;
-    }
+	public final void setSystemTitle(final byte[] value) {
+		systemTitle = value;
+	}
 
-    public final void setBlockCipherKey(final byte[] value) {
-        blockCipherKey = value;
-    }
+	public final byte[] getBlockCipherKey() {
+		return blockCipherKey;
+	}
 
-    public final byte[] getAuthenticationKey() {
-        return authenticationKey;
-    }
+	public final void setBlockCipherKey(final byte[] value) {
+		blockCipherKey = value;
+	}
 
-    public final void setAuthenticationKey(final byte[] value) {
-        authenticationKey = value;
-    }
+	public final byte[] getAuthenticationKey() {
+		return authenticationKey;
+	}
 
-    public final int getType() {
-        return type;
-    }
+	public final void setAuthenticationKey(final byte[] value) {
+		authenticationKey = value;
+	}
 
-    public final void setType(final int value) {
-        type = value;
-    }
+	public final int getType() {
+		return type;
+	}
 
-    @Override
-    public final String toString() {
-        StringBuilder sb = new StringBuilder();
-        sb.append("Security: ");
-        sb.append(getSecurity());
-        sb.append(" InvocationCounter: ");
-        sb.append(getInvocationCounter());
-        sb.append(" SystemTitle: ");
-        sb.append(GXCommon.toHex(systemTitle, true));
-        sb.append(" AuthenticationKey: ");
-        sb.append(GXCommon.toHex(authenticationKey, true));
-        sb.append(" BlockCipherKey: ");
-        sb.append(GXCommon.toHex(blockCipherKey, true));
-        return sb.toString();
-    }
+	public final void setType(final int value) {
+		type = value;
+	}
 
-    /**
-     * @return Optional Date time.
-     */
-    public byte[] getDateTime() {
-        return dateTime;
-    }
+	@Override
+	public final String toString() {
+		StringBuilder sb = new StringBuilder();
+		sb.append("Security: ");
+		sb.append(getSecurity());
+		sb.append(" InvocationCounter: ");
+		sb.append(getInvocationCounter());
+		sb.append(" SystemTitle: ");
+		sb.append(GXCommon.toHex(systemTitle, true));
+		sb.append(" AuthenticationKey: ");
+		sb.append(GXCommon.toHex(authenticationKey, true));
+		sb.append(" BlockCipherKey: ");
+		sb.append(GXCommon.toHex(blockCipherKey, true));
+		return sb.toString();
+	}
 
-    /**
-     * @param value
-     *            Date time.
-     */
-    public final void setDateTime(final byte[] value) {
-        dateTime = value;
-    }
+	/**
+	 * @return Optional Date time.
+	 */
+	public byte[] getDateTime() {
+		return dateTime;
+	}
 
-    /**
-     * @return Optional other information.
-     */
-    public byte[] getOtherInformation() {
-        return otherInformation;
-    }
+	/**
+	 * @param value Date time.
+	 */
+	public final void setDateTime(final byte[] value) {
+		dateTime = value;
+	}
 
-    /**
-     * @param value
-     *            Other information.
-     */
-    public final void setOtherInformation(final byte[] value) {
-        otherInformation = value;
-    }
+	/**
+	 * @return Optional other information.
+	 */
+	public byte[] getOtherInformation() {
+		return otherInformation;
+	}
 
-    /**
-     * @return Recipient system title.
-     */
-    public byte[] getRecipientSystemTitle() {
-        return recipientSystemTitle;
-    }
+	/**
+	 * @param value Other information.
+	 */
+	public final void setOtherInformation(final byte[] value) {
+		otherInformation = value;
+	}
 
-    /**
-     * @param value
-     *            Recipient system title.
-     */
-    public final void setRecipientSystemTitle(final byte[] value) {
-        recipientSystemTitle = value;
-    }
+	/**
+	 * @return Recipient system title.
+	 */
+	public byte[] getRecipientSystemTitle() {
+		return recipientSystemTitle;
+	}
 
-    /**
-     * @return Shared secret is generated when connection is made.
-     */
-    public byte[] getSharedSecret() {
-        return sharedSecret;
-    }
+	/**
+	 * @param value Recipient system title.
+	 */
+	public final void setRecipientSystemTitle(final byte[] value) {
+		recipientSystemTitle = value;
+	}
 
-    /**
-     * @param value
-     *            Shared secret is generated when connection is made.
-     */
-    public void setSharedSecret(final byte[] value) {
-        sharedSecret = value;
-    }
+	/**
+	 * @return Used security suite.
+	 */
+	public SecuritySuite getSecuritySuite() {
+		return securitySuite;
+	}
 
-    /**
-     * @return Used security suite.
-     */
-    public SecuritySuite getSecuritySuite() {
-        return securitySuite;
-    }
+	/**
+	 * @param value Used security suite.
+	 */
+	public void setSecuritySuite(final SecuritySuite value) {
+		securitySuite = value;
+	}
 
-    /**
-     * @param value
-     *            Used security suite.
-     */
-    public void setSecuritySuite(final SecuritySuite value) {
-        securitySuite = value;
-    }
+	/**
+	 * @return Key parameters.
+	 */
+	public int getKeyParameters() {
+		return keyParameters;
+	}
 
-    /**
-     * @return Key parameters.
-     */
-    public int getKeyParameters() {
-        return keyParameters;
-    }
+	/**
+	 * @param value Key parameters.
+	 */
+	public void setKeyParameters(final int value) {
+		keyParameters = value;
+	}
 
-    /**
-     * @param value
-     *            Key parameters.
-     */
-    public void setKeyParameters(final int value) {
-        keyParameters = value;
-    }
+	/**
+	 * @return Key ciphered data.
+	 */
+	public byte[] getKeyCipheredData() {
+		return keyCipheredData;
+	}
 
-    /**
-     * @return Key ciphered data.
-     */
-    public byte[] getKeyCipheredData() {
-        return keyCipheredData;
-    }
+	/**
+	 * @param value Key ciphered data.
+	 */
+	public void setKeyCipheredData(final byte[] value) {
+		keyCipheredData = value;
+	}
 
-    /**
-     * @param value
-     *            Key ciphered data.
-     */
-    public void setKeyCipheredData(final byte[] value) {
-        keyCipheredData = value;
-    }
+	/**
+	 * @return Ciphered content.
+	 */
+	public byte[] getCipheredContent() {
+		return cipheredContent;
+	}
 
-    /**
-     * @return Ciphered content.
-     */
-    public byte[] getCipheredContent() {
-        return cipheredContent;
-    }
+	/**
+	 * @param value Ciphered content.
+	 */
+	public void setCipheredContent(final byte[] value) {
+		cipheredContent = value;
+	}
 
-    /**
-     * @param value
-     *            Ciphered content.
-     */
-    public void setCipheredContent(final byte[] value) {
-        cipheredContent = value;
-    }
+	public final void setXml(final GXDLMSTranslatorStructure value) {
+		xml = value;
+	}
 
-    public final void setXml(final GXDLMSTranslatorStructure value) {
-        xml = value;
-    }
+	public final GXDLMSTranslatorStructure getXml() {
+		return xml;
+	}
 
-    public final GXDLMSTranslatorStructure getXml() {
-        return xml;
-    }
+	/**
+	 * @return DLMS settings.
+	 */
+	public GXDLMSSettings getSettings() {
+		return settings;
+	}
 }

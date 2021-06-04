@@ -179,4 +179,18 @@ public class GXAsn1BitString {
         return sb.toString();
     }
 
+    /**
+     * @return Bit-string value as integer.
+     */
+    public int toInteger() {
+        int ret = 0;
+        if (value != null) {
+            int bytePos = 0;
+            for (byte it : value) {
+                ret |= (int) (GXCommon.swapBits(it) << bytePos);
+                bytePos += 8;
+            }
+        }
+        return ret;
+    }
 }

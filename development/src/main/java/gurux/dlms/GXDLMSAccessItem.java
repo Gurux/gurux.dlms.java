@@ -3,7 +3,7 @@
 //  Gurux Ltd
 package gurux.dlms;
 
-import gurux.dlms.enums.AccessServiceCommandType;
+import gurux.dlms.enums.ErrorCode;
 import gurux.dlms.objects.GXDLMSObject;
 
 /**
@@ -23,6 +23,16 @@ public class GXDLMSAccessItem {
      * Attribute index.
      */
     private int index;
+
+    /**
+     * Reply error code.
+     */
+    private ErrorCode error;
+
+    /*
+     * Reply value.
+     */
+    private Object value;
 
     /**
      * @return COSEM target object.
@@ -79,14 +89,38 @@ public class GXDLMSAccessItem {
      */
     public GXDLMSAccessItem(final int commandType,
             final GXDLMSObject targetObject, final int attributeIndex) {
-        if (commandType == AccessServiceCommandType.GET) {
-            command = 1;
-        } else if (commandType == AccessServiceCommandType.SET) {
-            command = 2;
-        } else if (commandType == AccessServiceCommandType.ACTION) {
-            command = 3;
-        }
-        setTarget(targetObject);
-        setIndex(attributeIndex);
+        command = commandType;
+        target = targetObject;
+        index = attributeIndex;
+    }
+
+    /**
+     * @return Reply error code.
+     */
+    public ErrorCode getError() {
+        return error;
+    }
+
+    /**
+     * @param error
+     *            Reply error code.
+     */
+    public void setError(final ErrorCode error) {
+        this.error = error;
+    }
+
+    /**
+     * @return Reply value.
+     */
+    public Object getValue() {
+        return value;
+    }
+
+    /**
+     * @param val
+     *            Reply value
+     */
+    public void setValue(final Object val) {
+        value = val;
     }
 }

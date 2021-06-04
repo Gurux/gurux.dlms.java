@@ -34,6 +34,10 @@
 
 package gurux.dlms.server.example;
 
+import java.io.IOException;
+
+import javax.xml.stream.XMLStreamException;
+
 import gurux.dlms.objects.GXDLMSAssociationLogicalName;
 import gurux.dlms.objects.GXDLMSHdlcSetup;
 
@@ -42,7 +46,9 @@ import gurux.dlms.objects.GXDLMSHdlcSetup;
  * layer using HDLC protocol. Example Iskraemeco and Actaris uses this.
  */
 public class GXDLMSServerLN extends GXDLMSBase {
-    public GXDLMSServerLN() {
-        super(new GXDLMSAssociationLogicalName(), new GXDLMSHdlcSetup());
+    public GXDLMSServerLN(final String port)
+            throws XMLStreamException, IOException {
+        super(new GXDLMSAssociationLogicalName("0.0.40.0.1.255"),
+                new GXDLMSHdlcSetup(), port);
     }
 }

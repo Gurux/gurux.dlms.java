@@ -42,9 +42,21 @@ public class GXAsn1Context extends java.util.ArrayList<Object> {
     private static final long serialVersionUID = 1L;
 
     /**
+     * Constructor.
+     */
+    public GXAsn1Context() {
+        constructed = true;
+    }
+
+    /**
      * Context index.
      */
     private int index;
+
+    /**
+     * Is constructed.
+     */
+    private boolean constructed;
 
     /**
      * @return Context index.
@@ -60,4 +72,20 @@ public class GXAsn1Context extends java.util.ArrayList<Object> {
     public void setIndex(final int value) {
         index = value;
     }
+
+    /**
+     * @return Is constructed.
+     */
+    public boolean isConstructed() {
+        return constructed;
+    }
+
+    /**
+     * @param value
+     *            Is constructed.
+     */
+    public void setConstructed(final boolean value) {
+        constructed = value;
+    }
+
 }

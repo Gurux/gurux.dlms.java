@@ -34,17 +34,12 @@
 
 package gurux.dlms.server.example;
 
-import java.io.File;
 import java.io.IOException;
-import java.security.KeyPair;
 
 import gurux.common.GXCmdParameter;
 import gurux.common.GXCommon;
 import gurux.common.enums.TraceLevel;
 import gurux.dlms.GXDLMSTranslator;
-import gurux.dlms.asn.GXAsn1Converter;
-import gurux.dlms.asn.GXPkcs8;
-import gurux.dlms.asn.GXx509Certificate;
 import gurux.serial.GXSerial;
 
 class Settings {
@@ -52,8 +47,6 @@ class Settings {
     public int port = 4060;
     public String serial;
     public boolean useLogicalNameReferencing = true;
-    public GXPkcs8 privateKey;
-    public GXx509Certificate publicKey;
 }
 
 /**
@@ -63,16 +56,6 @@ public class GuruxDlmsServerExample {
 
     private static void updateKeys(final Settings settings,
             final GXDLMSBase server) {
-
-        if (settings.publicKey != null) {
-            String[] sn = settings.publicKey.getSubject().split("=");
-            if (sn.length != 2) {
-                throw new IllegalArgumentException(
-                        "Invalid public key subject.");
-            }
-            server.getCiphering()
-                    .setSystemTitle(GXDLMSTranslator.hexToBytes(sn[1]));
-        }
 
         System.out.println("System Title: "
                 + GXCommon.bytesToHex(server.getCiphering().getSystemTitle()));
@@ -85,21 +68,6 @@ public class GuruxDlmsServerExample {
                 + GXDLMSTranslator.toHex(server.getClientSystemTitle()));
         System.out.println("Master key (KEK) title: "
                 + GXDLMSTranslator.toHex(server.getKek()));
-        if (settings.privateKey != null) {
-            server.getCiphering().setSigningKeyPair(
-                    new KeyPair(settings.publicKey.getPublicKey(), // MIKKO
-                            // settings.privateKey.getPublicKey(),
-                            settings.privateKey.getPrivateKey()));
-            System.out.println(
-                    "Private key: " + GXDLMSTranslator.toHex(GXAsn1Converter
-                            .toUIn64((settings.privateKey.getPrivateKey()))));
-        }
-        if (settings.publicKey != null) {
-            server.getCiphering().getCertificates().add(settings.publicKey);
-            System.out.println("Client Public key: "
-                    + GXDLMSTranslator.toHex(GXAsn1Converter
-                            .toUIn64(settings.publicKey.getPublicKey())));
-        }
     }
 
     /**
@@ -117,12 +85,12 @@ public class GuruxDlmsServerExample {
             if (settings.serial != null) {
                 GXDLMSBase server;
                 if (settings.useLogicalNameReferencing) {
-                    server = new GXDLMSServerLN();
+                    server = new GXDLMSServerLN(settings.serial);
                     System.out
                             .println("Logical Name DLMS Server in serial port "
                                     + settings.serial);
                 } else {
-                    server = new GXDLMSServerSN();
+                    server = new GXDLMSServerSN(settings.serial);
                     System.out.println("Short Name DLMS Server in serial port "
                             + settings.serial);
                 }
@@ -156,7 +124,8 @@ public class GuruxDlmsServerExample {
                 ///////////////////////////////////////////////////////////////////////
                 // Create Gurux DLMS server component for Short Name
                 // and start listen events.
-                GXDLMSServerSN SNServer = new GXDLMSServerSN();
+                GXDLMSServerSN SNServer =
+                        new GXDLMSServerSN(String.valueOf(settings.port));
                 SNServer.initialize(settings.port, settings.trace);
                 updateKeys(settings, SNServer);
                 System.out.println("Short Name DLMS Server in port "
@@ -170,7 +139,8 @@ public class GuruxDlmsServerExample {
                 ///////////////////////////////////////////////////////////////////////
                 // Create Gurux DLMS server component for Logical Name
                 // and start listen events.
-                GXDLMSServerLN LNServer = new GXDLMSServerLN();
+                GXDLMSServerLN LNServer =
+                        new GXDLMSServerLN(String.valueOf(settings.port + 1));
                 LNServer.initialize(settings.port + 1, settings.trace);
                 updateKeys(settings, LNServer);
                 System.out.println("Logical Name DLMS Server in port "
@@ -184,7 +154,8 @@ public class GuruxDlmsServerExample {
                 ///////////////////////////////////////////////////////////////////////
                 // Create Gurux DLMS server component for Short Name
                 // and start listen events.
-                GXDLMSServerSN_47 SN_47Server = new GXDLMSServerSN_47();
+                GXDLMSServerSN_47 SN_47Server =
+                        new GXDLMSServerSN_47(String.valueOf(settings.port + 2));
                 SN_47Server.initialize(settings.port + 2, settings.trace);
                 updateKeys(settings, SN_47Server);
                 System.out.println(
@@ -199,7 +170,8 @@ public class GuruxDlmsServerExample {
                 ///////////////////////////////////////////////////////////////////////
                 // Create Gurux DLMS server component for Logical Name
                 // and start listen events.
-                GXDLMSServerLN_47 LN_47Server = new GXDLMSServerLN_47();
+                GXDLMSServerLN_47 LN_47Server =
+                        new GXDLMSServerLN_47(String.valueOf(settings.port + 3));
                 LN_47Server.initialize(settings.port + 3, settings.trace);
                 updateKeys(settings, LN_47Server);
                 System.out.println(
@@ -231,7 +203,7 @@ public class GuruxDlmsServerExample {
     private static int getParameters(String[] args, Settings settings)
             throws IOException {
         java.util.List<GXCmdParameter> parameters =
-                GXCommon.getParameters(args, "t:p:S:r:K:k:");
+                GXCommon.getParameters(args, "t:p:S:r:");
         for (GXCmdParameter it : parameters) {
             switch (it.getTag()) {
             case 't':
@@ -261,14 +233,6 @@ public class GuruxDlmsServerExample {
             case 'S':
                 // serial port.
                 settings.serial = it.getValue();
-                break;
-            case 'K':
-                settings.privateKey =
-                        GXPkcs8.load(new File(it.getValue()).toPath());
-                break;
-            case 'k':
-                settings.publicKey = GXx509Certificate
-                        .load(new File(it.getValue()).toPath());
                 break;
             case '?':
                 switch (it.getTag()) {
@@ -311,7 +275,8 @@ public class GuruxDlmsServerExample {
         System.out.println(" -S \t serial port.");
         System.out.println(
                 " -r [sn, sn]\t Short name or Logican Name (default) referencing is used.");
-        System.out.println(" -K \t Private key File. Ex. -k C:\\priv.pem");
-        System.out.println(" -k \t Public key File. Ex. -k C:\\pub.pem");
+        System.out.println(
+                " -T \t System title of the meter. Ex -T 4775727578313233");
+
     }
 }

@@ -46,101 +46,97 @@ import gurux.serial.GXSerial;
 
 public class sampleclient {
 
-    /**
-     * @param args
-     *            the command line arguments
-     * @throws IOException
-     * @throws XMLStreamException
-     */
-    public static void main(String[] args)
-            throws XMLStreamException, IOException {
-        Settings settings = new Settings();
-        GXDLMSReader reader = null;
-        try {
-            ////////////////////////////////////////
-            // Handle command line parameters.
-            int ret = Settings.getParameters(args, settings);
-            if (ret != 0) {
-                System.exit(1);
-                return;
-            }
+	/**
+	 * @param args the command line arguments
+	 * @throws IOException
+	 * @throws XMLStreamException
+	 */
+	public static void main(String[] args) throws XMLStreamException, IOException {
+		Settings settings = new Settings();
+		GXDLMSReader reader = null;
+		try {
+			////////////////////////////////////////
+			// Handle command line parameters.
+			int ret = Settings.getParameters(args, settings);
+			if (ret != 0) {
+				System.exit(1);
+				return;
+			}
 
-            ////////////////////////////////////////
-            // Initialize connection settings.
-            if (settings.media instanceof GXSerial) {
-                System.out.println("Connect using serial port connection "
-                        + settings.media.toString());
-            } else if (settings.media instanceof GXNet) {
-                System.out.println("Connect using network connection "
-                        + settings.media.toString());
-            } else {
-                throw new Exception("Unknown media type.");
-            }
-            ////////////////////////////////////////
-            reader = new GXDLMSReader(settings.client, settings.media,
-                    settings.trace, settings.invocationCounter);
-            try {
-                settings.media.open();
-            } catch (Exception ex) {
-                if (settings.media instanceof GXSerial) {
-                    System.out.println(
-                            "----------------------------------------------------------");
-                    System.out.println(ex.getMessage());
-                    System.out.println("Available ports:");
-                    StringBuilder sb = new StringBuilder();
-                    for (String it : GXSerial.getPortNames()) {
-                        if (sb.length() != 0) {
-                            sb.append(", ");
-                        }
-                        sb.append(it);
-                    }
-                    System.out.println(sb.toString());
-                }
-                throw ex;
-            }
-            if (!settings.readObjects.isEmpty()) {
-                reader.initializeConnection();
-                if (settings.outputFile != null
-                        && new File(settings.outputFile).exists()) {
-                    try {
-                        GXDLMSObjectCollection c = GXDLMSObjectCollection
-                                .load(settings.outputFile);
-                        settings.client.getObjects().addAll(c);
-                    } catch (Exception ex) {
-                        // It's OK if this fails.
-                        System.out.print(ex.getMessage());
-                    }
-                } else {
-                    reader.getAssociationView();
-                    if (settings.outputFile != null) {
-                        settings.client.getObjects().save(settings.outputFile,
-                                null);
-                    }
-                }
-                for (Map.Entry<String, Integer> it : settings.readObjects) {
-                    Object val = reader.read(
-                            settings.client.getObjects()
-                                    .findByLN(ObjectType.NONE, it.getKey()),
-                            it.getValue());
-                    reader.showValue(it.getValue(), val);
-                }
-            } else {
-                reader.readAll(settings.outputFile);
-            }
-        } catch (Exception ex) {
-            System.out.println(ex.getMessage());
-            System.exit(1);
-        } finally {
-            if (reader != null) {
-                try {
-                    reader.close();
-                } catch (Exception e) {
-                    System.out.println(e.getMessage());
-                    System.exit(1);
-                }
-            }
-            System.out.println("Ended. Press any key to continue.");
-        }
-    }
+			////////////////////////////////////////
+			// Initialize connection settings.
+			if (settings.media instanceof GXSerial) {
+				System.out.println("Connect using serial port connection " + settings.media.toString());
+			} else if (settings.media instanceof GXNet) {
+				System.out.println("Connect using network connection " + settings.media.toString());
+			} else {
+				throw new Exception("Unknown media type.");
+			}
+			////////////////////////////////////////
+			reader = new GXDLMSReader(settings.client, settings.media, settings.trace, settings.invocationCounter);
+			try {
+				settings.media.open();
+			} catch (Exception ex) {
+				if (settings.media instanceof GXSerial) {
+					System.out.println("----------------------------------------------------------");
+					System.out.println(ex.getMessage());
+					System.out.println("Available ports:");
+					StringBuilder sb = new StringBuilder();
+					for (String it : GXSerial.getPortNames()) {
+						if (sb.length() != 0) {
+							sb.append(", ");
+						}
+						sb.append(it);
+					}
+					System.out.println(sb.toString());
+				}
+				throw ex;
+			}
+			// Export client and server certificates from the meter.
+			if (settings.exportSecuritySetupLN != null) {
+				reader.exportMeterCertificates(settings.exportSecuritySetupLN);
+			}
+			// Generate new client and server certificates and import them to the server.
+			else if (settings.generateSecuritySetupLN != null) {
+				reader.generateCertificates(settings.generateSecuritySetupLN);
+			} else if (!settings.readObjects.isEmpty()) {
+				reader.initializeConnection();
+				if (settings.outputFile != null && new File(settings.outputFile).exists()) {
+					try {
+						GXDLMSObjectCollection c = GXDLMSObjectCollection.load(settings.outputFile);
+						settings.client.getObjects().addAll(c);
+					} catch (Exception ex) {
+						// It's OK if this fails.
+						System.out.print(ex.getMessage());
+					}
+				} else {
+					reader.getAssociationView();
+					if (settings.outputFile != null) {
+						settings.client.getObjects().save(settings.outputFile, null);
+					}
+				}
+				for (Map.Entry<String, Integer> it : settings.readObjects) {
+					Object val = reader.read(settings.client.getObjects().findByLN(ObjectType.NONE, it.getKey()),
+							it.getValue());
+					reader.showValue(it.getValue(), val);
+				}
+			} else {
+				reader.readAll(settings.outputFile);
+			}
+		} catch (Exception ex) {
+			System.out.println(ex.getMessage());
+			System.exit(1);
+		} finally {
+			if (reader != null) {
+				try {
+					reader.close();
+				} catch (Exception e) {
+					System.out.println(e.getMessage());
+					System.exit(1);
+				}
+			}
+			System.out.println("Ended. Press any key to continue.");
+		}
+	}
 
 }

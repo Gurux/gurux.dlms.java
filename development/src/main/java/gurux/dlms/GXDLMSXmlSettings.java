@@ -42,266 +42,258 @@ import gurux.dlms.enums.SourceDiagnostic;
 import gurux.dlms.secure.GXCiphering;
 
 class GXDLMSXmlSettings {
-    private AssociationResult result = AssociationResult.ACCEPTED;
-    private SourceDiagnostic diagnostic = SourceDiagnostic.NONE;
-    private byte reason = 0;
-    private int command;
+	private AssociationResult result = AssociationResult.ACCEPTED;
+	private SourceDiagnostic diagnostic = SourceDiagnostic.NONE;
+	private byte reason = 0;
+	private int command;
 
-    private int gwCommand;
-    // GW newtork ID.
-    private int networkId;
-    private byte[] physicalDeviceAddress;
+	private int gwCommand;
+	// GW newtork ID.
+	private int networkId;
+	private byte[] physicalDeviceAddress;
 
-    private int count = 0;
-    private int requestType = 0xFF;
-    private GXByteBuffer attributeDescriptor = new GXByteBuffer();
-    private GXByteBuffer data = new GXByteBuffer();
-    private GXDLMSSettings settings = new GXDLMSSettings(true);
-    private HashMap<String, Integer> tags = new HashMap<String, Integer>();
-    private GXDateTime time = null;
+	private int count = 0;
+	private int requestType = 0xFF;
+	private GXByteBuffer attributeDescriptor = new GXByteBuffer();
+	private GXByteBuffer data = new GXByteBuffer();
+	private final GXDLMSSettings settings;
+	private HashMap<String, Integer> tags = new HashMap<String, Integer>();
+	private GXDateTime time = null;
 
-    /**
-     * Is xml used as a reply template.
-     */
-    private boolean template;
+	/**
+	 * Is xml used as a reply template.
+	 */
+	private boolean template;
 
-    /**
-     * Are numeric values shows as hex.
-     */
-    private boolean showNumericsAsHex;
-    private boolean showStringAsHex = false;
+	/**
+	 * Are numeric values shows as hex.
+	 */
+	private boolean showNumericsAsHex;
+	private boolean showStringAsHex = false;
 
-    private TranslatorOutputType outputType;
+	private TranslatorOutputType outputType;
 
-    /*
-     * Constructor.
-     * @param list
-     */
-    GXDLMSXmlSettings(final TranslatorOutputType type,
-            final boolean numericsAsHex, final boolean hex,
-            final HashMap<String, Integer> list) {
-        outputType = type;
-        showNumericsAsHex = outputType != TranslatorOutputType.STANDARD_XML
-                && numericsAsHex;
-        showStringAsHex = hex;
-        settings.setInterfaceType(InterfaceType.PDU);
-        settings.setCipher(new GXCiphering("ABCDEFGH".getBytes()));
-        tags = list;
-    }
+	/*
+	 * Constructor.
+	 * 
+	 * @param list
+	 */
+	GXDLMSXmlSettings(final TranslatorOutputType type, final boolean numericsAsHex, final boolean hex,
+			final HashMap<String, Integer> list) {
+		settings = new GXDLMSSettings(true, this instanceof IGXCryptoNotifier ? (IGXCryptoNotifier) this : null);
+		outputType = type;
+		showNumericsAsHex = outputType != TranslatorOutputType.STANDARD_XML && numericsAsHex;
+		showStringAsHex = hex;
+		settings.setInterfaceType(InterfaceType.PDU);
+		settings.setCipher(new GXCiphering("ABCDEFGH".getBytes()));
+		tags = list;
+	}
 
-    /**
-     * @return DLMS settings.
-     */
-    public final GXDLMSSettings getSettings() {
-        return settings;
-    }
+	/**
+	 * @return DLMS settings.
+	 */
+	public final GXDLMSSettings getSettings() {
+		return settings;
+	}
 
-    /**
-     * @return the result
-     */
-    public final AssociationResult getResult() {
-        return result;
-    }
+	/**
+	 * @return the result
+	 */
+	public final AssociationResult getResult() {
+		return result;
+	}
 
-    /**
-     * @param value
-     *            the result to set
-     */
-    public final void setResult(final AssociationResult value) {
-        result = value;
-    }
+	/**
+	 * @param value the result to set
+	 */
+	public final void setResult(final AssociationResult value) {
+		result = value;
+	}
 
-    /**
-     * @return the diagnostic
-     */
-    public final SourceDiagnostic getDiagnostic() {
-        return diagnostic;
-    }
+	/**
+	 * @return the diagnostic
+	 */
+	public final SourceDiagnostic getDiagnostic() {
+		return diagnostic;
+	}
 
-    /**
-     * @param value
-     *            the diagnostic to set
-     */
-    public final void setDiagnostic(final SourceDiagnostic value) {
-        diagnostic = value;
-    }
+	/**
+	 * @param value the diagnostic to set
+	 */
+	public final void setDiagnostic(final SourceDiagnostic value) {
+		diagnostic = value;
+	}
 
-    /**
-     * @return the reason
-     */
-    public final byte getReason() {
-        return reason;
-    }
+	/**
+	 * @return the reason
+	 */
+	public final byte getReason() {
+		return reason;
+	}
 
-    /**
-     * @param value
-     *            the reason to set
-     */
-    public final void setReason(final byte value) {
-        reason = value;
-    }
+	/**
+	 * @param value the reason to set
+	 */
+	public final void setReason(final byte value) {
+		reason = value;
+	}
 
-    /**
-     * @return the command
-     */
-    public final int getCommand() {
-        return command;
-    }
+	/**
+	 * @return the command
+	 */
+	public final int getCommand() {
+		return command;
+	}
 
-    /**
-     * @param value
-     *            the command to set
-     */
-    public final void setCommand(final int value) {
-        command = value;
-    }
+	/**
+	 * @param value the command to set
+	 */
+	public final void setCommand(final int value) {
+		command = value;
+	}
 
-    /**
-     * @return the count
-     */
-    public final int getCount() {
-        return count;
-    }
+	/**
+	 * @return the count
+	 */
+	public final int getCount() {
+		return count;
+	}
 
-    /**
-     * @param value
-     *            the count to set
-     */
-    public void setCount(final int value) {
-        count = value;
-    }
+	/**
+	 * @param value the count to set
+	 */
+	public void setCount(final int value) {
+		count = value;
+	}
 
-    /**
-     * @return the requestType
-     */
-    public int getRequestType() {
-        return requestType;
-    }
+	/**
+	 * @return the requestType
+	 */
+	public int getRequestType() {
+		return requestType;
+	}
 
-    /**
-     * @param value
-     *            the requestType to set
-     */
-    public final void setRequestType(final int value) {
-        requestType = value;
-    }
+	/**
+	 * @param value the requestType to set
+	 */
+	public final void setRequestType(final int value) {
+		requestType = value;
+	}
 
-    /**
-     * @return the attributeDescriptor
-     */
-    public final GXByteBuffer getAttributeDescriptor() {
-        return attributeDescriptor;
-    }
+	/**
+	 * @return the attributeDescriptor
+	 */
+	public final GXByteBuffer getAttributeDescriptor() {
+		return attributeDescriptor;
+	}
 
-    /**
-     * @return the data
-     */
-    public final GXByteBuffer getData() {
-        return data;
-    }
+	/**
+	 * @return the data
+	 */
+	public final GXByteBuffer getData() {
+		return data;
+	}
 
-    /**
-     * @return the tags
-     */
-    public final HashMap<String, Integer> getTags() {
-        return tags;
-    }
+	/**
+	 * @return the tags
+	 */
+	public final HashMap<String, Integer> getTags() {
+		return tags;
+	}
 
-    /**
-     * @return the time
-     */
-    public final GXDateTime getTime() {
-        return time;
-    }
+	/**
+	 * @return the time
+	 */
+	public final GXDateTime getTime() {
+		return time;
+	}
 
-    /**
-     * @param value
-     *            the time to set
-     */
-    public final void setTime(final GXDateTime value) {
-        time = value;
-    }
+	/**
+	 * @param value the time to set
+	 */
+	public final void setTime(final GXDateTime value) {
+		time = value;
+	}
 
-    /**
-     * @return the showStringAsHex
-     */
-    public final boolean isShowStringAsHex() {
-        return showStringAsHex;
-    }
+	/**
+	 * @return the showStringAsHex
+	 */
+	public final boolean isShowStringAsHex() {
+		return showStringAsHex;
+	}
 
-    public final int parseInt(final String value) {
-        if (value == null || "".equals(value)) {
-            return 0;
-        }
-        if (showNumericsAsHex) {
-            return Integer.parseInt(value, 16);
-        }
-        return Integer.parseInt(value);
-    }
+	public final int parseInt(final String value) {
+		if (value == null || "".equals(value)) {
+			return 0;
+		}
+		if (showNumericsAsHex) {
+			return Integer.parseInt(value, 16);
+		}
+		return Integer.parseInt(value);
+	}
 
-    public final short parseShort(final String value) {
-        if (value == null || "".equals(value)) {
-            return 0;
-        }
-        if (showNumericsAsHex) {
-            return Short.parseShort(value, 16);
-        }
-        return Short.parseShort(value);
-    }
+	public final short parseShort(final String value) {
+		if (value == null || "".equals(value)) {
+			return 0;
+		}
+		if (showNumericsAsHex) {
+			return Short.parseShort(value, 16);
+		}
+		return Short.parseShort(value);
+	}
 
-    public final long parseLong(final String value) {
-        if (value == null || "".equals(value)) {
-            return 0;
-        }
-        if (showNumericsAsHex) {
-            return Long.parseLong(value, 16);
-        }
-        return Long.parseLong(value);
-    }
+	public final long parseLong(final String value) {
+		if (value == null || "".equals(value)) {
+			return 0;
+		}
+		if (showNumericsAsHex) {
+			return Long.parseLong(value, 16);
+		}
+		return Long.parseLong(value);
+	}
 
-    /**
-     * @return the outputType
-     */
-    public TranslatorOutputType getOutputType() {
-        return outputType;
-    }
+	/**
+	 * @return the outputType
+	 */
+	public TranslatorOutputType getOutputType() {
+		return outputType;
+	}
 
-    public int getGwCommand() {
-        return gwCommand;
-    }
+	public int getGwCommand() {
+		return gwCommand;
+	}
 
-    public void setGwCommand(final int value) {
-        gwCommand = value;
-    }
+	public void setGwCommand(final int value) {
+		gwCommand = value;
+	}
 
-    public int getNetworkId() {
-        return networkId;
-    }
+	public int getNetworkId() {
+		return networkId;
+	}
 
-    public void setNetworkId(final int value) {
-        networkId = value;
-    }
+	public void setNetworkId(final int value) {
+		networkId = value;
+	}
 
-    public byte[] getPhysicalDeviceAddress() {
-        return physicalDeviceAddress;
-    }
+	public byte[] getPhysicalDeviceAddress() {
+		return physicalDeviceAddress;
+	}
 
-    public void setPhysicalDeviceAddress(final byte[] value) {
-        physicalDeviceAddress = value;
-    }
+	public void setPhysicalDeviceAddress(final byte[] value) {
+		physicalDeviceAddress = value;
+	}
 
-    /**
-     * @return Is xml used as a reply template.
-     */
-    public boolean isTemplate() {
-        return template;
-    }
+	/**
+	 * @return Is xml used as a reply template.
+	 */
+	public boolean isTemplate() {
+		return template;
+	}
 
-    /**
-     * @param template
-     *            Is xml used as a reply template.
-     */
-    public void setTemplate(final boolean template) {
-        this.template = template;
-    }
+	/**
+	 * @param template Is xml used as a reply template.
+	 */
+	public void setTemplate(final boolean template) {
+		this.template = template;
+	}
 }

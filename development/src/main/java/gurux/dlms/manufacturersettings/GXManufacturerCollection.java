@@ -48,6 +48,8 @@ import java.util.Date;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.jar.Attributes;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 import javax.xml.stream.XMLInputFactory;
 import javax.xml.stream.XMLStreamConstants;
@@ -280,8 +282,9 @@ public class GXManufacturerCollection
                                         path + File.separator + it);
                         manufacturers.add(parse(in));
                     } catch (Exception e) {
-                        System.out.println(e.getMessage());
-                        continue;
+                        Logger.getLogger(
+                                GXManufacturerCollection.class.getName())
+                                .log(Level.SEVERE, e.getMessage());
                     }
                 }
             }
