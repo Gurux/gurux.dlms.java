@@ -52,17 +52,15 @@ final class GXDLMSLNCommandHandler {
 		byte type = 1;
 		short invokeID = 0;
 		try {
-			// Get type.
-			type = (byte) data.getUInt8();
-			// Get invoke ID and priority.
-			invokeID = data.getUInt8();
-			settings.updateInvokeId(invokeID);
-			if (xml != null) {
-				xml.appendStartTag(Command.GET_REQUEST);
-				xml.appendStartTag(Command.GET_REQUEST, type);
-				xml.appendInvokeId(invokeID);
+			// If GBT is used data is empty.
+			if (data.size() != 0) {
+				// Get type.
+				type = (byte) data.getUInt8();
+				// Get invoke ID and priority.
+				invokeID = data.getUInt8();
+				settings.updateInvokeId(invokeID);
+				GXDLMS.addInvokeId(xml, Command.GET_REQUEST, type, invokeID);
 			}
-
 			// GetRequest normal
 			if (type == GetCommandType.NORMAL) {
 				getRequestNormal(settings, invokeID, server, data, replyData, xml, cipheredCommand);
@@ -111,12 +109,7 @@ final class GXDLMSLNCommandHandler {
 		// SetRequest normal or Set Request With First Data Block
 		GXDLMSLNParameters p = new GXDLMSLNParameters(settings, invoke, Command.SET_RESPONSE, type, null, null, 0,
 				cipheredCommand);
-		if (xml != null) {
-			xml.appendStartTag(Command.SET_REQUEST);
-			xml.appendStartTag(Command.SET_REQUEST, type);
-			// InvokeIdAndPriority
-			xml.appendInvokeId(invoke);
-		}
+		GXDLMS.addInvokeId(xml, Command.SET_REQUEST, type, invoke);
 		try {
 			switch (type) {
 			case SetRequestType.NORMAL:
@@ -738,20 +731,12 @@ final class GXDLMSLNCommandHandler {
 		}
 	}
 
-	/*
-	 * Handle action request.
-	 */
-	static void handleMethodRequest(final GXDLMSSettings settings, final GXDLMSServerBase server,
-			final GXByteBuffer data, final GXDLMSConnectionEventArgs connectionInfo, final GXByteBuffer replyData,
-			final GXDLMSTranslatorStructure xml, final int cipheredCommand) throws Exception {
+	public static void methodRequestNormal(GXDLMSSettings settings, short invokeId, GXDLMSServerBase server,
+			GXByteBuffer data, GXDLMSConnectionEventArgs connectionInfo, GXByteBuffer replyData,
+			GXDLMSTranslatorStructure xml, int cipheredCommand) throws Exception {
 		ErrorCode error = ErrorCode.OK;
 		ValueEventArgs e = null;
 		GXByteBuffer bb = new GXByteBuffer();
-		// Get type.
-		short type = data.getUInt8();
-		// Get invoke ID and priority.
-		short invokeId = data.getUInt8();
-		settings.updateInvokeId(invokeId);
 		// CI
 		int ci = data.getUInt16();
 		ObjectType ot = ObjectType.forValue(ci);
@@ -764,20 +749,16 @@ final class GXDLMSLNCommandHandler {
 		byte selection = (byte) data.getUInt8();
 		if (xml != null) {
 			xml.appendStartTag(Command.METHOD_REQUEST);
-			if (type == ActionRequestType.NORMAL) {
-				xml.appendStartTag(Command.METHOD_REQUEST, ActionRequestType.NORMAL);
-				xml.appendInvokeId(invokeId);
-				appendMethodDescriptor(xml, ci, ln, id);
-				if (selection != 0) {
-					// MethodInvocationParameters
-					xml.appendStartTag(TranslatorTags.METHOD_INVOCATION_PARAMETERS);
-					GXDataInfo di = new GXDataInfo();
-					di.setXml(xml);
-					GXCommon.getData(settings, data, di);
-					xml.appendEndTag(TranslatorTags.METHOD_INVOCATION_PARAMETERS);
-				}
-				xml.appendEndTag(Command.METHOD_REQUEST, ActionRequestType.NORMAL);
+			appendMethodDescriptor(xml, ci, ln, id);
+			if (selection != 0) {
+				// MethodInvocationParameters
+				xml.appendStartTag(TranslatorTags.METHOD_INVOCATION_PARAMETERS);
+				GXDataInfo di = new GXDataInfo();
+				di.setXml(xml);
+				GXCommon.getData(settings, data, di);
+				xml.appendEndTag(TranslatorTags.METHOD_INVOCATION_PARAMETERS);
 			}
+			xml.appendEndTag(Command.METHOD_REQUEST, ActionRequestType.NORMAL);
 			xml.appendEndTag(Command.METHOD_REQUEST);
 			return;
 		}
@@ -855,6 +836,114 @@ final class GXDLMSLNCommandHandler {
 		// Start to use new keys.
 		if (e != null && error == ErrorCode.OK && obj instanceof GXDLMSSecuritySetup && (id == 2 || id == 3)) {
 			((GXDLMSSecuritySetup) obj).applyKeys(settings, e);
+		}
+	}
+
+	public static void methodRequestNextBlock(GXDLMSSettings settings, GXDLMSServerBase server, GXByteBuffer data,
+			GXDLMSConnectionEventArgs connectionInfo, GXByteBuffer replyData, GXDLMSTranslatorStructure xml,
+			boolean streaming, int cipheredCommand) throws Exception {
+		GXByteBuffer bb = new GXByteBuffer();
+		if (!streaming) {
+			// Get block index.
+			long index = data.getUInt32();
+			if (xml != null) {
+				xml.appendLine(TranslatorTags.BLOCK_NUMBER, null, xml.integerToHex(index, 8));
+				return;
+			}
+			if (index != settings.getBlockIndex()) {
+				LOGGER.log(Level.INFO, "methodRequestNextBlock failed. Invalid block number. "
+						+ settings.getBlockIndex() + "/" + index);
+				GXDLMS.getLNPdu(new GXDLMSLNParameters(settings, 0, Command.GET_RESPONSE, 2, null, bb,
+						ErrorCode.DATA_BLOCK_NUMBER_INVALID.getValue(), cipheredCommand), replyData);
+				return;
+			}
+		}
+		settings.increaseBlockIndex();
+		GXDLMSLNParameters p = new GXDLMSLNParameters(settings, 0,
+				streaming ? Command.GENERAL_BLOCK_TRANSFER : Command.GET_RESPONSE, 2, null, bb, ErrorCode.OK.getValue(),
+				cipheredCommand);
+		p.setStreaming(streaming);
+		p.setWindowSize(settings.getWindowSize());
+		// If transaction is not in progress.
+		if (server.getTransaction() == null) {
+			p.setStatus(ErrorCode.NO_LONG_GET_OR_READ_IN_PROGRESS.getValue());
+		} else {
+			bb.set(server.getTransaction().getData());
+			boolean moreData = settings.getIndex() != settings.getCount();
+			if (moreData) {
+				// If there is multiple blocks on the buffer.
+				// This might happen when Max PDU size is very small.
+				if (bb.size() < settings.getMaxPduSize()) {
+					Object value;
+					for (ValueEventArgs arg : server.getTransaction().getTargets()) {
+						arg.setInvokeId(p.getInvokeId());
+						server.notifyAction(new ValueEventArgs[] { arg });
+						if (arg.getHandled()) {
+							value = arg.getValue();
+						} else {
+							value = arg.getTarget().invoke(settings, arg);
+						}
+						p.setInvokeId(arg.getInvokeId());
+						// Add data.
+						if (arg.isByteArray()) {
+							bb.set((byte[]) value);
+						} else {
+							GXDLMS.appendData(arg.getTarget(), arg.getIndex(), bb, value);
+						}
+					}
+					moreData = settings.getIndex() != settings.getCount();
+				}
+			}
+			p.setMultipleBlocks(true);
+			GXDLMS.getLNPdu(p, replyData);
+			if (moreData || bb.available() != 0) {
+				server.getTransaction().setData(bb);
+			} else {
+				server.setTransaction(null);
+				settings.resetBlockIndex();
+			}
+		}
+	}
+
+	/*
+	 * Handle action request.
+	 */
+	static void handleMethodRequest(final GXDLMSSettings settings, final GXDLMSServerBase server,
+			final GXByteBuffer data, final GXDLMSConnectionEventArgs connectionInfo, final GXByteBuffer replyData,
+			final GXDLMSTranslatorStructure xml, final int cipheredCommand) throws Exception {
+		// Get type.
+		byte type = (byte) data.getUInt8();
+		// Get invoke ID and priority.
+		short invokeId = data.getUInt8();
+		settings.updateInvokeId(invokeId);
+		GXDLMS.addInvokeId(xml, Command.METHOD_REQUEST, type, invokeId);
+		switch (type) {
+		case ActionResponseType.NORMAL:
+			methodRequestNormal(settings, invokeId, server, data, connectionInfo, replyData, xml, cipheredCommand);
+			break;
+		case ActionResponseType.WITH_FIRST_BLOCK:
+			methodRequestNextBlock(settings, server, data, connectionInfo, replyData, xml, false, cipheredCommand);
+			break;
+		case ActionResponseType.WITH_LIST:
+			throw new IllegalArgumentException("Invalid Command.");
+		case ActionResponseType.WITH_BLOCK:
+			throw new IllegalArgumentException("Invalid Command.");
+		default:
+			if (xml == null) {
+				Logger.getLogger(GXDLMS.class.getName()).log(Level.WARNING,
+						"HandleMethodRequest failed. Invalid command type :{0} ", type);
+				settings.resetBlockIndex();
+				type = ActionRequestType.NORMAL;
+				data.clear();
+				GXDLMS.getLNPdu(new GXDLMSLNParameters(settings, invokeId, Command.METHOD_RESPONSE, (byte) type, null,
+						null, ErrorCode.READ_WRITE_DENIED.getValue(), cipheredCommand), replyData);
+			}
+		}
+		if (xml != null) {
+			if (type <= ActionRequestType.WITH_LIST) {
+				xml.appendEndTag(Command.METHOD_REQUEST, type);
+			}
+			xml.appendEndTag(Command.METHOD_REQUEST);
 		}
 	}
 

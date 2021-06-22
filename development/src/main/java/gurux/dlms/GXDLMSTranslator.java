@@ -2036,6 +2036,10 @@ public class GXDLMSTranslator {
 					s.getData().setUInt8(0);
 				}
 			} else {
+				if (s.getCommand() == Command.METHOD_RESPONSE) {
+					// Add Data-Access-Result.
+					s.getAttributeDescriptor().setUInt8(0);
+				}
 				preData = updateDataType(node, s, tag);
 			}
 		} else if (s.getCommand() == Command.CONFIRMED_SERVICE_ERROR) {
@@ -2092,15 +2096,14 @@ public class GXDLMSTranslator {
 				s.setCount(s.getCount() + 1);
 				break;
 			case Command.METHOD_REQUEST << 8 | ActionRequestType.NORMAL:
-				s.setRequestType((byte) (tag & 0xFF));
-				break;
 			case Command.METHOD_REQUEST << 8 | ActionRequestType.NEXT_BLOCK:
-				s.setRequestType((byte) (tag & 0xFF));
-				break;
 			case Command.METHOD_REQUEST << 8 | ActionRequestType.WITH_LIST:
 				s.setRequestType((byte) (tag & 0xFF));
 				break;
 			case Command.METHOD_RESPONSE << 8 | ActionResponseType.NORMAL:
+			case Command.METHOD_RESPONSE << 8 | ActionResponseType.WITH_FIRST_BLOCK:
+			case Command.METHOD_RESPONSE << 8 | ActionResponseType.WITH_LIST:
+			case Command.METHOD_RESPONSE << 8 | ActionResponseType.WITH_BLOCK:
 				s.setRequestType((byte) (tag & 0xFF));
 				break;
 			case Command.READ_RESPONSE << 8 | SingleReadResponse.DATA:
@@ -2209,11 +2212,7 @@ public class GXDLMSTranslator {
 			case TranslatorTags.PARAMETER:
 				break;
 			case TranslatorTags.LAST_BLOCK:
-				if (s.getOutputType() == TranslatorOutputType.SIMPLE_XML) {
-					s.getAttributeDescriptor().setUInt8(s.parseShort(getValue(node, s)));
-				} else {
-					s.getAttributeDescriptor().setUInt8(Boolean.parseBoolean(getValue(node, s)) ? 1 : 0);
-				}
+				s.getAttributeDescriptor().setUInt8(s.parseShort(getValue(node, s)));
 				break;
 			case TranslatorTags.BLOCK_NUMBER:
 				if (s.getCommand() == Command.GET_REQUEST || s.getCommand() == Command.GET_RESPONSE
@@ -2229,7 +2228,7 @@ public class GXDLMSTranslator {
 				}
 				break;
 			case TranslatorTags.RAW_DATA:
-				if (s.getCommand() == Command.GET_RESPONSE) {
+				if (s.getCommand() == Command.GET_RESPONSE || s.getCommand() == Command.METHOD_RESPONSE) {
 					s.getData().setUInt8(0);
 				}
 				tmp = GXCommon.hexToBytes(getValue(node, s));
@@ -2244,11 +2243,12 @@ public class GXDLMSTranslator {
 				s.getAttributeDescriptor().setUInt8(0);
 				break;
 			case TranslatorTags.RESULT:
+			case TranslatorTags.P_BLOCK:
 			case TranslatorGeneralTags.ASSOCIATION_RESULT:
 				// Result.
 				if (s.getCommand() == Command.GET_REQUEST || s.getRequestType() == 3) {
 					GXCommon.setObjectCount(node.getChildNodes().getLength(), s.getAttributeDescriptor());
-				} else if (s.getCommand() == Command.METHOD_RESPONSE || s.getCommand() == Command.SET_RESPONSE) {
+				} else if (s.getCommand() == Command.SET_RESPONSE || s.getCommand() == Command.METHOD_RESPONSE) {
 					str = getValue(node, s);
 					if (!str.isEmpty()) {
 						s.getAttributeDescriptor().setUInt8(valueOfErrorCode(s.getOutputType(), str).getValue());

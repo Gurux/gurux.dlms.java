@@ -34,6 +34,8 @@
 
 package gurux.dlms.objects;
 
+import java.io.ByteArrayInputStream;
+import java.io.ByteArrayOutputStream;
 import java.security.InvalidAlgorithmParameterException;
 import java.security.InvalidKeyException;
 import java.security.SignatureException;
@@ -44,7 +46,9 @@ import java.util.Map;
 import javax.crypto.BadPaddingException;
 import javax.crypto.IllegalBlockSizeException;
 import javax.crypto.NoSuchPaddingException;
+import javax.xml.stream.XMLStreamException;
 
+import gurux.dlms.GXDLMSClient;
 import gurux.dlms.GXDLMSException;
 import gurux.dlms.GXDLMSServerBase;
 import gurux.dlms.GXDLMSSettings;
@@ -65,7 +69,7 @@ import gurux.dlms.manufacturersettings.GXDLMSAttributeSettings;
  */
 public class GXDLMSObject {
 	private HashMap<Integer, java.util.Date> readTimes = new HashMap<Integer, java.util.Date>();
-	private int version;
+	protected int version;
 	private ObjectType objectType = ObjectType.NONE;
 	private GXAttributeCollection attributes = null;
 	private GXAttributeCollection methodAttributes = null;
@@ -556,5 +560,59 @@ public class GXDLMSObject {
 	 */
 	public void stop(final GXDLMSServerBase server) throws Exception {
 
+	}
+
+	/**
+	 * Creates and returns a copy of this object.
+	 * 
+	 * @return Cloned object.
+	 */
+	public final GXDLMSObject clone() {
+		ByteArrayOutputStream out = new ByteArrayOutputStream(2000);
+		GXXmlWriterSettings settings = null;
+		GXXmlWriter writer;
+		try {
+			GXDLMSObject target = GXDLMSClient.createObject(getObjectType());
+			writer = new GXXmlWriter(out, settings);
+			writer.writeStartDocument();
+			writer.writeStartElement("Objects");
+			((IGXDLMSBase) this).save(writer);
+			writer.writeEndElement();
+			writer.writeEndDocument();
+			ByteArrayInputStream in = new ByteArrayInputStream(out.toByteArray());
+			GXXmlReader reader = new GXXmlReader(in);
+			reader.read();
+			reader.read();
+			((IGXDLMSBase) target).load(reader);
+			return target;
+		} catch (XMLStreamException e) {
+			throw new RuntimeException(e.getMessage());
+		}
+	}
+
+	/**
+	 * Check are content of the objects equal.
+	 * 
+	 * @param obj1 Object.
+	 * @param obj2 Object.
+	 * @return True, if content of the objects is equal.
+	 */
+	public static final boolean equals(final GXDLMSObject obj1, final GXDLMSObject obj2) {
+		ByteArrayOutputStream out = new ByteArrayOutputStream(2000);
+		GXXmlWriterSettings settings = null;
+		GXXmlWriter writer;
+		try {
+			writer = new GXXmlWriter(out, settings);
+			writer.writeStartDocument();
+			((IGXDLMSBase) obj1).save(writer);
+			String expected = writer.toString();
+			out.reset();
+			writer.writeStartDocument();
+			((IGXDLMSBase) obj2).save(writer);
+			String actual = writer.toString();
+			return expected.equals(actual);
+		} catch (XMLStreamException e) {
+			throw new RuntimeException(e.getMessage());
+		}
 	}
 }

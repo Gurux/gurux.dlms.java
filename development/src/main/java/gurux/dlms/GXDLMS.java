@@ -2576,7 +2576,7 @@ abstract class GXDLMS {
 		} else {
 			value = buff.getUInt16();
 			// Check that server addresses match.
-			if (settings.getClientAddress() != 0 && settings.getServerAddress() != value) {
+			if (settings.getServerAddress() != 0 && settings.getServerAddress() != value) {
 				if (notify == null) {
 					throw new GXDLMSException("Source addresses do not match. It is " + String.valueOf(value)
 							+ ". It should be " + String.valueOf(settings.getServerAddress()) + ".");
@@ -2850,29 +2850,114 @@ abstract class GXDLMS {
 		}
 	}
 
+	private static boolean handleActionResponseFirstBlock(GXDLMSSettings settings, GXReplyData reply, int index) {
+		boolean ret = true;
+		short ch;
+		long number;
+		// Is Last block.
+		ch = reply.getData().getUInt8();
+		if (reply.getXml() != null) {
+			// Result start tag.
+			reply.getXml().appendStartTag(TranslatorTags.P_BLOCK);
+			// LastBlock
+			reply.getXml().appendLine(TranslatorTags.LAST_BLOCK, "Value", reply.getXml().integerToHex(ch, 2));
+		}
+		if (ch == 0) {
+			reply.getMoreData().add(RequestTypes.DATABLOCK);
+		} else {
+			reply.getMoreData().remove(RequestTypes.DATABLOCK);
+		}
+		// Get Block number.
+		number = reply.getData().getUInt32();
+		if (reply.getXml() != null) {
+			// BlockNumber
+			reply.getXml().appendLine(TranslatorTags.BLOCK_NUMBER, "Value", reply.getXml().integerToHex(number, 8));
+		} else {
+			// If meter's block index is zero based.
+			if (number == 0 && settings.getBlockIndex() == 1) {
+				settings.setBlockIndex(0);
+			}
+			int expectedIndex = settings.getBlockIndex();
+			if (number != expectedIndex) {
+				throw new IllegalArgumentException(
+						"Invalid Block number. It is " + number + " and it should be " + expectedIndex + ".");
+			}
+		}
+		// Get status.
+		ch = reply.getData().getUInt8();
+		if (ch != 0) {
+			reply.setError(reply.getData().getUInt8());
+		}
+		if (reply.getXml() != null) {
+			if (reply.getError() != 0) {
+				reply.getXml().appendLine(TranslatorTags.DATA_ACCESS_RESULT, "Value", GXDLMSTranslator
+						.errorCodeToString(reply.getXml().getOutputType(), ErrorCode.forValue(reply.getError())));
+			} else if (reply.getData().available() != 0) {
+				// Get data size.
+				int blockLength = GXCommon.getObjectCount(reply.getData());
+				// if whole block is read.
+				if (!reply.getMoreData().contains(RequestTypes.FRAME)) {
+					// Check Block length.
+					if (blockLength > reply.getData().available()) {
+						reply.getXml()
+								.appendComment("Block is not complete." + String.valueOf(reply.getData().available())
+										+ "/" + String.valueOf(blockLength) + ".");
+					}
+				}
+				reply.getXml().appendLine(TranslatorTags.RAW_DATA, "Value", GXCommon.toHex(reply.getData().getData(),
+						false, reply.getData().position(), reply.getData().available()));
+			}
+			reply.getXml().appendEndTag(TranslatorTags.P_BLOCK);
+		} else if (reply.getData().position() != reply.getData().size()) {
+			// Get data size.
+			int blockLength = GXCommon.getObjectCount(reply.getData());
+			// if whole block is read.
+			if (!(reply.getMoreData().contains(RequestTypes.FRAME))) {
+				// Check Block length.
+				if (blockLength > reply.getData().size() - reply.getData().position()) {
+					throw new IllegalArgumentException("Invalid block length.");
+				}
+				reply.setCommand(Command.NONE);
+			}
+			if (blockLength == 0) {
+				// If meter sends empty data block.
+				reply.getData().size(index);
+			} else {
+				getDataFromBlock(reply.getData(), index);
+			}
+			// If last packet and data is not try to peek.
+			if (reply.getMoreData().isEmpty()) {
+				if (!reply.getPeek()) {
+					reply.getData().position(0);
+					settings.resetBlockIndex();
+				}
+			}
+		}
+		if (reply.getMoreData().isEmpty() && settings != null && settings.getCommand() == Command.GET_REQUEST
+				&& settings.getCommandType() == GetCommandType.WITH_LIST) {
+			handleGetResponseWithList(settings, reply);
+			ret = false;
+		}
+		return ret;
+	}
+
 	/*
 	 * Handle method response and get data from block and/or update error status.
 	 * 
 	 * @param data Received data from the client.
 	 */
-	static void handleMethodResponse(final GXDLMSSettings settings, final GXReplyData data) {
+	static void handleMethodResponse(final GXDLMSSettings settings, final GXReplyData data, int index) {
 
 		// Get type.
 		byte type = (byte) data.getData().getUInt8();
 		// Get invoke ID and priority.
 		data.setInvokeId(data.getData().getUInt8());
 		verifyInvokeId(settings, data);
-		if (data.getXml() != null) {
-			data.getXml().appendStartTag(Command.METHOD_RESPONSE);
-			data.getXml().appendStartTag(Command.METHOD_RESPONSE, type);
-			// InvokeIdAndPriority
-			data.getXml().appendInvokeId((short) data.getInvokeId());
-		}
+		addInvokeId(data.getXml(), Command.METHOD_RESPONSE, type, data.getInvokeId());
 		if (type == 1) {
 			handleActionResponseNormal(settings, data);
 		} else if (type == 2) {
-			// Action-Response-With-Pblock
-			throw new IllegalArgumentException("Invalid Command.");
+			handleActionResponseFirstBlock(settings, data, index);
 		} else if (type == 3) {
 			// Action-Response-With-List.
 			throw new IllegalArgumentException("Invalid Command.");
@@ -3059,13 +3144,7 @@ abstract class GXDLMS {
 		// Invoke ID and priority.
 		data.setInvokeId(data.getData().getUInt8());
 		verifyInvokeId(settings, data);
-		if (data.getXml() != null) {
-			data.getXml().appendStartTag(Command.SET_RESPONSE);
-			data.getXml().appendStartTag(Command.SET_RESPONSE, type);
-			// InvokeIdAndPriority
-			data.getXml().appendInvokeId((short) data.getInvokeId());
-		}
-
+		addInvokeId(data.getXml(), Command.SET_RESPONSE, type, data.getInvokeId());
 		// SetResponseNormal
 		if (type == SetResponseType.NORMAL) {
 			data.setError(data.getData().getUInt8());
@@ -3215,38 +3294,16 @@ abstract class GXDLMS {
 		}
 	}
 
-	/*
-	 * Handle get response and get data from block and/or update error status.
-	 * 
-	 * @param settings DLMS settings.
-	 * 
-	 * @param reply Received data from the client.
-	 * 
-	 * @param index Block index number.
-	 */
-	@SuppressWarnings("squid:S1066")
-	static boolean handleGetResponse(final GXDLMSSettings settings, final GXReplyData reply, final int index) {
-		long number;
-		boolean ret = true;
-		short ch = 0;
-		GXByteBuffer data = reply.getData();
-		// Get type.
-		byte type = (byte) data.getUInt8();
-		// Get invoke ID and priority.
-		reply.setInvokeId(data.getUInt8());
-		verifyInvokeId(settings, reply);
-		if (reply.getXml() != null) {
-			reply.getXml().appendStartTag(Command.GET_RESPONSE);
-			reply.getXml().appendStartTag(Command.GET_RESPONSE, type);
-			// InvokeIdAndPriority
-			reply.getXml().appendInvokeId((int) reply.getInvokeId());
-		}
-		// Response normal
-		if (type == GetCommandType.NORMAL) {
+	private static boolean handleGetResponseNormal(GXDLMSSettings settings, GXReplyData reply, GXByteBuffer data) {
+		boolean empty = false;
+		if (data.available() == 0) {
+			empty = true;
+			getDataFromBlock(data, 0);
+		} else {
 			// Result
-			ch = data.getUInt8();
+			short ch = data.getUInt8();
 			if (ch != 0) {
-				reply.setError((short) data.getUInt8());
+				reply.setError(data.getUInt8());
 			}
 			if (reply.getXml() != null) {
 				// Result start tag.
@@ -3264,98 +3321,139 @@ abstract class GXDLMS {
 			} else {
 				getDataFromBlock(data, 0);
 			}
-		} else if (type == GetCommandType.NEXT_DATA_BLOCK) {
-			// GetResponsewithDataBlock
-			// Is Last block.
-			ch = data.getUInt8();
-			if (reply.getXml() != null) {
-				// Result start tag.
-				reply.getXml().appendStartTag(TranslatorTags.RESULT);
-				// LastBlock
-				reply.getXml().appendLine(TranslatorTags.LAST_BLOCK, "Value", reply.getXml().integerToHex(ch, 2));
+		}
+		return empty;
+	}
+
+	private static boolean handleGetResponseNextDataBlock(GXDLMSSettings settings, GXReplyData reply, int index,
+			GXByteBuffer data) {
+		boolean ret = true;
+		short ch;
+		long number;
+		// Is Last block.
+		ch = data.getUInt8();
+		if (reply.getXml() != null) {
+			// Result start tag.
+			reply.getXml().appendStartTag(TranslatorTags.RESULT);
+			// LastBlock
+			reply.getXml().appendLine(TranslatorTags.LAST_BLOCK, "Value", reply.getXml().integerToHex(ch, 2));
+		}
+		if (ch == 0) {
+			reply.getMoreData().add(RequestTypes.DATABLOCK);
+		} else {
+			reply.getMoreData().remove(RequestTypes.DATABLOCK);
+		}
+		// Get Block number.
+		number = data.getUInt32();
+		if (reply.getXml() != null) {
+			// BlockNumber
+			reply.getXml().appendLine(TranslatorTags.BLOCK_NUMBER, "Value", reply.getXml().integerToHex(number, 8));
+		} else {
+			// If meter's block index is zero based.
+			if (number == 0 && settings.getBlockIndex() == 1) {
+				settings.setBlockIndex(0);
 			}
-			if (ch == 0) {
-				reply.getMoreData().add(RequestTypes.DATABLOCK);
-			} else {
-				reply.getMoreData().remove(RequestTypes.DATABLOCK);
+			int expectedIndex = settings.getBlockIndex();
+			if (number != expectedIndex) {
+				throw new IllegalArgumentException(
+						"Invalid Block number. It is " + number + " and it should be " + expectedIndex + ".");
 			}
-			// Get Block number.
-			number = data.getUInt32();
-			if (reply.getXml() != null) {
-				// BlockNumber
-				reply.getXml().appendLine(TranslatorTags.BLOCK_NUMBER, "Value", reply.getXml().integerToHex(number, 8));
-			} else {
-				// If meter's block index is zero based.
-				if (number == 0 && settings.getBlockIndex() == 1) {
-					settings.setBlockIndex(0);
-				}
-				int expectedIndex = settings.getBlockIndex();
-				if (number != expectedIndex) {
-					throw new IllegalArgumentException(
-							"Invalid Block number. It is " + number + " and it should be " + expectedIndex + ".");
-				}
-			}
-			// Get status.
-			ch = data.getUInt8();
-			if (ch != 0) {
-				reply.setError(data.getUInt8());
-			}
-			if (reply.getXml() != null) {
-				// Result
-				reply.getXml().appendStartTag(TranslatorTags.RESULT);
-				if (reply.getError() != 0) {
-					reply.getXml().appendLine(TranslatorTags.DATA_ACCESS_RESULT, "Value", GXDLMSTranslator
-							.errorCodeToString(reply.getXml().getOutputType(), ErrorCode.forValue(reply.getError())));
-				} else if (reply.getData().available() != 0) {
-					// Get data size.
-					int blockLength = GXCommon.getObjectCount(data);
-					// if whole block is read.
-					if (!reply.getMoreData().contains(RequestTypes.FRAME)) {
-						// Check Block length.
-						if (blockLength > data.size() - data.position()) {
-							reply.getXml().appendComment(
-									"Block is not complete." + String.valueOf(data.size() - data.position()) + "/"
-											+ String.valueOf(blockLength) + ".");
-						}
-					}
-					reply.getXml().appendLine(TranslatorTags.RAW_DATA, "Value", GXCommon
-							.toHex(reply.getData().getData(), false, data.position(), reply.getData().available()));
-				}
-				reply.getXml().appendEndTag(TranslatorTags.RESULT);
-			} else if (data.position() != data.size()) {
+		}
+		// Get status.
+		ch = data.getUInt8();
+		if (ch != 0) {
+			reply.setError(data.getUInt8());
+		}
+		if (reply.getXml() != null) {
+			// Result
+			reply.getXml().appendStartTag(TranslatorTags.RESULT);
+			if (reply.getError() != 0) {
+				reply.getXml().appendLine(TranslatorTags.DATA_ACCESS_RESULT, "Value", GXDLMSTranslator
+						.errorCodeToString(reply.getXml().getOutputType(), ErrorCode.forValue(reply.getError())));
+			} else if (reply.getData().available() != 0) {
 				// Get data size.
 				int blockLength = GXCommon.getObjectCount(data);
 				// if whole block is read.
-				if (!(reply.getMoreData().contains(RequestTypes.FRAME))) {
+				if (!reply.getMoreData().contains(RequestTypes.FRAME)) {
 					// Check Block length.
 					if (blockLength > data.size() - data.position()) {
-						throw new IllegalArgumentException("Invalid block length.");
-					}
-					reply.setCommand(Command.NONE);
-				}
-				if (blockLength == 0) {
-					// If meter sends empty data block.
-					data.size(index);
-				} else {
-					getDataFromBlock(data, index);
-				}
-				// If last packet and data is not try to peek.
-				if (reply.getMoreData().isEmpty()) {
-					if (!reply.getPeek()) {
-						data.position(0);
-						settings.resetBlockIndex();
+						reply.getXml()
+								.appendComment("Block is not complete." + String.valueOf(data.size() - data.position())
+										+ "/" + String.valueOf(blockLength) + ".");
 					}
 				}
+				reply.getXml().appendLine(TranslatorTags.RAW_DATA, "Value",
+						GXCommon.toHex(reply.getData().getData(), false, data.position(), reply.getData().available()));
 			}
-			if (reply.getMoreData().isEmpty() && settings != null && settings.getCommand() == Command.GET_REQUEST
-					&& settings.getCommandType() == GetCommandType.WITH_LIST) {
-				handleGetResponseWithList(settings, reply);
-				ret = false;
+			reply.getXml().appendEndTag(TranslatorTags.RESULT);
+		} else if (data.position() != data.size()) {
+			// Get data size.
+			int blockLength = GXCommon.getObjectCount(data);
+			// if whole block is read.
+			if (!(reply.getMoreData().contains(RequestTypes.FRAME))) {
+				// Check Block length.
+				if (blockLength > data.size() - data.position()) {
+					throw new IllegalArgumentException("Invalid block length.");
+				}
+				reply.setCommand(Command.NONE);
 			}
-		} else if (type == GetCommandType.WITH_LIST) {
+			if (blockLength == 0) {
+				// If meter sends empty data block.
+				data.size(index);
+			} else {
+				getDataFromBlock(data, index);
+			}
+			// If last packet and data is not try to peek.
+			if (reply.getMoreData().isEmpty()) {
+				if (!reply.getPeek()) {
+					data.position(0);
+					settings.resetBlockIndex();
+				}
+			}
+		}
+		if (reply.getMoreData().isEmpty() && settings != null && settings.getCommand() == Command.GET_REQUEST
+				&& settings.getCommandType() == GetCommandType.WITH_LIST) {
 			handleGetResponseWithList(settings, reply);
 			ret = false;
-		} else {
+		}
+		return ret;
+	}
+
+	/*
+	 * Handle get response and get data from block and/or update error status.
+	 * 
+	 * @param settings DLMS settings.
+	 * 
+	 * @param reply Received data from the client.
+	 * 
+	 * @param index Block index number.
+	 */
+	@SuppressWarnings("squid:S1066")
+	static boolean handleGetResponse(final GXDLMSSettings settings, final GXReplyData reply, final int index) {
+		long number;
+		boolean ret = true;
+		short ch = 0;
+		boolean empty = false;
+		GXByteBuffer data = reply.getData();
+		// Get type.
+		byte type = (byte) data.getUInt8();
+		// Get invoke ID and priority.
+		reply.setInvokeId(data.getUInt8());
+		verifyInvokeId(settings, reply);
+		addInvokeId(reply.getXml(), Command.GET_RESPONSE, type, reply.getInvokeId());
+		switch (type) {
+		case GetCommandType.NORMAL:
+			empty = handleGetResponseNormal(settings, reply, data);
+			break;
+		case GetCommandType.NEXT_DATA_BLOCK:
+			// Is Last block.
+			ret = handleGetResponseNextDataBlock(settings, reply, index, data);
+			break;
+		case GetCommandType.WITH_LIST:
+			handleGetResponseWithList(settings, reply);
+			ret = false;
+			break;
+		default:
 			throw new IllegalArgumentException("Invalid Get response.");
 		}
 		if (reply.getXml() != null) {
@@ -3508,7 +3606,7 @@ abstract class GXDLMS {
 				handleWriteResponse(data);
 				break;
 			case Command.METHOD_RESPONSE:
-				handleMethodResponse(settings, data);
+				handleMethodResponse(settings, data, index);
 				break;
 			case Command.ACCESS_REQUEST:
 				if (data.getXml() != null
@@ -4021,12 +4119,17 @@ abstract class GXDLMS {
 			case Command.EVENT_NOTIFICATION:
 			case Command.DED_EVENT_NOTIFICATION:
 				isNotify = true;
+				notify.setComplete(data.isComplete());
+				notify.getMoreData().addAll(data.getMoreData());
+				data.getMoreData().clear();
 				notify.setCommand(data.getCommand());
 				data.setCommand(Command.NONE);
 				notify.setTime(data.getTime());
 				data.setTime(null);
 				notify.getData().set(data.getData());
 				data.getData().trim();
+				notify.setValue(data.getValue());
+				data.setValue(null);
 				break;
 			default:
 				break;
@@ -4263,6 +4366,29 @@ abstract class GXDLMS {
 		} else {
 			data.setUInt8(2);
 			data.setUInt16(value);
+		}
+	}
+
+	protected static void addInvokeId(GXDLMSTranslatorStructure xml, int command, byte type, long invokeID) {
+		if (xml != null) {
+			xml.appendStartTag(command);
+			xml.appendStartTag(command, type);
+			if (xml.isComments()) {
+				StringBuilder sb = new StringBuilder();
+				if ((invokeID & 0x80) != 0) {
+					sb.append("Priority: HIGH ");
+				} else {
+					sb.append("Priority: NORMAL ");
+				}
+				if ((invokeID & 0x40) != 0) {
+					sb.append("ServiceClass: CONFIRMED ");
+				} else {
+					sb.append("ServiceClass: UN_CONFIRMED ");
+				}
+				sb.append("InvokeID: " + String.valueOf(invokeID & 0xF));
+				xml.appendComment(sb.toString());
+			}
+			xml.appendLine(TranslatorTags.INVOKE_ID, null, xml.integerToHex(invokeID, 2));
 		}
 	}
 }

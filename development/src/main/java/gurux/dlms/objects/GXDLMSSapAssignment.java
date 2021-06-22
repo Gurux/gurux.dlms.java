@@ -266,4 +266,14 @@ public class GXDLMSSapAssignment extends GXDLMSObject implements IGXDLMSBase {
 	@Override
 	public final void postLoad(final GXXmlReader reader) {
 	}
+
+	@Override
+	public String[] getNames() {
+		return new String[] { "Logical Name", "Sap Assignment List" };
+	}
+
+	@Override
+	public String[] getMethodNames() {
+		return new String[] { "Connect logical device" };
+	}
 }

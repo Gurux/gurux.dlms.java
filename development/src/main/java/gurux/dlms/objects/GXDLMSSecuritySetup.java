@@ -1473,4 +1473,15 @@ public class GXDLMSSecuritySetup extends GXDLMSObject implements IGXDLMSBase, IG
 			serverSettings.getCipher().setKeyAgreementKeyPair(keyAgreement);
 		}
 	}
+
+	@Override
+	public String[] getNames() {
+		return new String[] { "Logical Name", "Security Policy", "Security Suite", "Client System Title",
+				"Server System Title" };
+	}
+
+	@Override
+	public String[] getMethodNames() {
+		return new String[] { "Security activate", "Key transfer" };
+	}
 }

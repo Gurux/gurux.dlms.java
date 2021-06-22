@@ -185,7 +185,7 @@ public class GXXmlWriter implements AutoCloseable {
 
 	public final void writeElementString(final String name, final Date value) throws XMLStreamException {
 		if (value != null && value.compareTo(new Date(0)) != 0) {
-			SimpleDateFormat sd = new SimpleDateFormat("", Locale.US);
+			SimpleDateFormat sd = new SimpleDateFormat("MM/dd/yyyy HH:mm:ss", Locale.US);
 			writeElementString(name, sd.format(value));
 		}
 	}
@@ -404,6 +404,7 @@ public class GXXmlWriter implements AutoCloseable {
 	 */
 	public final void writeEndDocument() throws XMLStreamException {
 		writer.writeEndDocument();
+		writer.flush();
 	}
 
 	/**

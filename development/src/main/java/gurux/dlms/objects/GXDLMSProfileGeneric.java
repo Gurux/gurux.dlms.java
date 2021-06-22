@@ -1063,4 +1063,15 @@ public class GXDLMSProfileGeneric extends GXDLMSObject implements IGXDLMSBase {
 	public final void postLoad(final GXXmlReader reader) {
 	}
 
+	@Override
+	public String[] getNames() {
+		return new String[] { "Logical Name", "Buffer", "CaptureObjects", "Capture Period", "Sort Method",
+				"Sort Object", "Entries In Use", "Profile Entries" };
+	}
+
+	@Override
+	public String[] getMethodNames() {
+		return new String[] { "Reset", "Capture" };
+	}
+
 }

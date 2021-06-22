@@ -291,4 +291,15 @@ public class GXDLMSMBusSlavePortSetup extends GXDLMSObject implements IGXDLMSBas
 	public final void postLoad(final GXXmlReader reader) {
 		// Not needed for this object.
 	}
+
+	@Override
+	public String[] getNames() {
+		return new String[] { "Logical Name", "Default Baud Rate", "Available Baud rate", "Address State",
+				"Bus Address" };
+	}
+
+	@Override
+	public String[] getMethodNames() {
+		return new String[0];
+	}
 }

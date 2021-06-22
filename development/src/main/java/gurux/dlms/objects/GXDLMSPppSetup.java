@@ -57,381 +57,356 @@ import gurux.dlms.objects.enums.PppSetupLcpOptionType;
  * https://www.gurux.fi/Gurux.DLMS.Objects.GXDLMSPppSetup
  */
 public class GXDLMSPppSetup extends GXDLMSObject implements IGXDLMSBase {
-    private GXDLMSPppSetupIPCPOption[] ipcpOptions;
-    private String phyReference;
-    private GXDLMSPppSetupLcpOption[] lcpOptions;
-    private byte[] userName;
-    private byte[] password;
-    private PppAuthenticationType authentication;
+	private GXDLMSPppSetupIPCPOption[] ipcpOptions;
+	private String phyReference;
+	private GXDLMSPppSetupLcpOption[] lcpOptions;
+	private byte[] userName;
+	private byte[] password;
+	private PppAuthenticationType authentication;
 
-    public final PppAuthenticationType getAuthentication() {
-        return authentication;
-    }
+	public final PppAuthenticationType getAuthentication() {
+		return authentication;
+	}
 
-    public final void setAuthentication(final PppAuthenticationType value) {
-        authentication = value;
-    }
+	public final void setAuthentication(final PppAuthenticationType value) {
+		authentication = value;
+	}
 
-    /**
-     * @return PPP authentication procedure user name.
-     */
-    public final byte[] getUserName() {
-        return userName;
-    }
+	/**
+	 * @return PPP authentication procedure user name.
+	 */
+	public final byte[] getUserName() {
+		return userName;
+	}
 
-    /**
-     * @param value
-     *            PPP authentication procedure user name.
-     */
-    public final void setUserName(final byte[] value) {
-        userName = value;
-    }
+	/**
+	 * @param value PPP authentication procedure user name.
+	 */
+	public final void setUserName(final byte[] value) {
+		userName = value;
+	}
 
-    /**
-     * @return PPP authentication procedure password.
-     */
-    public final byte[] getPassword() {
-        return password;
-    }
+	/**
+	 * @return PPP authentication procedure password.
+	 */
+	public final byte[] getPassword() {
+		return password;
+	}
 
-    /**
-     * @param value
-     *            PPP authentication procedure password.
-     */
-    public final void setPassword(final byte[] value) {
-        password = value;
-    }
+	/**
+	 * @param value PPP authentication procedure password.
+	 */
+	public final void setPassword(final byte[] value) {
+		password = value;
+	}
 
-    /**
-     * Constructor.
-     */
-    public GXDLMSPppSetup() {
-        super(ObjectType.PPP_SETUP);
-    }
+	/**
+	 * Constructor.
+	 */
+	public GXDLMSPppSetup() {
+		super(ObjectType.PPP_SETUP);
+	}
 
-    /**
-     * Constructor.
-     * 
-     * @param ln
-     *            Logical Name of the object.
-     */
-    public GXDLMSPppSetup(final String ln) {
-        super(ObjectType.PPP_SETUP, ln, 0);
-    }
+	/**
+	 * Constructor.
+	 * 
+	 * @param ln Logical Name of the object.
+	 */
+	public GXDLMSPppSetup(final String ln) {
+		super(ObjectType.PPP_SETUP, ln, 0);
+	}
 
-    /**
-     * Constructor.
-     * 
-     * @param ln
-     *            Logical Name of the object.
-     * @param sn
-     *            Short Name of the object.
-     */
-    public GXDLMSPppSetup(final String ln, final int sn) {
-        super(ObjectType.PPP_SETUP, ln, sn);
-    }
+	/**
+	 * Constructor.
+	 * 
+	 * @param ln Logical Name of the object.
+	 * @param sn Short Name of the object.
+	 */
+	public GXDLMSPppSetup(final String ln, final int sn) {
+		super(ObjectType.PPP_SETUP, ln, sn);
+	}
 
-    public final String getPHYReference() {
-        return phyReference;
-    }
+	public final String getPHYReference() {
+		return phyReference;
+	}
 
-    public final void setPHYReference(final String value) {
-        phyReference = value;
-    }
+	public final void setPHYReference(final String value) {
+		phyReference = value;
+	}
 
-    public final GXDLMSPppSetupLcpOption[] getLCPOptions() {
-        return lcpOptions;
-    }
+	public final GXDLMSPppSetupLcpOption[] getLCPOptions() {
+		return lcpOptions;
+	}
 
-    public final void setLCPOptions(final GXDLMSPppSetupLcpOption[] value) {
-        lcpOptions = value;
-    }
+	public final void setLCPOptions(final GXDLMSPppSetupLcpOption[] value) {
+		lcpOptions = value;
+	}
 
-    public final GXDLMSPppSetupIPCPOption[] getIPCPOptions() {
-        return ipcpOptions;
-    }
+	public final GXDLMSPppSetupIPCPOption[] getIPCPOptions() {
+		return ipcpOptions;
+	}
 
-    public final void setIPCPOptions(final GXDLMSPppSetupIPCPOption[] value) {
-        ipcpOptions = value;
-    }
+	public final void setIPCPOptions(final GXDLMSPppSetupIPCPOption[] value) {
+		ipcpOptions = value;
+	}
 
-    @Override
-    public final Object[] getValues() {
-        String str = "";
-        if (userName != null) {
-            str = new String(userName);
-        }
-        if (password != null) {
-            str += " " + new String(password);
-        }
-        return new Object[] { getLogicalName(), getPHYReference(),
-                getLCPOptions(), getIPCPOptions(), str };
-    }
+	@Override
+	public final Object[] getValues() {
+		String str = "";
+		if (userName != null) {
+			str = new String(userName);
+		}
+		if (password != null) {
+			str += " " + new String(password);
+		}
+		return new Object[] { getLogicalName(), getPHYReference(), getLCPOptions(), getIPCPOptions(), str };
+	}
 
-    /*
-     * Returns collection of attributes to read. If attribute is static and
-     * already read or device is returned HW error it is not returned.
-     */
-    @Override
-    public final int[] getAttributeIndexToRead(final boolean all) {
-        java.util.ArrayList<Integer> attributes =
-                new java.util.ArrayList<Integer>();
-        // LN is static and read only once.
-        if (all || getLogicalName() == null
-                || getLogicalName().compareTo("") == 0) {
-            attributes.add(1);
-        }
-        // PHYReference
-        if (all || !isRead(2)) {
-            attributes.add(2);
-        }
-        // LCPOptions
-        if (all || !isRead(3)) {
-            attributes.add(3);
-        }
-        // IPCPOptions
-        if (all || !isRead(4)) {
-            attributes.add(4);
-        }
-        // PPPAuthentication
-        if (all || !isRead(5)) {
-            attributes.add(5);
-        }
-        return GXDLMSObjectHelpers.toIntArray(attributes);
-    }
+	/*
+	 * Returns collection of attributes to read. If attribute is static and already
+	 * read or device is returned HW error it is not returned.
+	 */
+	@Override
+	public final int[] getAttributeIndexToRead(final boolean all) {
+		java.util.ArrayList<Integer> attributes = new java.util.ArrayList<Integer>();
+		// LN is static and read only once.
+		if (all || getLogicalName() == null || getLogicalName().compareTo("") == 0) {
+			attributes.add(1);
+		}
+		// PHYReference
+		if (all || !isRead(2)) {
+			attributes.add(2);
+		}
+		// LCPOptions
+		if (all || !isRead(3)) {
+			attributes.add(3);
+		}
+		// IPCPOptions
+		if (all || !isRead(4)) {
+			attributes.add(4);
+		}
+		// PPPAuthentication
+		if (all || !isRead(5)) {
+			attributes.add(5);
+		}
+		return GXDLMSObjectHelpers.toIntArray(attributes);
+	}
 
-    /*
-     * Returns amount of attributes.
-     */
-    @Override
-    public final int getAttributeCount() {
-        return 5;
-    }
+	/*
+	 * Returns amount of attributes.
+	 */
+	@Override
+	public final int getAttributeCount() {
+		return 5;
+	}
 
-    /*
-     * Returns amount of methods.
-     */
-    @Override
-    public final int getMethodCount() {
-        return 0;
-    }
+	/*
+	 * Returns amount of methods.
+	 */
+	@Override
+	public final int getMethodCount() {
+		return 0;
+	}
 
-    @Override
-    public final DataType getDataType(final int index) {
-        if (index == 1) {
-            return DataType.OCTET_STRING;
-        }
-        if (index == 2) {
-            return DataType.OCTET_STRING;
-        }
-        if (index == 3) {
-            return DataType.ARRAY;
-        }
-        if (index == 4) {
-            return DataType.ARRAY;
-        }
-        if (index == 5) {
-            if (userName == null || userName.length == 0) {
-                return DataType.NONE;
-            }
-            return DataType.STRUCTURE;
-        }
-        throw new IllegalArgumentException(
-                "getDataType failed. Invalid attribute index.");
-    }
+	@Override
+	public final DataType getDataType(final int index) {
+		if (index == 1) {
+			return DataType.OCTET_STRING;
+		}
+		if (index == 2) {
+			return DataType.OCTET_STRING;
+		}
+		if (index == 3) {
+			return DataType.ARRAY;
+		}
+		if (index == 4) {
+			return DataType.ARRAY;
+		}
+		if (index == 5) {
+			if (userName == null || userName.length == 0) {
+				return DataType.NONE;
+			}
+			return DataType.STRUCTURE;
+		}
+		throw new IllegalArgumentException("getDataType failed. Invalid attribute index.");
+	}
 
-    /*
-     * Returns value of given attribute.
-     */
-    @Override
-    public final Object getValue(final GXDLMSSettings settings,
-            final ValueEventArgs e) {
-        if (e.getIndex() == 1) {
-            return GXCommon.logicalNameToBytes(getLogicalName());
-        }
-        if (e.getIndex() == 2) {
-            return GXCommon.logicalNameToBytes(phyReference);
-        }
-        if (e.getIndex() == 3) {
-            GXByteBuffer data = new GXByteBuffer();
-            data.setUInt8((byte) DataType.ARRAY.getValue());
-            if (lcpOptions == null) {
-                data.setUInt8(0);
-            } else {
-                data.setUInt8((byte) lcpOptions.length);
-                for (GXDLMSPppSetupLcpOption it : lcpOptions) {
-                    data.setUInt8((byte) DataType.STRUCTURE.getValue());
-                    data.setUInt8(3);
-                    GXCommon.setData(settings, data, DataType.UINT8,
-                            it.getType().getValue());
-                    GXCommon.setData(settings, data, DataType.UINT8,
-                            it.getLength());
-                    GXCommon.setData(settings, data,
-                            GXDLMSConverter.getDLMSDataType(it.getData()),
-                            it.getData());
-                }
-            }
-            return data.array();
-        }
-        if (e.getIndex() == 4) {
-            GXByteBuffer data = new GXByteBuffer();
-            data.setUInt8((byte) DataType.ARRAY.getValue());
-            if (ipcpOptions == null) {
-                data.setUInt8(0);
-            } else {
-                data.setUInt8((byte) ipcpOptions.length);
-                for (GXDLMSPppSetupIPCPOption it : ipcpOptions) {
-                    data.setUInt8((byte) DataType.STRUCTURE.getValue());
-                    data.setUInt8(3);
-                    GXCommon.setData(settings, data, DataType.UINT8,
-                            it.getType().getValue());
-                    GXCommon.setData(settings, data, DataType.UINT8,
-                            it.getLength());
-                    GXCommon.setData(settings, data,
-                            GXDLMSConverter.getDLMSDataType(it.getData()),
-                            it.getData());
-                }
-            }
-            return data.array();
-        } else if (e.getIndex() == 5) {
-            if (userName == null || userName.length == 0) {
-                return null;
-            }
-            GXByteBuffer data = new GXByteBuffer();
-            data.setUInt8((byte) DataType.STRUCTURE.getValue());
-            data.setUInt8(2);
-            GXCommon.setData(settings, data, DataType.OCTET_STRING, userName);
-            GXCommon.setData(settings, data, DataType.OCTET_STRING, password);
-            return data.array();
-        }
-        e.setError(ErrorCode.READ_WRITE_DENIED);
-        return null;
-    }
+	/*
+	 * Returns value of given attribute.
+	 */
+	@Override
+	public final Object getValue(final GXDLMSSettings settings, final ValueEventArgs e) {
+		if (e.getIndex() == 1) {
+			return GXCommon.logicalNameToBytes(getLogicalName());
+		}
+		if (e.getIndex() == 2) {
+			return GXCommon.logicalNameToBytes(phyReference);
+		}
+		if (e.getIndex() == 3) {
+			GXByteBuffer data = new GXByteBuffer();
+			data.setUInt8((byte) DataType.ARRAY.getValue());
+			if (lcpOptions == null) {
+				data.setUInt8(0);
+			} else {
+				data.setUInt8((byte) lcpOptions.length);
+				for (GXDLMSPppSetupLcpOption it : lcpOptions) {
+					data.setUInt8((byte) DataType.STRUCTURE.getValue());
+					data.setUInt8(3);
+					GXCommon.setData(settings, data, DataType.UINT8, it.getType().getValue());
+					GXCommon.setData(settings, data, DataType.UINT8, it.getLength());
+					GXCommon.setData(settings, data, GXDLMSConverter.getDLMSDataType(it.getData()), it.getData());
+				}
+			}
+			return data.array();
+		}
+		if (e.getIndex() == 4) {
+			GXByteBuffer data = new GXByteBuffer();
+			data.setUInt8((byte) DataType.ARRAY.getValue());
+			if (ipcpOptions == null) {
+				data.setUInt8(0);
+			} else {
+				data.setUInt8((byte) ipcpOptions.length);
+				for (GXDLMSPppSetupIPCPOption it : ipcpOptions) {
+					data.setUInt8((byte) DataType.STRUCTURE.getValue());
+					data.setUInt8(3);
+					GXCommon.setData(settings, data, DataType.UINT8, it.getType().getValue());
+					GXCommon.setData(settings, data, DataType.UINT8, it.getLength());
+					GXCommon.setData(settings, data, GXDLMSConverter.getDLMSDataType(it.getData()), it.getData());
+				}
+			}
+			return data.array();
+		} else if (e.getIndex() == 5) {
+			if (userName == null || userName.length == 0) {
+				return null;
+			}
+			GXByteBuffer data = new GXByteBuffer();
+			data.setUInt8((byte) DataType.STRUCTURE.getValue());
+			data.setUInt8(2);
+			GXCommon.setData(settings, data, DataType.OCTET_STRING, userName);
+			GXCommon.setData(settings, data, DataType.OCTET_STRING, password);
+			return data.array();
+		}
+		e.setError(ErrorCode.READ_WRITE_DENIED);
+		return null;
+	}
 
-    /*
-     * Set value of given attribute.
-     */
-    @Override
-    public final void setValue(final GXDLMSSettings settings,
-            final ValueEventArgs e) {
-        if (e.getIndex() == 1) {
-            setLogicalName(GXCommon.toLogicalName(e.getValue()));
-        } else if (e.getIndex() == 2) {
-            phyReference = GXCommon.toLogicalName(e.getValue());
-        } else if (e.getIndex() == 3) {
-            java.util.ArrayList<GXDLMSPppSetupLcpOption> items =
-                    new java.util.ArrayList<GXDLMSPppSetupLcpOption>();
-            if (e.getValue() instanceof List<?>) {
-                for (Object item : (List<?>) e.getValue()) {
-                    GXDLMSPppSetupLcpOption it = new GXDLMSPppSetupLcpOption();
-                    it.setType(PppSetupLcpOptionType.forValue(
-                            ((Number) ((List<?>) item).get(0)).intValue()));
-                    it.setLength(((Number) ((List<?>) item).get(1)).intValue());
-                    it.setData(((List<?>) item).get(2));
-                    items.add(it);
-                }
-            }
-            lcpOptions =
-                    items.toArray(new GXDLMSPppSetupLcpOption[items.size()]);
-        } else if (e.getIndex() == 4) {
-            java.util.ArrayList<GXDLMSPppSetupIPCPOption> items =
-                    new java.util.ArrayList<GXDLMSPppSetupIPCPOption>();
-            if (e.getValue() instanceof List<?>) {
-                for (Object item : (List<?>) e.getValue()) {
-                    GXDLMSPppSetupIPCPOption it =
-                            new GXDLMSPppSetupIPCPOption();
-                    it.setType(PppSetupIPCPOptionType.forValue(
-                            ((Number) ((List<?>) item).get(0)).intValue()));
-                    it.setLength(((Number) ((List<?>) item).get(1)).intValue());
-                    it.setData(((List<?>) item).get(2));
-                    items.add(it);
-                }
-            }
-            ipcpOptions =
-                    items.toArray(new GXDLMSPppSetupIPCPOption[items.size()]);
-        } else if (e.getIndex() == 5) {
-            if (e.getValue() != null) {
-                userName = (byte[]) ((List<?>) e.getValue()).get(0);
-                password = (byte[]) ((List<?>) e.getValue()).get(1);
-            } else {
-                userName = password = null;
-            }
-        } else {
-            e.setError(ErrorCode.READ_WRITE_DENIED);
-        }
-    }
+	/*
+	 * Set value of given attribute.
+	 */
+	@Override
+	public final void setValue(final GXDLMSSettings settings, final ValueEventArgs e) {
+		if (e.getIndex() == 1) {
+			setLogicalName(GXCommon.toLogicalName(e.getValue()));
+		} else if (e.getIndex() == 2) {
+			phyReference = GXCommon.toLogicalName(e.getValue());
+		} else if (e.getIndex() == 3) {
+			java.util.ArrayList<GXDLMSPppSetupLcpOption> items = new java.util.ArrayList<GXDLMSPppSetupLcpOption>();
+			if (e.getValue() instanceof List<?>) {
+				for (Object item : (List<?>) e.getValue()) {
+					GXDLMSPppSetupLcpOption it = new GXDLMSPppSetupLcpOption();
+					it.setType(PppSetupLcpOptionType.forValue(((Number) ((List<?>) item).get(0)).intValue()));
+					it.setLength(((Number) ((List<?>) item).get(1)).intValue());
+					it.setData(((List<?>) item).get(2));
+					items.add(it);
+				}
+			}
+			lcpOptions = items.toArray(new GXDLMSPppSetupLcpOption[items.size()]);
+		} else if (e.getIndex() == 4) {
+			java.util.ArrayList<GXDLMSPppSetupIPCPOption> items = new java.util.ArrayList<GXDLMSPppSetupIPCPOption>();
+			if (e.getValue() instanceof List<?>) {
+				for (Object item : (List<?>) e.getValue()) {
+					GXDLMSPppSetupIPCPOption it = new GXDLMSPppSetupIPCPOption();
+					it.setType(PppSetupIPCPOptionType.forValue(((Number) ((List<?>) item).get(0)).intValue()));
+					it.setLength(((Number) ((List<?>) item).get(1)).intValue());
+					it.setData(((List<?>) item).get(2));
+					items.add(it);
+				}
+			}
+			ipcpOptions = items.toArray(new GXDLMSPppSetupIPCPOption[items.size()]);
+		} else if (e.getIndex() == 5) {
+			if (e.getValue() != null) {
+				userName = (byte[]) ((List<?>) e.getValue()).get(0);
+				password = (byte[]) ((List<?>) e.getValue()).get(1);
+			} else {
+				userName = password = null;
+			}
+		} else {
+			e.setError(ErrorCode.READ_WRITE_DENIED);
+		}
+	}
 
-    @Override
-    public final void load(final GXXmlReader reader) throws XMLStreamException {
-        phyReference = reader.readElementContentAsString("PHYReference");
-        List<GXDLMSPppSetupLcpOption> options =
-                new ArrayList<GXDLMSPppSetupLcpOption>();
-        if (reader.isStartElement("LCPOptions", true)) {
-            while (reader.isStartElement("Item", true)) {
-                GXDLMSPppSetupLcpOption it = new GXDLMSPppSetupLcpOption();
-                it.setType(PppSetupLcpOptionType
-                        .forValue(reader.readElementContentAsInt("Type")));
-                it.setLength(reader.readElementContentAsInt("Length"));
-                it.setData(reader.readElementContentAsObject("Data", null, null,
-                        0));
-            }
-            reader.readEndElement("LCPOptions");
-        }
-        lcpOptions =
-                options.toArray(new GXDLMSPppSetupLcpOption[options.size()]);
+	@Override
+	public final void load(final GXXmlReader reader) throws XMLStreamException {
+		phyReference = reader.readElementContentAsString("PHYReference");
+		List<GXDLMSPppSetupLcpOption> options = new ArrayList<GXDLMSPppSetupLcpOption>();
+		if (reader.isStartElement("LCPOptions", true)) {
+			while (reader.isStartElement("Item", true)) {
+				GXDLMSPppSetupLcpOption it = new GXDLMSPppSetupLcpOption();
+				it.setType(PppSetupLcpOptionType.forValue(reader.readElementContentAsInt("Type")));
+				it.setLength(reader.readElementContentAsInt("Length"));
+				it.setData(reader.readElementContentAsObject("Data", null, null, 0));
+			}
+			reader.readEndElement("LCPOptions");
+		}
+		lcpOptions = options.toArray(new GXDLMSPppSetupLcpOption[options.size()]);
 
-        List<GXDLMSPppSetupIPCPOption> list =
-                new ArrayList<GXDLMSPppSetupIPCPOption>();
-        if (reader.isStartElement("IPCPOptions", true)) {
-            while (reader.isStartElement("Item", true)) {
-                GXDLMSPppSetupIPCPOption it = new GXDLMSPppSetupIPCPOption();
-                it.setType(PppSetupIPCPOptionType
-                        .forValue(reader.readElementContentAsInt("Type")));
-                it.setLength(reader.readElementContentAsInt("Length"));
-                it.setData(reader.readElementContentAsObject("Data", null, null,
-                        0));
-            }
-            reader.readEndElement("IPCPOptions");
-        }
-        ipcpOptions = list.toArray(new GXDLMSPppSetupIPCPOption[list.size()]);
+		List<GXDLMSPppSetupIPCPOption> list = new ArrayList<GXDLMSPppSetupIPCPOption>();
+		if (reader.isStartElement("IPCPOptions", true)) {
+			while (reader.isStartElement("Item", true)) {
+				GXDLMSPppSetupIPCPOption it = new GXDLMSPppSetupIPCPOption();
+				it.setType(PppSetupIPCPOptionType.forValue(reader.readElementContentAsInt("Type")));
+				it.setLength(reader.readElementContentAsInt("Length"));
+				it.setData(reader.readElementContentAsObject("Data", null, null, 0));
+			}
+			reader.readEndElement("IPCPOptions");
+		}
+		ipcpOptions = list.toArray(new GXDLMSPppSetupIPCPOption[list.size()]);
 
-        userName = GXDLMSTranslator
-                .hexToBytes(reader.readElementContentAsString("UserName"));
-        password = GXDLMSTranslator
-                .hexToBytes(reader.readElementContentAsString("Password"));
-    }
+		userName = GXDLMSTranslator.hexToBytes(reader.readElementContentAsString("UserName"));
+		password = GXDLMSTranslator.hexToBytes(reader.readElementContentAsString("Password"));
+	}
 
-    @Override
-    public final void save(final GXXmlWriter writer) throws XMLStreamException {
-        writer.writeElementString("PHYReference", phyReference);
-        if (lcpOptions != null) {
-            writer.writeStartElement("LCPOptions");
-            for (GXDLMSPppSetupLcpOption it : lcpOptions) {
-                writer.writeStartElement("Item");
-                writer.writeElementString("Type", it.getType().getValue());
-                writer.writeElementString("Length", it.getLength());
-                writer.writeElementObject("Data", it.getData());
-                writer.writeEndElement();
-            }
-            writer.writeEndElement();
-        }
-        if (ipcpOptions != null) {
-            writer.writeStartElement("IPCPOptions");
-            for (GXDLMSPppSetupIPCPOption it : ipcpOptions) {
-                writer.writeStartElement("Item");
-                writer.writeElementString("Type", it.getType().getValue());
-                writer.writeElementString("Length", it.getLength());
-                writer.writeElementObject("Data", it.getData());
-                writer.writeEndElement();
-            }
-            writer.writeEndElement();
-        }
-        writer.writeElementString("UserName", GXDLMSTranslator.toHex(userName));
-        writer.writeElementString("Password", GXDLMSTranslator.toHex(password));
-    }
+	@Override
+	public final void save(final GXXmlWriter writer) throws XMLStreamException {
+		writer.writeElementString("PHYReference", phyReference);
+		if (lcpOptions != null) {
+			writer.writeStartElement("LCPOptions");
+			for (GXDLMSPppSetupLcpOption it : lcpOptions) {
+				writer.writeStartElement("Item");
+				writer.writeElementString("Type", it.getType().getValue());
+				writer.writeElementString("Length", it.getLength());
+				writer.writeElementObject("Data", it.getData());
+				writer.writeEndElement();
+			}
+			writer.writeEndElement();
+		}
+		if (ipcpOptions != null) {
+			writer.writeStartElement("IPCPOptions");
+			for (GXDLMSPppSetupIPCPOption it : ipcpOptions) {
+				writer.writeStartElement("Item");
+				writer.writeElementString("Type", it.getType().getValue());
+				writer.writeElementString("Length", it.getLength());
+				writer.writeElementObject("Data", it.getData());
+				writer.writeEndElement();
+			}
+			writer.writeEndElement();
+		}
+		writer.writeElementString("UserName", GXDLMSTranslator.toHex(userName));
+		writer.writeElementString("Password", GXDLMSTranslator.toHex(password));
+	}
 
-    @Override
-    public final void postLoad(final GXXmlReader reader) {
-        // Not needed for this object.
-    }
+	@Override
+	public final void postLoad(final GXXmlReader reader) {
+		// Not needed for this object.
+	}
+
+	@Override
+	public String[] getNames() {
+		return new String[] { "Logical Name", "PHY Reference", "LCP Options", "IPCP Options", "PPP Authentication" };
+	}
+
+	@Override
+	public String[] getMethodNames() {
+		return new String[0];
+	}
 }

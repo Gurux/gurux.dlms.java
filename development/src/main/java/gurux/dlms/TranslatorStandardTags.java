@@ -120,12 +120,11 @@ final class TranslatorStandardTags {
 		list.put(Command.SET_REQUEST << 8 | SetRequestType.WITH_LIST, "set-request-with-list");
 		GXDLMSTranslator.addTag(list, Command.METHOD_REQUEST, "action-request");
 		list.put(Command.METHOD_REQUEST << 8 | ActionRequestType.NORMAL, "action-request-normal");
-		list.put(Command.METHOD_REQUEST << 8 | ActionRequestType.NEXT_BLOCK, "ActionRequestForNextDataBlock");
+		list.put(Command.METHOD_REQUEST << 8 | ActionRequestType.NEXT_BLOCK, "action-request-next-pblock");
 		list.put(Command.METHOD_REQUEST << 8 | ActionRequestType.WITH_LIST, "action-request-with-list");
 		GXDLMSTranslator.addTag(list, Command.METHOD_RESPONSE, "action-response");
 		list.put(Command.METHOD_RESPONSE << 8 | ActionResponseType.NORMAL, "action-response-normal");
-		list.put(Command.METHOD_RESPONSE << 8 | ActionResponseType.WITH_FIRST_BLOCK,
-				"action-response-with-first-block");
+		list.put(Command.METHOD_RESPONSE << 8 | ActionResponseType.WITH_FIRST_BLOCK, "action-response-with-pblock");
 		list.put(Command.METHOD_RESPONSE << 8 | ActionResponseType.WITH_LIST, "action-response-with-list");
 		list.put(TranslatorTags.SINGLE_RESPONSE, "single-response");
 
@@ -240,6 +239,7 @@ final class TranslatorStandardTags {
 		GXDLMSTranslator.addTag(list, TranslatorTags.METHOD_DESCRIPTOR, "cosem-method-descriptor");
 		GXDLMSTranslator.addTag(list, TranslatorTags.METHOD_ID, "method-id");
 		GXDLMSTranslator.addTag(list, TranslatorTags.RESULT, "result");
+		GXDLMSTranslator.addTag(list, TranslatorTags.P_BLOCK, "pblock");
 		GXDLMSTranslator.addTag(list, TranslatorTags.RETURN_PARAMETERS, "return-parameters");
 		GXDLMSTranslator.addTag(list, TranslatorTags.ACCESS_SELECTION, "access-selection");
 		GXDLMSTranslator.addTag(list, TranslatorTags.VALUE, "value");

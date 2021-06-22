@@ -1906,4 +1906,28 @@ public class GXDLMSAssociationLogicalName extends GXDLMSObject implements IGXDLM
 		}
 		methodAccessRights.put(target, buff);
 	}
+
+	@Override
+	public String[] getNames() {
+		if (version == 0) {
+			return new String[] { "Logical Name", "Object List", "Associated partners Id", "Application Context Name",
+					"xDLMS Context Info", "Authentication Mechanism Name", "Secret", "Association Status" };
+		}
+		if (version == 1) {
+			return new String[] { "Logical Name", "Object List", "Associated partners Id", "Application Context Name",
+					"xDLMS Context Info", "Authentication Mechanism Name", "Secret", "Association Status",
+					"Security Setup Reference" };
+		}
+		return new String[] { "Logical Name", "Object List", "Associated partners Id", "Application Context Name",
+				"xDLMS Context Info", "Authentication Mechanism Name", "Secret", "Association Status",
+				"Security Setup Reference", "UserList", "CurrentUser" };
+	}
+
+	@Override
+	public String[] getMethodNames() {
+		if (version > 1)
+			return new String[] { "Reply to HLS authentication", "Change HLS secret", "Add object", "Remove object",
+					"Add user", "Remove user" };
+		return new String[] { "Reply to HLS authentication", "Change HLS secret", "Add object", "Remove object" };
+	}
 }

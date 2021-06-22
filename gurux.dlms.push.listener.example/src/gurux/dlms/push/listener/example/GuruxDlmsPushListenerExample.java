@@ -51,54 +51,50 @@ import gurux.net.enums.NetworkType;
  * @author Gurux Ltd
  */
 public class GuruxDlmsPushListenerExample {
-    /**
-     * Server component that handles received DLMS Push messages.
-     */
-    /**
-     * @param args
-     *            the command line arguments
-     */
-    public static void main(String[] args) {
-        int port = 4059;
-        GXNet media = new GXNet(NetworkType.TCP, "localhost", port);
-        GXDLMSSecureNotify cl =
-                new GXDLMSSecureNotify(true, 1, 1, InterfaceType.WRAPPER);
-        // Un-comment this if you want to send encrypted push messages.
-        // cl.getCiphering().setSecurity(Security.AUTHENTICATION_ENCRYPTION);
-        GXDLMSPushSetup p = new GXDLMSPushSetup();
-        GXDLMSClock clock = new GXDLMSClock();
-        p.getPushObjectList()
-                .add(new GXSimpleEntry<GXDLMSObject, GXDLMSCaptureObject>(p,
-                        new GXDLMSCaptureObject(2, 0)));
-        p.getPushObjectList()
-                .add(new GXSimpleEntry<GXDLMSObject, GXDLMSCaptureObject>(clock,
-                        new GXDLMSCaptureObject(2, 0)));
-        try (GXDLMSPushListener SNServer = new GXDLMSPushListener(port)) {
-            System.out.println(
-                    "Starting to listen Push messages in port " + port);
-            System.out.println(
-                    "Press X to close and Enter to send a Push message.");
-            int ret = 10;
-            while ((ret = System.in.read()) != -1) {
-                // Send push.
-                if (ret == 10) {
-                    System.out.println("Sending Push message.");
-                    media.open();
-                    clock.setTime(
-                            new GXDateTime(Calendar.getInstance().getTime()));
-                    for (byte[] it : cl.generatePushSetupMessages(null, p)) {
-                        media.send(it, null);
-                    }
-                    media.close();
-                }
-                // Close app.
-                if (ret == 'x' || ret == 'X') {
-                    break;
-                }
-            }
-            media.close();
-        } catch (Exception ex) {
-            System.out.println(ex.getMessage());
-        }
-    }
+	/**
+	 * Server component that handles received DLMS Push messages.
+	 */
+	/**
+	 * @param args the command line arguments
+	 */
+	public static void main(String[] args) {
+		int port = 4059;
+		GXNet media = new GXNet(NetworkType.TCP, "localhost", port);
+		GXDLMSSecureNotify cl = new GXDLMSSecureNotify(true, 1, 1, InterfaceType.WRAPPER);
+		// Un-comment this if you want to send encrypted push messages.
+		// cl.getCiphering().setSecurity(Security.AUTHENTICATION_ENCRYPTION);
+		GXDLMSPushSetup p = new GXDLMSPushSetup();
+		GXDLMSClock clock = new GXDLMSClock();
+		// Un-comment this if you want to describe the content of the push message for
+		// the client.
+		// p.getPushObjectList()
+		// .add(new GXSimpleEntry<GXDLMSObject, GXDLMSCaptureObject>(p,
+		// new GXDLMSCaptureObject(2, 0)));
+		p.getPushObjectList()
+				.add(new GXSimpleEntry<GXDLMSObject, GXDLMSCaptureObject>(clock, new GXDLMSCaptureObject(2, 0)));
+		try (GXDLMSPushListener SNServer = new GXDLMSPushListener(port)) {
+			System.out.println("Starting to listen Push messages in port " + port);
+			System.out.println("Press X to close and Enter to send a Push message.");
+			int ret = 10;
+			while ((ret = System.in.read()) != -1) {
+				// Send push.
+				if (ret == 10) {
+					System.out.println("Sending Push message.");
+					media.open();
+					clock.setTime(new GXDateTime(Calendar.getInstance().getTime()));
+					for (byte[] it : cl.generatePushSetupMessages(null, p)) {
+						media.send(it, null);
+					}
+					media.close();
+				}
+				// Close app.
+				if (ret == 'x' || ret == 'X') {
+					break;
+				}
+			}
+			media.close();
+		} catch (Exception ex) {
+			System.out.println(ex.getMessage());
+		}
+	}
 }

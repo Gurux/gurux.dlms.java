@@ -112,11 +112,11 @@ final class TranslatorSimpleTags {
 		list.put(Command.SET_REQUEST << 8 | SetRequestType.WITH_LIST, "SetRequestWithList");
 		GXDLMSTranslator.addTag(list, Command.METHOD_REQUEST, "ActionRequest");
 		list.put(Command.METHOD_REQUEST << 8 | ActionRequestType.NORMAL, "ActionRequestNormal");
-		list.put(Command.METHOD_REQUEST << 8 | ActionRequestType.NEXT_BLOCK, "ActionRequestForNextDataBlock");
+		list.put(Command.METHOD_REQUEST << 8 | ActionRequestType.NEXT_BLOCK, "ActionRequestForNextPBlock");
 		list.put(Command.METHOD_REQUEST << 8 | ActionRequestType.WITH_LIST, "ActionRequestWithList");
 		GXDLMSTranslator.addTag(list, Command.METHOD_RESPONSE, "ActionResponse");
 		list.put(Command.METHOD_RESPONSE << 8 | ActionResponseType.NORMAL, "ActionResponseNormal");
-		list.put(Command.METHOD_RESPONSE << 8 | ActionResponseType.WITH_FIRST_BLOCK, "ActionResponseWithFirstBlock");
+		list.put(Command.METHOD_RESPONSE << 8 | ActionResponseType.WITH_FIRST_BLOCK, "ActionResponseWithPBlock");
 		list.put(Command.METHOD_RESPONSE << 8 | ActionResponseType.WITH_LIST, "ActionResponseWithList");
 		list.put((int) Command.DATA_NOTIFICATION, "DataNotification");
 		GXDLMSTranslator.addTag(list, Command.GET_RESPONSE, "GetResponse");
@@ -232,6 +232,7 @@ final class TranslatorSimpleTags {
 		GXDLMSTranslator.addTag(list, TranslatorTags.METHOD_DESCRIPTOR, "MethodDescriptor");
 		GXDLMSTranslator.addTag(list, TranslatorTags.METHOD_ID, "MethodId");
 		GXDLMSTranslator.addTag(list, TranslatorTags.RESULT, "Result");
+		GXDLMSTranslator.addTag(list, TranslatorTags.P_BLOCK, "PBlock");
 		GXDLMSTranslator.addTag(list, TranslatorTags.RETURN_PARAMETERS, "ReturnParameters");
 		GXDLMSTranslator.addTag(list, TranslatorTags.ACCESS_SELECTION, "AccessSelection");
 		GXDLMSTranslator.addTag(list, TranslatorTags.VALUE, "Value");

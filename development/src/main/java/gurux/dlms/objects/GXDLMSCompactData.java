@@ -579,4 +579,15 @@ public class GXDLMSCompactData extends GXDLMSObject implements IGXDLMSBase {
 		info.setType(DataType.COMPACT_ARRAY);
 		return (List<Object>) GXCommon.getData(null, data, info);
 	}
+
+	@Override
+	public String[] getNames() {
+		return new String[] { "Logical Name", "Buffer", "CaptureObjects", "TemplateId", "TemplateDescription",
+				"CaptureMethod" };
+	}
+
+	@Override
+	public String[] getMethodNames() {
+		return new String[] { "Reset", "Capture" };
+	}
 }

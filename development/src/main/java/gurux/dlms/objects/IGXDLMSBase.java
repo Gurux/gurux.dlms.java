@@ -48,98 +48,90 @@ import gurux.dlms.ValueEventArgs;
 
 public interface IGXDLMSBase {
 
-    /**
-     * Returns collection of attributes to read. If attribute is static and
-     * already read or device is returned HW error it is not returned.
-     * 
-     * @param all
-     *            All are attributes get.
-     * @return Collection of attributes to read.
-     */
-    int[] getAttributeIndexToRead(boolean all);
+	/**
+	 * Returns collection of attributes to read. If attribute is static and already
+	 * read or device is returned HW error it is not returned.
+	 * 
+	 * @param all All are attributes get.
+	 * @return Collection of attributes to read.
+	 */
+	int[] getAttributeIndexToRead(boolean all);
 
-    /**
-     * @return Amount of attributes.
-     */
-    int getAttributeCount();
+	/**
+	 * @return Amount of attributes.
+	 */
+	int getAttributeCount();
 
-    /**
-     * @return Amount of methods.
-     */
-    int getMethodCount();
+	/**
+	 * @return Amount of methods.
+	 */
+	int getMethodCount();
 
-    /**
-     * Returns value of given attribute.
-     * 
-     * @param settings
-     *            DLMS settings.
-     * @param e
-     *            Get parameter.
-     * @return Returned value.
-     */
-    Object getValue(GXDLMSSettings settings, ValueEventArgs e);
+	/**
+	 * @return Returns names of attribute indexes.
+	 */
+	String[] getNames();
 
-    /**
-     * Set value of given attribute.
-     * 
-     * @param settings
-     *            DLMS settings.
-     * @param e
-     *            Set parameter.
-     */
-    void setValue(GXDLMSSettings settings, ValueEventArgs e);
+	/**
+	 * 
+	 * @return Returns names of method indexes.
+	 */
+	String[] getMethodNames();
 
-    /**
-     * Server calls invoke method.
-     * 
-     * @param settings
-     *            Server settings.
-     * @param e
-     *            Invoke parameter.
-     * @return Reply for the client.
-     * @throws NoSuchPaddingException
-     *             No such padding exception.
-     * @throws InvalidAlgorithmParameterException
-     *             Invalid algorithm parameter exception.
-     * @throws InvalidKeyException
-     *             Invalid key exception.
-     * @throws BadPaddingException
-     *             Bad padding exception.
-     * @throws SignatureException
-     *             Signature exception.
-     * @throws IllegalBlockSizeException
-     *             Illegal block size exception.
-     */
-    byte[] invoke(GXDLMSSettings settings, ValueEventArgs e)
-            throws InvalidKeyException, NoSuchPaddingException,
-            InvalidAlgorithmParameterException, IllegalBlockSizeException,
-            BadPaddingException, SignatureException;
+	/**
+	 * Returns value of given attribute.
+	 * 
+	 * @param settings DLMS settings.
+	 * @param e        Get parameter.
+	 * @return Returned value.
+	 */
+	Object getValue(GXDLMSSettings settings, ValueEventArgs e);
 
-    /**
-     * Load object content from XML.
-     * 
-     * @param reader
-     *            XML reader.
-     * @throws XMLStreamException
-     *             XML stream exception.
-     */
-    void load(GXXmlReader reader) throws XMLStreamException;
+	/**
+	 * Set value of given attribute.
+	 * 
+	 * @param settings DLMS settings.
+	 * @param e        Set parameter.
+	 */
+	void setValue(GXDLMSSettings settings, ValueEventArgs e);
 
-    /**
-     * Save object content to XML.
-     * 
-     * @param writer
-     *            XML writer.
-     * @throws XMLStreamException
-     *             XML stream exception.
-     */
-    void save(GXXmlWriter writer) throws XMLStreamException;
+	/**
+	 * Server calls invoke method.
+	 * 
+	 * @param settings Server settings.
+	 * @param e        Invoke parameter.
+	 * @return Reply for the client.
+	 * @throws NoSuchPaddingException             No such padding exception.
+	 * @throws InvalidAlgorithmParameterException Invalid algorithm parameter
+	 *                                            exception.
+	 * @throws InvalidKeyException                Invalid key exception.
+	 * @throws BadPaddingException                Bad padding exception.
+	 * @throws SignatureException                 Signature exception.
+	 * @throws IllegalBlockSizeException          Illegal block size exception.
+	 */
+	byte[] invoke(GXDLMSSettings settings, ValueEventArgs e) throws InvalidKeyException, NoSuchPaddingException,
+			InvalidAlgorithmParameterException, IllegalBlockSizeException, BadPaddingException, SignatureException;
 
-    /**
-     * Handle actions after Load.
-     * 
-     * @param reader
-     *            XML reader.
-     */
-    void postLoad(GXXmlReader reader);
+	/**
+	 * Load object content from XML.
+	 * 
+	 * @param reader XML reader.
+	 * @throws XMLStreamException XML stream exception.
+	 */
+	void load(GXXmlReader reader) throws XMLStreamException;
+
+	/**
+	 * Save object content to XML.
+	 * 
+	 * @param writer XML writer.
+	 * @throws XMLStreamException XML stream exception.
+	 */
+	void save(GXXmlWriter writer) throws XMLStreamException;
+
+	/**
+	 * Handle actions after Load.
+	 * 
+	 * @param reader XML reader.
+	 */
+	void postLoad(GXXmlReader reader);
 }

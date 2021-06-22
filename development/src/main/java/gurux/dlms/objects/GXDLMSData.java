@@ -214,4 +214,14 @@ public class GXDLMSData extends GXDLMSObject implements IGXDLMSBase {
 	@Override
 	public final void postLoad(final GXXmlReader reader) {
 	}
+
+	@Override
+	public String[] getNames() {
+		return new String[] { "Logical Name", "Value" };
+	}
+
+	@Override
+	public String[] getMethodNames() {
+		return new String[0];
+	}
 }
