@@ -334,6 +334,7 @@ public class GXDLMSBase extends GXDLMSSecureServer2
         super(ln, hdlc);
         ln.setClientSAP(16);
         ln.getXDLMSContextInfo().setMaxReceivePduSize(1024);
+        ln.getXDLMSContextInfo().setMaxSendPduSize(1024);
         // Only get is allowed.
         ln.getXDLMSContextInfo().getConformance().clear();
         ln.getXDLMSContextInfo().getConformance().add(Conformance.GET);
@@ -410,6 +411,9 @@ public class GXDLMSBase extends GXDLMSSecureServer2
         ln.setClientSAP(16);
         setPushClientAddress(64);
         this.setMaxReceivePDUSize(1024);
+        ln.getXDLMSContextInfo().setMaxReceivePduSize(1024);
+        ln.getXDLMSContextInfo().setMaxSendPduSize(1024);
+
         // Add security setup object.
         ln.setSecuritySetupReference("0.0.43.0.0.255");
         GXDLMSSecuritySetup s = new GXDLMSSecuritySetup("0.0.43.0.0.255");
