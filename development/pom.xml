@@ -2,7 +2,7 @@
   <modelVersion>4.0.0</modelVersion>
   <groupId>org.gurux</groupId>
   <artifactId>gurux.dlms</artifactId>
-  <version>4.0.28-SNAPSHOT</version>
+  <version>4.0.27-SNAPSHOT</version>
   <packaging>jar</packaging>
   <name>gurux.dlms.java</name>
   <url>http://www.gurux.org</url>
@@ -67,7 +67,7 @@
       <plugin>       
         <groupId>org.apache.maven.plugins</groupId>
         <artifactId>maven-release-plugin</artifactId>
-        <version>3.0.0-M1</version>
+        <version>3.0.0-M4</version>
         <configuration>
           <tagNameFormat>v@{project.version}</tagNameFormat>
           <autoVersionSubmodules>true</autoVersionSubmodules>
@@ -96,7 +96,7 @@
           <plugin>
             <groupId>org.apache.maven.plugins</groupId>
             <artifactId>maven-gpg-plugin</artifactId>
-            <version>1.5</version>
+            <version>3.0.1</version>
             <executions>
               <execution>
                 <id>sign-artifacts</id>
