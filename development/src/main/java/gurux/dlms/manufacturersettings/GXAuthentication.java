@@ -46,6 +46,7 @@ public class GXAuthentication {
     private int clientAddress;
     private Authentication type = Authentication.NONE;
     private byte[] password;
+    private String name;
 
     public GXAuthentication() {
     }
@@ -149,5 +150,20 @@ public class GXAuthentication {
      */
     public final void setPassword(final byte[] value) {
         password = value;
+    }
+
+    /**
+     * @return Authentication name.
+     */
+    public String getName() {
+        return name;
+    }
+
+    /**
+     * @param value
+     *            Authentication name.
+     */
+    public void setName(final String value) {
+        name = value;
     }
 }

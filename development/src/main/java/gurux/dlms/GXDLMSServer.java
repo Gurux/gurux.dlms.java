@@ -37,6 +37,7 @@ package gurux.dlms;
 import java.security.InvalidAlgorithmParameterException;
 import java.security.InvalidKeyException;
 import java.security.NoSuchAlgorithmException;
+import java.security.SignatureException;
 
 import javax.crypto.BadPaddingException;
 import javax.crypto.IllegalBlockSizeException;
@@ -288,11 +289,13 @@ public abstract class GXDLMSServer {
      *             Bad padding exception.
      * @throws IllegalBlockSizeException
      *             Illegal block size exception.
+     * @throws SignatureException
+     *             Signature exception.
      */
     public final byte[] handleRequest(final byte[] buff)
             throws InvalidKeyException, NoSuchAlgorithmException,
             NoSuchPaddingException, InvalidAlgorithmParameterException,
-            IllegalBlockSizeException, BadPaddingException {
+            IllegalBlockSizeException, BadPaddingException, SignatureException {
         return handleRequest(buff, new GXDLMSConnectionEventArgs());
     }
 
@@ -317,12 +320,14 @@ public abstract class GXDLMSServer {
      *             Bad padding exception.
      * @throws IllegalBlockSizeException
      *             Illegal block size exception.
+     * @throws SignatureException
+     *             Signature exception.
      */
     public final byte[] handleRequest(final byte[] buff,
             final GXDLMSConnectionEventArgs connectionInfo)
             throws InvalidKeyException, NoSuchAlgorithmException,
             NoSuchPaddingException, InvalidAlgorithmParameterException,
-            IllegalBlockSizeException, BadPaddingException {
+            IllegalBlockSizeException, BadPaddingException, SignatureException {
         GXServerReply sr = new GXServerReply(buff);
         sr.setConnectionInfo(connectionInfo);
         base.handleRequest(sr);

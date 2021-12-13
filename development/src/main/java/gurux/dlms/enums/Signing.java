@@ -31,40 +31,39 @@
 // This code is licensed under the GNU General Public License v2. 
 // Full text may be retrieved at http://www.gnu.org/licenses/gpl-2.0.txt
 //---------------------------------------------------------------------------
-
-package gurux.dlms;
+package gurux.dlms.enums;
 
 /**
- *
+ * Key agreement scheme.
  */
-public interface IGXCryptoNotifier {
+public enum Signing {
     /**
-     * Notifies Un-ciphered PDU.
-     * 
-     * @param sender
-     *            The source of the event.
-     * @param data
-     *            Un-ciphered PDU.
+     * Signing is not used.
      */
-    void onPduEventHandler(Object sender, byte[] data);
+    NONE,
+    /**
+     * The Ephemeral Unified Model scheme. Messages are digitally signed and
+     * send with general-ciphering messages.
+     */
+    EPHEMERAL_UNIFIED_MODEL,
 
     /**
-     * Called when the public or private key is needed and it's unknown.
-     * 
-     * @param sender
-     *            Sender
-     * @param args
-     *            Arguments
+     * The One-Pass Diffie-Hellman scheme. Messages are digitally signed and
+     * send with general-ciphering messages.
      */
-    void onKey(Object sender, GXCryptoKeyParameter args);
+    ONE_PASS_DIFFIE_HELLMAN,
 
     /**
-     * Called to encrypt or decrypt the ciphered data.
-     * 
-     * @param sender
-     *            Sender
-     * @param args
-     *            Arguments
+     * The Static Unified Model scheme. Messages are digitally signed and send
+     * with general-ciphering messages.
      */
-    void onCrypto(Object sender, GXCryptoKeyParameter args);
-};
+    STATIC_UNIFIED_MODEL,
+    /**
+     * General signing is used.
+     * <p>
+     * Messages are digitally signed and send with general-signing messages.
+     * general-signing messages are encrypted and send with glo_action.
+     * </p>
+     */
+    GENERAL_SIGNING
+}

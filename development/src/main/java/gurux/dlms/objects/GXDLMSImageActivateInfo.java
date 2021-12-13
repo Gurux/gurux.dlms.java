@@ -37,6 +37,9 @@ package gurux.dlms.objects;
 import gurux.dlms.GXByteBuffer;
 import gurux.dlms.internal.GXCommon;
 
+/**
+ * Meter firmware information is saved to image activate info.
+ */
 public class GXDLMSImageActivateInfo {
     private long size;
     private byte[] identification;
@@ -113,8 +116,8 @@ public class GXDLMSImageActivateInfo {
      * @param forSignature
      *            Signature.
      */
-    public GXDLMSImageActivateInfo(final long forSize,
-            final byte[] forIdentification, final byte[] forSignature) {
+    public GXDLMSImageActivateInfo(final long forSize, final byte[] forIdentification,
+            final byte[] forSignature) {
         size = forSize;
         identification = forIdentification;
         signature = forSignature;

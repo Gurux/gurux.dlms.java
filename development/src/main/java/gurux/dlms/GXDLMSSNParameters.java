@@ -86,9 +86,8 @@ class GXDLMSSNParameters {
      * @param forData Attribute descriptor
      * @return Generated messages.
      */
-    GXDLMSSNParameters(final GXDLMSSettings forSettings, final int forCommand,
-            final int forCount, final int forCommandType,
-            final GXByteBuffer forAttributeDescriptor,
+    GXDLMSSNParameters(final GXDLMSSettings forSettings, final int forCommand, final int forCount,
+            final int forCommandType, final GXByteBuffer forAttributeDescriptor,
             final GXByteBuffer forData) {
         settings = forSettings;
         blockIndex = (short) settings.getBlockIndex();
@@ -98,6 +97,9 @@ class GXDLMSSNParameters {
         attributeDescriptor = forAttributeDescriptor;
         data = forData;
         multipleBlocks = false;
+        if (settings != null) {
+            settings.setCommand(forCommand);
+        }
     }
 
     /**

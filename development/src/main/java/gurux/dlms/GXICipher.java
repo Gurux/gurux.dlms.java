@@ -37,160 +37,196 @@ package gurux.dlms;
 import java.security.KeyPair;
 
 import gurux.dlms.asn.GXx509CertificateCollection;
-import gurux.dlms.enums.KeyAgreementScheme;
 import gurux.dlms.enums.Security;
+import gurux.dlms.enums.Signing;
 import gurux.dlms.objects.enums.SecurityPolicy;
 import gurux.dlms.objects.enums.SecuritySuite;
 
 public interface GXICipher {
 
-	/**
-	 * Reset encrypt settings.
-	 */
-	void reset();
+    /**
+     * Reset encrypt settings.
+     */
+    void reset();
 
-	/**
-	 * @return Is ciphering used.
-	 */
-	boolean isCiphered();
+    /**
+     * @return Is ciphering used.
+     */
+    boolean isCiphered();
 
-	/**
-	 * @return Used security.
-	 */
-	Security getSecurity();
+    /**
+     * @return Used security.
+     */
+    Security getSecurity();
 
-	/**
-	 * @param value Used security policy.
-	 */
-	void setSecurityPolicy(java.util.Set<SecurityPolicy> value);
+    /**
+     * @param value
+     *            Used security policy.
+     */
+    void setSecurityPolicy(java.util.Set<SecurityPolicy> value);
 
-	/**
-	 * @return Used security policy.
-	 */
-	java.util.Set<SecurityPolicy> getSecurityPolicy();
+    /**
+     * @return Used security policy.
+     */
+    java.util.Set<SecurityPolicy> getSecurityPolicy();
 
-	/**
-	 * @param value Used security.
-	 */
-	void setSecurity(Security value);
+    /**
+     * @param value
+     *            Used security.
+     */
+    void setSecurity(Security value);
 
-	/**
-	 * @return Used security suite.
-	 */
-	SecuritySuite getSecuritySuite();
+    /**
+     * @return Used security suite.
+     */
+    SecuritySuite getSecuritySuite();
 
-	/**
-	 * @param value Used security suite.
-	 */
-	void setSecuritySuite(final SecuritySuite value);
+    /**
+     * @param value
+     *            Used security suite.
+     */
+    void setSecuritySuite(final SecuritySuite value);
 
-	/**
-	 * @return System title.
-	 */
-	byte[] getSystemTitle();
+    /**
+     * @return System title.
+     */
+    byte[] getSystemTitle();
 
-	/**
-	 * @param value System title.
-	 */
-	void setSystemTitle(byte[] value);
+    /**
+     * @param value
+     *            System title.
+     */
+    void setSystemTitle(byte[] value);
 
-	/**
-	 * @return Recipient system Title.
-	 */
-	byte[] getRecipientSystemTitle();
+    /**
+     * @return Recipient system Title.
+     */
+    byte[] getRecipientSystemTitle();
 
-	/**
-	 * @param value Block cipher key.
-	 */
-	void setBlockCipherKey(byte[] value);
+    /**
+     * @param value
+     *            Block cipher key.
+     */
+    void setBlockCipherKey(byte[] value);
 
-	/**
-	 * @return Block cipher key.
-	 */
-	byte[] getBlockCipherKey();
+    /**
+     * @return Block cipher key.
+     */
+    byte[] getBlockCipherKey();
 
-	/**
-	 * @return Authentication key.
-	 */
-	byte[] getAuthenticationKey();
+    /**
+     * @return Authentication key.
+     */
+    byte[] getAuthenticationKey();
 
-	/**
-	 * @param value Authentication key.
-	 */
-	void setAuthenticationKey(byte[] value);
+    /**
+     * @param value
+     *            Authentication key.
+     */
+    void setAuthenticationKey(byte[] value);
 
-	/**
-	 * @param value Broadcast block cipher key.
-	 */
-	void setBroadcastBlockCipherKey(byte[] value);
+    /**
+     * @param value
+     *            Broadcast block cipher key.
+     */
+    void setBroadcastBlockCipherKey(byte[] value);
 
-	/**
-	 * @return Broadcast block cipher key.
-	 */
-	byte[] getBroadcastBlockCipherKey();
+    /**
+     * @return Broadcast block cipher key.
+     */
+    byte[] getBroadcastBlockCipherKey();
 
-	/**
-	 * @return Invocation counter.
-	 */
-	long getInvocationCounter();
+    /**
+     * @return Invocation counter.
+     */
+    long getInvocationCounter();
 
-	/**
-	 * @param value Invocation counter.
-	 */
-	void setInvocationCounter(long value);
+    /**
+     * @param value
+     *            Invocation counter.
+     */
+    void setInvocationCounter(long value);
 
-	/**
-	 * @return Ephemeral key pair.
-	 */
-	KeyPair getEphemeralKeyPair();
+    /**
+     * @return Invocation counter.
+     */
+    byte[] getTransactionId();
 
-	/**
-	 * @param value Ephemeral key pair.
-	 */
-	void setEphemeralKeyPair(KeyPair value);
+    /**
+     * @param value
+     *            Invocation counter.
+     */
+    void setTransactionId(byte[] value);
 
-	/**
-	 * @return Client's key agreement key pair.
-	 */
-	KeyPair getKeyAgreementKeyPair();
+    /**
+     * @return Ephemeral key pair.
+     */
+    KeyPair getEphemeralKeyPair();
 
-	/**
-	 * @param value Client's key agreement key pair.
-	 */
-	void setKeyAgreementKeyPair(KeyPair value);
+    /**
+     * @param value
+     *            Ephemeral key pair.
+     */
+    void setEphemeralKeyPair(KeyPair value);
 
-	/**
-	 * @return Available certificates.
-	 */
-	GXx509CertificateCollection getCertificates();
+    /**
+     * @return Client's key agreement key pair.
+     */
+    KeyPair getKeyAgreementKeyPair();
 
-	/**
-	 * @return Signing key pair.
-	 */
-	KeyPair getSigningKeyPair();
+    /**
+     * @param value
+     *            Client's key agreement key pair.
+     */
+    void setKeyAgreementKeyPair(KeyPair value);
 
-	/**
-	 * @param value Signing key pair.
-	 */
-	void setSigningKeyPair(KeyPair value);
+    /**
+     * @return Available certificates.
+     */
+    GXx509CertificateCollection getCertificates();
 
-	/**
-	 * @return Dedicated key.
-	 */
-	byte[] getDedicatedKey();
+    /**
+     * @return Signing key pair.
+     */
+    KeyPair getSigningKeyPair();
 
-	/**
-	 * @param value Dedicated key.
-	 */
-	void setDedicatedKey(byte[] value);
+    /**
+     * @param value
+     *            Signing key pair.
+     */
+    void setSigningKeyPair(KeyPair value);
 
-	/**
-	 * @return Used key agreement scheme.
-	 */
-	public KeyAgreementScheme getKeyAgreementScheme();
+    /**
+     * @return TLS signing key pair.
+     */
+    KeyPair getTlsKeyPair();
 
-	/**
-	 * @param value Used key agreement scheme.
-	 */
-	public void setKeyAgreementScheme(final KeyAgreementScheme value);
+    /**
+     * @param value
+     *            Signing key pair.
+     */
+    void setTlsKeyPair(KeyPair value);
+
+    /**
+     * @return Dedicated key.
+     */
+    byte[] getDedicatedKey();
+
+    /**
+     * @param value
+     *            Dedicated key.
+     */
+    void setDedicatedKey(byte[] value);
+
+    /**
+     * @return Used signing.
+     */
+    Signing getSigning();
+
+    /**
+     * @param value
+     *            Used signing.
+     */
+    void setSigning(Signing value);
+
 }

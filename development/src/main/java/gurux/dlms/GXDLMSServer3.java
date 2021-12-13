@@ -47,92 +47,120 @@ import gurux.dlms.objects.GXDLMSTcpUdpSetup;
 /**
  * GXDLMSServer implements methods to implement DLMS/COSEM meter/proxy.
  */
-public abstract class GXDLMSServer3 extends GXDLMSServer2 {
-	/**
-	 * Constructor for logical name referencing.
-	 * 
-	 * @param logicalNameReferencing Is logical name referencing used.
-	 * @param type                   Interface type.
-	 */
-	public GXDLMSServer3(final boolean logicalNameReferencing, final InterfaceType type) {
-		super(logicalNameReferencing, type);
-	}
+public abstract class GXDLMSServer3 extends GXDLMSServer2
+        implements IGXCryptoNotifier {
+    /**
+     * Constructor for logical name referencing.
+     * 
+     * @param logicalNameReferencing
+     *            Is logical name referencing used.
+     * @param type
+     *            Interface type.
+     */
+    public GXDLMSServer3(final boolean logicalNameReferencing,
+            final InterfaceType type) {
+        super(logicalNameReferencing, type);
+    }
 
-	/**
-	 * Constructor for logical name referencing.
-	 * 
-	 * @param ln   Association logical name.
-	 * @param type Interface type.
-	 */
-	public GXDLMSServer3(final GXDLMSAssociationLogicalName ln, final InterfaceType type) {
-		super(ln, type);
-	}
+    /**
+     * Constructor for logical name referencing.
+     * 
+     * @param ln
+     *            Association logical name.
+     * @param type
+     *            Interface type.
+     */
+    public GXDLMSServer3(final GXDLMSAssociationLogicalName ln,
+            final InterfaceType type) {
+        super(ln, type);
+    }
 
-	/**
-	 * Constructor for short name referencing.
-	 * 
-	 * @param sn   Association short name.
-	 * @param type Interface type.
-	 */
-	public GXDLMSServer3(final GXDLMSAssociationShortName sn, final InterfaceType type) {
-		super(sn, type);
-	}
+    /**
+     * Constructor for short name referencing.
+     * 
+     * @param sn
+     *            Association short name.
+     * @param type
+     *            Interface type.
+     */
+    public GXDLMSServer3(final GXDLMSAssociationShortName sn,
+            final InterfaceType type) {
+        super(sn, type);
+    }
 
-	/**
-	 * Constructor for logical name referencing.
-	 * 
-	 * @param ln   Association logical name.
-	 * @param hdlc HDLC settings.
-	 */
-	public GXDLMSServer3(final GXDLMSAssociationLogicalName ln, final GXDLMSHdlcSetup hdlc) {
-		super(ln, hdlc);
-	}
+    /**
+     * Constructor for logical name referencing.
+     * 
+     * @param ln
+     *            Association logical name.
+     * @param hdlc
+     *            HDLC settings.
+     */
+    public GXDLMSServer3(final GXDLMSAssociationLogicalName ln,
+            final GXDLMSHdlcSetup hdlc) {
+        super(ln, hdlc);
+    }
 
-	/**
-	 * Constructor for short name referencing.
-	 * 
-	 * @param sn   Association short name.
-	 * @param hdlc HDLC settings.
-	 */
-	public GXDLMSServer3(final GXDLMSAssociationShortName sn, final GXDLMSHdlcSetup hdlc) {
-		super(sn, hdlc);
-	}
+    /**
+     * Constructor for short name referencing.
+     * 
+     * @param sn
+     *            Association short name.
+     * @param hdlc
+     *            HDLC settings.
+     */
+    public GXDLMSServer3(final GXDLMSAssociationShortName sn,
+            final GXDLMSHdlcSetup hdlc) {
+        super(sn, hdlc);
+    }
 
-	/**
-	 * Constructor for logical name referencing.
-	 * 
-	 * @param ln      Association logical name.
-	 * @param wrapper WRAPPER settings.
-	 */
-	public GXDLMSServer3(final GXDLMSAssociationLogicalName ln, final GXDLMSTcpUdpSetup wrapper) {
-		super(ln, wrapper);
-	}
+    /**
+     * Constructor for logical name referencing.
+     * 
+     * @param ln
+     *            Association logical name.
+     * @param wrapper
+     *            WRAPPER settings.
+     */
+    public GXDLMSServer3(final GXDLMSAssociationLogicalName ln,
+            final GXDLMSTcpUdpSetup wrapper) {
+        super(ln, wrapper);
+    }
 
-	/**
-	 * Constructor for short name referencing.
-	 * 
-	 * @param sn      Association short name.
-	 * @param wrapper WRAPPER settings.
-	 */
-	public GXDLMSServer3(final GXDLMSAssociationShortName sn, final GXDLMSTcpUdpSetup wrapper) {
-		super(sn, wrapper);
-	}
+    /**
+     * Constructor for short name referencing.
+     * 
+     * @param sn
+     *            Association short name.
+     * @param wrapper
+     *            WRAPPER settings.
+     */
+    public GXDLMSServer3(final GXDLMSAssociationShortName sn,
+            final GXDLMSTcpUdpSetup wrapper) {
+        super(sn, wrapper);
+    }
 
-	/**
-	 * Get attribute access mode.
-	 * 
-	 * @param arg Value event argument.
-	 * @return Access mode.
-	 * @throws Exception Server handler occurred exceptions.
-	 */
-	protected abstract Set<AccessMode3> onGetAttributeAccess3(ValueEventArgs arg) throws Exception;
+    /**
+     * Get attribute access mode.
+     * 
+     * @param arg
+     *            Value event argument.
+     * @return Access mode.
+     * @throws Exception
+     *             Server handler occurred exceptions.
+     */
+    protected abstract Set<AccessMode3>
+            onGetAttributeAccess3(ValueEventArgs arg) throws Exception;
 
-	/**
-	 * Get method access mode.
-	 * 
-	 * @param arg Value event argument.
-	 * @return Method access mode.
-	 * @throws Exception Server handler occurred exceptions.
-	 */
-	protected abstract Set<MethodAccessMode3> onGetMethodAccess3(ValueEventArgs arg) throws Exception;
+    /**
+     * Get method access mode.
+     * 
+     * @param arg
+     *            Value event argument.
+     * @return Method access mode.
+     * @throws Exception
+     *             Server handler occurred exceptions.
+     */
+    protected abstract Set<MethodAccessMode3>
+            onGetMethodAccess3(ValueEventArgs arg) throws Exception;
 }

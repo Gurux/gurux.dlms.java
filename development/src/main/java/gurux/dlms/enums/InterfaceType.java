@@ -86,7 +86,12 @@ public enum InterfaceType {
     /**
      * OFDM PLC PRIME is defined in IEC 62056-8-4.
      */
-    PLC_PRIME;
+    PLC_PRIME,
+    /**
+     * EN 13757-2 wired (twisted pair based) M-Bus scheme is used.
+     */
+    WIRED_MBUS;
+
     /**
      * @return Get integer value for enumeration.
      */

@@ -1312,9 +1312,6 @@ public class GXDLMSBase extends GXDLMSSecureServer2
                 getItems().addAll(GXDLMSObjectCollection.load(settingsPath));
                 return;
             }
-            if (getAssociationsShareCertificates()) {
-                // MIKKO
-            }
             // Save value if it's updated with action.
             if (isChangedWithAction(it.getTarget().getObjectType(),
                     it.getIndex())) {

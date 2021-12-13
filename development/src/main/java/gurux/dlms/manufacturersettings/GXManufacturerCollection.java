@@ -320,9 +320,11 @@ public class GXManufacturerCollection
                 if (target.equalsIgnoreCase("GXManufacturer")) {
                     man = new GXManufacturer();
                 } else if (target.equalsIgnoreCase("GXObisCode")) {
+                    att = null;
                     obisCode = new GXObisCode();
                     man.getObisCodes().add(obisCode);
                 } else if (target.equalsIgnoreCase("GXAuthentication")) {
+                    att = null;
                     authentication = new GXAuthentication();
                     man.getSettings().add(authentication);
                 } else if (target.equalsIgnoreCase("GXServerAddress")) {
@@ -343,7 +345,13 @@ public class GXManufacturerCollection
                 if (target.equalsIgnoreCase("Identification")) {
                     man.setIdentification(data);
                 } else if (target.equalsIgnoreCase("Name")) {
-                    man.setName(data);
+                    if (att != null) {
+                        att.setName(data);
+                    } else if (authentication != null) {
+                        authentication.setName(data);
+                    } else {
+                        man.setName(data);
+                    }
                 } else if (target.equalsIgnoreCase("UseLN")) {
                     man.setUseLogicalNameReferencing(
                             Boolean.parseBoolean(data));

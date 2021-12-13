@@ -32,39 +32,23 @@
 // Full text may be retrieved at http://www.gnu.org/licenses/gpl-2.0.txt
 //---------------------------------------------------------------------------
 
-package gurux.dlms;
+package gurux.dlms.objects.enums;
 
 /**
- *
+ * Enumerates communication port protection status values.
  */
-public interface IGXCryptoNotifier {
-    /**
-     * Notifies Un-ciphered PDU.
-     * 
-     * @param sender
-     *            The source of the event.
-     * @param data
-     *            Un-ciphered PDU.
-     */
-    void onPduEventHandler(Object sender, byte[] data);
+public enum ProtectionStatus {
 
     /**
-     * Called when the public or private key is needed and it's unknown.
-     * 
-     * @param sender
-     *            Sender
-     * @param args
-     *            Arguments
+     * Port is unlocked.
      */
-    void onKey(Object sender, GXCryptoKeyParameter args);
-
+    UNLOCKED,
     /**
-     * Called to encrypt or decrypt the ciphered data.
-     * 
-     * @param sender
-     *            Sender
-     * @param args
-     *            Arguments
+     * The port is temporarily locked. Communication is not possible.
      */
-    void onCrypto(Object sender, GXCryptoKeyParameter args);
-};
+    TEMPORARILY_LOCKED,
+    /**
+     * Port is locked. Communication is not possible.
+     */
+    LOCKED,
+}

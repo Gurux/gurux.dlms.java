@@ -32,39 +32,23 @@
 // Full text may be retrieved at http://www.gnu.org/licenses/gpl-2.0.txt
 //---------------------------------------------------------------------------
 
-package gurux.dlms;
+package gurux.dlms.objects.enums;
 
 /**
- *
+ * Defines NTP authentication methods.
  */
-public interface IGXCryptoNotifier {
+public enum NtpAuthenticationMethod {
     /**
-     * Notifies Un-ciphered PDU.
-     * 
-     * @param sender
-     *            The source of the event.
-     * @param data
-     *            Un-ciphered PDU.
+     * No security is used.
      */
-    void onPduEventHandler(Object sender, byte[] data);
+    NO_SECURITY,
+    /**
+     * Shared secrets are used.
+     */
+    SHARED_SECRETS,
 
     /**
-     * Called when the public or private key is needed and it's unknown.
-     * 
-     * @param sender
-     *            Sender
-     * @param args
-     *            Arguments
+     * IFF auto key is used.
      */
-    void onKey(Object sender, GXCryptoKeyParameter args);
-
-    /**
-     * Called to encrypt or decrypt the ciphered data.
-     * 
-     * @param sender
-     *            Sender
-     * @param args
-     *            Arguments
-     */
-    void onCrypto(Object sender, GXCryptoKeyParameter args);
-};
+    AUTO_KEY_IFF
+}

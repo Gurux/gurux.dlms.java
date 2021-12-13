@@ -291,6 +291,11 @@ public enum ObjectType {
     REGISTER_TABLE(61),
 
     /**
+     * NTP Setup is used for time synchronisation.
+     */
+    NTP_SETUP(100),
+
+    /**
      * Configure a ZigBee PRO device with information necessary to create or
      * join the network.
      */
@@ -417,6 +422,11 @@ public enum ObjectType {
      * G3-PLC 6LoWPAN.
      */
     G3_PLC6_LO_WPAN(92),
+
+    /*
+     * Communication port protection.
+     */
+    COMMUNICATION_PORT_PROTECTION(124),
 
     /**
      * Tariff Plan (Piano Tariffario) is used in Italian standard UNI/TS

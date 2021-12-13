@@ -38,7 +38,7 @@ package gurux.dlms.asn.enums;
  * x509 Certificate.
  */
 public enum X509Certificate {
-    OLD_AUTHORITY_KEY_IDENTIFIER("2.5.29.1"),
+    UNKNOWN(""), OLD_AUTHORITY_KEY_IDENTIFIER("2.5.29.1"),
     OLD_PRIMARY_KEY_ATTRIBUTES("2.5.29.2"), CERTIFICATE_POLICIES("2.5.29.3"),
     PRIMARY_KEY_USAGE_RESTRICTION("2.5.29.4"),
     SUBJECT_DIRECTORY_ATTRIBUTES("2.5.29.9"),
@@ -82,6 +82,10 @@ public enum X509Certificate {
      * Convert string for enum value.
      */
     public static X509Certificate forValue(final String value) {
-        return getMappings().get(value);
+        X509Certificate ret = getMappings().get(value);
+        if (ret == null) {
+            ret = X509Certificate.UNKNOWN;
+        }
+        return ret;
     }
 }

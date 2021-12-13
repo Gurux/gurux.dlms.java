@@ -189,8 +189,7 @@ public class GXDLMSReader {
      *            Received data.
      * @throws Exception
      */
-    private void handleNotifyMessages(final GXReplyData reply)
-            throws Exception {
+    public void handleNotifyMessages(final GXReplyData reply) throws Exception {
         List<Entry<GXDLMSObject, Integer>> items =
                 new ArrayList<Entry<GXDLMSObject, Integer>>();
         Object value = dlms.parseReport(reply, items);
@@ -478,7 +477,7 @@ public class GXDLMSReader {
 
             // Allocate buffer to same size as transmit buffer of the meter.
             // Size of replyBuff is payload and frame (Bop, EOP, crc).
-            int size = (int) ((((Number) dlms.getLimits().getMaxInfoTX())
+            int size = (int) ((((Number) dlms.getHdlcSettings().getMaxInfoTX())
                     .intValue() & 0xFFFFFFFFL) + 40);
             replyBuff = java.nio.ByteBuffer.allocate(size);
         }

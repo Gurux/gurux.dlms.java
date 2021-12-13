@@ -42,97 +42,102 @@ import gurux.dlms.internal.GXCommon;
 
 public class GXxDLMSContextType {
 
-	/**
-	 * Conformance.
-	 */
-	private Set<Conformance> conformance;
-	/**
-	 * Maximum receive PDU size.
-	 */
-	private int maxReceivePduSize;
-	/**
-	 * Maximum Send PDU size.
-	 */
-	private int maxSendPduSize;
-	/**
-	 * DLMS Version Number.
-	 */
-	private int dlmsVersionNumber;
-	/**
-	 * Quality Of Service.
-	 */
-	private int qualityOfService;
-	/**
-	 * CypheringInfo.
-	 */
-	private byte[] cypheringInfo;
+    /**
+     * Conformance.
+     */
+    private Set<Conformance> conformance;
+    /**
+     * Maximum receive PDU size.
+     */
+    private int maxReceivePduSize;
+    /**
+     * Maximum Send PDU size.
+     */
+    private int maxSendPduSize;
+    /**
+     * DLMS Version Number.
+     */
+    private int dlmsVersionNumber;
+    /**
+     * Quality Of Service.
+     */
+    private int qualityOfService;
+    /**
+     * CypheringInfo.
+     */
+    private byte[] cypheringInfo;
 
-	/**
-	 * Constructor.
-	 */
-	public GXxDLMSContextType() {
-		conformance = new HashSet<Conformance>();
-		dlmsVersionNumber = 6;
-	}
+    /**
+     * Constructor.
+     */
+    public GXxDLMSContextType() {
+        conformance = new HashSet<Conformance>();
+        dlmsVersionNumber = 6;
+        maxReceivePduSize = 1024;
+    }
 
-	/**
-	 * @return Conformance
-	 */
-	public final Set<Conformance> getConformance() {
-		return conformance;
-	}
+    /**
+     * @return Conformance
+     */
+    public final Set<Conformance> getConformance() {
+        return conformance;
+    }
 
-	/**
-	 * @param value Conformance
-	 */
-	public final void setConformance(final Set<Conformance> value) {
-		conformance = value;
-	}
+    /**
+     * @param value
+     *            Conformance
+     */
+    public final void setConformance(final Set<Conformance> value) {
+        conformance = value;
+    }
 
-	public final int getMaxReceivePduSize() {
-		return maxReceivePduSize;
-	}
+    public final int getMaxReceivePduSize() {
+        return maxReceivePduSize;
+    }
 
-	public final void setMaxReceivePduSize(final int value) {
-		maxReceivePduSize = value;
-	}
+    public final void setMaxReceivePduSize(final int value) {
+        maxReceivePduSize = value;
+    }
 
-	public final int getMaxSendPduSize() {
-		return maxSendPduSize;
-	}
+    public final int getMaxSendPduSize() {
+        return maxSendPduSize;
+    }
 
-	public final void setMaxSendPduSize(final int value) {
-		maxSendPduSize = value;
-	}
+    public final void setMaxSendPduSize(final int value) {
+        maxSendPduSize = value;
+    }
 
-	public final int getDlmsVersionNumber() {
-		return dlmsVersionNumber;
-	}
+    public final int getDlmsVersionNumber() {
+        return dlmsVersionNumber;
+    }
 
-	public final void setDlmsVersionNumber(final int value) {
-		dlmsVersionNumber = value;
-	}
+    public final void setDlmsVersionNumber(final int value) {
+        dlmsVersionNumber = value;
+    }
 
-	public final int getQualityOfService() {
-		return qualityOfService;
-	}
+    public final int getQualityOfService() {
+        return qualityOfService;
+    }
 
-	public final void setQualityOfService(final int value) {
-		qualityOfService = value;
-	}
+    public final void setQualityOfService(final int value) {
+        qualityOfService = value;
+    }
 
-	public final byte[] getCypheringInfo() {
-		return cypheringInfo;
-	}
+    public final byte[] getCypheringInfo() {
+        return cypheringInfo;
+    }
 
-	public final void setCypheringInfo(final byte[] value) {
-		cypheringInfo = value;
-	}
+    public final void setCypheringInfo(final byte[] value) {
+        cypheringInfo = value;
+    }
 
-	@Override
-	public final String toString() {
-		return String.valueOf(conformance) + " " + String.valueOf(maxReceivePduSize) + " "
-				+ String.valueOf(maxSendPduSize) + " " + String.valueOf(dlmsVersionNumber) + " "
-				+ String.valueOf(qualityOfService) + " " + GXCommon.toHex(cypheringInfo, true);
-	}
+    @Override
+    public final String toString() {
+        return String.valueOf(conformance) + " "
+                + String.valueOf(maxReceivePduSize) + " "
+                + String.valueOf(maxSendPduSize) + " "
+                + String.valueOf(dlmsVersionNumber) + " "
+                + String.valueOf(qualityOfService) + " "
+                + GXCommon.toHex(cypheringInfo, true);
+    }
 }
