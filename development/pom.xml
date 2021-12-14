@@ -34,9 +34,8 @@
     <connection>scm:git:https://github.com/gurux/gurux.dlms.java.git</connection>
     <url>https://github.com/gurux/gurux.dlms.java/</url>
     <developerConnection>scm:git:https://github.com/gurux/gurux.dlms.java.git</developerConnection>
-    <tag>HEAD</tag>
   </scm>
- <!-- Update component to Central repository. -->
+  <!-- Update component to Central repository. -->
   <distributionManagement>
     <snapshotRepository>
       <id>nexus-snapshot</id>
@@ -57,14 +56,26 @@
         <version>3.2.0</version>
         <executions>
           <execution>
-           <id>attach-javadocs</id>
-             <goals>
-               <goal>jar</goal>
+            <id>attach-javadocs</id>
+            <goals>
+              <goal>jar</goal>
             </goals>
           </execution>
         </executions>
       </plugin>
-      <plugin>       
+      <plugin>
+        <artifactId>maven-source-plugin</artifactId>
+        <version>3.2.0</version>
+        <executions>
+          <execution>
+            <id>attach-sources</id>
+            <goals>
+              <goal>jar</goal>
+            </goals>
+          </execution>
+        </executions>
+      </plugin>
+      <plugin>
         <groupId>org.apache.maven.plugins</groupId>
         <artifactId>maven-release-plugin</artifactId>
         <version>3.0.0-M4</version>
@@ -80,18 +91,7 @@
     <profile>
       <id>releases</id>
       <build>
-       	<plugins>
-	      <plugin>
-	        <artifactId>maven-source-plugin</artifactId>
-	            <executions>
-	                <execution>
-	                    <id>attach-sources</id>
-	                    <goals>
-	                        <goal>jar</goal>
-	                    </goals>
-	                </execution>
-	            </executions>
-	      </plugin>    
+        <plugins>
           <!--  Sign the component. -->
           <plugin>
             <groupId>org.apache.maven.plugins</groupId>
@@ -104,6 +104,9 @@
                 <goals>
                   <goal>sign</goal>
                 </goals>
+                <configuration>
+                  <keyname>${gpg.keyname}</keyname>
+                </configuration>
               </execution>
             </executions>
           </plugin>
@@ -123,16 +126,19 @@
       </build>
     </profile>
   </profiles>
-
   <dependencies>
+    <dependency>
+      <groupId>org.gurux</groupId>
+      <artifactId>gurux.common</artifactId>
+      <version>1.0.17</version>
+    </dependency>
     <dependency>
       <groupId>junit</groupId>
       <artifactId>junit</artifactId>
-      <version>4.8.1</version>
+      <version>4.13.1</version>
       <scope>test</scope>
     </dependency>
   </dependencies>
-
   <licenses>
     <license>
       <name>GNU General Public License, version 2</name>
