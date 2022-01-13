@@ -1154,79 +1154,79 @@ public class GXDLMSServerBase {
 
     private boolean handleGeneralBlockTransfer(final GXByteBuffer data, final GXServerReply sr,
             final int cipheredCommand) throws Exception {
-        if (transaction != null) {
-            if (transaction.getCommand() == Command.GET_REQUEST) {
-                // Get request for next data block
-                if (sr.getCount() == 0) {
-                    settings.setBlockNumberAck(settings.getBlockNumberAck() + 1);
-                    sr.setCount(settings.getGbtWindowSize());
-                }
-                GXDLMSLNCommandHandler.getRequestNextDataBlock(settings, 0, this, data, replyData,
-                        null, true, cipheredCommand);
-                if (sr.getCount() != 0) {
-                    sr.setCount(sr.getCount() - 1);
-                }
-                if (this.transaction == null) {
-                    sr.setCount(0);
-                }
-            } else {
-                // BlockControl
-                short bc = data.getUInt8();
-                // Block number.
-                int blockNumber = data.getUInt16();
-                // Block number acknowledged.
-                int blockNumberAck = data.getUInt16();
-                int len = GXCommon.getObjectCount(data);
-                if (len > data.size() - data.position()) {
-                    replyData
-                            .set(generateConfirmedServiceError(ConfirmedServiceError.INITIATE_ERROR,
-                                    ServiceError.SERVICE, Service.UNSUPPORTED.getValue()));
-                } else {
-                    transaction.getData().set(data);
-                    // Send ACK.
-                    boolean igonoreAck = (bc & 0x40) != 0
-                            && (blockNumberAck * settings.getGbtWindowSize()) + 1 > blockNumber;
-                    int windowSize = settings.getGbtWindowSize();
-                    int bn = settings.getBlockIndex();
-                    if ((bc & 0x80) != 0) {
-                        handleCommand(transaction.getCommand(), transaction.getData(), sr,
-                                cipheredCommand);
-                        transaction = null;
-                        igonoreAck = false;
-                        windowSize = 1;
-                    }
-                    if (igonoreAck) {
-                        return false;
-                    }
-                    replyData.setUInt8(Command.GENERAL_BLOCK_TRANSFER);
-                    replyData.setUInt8((byte) (0x80 | windowSize));
-                    settings.setBlockIndex(settings.getBlockIndex() + 1);
-                    replyData.setUInt16(bn);
-                    replyData.setUInt16(blockNumber);
-                    replyData.setUInt8(0);
-                }
-            }
-        } else {
-            // BlockControl
-            // short bc =
-            data.getUInt8();
+        short bc = 0;
+        int blockNumber = 0, blockNumberAck = 0;
+        // BlockControl
+        if (!sr.isStreaming()) {
+            bc = data.getUInt8();
             // Block number.
-            int blockNumber = data.getUInt16();
+            blockNumber = data.getUInt16();
             // Block number acknowledged.
-            int blockNumberAck = data.getUInt16();
+            blockNumberAck = data.getUInt16();
             int len = GXCommon.getObjectCount(data);
             if (len > data.size() - data.position()) {
                 replyData.set(generateConfirmedServiceError(ConfirmedServiceError.INITIATE_ERROR,
                         ServiceError.SERVICE, Service.UNSUPPORTED.getValue()));
+            }
+            if (transaction != null) {
+                if (transaction.getCommand() == Command.GET_REQUEST
+                        || transaction.getCommand() == Command.METHOD_RESPONSE) {
+                    // Get request for next data block
+                    if (sr.getCount() == 0) {
+                        settings.setBlockNumberAck(settings.getBlockNumberAck() + 1);
+                        sr.setCount(bc & 0x3F);
+                    }
+                    if (transaction.getCommand() == Command.GET_REQUEST) {
+                        GXDLMSLNCommandHandler.getRequestNextDataBlock(settings, 0, this, data,
+                                replyData, null, true, cipheredCommand);
+                    } else {
+                        GXDLMSLNCommandHandler.methodRequestNextDataBlock(settings, 0, this, data,
+                                replyData, null, true, cipheredCommand);
+                    }
+                    if (sr.getCount() != 0) {
+                        sr.setCount(sr.getCount() - 1);
+                    }
+                    if (this.transaction == null) {
+                        sr.setCount(0);
+                    }
+                    // Save server GBT window size to settings because sr is
+                    // lost.
+                    if (settings.isServer()) {
+                        settings.setCount(sr.getCount());
+                    }
+                }
             } else {
-                transaction = new GXDLMSLongTransaction(null, data.getUInt8(), data);
+                transaction.getData().set(data);
+                // Send ACK.
+                boolean igonoreAck = (bc & 0x40) != 0
+                        && (blockNumberAck * settings.getGbtWindowSize()) + 1 > blockNumber;
+                int windowSize = settings.getGbtWindowSize();
+                int bn = settings.getBlockIndex();
+                if ((bc & 0x80) != 0) {
+                    handleCommand(transaction.getCommand(), transaction.getData(), sr,
+                            cipheredCommand);
+                    transaction = null;
+                    igonoreAck = false;
+                    windowSize = 1;
+                }
+                if (igonoreAck) {
+                    return false;
+                }
                 replyData.setUInt8(Command.GENERAL_BLOCK_TRANSFER);
-                replyData.setUInt8((0x80 | settings.getGbtWindowSize()));
+                replyData.setUInt8((byte) (0x80 | windowSize));
+                settings.setBlockIndex(settings.getBlockIndex() + 1);
+                replyData.setUInt16(bn);
                 replyData.setUInt16(blockNumber);
-                ++blockNumberAck;
-                replyData.setUInt16(blockNumberAck);
                 replyData.setUInt8(0);
             }
+        } else {
+            transaction = new GXDLMSLongTransaction(null, data.getUInt8(), data);
+            replyData.setUInt8(Command.GENERAL_BLOCK_TRANSFER);
+            replyData.setUInt8((0x80 | settings.getGbtWindowSize()));
+            replyData.setUInt16(blockNumber);
+            ++blockNumberAck;
+            replyData.setUInt16(blockNumberAck);
+            replyData.setUInt8(0);
         }
         return true;
     }

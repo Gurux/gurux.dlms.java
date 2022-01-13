@@ -172,7 +172,7 @@ public class Settings {
                 else if ("Off".compareTo(it.getValue()) == 0)
                     settings.trace = TraceLevel.OFF;
                 else
-                    throw new IllegalArgumentException("Invalid Authentication option '"
+                    throw new IllegalArgumentException("Invalid Trace level option '"
                             + it.getValue() + "'. (Error, Warning, Info, Verbose, Off).");
                 break;
             case 'p':

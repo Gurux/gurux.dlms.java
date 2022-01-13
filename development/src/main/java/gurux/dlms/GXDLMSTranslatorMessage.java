@@ -35,6 +35,7 @@
 package gurux.dlms;
 
 import gurux.dlms.enums.InterfaceType;
+import gurux.dlms.enums.RequestTypes;
 
 /**
  * XML translator message detailed data.
@@ -66,6 +67,24 @@ public class GXDLMSTranslatorMessage {
      * Interface type.
      */
     private InterfaceType interfaceType;
+
+    /**
+     * Source address.
+     */
+    private int sourceAddress;
+    /**
+     * Target address.
+     */
+    private int targetAddress;
+    /**
+     * Is more data available. Return None if more data is not available or
+     * Frame or Block type.
+     */
+    private RequestTypes moreData;
+    /**
+     * Occurred exception.
+     */
+    private RuntimeException exception;
 
     public final GXByteBuffer getMessage() {
         return message;
@@ -146,8 +165,70 @@ public class GXDLMSTranslatorMessage {
      * @param value
      *            Interface type.
      */
-    public final void setInterfaceType(InterfaceType value) {
+    public final void setInterfaceType(final InterfaceType value) {
         interfaceType = value;
+    }
+
+    /**
+     * @return Source address.
+     */
+    public final int getSourceAddress() {
+        return sourceAddress;
+    }
+
+    /**
+     * @param value
+     *            Source address.
+     */
+    public final void setSourceAddress(final int value) {
+        sourceAddress = value;
+    }
+
+    /**
+     * @return Target address.
+     */
+    public final int getTargetAddress() {
+        return targetAddress;
+    }
+
+    /**
+     * @param value
+     *            Target address.
+     */
+    public final void setTargetAddress(final int value) {
+        targetAddress = value;
+    }
+
+    /**
+     * @return Is more data available. Return None if more data is not available
+     *         or Frame or Block type.
+     */
+    public final RequestTypes getMoreData() {
+        return moreData;
+    }
+
+    /**
+     * @param value
+     *            Is more data available. Return None if more data is not
+     *            available or Frame or Block type.
+     */
+    public final void setMoreData(final RequestTypes value) {
+        moreData = value;
+    }
+
+    /**
+     * @return Occurred exception.
+     */
+    public final RuntimeException getException() {
+        return exception;
+    }
+
+    /**
+     * @param value
+     *            Occurred exception.
+     */
+    public final void setException(final RuntimeException value) {
+        exception = value;
     }
 
 }

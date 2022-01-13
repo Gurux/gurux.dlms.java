@@ -251,6 +251,11 @@ public final class Command {
     public static final int GLO_CONFIRMED_SERVICE_ERROR = 46;
 
     /**
+     * Glo information report.
+     */
+    public static final int GLO_INFORMATION_REPORT = 56;
+
+    /**
      * General GLO ciphering.
      */
     public static final int GENERAL_GLO_CIPHERING = 0xDB;

@@ -724,6 +724,93 @@ public class GXDLMSTranslator {
         return msg.getXml();
     }
 
+    private static void updateAddress(final GXDLMSSettings settings,
+            final GXDLMSTranslatorMessage msg) {
+        Boolean reply = false;
+        switch (msg.getCommand()) {
+        case Command.READ_REQUEST:
+        case Command.WRITE_REQUEST:
+        case Command.GET_REQUEST:
+        case Command.SET_REQUEST:
+        case Command.METHOD_REQUEST:
+        case Command.SNRM:
+        case Command.AARQ:
+        case Command.DISCONNECT_REQUEST:
+        case Command.RELEASE_REQUEST:
+        case Command.ACCESS_REQUEST:
+        case Command.GLO_GET_REQUEST:
+        case Command.GLO_SET_REQUEST:
+        case Command.GLO_METHOD_REQUEST:
+        case Command.GLO_INITIATE_REQUEST:
+        case Command.GLO_READ_REQUEST:
+        case Command.GLO_WRITE_REQUEST:
+        case Command.DED_INITIATE_REQUEST:
+        case Command.DED_READ_REQUEST:
+        case Command.DED_WRITE_REQUEST:
+        case Command.DED_GET_REQUEST:
+        case Command.DED_SET_REQUEST:
+        case Command.DED_METHOD_REQUEST:
+        case Command.GATEWAY_REQUEST:
+        case Command.DISCOVER_REQUEST:
+        case Command.REGISTER_REQUEST:
+        case Command.PING_REQUEST:
+            reply = false;
+            break;
+        case Command.READ_RESPONSE:
+        case Command.WRITE_RESPONSE:
+        case Command.GET_RESPONSE:
+        case Command.SET_RESPONSE:
+        case Command.METHOD_RESPONSE:
+        case Command.DISCONNECT_MODE:
+        case Command.UNACCEPTABLE_FRAME:
+        case Command.UA:
+        case Command.AARE:
+        case Command.RELEASE_RESPONSE:
+        case Command.CONFIRMED_SERVICE_ERROR:
+        case Command.EXCEPTION_RESPONSE:
+            // case Command.GENERAL_BLOCK_TRANSFER:
+        case Command.ACCESS_RESPONSE:
+        case Command.DATA_NOTIFICATION:
+        case Command.GLO_GET_RESPONSE:
+        case Command.GLO_SET_RESPONSE:
+        case Command.GLO_EVENT_NOTIFICATION_REQUEST:
+        case Command.GLO_METHOD_RESPONSE:
+        case Command.GLO_INITIATE_RESPONSE:
+        case Command.GLO_READ_RESPONSE:
+        case Command.GLO_WRITE_RESPONSE:
+        case Command.GLO_CONFIRMED_SERVICE_ERROR:
+        case Command.GLO_INFORMATION_REPORT:
+            // case Command.GENERAL_GLO_CIPHERING:
+            // case Command.GENERALDEDCIPHERING:
+            // case Command.GENERALCIPHERING:
+            // case Command.GENERALSIGNING:
+        case Command.INFORMATION_REPORT:
+        case Command.EVENT_NOTIFICATION:
+        case Command.DED_INITIATE_RESPONSE:
+        case Command.DED_READ_RESPONSE:
+        case Command.DED_WRITE_RESPONSE:
+        case Command.DED_CONFIRMED_SERVICE_ERROR:
+        case Command.DED_UNCONFIRMED_WRITE_REQUEST:
+        case Command.DED_INFORMATION_REPORT_REQUEST:
+        case Command.DED_GET_RESPONSE:
+        case Command.DED_SET_RESPONSE:
+        case Command.DED_EVENT_NOTIFICATION:
+        case Command.DED_METHOD_RESPONSE:
+        case Command.GATEWAY_RESPONSE:
+        case Command.DISCOVER_REPORT:
+        case Command.PING_RESPONSE:
+            reply = true;
+            break;
+        }
+        if (reply) {
+            msg.setTargetAddress(settings.getClientAddress());
+            msg.setSourceAddress(settings.getServerAddress());
+        } else {
+            msg.setSourceAddress(settings.getClientAddress());
+            msg.setTargetAddress(settings.getServerAddress());
+        }
+    }
+
     /**
      * Convert message to XML.
      * 

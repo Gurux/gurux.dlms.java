@@ -948,10 +948,10 @@ final class GXDLMSLNCommandHandler {
         }
     }
 
-    public static void methodRequestNextDataBlock(GXDLMSSettings settings, GXDLMSServerBase server,
-            GXByteBuffer data, short invokeID, GXDLMSConnectionEventArgs connectionInfo,
-            GXByteBuffer replyData, GXDLMSTranslatorStructure xml, boolean streaming,
-            int cipheredCommand) throws Exception {
+    public static void methodRequestNextDataBlock(final GXDLMSSettings settings, final int invokeID,
+            final GXDLMSServerBase server, final GXByteBuffer data, final GXByteBuffer replyData,
+            final GXDLMSTranslatorStructure xml, final boolean streaming, final int cipheredCommand)
+            throws Exception {
         GXByteBuffer bb = new GXByteBuffer();
         short lastBlock = data.getUInt8();
         if (!streaming) {
@@ -974,6 +974,7 @@ final class GXDLMSLNCommandHandler {
                 return;
             }
         }
+        settings.increaseBlockIndex();
         GXDLMSLNParameters p = new GXDLMSLNParameters(settings, invokeID,
                 streaming ? Command.GENERAL_BLOCK_TRANSFER : Command.METHOD_RESPONSE,
                 ActionResponseType.NORMAL, null, bb, ErrorCode.OK.getValue(), cipheredCommand);
@@ -1065,8 +1066,8 @@ final class GXDLMSLNCommandHandler {
                     cipheredCommand);
             break;
         case ActionRequestType.NEXT_BLOCK:
-            methodRequestNextDataBlock(settings, server, data, invokeId, connectionInfo, replyData,
-                    xml, false, cipheredCommand);
+            methodRequestNextDataBlock(settings, invokeId, server, data, replyData, xml, false,
+                    cipheredCommand);
             break;
         case ActionRequestType.WITH_LIST:
             throw new IllegalArgumentException("Invalid Command.");

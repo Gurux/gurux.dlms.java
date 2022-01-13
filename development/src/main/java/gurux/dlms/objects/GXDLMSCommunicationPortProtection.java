@@ -58,8 +58,7 @@ import gurux.dlms.objects.enums.ProtectionStatus;
  * Online help:<br>
  * https://www.gurux.fi/Gurux.DLMS.Objects.GXDLMSCommunicationPortProtection
  */
-public class GXDLMSCommunicationPortProtection extends GXDLMSObject
-        implements IGXDLMSBase {
+public class GXDLMSCommunicationPortProtection extends GXDLMSObject implements IGXDLMSBase {
     /**
      * Controls the protection mode.
      */
@@ -292,19 +291,17 @@ public class GXDLMSCommunicationPortProtection extends GXDLMSObject
      * @throws SignatureException
      *             Signature exception.
      */
-    public final byte[][] reset(final GXDLMSClient client)
-            throws InvalidKeyException, NoSuchAlgorithmException,
-            NoSuchPaddingException, InvalidAlgorithmParameterException,
+    public final byte[][] reset(final GXDLMSClient client) throws InvalidKeyException,
+            NoSuchAlgorithmException, NoSuchPaddingException, InvalidAlgorithmParameterException,
             IllegalBlockSizeException, BadPaddingException, SignatureException {
         return client.method(getName(), getObjectType(), 1, 0, DataType.INT8);
     }
 
     @Override
     public final Object[] getValues() {
-        return new Object[] { getLogicalName(), protectionMode,
-                allowedFailedAttempts, initialLockoutTime, steepnessFactor,
-                maxLockoutTime, port, protectionStatus, failedAttempts,
-                cumulativeFailedAttempts };
+        return new Object[] { getLogicalName(), protectionMode, allowedFailedAttempts,
+                initialLockoutTime, steepnessFactor, maxLockoutTime, port, protectionStatus,
+                failedAttempts, cumulativeFailedAttempts };
     }
 
     /*
@@ -313,11 +310,9 @@ public class GXDLMSCommunicationPortProtection extends GXDLMSObject
      */
     @Override
     public final int[] getAttributeIndexToRead(final boolean all) {
-        java.util.ArrayList<Integer> attributes =
-                new java.util.ArrayList<Integer>();
+        java.util.ArrayList<Integer> attributes = new java.util.ArrayList<Integer>();
         // LN is static and read only once.
-        if (all || getLogicalName() == null
-                || getLogicalName().compareTo("") == 0) {
+        if (all || getLogicalName() == null || getLogicalName().compareTo("") == 0) {
             attributes.add(1);
         }
         // ProtectionMode
@@ -410,8 +405,7 @@ public class GXDLMSCommunicationPortProtection extends GXDLMSObject
             ret = DataType.UINT32;
             break;
         default:
-            throw new IllegalArgumentException(
-                    "getDataType failed. Invalid attribute index.");
+            throw new IllegalArgumentException("getDataType failed. Invalid attribute index.");
         }
         return ret;
     }
@@ -420,8 +414,7 @@ public class GXDLMSCommunicationPortProtection extends GXDLMSObject
      * Returns value of given attribute.
      */
     @Override
-    public final Object getValue(final GXDLMSSettings settings,
-            final ValueEventArgs e) {
+    public final Object getValue(final GXDLMSSettings settings, final ValueEventArgs e) {
         Object ret;
         switch (e.getIndex()) {
         case 1:
@@ -470,15 +463,13 @@ public class GXDLMSCommunicationPortProtection extends GXDLMSObject
      * Set value of given attribute.
      */
     @Override
-    public final void setValue(final GXDLMSSettings settings,
-            final ValueEventArgs e) {
+    public final void setValue(final GXDLMSSettings settings, final ValueEventArgs e) {
         switch (e.getIndex()) {
         case 1:
             setLogicalName(GXCommon.toLogicalName(e.getValue()));
             break;
         case 2:
-            protectionMode = ProtectionMode.values()[((Number) e.getValue())
-                    .byteValue()];
+            protectionMode = ProtectionMode.values()[((Number) e.getValue()).byteValue()];
             break;
         case 3:
             allowedFailedAttempts = ((Number) e.getValue()).intValue();
@@ -497,8 +488,7 @@ public class GXDLMSCommunicationPortProtection extends GXDLMSObject
                     GXCommon.toLogicalName(e.getValue()));
             break;
         case 8:
-            protectionStatus = ProtectionStatus.values()[((Number) e.getValue())
-                    .intValue()];
+            protectionStatus = ProtectionStatus.values()[((Number) e.getValue()).intValue()];
             break;
         case 9:
             failedAttempts = ((Number) e.getValue()).longValue();
@@ -514,14 +504,10 @@ public class GXDLMSCommunicationPortProtection extends GXDLMSObject
 
     @Override
     public final void load(final GXXmlReader reader) throws XMLStreamException {
-        protectionMode = ProtectionMode.values()[reader
-                .readElementContentAsInt("ProtectionMode")];
-        allowedFailedAttempts =
-                reader.readElementContentAsInt("AllowedFailedAttempts");
-        initialLockoutTime =
-                reader.readElementContentAsLong("InitialLockoutTime");
-        steepnessFactor =
-                (byte) reader.readElementContentAsInt("SteepnessFactor");
+        protectionMode = ProtectionMode.values()[reader.readElementContentAsInt("ProtectionMode")];
+        allowedFailedAttempts = reader.readElementContentAsInt("AllowedFailedAttempts");
+        initialLockoutTime = reader.readElementContentAsLong("InitialLockoutTime");
+        steepnessFactor = (byte) reader.readElementContentAsInt("SteepnessFactor");
         maxLockoutTime = reader.readElementContentAsLong("MaxLockoutTime");
         String str = reader.readElementContentAsString("Port");
         if (str == null || str == "") {
@@ -534,31 +520,27 @@ public class GXDLMSCommunicationPortProtection extends GXDLMSObject
                 port.setLogicalName(str);
             }
         }
-        protectionStatus = ProtectionStatus.values()[reader
-                .readElementContentAsInt("ProtectionStatus")];
+        protectionStatus =
+                ProtectionStatus.values()[reader.readElementContentAsInt("ProtectionStatus")];
         failedAttempts = reader.readElementContentAsLong("FailedAttempts");
-        cumulativeFailedAttempts =
-                reader.readElementContentAsLong("CumulativeFailedAttempts");
+        cumulativeFailedAttempts = reader.readElementContentAsLong("CumulativeFailedAttempts");
     }
 
     @Override
     public final void save(final GXXmlWriter writer) throws XMLStreamException {
         writer.writeElementString("ProtectionMode", protectionMode.ordinal());
-        writer.writeElementString("AllowedFailedAttempts",
-                allowedFailedAttempts);
-        writer.writeElementString("InitialLockoutTime", initialLockoutTime, 4);
-        writer.writeElementString("SteepnessFactor", steepnessFactor, 5);
-        writer.writeElementString("MaxLockoutTime", maxLockoutTime, 6);
+        writer.writeElementString("AllowedFailedAttempts", allowedFailedAttempts);
+        writer.writeElementString("InitialLockoutTime", initialLockoutTime);
+        writer.writeElementString("SteepnessFactor", steepnessFactor);
+        writer.writeElementString("MaxLockoutTime", maxLockoutTime);
         if (port == null) {
             writer.writeElementString("Port", "");
         } else {
             writer.writeElementString("Port", port.getLogicalName());
         }
-        writer.writeElementString("ProtectionStatus",
-                protectionStatus.ordinal(), 8);
+        writer.writeElementString("ProtectionStatus", protectionStatus.ordinal());
         writer.writeElementString("FailedAttempts", failedAttempts);
-        writer.writeElementString("CumulativeFailedAttempts",
-                cumulativeFailedAttempts);
+        writer.writeElementString("CumulativeFailedAttempts", cumulativeFailedAttempts);
     }
 
     @Override
@@ -567,11 +549,9 @@ public class GXDLMSCommunicationPortProtection extends GXDLMSObject
 
     @Override
     public String[] getNames() {
-        return new String[] { "Logical Name", "Protection mode",
-                "Allowed failed attempts", "Initial lockout time",
-                "Steepness factor", "Max lockout time", "Port",
-                "Protection status", "Failed attempts",
-                "Cumulative failed attempts" };
+        return new String[] { "Logical Name", "Protection mode", "Allowed failed attempts",
+                "Initial lockout time", "Steepness factor", "Max lockout time", "Port",
+                "Protection status", "Failed attempts", "Cumulative failed attempts" };
     }
 
     @Override
