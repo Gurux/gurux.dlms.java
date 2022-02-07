@@ -1169,34 +1169,11 @@ public class GXDLMSBase extends GXDLMSSecureServer2
         }
     }
 
-    void connect(GXDLMSAutoConnect target) throws Exception {
-        if (target.getDestinations().length == 0) {
-            throw new IllegalArgumentException("Invalid destination.");
-        }
-        if (target.getMode() )
-        byte[][] data = this.generatePushSetupMessages(null, target);
-        String host = target.getDestination().substring(0, pos);
-        int port = Integer.parseInt(target.getDestination().substring(pos + 1));
-        GXNet net = new GXNet(NetworkType.TCP, host, port);
-        try {
-            net.open();
-            for (byte[] it : data) {
-                net.send(it, null);
-            }
-        } finally {
-            net.close();
-        }
-    }
-
     @Override
     public void onPreAction(ValueEventArgs[] args) throws Exception {
         for (ValueEventArgs e : args) {
             if (e.getIndex() == 1 && e.getTarget().getObjectType() == ObjectType.PUSH_SETUP) {
                 sendPush((GXDLMSPushSetup) e.getTarget());
-                e.setHandled(true);
-            } else if (e.getIndex() == 1
-                    && e.getTarget().getObjectType() == ObjectType.AUTO_CONNECT) {
-                connect((GXDLMSAutoConnect) e.getTarget());
                 e.setHandled(true);
             }
         }
