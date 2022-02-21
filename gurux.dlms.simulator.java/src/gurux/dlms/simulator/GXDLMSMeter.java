@@ -101,8 +101,8 @@ public class GXDLMSMeter extends GXDLMSSecureServer3
         super(logicalNameReferencing, type);
     }
 
-    public void initialize(IGXMedia media, TraceLevel trace, String path,
-            int sn, boolean exclusive) throws Exception {
+    public void initialize(IGXMedia media, TraceLevel trace, String path, int sn, boolean exclusive)
+            throws Exception {
         serialNumber = sn;
         objectsFile = path;
         Exclusive = exclusive;
@@ -124,18 +124,18 @@ public class GXDLMSMeter extends GXDLMSSecureServer3
     void updateValues(GXDLMSObjectCollection items) {
         // Update COSEM Logical Device Name
         String LDN = String.format("%013d", serialNumber);
-        GXDLMSData d =
-                (GXDLMSData) items.findByLN(ObjectType.DATA, "0.0.42.0.0.255");
+        GXDLMSData d = (GXDLMSData) items.findByLN(ObjectType.DATA, "0.0.42.0.0.255");
         if (d != null && d.getValue() instanceof String) {
             String v = (String) d.getValue();
             if (v != "") {
                 d.setValue(v.substring(0, 3) + LDN.getBytes());
-                getCiphering().setSystemTitle((byte[]) d.getValue());
+                if (((byte[]) d.getValue()).length == 8) {
+                    getCiphering().setSystemTitle((byte[]) d.getValue());
+                }
             }
         }
         // Update SAP Assignments
-        for (GXDLMSObject it : getItems()
-                .getObjects(ObjectType.SAP_ASSIGNMENT)) {
+        for (GXDLMSObject it : getItems().getObjects(ObjectType.SAP_ASSIGNMENT)) {
             GXDLMSSapAssignment sap = (GXDLMSSapAssignment) it;
             for (Entry<Integer, String> e : sap.getSapAssignmentList()) {
                 e.setValue(LDN);
@@ -155,8 +155,7 @@ public class GXDLMSMeter extends GXDLMSSecureServer3
                     break;
                 }
             }
-            String format =
-                    "%0" + String.valueOf(v.length() - sb.length()) + "d";
+            String format = "%0" + String.valueOf(v.length() - sb.length()) + "d";
             d.setValue(sb.toString() + String.format(format, serialNumber));
         }
     }
@@ -176,8 +175,7 @@ public class GXDLMSMeter extends GXDLMSSecureServer3
         synchronized (fileLock) {
             File f = new File(path);
             if (f.exists()) {
-                GXDLMSObjectCollection objects =
-                        GXDLMSObjectCollection.load(path);
+                GXDLMSObjectCollection objects = GXDLMSObjectCollection.load(path);
                 items.clear();
                 items.addAll(objects);
                 updateValues(items);
@@ -190,8 +188,8 @@ public class GXDLMSMeter extends GXDLMSSecureServer3
     boolean init() throws Exception {
         // Load added objects.
         if (!loadObjects(objectsFile, getItems())) {
-            throw new RuntimeException(String
-                    .format("Invalid device template file %s", objectsFile));
+            throw new RuntimeException(
+                    String.format("Invalid device template file %s", objectsFile));
         }
         if (!Media.isOpen()) {
             Media.open();
@@ -226,8 +224,8 @@ public class GXDLMSMeter extends GXDLMSSecureServer3
     @Override
     public void onPreWrite(ValueEventArgs[] args) {
         for (ValueEventArgs e : args) {
-            System.out.println(String.format("PreWrite %1$s:%2$s",
-                    e.getTarget().getLogicalName(), e.getIndex()));
+            System.out.println(String.format("PreWrite %1$s:%2$s", e.getTarget().getLogicalName(),
+                    e.getIndex()));
         }
     }
 
@@ -269,26 +267,22 @@ public class GXDLMSMeter extends GXDLMSSecureServer3
                 return;
             }
             // Save value if it's updated with action.
-            if (isChangedWithAction(it.getTarget().getObjectType(),
-                    it.getIndex())) {
+            if (isChangedWithAction(it.getTarget().getObjectType(), it.getIndex())) {
                 GXXmlWriterSettings settings = new GXXmlWriterSettings();
                 getItems().save(objectsFile, settings);
             }
-            if (it.getTarget() instanceof GXDLMSSecuritySetup
-                    && it.getIndex() == 2) {
-                System.out.println(
-                        "----------------------------------------------------------");
+            if (it.getTarget() instanceof GXDLMSSecuritySetup && it.getIndex() == 2) {
+                System.out.println("----------------------------------------------------------");
                 System.out.println("Updated keys:");
-                System.out.println("Server System title: " + GXDLMSTranslator
-                        .toHex(getCiphering().getSystemTitle()));
-                System.out.println("Authentication key: " + GXDLMSTranslator
-                        .toHex(getCiphering().getAuthenticationKey()));
-                System.out.println("Block cipher key: " + GXDLMSTranslator
-                        .toHex(getCiphering().getBlockCipherKey()));
-                System.out.println("Client System title: "
-                        + GXDLMSTranslator.toHex(getClientSystemTitle()));
-                System.out.println("Master key (KEK) title: "
-                        + GXDLMSTranslator.toHex(getKek()));
+                System.out.println("Server System title: "
+                        + GXDLMSTranslator.toHex(getCiphering().getSystemTitle()));
+                System.out.println("Authentication key: "
+                        + GXDLMSTranslator.toHex(getCiphering().getAuthenticationKey()));
+                System.out.println("Block cipher key: "
+                        + GXDLMSTranslator.toHex(getCiphering().getBlockCipherKey()));
+                System.out.println(
+                        "Client System title: " + GXDLMSTranslator.toHex(getClientSystemTitle()));
+                System.out.println("Master key (KEK) title: " + GXDLMSTranslator.toHex(getKek()));
             }
         }
     }
@@ -309,8 +303,8 @@ public class GXDLMSMeter extends GXDLMSSecureServer3
             synchronized (this) {
                 if (Trace == TraceLevel.VERBOSE
                         && this.getConnectionState() != ConnectionState.NONE) {
-                    System.out.println("RX:\t" + gurux.common.GXCommon
-                            .bytesToHex((byte[]) e.getData()));
+                    System.out.println(
+                            "RX:\t" + gurux.common.GXCommon.bytesToHex((byte[]) e.getData()));
                 }
                 GXServerReply sr = new GXServerReply((byte[]) e.getData());
                 do {
@@ -321,8 +315,8 @@ public class GXDLMSMeter extends GXDLMSSecureServer3
                     // server or client address.
                     if (sr.getReply() != null) {
                         if (Trace == TraceLevel.VERBOSE) {
-                            System.out.println("TX:\t" + gurux.common.GXCommon
-                                    .bytesToHex(sr.getReply()));
+                            System.out.println(
+                                    "TX:\t" + gurux.common.GXCommon.bytesToHex(sr.getReply()));
                         }
                         Media.send(sr.getReply(), e.getSenderInfo());
                         sr.setData(null);
@@ -343,10 +337,8 @@ public class GXDLMSMeter extends GXDLMSSecureServer3
      * Client has made connection.
      */
     @Override
-    public void onClientConnected(Object sender,
-            gurux.net.ConnectionEventArgs e) {
-        if (Trace.ordinal() > TraceLevel.OFF.ordinal()
-                && (!Exclusive || serialNumber == 1)) {
+    public void onClientConnected(Object sender, gurux.net.ConnectionEventArgs e) {
+        if (Trace.ordinal() > TraceLevel.OFF.ordinal() && (!Exclusive || serialNumber == 1)) {
             System.out.println("TCP/IP connection established.");
         }
     }
@@ -355,10 +347,8 @@ public class GXDLMSMeter extends GXDLMSSecureServer3
      * Client has close connection.
      */
     @Override
-    public void onClientDisconnected(Object sender,
-            gurux.net.ConnectionEventArgs e) {
-        if (Trace.ordinal() > TraceLevel.OFF.ordinal()
-                && (!Exclusive || serialNumber == 1)) {
+    public void onClientDisconnected(Object sender, gurux.net.ConnectionEventArgs e) {
+        if (Trace.ordinal() > TraceLevel.OFF.ordinal() && (!Exclusive || serialNumber == 1)) {
             System.out.println("TCP/IP connection closed.");
         }
     }
@@ -377,12 +367,10 @@ public class GXDLMSMeter extends GXDLMSSecureServer3
         if (objectType == ObjectType.ASSOCIATION_LOGICAL_NAME) {
             for (GXDLMSObject it : getItems()) {
                 if (it.getObjectType() == ObjectType.ASSOCIATION_LOGICAL_NAME) {
-                    GXDLMSAssociationLogicalName a =
-                            (GXDLMSAssociationLogicalName) it;
+                    GXDLMSAssociationLogicalName a = (GXDLMSAssociationLogicalName) it;
                     if (a.getClientSAP() == getSettings().getClientAddress()
-                            && a.getAuthenticationMechanismName()
-                                    .getMechanismId() == getSettings()
-                                            .getAuthentication()
+                            && a.getAuthenticationMechanismName().getMechanismId() == getSettings()
+                                    .getAuthentication()
                             && (ln.compareTo(a.getLogicalName()) == 0
                                     || ln.compareTo("0.0.40.0.0.255") == 0)) {
                         return it;
@@ -392,8 +380,7 @@ public class GXDLMSMeter extends GXDLMSSecureServer3
         }
         // Find object from the active association view.
         else if (getAssignedAssociation() != null) {
-            return getAssignedAssociation().getObjectList().findByLN(objectType,
-                    ln);
+            return getAssignedAssociation().getObjectList().findByLN(objectType, ln);
         }
         return null;
     }
@@ -408,15 +395,12 @@ public class GXDLMSMeter extends GXDLMSSecureServer3
      * @return True.
      */
     @Override
-    public final boolean isTarget(final int serverAddress,
-            final int clientAddress) {
+    public final boolean isTarget(final int serverAddress, final int clientAddress) {
         // Find client address from the association views.
         setAssignedAssociation(null);
-        for (GXDLMSObject it : this.getItems()
-                .getObjects(ObjectType.ASSOCIATION_LOGICAL_NAME)) {
+        for (GXDLMSObject it : this.getItems().getObjects(ObjectType.ASSOCIATION_LOGICAL_NAME)) {
             {
-                GXDLMSAssociationLogicalName a =
-                        (GXDLMSAssociationLogicalName) it;
+                GXDLMSAssociationLogicalName a = (GXDLMSAssociationLogicalName) it;
                 if (a.getClientSAP() == clientAddress) {
                     setAssignedAssociation(a);
                     break;
@@ -426,13 +410,11 @@ public class GXDLMSMeter extends GXDLMSSecureServer3
         if (getAssignedAssociation() != null) {
             // If address is not broadcast or serial number.
             // Remove logical address from the server address.
-            boolean broadcast = (serverAddress & 0x3FFF) == 0x3FFF
-                    || (serverAddress & 0x7F) == 0x7F;
-            if (!(broadcast || (serverAddress & 0x3FFF) == serialNumber % 10000
-                    + 1000)) {
+            boolean broadcast =
+                    (serverAddress & 0x3FFF) == 0x3FFF || (serverAddress & 0x7F) == 0x7F;
+            if (!(broadcast || (serverAddress & 0x3FFF) == serialNumber % 10000 + 1000)) {
                 // Find address from the SAP table.
-                GXDLMSObjectCollection objs =
-                        getItems().getObjects(ObjectType.SAP_ASSIGNMENT);
+                GXDLMSObjectCollection objs = getItems().getObjects(ObjectType.SAP_ASSIGNMENT);
                 if (objs.size() == 0) {
                     return true;
                 }
@@ -441,8 +423,7 @@ public class GXDLMSMeter extends GXDLMSSecureServer3
                     if (sap.getSapAssignmentList().isEmpty()) {
                         return true;
                     }
-                    for (Map.Entry<Integer, String> e : sap
-                            .getSapAssignmentList()) {
+                    for (Map.Entry<Integer, String> e : sap.getSapAssignmentList()) {
                         // Check server address with two bytes.
                         if ((serverAddress & 0xFFFF0000) == 0
                                 && (serverAddress & 0x7FFF) == e.getKey()) {
@@ -457,15 +438,14 @@ public class GXDLMSMeter extends GXDLMSSecureServer3
                 }
             }
         } else {
-            System.out.println(String.format("Invalid client address: %1$s ",
-                    clientAddress));
+            System.out.println(String.format("Invalid client address: %1$s ", clientAddress));
         }
         return false;
     }
 
     @Override
-    public final SourceDiagnostic onValidateAuthentication(
-            final Authentication authentication, final byte[] password) {
+    public final SourceDiagnostic onValidateAuthentication(final Authentication authentication,
+            final byte[] password) {
         if (getUseLogicalNameReferencing()) {
             if (getAssignedAssociation() != null) {
                 if (getAssignedAssociation().getAuthenticationMechanismName()
@@ -479,8 +459,7 @@ public class GXDLMSMeter extends GXDLMSSecureServer3
                     // Other authentication levels are check later.
                     return SourceDiagnostic.NONE;
                 }
-                if (java.util.Arrays.equals(
-                        getAssignedAssociation().getSecret(), password)) {
+                if (java.util.Arrays.equals(getAssignedAssociation().getSecret(), password)) {
                     return SourceDiagnostic.NONE;
                 }
             }
@@ -490,28 +469,22 @@ public class GXDLMSMeter extends GXDLMSSecureServer3
 
     @Override
     protected AccessMode onGetAttributeAccess(final ValueEventArgs arg) {
-        return getAssignedAssociation().getAccess(arg.getTarget(),
-                arg.getIndex());
+        return getAssignedAssociation().getAccess(arg.getTarget(), arg.getIndex());
     }
 
     @Override
-    protected Set<AccessMode3> onGetAttributeAccess3(ValueEventArgs arg)
-            throws Exception {
-        return getAssignedAssociation().getAccess3(arg.getTarget(),
-                arg.getIndex());
+    protected Set<AccessMode3> onGetAttributeAccess3(ValueEventArgs arg) throws Exception {
+        return getAssignedAssociation().getAccess3(arg.getTarget(), arg.getIndex());
     }
 
     @Override
     protected MethodAccessMode onGetMethodAccess(final ValueEventArgs arg) {
-        return getAssignedAssociation().getMethodAccess(arg.getTarget(),
-                arg.getIndex());
+        return getAssignedAssociation().getMethodAccess(arg.getTarget(), arg.getIndex());
     }
 
     @Override
-    protected Set<MethodAccessMode3> onGetMethodAccess3(ValueEventArgs arg)
-            throws Exception {
-        return getAssignedAssociation().getMethodAccess3(arg.getTarget(),
-                arg.getIndex());
+    protected Set<MethodAccessMode3> onGetMethodAccess3(ValueEventArgs arg) throws Exception {
+        return getAssignedAssociation().getMethodAccess3(arg.getTarget(), arg.getIndex());
     }
 
     /**
@@ -529,8 +502,7 @@ public class GXDLMSMeter extends GXDLMSSecureServer3
      * DLMS client connection failed.
      */
     @Override
-    protected void
-            onInvalidConnection(GXDLMSConnectionEventArgs connectionInfo) {
+    protected void onInvalidConnection(GXDLMSConnectionEventArgs connectionInfo) {
 
     }
 
