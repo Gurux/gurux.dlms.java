@@ -2908,7 +2908,6 @@ abstract class GXDLMS {
             }
             if (!first) {
                 reply.getData().position(0);
-                first = true;
             }
             values = new ArrayList<Object>();
             if (reply.getValue() instanceof List<?>) {
