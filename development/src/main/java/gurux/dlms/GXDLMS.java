@@ -2908,6 +2908,7 @@ abstract class GXDLMS {
             }
             if (!first) {
                 reply.getData().position(0);
+                first = true;
             }
             values = new ArrayList<Object>();
             if (reply.getValue() instanceof List<?>) {
@@ -4012,8 +4013,9 @@ abstract class GXDLMS {
                     break;
                 }
             } else {
-                // Client do not need a command any more.
-                data.setCommand(Command.NONE);
+                if (data.isMoreData()) {
+                    data.setCommand(Command.NONE);
+                }
                 // Ciphered messages are handled after whole PDU is received.
                 switch (cmd) {
                 case Command.GLO_READ_RESPONSE:

@@ -116,11 +116,11 @@ public enum Unit {
     /*
      * Volume flux m3/24*60*60s.
      */
-    VOLUME_FLUXDAY(17),
+    VOLUME_FLUX_DAY(17),
     /*
      * Corrected volume flux m3/24*60*60s.
      */
-    CORRECTE_VOLUME_FLUX_DAY(18),
+    CORRECTED_VOLUME_FLUX_DAY(18),
     /*
      * Volume 10-3 m3.
      */
@@ -260,11 +260,11 @@ public enum Unit {
     /*
      * 1/(V2h) RU2h , volt-squared hour meter constant or pulse value.
      */
-    V2H(53),
+    RU2H(53),
     /*
      * 1/(A2h) RI2h , ampere-squared hour meter constant or pulse value.
      */
-    A2H(54),
+    RI2H(54),
     /*
      * 1/m3 RV , meter constant or pulse value (volume).
      */
@@ -303,10 +303,217 @@ public enum Unit {
      * substance Joule / kilogram m2 . kg . s -2 / kg = m2.
      */
     JOULE_KILOGRAM(65),
-    /*
-     * dBm Signal strength (e.g. of GSM radio systems).
+    /**
+     * Pressure, gram per square centimeter.
      */
-    SIGNAL_STRENGTH(70),
+    PRESSURE_GRAM_PER_SQUARE_CENTIMETER(66),
+    /**
+     * Pressure, atmosphere.
+     */
+    PRESSURE_ATMOSPHERE(67),
+
+    /*
+     * Signal strength, dB milliwatt (e.g. of GSM radio systems).
+     */
+    SIGNAL_STRENGTH_MILLI_WATT(70),
+
+    /**
+     * Signal strength, dB microvolt.
+     */
+    SIGNAL_STRENGTH_MICRO_VOLT(71),
+    /**
+     * Logarithmic unit that expresses the ratio between two values of a
+     * physical quantity
+     */
+    DB(72),
+    /**
+     * Length in inches.
+     */
+    INCH(128),
+    /**
+     * Foot (Length).
+     */
+    FOOT(129),
+    /**
+     * Pound (mass).
+     */
+    POUND(130),
+    /**
+     * Fahrenheit
+     */
+    FAHRENHEIT(131),
+    /**
+     * Rankine
+     */
+    RANKINE(132),
+    /**
+     * Square inch.
+     */
+    SQUARE_INCH(133),
+    /**
+     * Square foot.
+     */
+    SQUARE_FOOT(134),
+    /**
+     * Acre
+     */
+    ACRE(135),
+    /**
+     * Cubic inch.
+     */
+    CUBIC_INCH(136),
+    /**
+     * Cubic foot.
+     */
+    CUBIC_FOOT(137),
+    /**
+     * Acre-foot.
+     */
+    ACRE_FOOT(138),
+    /**
+     * Gallon (imperial).
+     */
+    GALLON_IMPERIAL(139),
+    /**
+     * Gallon (US).
+     */
+    GALLON_US(140),
+    /**
+     * Pound force.
+     */
+    POUND_FORCE(141),
+    /**
+     * Pound force per square inch
+     */
+    POUND_FORCE_PER_SQUARE_INCH(142),
+    /**
+     * Pound per cubic foot.
+     */
+    POUND_PER_CUBIC_FOOT(143),
+    /**
+     * Pound per (foot second)
+     */
+    POUND_PER_FOOT_SECOND(144),
+    /**
+     * Square foot per second.
+     */
+    SQUARE_FOOT_PER_SECOND(145),
+    /**
+     * British thermal unit.
+     */
+    BRITISH_THERMAL_UNIT(146),
+    /**
+     * Therm EU.
+     */
+    THERM_EU(147),
+    /**
+     * Therm US.
+     */
+    THERM_US(148),
+    /**
+     * British thermal unit per pound.
+     */
+    BRITISH_THERMAL_UNIT_PER_POUND(149),
+    /**
+     * British thermal unit per cubic foot.
+     */
+    BRITISH_THERMAL_UNIT_PER_CUBIC_FOOT(150),
+    /**
+     * Cubic feet.
+     */
+    CUBIC_FEET(151),
+    /**
+     * Foot per second.
+     */
+    FOOT_PER_SECOND(152),
+    /**
+     * Cubic foot per second.
+     */
+    CUBIC_FOOT_PER_SECOND(153),
+    /**
+     * Cubic foot per min.
+     */
+    CUBIC_FOOT_PER_MIN(154),
+    /**
+     * Cubic foot per hour.
+     */
+    CUBIC_FOOT_PER_HOUR(155),
+    /**
+     * Cubic foot per day
+     */
+    CUBIC_FOOT_PER_DAY(156),
+    /**
+     * Acre foot per second.
+     */
+    ACRE_FOOT_PER_SECOND(157),
+    /**
+     * Acre foot per min.
+     */
+    ACRE_FOOT_PER_MIN(158),
+    /**
+     * Acre foot per hour.
+     */
+    ACRE_FOOT_PER_HOUR(159),
+    /**
+     * Acre foot per day.
+     */
+    ACRE_FOOT_PER_DAY(160),
+    /**
+     * Imperial gallon.
+     */
+    IMPERIAL_GALLON(161),
+    /**
+     * Imperial gallon per second.
+     */
+    IMPERIAL_GALLON_PER_SECOND(162),
+    /**
+     * Imperial gallon per min.
+     */
+    IMPERIAL_GALLON_PER_MIN(163),
+    /**
+     * Imperial gallon per hour.
+     */
+    IMPERIAL_GALLON_PER_HOUR(164),
+    /**
+     * Imperial gallon per day.
+     */
+    IMPERIAL_GALLON_PER_DAY(165),
+    /**
+     * US gallon.
+     */
+    US_GALLON(166),
+    /**
+     * US gallon per second.
+     */
+    US_GALLON_PER_SECOND(167),
+    /**
+     * US gallon per min.
+     */
+    US_GALLON_PER_MIN(168),
+    /**
+     * US gallon per hour.
+     */
+    US_GALLON_PER_HOUR(169),
+    /**
+     * US gallon per day.
+     */
+    US_GALLON_PER_DAY(170),
+    /**
+     * British thermal unit per second.
+     */
+    BRITISH_THERMAL_UNIT_PER_SECOND(171),
+    /**
+     * British thermal unit per minute.
+     */
+    BRITISH_THERMAL_UNIT_PER_MINUTE(172),
+    /**
+     * British thermal unit per hour.
+     */
+    BRITISH_THERMAL_UNIT_PER_HOUR(173),
+    /**
+     * British thermal unit per day.
+     */
+    BRITISH_THERMAL_UNIT_PER_DAY(174),
     /*
      * Other Unit.
      */
@@ -351,206 +558,352 @@ public enum Unit {
     @Override
     public String toString() {
         String str;
-        switch (intValue) {
-        case 0: // NONE
+        switch (Unit.forValue(intValue)) {
+        case NONE:
             str = "None";
             break;
-        case 1: // YEAR
+        case YEAR:
             str = "Year";
             break;
-        case 2: // MONTH
+        case MONTH:
             str = "Month";
             break;
-        case 3: // WEEK
+        case WEEK:
             str = "Week";
             break;
-        case 4: // DAY
+        case DAY:
             str = "Day";
             break;
-        case 5: // HOUR
+        case HOUR:
             str = "Hour";
             break;
-        case 6: // MINUTE
+        case MINUTE:
             str = "Minute";
             break;
-        case 7: // SECOND
+        case SECOND:
             str = "Second";
             break;
-        case 8: // PHASE_ANGLEGEGREE
+        case PHASE_ANGLE_DEGREE:
             str = "PhaseAngle";
             break;
-        case 9: // TEMPERATURE
+        case TEMPERATURE:
             str = "Temperature";
             break;
-        case 10: // LOCAL_CURRENCY
+        case LOCAL_CURRENCY:
             str = "LocalCurrency";
             break;
-        case 11: // LENGTH
+        case LENGTH:
             str = "Length";
             break;
-        case 12: // SPEED
+        case SPEED:
             str = "Speed";
             break;
-        case 13: // VOLUME_CUBIC_METER
-            str = "VolumeCubicMeter";
+        case VOLUME_CUBIC_METER:
+            str = "Volume Cubic Meter";
             break;
-        case 14: // CORRECTED_VOLUME
-            str = "CorrectededCVolume";
+        case CORRECTED_VOLUME:
+            str = "Corrected volume";
             break;
-        case 15: // VOLUME_FLUX_HOUR
-            str = "VolumeFluxHour";
+        case VOLUME_FLUX_HOUR:
+            str = "Volume flux hour";
             break;
-        case 16: // CORRECTED_VOLUME_FLUX_HOUR
-            str = "CorrectedVolumeFluxHour";
+        case CORRECTED_VOLUME_FLUX_HOUR:
+            str = "Corrected volume flux hour";
             break;
-        case 17: // VOLUME_FLUXDAY
-            str = "VolumeFluxDay";
+        case VOLUME_FLUX_DAY:
+            str = "Volume flux day";
             break;
-        case 18: // CORRECTE_VOLUME_FLUX_DAY
-            str = "CorrectedVolumeFluxDay";
+        case CORRECTED_VOLUME_FLUX_DAY:
+            str = "Corrected volume flux day";
             break;
-        case 19: // VOLUME_LITER
-            str = "VolumeLiter";
+        case VOLUME_LITER:
+            str = "Volume liter";
             break;
-        case 20: // MASS_KG
-            str = "MassKg";
+        case MASS_KG:
+            str = "Mass Kg";
             break;
-        case 21: // FORCE
+        case FORCE:
             str = "Force";
             break;
-        case 22: // ENERGY
+        case ENERGY:
             str = "Energy";
             break;
-        case 23: // PRESSURE_PASCAL
-            str = "PressurePascal";
+        case PRESSURE_PASCAL:
+            str = "Pressure pascal";
             break;
-        case 24: // PRESSURE_BAR
-            str = "PressureBar";
+        case PRESSURE_BAR:
+            str = "Pressure Bar";
             break;
-        case 25: // ENERGY_JOULE
-            str = "EnergyJoule";
+        case ENERGY_JOULE:
+            str = "Energy joule";
             break;
-        case 26: // THERMAL_POWER
-            str = "ThermalPower";
+        case THERMAL_POWER:
+            str = "Thermal power";
             break;
-        case 27: // ACTIVE_POWER
-            str = "ActivePower";
+        case ACTIVE_POWER:
+            str = "Active power";
             break;
-        case 28: // APPARENT_POWER
-            str = "ApparentPower";
+        case APPARENT_POWER:
+            str = "Apparent power";
             break;
-        case 29: // REACTIVE_POWER
-            str = "ReactivePower";
+        case REACTIVE_POWER:
+            str = "Reactive power";
             break;
-        case 30: // ACTIVE_ENERGY
-            str = "ActiveEnergy";
+        case ACTIVE_ENERGY:
+            str = "Active energy";
             break;
-        case 31: // APPARENT_ENERGY
-            str = "ApparentEnergy";
+        case APPARENT_ENERGY:
+            str = "Apparent energy";
             break;
-        case 32: // REACTIVE_ENERGY
-            str = "ReactiveEnergy";
+        case REACTIVE_ENERGY:
+            str = "Reactive energy";
             break;
-        case 33: // CURRENT
+        case CURRENT:
             str = "Current";
             break;
-        case 34: // ELECTRICAL_CHARGE
+        case ELECTRICAL_CHARGE:
             str = "ElectricalCharge";
             break;
-        case 35: // VOLTAGE
+        case VOLTAGE:
             str = "Voltage";
             break;
-        case 36: // ELECTRICAL_FIELD_STRENGTH
-            str = "ElectricalFieldStrength";
+        case ELECTRICAL_FIELD_STRENGTH:
+            str = "Electrical field strength E V/m";
             break;
-        case 37: // CAPACITY
-            str = "Capacity";
+        case CAPACITY:
+            str = "Capacity C farad C/V = As/V";
             break;
-        case 38: // RESISTANCE
+        case RESISTANCE:
             str = "Resistance";
             break;
-        case 39: // RESISTIVITY
+        case RESISTIVITY:
             str = "Resistivity";
             break;
-        case 40: // MAGNETIC_FLUX
-            str = "MagneticFlux";
+        case MAGNETIC_FLUX:
+            str = "Magnetic flux F weber Wb = Vs";
             break;
-        case 41: // INDUCTION
-            str = "Induction";
+        case INDUCTION:
+            str = "Induction T tesla Wb/m2";
             break;
-        case 42: // MAGNETIC
-            str = "Magnetic";
+        case MAGNETIC:
+            str = "Magnetic field strength H A/m";
             break;
-        case 43: // INDUCTIVITY
-            str = "Inductivity";
+        case INDUCTIVITY:
+            str = "Inductivity L henry H = Wb/A";
             break;
-        case 44: // FREQUENCY
+        case FREQUENCY:
             str = "Frequency";
             break;
-        case 45: // ACTIVE
-            str = "Active";
+        case ACTIVE:
+            str = "Active energy";
             break;
-        case 46: // REACTIVE
-            str = "Reactive";
+        case REACTIVE:
+            str = "Reactive energy";
             break;
-        case 47: // APPARENT
-            str = "Apparent";
+        case APPARENT:
+            str = "Apparent energy";
             break;
-        case 48: // V260
-            str = "V260";
+        case V260:
+            str = "V260*60s";
             break;
-        case 49: // A260
-            str = "A260";
+        case A260:
+            str = "A260*60s";
             break;
-        case 50: // MASS_KG_PER_SECOND
-            str = "MassKgPerSecond";
+        case MASS_KG_PER_SECOND:
+            str = "Mass";
             break;
-        case 51: // CONDUCTANCE
-            str = "Conductance";
+        case CONDUCTANCE:
+            str = "Conductance siemens";
             break;
-        case 52: // KELVIN
-            str = "Kelvin.";
+        case KELVIN:
+            str = "Kelvin";
             break;
-        case 53: // V2H
-            str = "V2H";
+        case RU2H:
+            str = "RU2h";
             break;
-        case 54: // A2H
-            str = "A2H";
+        case RI2H:
+            str = "RI2h";
             break;
-        case 55: // CUBIC_METER_RV
-            str = "CubicMeterRV";
+        case CUBIC_METER_RV:
+            str = "Cubic meter RV";
             break;
-        case 56: // PERCENTAGE
+        case PERCENTAGE:
             str = "Percentage";
             break;
-        case 57: // AMPERE_HOURS
-            str = "AmpereHours";
+        case AMPERE_HOURS:
+            str = "Ampere hours";
             break;
-        case 60: // ENERGY_PER_VOLUME
-            str = "EnergyPerVolume";
+        case ENERGY_PER_VOLUME:
+            str = "Energy per volume";
             break;
-        case 61: // WOBBE
-            str = "WOBBE";
+        case WOBBE:
+            str = "Wobbe";
             break;
-        case 62: // MOLE_PERCENT
-            str = "MolePercent";
+        case MOLE_PERCENT:
+            str = "Mole percent";
             break;
-        case 63: // MASS_DENSITY
-            str = "MassDensity";
+        case MASS_DENSITY:
+            str = "Mass density";
             break;
-        case 64: // PASCAL_SECOND
-            str = "PascalSecond";
+        case PASCAL_SECOND:
+            str = "Pascal second";
             break;
-        case 65: // JOULE_KILOGRAM
-            str = "JouleKilogram.";
+        case JOULE_KILOGRAM:
+            str = "Joule kilogram";
             break;
-        case 70: // SIGNAL_STRENGTH
-            str = "SignalStrength";
+        case PRESSURE_GRAM_PER_SQUARE_CENTIMETER:
+            str = "Pressure, gram per square centimeter.";
             break;
-        case 254: // OTHER_UNIT
-            str = "OtherUnit";
+        case PRESSURE_ATMOSPHERE:
+            str = "Pressure, atmosphere.";
             break;
-        case 255: // NO_UNIT
+        case SIGNAL_STRENGTH_MILLI_WATT:
+            str = "Signal strength, dB milliwatt";
+            break;
+        case SIGNAL_STRENGTH_MICRO_VOLT:
+            // logarithmic unit that expresses the ratio between two values of a
+            // physical quantity
+            str = "Signal strength, dB microvolt";
+            break;
+        case DB:
+            str = "dB";
+            break;
+        case INCH:
+            str = "Inch";
+            break;
+        case FOOT:
+            str = "Foot";
+            break;
+        case POUND:
+            str = "Pound";
+            break;
+        case FAHRENHEIT:
+            str = "Fahrenheit";
+            break;
+        case RANKINE:
+            str = "Rankine";
+            break;
+        case SQUARE_INCH:
+            str = "Square inch";
+            break;
+        case SQUARE_FOOT:
+            str = "Square foot";
+            break;
+        case ACRE:
+            str = "Acre";
+            break;
+        case CUBIC_INCH:
+            str = "Cubic inch";
+            break;
+        case CUBIC_FOOT:
+            str = "Cubic foot";
+            break;
+        case ACRE_FOOT:
+            str = "Acre foot";
+            break;
+        case GALLON_IMPERIAL:
+            str = "Gallon Imperial";
+            break;
+        case GALLON_US:
+            str = "GallonUS";
+            break;
+        case POUND_FORCE:
+            str = "Pound force";
+            break;
+        case POUND_FORCE_PER_SQUARE_INCH:
+            str = "Pound force per square inch";
+            break;
+        case POUND_PER_CUBIC_FOOT:
+            str = "Pound per cubic foot";
+            break;
+        case POUND_PER_FOOT_SECOND:
+            str = "Pound per foot second";
+            break;
+        case BRITISH_THERMAL_UNIT:
+            str = "British thermal unit";
+            break;
+        case THERM_EU:
+            str = "Therm EU";
+            break;
+        case THERM_US:
+            str = "Therm US";
+            break;
+        case BRITISH_THERMAL_UNIT_PER_POUND:
+            str = "British thermal unit per pound";
+            break;
+        case BRITISH_THERMAL_UNIT_PER_CUBIC_FOOT:
+            str = "British thermal unit per cubic foot";
+            break;
+        case CUBIC_FEET:
+            str = "Cubic feet";
+            break;
+        case FOOT_PER_SECOND:
+            str = "Foot per second";
+            break;
+        case CUBIC_FOOT_PER_MIN:
+            str = "Foot per min";
+            break;
+        case CUBIC_FOOT_PER_DAY:
+            str = "Foot per day";
+            break;
+        case ACRE_FOOT_PER_SECOND:
+            str = "Acre foot per second";
+            break;
+        case ACRE_FOOT_PER_MIN:
+            str = "Acre foot per min";
+            break;
+        case ACRE_FOOT_PER_HOUR:
+            str = "Acre foot per hour";
+            break;
+        case ACRE_FOOT_PER_DAY:
+            str = "Acre foot per day";
+            break;
+        case IMPERIAL_GALLON:
+            str = "Imperial gallon";
+            break;
+        case IMPERIAL_GALLON_PER_SECOND:
+            str = "Imperial gallon per second";
+            break;
+        case IMPERIAL_GALLON_PER_MIN:
+            str = "Imperial gallon per min";
+            break;
+        case IMPERIAL_GALLON_PER_HOUR:
+            str = "Imperial gallon per hour";
+            break;
+        case IMPERIAL_GALLON_PER_DAY:
+            str = "Imperial gallon per day";
+            break;
+        case US_GALLON:
+            str = "US Gallon";
+            break;
+        case US_GALLON_PER_SECOND:
+            str = "US gallon per second";
+            break;
+        case US_GALLON_PER_MIN:
+            str = "US gallon per min";
+            break;
+        case US_GALLON_PER_HOUR:
+            str = "US gallon per hour";
+            break;
+        case US_GALLON_PER_DAY:
+            str = "US gallon per day";
+            break;
+        case BRITISH_THERMAL_UNIT_PER_SECOND:
+            str = "British thermal unit per second";
+            break;
+        case BRITISH_THERMAL_UNIT_PER_MINUTE:
+            str = "British thermal unit per min";
+            break;
+        case BRITISH_THERMAL_UNIT_PER_HOUR:
+            str = "British thermal unit per hour";
+            break;
+        case BRITISH_THERMAL_UNIT_PER_DAY:
+            str = "British thermal unit per day";
+            break;
+        case OTHER_UNIT:
+            str = "Other unit";
+            break;
+        case NO_UNIT:
             str = "NoUnit";
             break;
         default:
