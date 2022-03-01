@@ -129,7 +129,7 @@ public class GXDLMSMeter extends GXDLMSSecureServer3
             String v = (String) d.getValue();
             if (v != "") {
                 d.setValue(v.substring(0, 3) + LDN.getBytes());
-                if (((byte[]) d.getValue()).length == 8) {
+                if (d.getValue() instanceof Byte[] && ((byte[]) d.getValue()).length == 8) {
                     getCiphering().setSystemTitle((byte[]) d.getValue());
                 }
             }

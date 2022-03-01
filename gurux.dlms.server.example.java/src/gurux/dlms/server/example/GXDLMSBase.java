@@ -146,18 +146,35 @@ public class GXDLMSBase extends GXDLMSSecureServer2
 
     static final Object fileLock = new Object();
 
+    /**
+     * Is Windows operating system.
+     * 
+     * @param os
+     *            Operating system name.
+     * @return True if Windows.
+     */
+    static boolean isWindows(final String os) {
+        return (os.indexOf("win") >= 0);
+    }
+
     // Data file is saved to same directory where app is.
     static final String getDataFile() {
-        final String dir = Paths.get(GXDLMSBase.class.getProtectionDomain().getCodeSource()
-                .getLocation().getPath().substring(1)).getParent().toString();
-        return dir + "/data.csv";
+        if (isWindows(System.getProperty("os.name").toLowerCase())) {
+            final String dir = Paths.get(GXDLMSBase.class.getProtectionDomain().getCodeSource()
+                    .getLocation().getPath().substring(1)).getParent().toString();
+            return dir + "/data.csv";
+        }
+        return "data.csv";
     }
 
     // Settings file is saved to same directory where app is.
     static final String getSettingsFile(final String preFix) {
-        final String dir = Paths.get(GXDLMSBase.class.getProtectionDomain().getCodeSource()
-                .getLocation().getPath().substring(1)).getParent().toString();
-        return dir + "/" + preFix + "settings.xml";
+        if (isWindows(System.getProperty("os.name").toLowerCase())) {
+            final String dir = Paths.get(GXDLMSBase.class.getProtectionDomain().getCodeSource()
+                    .getLocation().getPath().substring(1)).getParent().toString();
+            return dir + "/" + preFix + "settings.xml";
+        }
+        return preFix + "settings.xml";
     }
 
     /**
