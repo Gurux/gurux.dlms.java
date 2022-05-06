@@ -30,6 +30,7 @@ import gurux.dlms.enums.MethodAccessMode3;
 import gurux.dlms.enums.ObjectType;
 import gurux.dlms.enums.Priority;
 import gurux.dlms.enums.RequestTypes;
+import gurux.dlms.enums.Security;
 import gurux.dlms.enums.ServiceClass;
 import gurux.dlms.enums.SourceDiagnostic;
 import gurux.dlms.internal.GXCommon;
@@ -357,11 +358,6 @@ public class GXDLMSServerBase {
                 if (ln.getObjectList().isEmpty()) {
                     ln.getObjectList().addAll(getItems());
                 }
-                if (ln.getXDLMSContextInfo().getMaxReceivePduSize() == 0) {
-                    throw new RuntimeException(
-                            "MaxReceivePduSize is not set for " + ln.getLogicalName());
-                }
-
                 associationObject = it;
                 if (!settings.getProposedConformance().isEmpty()) {
                     ln.getXDLMSContextInfo().setConformance(settings.getProposedConformance());
@@ -498,15 +494,26 @@ public class GXDLMSServerBase {
                     notifyInvalidConnection(connectionInfo);
                 } else {
                     if (owner instanceof GXDLMSServer) {
-                        GXDLMSServer b = (GXDLMSServer) owner;
-                        ret = b.validateAuthentication(settings.getAuthentication(),
-                                settings.getPassword());
+                        if (getAssignedAssociation() != null
+                                && getAssignedAssociation().getAuthenticationMechanismName()
+                                        .getMechanismId() != settings.getAuthentication()) {
+                            ret = SourceDiagnostic.NOT_SUPPORTED;
+                        } else {
+                            GXDLMSServer b = (GXDLMSServer) owner;
+                            ret = b.validateAuthentication(settings.getAuthentication(),
+                                    settings.getPassword());
+                        }
                     } else {
-                        GXDLMSServer2 b = (GXDLMSServer2) owner;
-                        ret = b.onValidateAuthentication(settings.getAuthentication(),
-                                settings.getPassword());
+                        if (getAssignedAssociation() != null
+                                && getAssignedAssociation().getAuthenticationMechanismName()
+                                        .getMechanismId() != settings.getAuthentication()) {
+                            ret = SourceDiagnostic.NOT_SUPPORTED;
+                        } else {
+                            GXDLMSServer2 b = (GXDLMSServer2) owner;
+                            ret = b.onValidateAuthentication(settings.getAuthentication(),
+                                    settings.getPassword());
+                        }
                     }
-
                     if ((SourceDiagnostic) ret != SourceDiagnostic.NONE) {
                         result = AssociationResult.PERMANENT_REJECTED;
                     } else if (settings.getAuthentication().getValue() > Authentication.LOW
@@ -705,23 +712,39 @@ public class GXDLMSServerBase {
             settings.setServerAddress(0);
             settings.setClientAddress(0);
         }
+        settings.setProtocolVersion(null);
         // Reset Ephemeral keys.
         settings.setEphemeralBlockCipherKey(null);
         settings.setEphemeralBroadcastBlockCipherKey(null);
         settings.setEphemeralAuthenticationKey(null);
-        settings.setProtocolVersion(null);
         settings.setCtoSChallenge(null);
         settings.setStoCChallenge(null);
         receivedData.clear();
         transaction = null;
+        settings.setBlockIndex(1);
         settings.setCount(0);
         settings.setIndex(0);
         settings.setConnected(ConnectionState.NONE);
         replyData.clear();
+        receivedData.clear();
+        settings.setPassword(null);
+        if (!connect) {
+            info.clear();
+            settings.setServerAddress(0);
+            settings.setClientAddress(0);
+            setAssignedAssociation(null);
+        }
         settings.setAuthentication(Authentication.NONE);
         if (settings.getCipher() != null) {
-            settings.getCipher().reset();
+            if (!connect) {
+                settings.getCipher().reset();
+            } else {
+                settings.getCipher().setSecurity(Security.NONE);
+            }
         }
+        dataReceived = 0;
+        settings.setGbtCount(0);
+
     }
 
     /*

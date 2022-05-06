@@ -35,8 +35,15 @@ package gurux.dlms.client;
 
 import java.io.File;
 import java.io.IOException;
+import java.security.InvalidAlgorithmParameterException;
+import java.security.InvalidKeyException;
+import java.security.NoSuchAlgorithmException;
+import java.security.SignatureException;
 import java.util.Map;
 
+import javax.crypto.BadPaddingException;
+import javax.crypto.IllegalBlockSizeException;
+import javax.crypto.NoSuchPaddingException;
 import javax.xml.stream.XMLStreamException;
 
 import gurux.dlms.enums.ObjectType;
@@ -52,9 +59,18 @@ public class sampleclient {
      *            the command line arguments
      * @throws IOException
      * @throws XMLStreamException
+     * @throws SignatureException
+     * @throws BadPaddingException
+     * @throws IllegalBlockSizeException
+     * @throws InvalidAlgorithmParameterException
+     * @throws NoSuchPaddingException
+     * @throws NoSuchAlgorithmException
+     * @throws InvalidKeyException
      */
     public static void main(String[] args)
-            throws XMLStreamException, IOException {
+            throws XMLStreamException, IOException, InvalidKeyException, NoSuchAlgorithmException,
+            NoSuchPaddingException, InvalidAlgorithmParameterException, IllegalBlockSizeException,
+            BadPaddingException, SignatureException {
         Settings settings = new Settings();
         GXDLMSReader reader = null;
         try {
@@ -69,23 +85,22 @@ public class sampleclient {
             ////////////////////////////////////////
             // Initialize connection settings.
             if (settings.media instanceof GXSerial) {
-                System.out.println("Connect using serial port connection "
-                        + settings.media.toString());
+                System.out.println(
+                        "Connect using serial port connection " + settings.media.toString());
             } else if (settings.media instanceof GXNet) {
-                System.out.println("Connect using network connection "
-                        + settings.media.toString());
+                System.out.println("Connect using network connection " + settings.media.toString());
             } else {
                 throw new Exception("Unknown media type.");
             }
             ////////////////////////////////////////
-            reader = new GXDLMSReader(settings.client, settings.media,
-                    settings.trace, settings.invocationCounter);
+            reader = new GXDLMSReader(settings.client, settings.media, settings.trace,
+                    settings.invocationCounter);
             try {
                 settings.media.open();
             } catch (Exception ex) {
                 if (settings.media instanceof GXSerial) {
-                    System.out.println(
-                            "----------------------------------------------------------");
+                    System.out
+                            .println("----------------------------------------------------------");
                     System.out.println(ex.getMessage());
                     System.out.println("Available ports:");
                     StringBuilder sb = new StringBuilder();
@@ -110,11 +125,9 @@ public class sampleclient {
             } else if (!settings.readObjects.isEmpty()) {
                 reader.initializeConnection();
                 boolean read = false;
-                if (settings.outputFile != null
-                        && new File(settings.outputFile).exists()) {
+                if (settings.outputFile != null && new File(settings.outputFile).exists()) {
                     try {
-                        GXDLMSObjectCollection c = GXDLMSObjectCollection
-                                .load(settings.outputFile);
+                        GXDLMSObjectCollection c = GXDLMSObjectCollection.load(settings.outputFile);
                         settings.client.getObjects().addAll(c);
                         read = true;
                     } catch (Exception ex) {
@@ -131,8 +144,7 @@ public class sampleclient {
                 }
                 for (Map.Entry<String, Integer> it : settings.readObjects) {
                     Object val = reader.read(
-                            settings.client.getObjects()
-                                    .findByLN(ObjectType.NONE, it.getKey()),
+                            settings.client.getObjects().findByLN(ObjectType.NONE, it.getKey()),
                             it.getValue());
                     reader.showValue(it.getValue(), val);
                 }

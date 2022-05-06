@@ -1133,11 +1133,11 @@ public class GXDLMSClient {
             buff.setUInt8(0x80);
             buff.setUInt8(01);
             buff.setUInt8(00);
-            if (settings.getCipher() != null && settings.getCipher().isCiphered()) {
+            GXAPDU.generateUserInformation(settings, settings.getCipher(), null, buff);
+            if (settings.isCiphered(false)) {
                 settings.getCipher()
                         .setInvocationCounter(settings.getCipher().getInvocationCounter() + 1);
             }
-            GXAPDU.generateUserInformation(settings, settings.getCipher(), null, buff);
             buff.setUInt8(0, (byte) (buff.size() - 1));
         }
         List<byte[]> reply;
@@ -3371,7 +3371,7 @@ public class GXDLMSClient {
                     Conformance.BLOCK_TRANSFER_WITH_GET_OR_READ, Conformance.SET,
                     Conformance.SELECTIVE_ACCESS, Conformance.ACTION,
                     Conformance.MULTIPLE_REFERENCES, Conformance.GET, Conformance.ACCESS,
-                    Conformance.DELTA_VALUE_ENCODING));
+                    Conformance.GENERAL_PROTECTION, Conformance.DELTA_VALUE_ENCODING));
         } else {
             list.addAll(Arrays.asList(Conformance.INFORMATION_REPORT, Conformance.READ,
                     Conformance.UN_CONFIRMED_WRITE, Conformance.WRITE,

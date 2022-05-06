@@ -72,6 +72,7 @@ import gurux.dlms.enums.RequestTypes;
 import gurux.dlms.enums.Security;
 import gurux.dlms.enums.ServiceClass;
 import gurux.dlms.enums.Signing;
+import gurux.dlms.enums.Standard;
 import gurux.dlms.internal.GXCommon;
 import gurux.dlms.internal.GXDataInfo;
 import gurux.dlms.objects.GXDLMSAccount;
@@ -138,6 +139,7 @@ import gurux.dlms.objects.GXDLMSTcpUdpSetup;
 import gurux.dlms.objects.GXDLMSTokenGateway;
 import gurux.dlms.objects.GXDLMSUtilityTables;
 import gurux.dlms.objects.enums.CertificateType;
+import gurux.dlms.objects.enums.SecuritySuite;
 import gurux.dlms.plc.enums.PlcDataLinkData;
 import gurux.dlms.plc.enums.PlcDestinationAddress;
 import gurux.dlms.plc.enums.PlcHdlcSourceAddress;
@@ -698,6 +700,12 @@ abstract class GXDLMS {
         if (ciphering) {
             len += CIPHERING_HEADER_SIZE;
         }
+        // If system title is sent.
+        if ((Conformance.toInteger(p.getSettings().getNegotiatedConformance())
+                & Conformance.GENERAL_PROTECTION.getValue()) != 0) {
+            len += 9;
+        }
+        len += getSigningSize(p);
         if (!p.isMultipleBlocks()) {
             // Add command type and invoke and priority.
             p.setMultipleBlocks(2 + reply.size() + len > p.getSettings().getMaxPduSize());
@@ -712,6 +720,27 @@ abstract class GXDLMS {
         }
     }
 
+    /**
+     * Returns the amount of the bytes that signing requires.
+     * 
+     * @param p
+     *            LN Parameters.
+     * @return need bytes.
+     */
+    static private byte getSigningSize(final GXDLMSLNParameters p) {
+        byte size = 0;
+        // If signing is used.
+        if (p.getSettings().getCipher() != null
+                && p.getSettings().getCipher().getSigning() == Signing.GENERAL_SIGNING) {
+            if (p.getSettings().getCipher().getSecuritySuite() == SecuritySuite.SUITE_1) {
+                size = 65;
+            } else if (p.getSettings().getCipher().getSecuritySuite() == SecuritySuite.SUITE_2) {
+                size = 99;
+            }
+        }
+        return size;
+    }
+
     /*
      * Get next logical name PDU.
      * @param p LN parameters.
@@ -722,10 +751,7 @@ abstract class GXDLMS {
             InvalidAlgorithmParameterException, IllegalBlockSizeException, BadPaddingException,
             SignatureException {
         boolean ciphering = p.getCommand() != Command.AARQ && p.getCommand() != Command.AARE
-                && p.getSettings().getCipher() != null
-                && p.getSettings().getCipher().getSecurity() != null
-                && p.getSettings().getCipher().getSecurity() != Security.NONE;
-        // Association LN V3 and ciphering is not needed.
+                && (p.getSettings().isCiphered(true) || p.cipheredCommand != Command.NONE);
         if (!p.getSettings().getOverwriteAttributeAccessRights() && ciphering & p.accessMode != 0) {
             if (p.getSettings().isServer()) {
                 if ((p.accessMode & (AccessMode3.AUTHENTICATED_RESPONSE.getValue()
@@ -938,13 +964,12 @@ abstract class GXDLMS {
                         if (ciphering && p.command != Command.GENERAL_BLOCK_TRANSFER) {
                             reply.set(p.getData());
                             byte[] tmp;
-                            boolean cipher0 =
-                                    (p.getSettings().getConnected() & ConnectionState.DLMS) == 0
-                                            || !shoudSign(p);
-                            if (cipher0) {
+                            boolean sign = shoudSign(p);
+                            if ((p.getSettings().getConnected() & ConnectionState.DLMS) == 0
+                                    || !sign) {
                                 tmp = cipher0(p, reply.array());
                             } else {
-                                tmp = cipher1(p, reply.array());
+                                tmp = cipher1(p, reply.array(), sign);
                             }
                             p.getData().size(0);
                             p.getData().set(tmp);
@@ -953,11 +978,15 @@ abstract class GXDLMS {
                             if (7 + len > p.getSettings().getMaxPduSize()) {
                                 len = p.getSettings().getMaxPduSize() - 7;
                             }
+                            if (len + getSigningSize(p) > p.getSettings().getMaxPduSize()) {
+                                len -= getSigningSize(p);
+                            }
                             ciphering = false;
                         }
                     } else if (p.getCommand() != Command.GET_REQUEST
                             && len + reply.size() > p.getSettings().getMaxPduSize()) {
                         len = p.getSettings().getMaxPduSize() - reply.size();
+                        len -= getSigningSize(p);
                     }
                     reply.set(p.getData(), len);
                 } else if ((p.getSettings().getGateway() != null
@@ -980,16 +1009,15 @@ abstract class GXDLMS {
                 }
             }
             if (ciphering && reply.size() != 0 && p.getCommand() != Command.RELEASE_REQUEST
-                    && !p.getSettings().getNegotiatedConformance()
-                            .contains(Conformance.GENERAL_BLOCK_TRANSFER)) {
+                    && (!p.isMultipleBlocks() || !p.getSettings().getNegotiatedConformance()
+                            .contains(Conformance.GENERAL_BLOCK_TRANSFER))) {
                 // GBT ciphering is done for all the data, not just block.
                 byte[] tmp;
-                boolean cipher0 = (p.getSettings().getConnected() & ConnectionState.DLMS) == 0
-                        || !shoudSign(p);
-                if (cipher0) {
+                boolean sign = shoudSign(p);
+                if ((p.getSettings().getConnected() & ConnectionState.DLMS) == 0 || !sign) {
                     tmp = cipher0(p, reply.array());
                 } else {
-                    tmp = cipher1(p, reply.array());
+                    tmp = cipher1(p, reply.array(), sign);
                 }
                 reply.size(0);
                 reply.set(tmp);
@@ -1052,7 +1080,7 @@ abstract class GXDLMS {
     }
 
     static private boolean shoudSign(GXDLMSLNParameters p) {
-        boolean signing = p.getSettings().getCipher().getSigning() != Signing.NONE;
+        boolean signing = p.getSettings().getCipher().getSigning() == Signing.GENERAL_SIGNING;
         // Association LN V3 and signing is not needed.
         if (!p.getSettings().getOverwriteAttributeAccessRights() && signing & p.accessMode != 0) {
             if (p.getSettings().isServer()) {
@@ -1068,6 +1096,62 @@ abstract class GXDLMS {
         return signing;
     }
 
+    static AesGcmParameter getCipheringParameters(GXDLMSLNParameters p) {
+        int cmd;
+        byte[] key;
+        GXICipher cipher = p.getSettings().getCipher();
+        // If client.
+        if (p.cipheredCommand == Command.NONE) {
+            // General protection can be used with pre-established connections.
+            if (((p.getSettings().getConnected() & ConnectionState.DLMS) == 0
+                    || (Conformance.toInteger(p.getSettings().getNegotiatedConformance())
+                            & Conformance.GENERAL_PROTECTION.getValue()) == 0)
+                    && (p.getSettings().getPreEstablishedSystemTitle() == null
+                            || p.getSettings().getPreEstablishedSystemTitle().length == 0
+                            || (Conformance.toInteger(p.getSettings().getProposedConformance())
+                                    & Conformance.GENERAL_PROTECTION.getValue()) == 0)) {
+                if (cipher.getDedicatedKey() != null
+                        && (p.getSettings().getConnected() & ConnectionState.DLMS) != 0) {
+                    cmd = getDedMessage(p.getCommand());
+                    key = cipher.getDedicatedKey();
+                } else {
+                    cmd = getGloMessage(p.getCommand());
+                    key = getBlockCipherKey(p.getSettings());
+                }
+            } else {
+                if (p.getSettings().getCipher().getDedicatedKey() != null) {
+                    cmd = Command.GENERAL_DED_CIPHERING;
+                    key = cipher.getDedicatedKey();
+                } else {
+                    cmd = Command.GENERAL_DED_CIPHERING;
+                    key = getBlockCipherKey(p.getSettings());
+                }
+            }
+        } else // If server.
+        {
+            if (p.cipheredCommand == Command.GENERAL_DED_CIPHERING) {
+                cmd = (byte) Command.GENERAL_DED_CIPHERING;
+                key = cipher.getDedicatedKey();
+            } else if (p.cipheredCommand == Command.GENERAL_GLO_CIPHERING) {
+                cmd = Command.GENERAL_GLO_CIPHERING;
+                key = getBlockCipherKey(p.getSettings());
+            } else if (p.getSettings().getCipher().getDedicatedKey() == null
+                    || isGloMessage(p.cipheredCommand)) {
+                cmd = getGloMessage(p.command);
+                key = getBlockCipherKey(p.getSettings());
+            } else {
+                cmd = getDedMessage(p.command);
+                key = cipher.getDedicatedKey();
+            }
+        }
+        AesGcmParameter s = new AesGcmParameter(cmd, cipher.getSecurity(),
+                cipher.getSecuritySuite(), cipher.getInvocationCounter(), cipher.getSystemTitle(),
+                key, getAuthenticationKey(p.getSettings()));
+        s.setIgnoreSystemTitle(p.getSettings().getStandard() == Standard.ITALY);
+        s.setRecipientSystemTitle(p.getSettings().getSourceSystemTitle());
+        return s;
+    }
+
     /**
      * Cipher using security suite 1 or 2.
      * 
@@ -1077,10 +1161,13 @@ abstract class GXDLMS {
      *            Data to encrypt.
      * @throws SignatureException
      */
-    private static byte[] cipher1(final GXDLMSLNParameters p, final byte[] data)
+    private static byte[] cipher1(final GXDLMSLNParameters p, final byte[] data, boolean sign)
             throws InvalidKeyException, NoSuchAlgorithmException, NoSuchPaddingException,
             InvalidAlgorithmParameterException, IllegalBlockSizeException, BadPaddingException,
             SignatureException {
+        if (!sign && p.getSettings().getCipher().getSigning() == Signing.GENERAL_SIGNING) {
+            sign = true;
+        }
         byte keyid;
         switch (p.getSettings().getCipher().getSigning()) {
         case ONE_PASS_DIFFIE_HELLMAN:
@@ -1095,7 +1182,8 @@ abstract class GXDLMS {
         }
         byte sc = 0;
         GXICipher c = p.getSettings().getCipher();
-        if (p.getSettings().getSourceSystemTitle() == null) {
+        if (p.getSettings().getSourceSystemTitle() == null
+                && p.getSettings().getPreEstablishedSystemTitle() == null) {
             throw new IllegalArgumentException("Invalid Recipient System Title.");
         }
         if (c.getSystemTitle() == null) {
@@ -1117,6 +1205,7 @@ abstract class GXDLMS {
             if (c.getSigning() != Signing.GENERAL_SIGNING) {
                 throw new IllegalArgumentException("Invalid security.");
             }
+            break;
         }
         String alg, algID;
         int keyDataLen;
@@ -1142,7 +1231,7 @@ abstract class GXDLMS {
         byte[] z = null;
         PrivateKey key = null;
         PublicKey pub = null;
-        if (p.getSettings().getCipher().getSigning() != Signing.GENERAL_SIGNING) {
+        if (!sign) {
             // If external Hardware Security Module is used.
             byte[] ret = p.getSettings().crypt(CertificateType.KEY_AGREEMENT, data, true);
             if (ret != null) {
@@ -1179,7 +1268,7 @@ abstract class GXDLMS {
                         .log(Level.FINEST, "Public agreement key: {0}", GXCommon.toHex(
                                 GXAsn1Converter.rawValue(c.getKeyAgreementKeyPair().getPublic()),
                                 true));
-            } else {
+            } else if (keyid == 2) {
                 Logger.getLogger(GXSecure.class.getName()).log(Level.FINEST,
                         "Private agreement key {0}",
                         GXCommon.toHex(GXAsn1Converter.rawValue(key), true));
@@ -1190,8 +1279,12 @@ abstract class GXDLMS {
                 ka.init(c.getKeyAgreementKeyPair().getPrivate());
                 ka.doPhase(c.getKeyAgreementKeyPair().getPublic(), true);
                 z = ka.generateSecret();
-                tmp2.setUInt8(0x8);
-                tmp2.setUInt64(c.getInvocationCounter());
+                if (c.getTransactionId() == null) {
+                    tmp2.setUInt8(0x0);
+                } else {
+                    tmp2.setUInt8(c.getTransactionId().length);
+                    tmp2.set(c.getTransactionId());
+                }
             }
         } else {
             if (c.getSigningKeyPair() != null) {
@@ -1208,10 +1301,6 @@ abstract class GXDLMS {
                         p.getSettings().getSourceSystemTitle(), false);
                 c.setSigningKeyPair(new KeyPair(pub, key));
             }
-            KeyAgreement ka = KeyAgreement.getInstance("ECDH");
-            ka.init(key);
-            ka.doPhase(pub, true);
-            z = ka.generateSecret();
             Logger.getLogger(GXDLMS.class.getName()).log(Level.FINEST,
                     "Private signing key: {0}" + GXCommon.toHex(key.getEncoded()));
             Logger.getLogger(GXDLMS.class.getName()).log(Level.FINEST,
@@ -1223,34 +1312,40 @@ abstract class GXDLMS {
             Logger.getLogger(GXSecure.class.getName()).log(Level.FINEST, "Shared secret {0}",
                     GXCommon.toHex(z));
         }
-        GXByteBuffer kdf = new GXByteBuffer();
-        kdf.set(GXSecure.generateKDF(alg, z, keyDataLen, GXCommon.hexToBytes(algID),
-                c.getSystemTitle(), tmp2.array(), null, null));
-        Logger.getLogger(GXDLMS.class.getName()).log(Level.FINEST, "kdf: {0}", kdf);
-        AesGcmParameter s =
-                new AesGcmParameter(0x31, p.getSettings(), security, c.getSecuritySuite(), 0,
-                        // KDF
-                        kdf.subArray(0, 16),
-                        // Authentication key.
-                        c.getAuthenticationKey(),
-                        // Originator system title.
-                        c.getSystemTitle(),
-                        // recipient system title.
-                        p.getSettings().getSourceSystemTitle(),
-                        // Date time
-                        null,
-                        // Other information.
-                        null);
-
+        AesGcmParameter s;
+        if (sign) {
+            s = getCipheringParameters(p);
+        } else {
+            GXByteBuffer kdf = new GXByteBuffer();
+            kdf.set(GXSecure.generateKDF(alg, z, keyDataLen, GXCommon.hexToBytes(algID),
+                    c.getSystemTitle(), tmp2.array(), null, null));
+            Logger.getLogger(GXDLMS.class.getName()).log(Level.FINEST, "kdf: {0}", kdf);
+            s = new AesGcmParameter(0x31, p.getSettings(), security, c.getSecuritySuite(), 0,
+                    // KDF
+                    kdf.subArray(0, 16),
+                    // Authentication key.
+                    c.getAuthenticationKey(),
+                    // Originator system title.
+                    c.getSystemTitle(),
+                    // recipient system title.
+                    p.getSettings().getSourceSystemTitle(),
+                    // Date time
+                    null,
+                    // Other information.
+                    null);
+        }
         GXByteBuffer reply = new GXByteBuffer();
-        if (p.getSettings().getCipher().getSigning() == Signing.GENERAL_SIGNING) {
+        if (sign) {
             reply.setUInt8(Command.GENERAL_SIGNING);
         } else {
             reply.setUInt8(Command.GENERAL_CIPHERING);
         }
-        GXCommon.setObjectCount(8, reply);
-        reply.setUInt64(c.getInvocationCounter());
-        c.setInvocationCounter(1 + c.getInvocationCounter());
+        if (c.getTransactionId() == null) {
+            GXCommon.setObjectCount(0, reply);
+        } else {
+            GXCommon.setObjectCount(c.getTransactionId().length, reply);
+            reply.set(c.getTransactionId());
+        }
         GXCommon.setObjectCount(s.getSystemTitle().length, reply);
         reply.set(s.getSystemTitle());
         GXCommon.setObjectCount(s.getRecipientSystemTitle().length, reply);
@@ -1259,7 +1354,7 @@ abstract class GXDLMS {
         reply.setUInt8(0);
         // other-information not present
         reply.setUInt8(0);
-        if (p.getSettings().getCipher().getSigning() != Signing.GENERAL_SIGNING) {
+        if (!sign) {
             // optional flag
             reply.setUInt8(1);
             // agreed-key CHOICE
@@ -1298,32 +1393,56 @@ abstract class GXDLMS {
             } catch (Exception e) {
                 throw new IllegalArgumentException(e.getMessage());
             }
-        } else if (p.getSettings().getCipher().getSigning() != Signing.GENERAL_SIGNING) {
+        } else if (!sign) {
             reply.setUInt8(0);
         }
         // ciphered-content
         s.setType(CountType.DATA | CountType.TAG);
         byte[] tmp = GXCiphering.encrypt(s, data);
-        // Len
-        GXCommon.setObjectCount(5 + tmp.length, reply);
-        int contentStart = reply.size();
-        // Add SC
-        reply.setUInt8(sc);
-        // Add IC.
-        reply.setUInt32(0);
+        // Content length is not add for the signed data.
+        GXByteBuffer signedData = new GXByteBuffer();
+        signedData.set(reply.getData(), 1, reply.size() - 1);
+        if (c.getSecurity() != Security.NONE) {
+            if (sign) {
+                // Content length is not add for the signed data.
+                GXCommon.setObjectCount(
+                        6 + GXCommon.getObjectCountSizeInBytes(5 + tmp.length) + tmp.length, reply);
+                // Add ciphered command.
+                if (p.getSettings().getCipher().getDedicatedKey() == null) {
+                    reply.setUInt8(getGloMessage(p.command));
+                    signedData.setUInt8(getGloMessage(p.command));
+                } else {
+                    reply.setUInt8(getDedMessage(p.command));
+                    signedData.setUInt8(getDedMessage(p.command));
+                }
+            }
+            // Len
+            GXCommon.setObjectCount(5 + tmp.length, reply);
+            GXCommon.setObjectCount(5 + tmp.length, signedData);
+            // Add SC
+            reply.setUInt8(sc);
+            signedData.setUInt8(sc);
+            // Add IC.
+            reply.setUInt32(p.getSettings().getCipher().getInvocationCounter());
+            signedData.setUInt32(p.getSettings().getCipher().getInvocationCounter());
+        } else if (!sign) {
+            // Length.
+            GXCommon.setObjectCount(tmp.length, reply);
+        }
+        p.getSettings().getCipher()
+                .setInvocationCounter(1 + p.getSettings().getCipher().getInvocationCounter());
         reply.set(tmp);
-
-        if (p.getSettings().getCipher().getSigning() == Signing.GENERAL_SIGNING) {
+        signedData.set(tmp);
+        if (sign) {
             // Signature
             Signature sig = Signature.getInstance("SHA256withECDSA");
             if (c.getSigningKeyPair() == null) {
                 throw new IllegalArgumentException("SigningKeyPair is empty.");
             }
             sig.initSign(key);
-            tmp = reply.subArray(contentStart, reply.size() - contentStart);
-            sig.update(tmp);
-            GXByteBuffer bb = new GXByteBuffer();
+            sig.update(signedData.array());
             GXAsn1Sequence seq = (GXAsn1Sequence) GXAsn1Converter.fromByteArray(sig.sign());
+            GXByteBuffer bb = new GXByteBuffer();
             bb.set(((GXAsn1Integer) seq.get(0)).getByteArray());
             if (bb.size() != 32) {
                 bb.move(1, 0, 32);
@@ -1515,8 +1634,7 @@ abstract class GXDLMS {
 
     private static int appendMultipleSNBlocks(final GXDLMSSNParameters p,
             final GXByteBuffer reply) {
-        boolean ciphering = p.getSettings().getCipher() != null
-                && p.getSettings().getCipher().getSecurity() != Security.NONE;
+        boolean ciphering = p.getSettings().isCiphered(false);
         int hSize = reply.size() + 3;
         // Add LLC bytes.
         if (p.getCommand() == Command.WRITE_REQUEST || p.getCommand() == Command.READ_REQUEST) {
@@ -1559,8 +1677,8 @@ abstract class GXDLMS {
     public static void getSNPdu(final GXDLMSSNParameters p, final GXByteBuffer reply)
             throws InvalidKeyException, NoSuchAlgorithmException, NoSuchPaddingException,
             InvalidAlgorithmParameterException, IllegalBlockSizeException, BadPaddingException {
-        boolean ciphering = p.getSettings().getCipher() != null
-                && p.getSettings().getCipher().getSecurity() != Security.NONE;
+        boolean ciphering = p.getCommand() != Command.AARQ && p.getCommand() != Command.AARE
+                && p.getSettings().isCiphered(false);
         if ((!ciphering || p.getCommand() == Command.AARQ || p.getCommand() == Command.AARE)
                 && useHdlc(p.getSettings().getInterfaceType())) {
             if (p.getSettings().isServer()) {
@@ -2546,7 +2664,7 @@ abstract class GXDLMS {
             return false;
         }
         MBusCommand cmd = MBusCommand.forValue(buff.getUInt8(buff.position() + 1));
-        return (cmd == MBusCommand.SND_NR || cmd == MBusCommand.SND_UD2
+        return (cmd == MBusCommand.SND_NR || cmd == MBusCommand.SND_UD
                 || cmd == MBusCommand.RSP_UD);
     }
 
@@ -2762,6 +2880,80 @@ abstract class GXDLMS {
             }
         }
         return frame;
+    }
+
+    /**
+     * Check is this wireless M-Bus message.
+     * 
+     * @param buff
+     *            Received data.
+     * @return True, if this is wireless M-Bus message.
+     */
+    public static boolean isWirelessMBusData(final GXByteBuffer buff) {
+        if (buff.available() < 2) {
+            return false;
+        }
+        short cmd = buff.getUInt8(buff.position() + 1);
+        return (cmd & MBusCommand.SND_NR.getValue()) != 0
+                || (cmd & MBusCommand.SND_UD.getValue()) != 0
+                || (cmd & MBusCommand.RSP_UD.getValue()) != 0;
+    }
+
+    /**
+     * Check is this wired M-Bus message.
+     * 
+     * @param buff
+     *            Received data.
+     * @return True, if this is wired M-Bus message.
+     */
+    public static boolean isWiredMBusData(final GXByteBuffer buff) {
+        if (buff.available() < 1) {
+            return false;
+        }
+        return buff.getUInt8(buff.position()) == 0x68;
+    }
+
+    /**
+     * Check is this PLC S-FSK message.
+     * 
+     * @param buff
+     *            Received data.
+     * @return S-FSK frame size in bytes.
+     */
+    public static int GetPlcSfskFrameSize(final GXByteBuffer buff) {
+        int ret;
+        if (buff.available() < 2) {
+            ret = 0;
+        } else {
+            int len = buff.getUInt16(buff.position());
+            switch (len) {
+            case (int) PlcMacSubframes.ONE:
+                ret = 36;
+                break;
+            case (int) PlcMacSubframes.TWO:
+                ret = 2 * 36;
+                break;
+            case (int) PlcMacSubframes.THREE:
+                ret = 3 * 36;
+                break;
+            case (int) PlcMacSubframes.FOUR:
+                ret = 4 * 36;
+                break;
+            case (int) PlcMacSubframes.FIVE:
+                ret = 5 * 36;
+                break;
+            case (int) PlcMacSubframes.SIX:
+                ret = 6 * 36;
+                break;
+            case (int) PlcMacSubframes.SEVEN:
+                ret = 7 * 36;
+                break;
+            default:
+                ret = 0;
+                break;
+            }
+        }
+        return ret;
     }
 
     private static boolean checkWrapperAddress(final GXDLMSSettings settings,
@@ -4030,6 +4222,7 @@ abstract class GXDLMS {
                 case Command.GENERAL_CIPHERING:
                 case Command.ACCESS_RESPONSE:
                 case Command.GENERAL_SIGNING:
+                    data.setCommand(Command.NONE);
                     data.getData().position(data.getCipherIndex());
                     getPdu(settings, data);
                     break;
@@ -4140,7 +4333,7 @@ abstract class GXDLMS {
                 } else if (data.getCommand() == Command.GENERAL_GLO_CIPHERING) {
                     p = new AesGcmParameter(settings, settings.getSourceSystemTitle(),
                             getBlockCipherKey(settings), getAuthenticationKey(settings));
-                } else if (isGloMessage(data.getCommand())) {
+                } else if (cipher.getDedicatedKey() == null || isGloMessage(data.getCommand())) {
                     p = new AesGcmParameter(settings, settings.getSourceSystemTitle(),
                             getBlockCipherKey(settings), getAuthenticationKey(settings));
                 } else {

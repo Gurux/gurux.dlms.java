@@ -179,6 +179,16 @@ public class GXDLMSTranslator {
      * @param type
      *            Translator output type.
      */
+    public GXDLMSTranslator() {
+        this(TranslatorOutputType.SIMPLE_XML);
+    }
+
+    /**
+     * Constructor.
+     * 
+     * @param type
+     *            Translator output type.
+     */
     public GXDLMSTranslator(final TranslatorOutputType type) {
         outputType = type;
         getTags(outputType, tags, tagsByName);
@@ -381,6 +391,14 @@ public class GXDLMSTranslator {
      * @param value
      *            Is only complete PDU parsed and shown.
      */
+    public final void setCompletePdu(final boolean value) {
+        completePdu = value;
+    }
+
+    /**
+     * @param value
+     *            Is only complete PDU parsed and shown.
+     */
     public final void setCompleatePdu(final boolean value) {
         completePdu = value;
     }
@@ -447,6 +465,13 @@ public class GXDLMSTranslator {
             } else if (data.getUInt16(data.position()) == 0x1) {
                 pos = data.position();
                 settings.setInterfaceType(InterfaceType.WRAPPER);
+                found = GXDLMS.getData(settings, data, reply, null);
+                data.position(pos);
+                if (found) {
+                    break;
+                }
+            } else if (GXDLMS.isWiredMBusData(data)) {
+                pos = data.position();
                 found = GXDLMS.getData(settings, data, reply, null);
                 data.position(pos);
                 if (found) {

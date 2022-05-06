@@ -94,7 +94,6 @@ public final class GXSecure {
      * Constructor.
      */
     private GXSecure() {
-
     }
 
     private static int getBlocklength(final byte[] data) {
@@ -305,21 +304,13 @@ public final class GXSecure {
                 if (cipher.getSigningKeyPair() == null) {
                     throw new IllegalArgumentException("SigningKeyPair is empty.");
                 }
+                System.out.println(GXCommon
+                        .toHex(GXAsn1Converter.rawValue(cipher.getSigningKeyPair().getPrivate())));
                 sig.initSign(cipher.getSigningKeyPair().getPrivate());
-                GXByteBuffer bb = new GXByteBuffer();
-                bb.set(settings.getCipher().getSystemTitle());
-                bb.set(settings.getSourceSystemTitle());
-                if (settings.isServer()) {
-                    bb.set(settings.getCtoSChallenge());
-                    bb.set(settings.getStoCChallenge());
-                } else {
-                    bb.set(settings.getStoCChallenge());
-                    bb.set(settings.getCtoSChallenge());
-                }
-                sig.update(bb.array());
+                sig.update(secret);
                 d = sig.sign();
                 GXAsn1Sequence seq = (GXAsn1Sequence) GXAsn1Converter.fromByteArray(d);
-                bb.size(0);
+                GXByteBuffer bb = new GXByteBuffer();
                 bb.set(((GXAsn1Integer) seq.get(0)).getByteArray());
                 if (bb.size() != 32) {
                     bb.move(1, 0, 32);
@@ -640,8 +631,7 @@ public final class GXSecure {
             return c.doFinal(data);
         } catch (Exception ex) {
             if (p.getXml() == null) {
-                Logger.getLogger(GXSecure.class.getName()).log(Level.SEVERE,
-                        "Decrypt failed. Invalid authentication tag.");
+                LOGGER.log(Level.SEVERE, "Decrypt failed. Invalid authentication tag.");
                 throw ex;
             }
             if (ex instanceof javax.crypto.AEADBadTagException) {
@@ -897,23 +887,20 @@ public final class GXSecure {
             p.setSecuritySuite(SecuritySuite.forValue(sc & 0x3));
             p.setSecurity(Security.forValue(sc & 0x30));
             if ((sc & 0x80) != 0) {
-                Logger.getLogger(GXSecure.class.getName()).log(Level.FINEST,
-                        "Compression is used.");
+                LOGGER.log(Level.FINEST, "Compression is used.");
             }
             if ((sc & 0x40) != 0) {
-                Logger.getLogger(GXSecure.class.getName()).log(Level.FINEST, "Key_Set is used.");
+                LOGGER.log(Level.FINEST, "Key_Set is used.");
                 if (p.getXml() == null) {
                     throw new GXDLMSExceptionResponse(ExceptionStateError.SERVICE_NOT_ALLOWED,
                             ExceptionServiceError.DECIPHERING_ERROR, null);
                 }
             }
             if ((sc & 0x20) != 0) {
-                Logger.getLogger(GXSecure.class.getName()).log(Level.FINEST,
-                        "Encryption is applied.");
+                LOGGER.log(Level.FINEST, "Encryption is applied.");
             }
             if ((sc & 0x10) != 0) {
-                Logger.getLogger(GXSecure.class.getName()).log(Level.FINEST,
-                        "Authentication is applied.");
+                LOGGER.log(Level.FINEST, "Authentication is applied.");
             }
             if (value != 0 && p.getXml() != null && kp.getPublic() == null) {
                 return p.getCipheredContent();
@@ -921,10 +908,8 @@ public final class GXSecure {
             byte[] algID = GXCommon.hexToBytes("60857405080300"); // AES-GCM-128
             if (cmd == Command.GENERAL_SIGNING && p.getSecurity() != Security.NONE) {
                 if (!(p.getXml() != null && (kp.getPrivate() == null || kp.getPublic() == null))) {
-                    Logger.getLogger(GXSecure.class.getName()).log(Level.FINEST,
-                            "Private signing key: ", kp.getPrivate());
-                    Logger.getLogger(GXSecure.class.getName()).log(Level.FINEST,
-                            "Public signing key: ", kp.getPublic());
+                    LOGGER.log(Level.FINEST, "Private signing key: ", kp.getPrivate());
+                    LOGGER.log(Level.FINEST, "Public signing key: ", kp.getPublic());
                 }
             } else if (value == KeyAgreementScheme.ONE_PASS_DIFFIE_HELLMAN.ordinal()) {
                 // Client generates shared secret.
@@ -932,18 +917,15 @@ public final class GXSecure {
                 ka.init(kp.getPrivate());
                 ka.doPhase(kp.getPublic(), true);
                 byte[] z = ka.generateSecret();
-                Logger.getLogger(GXSecure.class.getName()).log(Level.FINEST,
-                        "Private agreement key {0}",
+                LOGGER.log(Level.FINEST, "Private agreement key {0}",
                         GXCommon.toHex(GXAsn1Converter.rawValue(key), true));
-                Logger.getLogger(GXSecure.class.getName()).log(Level.FINEST,
-                        "Public ephemeral key: {0}",
+                LOGGER.log(Level.FINEST, "Public ephemeral key: {0}",
                         GXCommon.toHex(GXAsn1Converter.rawValue(pub), true));
-                Logger.getLogger(GXSecure.class.getName()).log(Level.FINEST, "Shared secret: {0}",
-                        GXCommon.toHex(z, true));
+                LOGGER.log(Level.FINEST, "Shared secret: {0}", GXCommon.toHex(z, true));
                 GXByteBuffer kdf = new GXByteBuffer();
                 kdf.set(GXSecure.generateKDF("SHA-256", z, 256, algID, p.getSystemTitle(),
                         p.getRecipientSystemTitle(), null, null));
-                Logger.getLogger(GXSecure.class.getName()).log(Level.FINEST, "KDF {0}", kdf);
+                LOGGER.log(Level.FINEST, "KDF {0}", kdf);
                 p.setBlockCipherKey(kdf.subArray(0, 16));
             } else if (value == KeyAgreementScheme.STATIC_UNIFIED_MODEL.ordinal()) {
                 // Client generates shared secret.
@@ -951,22 +933,19 @@ public final class GXSecure {
                 ka.init(p.getSettings().getCipher().getKeyAgreementKeyPair().getPrivate());
                 ka.doPhase(kp.getPublic(), true);
                 byte[] z = ka.generateSecret();
-                Logger.getLogger(GXSecure.class.getName()).log(Level.FINEST,
-                        "Private Agreement key: {0}",
+                LOGGER.log(Level.FINEST, "Private Agreement key: {0}",
                         GXDLMSTranslator.toHex(GXAsn1Converter.rawValue(p.getSettings().getCipher()
                                 .getKeyAgreementKeyPair().getPrivate())));
-                Logger.getLogger(GXSecure.class.getName()).log(Level.FINEST,
-                        "Public Agreement key: {0}",
+                LOGGER.log(Level.FINEST, "Public Agreement key: {0}",
                         GXDLMSTranslator.toHex(GXAsn1Converter.rawValue(pub)));
-                Logger.getLogger(GXSecure.class.getName()).log(Level.FINEST, "Shared secret {0}",
-                        GXCommon.toHex(z, true));
+                LOGGER.log(Level.FINEST, "Shared secret {0}", GXCommon.toHex(z, true));
                 GXByteBuffer kdf = new GXByteBuffer();
                 kdf.set(GXSecure.generateKDF("SHA-256", z, 256, algID, p.getSystemTitle(),
                         transactionId.array(), p.getRecipientSystemTitle(), null));
 
-                Logger.getLogger(GXSecure.class.getName()).log(Level.FINEST, "KDF {0}", kdf);
-                Logger.getLogger(GXSecure.class.getName()).log(Level.FINEST,
-                        "Authentication key {0}", GXDLMSTranslator.toHex(p.getAuthenticationKey()));
+                LOGGER.log(Level.FINEST, "KDF {0}", kdf);
+                LOGGER.log(Level.FINEST, "Authentication key {0}",
+                        GXDLMSTranslator.toHex(p.getAuthenticationKey()));
                 // Get Ephemeral signing key.
                 p.setBlockCipherKey(kdf.subArray(0, 16));
             }
@@ -991,9 +970,8 @@ public final class GXSecure {
                 }
             }
             p.setInvocationCounter(invocationCounter);
-            Logger.getLogger(GXSecure.class.getName()).log(Level.FINEST, "Decrypt settings {0}",
-                    p.toString());
-            Logger.getLogger(GXSecure.class.getName()).log(Level.FINEST, "Encrypted {0}",
+            LOGGER.log(Level.FINEST, "Decrypt settings {0}", p.toString());
+            LOGGER.log(Level.FINEST, "Encrypted {0}",
                     GXCommon.toHex(data.getData(), false, data.position(), data.available()));
             byte[] tag = null;
             if (p.getSecurity() != Security.ENCRYPTION) {
@@ -1005,8 +983,7 @@ public final class GXSecure {
                 try {
                     encryptedData = encryptAesGcm(false, p, data.remaining());
                 } catch (AEADBadTagException e) {
-                    Logger.getLogger(GXSecure.class.getName()).log(Level.SEVERE,
-                            "Decrypt failed. Invalid authentication tag.");
+                    LOGGER.log(Level.SEVERE, "Decrypt failed. Invalid authentication tag.");
                     encryptedData = null;
                     if (p.getXml() == null) {
                         throw e;
@@ -1034,8 +1011,7 @@ public final class GXSecure {
                 bb.set(ciphertext);
                 bb.set(tag);
                 decrypted = encryptAesGcm(false, p, bb.array());
-                Logger.getLogger(GXSecure.class.getName()).log(Level.FINEST, "Decrypted: {0}",
-                        GXCommon.toHex(decrypted, true));
+                LOGGER.log(Level.FINEST, "Decrypted: {0}", GXCommon.toHex(decrypted, true));
             } else {
                 length = len;
                 decrypted = new byte[length];
@@ -1050,17 +1026,14 @@ public final class GXSecure {
                 byte[] s = new byte[len];
                 data.get(s);
                 p.setSignature(s);
-                Logger.getLogger(GXSecure.class.getName()).log(Level.FINEST,
-                        "Verifying signature for sender: {0}",
+                LOGGER.log(Level.FINEST, "Verifying signature for sender: {0}",
                         GXCommon.toHex(p.getSystemTitle(), true));
                 if (p.getXml() == null) {
                     if (kp.getPublic() == null) {
                         throw new IllegalArgumentException("Public key is not set.");
                     }
-                    Signature instance = Signature.getInstance("SHA256withECDSA");
-                    instance.initVerify(kp.getPublic());
-                    instance.update(signedData.array());
-                    if (!instance.verify(p.getSignature())) {
+                    if (!validateEphemeralPublicKeySignature(signedData.array(), p.getSignature(),
+                            kp.getPublic())) {
                         throw new Exception("Invalid signature.");
                     }
                 } else {
@@ -1068,10 +1041,8 @@ public final class GXSecure {
                         p.getXml().appendComment(
                                 "Failed to verify signed data. Public key is not set.");
                     } else {
-                        Signature instance = Signature.getInstance("SHA256withECDSA");
-                        instance.initVerify(kp.getPublic());
-                        instance.update(signedData.array());
-                        if (!instance.verify(p.getSignature())) {
+                        if (!validateEphemeralPublicKeySignature(signedData.array(),
+                                p.getSignature(), kp.getPublic())) {
                             p.getXml().appendComment(
                                     "Failed to verify signed data. Invalid signature.");
                         }
@@ -1082,7 +1053,7 @@ public final class GXSecure {
         } catch (AEADBadTagException ex) {
             throw ex;
         } catch (Exception ex) {
-            Logger.getLogger(GXSecure.class.getName()).log(Level.SEVERE, ex.getMessage());
+            LOGGER.log(Level.SEVERE, ex.getMessage());
             throw new GXDLMSExceptionResponse(ExceptionStateError.SERVICE_NOT_ALLOWED,
                     ExceptionServiceError.DECIPHERING_ERROR, null);
         }

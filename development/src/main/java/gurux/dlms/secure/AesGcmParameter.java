@@ -108,10 +108,15 @@ public class AesGcmParameter {
      */
     private byte[] signature;
 
-    /**
+    /*
      * Used security suite.
      */
     private SecuritySuite securitySuite = SecuritySuite.SUITE_0;
+
+    /*
+     * System title is not send on pre-established connections.
+     */
+    private boolean ignoreSystemTitle;
 
     private GXDLMSTranslatorStructure xml;
 
@@ -366,6 +371,21 @@ public class AesGcmParameter {
      */
     public void setSecuritySuite(final SecuritySuite value) {
         securitySuite = value;
+    }
+
+    /**
+     * @return System title is not send on pre-established connections.
+     */
+    public boolean getIgnoreSystemTitle() {
+        return ignoreSystemTitle;
+    }
+
+    /**
+     * @param value
+     *            System title is not send on pre-established connections.
+     */
+    public void setIgnoreSystemTitle(final boolean value) {
+        ignoreSystemTitle = value;
     }
 
     /**

@@ -192,6 +192,7 @@ public class GXCiphering implements GXICipher {
 
     @Override
     public final void reset() {
+        signing = Signing.NONE;
         setSecurity(Security.NONE);
         setInvocationCounter(0);
     }

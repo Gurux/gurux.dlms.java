@@ -205,6 +205,9 @@ public class GXDLMSSecuritySetup extends GXDLMSObject implements IGXDLMSBase {
      *            Block cipher key.
      */
     public void setGuek(final byte[] value) {
+        if (getVersion() < 2 && value != null && value.length != 16 && value.length != 0) {
+            throw new IllegalArgumentException("Invalid Guek");
+        }
         guek = value;
     }
 
@@ -220,6 +223,10 @@ public class GXDLMSSecuritySetup extends GXDLMSObject implements IGXDLMSBase {
      *            Broadcast block cipher key.
      */
     public void setGbek(final byte[] value) {
+        if (getVersion() < 2 && value != null && value.length != 16 && value.length != 0) {
+            throw new IllegalArgumentException("Invalid Gbek");
+        }
+
         gbek = value;
     }
 
@@ -235,6 +242,9 @@ public class GXDLMSSecuritySetup extends GXDLMSObject implements IGXDLMSBase {
      *            Authentication key.
      */
     public void setGak(final byte[] value) {
+        if (getVersion() < 2 && value != null && value.length != 16 && value.length != 0) {
+            throw new IllegalArgumentException("Invalid Gak");
+        }
         gak = value;
     }
 
@@ -864,6 +874,9 @@ public class GXDLMSSecuritySetup extends GXDLMSObject implements IGXDLMSBase {
 
     @Override
     public final byte[] invoke(final GXDLMSSettings settings, final ValueEventArgs e) {
+        if (securitySuite == SecuritySuite.SUITE_0 && e.getIndex() > 3) {
+            throw new IllegalArgumentException("Invalid Security Suite Version.");
+        }
         switch (e.getIndex()) {
         case 1:
             securityActivate(settings, e);

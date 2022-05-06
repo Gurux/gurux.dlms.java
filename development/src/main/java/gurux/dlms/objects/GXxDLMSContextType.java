@@ -40,6 +40,9 @@ import java.util.Set;
 import gurux.dlms.enums.Conformance;
 import gurux.dlms.internal.GXCommon;
 
+/**
+ * xDLMS context type information.
+ */
 public class GXxDLMSContextType {
 
     /**
@@ -133,11 +136,8 @@ public class GXxDLMSContextType {
 
     @Override
     public final String toString() {
-        return String.valueOf(conformance) + " "
-                + String.valueOf(maxReceivePduSize) + " "
-                + String.valueOf(maxSendPduSize) + " "
-                + String.valueOf(dlmsVersionNumber) + " "
-                + String.valueOf(qualityOfService) + " "
-                + GXCommon.toHex(cypheringInfo, true);
+        return String.valueOf(conformance) + " " + String.valueOf(maxReceivePduSize) + " "
+                + String.valueOf(maxSendPduSize) + " " + String.valueOf(dlmsVersionNumber) + " "
+                + String.valueOf(qualityOfService) + " " + GXCommon.toHex(cypheringInfo, true);
     }
 }

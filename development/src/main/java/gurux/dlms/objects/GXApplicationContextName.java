@@ -36,6 +36,9 @@ package gurux.dlms.objects;
 
 import gurux.dlms.objects.enums.ApplicationContextName;
 
+/**
+ * Application context name information.
+ */
 public class GXApplicationContextName {
     private int jointIsoCtt;
     private int country;
@@ -117,10 +120,8 @@ public class GXApplicationContextName {
     @Override
     public final String toString() {
         return String.valueOf(jointIsoCtt) + " " + String.valueOf(country) + " "
-                + String.valueOf(countryName) + " "
-                + String.valueOf(identifiedOrganization) + " "
-                + String.valueOf(dlmsUA) + " "
-                + String.valueOf(applicationContext) + " "
+                + String.valueOf(countryName) + " " + String.valueOf(identifiedOrganization) + " "
+                + String.valueOf(dlmsUA) + " " + String.valueOf(applicationContext) + " "
                 + String.valueOf(contextId);
     }
 }

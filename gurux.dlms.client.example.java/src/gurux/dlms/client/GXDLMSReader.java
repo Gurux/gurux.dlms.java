@@ -79,6 +79,7 @@ import gurux.dlms.enums.ErrorCode;
 import gurux.dlms.enums.InterfaceType;
 import gurux.dlms.enums.ObjectType;
 import gurux.dlms.enums.Security;
+import gurux.dlms.enums.Signing;
 import gurux.dlms.objects.GXDLMSAssociationShortName;
 import gurux.dlms.objects.GXDLMSCaptureObject;
 import gurux.dlms.objects.GXDLMSCertificateInfo;
@@ -379,15 +380,16 @@ public class GXDLMSReader {
             byte[] data;
             GXReplyData reply = new GXReplyData();
             reply.clear();
-            dlms.getProposedConformance().add(Conformance.GENERAL_PROTECTION);
             int add = dlms.getClientAddress();
             Authentication auth = dlms.getAuthentication();
             Security security = dlms.getCiphering().getSecurity();
+            Signing signing = dlms.getCiphering().getSigning();
             byte[] challenge = dlms.getCtoSChallenge();
             try {
                 dlms.setClientAddress(16);
                 dlms.setAuthentication(Authentication.NONE);
                 dlms.getCiphering().setSecurity(Security.NONE);
+                dlms.getCiphering().setSigning(Signing.NONE);
                 data = dlms.snrmRequest();
                 if (data != null) {
                     readDLMSPacket(data, reply);
@@ -427,6 +429,7 @@ public class GXDLMSReader {
                 dlms.setAuthentication(auth);
                 dlms.getCiphering().setSecurity(security);
                 dlms.setCtoSChallenge(challenge);
+                dlms.getCiphering().setSigning(signing);
             }
         }
     }
@@ -589,7 +592,7 @@ public class GXDLMSReader {
             // Update public key certificate and private key.
             if (dlms.getAuthentication() == Authentication.HIGH_ECDSA) {
                 Path path = Paths.get("Keys",
-                        GXDLMSTranslator.toHex(dlms.getCiphering().getSystemTitle(), false)
+                        "D" + GXDLMSTranslator.toHex(dlms.getCiphering().getSystemTitle(), false)
                                 + ".pem");
                 if (!Files.exists(path)) {
                     throw new IllegalArgumentException("Client Private key file is missing. "
@@ -598,7 +601,7 @@ public class GXDLMSReader {
                 GXPkcs8 key = GXPkcs8.load(path);
                 // Load public key of the server.
                 path = Paths.get("Certificates",
-                        GXDLMSTranslator.toHex(dlms.getSourceSystemTitle(), false) + ".pem");
+                        "D" + GXDLMSTranslator.toHex(dlms.getSourceSystemTitle(), false) + ".pem");
                 GXx509Certificate cert = GXx509Certificate.load(path);
                 dlms.getCiphering()
                         .setSigningKeyPair(new KeyPair(cert.getPublicKey(), key.getPrivateKey()));
@@ -1354,7 +1357,6 @@ public class GXDLMSReader {
      */
     void readAll(String outputFile) throws Exception {
         try {
-            dlms.getProposedConformance().add(Conformance.GENERAL_BLOCK_TRANSFER);
             initializeConnection();
 
             boolean read = false;

@@ -36,6 +36,9 @@ package gurux.dlms.objects;
 
 import gurux.dlms.enums.Authentication;
 
+/**
+ * Authentication mechanism name information.
+ */
 public class GXAuthenticationMechanismName {
     private int jointIsoCtt;
     private int country;
@@ -45,7 +48,7 @@ public class GXAuthenticationMechanismName {
     private int authenticationMechanismName;
     private Authentication mechanismId;
 
-    /*
+    /**
      * Constructor.
      */
     public GXAuthenticationMechanismName() {
@@ -117,10 +120,8 @@ public class GXAuthenticationMechanismName {
     @Override
     public final String toString() {
         return String.valueOf(jointIsoCtt) + " " + String.valueOf(country) + " "
-                + String.valueOf(countryName) + " "
-                + String.valueOf(identifiedOrganization) + " "
-                + String.valueOf(dlmsUA) + " "
-                + String.valueOf(authenticationMechanismName) + " "
+                + String.valueOf(countryName) + " " + String.valueOf(identifiedOrganization) + " "
+                + String.valueOf(dlmsUA) + " " + String.valueOf(authenticationMechanismName) + " "
                 + String.valueOf(mechanismId);
     }
 }

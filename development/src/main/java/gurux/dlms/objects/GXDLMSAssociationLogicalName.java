@@ -146,40 +146,58 @@ public class GXDLMSAssociationLogicalName extends GXDLMSObject implements IGXDLM
         setVersion(2);
     }
 
+    /**
+     * @return Object list.
+     */
     public final GXDLMSObjectCollection getObjectList() {
         return objectList;
     }
 
+    /**
+     * @param value
+     *            Object list.
+     */
     public final void setObjectList(final GXDLMSObjectCollection value) {
         objectList = value;
     }
 
-    /*
-     * Contains the identifiers of the COSEM client APs within the physical
-     * devices hosting these APs, which belong to the AA modelled by the
-     * Association LN object.
+    /**
+     * @return Contains the identifiers of the COSEM client APs within the
+     *         physical devices hosting these APs, which belong to the AA
+     *         modeled by the Association LN object.
      */
     public final int getClientSAP() {
         return clientSAP;
     }
 
+    /**
+     * @param value
+     *            Client address.
+     */
     public final void setClientSAP(final int value) {
         clientSAP = value;
     }
 
-    /*
-     * Contains the identifiers of the COSEM server (logical device) APs within
-     * the physical devices hosting these APs, which belong to the AA modelled
-     * by the Association LN object.
+    /**
+     * @return Contains the identifiers of the COSEM server (logical device) APs
+     *         within the physical devices hosting these APs, which belong to
+     *         the AA modeled by the Association LN object.
      */
     public final short getServerSAP() {
         return serverSAP;
     }
 
+    /**
+     * @param value
+     *            Server address.
+     */
     public final void setServerSAP(final short value) {
         serverSAP = value;
     }
 
+    /**
+     * @return Application context name.
+     */
     public final GXApplicationContextName getApplicationContextName() {
         return applicationContextName;
     }
@@ -188,6 +206,9 @@ public class GXDLMSAssociationLogicalName extends GXDLMSObject implements IGXDLM
         return xDLMSContextInfo;
     }
 
+    /**
+     * @return Authentication mechanism name.
+     */
     public final GXAuthenticationMechanismName getAuthenticationMechanismName() {
         return authenticationMechanismName;
     }
@@ -207,10 +228,17 @@ public class GXDLMSAssociationLogicalName extends GXDLMSObject implements IGXDLM
         secret = value;
     }
 
+    /**
+     * @return Association status.
+     */
     public final AssociationStatus getAssociationStatus() {
         return associationStatus;
     }
 
+    /**
+     * @param value
+     *            Association status.
+     */
     public final void setAssociationStatus(final AssociationStatus value) {
         associationStatus = value;
     }
@@ -242,6 +270,7 @@ public class GXDLMSAssociationLogicalName extends GXDLMSObject implements IGXDLM
      * @throws IllegalBlockSizeException
      *             Illegal block size exception.
      * @throws SignatureException
+     *             Signature exception.
      */
     public byte[][] updateSecret(final GXDLMSClient client) throws InvalidKeyException,
             NoSuchAlgorithmException, NoSuchPaddingException, InvalidAlgorithmParameterException,
@@ -282,6 +311,7 @@ public class GXDLMSAssociationLogicalName extends GXDLMSObject implements IGXDLM
      * @throws IllegalBlockSizeException
      *             Illegal block size exception.
      * @throws SignatureException
+     *             Signature exception.
      */
     public final byte[][] addUser(final GXDLMSClient client, final byte id, final String name)
             throws InvalidKeyException, NoSuchAlgorithmException, NoSuchPaddingException,
@@ -319,6 +349,7 @@ public class GXDLMSAssociationLogicalName extends GXDLMSObject implements IGXDLM
      * @throws IllegalBlockSizeException
      *             Illegal block size exception.
      * @throws SignatureException
+     *             Signature exception.
      */
     public final byte[][] removeUser(final GXDLMSClient client, final byte id, final String name)
             throws InvalidKeyException, NoSuchAlgorithmException, NoSuchPaddingException,
@@ -433,14 +464,14 @@ public class GXDLMSAssociationLogicalName extends GXDLMSObject implements IGXDLM
             accept = GXCommon.compare(serverChallenge, clientChallenge);
         }
         if (accept) {
-            if (settings.getAuthentication() == Authentication.HIGH_GMAC
-                    || settings.getAuthentication() == Authentication.HIGH_ECDSA) {
+            if (settings.getAuthentication() == Authentication.HIGH_GMAC) {
                 readSecret = settings.getCipher().getSystemTitle();
                 ic = settings.getCipher().getInvocationCounter();
             } else {
                 readSecret = secret;
             }
-            if (settings.getAuthentication() == Authentication.HIGH_SHA256) {
+            if (settings.getAuthentication() == Authentication.HIGH_SHA256
+                    || settings.getAuthentication() == Authentication.HIGH_ECDSA) {
                 GXByteBuffer tmp = new GXByteBuffer();
                 tmp.set(secret);
                 tmp.set(settings.getCipher().getSystemTitle());
@@ -776,6 +807,11 @@ public class GXDLMSAssociationLogicalName extends GXDLMSObject implements IGXDLM
                         }
                     }
                 }
+            }
+            // If all objects are read.
+            if (pos == objectList.size()) {
+                settings.setCount(0);
+                settings.setIndex(0);
             }
             return data.array();
         } catch (Exception ex) {
@@ -1620,18 +1656,32 @@ public class GXDLMSAssociationLogicalName extends GXDLMSObject implements IGXDLM
     public final void postLoad(final GXXmlReader reader) {
     }
 
+    /**
+     * @return User list.
+     */
     public List<Entry<Byte, String>> getUserList() {
         return userList;
     }
 
+    /**
+     * @param userList
+     *            User list.
+     */
     public void setUserList(List<Entry<Byte, String>> userList) {
         this.userList = userList;
     }
 
+    /**
+     * @return Current user.
+     */
     public Entry<Byte, String> getCurrentUser() {
         return currentUser;
     }
 
+    /**
+     * @param currentUser
+     *            Current user.
+     */
     public void setCurrentUser(Entry<Byte, String> currentUser) {
         this.currentUser = currentUser;
     }

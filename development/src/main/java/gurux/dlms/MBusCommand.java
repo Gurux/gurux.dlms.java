@@ -10,17 +10,20 @@ import java.util.HashMap;
  * M-Bus command.
  */
 public enum MBusCommand {
-    /** 
-    
-    */
-    SND_NR(0x44),
-    /** 
-    
-    */
-    SND_UD2(0x43),
-    /** 
-    
-    */
+    /**
+     * Send unsolicited/periodical application data without request (Send/No
+     * Reply)
+     */
+    SND_NR(0x4),
+    /**
+     * Send a command (Send User Data).
+     */
+    SND_UD(0x3),
+
+    /**
+     * Access demand from Meter to Other Device. This message requests an access
+     * to the Meter (contains no application data).
+     */
     RSP_UD(0x08);
 
     /**
@@ -78,8 +81,7 @@ public enum MBusCommand {
     public static MBusCommand forValue(final int value) {
         MBusCommand ret = getMappings().get(value);
         if (ret == null) {
-            throw new IllegalArgumentException(
-                    "Invalid MBus command enum value.");
+            throw new IllegalArgumentException("Invalid MBus command enum value.");
         }
         return ret;
     }

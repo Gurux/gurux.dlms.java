@@ -74,6 +74,7 @@ import gurux.dlms.enums.Authentication;
 import gurux.dlms.enums.Conformance;
 import gurux.dlms.enums.DataType;
 import gurux.dlms.enums.ErrorCode;
+import gurux.dlms.enums.InterfaceType;
 import gurux.dlms.enums.MethodAccessMode;
 import gurux.dlms.enums.ObjectType;
 import gurux.dlms.enums.SourceDiagnostic;
@@ -116,12 +117,14 @@ import gurux.dlms.objects.GXDLMSTcpUdpSetup;
 import gurux.dlms.objects.GXDLMSWeekProfile;
 import gurux.dlms.objects.GXIgnoreSerialize;
 import gurux.dlms.objects.GXXmlWriterSettings;
+import gurux.dlms.objects.enums.ApplicationContextName;
 import gurux.dlms.objects.enums.AutoAnswerMode;
 import gurux.dlms.objects.enums.AutoAnswerStatus;
 import gurux.dlms.objects.enums.AutoConnectMode;
 import gurux.dlms.objects.enums.BaudRate;
 import gurux.dlms.objects.enums.LocalPortResponseTime;
 import gurux.dlms.objects.enums.OpticalProtocolMode;
+import gurux.dlms.objects.enums.SecuritySuite;
 import gurux.dlms.objects.enums.SingleActionScheduleType;
 import gurux.dlms.objects.enums.SortMethod;
 import gurux.dlms.secure.GXDLMSSecureServer2;
@@ -184,32 +187,25 @@ public class GXDLMSBase extends GXDLMSSecureServer2
         GXDLMSAssociationLogicalName obj = new GXDLMSAssociationLogicalName("0.0.40.0.2.255");
         obj.setClientSAP(17);
         obj.getXDLMSContextInfo().setMaxReceivePduSize(1024);
+        obj.getXDLMSContextInfo().setMaxSendPduSize(1024);
         byte[] secret = "Gurux".getBytes();
         obj.setSecret(secret);
         obj.getAuthenticationMechanismName().setMechanismId(Authentication.LOW);
         // Only get, set, multiple references and parameterized access services
-        // is
-        // allowed.
-        // https://www.gurux.fi/Gurux.DLMS.Conformance
+        // are allowed. https://www.gurux.fi/Gurux.DLMS.Conformance
         obj.getXDLMSContextInfo().getConformance().clear();
         obj.getXDLMSContextInfo().getConformance().add(Conformance.GET);
         obj.getXDLMSContextInfo().getConformance().add(Conformance.MULTIPLE_REFERENCES);
-        obj.getXDLMSContextInfo().getConformance().add(Conformance.PARAMETERIZED_ACCESS);
+        obj.getXDLMSContextInfo().getConformance().add(Conformance.SELECTIVE_ACCESS);
         obj.getXDLMSContextInfo().getConformance().add(Conformance.SET);
         getItems().add(obj);
-        obj.getXDLMSContextInfo().setMaxReceivePduSize(1024);
-
-        GXDLMSSecuritySetup s = new GXDLMSSecuritySetup("0.0.43.0.1.255");
-        obj.setSecuritySetupReference(s.getLogicalName());
-        s.setServerSystemTitle(getCiphering().getSystemTitle());
-        getItems().add(s);
-
     }
 
     private void addHighLevelAssociation() {
         GXDLMSAssociationLogicalName obj = new GXDLMSAssociationLogicalName("0.0.40.0.3.255");
         obj.setClientSAP(18);
         obj.getXDLMSContextInfo().setMaxReceivePduSize(1024);
+        obj.getXDLMSContextInfo().setMaxSendPduSize(1024);
         byte[] secret = "Gurux".getBytes();
         obj.setSecret(secret);
         obj.getAuthenticationMechanismName().setMechanismId(Authentication.HIGH);
@@ -219,18 +215,14 @@ public class GXDLMSBase extends GXDLMSSecureServer2
         obj.getXDLMSContextInfo().getConformance().add(Conformance.MULTIPLE_REFERENCES);
         obj.getXDLMSContextInfo().getConformance().add(Conformance.PARAMETERIZED_ACCESS);
         obj.getXDLMSContextInfo().getConformance().add(Conformance.SET);
-
         getItems().add(obj);
-        GXDLMSSecuritySetup s = new GXDLMSSecuritySetup("0.0.43.0.2.255");
-        obj.setSecuritySetupReference(s.getLogicalName());
-        s.setServerSystemTitle(getCiphering().getSystemTitle());
-        getItems().add(s);
     }
 
     private void addHighLevelAssociationMd5() {
         GXDLMSAssociationLogicalName obj = new GXDLMSAssociationLogicalName("0.0.40.0.4.255");
         obj.setClientSAP(19);
         obj.getXDLMSContextInfo().setMaxReceivePduSize(1024);
+        obj.getXDLMSContextInfo().setMaxSendPduSize(1024);
         byte[] secret = "Gurux".getBytes();
         obj.setSecret(secret);
         obj.getAuthenticationMechanismName().setMechanismId(Authentication.HIGH_MD5);
@@ -238,16 +230,13 @@ public class GXDLMSBase extends GXDLMSSecureServer2
         // https://www.gurux.fi/Gurux.DLMS.Conformance
         obj.getXDLMSContextInfo().getConformance().addAll(GXDLMSClient.getInitialConformance(true));
         getItems().add(obj);
-        GXDLMSSecuritySetup s = new GXDLMSSecuritySetup("0.0.43.0.3.255");
-        obj.setSecuritySetupReference(s.getLogicalName());
-        s.setServerSystemTitle(getCiphering().getSystemTitle());
-        getItems().add(s);
     }
 
     private void addHighLevelAssociationSha1() {
         GXDLMSAssociationLogicalName obj = new GXDLMSAssociationLogicalName("0.0.40.0.5.255");
         obj.setClientSAP(20);
         obj.getXDLMSContextInfo().setMaxReceivePduSize(1024);
+        obj.getXDLMSContextInfo().setMaxSendPduSize(1024);
         byte[] secret = "Gurux".getBytes();
         obj.setSecret(secret);
         obj.getAuthenticationMechanismName().setMechanismId(Authentication.HIGH_SHA1);
@@ -255,25 +244,18 @@ public class GXDLMSBase extends GXDLMSSecureServer2
         // https://www.gurux.fi/Gurux.DLMS.Conformance
         obj.getXDLMSContextInfo().getConformance().addAll(GXDLMSClient.getInitialConformance(true));
         getItems().add(obj);
-        GXDLMSSecuritySetup s = new GXDLMSSecuritySetup("0.0.43.0.4.255");
-        obj.setSecuritySetupReference(s.getLogicalName());
-        s.setServerSystemTitle(getCiphering().getSystemTitle());
-        getItems().add(s);
     }
 
     private void addHighLevelAssociationGmac() {
         GXDLMSAssociationLogicalName obj = new GXDLMSAssociationLogicalName("0.0.40.0.6.255");
         obj.setClientSAP(21);
         obj.getXDLMSContextInfo().setMaxReceivePduSize(1024);
+        obj.getXDLMSContextInfo().setMaxSendPduSize(1024);
         obj.getAuthenticationMechanismName().setMechanismId(Authentication.HIGH_GMAC);
         // Add supported services.
         // https://www.gurux.fi/Gurux.DLMS.Conformance
         obj.getXDLMSContextInfo().getConformance().addAll(GXDLMSClient.getInitialConformance(true));
         getItems().add(obj);
-        GXDLMSSecuritySetup s = new GXDLMSSecuritySetup("0.0.43.0.5.255");
-        obj.setSecuritySetupReference(s.getLogicalName());
-        s.setServerSystemTitle(getCiphering().getSystemTitle());
-        getItems().add(s);
     }
 
     private void addHighLevelAssociationSha256() {
@@ -282,30 +264,65 @@ public class GXDLMSBase extends GXDLMSSecureServer2
         obj.setSecret(secret);
         obj.setClientSAP(22);
         obj.getXDLMSContextInfo().setMaxReceivePduSize(1024);
+        obj.getXDLMSContextInfo().setMaxSendPduSize(1024);
         obj.getAuthenticationMechanismName().setMechanismId(Authentication.HIGH_SHA256);
         // Add supported services.
         // https://www.gurux.fi/Gurux.DLMS.Conformance
         obj.getXDLMSContextInfo().getConformance().addAll(GXDLMSClient.getInitialConformance(true));
         getItems().add(obj);
-        GXDLMSSecuritySetup s = new GXDLMSSecuritySetup("0.0.43.0.6.255");
-        obj.setSecuritySetupReference(s.getLogicalName());
-        s.setServerSystemTitle(getCiphering().getSystemTitle());
-        getItems().add(s);
     }
 
     private void addHighLevelAssociationEcdsa() {
         GXDLMSAssociationLogicalName obj = new GXDLMSAssociationLogicalName("0.0.40.0.8.255");
         obj.setClientSAP(23);
         obj.getXDLMSContextInfo().setMaxReceivePduSize(1024);
+        obj.getXDLMSContextInfo().setMaxSendPduSize(1024);
         obj.getAuthenticationMechanismName().setMechanismId(Authentication.HIGH_ECDSA);
         // Add supported services.
         // https://www.gurux.fi/Gurux.DLMS.Conformance
         obj.getXDLMSContextInfo().getConformance().addAll(GXDLMSClient.getInitialConformance(true));
         getItems().add(obj);
         GXDLMSSecuritySetup s = new GXDLMSSecuritySetup("0.0.43.0.7.255");
+        s.setSecuritySuite(SecuritySuite.SUITE_1);
         obj.setSecuritySetupReference(s.getLogicalName());
         s.setServerSystemTitle(getCiphering().getSystemTitle());
         getItems().add(s);
+    }
+
+    /*
+     * Add ciphered High level association.
+     */
+    private void addSecuredHighLevelAssociation() {
+        GXDLMSAssociationLogicalName obj = new GXDLMSAssociationLogicalName("0.0.40.0.9.255");
+        obj.setClientSAP(24);
+        obj.getXDLMSContextInfo().setMaxReceivePduSize(1024);
+        obj.getXDLMSContextInfo().setMaxSendPduSize(1024);
+        byte[] secret = "Gurux".getBytes();
+        obj.setSecret(secret);
+        obj.getAuthenticationMechanismName().setMechanismId(Authentication.HIGH);
+        // Add supported services.
+        // https://www.gurux.fi/Gurux.DLMS.Conformance
+        obj.getXDLMSContextInfo().getConformance().addAll(GXDLMSClient.getInitialConformance(true));
+        getItems().add(obj);
+        GXDLMSSecuritySetup s = new GXDLMSSecuritySetup("0.0.43.0.8.255");
+        s.setSecuritySuite(SecuritySuite.SUITE_1);
+        obj.setSecuritySetupReference(s.getLogicalName());
+        s.setServerSystemTitle(getCiphering().getSystemTitle());
+        obj.getApplicationContextName()
+                .setContextId(ApplicationContextName.LOGICAL_NAME_WITH_CIPHERING);
+        getItems().add(s);
+        // Add invocation counter.
+        GXDLMSData d = new GXDLMSData("0.0.43.1.8.255");
+        d.setValue(0);
+        d.setDataType(2, DataType.UINT32);
+        // Set initial value.
+        d.setValue(100);
+        getItems().add(d);
+        // Add invocation counter for the public association as well so it can
+        // be read.
+        GXDLMSAssociationLogicalName publicAssociation = (GXDLMSAssociationLogicalName) getItems()
+                .findByLN(ObjectType.ASSOCIATION_LOGICAL_NAME, "0.0.40.0.1.255");
+        publicAssociation.getObjectList().add(d);
     }
 
     /**
@@ -321,6 +338,7 @@ public class GXDLMSBase extends GXDLMSSecureServer2
     public GXDLMSBase(final GXDLMSAssociationLogicalName ln, final GXDLMSHdlcSetup hdlc,
             final String port) throws XMLStreamException, IOException {
         super(ln, hdlc);
+        getConformance().clear();
         ln.setClientSAP(16);
         ln.getXDLMSContextInfo().setMaxReceivePduSize(1024);
         ln.getXDLMSContextInfo().setMaxSendPduSize(1024);
@@ -329,27 +347,21 @@ public class GXDLMSBase extends GXDLMSSecureServer2
         ln.getXDLMSContextInfo().getConformance().add(Conformance.GET);
         setPushClientAddress(64);
         this.setMaxReceivePDUSize(1024);
-        byte[] secret = "Gurux".getBytes();
-        ln.setSecret(secret);
-        GXDLMSSecuritySetup s = (GXDLMSSecuritySetup) getItems().findByLN(ObjectType.SECURITY_SETUP,
-                "0.0.43.0.0.255");
-        // Add security setup object if not added yet.
-        if (s == null) {
-            ln.setSecuritySetupReference("0.0.43.0.0.255");
-            s = new GXDLMSSecuritySetup("0.0.43.0.0.255");
-            s.setServerSystemTitle(getCiphering().getSystemTitle());
-            getItems().add(s);
-        }
+        // Add other objects.
+        init(port);
         // Add only three object for this association.
         ln.getObjectList().clear();
         ln.getObjectList().add(ln);
+        // Add Logical Device Name
         GXDLMSObject obj = getItems().findByLN(ObjectType.DATA, "0.0.42.0.0.255");
         if (obj != null) {
             ln.getObjectList().add(obj);
         }
-        ln.getObjectList().add(s);
-        // Add other objects.
-        init(port);
+        // Add invocation counter.
+        obj = getItems().findByLN(ObjectType.DATA, "0.0.43.1.0.255");
+        if (obj != null) {
+            ln.getObjectList().add(obj);
+        }
     }
 
     /**
@@ -369,11 +381,6 @@ public class GXDLMSBase extends GXDLMSSecureServer2
         this.setMaxReceivePDUSize(1024);
         byte[] secret = "Gurux".getBytes();
         sn.setSecret(secret);
-        // Add security setup object.
-        sn.setSecuritySetupReference("0.0.43.0.0.255");
-        GXDLMSSecuritySetup s = new GXDLMSSecuritySetup("0.0.43.0.0.255");
-        s.setServerSystemTitle(getCiphering().getSystemTitle());
-        getItems().add(s);
         // Add other objects.
         init(port);
     }
@@ -391,6 +398,8 @@ public class GXDLMSBase extends GXDLMSSecureServer2
     public GXDLMSBase(final GXDLMSAssociationLogicalName ln, final GXDLMSTcpUdpSetup wrapper,
             final String port) throws XMLStreamException, IOException {
         super(ln, wrapper);
+        getConformance().clear();
+        ln.setClientSAP(16);
         // Only get is allowed.
         ln.getXDLMSContextInfo().getConformance().clear();
         ln.getXDLMSContextInfo().getConformance().add(Conformance.GET);
@@ -399,14 +408,21 @@ public class GXDLMSBase extends GXDLMSSecureServer2
         this.setMaxReceivePDUSize(1024);
         ln.getXDLMSContextInfo().setMaxReceivePduSize(1024);
         ln.getXDLMSContextInfo().setMaxSendPduSize(1024);
-
-        // Add security setup object.
-        ln.setSecuritySetupReference("0.0.43.0.0.255");
-        GXDLMSSecuritySetup s = new GXDLMSSecuritySetup("0.0.43.0.0.255");
-        s.setServerSystemTitle(getCiphering().getSystemTitle());
-        getItems().add(s);
         // Add other objects.
         init(port);
+        // Add only three object for this association.
+        ln.getObjectList().clear();
+        ln.getObjectList().add(ln);
+        // Add Logical Device Name
+        GXDLMSObject obj = getItems().findByLN(ObjectType.DATA, "0.0.42.0.0.255");
+        if (obj != null) {
+            ln.getObjectList().add(obj);
+        }
+        // Add invocation counter.
+        obj = getItems().findByLN(ObjectType.DATA, "0.0.43.1.0.255");
+        if (obj != null) {
+            ln.getObjectList().add(obj);
+        }
     }
 
     /**
@@ -426,11 +442,6 @@ public class GXDLMSBase extends GXDLMSSecureServer2
         this.setMaxReceivePDUSize(1024);
         byte[] secret = "Gurux".getBytes();
         sn.setSecret(secret);
-        // Add security setup object.
-        sn.setSecuritySetupReference("0.0.43.0.0.255");
-        GXDLMSSecuritySetup s = new GXDLMSSecuritySetup("0.0.43.0.0.255");
-        s.setServerSystemTitle(getCiphering().getSystemTitle());
-        getItems().add(s);
         // Add other objects.
         init(port);
     }
@@ -439,13 +450,16 @@ public class GXDLMSBase extends GXDLMSSecureServer2
      * Add Logical Device Name. 123456 is meter serial number.
      */
     void addLogicalDeviceName() {
-        GXDLMSData d = new GXDLMSData("0.0.42.0.0.255");
-        d.setValue("GRX" + String.valueOf(SERIAL_NUMBER));
-        // Set access right. Client can't change Device name.
-        d.setAccess(2, AccessMode.READ);
-        d.setDataType(2, DataType.OCTET_STRING);
-        d.setUIDataType(2, DataType.STRING);
-        getItems().add(d);
+        // If LDN is not added yet.
+        if (getItems().findByLN(ObjectType.DATA, "0.0.42.0.0.255") == null) {
+            GXDLMSData d = new GXDLMSData("0.0.42.0.0.255");
+            d.setValue("GRX" + String.valueOf(SERIAL_NUMBER));
+            // Set access right. Client can't change Device name.
+            d.setAccess(2, AccessMode.READ);
+            d.setDataType(2, DataType.OCTET_STRING);
+            d.setUIDataType(2, DataType.STRING);
+            getItems().add(d);
+        }
     }
 
     /*
@@ -461,12 +475,15 @@ public class GXDLMSBase extends GXDLMSSecureServer2
      * Add invocation counter.
      */
     void addInvocationCounter() {
-        GXDLMSData d = new GXDLMSData("0.0.43.1.0.255");
-        d.setValue(0);
-        d.setDataType(2, DataType.UINT32);
-        // Set initial value.
-        d.setValue(100);
-        getItems().add(d);
+        // If invocation counter is not added yet.
+        if (getItems().findByLN(ObjectType.DATA, "0.0.43.1.0.255") == null) {
+            GXDLMSData d = new GXDLMSData("0.0.43.1.0.255");
+            d.setValue(0);
+            d.setDataType(2, DataType.UINT32);
+            // Set initial value.
+            d.setValue(100);
+            getItems().add(d);
+        }
     }
 
     GXDLMSRegister addRegister() {
@@ -839,6 +856,7 @@ public class GXDLMSBase extends GXDLMSSecureServer2
             addHighLevelAssociationGmac();
             addHighLevelAssociationSha256();
             addHighLevelAssociationEcdsa();
+            addSecuredHighLevelAssociation();
         }
 
         // Add objects of the meter.
@@ -1386,42 +1404,60 @@ public class GXDLMSBase extends GXDLMSSecureServer2
      */
     @Override
     public final boolean isTarget(final int serverAddress, final int clientAddress) {
-        // Find client address from the association views.
-        setAssignedAssociation(null);
-        for (GXDLMSObject it : this.getItems().getObjects(ObjectType.ASSOCIATION_LOGICAL_NAME)) {
-            {
-                GXDLMSAssociationLogicalName a = (GXDLMSAssociationLogicalName) it;
-                if (a.getClientSAP() == clientAddress) {
-                    setAssignedAssociation(a);
-                    break;
-                }
-            }
-        }
+        // Only one connection per meter at the time is allowed.
         if (getAssignedAssociation() != null) {
-            // If address is not broadcast or serial number.
-            // Remove logical address from the server address.
-            boolean broadcast =
-                    (serverAddress & 0x3FFF) == 0x3FFF || (serverAddress & 0x7F) == 0x7F;
-            if (!(broadcast || (serverAddress & 0x3FFF) == SERIAL_NUMBER % 10000 + 1000)) {
-                // Find address from the SAP table.
-                for (GXDLMSObject s : this.getItems().getObjects(ObjectType.SAP_ASSIGNMENT)) {
+            return false;
+        }
+        boolean ret = false;
+        // Check HDLC station address if it's used.
+        if (getInterfaceType() == InterfaceType.HDLC && getHdlc() != null
+                && getHdlc().getDeviceAddress() != 0) {
+            ret = getHdlc().getDeviceAddress() == serverAddress;
+        }
+        // Check server address using serial number.
+        boolean broadcast = (serverAddress & 0x3FFF) == 0x3FFF || (serverAddress & 0x7F) == 0x7F;
+        if (!(broadcast || (serverAddress & 0x3FFF) == SERIAL_NUMBER % 10000 + 1000)) {
+            // Find address from the SAP table.
+            GXDLMSObjectCollection saps = getItems().getObjects(ObjectType.SAP_ASSIGNMENT);
+            if (saps.size() != 0) {
+                for (GXDLMSObject s : saps) {
                     GXDLMSSapAssignment sap = (GXDLMSSapAssignment) s;
+                    if (sap.getSapAssignmentList().size() == 0) {
+                        ret = true;
+                        break;
+                    }
                     for (Map.Entry<Integer, String> e : sap.getSapAssignmentList()) {
                         // Check server address with two bytes.
                         if ((serverAddress & 0xFFFF0000) == 0
                                 && (serverAddress & 0x7FFF) == e.getKey()) {
-                            return true;
+                            ret = true;
+                            break;
                         }
                         // Check server address with one byte.
                         if ((serverAddress & 0xFFFFFF00) == 0
                                 && (serverAddress & 0x7F) == e.getKey()) {
-                            return true;
+                            ret = true;
+                            break;
                         }
                     }
                 }
+            } else {
+                // Accept all server addresses if there is no SAP table
+                // available.
+                ret = true;
             }
         }
-        return false;
+        if (ret) {
+            setAssignedAssociation(null);
+            for (GXDLMSObject it : getItems().getObjects(ObjectType.ASSOCIATION_LOGICAL_NAME)) {
+                GXDLMSAssociationLogicalName ln = (GXDLMSAssociationLogicalName) it;
+                if (ln.getClientSAP() == clientAddress) {
+                    setAssignedAssociation(ln);
+                    break;
+                }
+            }
+        }
+        return ret;
     }
 
     @Override

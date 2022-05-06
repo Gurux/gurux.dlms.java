@@ -54,7 +54,9 @@ import gurux.dlms.enums.DateTimeSkips;
 import gurux.dlms.enums.InterfaceType;
 import gurux.dlms.enums.ObjectType;
 import gurux.dlms.enums.Priority;
+import gurux.dlms.enums.Security;
 import gurux.dlms.enums.ServiceClass;
+import gurux.dlms.enums.Signing;
 import gurux.dlms.enums.Standard;
 import gurux.dlms.objects.GXDLMSAssociationLogicalName;
 import gurux.dlms.objects.GXDLMSData;
@@ -829,6 +831,26 @@ public class GXDLMSSettings {
         return clientAddress;
     }
 
+    /*
+     * General Block Transfer count in server.
+     */
+    private int gbtCount;
+
+    /**
+     * @param value
+     *            General Block Transfer count in server.
+     */
+    public final void setGbtCount(final int value) {
+        gbtCount = value;
+    }
+
+    /**
+     * @return General Block Transfer count in server.
+     */
+    public final int getGbtCount() {
+        return gbtCount;
+    }
+
     /**
      * @param value
      *            Client address.
@@ -971,8 +993,12 @@ public class GXDLMSSettings {
         if (assignedAssociation != null) {
             // Update security settings.
             if (assignedAssociation.getSecuritySetupReference() != null
-                    && assignedAssociation.getApplicationContextName()
-                            .getContextId() == ApplicationContextName.LOGICAL_NAME_WITH_CIPHERING) {
+                    && (assignedAssociation.getApplicationContextName()
+                            .getContextId() == ApplicationContextName.LOGICAL_NAME_WITH_CIPHERING
+                            || assignedAssociation.getAuthenticationMechanismName()
+                                    .getMechanismId() == Authentication.HIGH_GMAC
+                            || assignedAssociation.getAuthenticationMechanismName()
+                                    .getMechanismId() == Authentication.HIGH_ECDSA)) {
                 GXDLMSSecuritySetup ss = (GXDLMSSecuritySetup) assignedAssociation.getObjectList()
                         .findByLN(ObjectType.SECURITY_SETUP,
                                 assignedAssociation.getSecuritySetupReference());
@@ -1139,6 +1165,14 @@ public class GXDLMSSettings {
      */
     public final void setUseCustomChallenge(final boolean value) {
         customChallenges = value;
+    }
+
+    public boolean isCiphered(boolean checkGeneralSigning) {
+        if (cipher == null) {
+            return false;
+        }
+        return cipher.getSecurity() != Security.NONE
+                || (checkGeneralSigning && cipher.getSigning() == Signing.GENERAL_SIGNING);
     }
 
     /**
