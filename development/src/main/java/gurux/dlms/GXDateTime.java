@@ -345,6 +345,14 @@ public class GXDateTime {
         return -1;
     }
 
+    /**
+     * @param value
+     *            date time value as a string.
+     * @param pattern
+     *            Used pattern.
+     * @param locale
+     *            Used locale.
+     */
     public void init(final String value, final String pattern, final Locale locale) {
         if (skip == null) {
             skip = new HashSet<DateTimeSkips>();
@@ -582,16 +590,20 @@ public class GXDateTime {
     }
 
     /**
-     * @param forValue
+     * @param value
      *            Skipped date time fields.
      */
-    public final void setSkip(final java.util.Set<DateTimeSkips> forValue) {
-        skip = forValue;
+    public final void setSkip(final java.util.Set<DateTimeSkips> value) {
+        skip = value;
     }
 
-    public final void setUsed(final java.util.Set<DateTimeSkips> forValue) {
+    /**
+     * @param value
+     *            Used date time fields.
+     */
+    public final void setUsed(final java.util.Set<DateTimeSkips> value) {
         int val = 0;
-        for (DateTimeSkips it : forValue) {
+        for (DateTimeSkips it : value) {
             val |= it.getValue();
         }
         int tmp = (-1 & ~val);
@@ -671,10 +683,18 @@ public class GXDateTime {
         format.append(tmp.trim());
     }
 
+    /**
+     * @return Returns date time value as a formatted string.
+     */
     public String toFormatString() {
         return toFormatString((Locale) null);
     }
 
+    /**
+     * @param pattern
+     *            Used pattern.
+     * @return Returns date time value as a formatted string.
+     */
     public String toFormatString(final String pattern) {
         return toFormatString(pattern, true, null);
     }
@@ -890,14 +910,33 @@ public class GXDateTime {
         return sd.format(getMeterCalendar().getTime());
     }
 
+    /**
+     * @param pattern
+     *            Used pattern.
+     * @return Returns date time value as the meter time.
+     */
     public final String toMeterString(final String pattern) {
         return toString(pattern, null, false);
     }
 
+    /**
+     * @param pattern
+     *            Used pattern.
+     * @return Date time value as a string.
+     */
     public final String toString(final String pattern) {
         return toString(pattern, null, true);
     }
 
+    /**
+     * @param pattern
+     *            Used pattern.
+     * @param locale
+     *            Used locale.
+     * @param useLocalTime
+     *            Is UTC deviation used.
+     * @return Date time value as a string.
+     */
     private final String toString(final String pattern, final Locale locale,
             final boolean useLocalTime) {
         if (!getSkip().isEmpty()) {

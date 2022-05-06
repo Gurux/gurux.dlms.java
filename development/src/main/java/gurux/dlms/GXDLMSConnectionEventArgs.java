@@ -34,16 +34,26 @@
 
 package gurux.dlms;
 
+/**
+ * DLMS connection event arguments.
+ */
 public class GXDLMSConnectionEventArgs {
     /**
      * Server ID that client try to use to make connection.
      */
     private long serverID;
 
+    /**
+     * @return Server ID that client try to use to make connection.
+     */
     public final long getServerID() {
         return serverID;
     }
 
+    /**
+     * @param value
+     *            Server ID that client try to use to make connection.
+     */
     public final void setServerID(final long value) {
         serverID = value;
     }

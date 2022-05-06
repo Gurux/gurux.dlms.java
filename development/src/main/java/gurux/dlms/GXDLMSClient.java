@@ -98,6 +98,9 @@ public class GXDLMSClient {
 
     private boolean useProtectedRelease = false;
 
+    /**
+     * DLMS translator.
+     */
     protected GXDLMSTranslator translator;
 
     /**
@@ -255,6 +258,12 @@ public class GXDLMSClient {
         return obisCodes;
     }
 
+    /**
+     * @param value
+     *            This list is used when Association view is read from the meter
+     *            and description of the object is needed. If collection is not
+     *            set description of object is empty.
+     */
     public final void setObisCodes(final GXObisCodeCollection value) {
         obisCodes = value;
     }
@@ -1972,6 +1981,7 @@ public class GXDLMSClient {
      * @throws IllegalBlockSizeException
      *             Illegal block size exception.
      * @throws SignatureException
+     *             Signature exception.
      */
     public final byte[][] write(final Object name, final Object value, final DataType dataType,
             final ObjectType objectType, final int index) throws InvalidKeyException,
@@ -3595,7 +3605,7 @@ public class GXDLMSClient {
      *            User password.
      * @param seed
      *            Seed received from the meter.
-     * @return
+     * @return Encrypted challenge.
      */
     public static byte[] encryptLandisGyrHighLevelAuthentication(final byte[] password,
             final byte[] seed) {

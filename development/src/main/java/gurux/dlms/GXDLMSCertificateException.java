@@ -46,6 +46,12 @@ public class GXDLMSCertificateException extends RuntimeException {
      */
     private static final long serialVersionUID = 1L;
 
+    /**
+     * DLMS certificate exception constructor.
+     * 
+     * @param message
+     *            Exception message.
+     */
     public GXDLMSCertificateException(final String message) {
         super(message);
     }

@@ -39,6 +39,9 @@ import java.util.Locale;
 
 import gurux.dlms.enums.DateTimeSkips;
 
+/**
+ * Date object.
+ */
 public class GXDate extends GXDateTime {
     /**
      * Constructor.

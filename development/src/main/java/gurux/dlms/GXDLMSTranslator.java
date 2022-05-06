@@ -175,9 +175,6 @@ public class GXDLMSTranslator {
 
     /**
      * Constructor.
-     * 
-     * @param type
-     *            Translator output type.
      */
     public GXDLMSTranslator() {
         this(TranslatorOutputType.SIMPLE_XML);

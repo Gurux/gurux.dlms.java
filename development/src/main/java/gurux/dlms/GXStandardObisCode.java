@@ -55,8 +55,8 @@ class GXStandardObisCode {
     /*
      * Constructor.
      */
-    GXStandardObisCode(final String[] forObis, final String desc,
-            final String forInterfaces, final String forDataType) {
+    GXStandardObisCode(final String[] forObis, final String desc, final String forInterfaces,
+            final String forDataType) {
         obis = new String[6];
         if (forObis != null) {
             System.arraycopy(forObis, 0, obis, 0, 6);
@@ -84,39 +84,55 @@ class GXStandardObisCode {
         return description;
     }
 
+    /**
+     * @param value
+     *            Set OBIS code description.
+     */
     public final void setDescription(final String value) {
         description = value;
     }
 
-    /*
-     * Interfaces that are using this OBIS code.
+    /**
+     * @return Interfaces that are using this OBIS code.
      */
     public final String getInterfaces() {
         return interfaces;
     }
 
+    /**
+     * @param value
+     *            Interfaces that are using this OBIS code.
+     */
     public final void setInterfaces(final String value) {
         interfaces = value;
     }
 
     /**
-     * @return Standard data types.
+     * @return Data type.
      */
     public final String getDataType() {
         return dataType;
     }
 
+    /**
+     * @param value
+     *            Data type.
+     */
     public final void setDataType(final String value) {
         dataType = value;
     }
 
     /**
-     * @return Standard data types.
+     * @return UI data types.
      */
     public final String getUIDataType() {
         return uiDataType;
     }
 
+    /**
+     * @param value
+     *            UI data types.
+     */
     public final void setUIDataType(final String value) {
         uiDataType = value;
     }
