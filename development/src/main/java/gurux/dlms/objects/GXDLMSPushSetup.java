@@ -103,10 +103,8 @@ public class GXDLMSPushSetup extends GXDLMSObject implements IGXDLMSBase {
      */
     public GXDLMSPushSetup(final String ln, final int sn) {
         super(ObjectType.PUSH_SETUP, ln, sn);
-        pushObjectList =
-                new ArrayList<Entry<GXDLMSObject, GXDLMSCaptureObject>>();
-        communicationWindow =
-                new ArrayList<Map.Entry<GXDateTime, GXDateTime>>();
+        pushObjectList = new ArrayList<Entry<GXDLMSObject, GXDLMSCaptureObject>>();
+        communicationWindow = new ArrayList<Map.Entry<GXDateTime, GXDateTime>>();
         service = ServiceType.TCP;
         message = MessageType.COSEM_APDU;
     }
@@ -140,8 +138,7 @@ public class GXDLMSPushSetup extends GXDLMSObject implements IGXDLMSBase {
      *         call of the push (data) method the selected attributes are sent
      *         to the destination defined in getSendDestinationAndMethod.
      */
-    public final List<Entry<GXDLMSObject, GXDLMSCaptureObject>>
-            getPushObjectList() {
+    public final List<Entry<GXDLMSObject, GXDLMSCaptureObject>> getPushObjectList() {
         return pushObjectList;
     }
 
@@ -150,8 +147,7 @@ public class GXDLMSPushSetup extends GXDLMSObject implements IGXDLMSBase {
      *         window(s) for the push become active (for the start instant), or
      *         inactive (for the end instant).
      */
-    public final List<Map.Entry<GXDateTime, GXDateTime>>
-            getCommunicationWindow() {
+    public final List<Map.Entry<GXDateTime, GXDateTime>> getCommunicationWindow() {
         return communicationWindow;
     }
 
@@ -203,9 +199,8 @@ public class GXDLMSPushSetup extends GXDLMSObject implements IGXDLMSBase {
     @Override
     public final Object[] getValues() {
         return new Object[] { getLogicalName(), pushObjectList,
-                service + " " + destination + " " + message,
-                communicationWindow, randomisationStartInterval,
-                numberOfRetries, repetitionDelay };
+                service + " " + destination + " " + message, communicationWindow,
+                randomisationStartInterval, numberOfRetries, repetitionDelay };
     }
 
     /**
@@ -226,20 +221,24 @@ public class GXDLMSPushSetup extends GXDLMSObject implements IGXDLMSBase {
                 new ArrayList<Entry<GXDLMSObject, GXDLMSCaptureObject>>();
         for (Entry<GXDLMSObject, GXDLMSCaptureObject> it : pushObjectList) {
             GXDLMSObject obj = (GXDLMSObject) it.getKey();
-            objects.add(
-                    new GXSimpleEntry<GXDLMSObject, GXDLMSCaptureObject>(obj,
-                            new GXDLMSCaptureObject(
-                                    it.getValue().getAttributeIndex(),
-                                    it.getValue().getDataIndex())));
-            client.updateValue(obj, it.getValue().getAttributeIndex(),
-                    values.get(pos));
+            objects.add(new GXSimpleEntry<GXDLMSObject, GXDLMSCaptureObject>(obj,
+                    new GXDLMSCaptureObject(it.getValue().getAttributeIndex(),
+                            it.getValue().getDataIndex())));
+
+            if (it.getValue().getAttributeIndex() == 0) {
+                List<?> tmp = (List<?>) values.get(pos);
+                for (int index = 1; index <= it.getKey().getAttributeCount(); ++index) {
+                    client.updateValue(it.getKey(), index, tmp.get(index - 1));
+                }
+            } else {
+                client.updateValue(obj, it.getValue().getAttributeIndex(), values.get(pos));
+            }
             ++pos;
         }
     }
 
     @Override
-    public final byte[] invoke(final GXDLMSSettings settings,
-            final ValueEventArgs e) {
+    public final byte[] invoke(final GXDLMSSettings settings, final ValueEventArgs e) {
         if (e.getIndex() != 1) {
             e.setError(ErrorCode.READ_WRITE_DENIED);
         }
@@ -249,20 +248,17 @@ public class GXDLMSPushSetup extends GXDLMSObject implements IGXDLMSBase {
     /*
      * Activates the push process.
      */
-    public final byte[][] activate(final GXDLMSClient client)
-            throws InvalidKeyException, NoSuchAlgorithmException,
-            NoSuchPaddingException, InvalidAlgorithmParameterException,
+    public final byte[][] activate(final GXDLMSClient client) throws InvalidKeyException,
+            NoSuchAlgorithmException, NoSuchPaddingException, InvalidAlgorithmParameterException,
             IllegalBlockSizeException, BadPaddingException, SignatureException {
         return client.method(getName(), getObjectType(), 1, 0, DataType.INT8);
     }
 
     @Override
     public final int[] getAttributeIndexToRead(final boolean all) {
-        java.util.ArrayList<Integer> attributes =
-                new java.util.ArrayList<Integer>();
+        java.util.ArrayList<Integer> attributes = new java.util.ArrayList<Integer>();
         // LN is static and read only once.
-        if (all || getLogicalName() == null
-                || getLogicalName().compareTo("") == 0) {
+        if (all || getLogicalName() == null || getLogicalName().compareTo("") == 0) {
             attributes.add(1);
         }
         // PushObjectList
@@ -331,16 +327,14 @@ public class GXDLMSPushSetup extends GXDLMSObject implements IGXDLMSBase {
         if (index == 7) {
             return DataType.UINT16;
         }
-        throw new IllegalArgumentException(
-                "getDataType failed. Invalid attribute index.");
+        throw new IllegalArgumentException("getDataType failed. Invalid attribute index.");
     }
 
     /*
      * Returns value of given attribute.
      */
     @Override
-    public final Object getValue(final GXDLMSSettings settings,
-            final ValueEventArgs e) {
+    public final Object getValue(final GXDLMSSettings settings, final ValueEventArgs e) {
         if (e.getIndex() == 1) {
             return GXCommon.logicalNameToBytes(getLogicalName());
         }
@@ -353,20 +347,17 @@ public class GXDLMSPushSetup extends GXDLMSObject implements IGXDLMSBase {
                 buff.setUInt8(4);
                 GXCommon.setData(settings, buff, DataType.UINT16,
                         it.getKey().getObjectType().getValue());
-                GXCommon.setData(settings, buff, DataType.OCTET_STRING, GXCommon
-                        .logicalNameToBytes(it.getKey().getLogicalName()));
-                GXCommon.setData(settings, buff, DataType.INT8,
-                        it.getValue().getAttributeIndex());
-                GXCommon.setData(settings, buff, DataType.UINT16,
-                        it.getValue().getDataIndex());
+                GXCommon.setData(settings, buff, DataType.OCTET_STRING,
+                        GXCommon.logicalNameToBytes(it.getKey().getLogicalName()));
+                GXCommon.setData(settings, buff, DataType.INT8, it.getValue().getAttributeIndex());
+                GXCommon.setData(settings, buff, DataType.UINT16, it.getValue().getDataIndex());
             }
             return buff.array();
         }
         if (e.getIndex() == 3) {
             buff.setUInt8(DataType.STRUCTURE.getValue());
             buff.setUInt8(3);
-            GXCommon.setData(settings, buff, DataType.ENUM,
-                    getService().getValue());
+            GXCommon.setData(settings, buff, DataType.ENUM, getService().getValue());
             byte[] tmp = null;
             if (GXCommon.isHexString(destination)) {
                 tmp = GXCommon.hexToBytes(destination);
@@ -374,8 +365,7 @@ public class GXDLMSPushSetup extends GXDLMSObject implements IGXDLMSBase {
                 tmp = getDestination().getBytes();
             }
             GXCommon.setData(settings, buff, DataType.OCTET_STRING, tmp);
-            GXCommon.setData(settings, buff, DataType.ENUM,
-                    getMessage().getValue());
+            GXCommon.setData(settings, buff, DataType.ENUM, getMessage().getValue());
             return buff.array();
         }
         if (e.getIndex() == 4) {
@@ -384,10 +374,8 @@ public class GXDLMSPushSetup extends GXDLMSObject implements IGXDLMSBase {
             for (Entry<GXDateTime, GXDateTime> it : communicationWindow) {
                 buff.setUInt8(DataType.STRUCTURE.getValue());
                 buff.setUInt8(2);
-                GXCommon.setData(settings, buff, DataType.OCTET_STRING,
-                        it.getKey());
-                GXCommon.setData(settings, buff, DataType.OCTET_STRING,
-                        it.getValue());
+                GXCommon.setData(settings, buff, DataType.OCTET_STRING, it.getKey());
+                GXCommon.setData(settings, buff, DataType.OCTET_STRING, it.getValue());
             }
             return buff.array();
         }
@@ -408,8 +396,7 @@ public class GXDLMSPushSetup extends GXDLMSObject implements IGXDLMSBase {
      * Set value of given attribute.
      */
     @Override
-    public final void setValue(final GXDLMSSettings settings,
-            final ValueEventArgs e) {
+    public final void setValue(final GXDLMSSettings settings, final ValueEventArgs e) {
         if (e.getIndex() == 1) {
             setLogicalName(GXCommon.toLogicalName(e.getValue()));
         } else if (e.getIndex() == 2) {
@@ -418,8 +405,7 @@ public class GXDLMSPushSetup extends GXDLMSObject implements IGXDLMSBase {
             if (e.getValue() instanceof List<?>) {
                 for (Object it : (List<?>) e.getValue()) {
                     List<?> tmp = (List<?>) it;
-                    ObjectType type = ObjectType
-                            .forValue(((Number) tmp.get(0)).intValue());
+                    ObjectType type = ObjectType.forValue(((Number) tmp.get(0)).intValue());
                     String ln = GXCommon.toLogicalName(tmp.get(1));
                     GXDLMSObject obj = settings.getObjects().findByLN(type, ln);
                     if (obj == null) {
@@ -429,24 +415,21 @@ public class GXDLMSPushSetup extends GXDLMSObject implements IGXDLMSBase {
                     GXDLMSCaptureObject co = new GXDLMSCaptureObject();
                     co.setAttributeIndex(((Number) tmp.get(2)).intValue());
                     co.setDataIndex(((Number) tmp.get(3)).intValue());
-                    ent = new GXSimpleEntry<GXDLMSObject, GXDLMSCaptureObject>(
-                            obj, co);
+                    ent = new GXSimpleEntry<GXDLMSObject, GXDLMSCaptureObject>(obj, co);
                     pushObjectList.add(ent);
                 }
             }
         } else if (e.getIndex() == 3) {
             List<?> tmp = (List<?>) e.getValue();
             if (tmp != null) {
-                setService(
-                        ServiceType.forValue(((Number) tmp.get(0)).intValue()));
+                setService(ServiceType.forValue(((Number) tmp.get(0)).intValue()));
                 byte[] tmp2 = (byte[]) tmp.get(1);
                 if (GXByteBuffer.isAsciiString(tmp2)) {
                     setDestination(new String(tmp2));
                 } else {
                     setDestination(GXCommon.toHex(tmp2, false));
                 }
-                setMessage(
-                        MessageType.forValue(((Number) tmp.get(2)).intValue()));
+                setMessage(MessageType.forValue(((Number) tmp.get(2)).intValue()));
             }
         } else if (e.getIndex() == 4) {
             communicationWindow.clear();
@@ -459,13 +442,11 @@ public class GXDLMSPushSetup extends GXDLMSObject implements IGXDLMSBase {
                 }
                 for (Object it : (List<?>) e.getValue()) {
                     List<?> tmp = (List<?>) it;
-                    GXDateTime start = (GXDateTime) GXDLMSClient.changeType(
-                            (byte[]) tmp.get(0), DataType.DATETIME, useUtc);
-                    GXDateTime end = (GXDateTime) GXDLMSClient.changeType(
-                            (byte[]) tmp.get(1), DataType.DATETIME, useUtc);
-                    communicationWindow.add(
-                            new GXSimpleEntry<GXDateTime, GXDateTime>(start,
-                                    end));
+                    GXDateTime start = (GXDateTime) GXDLMSClient.changeType((byte[]) tmp.get(0),
+                            DataType.DATETIME, useUtc);
+                    GXDateTime end = (GXDateTime) GXDLMSClient.changeType((byte[]) tmp.get(1),
+                            DataType.DATETIME, useUtc);
+                    communicationWindow.add(new GXSimpleEntry<GXDateTime, GXDateTime>(start, end));
                 }
             }
         } else if (e.getIndex() == 5) {
@@ -484,8 +465,7 @@ public class GXDLMSPushSetup extends GXDLMSObject implements IGXDLMSBase {
         pushObjectList.clear();
         if (reader.isStartElement("ObjectList", true)) {
             while (reader.isStartElement("Item", true)) {
-                ObjectType ot = ObjectType
-                        .forValue(reader.readElementContentAsInt("ObjectType"));
+                ObjectType ot = ObjectType.forValue(reader.readElementContentAsInt("ObjectType"));
                 String ln = reader.readElementContentAsString("LN");
                 int ai = reader.readElementContentAsInt("AI");
                 int di = reader.readElementContentAsInt("DI");
@@ -496,30 +476,24 @@ public class GXDLMSPushSetup extends GXDLMSObject implements IGXDLMSBase {
                     obj = GXDLMSClient.createObject(ot);
                     obj.setLogicalName(ln);
                 }
-                pushObjectList.add(
-                        new GXSimpleEntry<GXDLMSObject, GXDLMSCaptureObject>(
-                                obj, co));
+                pushObjectList.add(new GXSimpleEntry<GXDLMSObject, GXDLMSCaptureObject>(obj, co));
             }
             reader.readEndElement("ObjectList");
         }
 
-        service =
-                ServiceType.forValue(reader.readElementContentAsInt("Service"));
+        service = ServiceType.forValue(reader.readElementContentAsInt("Service"));
         destination = reader.readElementContentAsString("Destination");
-        message =
-                MessageType.forValue(reader.readElementContentAsInt("Message"));
+        message = MessageType.forValue(reader.readElementContentAsInt("Message"));
         communicationWindow.clear();
         if (reader.isStartElement("CommunicationWindow", true)) {
             while (reader.isStartElement("Item", true)) {
                 GXDateTime start = reader.readElementContentAsDateTime("Start");
                 GXDateTime end = reader.readElementContentAsDateTime("End");
-                communicationWindow.add(
-                        new GXSimpleEntry<GXDateTime, GXDateTime>(start, end));
+                communicationWindow.add(new GXSimpleEntry<GXDateTime, GXDateTime>(start, end));
             }
             reader.readEndElement("CommunicationWindow");
         }
-        randomisationStartInterval =
-                reader.readElementContentAsInt("RandomisationStartInterval");
+        randomisationStartInterval = reader.readElementContentAsInt("RandomisationStartInterval");
         numberOfRetries = reader.readElementContentAsInt("NumberOfRetries");
         repetitionDelay = reader.readElementContentAsInt("RepetitionDelay");
     }
@@ -530,11 +504,9 @@ public class GXDLMSPushSetup extends GXDLMSObject implements IGXDLMSBase {
             writer.writeStartElement("ObjectList");
             for (Entry<GXDLMSObject, GXDLMSCaptureObject> it : pushObjectList) {
                 writer.writeStartElement("Item");
-                writer.writeElementString("ObjectType",
-                        it.getKey().getObjectType().getValue());
+                writer.writeElementString("ObjectType", it.getKey().getObjectType().getValue());
                 writer.writeElementString("LN", it.getKey().getLogicalName());
-                writer.writeElementString("AI",
-                        it.getValue().getAttributeIndex());
+                writer.writeElementString("AI", it.getValue().getAttributeIndex());
                 writer.writeElementString("DI", it.getValue().getDataIndex());
                 writer.writeEndElement();
             }
@@ -557,8 +529,7 @@ public class GXDLMSPushSetup extends GXDLMSObject implements IGXDLMSBase {
             }
             writer.writeEndElement();
         }
-        writer.writeElementString("RandomisationStartInterval",
-                randomisationStartInterval);
+        writer.writeElementString("RandomisationStartInterval", randomisationStartInterval);
         writer.writeElementString("NumberOfRetries", numberOfRetries);
         writer.writeElementString("RepetitionDelay", repetitionDelay);
     }
@@ -570,9 +541,8 @@ public class GXDLMSPushSetup extends GXDLMSObject implements IGXDLMSBase {
 
     @Override
     public String[] getNames() {
-        return new String[] { "Logical Name", "Object List",
-                "Send Destination And Method", "Communication Window",
-                "Randomisation Start Interval", "Number Of Retries",
+        return new String[] { "Logical Name", "Object List", "Send Destination And Method",
+                "Communication Window", "Randomisation Start Interval", "Number Of Retries",
                 "Repetition Delay" };
 
     }

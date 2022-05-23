@@ -3711,6 +3711,11 @@ abstract class GXDLMS {
                 } else {
                     reply.setReadPosition(reply.getData().position());
                     getValueFromData(settings, reply);
+                    if (reply.getValue() == null) {
+                        // Increase read position if data is null. This is a
+                        // special case.
+                        reply.setReadPosition(1 + reply.getReadPosition());
+                    }
                     reply.getData().position(reply.getReadPosition());
                     values.add(reply.getValue());
                     reply.setValue(null);

@@ -1130,6 +1130,10 @@ public class GXDLMSClient {
         if ((settings.getConnected() & ConnectionState.DLMS) == 0) {
             return null;
         }
+        // Restore default values.
+        // Restore proposed PDU size here because it's send in protected
+        // release.
+        setMaxReceivePDUSize(initializePduSize);
         GXByteBuffer buff = new GXByteBuffer();
         if (!useProtectedRelease) {
             buff.setUInt8(3);
@@ -1160,7 +1164,6 @@ public class GXDLMSClient {
         }
         settings.setConnected(settings.getConnected() & ~ConnectionState.DLMS);
         // Restore default values.
-        setMaxReceivePDUSize(initializePduSize);
         settings.setCtoSChallenge(initializeChallenge);
         return reply.toArray(new byte[][] {});
     }
