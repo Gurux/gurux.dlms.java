@@ -956,6 +956,7 @@ public class GXDLMSBase extends GXDLMSSecureServer2
                     // Skip row
                     if (index > 0) {
                         --index;
+                        continue;
                     } else if (line.length() != 0) {
                         String[] values = line.split("[;]", -1);
                         p.addRow(new Object[] { df.parse(values[0]), Integer.parseInt(values[1]) });
@@ -1091,7 +1092,7 @@ public class GXDLMSBase extends GXDLMSSecureServer2
                         } else if (e.getSelector() == 2) {
                             // Read by range.
                             List<?> arr = (List<?>) e.getParameters();
-                            e.setRowBeginIndex(((GXUInt32) arr.get(0)).longValue());
+                            e.setRowBeginIndex(((GXUInt32) arr.get(0)).longValue() - 1);
                             e.setRowEndIndex(((GXUInt32) arr.get(1)).longValue());
                             // If client wants to read more data what we have.
                             int cnt = getProfileGenericDataCount();

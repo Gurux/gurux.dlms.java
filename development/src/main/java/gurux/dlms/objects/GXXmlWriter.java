@@ -111,13 +111,11 @@ public class GXXmlWriter implements AutoCloseable {
      * @throws FileNotFoundException
      *             File not found.
      */
-    public GXXmlWriter(final String filename,
-            final GXXmlWriterSettings wSettings)
+    public GXXmlWriter(final String filename, final GXXmlWriterSettings wSettings)
             throws FileNotFoundException, XMLStreamException {
         settings = wSettings;
         XMLOutputFactory outputFactory = XMLOutputFactory.newInstance();
-        writer = outputFactory
-                .createXMLStreamWriter(new FileOutputStream(filename));
+        writer = outputFactory.createXMLStreamWriter(new FileOutputStream(filename));
     }
 
     /**
@@ -130,8 +128,8 @@ public class GXXmlWriter implements AutoCloseable {
      * @throws XMLStreamException
      *             Invalid XML stream.
      */
-    public GXXmlWriter(final OutputStream s,
-            final GXXmlWriterSettings wSettings) throws XMLStreamException {
+    public GXXmlWriter(final OutputStream s, final GXXmlWriterSettings wSettings)
+            throws XMLStreamException {
         settings = wSettings;
         XMLOutputFactory outputFactory = XMLOutputFactory.newInstance();
         writer = outputFactory.createXMLStreamWriter(s);
@@ -164,17 +162,15 @@ public class GXXmlWriter implements AutoCloseable {
         indenting = 0;
     }
 
-    public final void writeStartElement(final String name)
-            throws XMLStreamException {
+    public final void writeStartElement(final String name) throws XMLStreamException {
         appendSpaces();
         writer.writeStartElement(name);
         writer.writeCharacters(newline);
         ++indenting;
     }
 
-    public final void writeStartElement(final String elementName,
-            final String attributeName, final String value,
-            final boolean newLine) throws XMLStreamException {
+    public final void writeStartElement(final String elementName, final String attributeName,
+            final String value, final boolean newLine) throws XMLStreamException {
         appendSpaces();
         writer.writeStartElement(elementName);
         writer.writeAttribute(attributeName, value);
@@ -185,8 +181,8 @@ public class GXXmlWriter implements AutoCloseable {
     }
 
     public final void writeStartElement(final String elementName,
-            final List<Map.Entry<String, String>> attributes,
-            final boolean newLine) throws XMLStreamException {
+            final List<Map.Entry<String, String>> attributes, final boolean newLine)
+            throws XMLStreamException {
         appendSpaces();
         writer.writeStartElement(elementName);
         for (Map.Entry<String, String> it : attributes) {
@@ -201,8 +197,7 @@ public class GXXmlWriter implements AutoCloseable {
     public final void writeElementString(final String name, final Date value)
             throws XMLStreamException {
         if (value != null && value.compareTo(new Date(0)) != 0) {
-            SimpleDateFormat sd =
-                    new SimpleDateFormat("MM/dd/yyyy HH:mm:ss", Locale.US);
+            SimpleDateFormat sd = new SimpleDateFormat("MM/dd/yyyy HH:mm:ss", Locale.US);
             writeElementString(name, sd.format(value));
         }
     }
@@ -253,13 +248,11 @@ public class GXXmlWriter implements AutoCloseable {
         }
     }
 
-    public final void writeElementString(final String name,
-            final GXDateTime value) throws XMLStreamException {
-        if (value != null && value.getMeterCalendar()
-                .getTime() != new java.util.Date(0)) {
+    public final void writeElementString(final String name, final GXDateTime value)
+            throws XMLStreamException {
+        if (value != null && value.getMeterCalendar().getTime() != new java.util.Date(0)) {
             if (isUseMeterTime()) {
-                writeElementString(name,
-                        value.toFormatMeterString(Locale.ROOT));
+                writeElementString(name, value.toFormatMeterString(Locale.ROOT));
             } else {
                 writeElementString(name, value.toFormatString(Locale.ROOT));
             }
@@ -274,13 +267,12 @@ public class GXXmlWriter implements AutoCloseable {
                 if (tmp instanceof byte[]) {
                     writeElementObject("Item", tmp, false);
                 } else if (tmp instanceof GXArray) {
-                    writeStartElement("Item", "Type",
-                            String.valueOf(DataType.ARRAY.getValue()), true);
+                    writeStartElement("Item", "Type", String.valueOf(DataType.ARRAY.getValue()),
+                            true);
                     writeArray(tmp);
                     writeEndElement();
                 } else if (tmp instanceof GXStructure) {
-                    writeStartElement("Item", "Type",
-                            String.valueOf(DataType.STRUCTURE.getValue()),
+                    writeStartElement("Item", "Type", String.valueOf(DataType.STRUCTURE.getValue()),
                             true);
                     writeArray(tmp);
                     writeEndElement();
@@ -310,19 +302,16 @@ public class GXXmlWriter implements AutoCloseable {
      * @throws XMLStreamException
      *             Invalid XML stream.
      */
-    public final void writeElementObject(final String name, final Object value,
-            final DataType dt, final DataType uiType)
-            throws XMLStreamException {
+    public final void writeElementObject(final String name, final Object value, final DataType dt,
+            final DataType uiType) throws XMLStreamException {
         if (value != null) {
             if (isSkipDefaults() && value instanceof java.util.Date
-                    && (((java.util.Date) value)
-                            .compareTo(new java.util.Date(0))) == 0) {
+                    && (((java.util.Date) value).compareTo(new java.util.Date(0))) == 0) {
                 return;
             }
             boolean addSpaces = false;
             if (value instanceof GXDateTimeOS) {
-                List<Map.Entry<String, String>> list =
-                        new ArrayList<Map.Entry<String, String>>();
+                List<Map.Entry<String, String>> list = new ArrayList<Map.Entry<String, String>>();
                 list.add(new GXSimpleEntry<String, String>("Type",
                         String.valueOf(DataType.OCTET_STRING.getValue())));
                 if (value instanceof GXTimeOS) {
@@ -337,20 +326,15 @@ public class GXXmlWriter implements AutoCloseable {
                 }
                 writeStartElement(name, list, false);
             } else if (uiType != DataType.NONE && uiType != dt
-                    && (uiType != DataType.STRING
-                            || dt == DataType.OCTET_STRING)) {
-                List<Map.Entry<String, String>> list =
-                        new ArrayList<Map.Entry<String, String>>();
-                list.add(new GXSimpleEntry<String, String>("Type",
-                        String.valueOf(dt.getValue())));
+                    && (uiType != DataType.STRING || dt == DataType.OCTET_STRING)) {
+                List<Map.Entry<String, String>> list = new ArrayList<Map.Entry<String, String>>();
+                list.add(new GXSimpleEntry<String, String>("Type", String.valueOf(dt.getValue())));
                 list.add(new GXSimpleEntry<String, String>("UIType",
                         String.valueOf(uiType.getValue())));
                 writeStartElement(name, list, false);
             } else if (value instanceof Double || value instanceof Float) {
-                List<Map.Entry<String, String>> list =
-                        new ArrayList<Map.Entry<String, String>>();
-                list.add(new GXSimpleEntry<String, String>("Type",
-                        String.valueOf(dt.getValue())));
+                List<Map.Entry<String, String>> list = new ArrayList<Map.Entry<String, String>>();
+                list.add(new GXSimpleEntry<String, String>("Type", String.valueOf(dt.getValue())));
                 if (value instanceof Double) {
                     list.add(new GXSimpleEntry<String, String>("UIType",
                             String.valueOf(DataType.FLOAT64.getValue())));
@@ -364,8 +348,7 @@ public class GXXmlWriter implements AutoCloseable {
                     addSpaces = true;
                     writeStartElement(name);
                 } else {
-                    writeStartElement(name, "Type",
-                            String.valueOf(dt.getValue()), false);
+                    writeStartElement(name, "Type", String.valueOf(dt.getValue()), false);
                 }
             }
             if (dt == DataType.ARRAY || dt == DataType.STRUCTURE) {
@@ -374,11 +357,15 @@ public class GXXmlWriter implements AutoCloseable {
                 if (value instanceof GXDateTime) {
                     String str;
                     if (isUseMeterTime()) {
-                        str = ((GXDateTime) value)
-                                .toFormatMeterString(Locale.ROOT);
+                        str = ((GXDateTime) value).toFormatMeterString(Locale.ROOT);
                     } else {
                         str = ((GXDateTime) value).toFormatString(Locale.ROOT);
                     }
+                    writer.writeCharacters(str);
+                } else if (value instanceof Date) {
+                    String str;
+                    SimpleDateFormat sd = new SimpleDateFormat("MM/dd/yyyy HH:mm:ss XXX");
+                    str = sd.format(value);
                     writer.writeCharacters(str);
                 } else if (value instanceof byte[]) {
                     writer.writeCharacters(GXCommon.toHex((byte[]) value));
@@ -389,10 +376,8 @@ public class GXXmlWriter implements AutoCloseable {
             writeEndElement(addSpaces);
         } else if (!isSkipDefaults()) {
             if (dt != DataType.NONE || uiType != DataType.NONE) {
-                List<Map.Entry<String, String>> list =
-                        new ArrayList<Map.Entry<String, String>>();
-                list.add(new GXSimpleEntry<String, String>("Type",
-                        String.valueOf(dt.getValue())));
+                List<Map.Entry<String, String>> list = new ArrayList<Map.Entry<String, String>>();
+                list.add(new GXSimpleEntry<String, String>("Type", String.valueOf(dt.getValue())));
                 list.add(new GXSimpleEntry<String, String>("UIType",
                         String.valueOf(uiType.getValue())));
                 writeStartElement(name, list, false);
@@ -421,19 +406,15 @@ public class GXXmlWriter implements AutoCloseable {
             final boolean skipDefaultValue) throws XMLStreamException {
         if (value != null || !skipDefaultValue) {
             if (skipDefaultValue && value instanceof java.util.Date
-                    && (((java.util.Date) value)
-                            .compareTo(new java.util.Date(0))) == 0) {
+                    && (((java.util.Date) value).compareTo(new java.util.Date(0))) == 0) {
                 return;
             }
             if (value instanceof GXDateTimeOS) {
-                writeElementObject(name, value, DataType.OCTET_STRING,
-                        DataType.DATETIME);
+                writeElementObject(name, value, DataType.OCTET_STRING, DataType.DATETIME);
             } else if (value instanceof GXDateOS) {
-                writeElementObject(name, value, DataType.OCTET_STRING,
-                        DataType.DATE);
+                writeElementObject(name, value, DataType.OCTET_STRING, DataType.DATE);
             } else if (value instanceof GXTimeOS) {
-                writeElementObject(name, value, DataType.OCTET_STRING,
-                        DataType.TIME);
+                writeElementObject(name, value, DataType.OCTET_STRING, DataType.TIME);
             } else {
                 DataType dt = GXDLMSConverter.getDLMSDataType(value);
                 writeElementObject(name, value, dt, DataType.NONE);
@@ -441,8 +422,7 @@ public class GXXmlWriter implements AutoCloseable {
         }
     }
 
-    private void writeEndElement(final boolean addSpaces)
-            throws XMLStreamException {
+    private void writeEndElement(final boolean addSpaces) throws XMLStreamException {
         --indenting;
         if (addSpaces) {
             appendSpaces();
