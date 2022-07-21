@@ -344,6 +344,11 @@ public class GXDLMSSettings {
      */
     private java.util.Set<DateTimeSkips> dateTimeSkips = new HashSet<DateTimeSkips>();
 
+    /**
+     * Skipped fields.
+     */
+    private java.util.Set<DateTimeSkips> readDateTimeSkips = new HashSet<DateTimeSkips>();
+
     private Standard standard;
 
     /**
@@ -1413,6 +1418,23 @@ public class GXDLMSSettings {
      */
     public void setDateTimeSkips(final java.util.Set<DateTimeSkips> value) {
         dateTimeSkips = value;
+    }
+
+    /**
+     * @return Skipped date time fields on read. This value can be used if meter
+     *         returns invalid deviation on read.
+     */
+    public java.util.Set<DateTimeSkips> getDateTimeSkipsOnRead() {
+        return readDateTimeSkips;
+    }
+
+    /**
+     * @param value
+     *            Skipped date time fields on read. This value can be used if
+     *            meter returns invalid deviation on read.
+     */
+    public void setDateTimeSkipsOnRead(final java.util.Set<DateTimeSkips> value) {
+        readDateTimeSkips = value;
     }
 
     /**

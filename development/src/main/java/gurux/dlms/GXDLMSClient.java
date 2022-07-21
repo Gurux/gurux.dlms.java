@@ -488,6 +488,23 @@ public class GXDLMSClient {
     }
 
     /**
+     * @return Skipped date time fields on read. This value can be used if meter
+     *         returns invalid deviation on read.
+     */
+    public java.util.Set<DateTimeSkips> getDateTimeSkipsOnRead() {
+        return settings.getDateTimeSkipsOnRead();
+    }
+
+    /**
+     * @param value
+     *            Skipped date time fields on read. This value can be used if
+     *            meter returns invalid deviation on read.
+     */
+    public void setDateTimeSkipsOnRead(final java.util.Set<DateTimeSkips> value) {
+        settings.setDateTimeSkipsOnRead(value);
+    }
+
+    /**
      * @return Used standard.
      */
     public Standard getStandard() {

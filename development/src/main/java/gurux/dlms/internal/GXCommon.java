@@ -958,7 +958,12 @@ public final class GXCommon {
                 deviation = -deviation;
             }
             java.util.Calendar tm;
-            if (deviation == -32768) {
+            boolean ignoreDeviation = deviation == -32768;
+            if (!ignoreDeviation && settings != null
+                    && settings.getDateTimeSkipsOnRead().contains(DateTimeSkips.DEVITATION)) {
+                ignoreDeviation = true;
+            }
+            if (ignoreDeviation) {
                 tm = Calendar.getInstance();
             } else {
                 TimeZone tz = GXDateTime.getTimeZone(-deviation,
