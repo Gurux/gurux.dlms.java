@@ -959,8 +959,8 @@ public final class GXCommon {
             }
             java.util.Calendar tm;
             boolean ignoreDeviation = deviation == -32768;
-            if (!ignoreDeviation && settings != null
-                    && settings.getDateTimeSkipsOnRead().contains(DateTimeSkips.DEVITATION)) {
+            if (!ignoreDeviation || (settings != null
+                    && settings.getDateTimeSkipsOnRead().contains(DateTimeSkips.DEVITATION))) {
                 ignoreDeviation = true;
             }
             if (ignoreDeviation) {
