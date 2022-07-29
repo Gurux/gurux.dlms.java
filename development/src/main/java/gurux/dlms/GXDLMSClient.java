@@ -1682,10 +1682,6 @@ public class GXDLMSClient {
      *            Byte array received from the meter.
      * @param type
      *            Wanted type.
-     * @param useUtc
-     *            Standard says that Time zone is from normal time to UTC in
-     *            minutes. If meter is configured to use UTC time (UTC to normal
-     *            time) set this to true.
      * @return Value changed by type.
      */
     public Object changeType2(final byte[] value, final DataType type) {
