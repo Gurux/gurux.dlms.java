@@ -1670,6 +1670,47 @@ public class GXDLMSClient {
         if (value == null) {
             return null;
         }
+        GXDLMSSettings settings = new GXDLMSSettings(false, null);
+        settings.setUseUtc2NormalTime(useUtc);
+        return changeType(value, type, settings);
+    }
+
+    /**
+     * Changes byte array received from the meter to given type.
+     * 
+     * @param value
+     *            Byte array received from the meter.
+     * @param type
+     *            Wanted type.
+     * @param useUtc
+     *            Standard says that Time zone is from normal time to UTC in
+     *            minutes. If meter is configured to use UTC time (UTC to normal
+     *            time) set this to true.
+     * @return Value changed by type.
+     */
+    public Object changeType2(final byte[] value, final DataType type) {
+        if (value == null) {
+            return null;
+        }
+        return changeType(value, type, settings);
+    }
+
+    /**
+     * Changes byte array received from the meter to given type.
+     * 
+     * @param value
+     *            Byte array received from the meter.
+     * @param type
+     *            Wanted type.
+     * @param settings
+     *            DLMS settings.
+     * @return Value changed by type.
+     */
+    private static Object changeType(final byte[] value, final DataType type,
+            final GXDLMSSettings settings) {
+        if (value == null) {
+            return null;
+        }
         if (type == DataType.NONE) {
             return GXCommon.toHex(value, true);
         }
@@ -1691,9 +1732,6 @@ public class GXDLMSClient {
         if (value.length == 0 && type == DataType.TIME) {
             return new GXTime(new Date(0));
         }
-
-        GXDLMSSettings settings = new GXDLMSSettings(false, null);
-        settings.setUseUtc2NormalTime(useUtc);
         GXDataInfo info = new GXDataInfo();
         info.setType(type);
         Object ret = GXCommon.getData(settings, new GXByteBuffer(value), info);
