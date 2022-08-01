@@ -527,13 +527,7 @@ final class GXDLMSSNCommandHandler {
                     if (value instanceof byte[]) {
                         DataType dt = target.getItem().getDataType(target.getIndex());
                         if (dt != DataType.NONE && dt != DataType.OCTET_STRING) {
-                            boolean useUtc;
-                            if (settings != null) {
-                                useUtc = settings.getUseUtc2NormalTime();
-                            } else {
-                                useUtc = false;
-                            }
-                            value = GXDLMSClient.changeType((byte[]) value, dt, useUtc);
+                            value = GXDLMSClient.changeType((byte[]) value, dt, settings);
                         }
                     }
                     int am = server.notifyGetAttributeAccess(e);
@@ -610,15 +604,9 @@ final class GXDLMSSNCommandHandler {
         byte[] tmp = null;
         // If date time is given.
         if (len != 0) {
-            boolean useUtc;
-            if (settings != null) {
-                useUtc = settings.getUseUtc2NormalTime();
-            } else {
-                useUtc = false;
-            }
             tmp = new byte[len];
             reply.getData().get(tmp);
-            reply.setTime((GXDateTime) GXDLMSClient.changeType(tmp, DataType.DATETIME, useUtc));
+            reply.setTime((GXDateTime) GXDLMSClient.changeType(tmp, DataType.DATETIME, settings));
         }
         short type;
         TranslatorOutputType ot = TranslatorOutputType.SIMPLE_XML;

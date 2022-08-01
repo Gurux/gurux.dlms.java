@@ -243,9 +243,8 @@ public class GXDLMSDemandRegister extends GXDLMSObject implements IGXDLMSBase {
      * @throws IllegalBlockSizeException
      *             Illegal block size exception.
      */
-    public final byte[][] reset(final GXDLMSClient client)
-            throws InvalidKeyException, NoSuchAlgorithmException,
-            NoSuchPaddingException, InvalidAlgorithmParameterException,
+    public final byte[][] reset(final GXDLMSClient client) throws InvalidKeyException,
+            NoSuchAlgorithmException, NoSuchPaddingException, InvalidAlgorithmParameterException,
             IllegalBlockSizeException, BadPaddingException, SignatureException {
         return client.method(getName(), getObjectType(), 1, 0, DataType.INT8);
     }
@@ -269,20 +268,18 @@ public class GXDLMSDemandRegister extends GXDLMSObject implements IGXDLMSBase {
      * @throws IllegalBlockSizeException
      *             Illegal block size exception.
      */
-    public final byte[][] nextPeriod(final GXDLMSClient client)
-            throws InvalidKeyException, NoSuchAlgorithmException,
-            NoSuchPaddingException, InvalidAlgorithmParameterException,
+    public final byte[][] nextPeriod(final GXDLMSClient client) throws InvalidKeyException,
+            NoSuchAlgorithmException, NoSuchPaddingException, InvalidAlgorithmParameterException,
             IllegalBlockSizeException, BadPaddingException, SignatureException {
         return client.method(getName(), getObjectType(), 2, 0, DataType.INT8);
     }
 
     @Override
     public final Object[] getValues() {
-        String str = "Scaler: " + String.valueOf(getScaler()) + " Unit: "
-                + getUnit().toString();
-        return new Object[] { getLogicalName(), getCurrentAverageValue(),
-                getLastAverageValue(), str, getStatus(), getCaptureTime(),
-                getStartTimeCurrent(), getPeriod(), getNumberOfPeriods() };
+        String str = "Scaler: " + String.valueOf(getScaler()) + " Unit: " + getUnit().toString();
+        return new Object[] { getLogicalName(), getCurrentAverageValue(), getLastAverageValue(),
+                str, getStatus(), getCaptureTime(), getStartTimeCurrent(), getPeriod(),
+                getNumberOfPeriods() };
     }
 
     @Override
@@ -294,8 +291,7 @@ public class GXDLMSDemandRegister extends GXDLMSObject implements IGXDLMSBase {
     }
 
     @Override
-    public final byte[] invoke(final GXDLMSSettings settings,
-            final ValueEventArgs e) {
+    public final byte[] invoke(final GXDLMSSettings settings, final ValueEventArgs e) {
         // Resets the value to the default value.
         // The default value is an instance specific constant.
         if (e.getIndex() == 1) {
@@ -319,11 +315,9 @@ public class GXDLMSDemandRegister extends GXDLMSObject implements IGXDLMSBase {
      */
     @Override
     public final int[] getAttributeIndexToRead(final boolean all) {
-        java.util.ArrayList<Integer> attributes =
-                new java.util.ArrayList<Integer>();
+        java.util.ArrayList<Integer> attributes = new java.util.ArrayList<Integer>();
         // LN is static and read only once.
-        if (all || getLogicalName() == null
-                || getLogicalName().compareTo("") == 0) {
+        if (all || getLogicalName() == null || getLogicalName().compareTo("") == 0) {
             attributes.add(1);
         }
         // ScalerUnit
@@ -406,26 +400,22 @@ public class GXDLMSDemandRegister extends GXDLMSObject implements IGXDLMSBase {
         if (index == 9) {
             return DataType.UINT16;
         }
-        throw new IllegalArgumentException(
-                "getDataType failed. Invalid attribute index.");
+        throw new IllegalArgumentException("getDataType failed. Invalid attribute index.");
     }
 
     /*
      * Returns value of given attribute.
      */
     @Override
-    public final Object getValue(final GXDLMSSettings settings,
-            final ValueEventArgs e) {
+    public final Object getValue(final GXDLMSSettings settings, final ValueEventArgs e) {
         if (e.getIndex() == 1) {
             return GXCommon.logicalNameToBytes(getLogicalName());
         }
         if (e.getIndex() == 2) {
             if (settings != null && !settings.isServer() && getScaler() != 1
                     && currentAverageValue != null) {
-                DataType type =
-                        GXDLMSConverter.getDLMSDataType(currentAverageValue);
-                Object tmp = ((Number) currentAverageValue).doubleValue()
-                        / getScaler();
+                DataType type = GXDLMSConverter.getDLMSDataType(currentAverageValue);
+                Object tmp = ((Number) currentAverageValue).doubleValue() / getScaler();
                 if (type != DataType.NONE) {
                     tmp = GXDLMSConverter.changeType(tmp, type);
                 }
@@ -436,10 +426,8 @@ public class GXDLMSDemandRegister extends GXDLMSObject implements IGXDLMSBase {
         if (e.getIndex() == 3) {
             if (settings != null && !settings.isServer() && getScaler() != 1
                     && lastAverageValue != null) {
-                DataType type =
-                        GXDLMSConverter.getDLMSDataType(lastAverageValue);
-                Object tmp =
-                        ((Number) lastAverageValue).doubleValue() / getScaler();
+                DataType type = GXDLMSConverter.getDLMSDataType(lastAverageValue);
+                Object tmp = ((Number) lastAverageValue).doubleValue() / getScaler();
                 if (type != DataType.NONE) {
                     tmp = GXDLMSConverter.changeType(tmp, type);
                 }
@@ -478,16 +466,14 @@ public class GXDLMSDemandRegister extends GXDLMSObject implements IGXDLMSBase {
      * Set value of given attribute.
      */
     @Override
-    public final void setValue(final GXDLMSSettings settings,
-            final ValueEventArgs e) {
+    public final void setValue(final GXDLMSSettings settings, final ValueEventArgs e) {
         if (e.getIndex() == 1) {
             setLogicalName(GXCommon.toLogicalName(e.getValue()));
         } else if (e.getIndex() == 2) {
             if (settings != null && !settings.isServer() && getScaler() != 1
                     && e.getValue() != null) {
                 try {
-                    setCurrentAverageValue(((Number) e.getValue()).doubleValue()
-                            * getScaler());
+                    setCurrentAverageValue(((Number) e.getValue()).doubleValue() * getScaler());
                 } catch (Exception e1) {
                     // Sometimes scaler is set for wrong Object type.
                     setCurrentAverageValue(e.getValue());
@@ -499,8 +485,7 @@ public class GXDLMSDemandRegister extends GXDLMSObject implements IGXDLMSBase {
             if (settings != null && !settings.isServer() && getScaler() != 1
                     && e.getValue() != null) {
                 try {
-                    setLastAverageValue(((Number) e.getValue()).doubleValue()
-                            * getScaler());
+                    setLastAverageValue(((Number) e.getValue()).doubleValue() * getScaler());
                 } catch (Exception e1) {
                     // Sometimes scaler is set for wrong Object type.
                     setLastAverageValue(e.getValue());
@@ -534,14 +519,8 @@ public class GXDLMSDemandRegister extends GXDLMSObject implements IGXDLMSBase {
             } else {
                 GXDateTime tmp;
                 if (e.getValue() instanceof byte[]) {
-                    boolean useUtc;
-                    if (e.getSettings() != null) {
-                        useUtc = e.getSettings().getUseUtc2NormalTime();
-                    } else {
-                        useUtc = false;
-                    }
-                    tmp = (GXDateTime) GXDLMSClient.changeType(
-                            (byte[]) e.getValue(), DataType.DATETIME, useUtc);
+                    tmp = (GXDateTime) GXDLMSClient.changeType((byte[]) e.getValue(),
+                            DataType.DATETIME, e.getSettings());
                 } else {
                     tmp = (GXDateTime) e.getValue();
                 }
@@ -553,14 +532,8 @@ public class GXDLMSDemandRegister extends GXDLMSObject implements IGXDLMSBase {
             } else {
                 GXDateTime tmp;
                 if (e.getValue() instanceof byte[]) {
-                    boolean useUtc;
-                    if (e.getSettings() != null) {
-                        useUtc = e.getSettings().getUseUtc2NormalTime();
-                    } else {
-                        useUtc = false;
-                    }
-                    tmp = (GXDateTime) GXDLMSClient.changeType(
-                            (byte[]) e.getValue(), DataType.DATETIME, useUtc);
+                    tmp = (GXDateTime) GXDLMSClient.changeType((byte[]) e.getValue(),
+                            DataType.DATETIME, e.getSettings());
                 } else {
                     tmp = (GXDateTime) e.getValue();
                 }
@@ -585,16 +558,14 @@ public class GXDLMSDemandRegister extends GXDLMSObject implements IGXDLMSBase {
 
     @Override
     public final void load(final GXXmlReader reader) throws XMLStreamException {
-        currentAverageValue = reader.readElementContentAsObject(
-                "CurrentAverageValue", null, this, 2);
-        lastAverageValue = reader.readElementContentAsObject("LastAverageValue",
-                null, this, 3);
+        currentAverageValue =
+                reader.readElementContentAsObject("CurrentAverageValue", null, this, 2);
+        lastAverageValue = reader.readElementContentAsObject("LastAverageValue", null, this, 3);
         setScaler(reader.readElementContentAsDouble("Scaler", 1));
         unit = reader.readElementContentAsInt("Unit");
         status = reader.readElementContentAsObject("Status", null, this, 5);
         captureTime = reader.readElementContentAsDateTime("CaptureTime");
-        startTimeCurrent =
-                reader.readElementContentAsDateTime("StartTimeCurrent");
+        startTimeCurrent = reader.readElementContentAsDateTime("StartTimeCurrent");
         period = reader.readElementContentAsInt("Period");
         numberOfPeriods = reader.readElementContentAsInt("NumberOfPeriods");
     }
@@ -619,9 +590,8 @@ public class GXDLMSDemandRegister extends GXDLMSObject implements IGXDLMSBase {
 
     @Override
     public String[] getNames() {
-        return new String[] { "Logical Name", "Current Average Value",
-                "Last Average Value", "Scaler and Unit", "Status",
-                "Capture Time", "Start Time Current", "Period",
+        return new String[] { "Logical Name", "Current Average Value", "Last Average Value",
+                "Scaler and Unit", "Status", "Capture Time", "Start Time Current", "Period",
                 "Number Of Periods" };
     }
 

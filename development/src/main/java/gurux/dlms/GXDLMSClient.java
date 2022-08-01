@@ -1702,7 +1702,7 @@ public class GXDLMSClient {
      *            DLMS settings.
      * @return Value changed by type.
      */
-    private static Object changeType(final byte[] value, final DataType type,
+    public static Object changeType(final byte[] value, final DataType type,
             final GXDLMSSettings settings) {
         if (value == null) {
             return null;

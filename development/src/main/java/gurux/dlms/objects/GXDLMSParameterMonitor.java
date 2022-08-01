@@ -63,8 +63,7 @@ import gurux.dlms.internal.GXCommon;
  * Online help:<br>
  * https://www.gurux.fi/Gurux.DLMS.Objects.GXDLMSParameterMonitor
  */
-public class GXDLMSParameterMonitor extends GXDLMSObject
-        implements IGXDLMSBase {
+public class GXDLMSParameterMonitor extends GXDLMSObject implements IGXDLMSBase {
     /**
      * Changed parameter.
      */
@@ -156,8 +155,7 @@ public class GXDLMSParameterMonitor extends GXDLMSObject
 
     @Override
     public final Object[] getValues() {
-        return new Object[] { getLogicalName(), changedParameter, captureTime,
-                parameters };
+        return new Object[] { getLogicalName(), changedParameter, captureTime, parameters };
     }
 
     /**
@@ -186,16 +184,15 @@ public class GXDLMSParameterMonitor extends GXDLMSObject
      *             Signature exception.
      */
     public final byte[][] insert(GXDLMSClient client, GXDLMSTarget entry)
-            throws InvalidKeyException, NoSuchAlgorithmException,
-            NoSuchPaddingException, InvalidAlgorithmParameterException,
-            IllegalBlockSizeException, BadPaddingException, SignatureException {
+            throws InvalidKeyException, NoSuchAlgorithmException, NoSuchPaddingException,
+            InvalidAlgorithmParameterException, IllegalBlockSizeException, BadPaddingException,
+            SignatureException {
         GXByteBuffer bb = new GXByteBuffer();
         bb.setUInt8(DataType.STRUCTURE.getValue());
         bb.setUInt8(3);
-        GXCommon.setData(null, bb, DataType.UINT16,
-                entry.getTarget().getObjectType().getValue());
-        GXCommon.setData(null, bb, DataType.OCTET_STRING, GXCommon
-                .logicalNameToBytes(entry.getTarget().getLogicalName()));
+        GXCommon.setData(null, bb, DataType.UINT16, entry.getTarget().getObjectType().getValue());
+        GXCommon.setData(null, bb, DataType.OCTET_STRING,
+                GXCommon.logicalNameToBytes(entry.getTarget().getLogicalName()));
         GXCommon.setData(null, bb, DataType.INT8, entry.getAttributeIndex());
         return client.method(this, 1, bb.array(), DataType.ARRAY);
     }
@@ -224,31 +221,28 @@ public class GXDLMSParameterMonitor extends GXDLMSObject
      *             Signature exception.
      */
     public final byte[][] delete(GXDLMSClient client, GXDLMSTarget entry)
-            throws InvalidKeyException, NoSuchAlgorithmException,
-            NoSuchPaddingException, InvalidAlgorithmParameterException,
-            IllegalBlockSizeException, BadPaddingException, SignatureException {
+            throws InvalidKeyException, NoSuchAlgorithmException, NoSuchPaddingException,
+            InvalidAlgorithmParameterException, IllegalBlockSizeException, BadPaddingException,
+            SignatureException {
 
         GXByteBuffer bb = new GXByteBuffer();
         bb.setUInt8(DataType.STRUCTURE.getValue());
         bb.setUInt8(3);
-        GXCommon.setData(null, bb, DataType.UINT16,
-                entry.getTarget().getObjectType());
-        GXCommon.setData(null, bb, DataType.OCTET_STRING, GXCommon
-                .logicalNameToBytes(entry.getTarget().getLogicalName()));
+        GXCommon.setData(null, bb, DataType.UINT16, entry.getTarget().getObjectType());
+        GXCommon.setData(null, bb, DataType.OCTET_STRING,
+                GXCommon.logicalNameToBytes(entry.getTarget().getLogicalName()));
         GXCommon.setData(null, bb, DataType.INT8, entry.getAttributeIndex());
         return client.method(this, 2, bb.array(), DataType.ARRAY);
     }
 
     @Override
-    public final byte[] invoke(final GXDLMSSettings settings,
-            final ValueEventArgs e) {
+    public final byte[] invoke(final GXDLMSSettings settings, final ValueEventArgs e) {
         if (e.getIndex() != 1 && e.getIndex() != 2) {
             e.setError(ErrorCode.READ_WRITE_DENIED);
         } else {
             if (e.getIndex() == 1) {
                 List<?> tmp = (List<?>) e.getParameters();
-                ObjectType type =
-                        ObjectType.forValue(((Number) tmp.get(0)).intValue());
+                ObjectType type = ObjectType.forValue(((Number) tmp.get(0)).intValue());
                 String ln = GXCommon.toLogicalName((byte[]) tmp.get(1));
                 int index = ((Number) tmp.get(2)).intValue();
                 for (GXDLMSTarget item : parameters) {
@@ -269,8 +263,7 @@ public class GXDLMSParameterMonitor extends GXDLMSObject
                 parameters.add(it);
             } else if (e.getIndex() == 2) {
                 List<?> tmp = (List<?>) e.getParameters();
-                ObjectType type =
-                        ObjectType.forValue(((Number) tmp.get(0)).intValue());
+                ObjectType type = ObjectType.forValue(((Number) tmp.get(0)).intValue());
                 String ln = GXCommon.toLogicalName((byte[]) tmp.get(1));
                 int index = ((Number) tmp.get(2)).intValue();
                 for (GXDLMSTarget item : parameters) {
@@ -292,11 +285,9 @@ public class GXDLMSParameterMonitor extends GXDLMSObject
      */
     @Override
     public final int[] getAttributeIndexToRead(final boolean all) {
-        java.util.ArrayList<Integer> attributes =
-                new java.util.ArrayList<Integer>();
+        java.util.ArrayList<Integer> attributes = new java.util.ArrayList<Integer>();
         // LN is static and read only once.
-        if (all || getLogicalName() == null
-                || getLogicalName().compareTo("") == 0) {
+        if (all || getLogicalName() == null || getLogicalName().compareTo("") == 0) {
             attributes.add(1);
         }
         // ChangedParameter
@@ -342,8 +333,7 @@ public class GXDLMSParameterMonitor extends GXDLMSObject
         case 4:
             return DataType.ARRAY;
         default:
-            throw new IllegalArgumentException(
-                    "getDataType failed. Invalid attribute index.");
+            throw new IllegalArgumentException("getDataType failed. Invalid attribute index.");
         }
     }
 
@@ -351,8 +341,7 @@ public class GXDLMSParameterMonitor extends GXDLMSObject
      * Returns value of given attribute.
      */
     @Override
-    public final Object getValue(final GXDLMSSettings settings,
-            final ValueEventArgs e) {
+    public final Object getValue(final GXDLMSSettings settings, final ValueEventArgs e) {
         switch (e.getIndex()) {
         case 1:
             return GXCommon.logicalNameToBytes(getLogicalName());
@@ -368,16 +357,13 @@ public class GXDLMSParameterMonitor extends GXDLMSObject
                 GXCommon.setData(settings, data, DataType.NONE, null);
             } else {
                 GXCommon.setData(settings, data, DataType.UINT16,
-                        changedParameter.getTarget().getObjectType()
-                                .getValue());
+                        changedParameter.getTarget().getObjectType().getValue());
                 GXCommon.setData(settings, data, DataType.OCTET_STRING,
-                        GXCommon.logicalNameToBytes(
-                                changedParameter.getTarget().getLogicalName()));
+                        GXCommon.logicalNameToBytes(changedParameter.getTarget().getLogicalName()));
                 GXCommon.setData(settings, data, DataType.INT8,
                         changedParameter.getAttributeIndex());
                 GXCommon.setData(settings, data,
-                        GXDLMSConverter
-                                .getDLMSDataType(changedParameter.getValue()),
+                        GXDLMSConverter.getDLMSDataType(changedParameter.getValue()),
                         changedParameter.getValue());
             }
             return data.array();
@@ -397,10 +383,8 @@ public class GXDLMSParameterMonitor extends GXDLMSObject
                     GXCommon.setData(settings, data, DataType.UINT16,
                             it.getTarget().getObjectType().getValue());
                     GXCommon.setData(settings, data, DataType.OCTET_STRING,
-                            GXCommon.logicalNameToBytes(
-                                    it.getTarget().getLogicalName()));
-                    GXCommon.setData(settings, data, DataType.INT8,
-                            it.getAttributeIndex());
+                            GXCommon.logicalNameToBytes(it.getTarget().getLogicalName()));
+                    GXCommon.setData(settings, data, DataType.INT8, it.getAttributeIndex());
                 }
             }
             return data.array();
@@ -416,8 +400,7 @@ public class GXDLMSParameterMonitor extends GXDLMSObject
      * Set value of given attribute.
      */
     @Override
-    public final void setValue(final GXDLMSSettings settings,
-            final ValueEventArgs e) {
+    public final void setValue(final GXDLMSSettings settings, final ValueEventArgs e) {
         switch (e.getIndex()) {
         case 1:
             setLogicalName(GXCommon.toLogicalName(e.getValue()));
@@ -429,17 +412,14 @@ public class GXDLMSParameterMonitor extends GXDLMSObject
                 if (tmp.size() != 4) {
                     throw new GXDLMSException("Invalid structure format.");
                 }
-                ObjectType type =
-                        ObjectType.forValue(((Number) tmp.get(0)).intValue());
+                ObjectType type = ObjectType.forValue(((Number) tmp.get(0)).intValue());
                 String ln = GXCommon.toLogicalName((byte[]) tmp.get(1));
-                changedParameter
-                        .setTarget(settings.getObjects().findByLN(type, ln));
+                changedParameter.setTarget(settings.getObjects().findByLN(type, ln));
                 if (changedParameter.getTarget() == null) {
                     changedParameter.setTarget(GXDLMSClient.createObject(type));
                     changedParameter.getTarget().setLogicalName(ln);
                 }
-                changedParameter
-                        .setAttributeIndex(((Number) tmp.get(2)).intValue());
+                changedParameter.setAttributeIndex(((Number) tmp.get(2)).intValue());
                 changedParameter.setValue(tmp.get(3));
             }
             break;
@@ -451,14 +431,8 @@ public class GXDLMSParameterMonitor extends GXDLMSObject
             } else {
                 GXDateTime tmp;
                 if (e.getValue() instanceof byte[]) {
-                    boolean useUtc;
-                    if (e.getSettings() != null) {
-                        useUtc = e.getSettings().getUseUtc2NormalTime();
-                    } else {
-                        useUtc = false;
-                    }
-                    tmp = (GXDateTime) GXDLMSClient.changeType(
-                            (byte[]) e.getValue(), DataType.DATETIME, useUtc);
+                    tmp = (GXDateTime) GXDLMSClient.changeType((byte[]) e.getValue(),
+                            DataType.DATETIME, e.getSettings());
                 } else {
                     tmp = (GXDateTime) e.getValue();
                 }
@@ -474,14 +448,12 @@ public class GXDLMSParameterMonitor extends GXDLMSObject
                         throw new GXDLMSException("Invalid structure format.");
                     }
                     GXDLMSTarget obj = new GXDLMSTarget();
-                    ObjectType type = ObjectType
-                            .forValue(((Number) tmp.get(0)).intValue());
+                    ObjectType type = ObjectType.forValue(((Number) tmp.get(0)).intValue());
                     String ln = GXCommon.toLogicalName((byte[]) tmp.get(1));
                     obj.setTarget(settings.getObjects().findByLN(type, ln));
                     if (obj.getTarget() == null) {
                         obj.setTarget(GXDLMSClient.createObject(type));
-                        obj.getTarget().setLogicalName(
-                                GXCommon.toLogicalName((byte[]) tmp.get(1)));
+                        obj.getTarget().setLogicalName(GXCommon.toLogicalName((byte[]) tmp.get(1)));
                     }
                     obj.setAttributeIndex(((Number) tmp.get(2)).intValue());
                     parameters.add(obj);
@@ -499,18 +471,15 @@ public class GXDLMSParameterMonitor extends GXDLMSObject
     public final void load(final GXXmlReader reader) throws XMLStreamException {
         changedParameter = new GXDLMSTarget();
         if (reader.isStartElement("ChangedParameter", true)) {
-            ObjectType ot =
-                    ObjectType.forValue(reader.readElementContentAsInt("Type"));
+            ObjectType ot = ObjectType.forValue(reader.readElementContentAsInt("Type"));
             String ln = reader.readElementContentAsString("LN");
             changedParameter.setTarget(reader.getObjects().findByLN(ot, ln));
             if (changedParameter.getTarget() == null) {
                 changedParameter.setTarget(GXDLMSClient.createObject(ot));
                 changedParameter.getTarget().setLogicalName(ln);
             }
-            changedParameter
-                    .setAttributeIndex(reader.readElementContentAsInt("Index"));
-            changedParameter.setValue(
-                    reader.readElementContentAsObject("Value", null, null, 0));
+            changedParameter.setAttributeIndex(reader.readElementContentAsInt("Index"));
+            changedParameter.setValue(reader.readElementContentAsObject("Value", null, null, 0));
             reader.readEndElement("ChangedParameter");
         }
         GXDateTime tmp = reader.readElementContentAsDateTime("Time");
@@ -522,8 +491,7 @@ public class GXDLMSParameterMonitor extends GXDLMSObject
         if (reader.isStartElement("Parameters", true)) {
             while (reader.isStartElement("Item", true)) {
                 GXDLMSTarget obj = new GXDLMSTarget();
-                ObjectType ot = ObjectType
-                        .forValue(reader.readElementContentAsInt("Type"));
+                ObjectType ot = ObjectType.forValue(reader.readElementContentAsInt("Type"));
                 String ln = reader.readElementContentAsString("LN");
                 obj.setTarget(reader.getObjects().findByLN(ot, ln));
                 if (obj.getTarget() == null) {
@@ -543,10 +511,8 @@ public class GXDLMSParameterMonitor extends GXDLMSObject
             writer.writeStartElement("ChangedParameter");
             writer.writeElementString("Type",
                     changedParameter.getTarget().getObjectType().getValue());
-            writer.writeElementString("LN",
-                    changedParameter.getTarget().getLogicalName());
-            writer.writeElementString("Index",
-                    changedParameter.getAttributeIndex());
+            writer.writeElementString("LN", changedParameter.getTarget().getLogicalName());
+            writer.writeElementString("Index", changedParameter.getAttributeIndex());
             writer.writeElementObject("Value", changedParameter.getValue());
             writer.writeEndElement();
         }
@@ -557,10 +523,8 @@ public class GXDLMSParameterMonitor extends GXDLMSObject
             writer.writeStartElement("Parameters");
             for (GXDLMSTarget it : parameters) {
                 writer.writeStartElement("Item");
-                writer.writeElementString("Type",
-                        it.getTarget().getObjectType().getValue());
-                writer.writeElementString("LN",
-                        it.getTarget().getLogicalName());
+                writer.writeElementString("Type", it.getTarget().getObjectType().getValue());
+                writer.writeElementString("LN", it.getTarget().getLogicalName());
                 writer.writeElementString("Index", it.getAttributeIndex());
                 writer.writeEndElement();
             }
@@ -574,8 +538,7 @@ public class GXDLMSParameterMonitor extends GXDLMSObject
 
     @Override
     public String[] getNames() {
-        return new String[] { "Logical Name", "ChangedParameter", "CaptureTime",
-                "Parameters" };
+        return new String[] { "Logical Name", "ChangedParameter", "CaptureTime", "Parameters" };
 
     }
 

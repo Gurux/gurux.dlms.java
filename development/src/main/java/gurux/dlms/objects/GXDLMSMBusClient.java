@@ -105,8 +105,7 @@ public class GXDLMSMBusClient extends GXDLMSObject implements IGXDLMSBase {
      */
     public GXDLMSMBusClient(final String ln, final int sn) {
         super(ObjectType.MBUS_CLIENT, ln, sn);
-        captureDefinition =
-                new java.util.ArrayList<java.util.Map.Entry<String, String>>();
+        captureDefinition = new java.util.ArrayList<java.util.Map.Entry<String, String>>();
         setVersion(1);
     }
 
@@ -129,8 +128,7 @@ public class GXDLMSMBusClient extends GXDLMSObject implements IGXDLMSBase {
         mBusPortReference = value;
     }
 
-    public final List<java.util.Map.Entry<String, String>>
-            getCaptureDefinition() {
+    public final List<java.util.Map.Entry<String, String>> getCaptureDefinition() {
         return captureDefinition;
     }
 
@@ -248,11 +246,10 @@ public class GXDLMSMBusClient extends GXDLMSObject implements IGXDLMSBase {
      *             Illegal block size exception.
      * @throws SignatureException
      */
-    public final byte[][] slaveInstall(final GXDLMSClient client,
-            byte primaryAddress)
-            throws InvalidKeyException, NoSuchAlgorithmException,
-            NoSuchPaddingException, InvalidAlgorithmParameterException,
-            IllegalBlockSizeException, BadPaddingException, SignatureException {
+    public final byte[][] slaveInstall(final GXDLMSClient client, byte primaryAddress)
+            throws InvalidKeyException, NoSuchAlgorithmException, NoSuchPaddingException,
+            InvalidAlgorithmParameterException, IllegalBlockSizeException, BadPaddingException,
+            SignatureException {
         return client.method(this, 1, primaryAddress, DataType.INT8);
     }
 
@@ -276,9 +273,8 @@ public class GXDLMSMBusClient extends GXDLMSObject implements IGXDLMSBase {
      *             Illegal block size exception.
      * @throws SignatureException
      */
-    public final byte[][] slaveDeInstall(final GXDLMSClient client)
-            throws InvalidKeyException, NoSuchAlgorithmException,
-            NoSuchPaddingException, InvalidAlgorithmParameterException,
+    public final byte[][] slaveDeInstall(final GXDLMSClient client) throws InvalidKeyException,
+            NoSuchAlgorithmException, NoSuchPaddingException, InvalidAlgorithmParameterException,
             IllegalBlockSizeException, BadPaddingException, SignatureException {
         return client.method(this, 2, 0, DataType.INT8);
     }
@@ -303,9 +299,8 @@ public class GXDLMSMBusClient extends GXDLMSObject implements IGXDLMSBase {
      *             Illegal block size exception.
      * @throws SignatureException
      */
-    public final byte[][] capture(final GXDLMSClient client)
-            throws InvalidKeyException, NoSuchAlgorithmException,
-            NoSuchPaddingException, InvalidAlgorithmParameterException,
+    public final byte[][] capture(final GXDLMSClient client) throws InvalidKeyException,
+            NoSuchAlgorithmException, NoSuchPaddingException, InvalidAlgorithmParameterException,
             IllegalBlockSizeException, BadPaddingException, SignatureException {
         return client.method(this, 3, 0, DataType.INT8);
     }
@@ -330,9 +325,8 @@ public class GXDLMSMBusClient extends GXDLMSObject implements IGXDLMSBase {
      *             Illegal block size exception.
      * @throws SignatureException
      */
-    public final byte[][] resetAlarm(final GXDLMSClient client)
-            throws InvalidKeyException, NoSuchAlgorithmException,
-            NoSuchPaddingException, InvalidAlgorithmParameterException,
+    public final byte[][] resetAlarm(final GXDLMSClient client) throws InvalidKeyException,
+            NoSuchAlgorithmException, NoSuchPaddingException, InvalidAlgorithmParameterException,
             IllegalBlockSizeException, BadPaddingException, SignatureException {
         return client.method(this, 4, 0, DataType.INT8);
     }
@@ -357,9 +351,8 @@ public class GXDLMSMBusClient extends GXDLMSObject implements IGXDLMSBase {
      *             Illegal block size exception.
      * @throws SignatureException
      */
-    public final byte[][] synchronizeClock(final GXDLMSClient client)
-            throws InvalidKeyException, NoSuchAlgorithmException,
-            NoSuchPaddingException, InvalidAlgorithmParameterException,
+    public final byte[][] synchronizeClock(final GXDLMSClient client) throws InvalidKeyException,
+            NoSuchAlgorithmException, NoSuchPaddingException, InvalidAlgorithmParameterException,
             IllegalBlockSizeException, BadPaddingException, SignatureException {
         return client.method(this, 5, 0, DataType.INT8);
     }
@@ -386,11 +379,10 @@ public class GXDLMSMBusClient extends GXDLMSObject implements IGXDLMSBase {
      *             Illegal block size exception.
      * @throws SignatureException
      */
-    public final byte[][] sendData(final GXDLMSClient client,
-            final GXMBusClientData[] data)
-            throws InvalidKeyException, NoSuchAlgorithmException,
-            NoSuchPaddingException, InvalidAlgorithmParameterException,
-            IllegalBlockSizeException, BadPaddingException, SignatureException {
+    public final byte[][] sendData(final GXDLMSClient client, final GXMBusClientData[] data)
+            throws InvalidKeyException, NoSuchAlgorithmException, NoSuchPaddingException,
+            InvalidAlgorithmParameterException, IllegalBlockSizeException, BadPaddingException,
+            SignatureException {
         GXByteBuffer bb = new GXByteBuffer();
         bb.setUInt8(DataType.ARRAY);
         bb.setUInt8(DataType.STRUCTURE);
@@ -404,9 +396,7 @@ public class GXDLMSMBusClient extends GXDLMSObject implements IGXDLMSBase {
             bb.setUInt8(DataType.OCTET_STRING);
             GXCommon.setObjectCount(it.getValueInformation().length, bb);
             bb.set(it.getValueInformation());
-            GXCommon.setData(null, bb,
-                    GXDLMSConverter.getDLMSDataType(it.getData()),
-                    it.getData());
+            GXCommon.setData(null, bb, GXDLMSConverter.getDLMSDataType(it.getData()), it.getData());
         }
         return client.method(this, 6, bb.array(), DataType.ARRAY);
     }
@@ -434,11 +424,10 @@ public class GXDLMSMBusClient extends GXDLMSObject implements IGXDLMSBase {
      *             Illegal block size exception.
      * @throws SignatureException
      */
-    public final byte[][] setEncryptionKey(GXDLMSClient client,
-            byte[] encryptionKey)
-            throws InvalidKeyException, NoSuchAlgorithmException,
-            NoSuchPaddingException, InvalidAlgorithmParameterException,
-            IllegalBlockSizeException, BadPaddingException, SignatureException {
+    public final byte[][] setEncryptionKey(GXDLMSClient client, byte[] encryptionKey)
+            throws InvalidKeyException, NoSuchAlgorithmException, NoSuchPaddingException,
+            InvalidAlgorithmParameterException, IllegalBlockSizeException, BadPaddingException,
+            SignatureException {
         GXByteBuffer bb = new GXByteBuffer();
         bb.setUInt8(DataType.OCTET_STRING);
         if (encryptionKey == null) {
@@ -473,9 +462,9 @@ public class GXDLMSMBusClient extends GXDLMSObject implements IGXDLMSBase {
      * @throws SignatureException
      */
     public final byte[][] transferKey(GXDLMSClient client, byte[] encryptionKey)
-            throws InvalidKeyException, NoSuchAlgorithmException,
-            NoSuchPaddingException, InvalidAlgorithmParameterException,
-            IllegalBlockSizeException, BadPaddingException, SignatureException {
+            throws InvalidKeyException, NoSuchAlgorithmException, NoSuchPaddingException,
+            InvalidAlgorithmParameterException, IllegalBlockSizeException, BadPaddingException,
+            SignatureException {
         GXByteBuffer bb = new GXByteBuffer();
         bb.setUInt8(DataType.OCTET_STRING);
         if (encryptionKey == null) {
@@ -490,16 +479,13 @@ public class GXDLMSMBusClient extends GXDLMSObject implements IGXDLMSBase {
     @Override
     public final Object[] getValues() {
         if (getVersion() == 0) {
-            return new Object[] { getLogicalName(), mBusPortReference,
-                    captureDefinition, capturePeriod, primaryAddress,
-                    identificationNumber, manufacturerID, dataHeaderVersion,
-                    deviceType, accessNumber, status, alarm };
+            return new Object[] { getLogicalName(), mBusPortReference, captureDefinition,
+                    capturePeriod, primaryAddress, identificationNumber, manufacturerID,
+                    dataHeaderVersion, deviceType, accessNumber, status, alarm };
         }
-        return new Object[] { getLogicalName(), mBusPortReference,
-                captureDefinition, capturePeriod, primaryAddress,
-                identificationNumber, manufacturerID, dataHeaderVersion,
-                deviceType, accessNumber, status, alarm, configuration,
-                encryptionKeyStatus };
+        return new Object[] { getLogicalName(), mBusPortReference, captureDefinition, capturePeriod,
+                primaryAddress, identificationNumber, manufacturerID, dataHeaderVersion, deviceType,
+                accessNumber, status, alarm, configuration, encryptionKeyStatus };
     }
 
     /*
@@ -508,11 +494,9 @@ public class GXDLMSMBusClient extends GXDLMSObject implements IGXDLMSBase {
      */
     @Override
     public final int[] getAttributeIndexToRead(final boolean all) {
-        java.util.ArrayList<Integer> attributes =
-                new java.util.ArrayList<Integer>();
+        java.util.ArrayList<Integer> attributes = new java.util.ArrayList<Integer>();
         // LN is static and read only once.
-        if (all || getLogicalName() == null
-                || getLogicalName().compareTo("") == 0) {
+        if (all || getLogicalName() == null || getLogicalName().compareTo("") == 0) {
             attributes.add(1);
         }
         // MBusPortReference
@@ -637,16 +621,14 @@ public class GXDLMSMBusClient extends GXDLMSObject implements IGXDLMSBase {
                 return DataType.ENUM;
             }
         }
-        throw new IllegalArgumentException(
-                "getDataType failed. Invalid attribute index.");
+        throw new IllegalArgumentException("getDataType failed. Invalid attribute index.");
     }
 
     /*
      * Returns value of given attribute.
      */
     @Override
-    public final Object getValue(final GXDLMSSettings settings,
-            final ValueEventArgs e) {
+    public final Object getValue(final GXDLMSSettings settings, final ValueEventArgs e) {
         if (e.getIndex() == 1) {
             return GXCommon.logicalNameToBytes(getLogicalName());
         }
@@ -662,8 +644,7 @@ public class GXDLMSMBusClient extends GXDLMSObject implements IGXDLMSBase {
                 buff.setUInt8(2);
                 GXCommon.setData(settings, buff, DataType.UINT8, it.getKey());
                 if (it.getValue() == null) {
-                    GXCommon.setData(settings, buff, DataType.OCTET_STRING,
-                            null);
+                    GXCommon.setData(settings, buff, DataType.OCTET_STRING, null);
                 } else {
                     GXCommon.setData(settings, buff, DataType.OCTET_STRING,
                             it.getValue().getBytes());
@@ -714,8 +695,7 @@ public class GXDLMSMBusClient extends GXDLMSObject implements IGXDLMSBase {
      * Set value of given attribute.
      */
     @Override
-    public final void setValue(final GXDLMSSettings settings,
-            final ValueEventArgs e) {
+    public final void setValue(final GXDLMSSettings settings, final ValueEventArgs e) {
         if (e.getIndex() == 1) {
             setLogicalName(GXCommon.toLogicalName(e.getValue()));
         } else if (e.getIndex() == 2) {
@@ -723,21 +703,17 @@ public class GXDLMSMBusClient extends GXDLMSObject implements IGXDLMSBase {
         } else if (e.getIndex() == 3) {
             captureDefinition.clear();
             if (e.getValue() != null) {
-                boolean useUtc;
-                if (e.getSettings() != null) {
-                    useUtc = e.getSettings().getUseUtc2NormalTime();
-                } else {
-                    useUtc = false;
-                }
                 for (Object it : (List<?>) e.getValue()) {
-                    captureDefinition.add(new GXSimpleEntry<String, String>(
-                            GXDLMSClient.changeType(
-                                    (byte[]) ((List<?>) it).get(0),
-                                    DataType.OCTET_STRING, useUtc).toString(),
-                            GXDLMSClient
-                                    .changeType((byte[]) ((List<?>) it).get(1),
-                                            DataType.OCTET_STRING, useUtc)
-                                    .toString()));
+                    captureDefinition
+                            .add(new GXSimpleEntry<String, String>(
+                                    GXDLMSClient
+                                            .changeType((byte[]) ((List<?>) it).get(0),
+                                                    DataType.OCTET_STRING, e.getSettings())
+                                            .toString(),
+                                    GXDLMSClient
+                                            .changeType((byte[]) ((List<?>) it).get(1),
+                                                    DataType.OCTET_STRING, e.getSettings())
+                                            .toString()));
                 }
             }
         } else if (e.getIndex() == 4) {
@@ -762,8 +738,8 @@ public class GXDLMSMBusClient extends GXDLMSObject implements IGXDLMSBase {
             if (e.getIndex() == 13) {
                 configuration = ((Number) e.getValue()).intValue();
             } else if (e.getIndex() == 14) {
-                encryptionKeyStatus = MBusEncryptionKeyStatus
-                        .values()[((Number) e.getValue()).intValue()];
+                encryptionKeyStatus =
+                        MBusEncryptionKeyStatus.values()[((Number) e.getValue()).intValue()];
             } else {
                 e.setError(ErrorCode.READ_WRITE_DENIED);
             }
@@ -774,8 +750,7 @@ public class GXDLMSMBusClient extends GXDLMSObject implements IGXDLMSBase {
 
     @Override
     public final void load(final GXXmlReader reader) throws XMLStreamException {
-        mBusPortReference =
-                reader.readElementContentAsString("MBusPortReference");
+        mBusPortReference = reader.readElementContentAsString("MBusPortReference");
         captureDefinition.clear();
         if (reader.isStartElement("CaptureDefinition", true)) {
             while (reader.isStartElement("Item", true)) {
@@ -787,8 +762,7 @@ public class GXDLMSMBusClient extends GXDLMSObject implements IGXDLMSBase {
         }
         capturePeriod = reader.readElementContentAsInt("CapturePeriod");
         primaryAddress = reader.readElementContentAsInt("PrimaryAddress");
-        identificationNumber =
-                reader.readElementContentAsInt("IdentificationNumber");
+        identificationNumber = reader.readElementContentAsInt("IdentificationNumber");
         manufacturerID = reader.readElementContentAsInt("ManufacturerID");
         dataHeaderVersion = reader.readElementContentAsInt("DataHeaderVersion");
         deviceType = reader.readElementContentAsInt("DeviceType");
@@ -827,8 +801,7 @@ public class GXDLMSMBusClient extends GXDLMSObject implements IGXDLMSBase {
         writer.writeElementString("Alarm", alarm);
         if (getVersion() > 0) {
             writer.writeElementString("Configuration", configuration);
-            writer.writeElementString("EncryptionKeyStatus",
-                    encryptionKeyStatus.ordinal());
+            writer.writeElementString("EncryptionKeyStatus", encryptionKeyStatus.ordinal());
         }
     }
 
@@ -840,22 +813,19 @@ public class GXDLMSMBusClient extends GXDLMSObject implements IGXDLMSBase {
     @Override
     public String[] getNames() {
         if (version == 0) {
-            return new String[] { "Logical Name", "MBus Port Reference",
-                    "Capture Definition", "Capture Period", "Primary Address",
-                    "Identification Number", "Manufacturer ID", "Version",
-                    "Device Type", "Access Number", "Status", "Alarm" };
+            return new String[] { "Logical Name", "MBus Port Reference", "Capture Definition",
+                    "Capture Period", "Primary Address", "Identification Number", "Manufacturer ID",
+                    "Version", "Device Type", "Access Number", "Status", "Alarm" };
         }
-        return new String[] { "Logical Name", "MBus Port Reference",
-                "Capture Definition", "Capture Period", "Primary Address",
-                "Identification Number", "Manufacturer ID", "Version",
-                "Device Type", "Access Number", "Status", "Alarm",
-                "Configuration", "Encryption Key Status" };
+        return new String[] { "Logical Name", "MBus Port Reference", "Capture Definition",
+                "Capture Period", "Primary Address", "Identification Number", "Manufacturer ID",
+                "Version", "Device Type", "Access Number", "Status", "Alarm", "Configuration",
+                "Encryption Key Status" };
     }
 
     @Override
     public String[] getMethodNames() {
-        return new String[] { "Slave install", "Slave deinstall", "Capture",
-                "Reset alarm", "Synchronize clock", "Data send",
-                "Set encryption key", "Transfer key" };
+        return new String[] { "Slave install", "Slave deinstall", "Capture", "Reset alarm",
+                "Synchronize clock", "Data send", "Set encryption key", "Transfer key" };
     }
 }

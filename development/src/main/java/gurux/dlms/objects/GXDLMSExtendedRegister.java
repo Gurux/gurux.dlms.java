@@ -125,13 +125,11 @@ public class GXDLMSExtendedRegister extends GXDLMSRegister {
         String str = "Scaler: " + formatter.format(getScaler());
         str += " Unit: ";
         str += getUnit().toString();
-        return new Object[] { getLogicalName(), getValue(), str, getStatus(),
-                getCaptureTime() };
+        return new Object[] { getLogicalName(), getValue(), str, getStatus(), getCaptureTime() };
     }
 
     @Override
-    public final byte[] invoke(final GXDLMSSettings settings,
-            final ValueEventArgs e) {
+    public final byte[] invoke(final GXDLMSSettings settings, final ValueEventArgs e) {
         // Resets the value to the default value.
         // The default value is an instance specific constant.
         if (e.getIndex() == 1) {
@@ -149,11 +147,9 @@ public class GXDLMSExtendedRegister extends GXDLMSRegister {
      */
     @Override
     public final int[] getAttributeIndexToRead(final boolean all) {
-        java.util.ArrayList<Integer> attributes =
-                new java.util.ArrayList<Integer>();
+        java.util.ArrayList<Integer> attributes = new java.util.ArrayList<Integer>();
         // LN is static and read only once.
-        if (all || getLogicalName() == null
-                || getLogicalName().compareTo("") == 0) {
+        if (all || getLogicalName() == null || getLogicalName().compareTo("") == 0) {
             attributes.add(1);
         }
         // ScalerUnit
@@ -200,16 +196,14 @@ public class GXDLMSExtendedRegister extends GXDLMSRegister {
         if (index == 5) {
             return DataType.OCTET_STRING;
         }
-        throw new IllegalArgumentException(
-                "getDataType failed. Invalid attribute index.");
+        throw new IllegalArgumentException("getDataType failed. Invalid attribute index.");
     }
 
     /*
      * Returns value of given attribute.
      */
     @Override
-    public final Object getValue(final GXDLMSSettings settings,
-            final ValueEventArgs e) {
+    public final Object getValue(final GXDLMSSettings settings, final ValueEventArgs e) {
         if (e.getIndex() == 4) {
             return getStatus();
         }
@@ -223,8 +217,7 @@ public class GXDLMSExtendedRegister extends GXDLMSRegister {
      * Set value of given attribute.
      */
     @Override
-    public final void setValue(final GXDLMSSettings settings,
-            final ValueEventArgs e) {
+    public final void setValue(final GXDLMSSettings settings, final ValueEventArgs e) {
         if (e.getIndex() == 4) {
             setStatus(e.getValue());
         } else if (e.getIndex() == 5) {
@@ -233,14 +226,8 @@ public class GXDLMSExtendedRegister extends GXDLMSRegister {
             } else {
                 GXDateTime tmp;
                 if (e.getValue() instanceof byte[]) {
-                    boolean useUtc;
-                    if (e.getSettings() != null) {
-                        useUtc = e.getSettings().getUseUtc2NormalTime();
-                    } else {
-                        useUtc = false;
-                    }
-                    tmp = (GXDateTime) GXDLMSClient.changeType(
-                            (byte[]) e.getValue(), DataType.DATETIME, useUtc);
+                    tmp = (GXDateTime) GXDLMSClient.changeType((byte[]) e.getValue(),
+                            DataType.DATETIME, e.getSettings());
                 } else {
                     tmp = (GXDateTime) e.getValue();
                 }
@@ -264,10 +251,8 @@ public class GXDLMSExtendedRegister extends GXDLMSRegister {
     public final void save(final GXXmlWriter writer) throws XMLStreamException {
         writer.writeElementString("Unit", getUnit().getValue());
         writer.writeElementString("Scaler", getScaler(), 1);
-        writer.writeElementObject("Value", getValue(), getDataType(2),
-                getUIDataType(2));
-        writer.writeElementObject("Status", status, getDataType(4),
-                getUIDataType(4));
+        writer.writeElementObject("Value", getValue(), getDataType(2), getUIDataType(2));
+        writer.writeElementObject("Status", status, getDataType(4), getUIDataType(4));
         writer.writeElementString("CaptureTime", captureTime);
     }
 
