@@ -61,6 +61,7 @@ import gurux.dlms.ecdsa.GXEcdsa;
 import gurux.dlms.enums.AccessMode3;
 import gurux.dlms.enums.Command;
 import gurux.dlms.enums.Conformance;
+import gurux.dlms.enums.CryptoKeyType;
 import gurux.dlms.enums.DataType;
 import gurux.dlms.enums.ErrorCode;
 import gurux.dlms.enums.ExceptionServiceError;
@@ -752,21 +753,6 @@ abstract class GXDLMS {
             SignatureException {
         boolean ciphering = p.getCommand() != Command.AARQ && p.getCommand() != Command.AARE
                 && (p.getSettings().isCiphered(true) || p.cipheredCommand != Command.NONE);
-        if (!p.getSettings().getOverwriteAttributeAccessRights() && ciphering & p.accessMode != 0) {
-            if (p.getSettings().isServer()) {
-                if ((p.accessMode & (AccessMode3.AUTHENTICATED_RESPONSE.getValue()
-                        | AccessMode3.ENCRYPTED_RESPONSE.getValue()
-                        | AccessMode3.DIGITALLY_SIGNED_RESPONSE.getValue())) == 0) {
-                    ciphering = false;
-                }
-            } else {
-                if ((p.accessMode & (AccessMode3.AUTHENTICATED_REQUEST.getValue()
-                        | AccessMode3.ENCRYPTED_REQUEST.getValue()
-                        | AccessMode3.DIGITALLY_SIGNED_REQUEST.getValue())) == 0) {
-                    ciphering = false;
-                }
-            }
-        }
         int len = 0;
         if (p.getCommand() == Command.AARQ) {
             if (p.getSettings().getGateway() != null
@@ -1081,16 +1067,12 @@ abstract class GXDLMS {
 
     static private boolean shoudSign(GXDLMSLNParameters p) {
         boolean signing = p.getSettings().getCipher().getSigning() == Signing.GENERAL_SIGNING;
-        // Association LN V3 and signing is not needed.
-        if (!p.getSettings().getOverwriteAttributeAccessRights() && signing & p.accessMode != 0) {
+        if (!signing) {
+            // Association LN V3 and signing is not needed.
             if (p.getSettings().isServer()) {
-                if ((p.accessMode & AccessMode3.DIGITALLY_SIGNED_RESPONSE.ordinal()) == 0) {
-                    signing = false;
-                }
+                signing = (p.accessMode & AccessMode3.DIGITALLY_SIGNED_RESPONSE.ordinal()) != 0;
             } else {
-                if ((p.accessMode & AccessMode3.DIGITALLY_SIGNED_REQUEST.ordinal()) == 0) {
-                    signing = false;
-                }
+                signing = (p.accessMode & AccessMode3.DIGITALLY_SIGNED_REQUEST.ordinal()) != 0;
             }
         }
         return signing;
@@ -1144,7 +1126,7 @@ abstract class GXDLMS {
                 key = cipher.getDedicatedKey();
             }
         }
-        AesGcmParameter s = new AesGcmParameter(cmd, cipher.getSecurity(),
+        AesGcmParameter s = new AesGcmParameter(p.getSettings(), cmd, cipher.getSecurity(),
                 cipher.getSecuritySuite(), cipher.getInvocationCounter(), cipher.getSystemTitle(),
                 key, getAuthenticationKey(p.getSettings()));
         s.setIgnoreSystemTitle(p.getSettings().getStandard() == Standard.ITALY);
@@ -1233,8 +1215,12 @@ abstract class GXDLMS {
         PublicKey pub = null;
         if (!sign) {
             // If external Hardware Security Module is used.
-            byte[] ret = p.getSettings().crypt(CertificateType.KEY_AGREEMENT, data, true);
+            byte[] ret = GXCommon.crypt(p.getSettings(), CertificateType.KEY_AGREEMENT, data, true,
+                    CryptoKeyType.ECDSA, 0, c.getSecurity(), c.getSecuritySuite(),
+                    c.getInvocationCounter());
             if (ret != null) {
+                p.getSettings().getCipher().setInvocationCounter(
+                        1 + p.getSettings().getCipher().getInvocationCounter());
                 return ret;
             }
             if (c.getKeyAgreementKeyPair() != null) {
@@ -1531,7 +1517,23 @@ abstract class GXDLMS {
                 key = cipher.getDedicatedKey();
             }
         }
-        AesGcmParameter s = new AesGcmParameter(cmd, cipher.getSecurity(),
+        // If external Hardware Security Module is used.
+        CryptoKeyType keyType;
+        switch (cipher.getSecurity()) {
+        case AUTHENTICATION:
+            keyType = CryptoKeyType.AUTHENTICATION;
+            break;
+        case ENCRYPTION:
+            keyType = CryptoKeyType.BLOCK_CIPHER;
+            break;
+        case AUTHENTICATION_ENCRYPTION:
+            keyType = CryptoKeyType.forValue(CryptoKeyType.AUTHENTICATION.getValue()
+                    | CryptoKeyType.BLOCK_CIPHER.getValue());
+            break;
+        default:
+            throw new IllegalArgumentException("Security");
+        }
+        AesGcmParameter s = new AesGcmParameter(p.getSettings(), cmd, cipher.getSecurity(),
                 cipher.getSecuritySuite(), cipher.getInvocationCounter(), cipher.getSystemTitle(),
                 key, getAuthenticationKey(p.getSettings()));
         byte[] tmp = GXCiphering.encrypt(s, data);
@@ -1764,7 +1766,7 @@ abstract class GXDLMS {
         // If Ciphering is used.
         if (ciphering && p.getCommand() != Command.AARQ && p.getCommand() != Command.AARE) {
             GXICipher cipher = p.getSettings().getCipher();
-            AesGcmParameter s = new AesGcmParameter(getGloMessage(p.getCommand()),
+            AesGcmParameter s = new AesGcmParameter(p.getSettings(), getGloMessage(p.getCommand()),
                     cipher.getSecurity(), cipher.getSecuritySuite(), cipher.getInvocationCounter(),
                     cipher.getSystemTitle(), getBlockCipherKey(p.getSettings()),
                     getAuthenticationKey(p.getSettings()));
@@ -2592,6 +2594,210 @@ abstract class GXDLMS {
         return isData;
     }
 
+    public static boolean checkSMSAddress(final GXDLMSSettings settings, final GXByteBuffer buff,
+            final GXReplyData data, final GXReplyData notify) {
+        boolean ret = true;
+        int value;
+        if (settings.isServer()) {
+            value = buff.getUInt8();
+            data.setSourceAddress(value);
+            // Check that client addresses match.
+            if (data.getXml() == null && settings.getClientAddress() != 0
+                    && settings.getClientAddress() != value) {
+                throw new RuntimeException(
+                        "Source addresses do not match. It is " + String.valueOf(value)
+                                + ". It should be " + String.valueOf(settings.getClientAddress()));
+            }
+            settings.setClientAddress(value);
+            value = buff.getUInt8();
+            data.setTargetAddress(value);
+            // Check that server addresses match.
+            if (data.getXml() == null && settings.getServerAddress() != 0
+                    && settings.getServerAddress() != value) {
+                throw new RuntimeException("Destination addresses do not match. It is "
+                        + String.valueOf(value) + ". It should be "
+                        + String.valueOf(settings.getServerAddress()) + ".");
+            }
+            settings.setServerAddress(value);
+        } else {
+            value = buff.getUInt8();
+            data.setTargetAddress(value);
+            // Check that server addresses match.
+            if (data.getXml() == null && settings.getServerAddress() != 0
+                    && settings.getServerAddress() != value) {
+                if (notify == null) {
+                    throw new RuntimeException("Source addresses do not match. It is "
+                            + String.valueOf(value) + ". It should be "
+                            + String.valueOf(settings.getServerAddress()) + ".");
+                }
+                notify.setSourceAddress(value);
+                ret = false;
+            } else {
+                settings.setServerAddress(value);
+            }
+            value = buff.getUInt8();
+            data.setSourceAddress(value);
+            // Check that client addresses match.
+            if (data.getXml() == null && settings.getClientAddress() != 0
+                    && settings.getClientAddress() != value) {
+                if (notify == null) {
+                    throw new RuntimeException("Destination addresses do not match. It is "
+                            + (new Integer(value)).toString() + ". It should be "
+                            + settings.getClientAddress() + ".");
+                }
+                ret = false;
+                notify.setTargetAddress(value);
+            } else {
+                settings.setClientAddress(value);
+            }
+        }
+        return ret;
+    }
+
+    /**
+     * Get data from SMS frame.
+     * 
+     * @param settings
+     *            DLMS settings.
+     * @param buff
+     *            Received data.
+     * @param data
+     *            Reply information.
+     * @param notify
+     *            Notify information.
+     */
+    private static boolean getSmsData(final GXDLMSSettings settings, final GXByteBuffer buff,
+            GXReplyData data, final GXReplyData notify) {
+        // If whole frame is not received yet.
+        if (buff.size() - buff.position() < 3) {
+            data.setComplete(false);
+            return true;
+        }
+        boolean isData = true;
+        int pos = buff.position();
+        data.setComplete(false);
+        if (notify != null) {
+            notify.setComplete(false);
+            notify.setComplete(false);
+        }
+        // Check SMS addresses.
+        if (!checkSMSAddress(settings, buff, data, notify)) {
+            data = notify;
+            isData = false;
+        }
+        // Get length.
+        data.setComplete(buff.available() != 0);
+        if (!data.isComplete()) {
+            buff.position(pos);
+        } else {
+            data.setPacketLength(buff.size());
+        }
+        return isData;
+    }
+
+    /**
+     * Validate M-Bus checksum
+     */
+    private static boolean validateCheckSum(final GXByteBuffer bb, final int count) {
+        byte value = 0;
+        for (int pos = 0; pos != count; ++pos) {
+            value += bb.getUInt8(bb.position() + pos);
+        }
+        return value == bb.getUInt8(bb.position() + count);
+    }
+
+    /**
+     * Get data from wired M-Bus frame.
+     * 
+     * @param settings
+     *            DLMS settings.
+     * @param buff
+     *            Received data.
+     * @param data
+     *            Reply information.
+     */
+    private static void getWiredMBusData(final GXDLMSSettings settings, final GXByteBuffer buff,
+            final GXReplyData data) {
+        int packetStartID = buff.position();
+        if (buff.getUInt8() != 0x68 || buff.available() < 5) {
+            data.setComplete(false);
+            buff.position(buff.position() - 1);
+        } else {
+            // L-field.
+            int len = buff.getUInt8();
+            // L-field.
+            if (buff.getUInt8() != len || buff.available() < 3 + len || buff.getUInt8() != 0x68) {
+                data.setComplete(false);
+                buff.position(packetStartID);
+            } else {
+                boolean crc = validateCheckSum(buff, len);
+                if (!crc && data.getXml() == null) {
+                    data.setComplete(false);
+                    buff.position(packetStartID);
+                } else {
+                    if (!crc) {
+                        data.getXml().appendComment("Invalid checksum.");
+                    }
+                    // Check EOP.
+                    if (buff.getUInt8(buff.position() + len + 1) != 0x16) {
+                        data.setComplete(false);
+                        buff.position(packetStartID);
+                        return;
+                    }
+                    data.setPacketLength(buff.position() + len);
+                    data.setComplete(true);
+                    int index = data.getData().position();
+                    // Control field (C-Field)
+                    short tmp = buff.getUInt8();
+                    MBusCommand cmd = MBusCommand.forValue(tmp & 0xF);
+                    // Address (A-field)
+                    short id = buff.getUInt8();
+                    // The Control Information Field (CI-field)
+                    short ci = buff.getUInt8();
+                    if (ci == 0x0) {
+                        data.getMoreData().add(RequestTypes.FRAME);
+                    } else if ((ci >>> 4) == (ci & 0xf)) {
+                        // If this is the last telegram.
+                        data.getMoreData().remove(RequestTypes.FRAME);
+                    }
+                    // If M-Bus data header is present
+                    if (ci != 0) {
+
+                    }
+                    if ((tmp & 0x40) != 0) {
+                        // Message from primary(initiating) station
+                        // Destination Transport Service Access Point
+                        settings.setClientAddress(buff.getUInt8());
+                        // Source Transport Service Access Point
+                        settings.setServerAddress(buff.getUInt8());
+                    } else {
+                        // Message from secondary (responding) station.
+                        // Source Transport Service Access Point
+                        settings.setServerAddress(buff.getUInt8());
+                        // Destination Transport Service Access Point
+                        settings.setClientAddress(buff.getUInt8());
+                    }
+                    if (data.getXml() != null && data.getXml().isComments()) {
+                        data.getXml().appendComment("Command: " + cmd);
+                        data.getXml().appendComment("A-Field: " + id);
+                        data.getXml().appendComment("CI-Field: " + ci);
+                        if ((tmp & 0x40) != 0) {
+                            data.getXml().appendComment(
+                                    "Primary station: " + settings.getServerAddress());
+                            data.getXml().appendComment(
+                                    "Secondary station: " + settings.getClientAddress());
+                        } else {
+                            data.getXml().appendComment(
+                                    "Primary station: " + settings.getClientAddress());
+                            data.getXml().appendComment(
+                                    "Secondary station: " + settings.getServerAddress());
+                        }
+                    }
+                }
+            }
+        }
+    }
+
     /**
      * Get data from Wireless M-Bus frame.
      * 
@@ -2602,7 +2808,7 @@ abstract class GXDLMS {
      * @param data
      *            Reply information.
      */
-    static void getMBusData(final GXDLMSSettings settings, final GXByteBuffer buff,
+    static void getWirelessMBusData(final GXDLMSSettings settings, final GXByteBuffer buff,
             final GXReplyData data) {
         // L-field.
         int len = buff.getUInt8();
@@ -4552,7 +4758,7 @@ abstract class GXDLMS {
             }
             break;
         case WIRELESS_MBUS:
-            getMBusData(settings, reply, target);
+            getWirelessMBusData(settings, reply, target);
             break;
         case PDU:
             target.setPacketLength(reply.size());

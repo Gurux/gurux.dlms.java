@@ -61,6 +61,7 @@ import javax.crypto.spec.IvParameterSpec;
 import javax.crypto.spec.SecretKeySpec;
 
 import gurux.dlms.GXByteBuffer;
+import gurux.dlms.GXCryptoKeyParameter;
 import gurux.dlms.GXDLMSExceptionResponse;
 import gurux.dlms.GXDLMSSettings;
 import gurux.dlms.GXDLMSTranslator;
@@ -71,6 +72,7 @@ import gurux.dlms.asn.GXAsn1Integer;
 import gurux.dlms.asn.GXAsn1Sequence;
 import gurux.dlms.enums.Authentication;
 import gurux.dlms.enums.Command;
+import gurux.dlms.enums.CryptoKeyType;
 import gurux.dlms.enums.ExceptionServiceError;
 import gurux.dlms.enums.ExceptionStateError;
 import gurux.dlms.enums.KeyAgreementScheme;
@@ -288,7 +290,7 @@ public final class GXSecure {
                 break;
             case HIGH_GMAC:
                 // SC is always Security.Authentication.
-                AesGcmParameter p = new AesGcmParameter(0, Security.AUTHENTICATION,
+                AesGcmParameter p = new AesGcmParameter(settings, 0, Security.AUTHENTICATION,
                         cipher.getSecuritySuite(), ic, secret, cipher.getBlockCipherKey(),
                         cipher.getAuthenticationKey());
                 p.setType(CountType.TAG);
@@ -566,6 +568,22 @@ public final class GXSecure {
             LOGGER.log(Level.FINEST, "Block cipher key key: {0}",
                     GXCommon.toHex(p.getBlockCipherKey()));
         }
+        // If external Hardware Security Module is used.
+        CryptoKeyType keyType;
+        switch (p.getSecurity()) {
+        case AUTHENTICATION:
+            keyType = CryptoKeyType.AUTHENTICATION;
+            break;
+        case ENCRYPTION:
+            keyType = CryptoKeyType.BLOCK_CIPHER;
+            break;
+        case AUTHENTICATION_ENCRYPTION:
+            keyType = CryptoKeyType.forValue(CryptoKeyType.AUTHENTICATION.getValue()
+                    | CryptoKeyType.BLOCK_CIPHER.getValue());
+            break;
+        default:
+            throw new IllegalArgumentException("Security");
+        }
 
         GXByteBuffer bb = new GXByteBuffer(10 + data.length);
         if (encrypt) {
@@ -582,11 +600,21 @@ public final class GXSecure {
             } else if (p.getSecurity() == Security.ENCRYPTION) {
                 bb.set(encrypt(c, data));
             } else if (p.getSecurity() == Security.AUTHENTICATION_ENCRYPTION) {
-                GXByteBuffer data2 = new GXByteBuffer();
-                data2.setUInt8(p.getSecurity().getValue() | p.getSecuritySuite().getValue());
-                data2.set(p.getAuthenticationKey());
-                c.updateAAD(data2.array());
-                bb.set(c.doFinal(data));
+                byte[] crypted = null;
+                if (p.getSettings() != null) {
+                    crypted = GXCommon.crypt(p.getSettings(), CertificateType.DIGITAL_SIGNATURE,
+                            data, true, keyType, Command.GLO_INITIATE_REQUEST, p.getSecurity(),
+                            p.getSecuritySuite(), p.getInvocationCounter());
+                }
+                if (crypted != null) {
+                    bb.set(crypted);
+                } else {
+                    GXByteBuffer data2 = new GXByteBuffer();
+                    data2.setUInt8(p.getSecurity().getValue() | p.getSecuritySuite().getValue());
+                    data2.set(p.getAuthenticationKey());
+                    c.updateAAD(data2.array());
+                    bb.set(c.doFinal(data));
+                }
             }
             if (p.getType() == CountType.PACKET) {
                 GXByteBuffer bb2 = new GXByteBuffer(5 + bb.size());
@@ -623,11 +651,20 @@ public final class GXSecure {
             }
             return data2.array();
         }
-        GXByteBuffer data2 = new GXByteBuffer();
-        data2.setUInt8(p.getSecurity().getValue() | p.getSecuritySuite().getValue());
-        data2.set(p.getAuthenticationKey());
-        c.updateAAD(data2.array());
         try {
+            byte[] tmp = null;
+            if (p.getSettings() != null) {
+                tmp = GXCommon.crypt(p.getSettings(), CertificateType.DIGITAL_SIGNATURE, data,
+                        false, keyType, Command.GLO_INITIATE_RESPONSE, p.getSecurity(),
+                        p.getSecuritySuite(), p.getInvocationCounter());
+            }
+            if (tmp != null) {
+                return tmp;
+            }
+            GXByteBuffer data2 = new GXByteBuffer();
+            data2.setUInt8(p.getSecurity().getValue() | p.getSecuritySuite().getValue());
+            data2.set(p.getAuthenticationKey());
+            c.updateAAD(data2.array());
             return c.doFinal(data);
         } catch (Exception ex) {
             if (p.getXml() == null) {
@@ -970,6 +1007,39 @@ public final class GXSecure {
                 }
             }
             p.setInvocationCounter(invocationCounter);
+            if (p.getAuthenticationKey() == null || p.getBlockCipherKey() == null) {
+                if (p.getSettings().getCryptoNotifier() == null) {
+                    throw new Exception("Failed to get the block cipher key.");
+                }
+                GXCryptoKeyParameter args = new GXCryptoKeyParameter();
+                args.setInvocationCounter(invocationCounter);
+                args.setSystemTitle(p.getSystemTitle());
+                if (p.getBlockCipherKey() == null) {
+                    args.setKeyType(CryptoKeyType.forValue(
+                            args.getKeyType().getValue() | CryptoKeyType.BLOCK_CIPHER.getValue()));
+                }
+                if (p.getAuthenticationKey() == null) {
+                    args.setKeyType(CryptoKeyType.forValue(args.getKeyType().getValue()
+                            | CryptoKeyType.AUTHENTICATION.getValue()));
+                }
+                p.getSettings().getCryptoNotifier().onKey(p.getSettings().getCryptoNotifier(),
+                        args);
+                if (p.getBlockCipherKey() == null) {
+                    if (args.getBlockCipherKey() == null || (args.getBlockCipherKey().length != 16
+                            && args.getBlockCipherKey().length != 32)) {
+                        throw new Exception("Invalid Block cipher key.");
+                    }
+                    p.setBlockCipherKey(args.getBlockCipherKey());
+                }
+                if (p.getAuthenticationKey() == null) {
+                    if (args.getAuthenticationKey() == null
+                            || (args.getAuthenticationKey().length != 16
+                                    && args.getAuthenticationKey().length != 32)) {
+                        throw new Exception("Invalid authentication key.");
+                    }
+                    p.setAuthenticationKey(args.getAuthenticationKey());
+                }
+            }
             LOGGER.log(Level.FINEST, "Decrypt settings {0}", p.toString());
             LOGGER.log(Level.FINEST, "Encrypted {0}",
                     GXCommon.toHex(data.getData(), false, data.position(), data.available()));

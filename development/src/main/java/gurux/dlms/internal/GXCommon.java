@@ -47,9 +47,11 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.TimeZone;
 
+import gurux.dlms.ConnectionState;
 import gurux.dlms.GXArray;
 import gurux.dlms.GXBitString;
 import gurux.dlms.GXByteBuffer;
+import gurux.dlms.GXCryptoKeyParameter;
 import gurux.dlms.GXDLMSClient;
 import gurux.dlms.GXDLMSConverter;
 import gurux.dlms.GXDLMSSettings;
@@ -65,10 +67,14 @@ import gurux.dlms.GXUInt8;
 import gurux.dlms.TranslatorOutputType;
 import gurux.dlms.enums.ClockStatus;
 import gurux.dlms.enums.Command;
+import gurux.dlms.enums.CryptoKeyType;
 import gurux.dlms.enums.DataType;
 import gurux.dlms.enums.DateTimeExtraInfo;
 import gurux.dlms.enums.DateTimeSkips;
+import gurux.dlms.enums.Security;
 import gurux.dlms.enums.Standard;
+import gurux.dlms.objects.enums.CertificateType;
+import gurux.dlms.objects.enums.SecuritySuite;
 
 /*
  * <b> This class is for internal use only and is subject to changes or removal
@@ -2802,6 +2808,58 @@ public final class GXCommon {
         default:
             return false;
         }
+    }
+
+    /**
+     * Encrypt or decrypt the data using external Hardware Security Module.
+     * 
+     * @param certificateType
+     *            Certificate type.
+     * @param Data
+     *            Data.
+     * @param encrypt
+     *            Is data encrypted or decrypted.
+     * @param keyType
+     *            Key type.
+     * @return
+     */
+    public static byte[] crypt(final GXDLMSSettings settings, final CertificateType certificateType,
+            final byte[] Data, final boolean encrypt, final CryptoKeyType keyType,
+            final int command, final Security security, final SecuritySuite securitySuite,
+            final long invocationCounter) {
+        if (settings.getCryptoNotifier() != null) {
+            GXCryptoKeyParameter args = new GXCryptoKeyParameter();
+            args.setEncrypt(encrypt);
+            args.setKeyType(keyType);
+            args.setCommand(command);
+            args.setSystemTitle(settings.getCipher().getSystemTitle());
+            args.setRecipientSystemTitle(settings.getSourceSystemTitle());
+            args.setCertificateType(certificateType);
+            args.setInvocationCounter(invocationCounter);
+            args.setSecurity(security);
+            args.setSecuritySuite(securitySuite);
+            args.setSecurityPolicy(settings.getCipher().getSecurityPolicy());
+            if (encrypt) {
+                args.setPlainText(Data);
+            } else {
+                args.setEncrypted(Data);
+            }
+            args.setAuthenticationKey(settings.getCipher().getAuthenticationKey());
+            if (settings.getCipher().getDedicatedKey() != null
+                    && settings.getCipher().getDedicatedKey().length == 16
+                    && (settings.getConnected() & ConnectionState.DLMS) != 0) {
+                args.setBlockCipherKey(settings.getCipher().getDedicatedKey());
+            } else {
+                args.setBlockCipherKey(settings.getCipher().getBlockCipherKey());
+            }
+            settings.getCryptoNotifier().onCrypto(settings.getCryptoNotifier(), args);
+            if (encrypt) {
+                return args.getEncrypted();
+            } else {
+                return args.getPlainText();
+            }
+        }
+        return null;
     }
 
 }

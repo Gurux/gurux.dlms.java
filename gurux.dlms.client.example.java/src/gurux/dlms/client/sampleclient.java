@@ -153,6 +153,7 @@ public class sampleclient {
             }
         } catch (Exception ex) {
             System.out.println(ex.getMessage());
+            ex.printStackTrace();
             System.exit(1);
         } finally {
             if (reader != null) {

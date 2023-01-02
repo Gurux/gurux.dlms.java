@@ -162,13 +162,13 @@ public class GXReplyData {
      * Client address of the notification message. Notification message sets
      * this.
      */
-    private int clientAddress;
+    private int targetAddress;
 
     /**
      * Server address of the notification message. Notification message sets
      * this.
      */
-    private int serverAddress;
+    private int sourceAddress;
 
     /**
      * Gateway information.
@@ -631,7 +631,7 @@ public class GXReplyData {
      *         sets this.
      */
     public final int getClientAddress() {
-        return clientAddress;
+        return targetAddress;
     }
 
     /**
@@ -640,7 +640,45 @@ public class GXReplyData {
      *            message sets this.
      */
     public final void setClientAddress(final int value) {
-        clientAddress = value;
+        targetAddress = value;
+    }
+
+    /**
+     * @return Client address of the notification message.<br>
+     *         Notification message sets this. This is also used with XML
+     *         parser.
+     */
+    public final int getTargetAddress() {
+        return targetAddress;
+    }
+
+    /**
+     * @param value
+     *            Client address of the notification message.<br>
+     *            Notification message sets this. This is also used with XML
+     *            parser.
+     */
+    public final void setTargetAddress(final int value) {
+        targetAddress = value;
+    }
+
+    /**
+     * @return Server address of the notification message.<br>
+     *         Notification message sets this. This is also used with XML
+     *         parser.
+     */
+    public final int getSourceAddress() {
+        return sourceAddress;
+    }
+
+    /**
+     * @param value
+     *            Server address of the notification message.<br>
+     *            Notification message sets this. This is also used with XML
+     *            parser.
+     */
+    public final void setSourceAddress(final int value) {
+        sourceAddress = value;
     }
 
     /**
@@ -648,7 +686,7 @@ public class GXReplyData {
      *         sets this.
      */
     public final int getServerAddress() {
-        return serverAddress;
+        return sourceAddress;
     }
 
     /**
@@ -657,7 +695,7 @@ public class GXReplyData {
      *            message sets this.
      */
     public final void setServerAddress(int value) {
-        serverAddress = value;
+        sourceAddress = value;
     }
 
     /**

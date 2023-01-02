@@ -427,7 +427,7 @@ public class GXCiphering implements GXICipher {
             throws InvalidKeyException, IllegalBlockSizeException, BadPaddingException,
             NoSuchAlgorithmException, NoSuchPaddingException, InvalidAlgorithmParameterException {
         AesGcmParameter p =
-                new AesGcmParameter(0x10, Security.AUTHENTICATION, SecuritySuite.SUITE_0,
+                new AesGcmParameter(null, 0x10, Security.AUTHENTICATION, SecuritySuite.SUITE_0,
                         invocationCounter, systemTitle, blockCipherKey, authenticationKey);
         p.setType(CountType.TAG);
         GXByteBuffer bb = new GXByteBuffer();

@@ -607,8 +607,18 @@ public class GXDLMSTranslator {
             if (value.available() > 1 && value.getUInt16(pos) == 1) {
                 return InterfaceType.WRAPPER;
             }
-            if (GXDLMS.isMBusData(value)) {
+
+            if (value.getUInt8(pos) == 0x2) {
+                return InterfaceType.PLC;
+            }
+            if (value.getUInt8(pos) == 0x68) {
+                return InterfaceType.WIRED_MBUS;
+            }
+            if (GXDLMS.isWirelessMBusData(value)) {
                 return InterfaceType.WIRELESS_MBUS;
+            }
+            if (GXDLMS.getPlcSfskFrameSize(value) != 0) {
+                return InterfaceType.PLC_HDLC;
             }
         }
         throw new IllegalArgumentException("Invalid DLMS framing.");

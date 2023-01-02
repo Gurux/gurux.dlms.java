@@ -306,7 +306,7 @@ final class GXAPDU {
             } else {
                 GXByteBuffer tmp = new GXByteBuffer();
                 getInitiateRequest(settings, tmp, false);
-                AesGcmParameter p = new AesGcmParameter(Command.GLO_INITIATE_REQUEST,
+                AesGcmParameter p = new AesGcmParameter(settings, Command.GLO_INITIATE_REQUEST,
                         cipher.getSecurity(), cipher.getSecuritySuite(),
                         cipher.getInvocationCounter(), cipher.getSystemTitle(),
                         cipher.getBlockCipherKey(), cipher.getAuthenticationKey());
@@ -1412,7 +1412,7 @@ final class GXAPDU {
             data.setUInt16(0xFA00);
         }
         if (settings.isCiphered(false)) {
-            AesGcmParameter p = new AesGcmParameter(Command.GLO_INITIATE_RESPONSE,
+            AesGcmParameter p = new AesGcmParameter(settings, Command.GLO_INITIATE_RESPONSE,
                     cipher.getSecurity(), cipher.getSecuritySuite(), cipher.getInvocationCounter(),
                     cipher.getSystemTitle(), cipher.getBlockCipherKey(),
                     cipher.getAuthenticationKey());

@@ -36,7 +36,16 @@ package gurux.dlms.client;
 import java.io.IOException;
 import java.nio.file.Path;
 import java.nio.file.Paths;
+import java.security.InvalidAlgorithmParameterException;
+import java.security.InvalidKeyException;
+import java.security.NoSuchAlgorithmException;
 
+import javax.crypto.Cipher;
+import javax.crypto.NoSuchPaddingException;
+import javax.crypto.spec.GCMParameterSpec;
+import javax.crypto.spec.SecretKeySpec;
+
+import gurux.dlms.GXByteBuffer;
 import gurux.dlms.GXCryptoKeyParameter;
 import gurux.dlms.GXDLMSTranslator;
 import gurux.dlms.IGXCryptoNotifier;
@@ -46,8 +55,7 @@ import gurux.dlms.objects.enums.CertificateType;
 import gurux.dlms.objects.enums.SecuritySuite;
 import gurux.dlms.secure.GXDLMSSecureClient;
 
-public class GXDLMSSecureClient2 extends GXDLMSSecureClient
-        implements IGXCryptoNotifier {
+public class GXDLMSSecureClient2 extends GXDLMSSecureClient implements IGXCryptoNotifier {
 
     /**
      * Constructor.
@@ -73,9 +81,8 @@ public class GXDLMSSecureClient2 extends GXDLMSSecureClient
      * @return Path to the certificate file or folder if system title is not
      *         given.
      */
-    private static Path getPath(final SecuritySuite securitySuite,
-            final CertificateType type, final String path,
-            final byte[] systemTitle) {
+    private static Path getPath(final SecuritySuite securitySuite, final CertificateType type,
+            final String path, final byte[] systemTitle) {
         String pre;
         Path tmp;
         if (securitySuite == SecuritySuite.SUITE_2) {
@@ -96,8 +103,7 @@ public class GXDLMSSecureClient2 extends GXDLMSSecureClient
         default:
             throw new RuntimeException("Invalid type.");
         }
-        return Paths.get(tmp.toString(),
-                pre + GXDLMSTranslator.toHex(systemTitle, false) + ".pem");
+        return Paths.get(tmp.toString(), pre + GXDLMSTranslator.toHex(systemTitle, false) + ".pem");
     }
 
     @Override
@@ -115,15 +121,13 @@ public class GXDLMSSecureClient2 extends GXDLMSSecureClient
         try {
             if (args.getEncrypt()) {
                 // Find private key.
-                Path path = getPath(args.getSecuritySuite(),
-                        args.getCertificateType(), "Keys",
+                Path path = getPath(args.getSecuritySuite(), args.getCertificateType(), "Keys",
                         args.getSystemTitle());
                 args.setPrivateKey(GXPkcs8.load(path).getPrivateKey());
             } else {
                 // Find public key.
-                Path path = getPath(args.getSecuritySuite(),
-                        args.getCertificateType(), "Certificates",
-                        args.getSystemTitle());
+                Path path = getPath(args.getSecuritySuite(), args.getCertificateType(),
+                        "Certificates", args.getSystemTitle());
                 args.setPublicKey(GXx509Certificate.load(path).getPublicKey());
             }
         } catch (IOException e) {
@@ -131,9 +135,63 @@ public class GXDLMSSecureClient2 extends GXDLMSSecureClient
         }
     }
 
-    @Override
-    public void onCrypto(Object sender, GXCryptoKeyParameter args) {
+    private static Cipher getCipher(final GXCryptoKeyParameter p, final boolean encrypt)
+            throws NoSuchAlgorithmException, NoSuchPaddingException, InvalidKeyException,
+            InvalidAlgorithmParameterException {
+        GXByteBuffer iv = new GXByteBuffer();
+        if (encrypt) {
+            iv.set(p.getSystemTitle());
+        } else {
+            iv.set(p.getRecipientSystemTitle());
+        }
+        iv.setUInt32(p.getInvocationCounter());
+        SecretKeySpec eks = new SecretKeySpec(p.getBlockCipherKey(), "AES");
+        Cipher c = Cipher.getInstance("AES/GCM/NoPadding");
+        int mode;
+        if (encrypt) {
+            mode = Cipher.ENCRYPT_MODE;
+        } else {
+            mode = Cipher.DECRYPT_MODE;
+        }
+        c.init(mode, eks, new GCMParameterSpec(12 * 8, iv.array()));
+        return c;
+    }
 
+    /**
+     * External Hardware Security Module is used to encrypt the data.
+     */
+    @Override
+    public void onCrypto(final Object sender, final GXCryptoKeyParameter args) {
+        try {
+            // Cipher c = getCipher(args,
+            // args.getEncrypt() || args.getSecurity() !=
+            // Security.AUTHENTICATION_ENCRYPTION);
+            // if (args.getEncrypt()) {
+            // // Encrypt the data.
+            // if (args.getKeyType() == CryptoKeyType
+            // .forValue(CryptoKeyType.BLOCK_CIPHER.getValue()
+            // | CryptoKeyType.AUTHENTICATION.getValue())) {
+            // args.setEncrypted(c.doFinal(args.getPlainText()));
+            // }
+            // } else {
+            // // Decrypt the data.
+            // if (args.getKeyType() == CryptoKeyType
+            // .forValue(CryptoKeyType.BLOCK_CIPHER.getValue()
+            // | CryptoKeyType.AUTHENTICATION.getValue())) {
+            // // Encrypt with block cipher key and count authentication
+            // // key.
+            // GXByteBuffer data2 = new GXByteBuffer();
+            // data2.setUInt8(
+            // args.getSecurity().getValue() |
+            // args.getSecuritySuite().getValue());
+            // data2.set(args.getAuthenticationKey());
+            // c.updateAAD(data2.array());
+            // args.setPlainText(c.doFinal(args.getEncrypted()));
+            // }
+            // }
+        } catch (Exception ex) {
+            System.out.println(ex.getMessage());
+        }
     }
 
 }

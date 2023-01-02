@@ -31,41 +31,53 @@
 // This code is licensed under the GNU General Public License v2. 
 // Full text may be retrieved at http://www.gnu.org/licenses/gpl-2.0.txt
 //---------------------------------------------------------------------------
-
-package gurux.dlms;
+package gurux.dlms.enums;
 
 /**
- *
+ * Access describes access errors.
  */
-public interface IGXCryptoNotifier {
+public enum CryptoKeyType {
     /**
-     * Notifies Un-ciphered PDU.
-     * 
-     * @param sender
-     *            The source of the event.
-     * @param data
-     *            Un-ciphered PDU.
+     * ECDSA public or private key is asked.
      */
-    void onPduEventHandler(Object sender, byte[] data);
+    ECDSA(0),
+    /**
+     * Block cipher key is asked.
+     */
+    BLOCK_CIPHER(1),
+    /**
+     * Authentication key is asked.
+     */
+    AUTHENTICATION(2);
 
-    /**
-     * Called when the public or private key is needed and it's unknown.
-     * 
-     * @param sender
-     *            Sender
-     * @param args
-     *            Arguments
-     */
-    void onKey(Object sender, GXCryptoKeyParameter args);
+    private int value;
+    private static java.util.HashMap<Integer, CryptoKeyType> mappings;
 
-    /**
-     * Called to encrypt or decrypt the data using external Hardware Security
-     * Module.
-     * 
-     * @param sender
-     *            Sender
-     * @param args
-     *            Arguments
+    private static java.util.HashMap<Integer, CryptoKeyType> getMappings() {
+        synchronized (CryptoKeyType.class) {
+            if (mappings == null) {
+                mappings = new java.util.HashMap<Integer, CryptoKeyType>();
+            }
+        }
+        return mappings;
+    }
+
+    CryptoKeyType(final int mode) {
+        this.value = mode;
+        getMappings().put(mode, this);
+    }
+
+    /*
+     * Get integer value for enum.
      */
-    void onCrypto(Object sender, GXCryptoKeyParameter args);
-};
+    public final int getValue() {
+        return value;
+    }
+
+    /*
+     * Convert integer for enum value.
+     */
+    public static CryptoKeyType forValue(final int value) {
+        return getMappings().get(value);
+    }
+}

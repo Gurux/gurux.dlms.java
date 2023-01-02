@@ -138,10 +138,11 @@ public class AesGcmParameter {
      * @param forAuthenticationKey
      *            Authentication key.
      */
-    public AesGcmParameter(final int forTag, final Security forSecurity,
+    public AesGcmParameter(final GXDLMSSettings s, final int forTag, final Security forSecurity,
             final SecuritySuite forSecuritySuite, final long forInvocationCounter,
             final byte[] forSystemTitle, final byte[] forBlockCipherKey,
             final byte[] forAuthenticationKey) {
+        settings = s;
         tag = forTag;
         security = forSecurity;
         securitySuite = forSecuritySuite;

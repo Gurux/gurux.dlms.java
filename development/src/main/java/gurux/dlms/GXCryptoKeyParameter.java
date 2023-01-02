@@ -3,6 +3,8 @@ package gurux.dlms;
 import java.security.PrivateKey;
 import java.security.PublicKey;
 
+import gurux.dlms.enums.CryptoKeyType;
+import gurux.dlms.enums.Security;
 import gurux.dlms.objects.enums.CertificateType;
 import gurux.dlms.objects.enums.SecurityPolicy;
 import gurux.dlms.objects.enums.SecuritySuite;
@@ -11,6 +13,13 @@ import gurux.dlms.objects.enums.SecuritySuite;
  * Crypto key parameter is used to get public or private key.
  */
 public class GXCryptoKeyParameter {
+
+    private int command;
+    /**
+     * Crypto key type.
+     */
+    private CryptoKeyType keyType;
+
     /**
      * Is data encrypted or decrypted.
      */
@@ -25,6 +34,11 @@ public class GXCryptoKeyParameter {
      * Decrypted data.
      */
     private byte[] plainText;
+
+    /**
+     * Used security.
+     */
+    private Security security;
 
     /**
      * Used security suite.
@@ -289,5 +303,50 @@ public class GXCryptoKeyParameter {
      */
     public void setTransactionId(byte[] value) {
         transactionId = value;
+    }
+
+    /**
+     * @return Crypto key type.
+     */
+    public CryptoKeyType getKeyType() {
+        return keyType;
+    }
+
+    /**
+     * @param value
+     *            Crypto key type.
+     */
+    public void setKeyType(final CryptoKeyType value) {
+        keyType = value;
+    }
+
+    /**
+     * @return Command.
+     */
+    public int getCommand() {
+        return command;
+    }
+
+    /**
+     * @param value
+     *            Command.
+     */
+    public void setCommand(final int value) {
+        command = value;
+    }
+
+    /**
+     * @return Used security
+     */
+    public Security getSecurity() {
+        return security;
+    }
+
+    /**
+     * @param value
+     *            Used security
+     */
+    public void setSecurity(final Security value) {
+        security = value;
     }
 }

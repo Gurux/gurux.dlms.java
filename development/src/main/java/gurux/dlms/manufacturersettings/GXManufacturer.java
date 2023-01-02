@@ -34,7 +34,12 @@
 
 package gurux.dlms.manufacturersettings;
 
+import java.util.ArrayList;
+import java.util.List;
+
 import gurux.dlms.enums.Authentication;
+import gurux.dlms.enums.InterfaceType;
+import gurux.dlms.enums.Security;
 
 public class GXManufacturer {
     private InactivityMode inactivityMode = InactivityMode.KEEPALIVE;
@@ -51,6 +56,12 @@ public class GXManufacturer {
 
     private String webAddress;
     private String info;
+    private Security security = Security.NONE;
+    private byte[] systemTitle;
+    private byte[] serverSystemTitle;
+    private byte[] blockCipherKey;
+    private byte[] authenticationKey;
+    private List<InterfaceType> supporterdInterfaces;
 
     /**
      * Constructor.
@@ -62,6 +73,7 @@ public class GXManufacturer {
         setSettings(new java.util.ArrayList<GXAuthentication>());
         serverSettings = new java.util.ArrayList<GXServerAddress>();
         setKeepAliveInterval(40000);
+        supporterdInterfaces = new ArrayList<InterfaceType>();
     }
 
     /**
@@ -205,8 +217,7 @@ public class GXManufacturer {
      * @param value
      *            Initialize settings.
      */
-    public final void
-            setSettings(final java.util.ArrayList<GXAuthentication> value) {
+    public final void setSettings(final java.util.ArrayList<GXAuthentication> value) {
         settings = value;
     }
 
@@ -233,8 +244,7 @@ public class GXManufacturer {
      *            Authentication type.
      * @return Authentication settings.
      */
-    public final GXAuthentication
-            getAuthentication(final Authentication authentication) {
+    public final GXAuthentication getAuthentication(final Authentication authentication) {
         for (GXAuthentication it : getSettings()) {
             if (it.getType() == authentication) {
                 return it;
@@ -271,5 +281,87 @@ public class GXManufacturer {
      */
     public void setInfo(final String value) {
         info = value;
+    }
+
+    /**
+     * @return Used GMAC Security type.
+     */
+    public Security getSecurity() {
+        return security;
+    }
+
+    /**
+     * @param value
+     *            Used GMAC Security type.
+     */
+    public void setSecurity(final Security value) {
+        security = value;
+    }
+
+    /**
+     * @return System Title.
+     */
+    public byte[] getSystemTitle() {
+        return systemTitle;
+    }
+
+    /**
+     * @param value
+     *            System Title.
+     */
+    public void setSystemTitle(final byte[] value) {
+        systemTitle = value;
+    }
+
+    /**
+     * @return Server System Title.
+     */
+    public byte[] getServerSystemTitle() {
+        return serverSystemTitle;
+    }
+
+    /**
+     * @param value
+     *            Server System Title.
+     */
+    public void setServerSystemTitle(final byte[] value) {
+        this.serverSystemTitle = value;
+    }
+
+    /**
+     * @return GMAC block cipher key.
+     */
+    public byte[] getBlockCipherKey() {
+        return blockCipherKey;
+    }
+
+    /**
+     * @param value
+     *            GMAC block cipher key.
+     */
+    public void setBlockCipherKey(final byte[] value) {
+        this.blockCipherKey = value;
+    }
+
+    /**
+     * @return GMAC authentication key.
+     */
+    public byte[] getAuthenticationKey() {
+        return authenticationKey;
+    }
+
+    /**
+     * @param value
+     *            GMAC authentication key.
+     */
+    public void setAuthenticationKey(final byte[] value) {
+        this.authenticationKey = value;
+    }
+
+    /**
+     * @return Supported interface types.
+     */
+    public List<InterfaceType> getSupporterdInterfaces() {
+        return supporterdInterfaces;
     }
 }

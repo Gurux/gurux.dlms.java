@@ -178,6 +178,7 @@ public class GXDLMSSettings {
      * Server address.
      */
     private int serverAddress;
+
     /**
      * Server is using push client address when sending push messages. Client
      * address is used if PushAddress is zero.
@@ -1637,46 +1638,6 @@ public class GXDLMSSettings {
         } else {
             return args.getPublicKey();
         }
-    }
-
-    /**
-     * Encrypt or decrypt the data using external Hardware Security Module.
-     * 
-     * @param certificateType
-     * @param Data
-     * @param encrypt
-     * @return
-     */
-    byte[] crypt(final CertificateType certificateType, final byte[] Data, final boolean encrypt) {
-        if (cryptoNotifier != null) {
-            GXCryptoKeyParameter args = new GXCryptoKeyParameter();
-            args.setEncrypt(encrypt);
-            args.setSystemTitle(getCipher().getSystemTitle());
-            args.setRecipientSystemTitle(getSourceSystemTitle());
-            args.setCertificateType(certificateType);
-            args.setInvocationCounter(getCipher().getInvocationCounter());
-            args.setSecuritySuite(getCipher().getSecuritySuite());
-            args.setSecurityPolicy(getCipher().getSecurityPolicy());
-            if (encrypt) {
-                args.setPlainText(Data);
-            } else {
-                args.setEncrypted(Data);
-            }
-            args.setAuthenticationKey(getCipher().getAuthenticationKey());
-            if (getCipher().getDedicatedKey() != null && getCipher().getDedicatedKey().length == 16
-                    && (getConnected() & ConnectionState.DLMS) != 0) {
-                args.setBlockCipherKey(getCipher().getDedicatedKey());
-            } else {
-                args.setBlockCipherKey(getCipher().getBlockCipherKey());
-            }
-            cryptoNotifier.onCrypto(cryptoNotifier, args);
-            if (encrypt) {
-                return args.getEncrypted();
-            } else {
-                return args.getPlainText();
-            }
-        }
-        return null;
     }
 
     /**

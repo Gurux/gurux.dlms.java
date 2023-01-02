@@ -90,7 +90,11 @@ public enum InterfaceType {
     /**
      * EN 13757-2 wired (twisted pair based) M-Bus scheme is used.
      */
-    WIRED_MBUS;
+    WIRED_MBUS,
+    /**
+     * SMS short wrapper scheme is used.
+     */
+    SMS;
 
     /**
      * @return Get integer value for enumeration.
