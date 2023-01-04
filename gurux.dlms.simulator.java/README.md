@@ -23,7 +23,7 @@ You create simulator template running Gurux.DLMS.Simulator. In this example mete
 
 ```java
 
-Gurux.DLMS.Simulator.Net.exe -S COM8 -o simulator_template.xml -t Verbose
+java -jar target/gurux.dlms.simulator.java-0.0.1-SNAPSHOT.jar -S COM8 -o simulator_template.xml -t Verbose
 
 ```
 
@@ -31,7 +31,7 @@ This might take some time because all the values are read from the meter. After 
 
 ```java
 
-Gurux.DLMS.Simulator.Net.exe -p 1000 -x simulator_template.xml -t Verbose -N 10
+java -jar target/gurux.dlms.simulator.java-0.0.1-SNAPSHOT.jar -p 1000 -x simulator_template.xml -t Verbose -N 10
 
 ```
 If you want to that all the meters are using the same TCP/IP port you can use -X parameter.
@@ -39,7 +39,7 @@ You need to use serial number to read the meter if you are using the same TCP/IP
 
 ```java
 
-Gurux.DLMS.Simulator.Net.exe -p 1000 -x simulator_template.xml -t Verbose -N 10000 -X
+java -jar target/gurux.dlms.simulator.java-0.0.1-SNAPSHOT.jar -p 1000 -x simulator_template.xml -t Verbose -N 10000 -X
 
 ```
 
