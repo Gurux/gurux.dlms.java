@@ -1,4 +1,4 @@
-See An [Gurux](http://www.gurux.org/ "Gurux") for an overview.
+See An [Gurux](http://www.gurux.fi/ "Gurux") for an overview.
 
 Join the Gurux Community or follow [@Gurux](https://twitter.com/guruxorg "@Gurux") for project updates.
 
