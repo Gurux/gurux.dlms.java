@@ -49,6 +49,7 @@ import javax.xml.stream.XMLStreamException;
 import gurux.dlms.enums.ObjectType;
 import gurux.dlms.objects.GXDLMSObjectCollection;
 import gurux.dlms.objects.GXXmlWriterSettings;
+import gurux.mqtt.GXMqtt;
 import gurux.net.GXNet;
 import gurux.serial.GXSerial;
 
@@ -89,6 +90,8 @@ public class sampleclient {
                         "Connect using serial port connection " + settings.media.toString());
             } else if (settings.media instanceof GXNet) {
                 System.out.println("Connect using network connection " + settings.media.toString());
+            } else if (settings.media instanceof GXMqtt) {
+                System.out.println("Connect using MQTT connection " + settings.media.toString());
             } else {
                 throw new Exception("Unknown media type.");
             }

@@ -53,6 +53,7 @@ import gurux.dlms.objects.enums.SecuritySuite;
 import gurux.io.BaudRate;
 import gurux.io.Parity;
 import gurux.io.StopBits;
+import gurux.mqtt.GXMqtt;
 import gurux.net.GXNet;
 import gurux.serial.GXSerial;
 
@@ -83,7 +84,8 @@ public class Settings {
                 "GuruxDlmsSample -h [Meter IP Address] -p [Meter Port No] -c 16 -s 1 -r sn");
         System.out.println(" -h \t host name or IP address.");
         System.out.println(" -p \t port number or name (Example: 1000).");
-        System.out.println(" -S \t serial port.");
+        System.out.println(" -q \t MQTT topic.");
+        System.out.println(" -S [COM1:9600:8None1]\t serial port.");
         System.out.println(
                 " -a \t Authentication (None, Low, High, HighMd5, HighSha1, HighGMac, HighSha256).");
         System.out.println(" -P \t Password for authentication.");
@@ -136,13 +138,14 @@ public class Settings {
         System.out.println("GuruxDlmsSample -r sn -c 16 -s 1 -S COM1 -i");
         System.out.println("Read Indian device using serial port connection.");
         System.out.println("GuruxDlmsSample -S COM1 -c 16 -s 1 -a Low -P [password]");
-
+        System.out.println("Read MQTT device -h [Broker address] -q [Topic/meterId]");
     }
 
     static int getParameters(String[] args, Settings settings) throws IOException {
         List<GXCmdParameter> parameters = GXCommon.getParameters(args,
-                "h:p:c:s:r:i:It:a:pP:g:S:n:C:v:o:T:A:B:D:d:l:E:V:M:K:N:W:w:f:L:");
+                "h:p:c:s:r:i:It:a:pP:g:S:n:C:v:o:T:A:B:D:d:l:E:V:M:K:N:W:w:f:L:q:");
         GXNet net = null;
+        GXMqtt mqtt = null;
         // Has user give the custom serial port settings or are the default
         // values used in mode E.
         boolean modeEDefaultValues = true;
@@ -162,8 +165,13 @@ public class Settings {
                 if (settings.media == null) {
                     settings.media = new GXNet();
                 }
-                net = (GXNet) settings.media;
-                net.setHostName(it.getValue());
+                if (settings.media instanceof GXNet) {
+                    net = (GXNet) settings.media;
+                    net.setHostName(it.getValue());
+                } else if (settings.media instanceof GXMqtt) {
+                    mqtt = (GXMqtt) settings.media;
+                    mqtt.setServerAddress(it.getValue());
+                }
                 break;
             case 't':
                 // Trace.
@@ -186,8 +194,28 @@ public class Settings {
                 if (settings.media == null) {
                     settings.media = new GXNet();
                 }
-                net = (GXNet) settings.media;
-                net.setPort(Integer.parseInt(it.getValue()));
+                if (settings.media instanceof GXNet) {
+                    net = (GXNet) settings.media;
+                    net.setPort(Integer.parseInt(it.getValue()));
+                } else if (settings.media instanceof GXMqtt) {
+                    mqtt = (GXMqtt) settings.media;
+                    mqtt.setPort(Integer.parseInt(it.getValue()));
+                }
+                break;
+            case 'q':
+                mqtt = new GXMqtt();
+                mqtt.setTopic(it.getValue());
+                if (settings.media instanceof GXNet) {
+                    net = (GXNet) settings.media;
+                    mqtt.setServerAddress(net.getHostName());
+                    if (net.getPort() != 0) {
+                        mqtt.setPort(net.getPort());
+                    }
+                }
+                settings.media = mqtt;
+
+                // MIKKO
+                mqtt.properties(null);
                 break;
             case 'P':// Password
                 settings.client.setPassword(it.getValue().getBytes());

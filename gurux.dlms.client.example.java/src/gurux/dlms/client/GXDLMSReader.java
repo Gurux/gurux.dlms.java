@@ -1356,43 +1356,37 @@ public class GXDLMSReader {
      * no need to read all data from the meter.
      */
     void readAll(String outputFile) throws Exception {
-        try {
-            initializeConnection();
-
-            boolean read = false;
-            if (outputFile != null && new File(outputFile).exists()) {
-                try {
-                    GXDLMSObjectCollection list = GXDLMSObjectCollection.load(outputFile);
-                    dlms.getObjects().addAll(list);
-                    GXDLMSConverter c = new GXDLMSConverter(dlms.getStandard());
-                    c.updateOBISCodeInformation(dlms.getObjects());
-                    read = true;
-                } catch (Exception ex) {
-                    // It's OK if this fails.
-                    System.out.print(ex.getMessage());
-                }
+        initializeConnection();
+        boolean read = false;
+        if (outputFile != null && new File(outputFile).exists()) {
+            try {
+                GXDLMSObjectCollection list = GXDLMSObjectCollection.load(outputFile);
+                dlms.getObjects().addAll(list);
+                GXDLMSConverter c = new GXDLMSConverter(dlms.getStandard());
+                c.updateOBISCodeInformation(dlms.getObjects());
+                read = true;
+            } catch (Exception ex) {
+                // It's OK if this fails.
+                System.out.print(ex.getMessage());
             }
-            if (!read) {
-                getAssociationView();
-                // Read Scalers and units from the register objects.
-                readScalerAndUnits();
-                // Read Profile Generic columns.
-                getProfileGenericColumns();
-            }
-            // Read all attributes from all objects.
-            getReadOut();
-            // Read historical data.
-            getProfileGenerics();
-        } finally {
-            close();
         }
+        if (!read) {
+            getAssociationView();
+            // Read Scalers and units from the register objects.
+            readScalerAndUnits();
+            // Read Profile Generic columns.
+            getProfileGenericColumns();
+        }
+        // Read all attributes from all objects.
+        getReadOut();
+        // Read historical data.
+        getProfileGenerics();
         if (outputFile != null) {
             GXXmlWriterSettings s = new GXXmlWriterSettings();
             s.setIgnoreDefaultValues(false);
             s.setUseMeterTime(true);
             dlms.getObjects().save(outputFile, s);
         }
-
     }
 
     /*

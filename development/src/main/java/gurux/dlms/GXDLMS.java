@@ -1070,9 +1070,9 @@ abstract class GXDLMS {
         if (!signing) {
             // Association LN V3 and signing is not needed.
             if (p.getSettings().isServer()) {
-                signing = (p.accessMode & AccessMode3.DIGITALLY_SIGNED_RESPONSE.ordinal()) != 0;
+                signing = (p.accessMode & AccessMode3.DIGITALLY_SIGNED_RESPONSE.getValue()) != 0;
             } else {
-                signing = (p.accessMode & AccessMode3.DIGITALLY_SIGNED_REQUEST.ordinal()) != 0;
+                signing = (p.accessMode & AccessMode3.DIGITALLY_SIGNED_REQUEST.getValue()) != 0;
             }
         }
         return signing;

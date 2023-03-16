@@ -52,8 +52,13 @@
     <dependency>
       <groupId>org.gurux</groupId>
       <artifactId>gurux.dlms</artifactId>
-      <version>4.0.39</version>
+      <version>4.0.40</version>
     </dependency>
+    <dependency>
+      <groupId>org.gurux</groupId>
+      <artifactId>gurux.mqtt</artifactId>
+      <version>1.0.1</version>
+    </dependency>    
   </dependencies>
   <licenses>
     <license>
