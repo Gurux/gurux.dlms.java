@@ -34,6 +34,12 @@
 
 package gurux.dlms;
 
+import java.util.HashSet;
+import java.util.Set;
+
+import gurux.dlms.enums.Command;
+import gurux.dlms.enums.RequestTypes;
+
 public class GXServerReply {
 
     /**
@@ -55,6 +61,28 @@ public class GXServerReply {
      * Message count to send.
      */
     private int count;
+
+    /**
+     * Is GBT streaming in progress.
+     */
+    private Set<RequestTypes> moreData = new HashSet<RequestTypes>();
+
+    /**
+     * HDLC window count to send.
+     */
+    private short hdlcWindowCount;
+    /**
+     * Received command.
+     */
+    private Command command;
+    /**
+     * Gateway information.
+     */
+    private GXDLMSGateway gateway;
+    /**
+     * Baudrate is changed when optical probe is used.
+     */
+    private int newBaudRate;
 
     /**
      * Constructor.
@@ -115,7 +143,8 @@ public class GXServerReply {
      * @return Is GBT streaming in progress.
      */
     public final boolean isStreaming() {
-        return getCount() != 0;
+        return (getCount() != 0 && RequestTypes.toInteger(moreData) == 0) || (hdlcWindowCount != 0
+                && RequestTypes.toInteger(moreData) == RequestTypes.FRAME.getValue());
     }
 
     /**
@@ -131,5 +160,73 @@ public class GXServerReply {
      */
     public final void setCount(final int value) {
         count = value;
+    }
+
+    /**
+     * @return Is GBT streaming in progress.
+     */
+    public Set<RequestTypes> getMoreData() {
+        return moreData;
+    }
+
+    /**
+     * @param value
+     *            Is GBT streaming in progress.
+     */
+    public void getMoreData(final Set<RequestTypes> value) {
+        moreData = value;
+    }
+
+    /**
+     * @return HDLC window count to send.
+     */
+    public final short getHdlcWindowCount() {
+        return hdlcWindowCount;
+    }
+
+    /**
+     * @param value
+     *            HDLC window count to send.
+     */
+    public final void setHdlcWindowCount(final short value) {
+        hdlcWindowCount = value;
+    }
+
+    /**
+     * @return Received command.
+     */
+    public final Command getCommand() {
+        return command;
+    }
+
+    /**
+     * @param value
+     *            Received command.
+     */
+    public final void setCommand(Command value) {
+        command = value;
+    }
+
+    public final GXDLMSGateway getGateway() {
+        return gateway;
+    }
+
+    public final void setGateway(final GXDLMSGateway value) {
+        gateway = value;
+    }
+
+    /**
+     * @return Baudrate is changed when optical probe is used.
+     */
+    public final int getNewBaudRate() {
+        return newBaudRate;
+    }
+
+    /**
+     * @param value
+     *            Baudrate is changed when optical probe is used.
+     */
+    public final void setNewBaudRate(final int value) {
+        newBaudRate = value;
     }
 }

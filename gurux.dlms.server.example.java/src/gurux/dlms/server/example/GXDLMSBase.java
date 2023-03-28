@@ -44,6 +44,7 @@ import java.net.UnknownHostException;
 import java.nio.file.Paths;
 import java.text.SimpleDateFormat;
 import java.util.AbstractMap;
+import java.util.AbstractMap.SimpleEntry;
 import java.util.Calendar;
 import java.util.Date;
 import java.util.List;
@@ -347,6 +348,46 @@ public class GXDLMSBase extends GXDLMSSecureServer2
         ln.getXDLMSContextInfo().getConformance().add(Conformance.GET);
         setPushClientAddress(64);
         this.setMaxReceivePDUSize(1024);
+        // Add other objects.
+        init(port);
+        // Add only three object for this association.
+        ln.getObjectList().clear();
+        ln.getObjectList().add(ln);
+        // Add Logical Device Name
+        GXDLMSObject obj = getItems().findByLN(ObjectType.DATA, "0.0.42.0.0.255");
+        if (obj != null) {
+            ln.getObjectList().add(obj);
+        }
+        // Add invocation counter.
+        obj = getItems().findByLN(ObjectType.DATA, "0.0.43.1.0.255");
+        if (obj != null) {
+            ln.getObjectList().add(obj);
+        }
+    }
+
+    /**
+     * Constructor.
+     * 
+     * @param ln
+     *            Association logical name.
+     * @param hdlc
+     *            HDLC settings.
+     * @throws IOException
+     * @throws XMLStreamException
+     */
+    public GXDLMSBase(final GXDLMSAssociationLogicalName ln, final GXDLMSHdlcSetup hdlc,
+            final String port, InterfaceType interfaceType) throws XMLStreamException, IOException {
+        super(true, interfaceType);
+        getConformance().clear();
+        ln.setClientSAP(16);
+        ln.getXDLMSContextInfo().setMaxReceivePduSize(1024);
+        ln.getXDLMSContextInfo().setMaxSendPduSize(1024);
+        // Only get is allowed.
+        ln.getXDLMSContextInfo().getConformance().clear();
+        ln.getXDLMSContextInfo().getConformance().add(Conformance.GET);
+        setPushClientAddress(64);
+        this.setMaxReceivePDUSize(1024);
+        getItems().add(hdlc);
         // Add other objects.
         init(port);
         // Add only three object for this association.
@@ -910,8 +951,12 @@ public class GXDLMSBase extends GXDLMSSecureServer2
 
         // Add GSM Diagnostic.
         addGSMDiagnostic();
-
-        getItems().add(new GXDLMSCompactData());
+        GXDLMSCompactData cd = new GXDLMSCompactData();
+        cd.getCaptureObjects().add(new SimpleEntry<GXDLMSObject, GXDLMSCaptureObject>(clock,
+                new GXDLMSCaptureObject(2, 0)));
+        cd.getCaptureObjects().add(new SimpleEntry<GXDLMSObject, GXDLMSCaptureObject>(register,
+                new GXDLMSCaptureObject(2, 0)));
+        getItems().add(cd);
         getItems().add(new GXDLMSDisconnectControl());
         ///////////////////////////////////////////////////////////////////////
         // Each association has own conformance.

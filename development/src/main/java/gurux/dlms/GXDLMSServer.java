@@ -50,6 +50,7 @@ import gurux.dlms.enums.ObjectType;
 import gurux.dlms.enums.Priority;
 import gurux.dlms.enums.ServiceClass;
 import gurux.dlms.enums.SourceDiagnostic;
+import gurux.dlms.objects.GXDLMSIECLocalPortSetup;
 import gurux.dlms.objects.GXDLMSObject;
 import gurux.dlms.objects.GXDLMSObjectCollection;
 
@@ -68,8 +69,7 @@ public abstract class GXDLMSServer {
      * @param type
      *            Interface type.
      */
-    public GXDLMSServer(final boolean logicalNameReferencing,
-            final InterfaceType type) {
+    public GXDLMSServer(final boolean logicalNameReferencing, final InterfaceType type) {
         base = new GXDLMSServerBase(this, logicalNameReferencing, type);
     }
 
@@ -271,6 +271,85 @@ public abstract class GXDLMSServer {
     }
 
     /**
+     * Client system title is optional and it's used when Pre-established
+     * Application Associations is used.
+     * 
+     * @return Client system title.
+     */
+    public byte[] getClientSystemTitle() {
+        return base.getClientSystemTitle();
+    }
+
+    /**
+     * Client system title is optional and it's used when Pre-established
+     * Application Associations is used.
+     * 
+     * @param value
+     *            Client system title.
+     */
+    public void setClientSystemTitle(final byte[] value) {
+        base.setClientSystemTitle(value);
+    }
+
+    /**
+     * Server is using push client address when sending push messages. Client
+     * address is used if PushAddress is zero.
+     * 
+     * @return Push client address.
+     */
+    public int getPushClientAddress() {
+        return base.getPushClientAddress();
+    }
+
+    /**
+     * Server is using push client address when sending push messages. Client
+     * address is used if PushAddress is zero.
+     * 
+     * @param value
+     *            Push client address.
+     */
+    public void setPushClientAddress(final int value) {
+        base.setPushClientAddress(value);
+    }
+
+    public String getFlaID() {
+        return base.getFlaID();
+    }
+
+    public void setFlaID(final String value) {
+        if (value == null || value.length() != 3) {
+            throw new IllegalArgumentException("Invalid FLAG ID.");
+        }
+        base.setFlaID(value);
+    }
+
+    /**
+     * Local port setup is used when communicating with optical probe.
+     * 
+     * @return Local port setup object.
+     */
+    public GXDLMSIECLocalPortSetup getLocalPortSetup() {
+        return base.getLocalPortSetup();
+    }
+
+    /**
+     * Local port setup is used when communicating with optical probe.
+     * 
+     * @param value
+     *            Local port setup object.
+     */
+    public void setLocalPortSetup(final GXDLMSIECLocalPortSetup value) {
+        base.setLocalPortSetup(value);
+    }
+
+    /**
+     * @return Client connection state.
+     */
+    public byte getConnectionState() {
+        return base.getConnectionState();
+    }
+
+    /**
      * Handles client request.
      * 
      * @param buff
@@ -292,9 +371,8 @@ public abstract class GXDLMSServer {
      * @throws SignatureException
      *             Signature exception.
      */
-    public final byte[] handleRequest(final byte[] buff)
-            throws InvalidKeyException, NoSuchAlgorithmException,
-            NoSuchPaddingException, InvalidAlgorithmParameterException,
+    public final byte[] handleRequest(final byte[] buff) throws InvalidKeyException,
+            NoSuchAlgorithmException, NoSuchPaddingException, InvalidAlgorithmParameterException,
             IllegalBlockSizeException, BadPaddingException, SignatureException {
         return handleRequest(buff, new GXDLMSConnectionEventArgs());
     }
@@ -324,9 +402,8 @@ public abstract class GXDLMSServer {
      *             Signature exception.
      */
     public final byte[] handleRequest(final byte[] buff,
-            final GXDLMSConnectionEventArgs connectionInfo)
-            throws InvalidKeyException, NoSuchAlgorithmException,
-            NoSuchPaddingException, InvalidAlgorithmParameterException,
+            final GXDLMSConnectionEventArgs connectionInfo) throws InvalidKeyException,
+            NoSuchAlgorithmException, NoSuchPaddingException, InvalidAlgorithmParameterException,
             IllegalBlockSizeException, BadPaddingException, SignatureException {
         GXServerReply sr = new GXServerReply(buff);
         sr.setConnectionInfo(connectionInfo);
@@ -354,8 +431,8 @@ public abstract class GXDLMSServer {
      *            Password.
      * @return Source diagnostic.
      */
-    protected abstract SourceDiagnostic validateAuthentication(
-            Authentication authentication, byte[] password);
+    protected abstract SourceDiagnostic validateAuthentication(Authentication authentication,
+            byte[] password);
 
     /**
      * Find object.
@@ -368,8 +445,7 @@ public abstract class GXDLMSServer {
      *            Logical Name. In Short Name referencing this is not used.
      * @return Found object or null if object is not found.
      */
-    protected abstract GXDLMSObject onFindObject(ObjectType objectType, int sn,
-            String ln);
+    protected abstract GXDLMSObject onFindObject(ObjectType objectType, int sn, String ln);
 
     /**
      * Read selected item(s).
@@ -402,8 +478,7 @@ public abstract class GXDLMSServer {
      * @param connectionInfo
      *            Connection info.
      */
-    protected abstract void
-            invalidConnection(GXDLMSConnectionEventArgs connectionInfo);
+    protected abstract void invalidConnection(GXDLMSConnectionEventArgs connectionInfo);
 
     /**
      * Server has close the connection. All clean up is made here.
@@ -411,8 +486,7 @@ public abstract class GXDLMSServer {
      * @param connectionInfo
      *            Connection info.
      */
-    protected abstract void
-            disconnected(GXDLMSConnectionEventArgs connectionInfo);
+    protected abstract void disconnected(GXDLMSConnectionEventArgs connectionInfo);
 
     /**
      * Action is occurred.

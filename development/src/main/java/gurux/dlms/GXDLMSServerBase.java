@@ -39,11 +39,13 @@ import gurux.dlms.manufacturersettings.GXDLMSAttributeSettings;
 import gurux.dlms.objects.GXDLMSAssociationLogicalName;
 import gurux.dlms.objects.GXDLMSAssociationShortName;
 import gurux.dlms.objects.GXDLMSHdlcSetup;
+import gurux.dlms.objects.GXDLMSIECLocalPortSetup;
 import gurux.dlms.objects.GXDLMSObject;
 import gurux.dlms.objects.GXDLMSObjectCollection;
 import gurux.dlms.objects.IGXDLMSBase;
 import gurux.dlms.objects.enums.ApplicationContextName;
 import gurux.dlms.objects.enums.AssociationStatus;
+import gurux.dlms.objects.enums.BaudRate;
 import gurux.dlms.secure.GXSecure;
 
 public class GXDLMSServerBase {
@@ -62,6 +64,88 @@ public class GXDLMSServerBase {
     private GXByteBuffer replyData = new GXByteBuffer();
 
     /*
+     * FLAG ID.
+     */
+    private String flaID;
+    private GXDLMSIECLocalPortSetup localPortSetup;
+
+    /*
+     * Client system title is optional and it's used when Pre-established
+     * Application Associations is used.
+     * @return Client system title.
+     */
+    public byte[] getClientSystemTitle() {
+        return settings.getPreEstablishedSystemTitle();
+    }
+
+    /*
+     * Client system title is optional and it's used when Pre-established
+     * Application Associations is used.
+     * @param value Client system title.
+     */
+    public void setClientSystemTitle(final byte[] value) {
+        settings.setPreEstablishedSystemTitle(value);
+    }
+
+    /*
+     * Server is using push client address when sending push messages. Client
+     * address is used if PushAddress is zero.
+     * @return Push client address.
+     */
+    public int getPushClientAddress() {
+        return settings.getPushClientAddress();
+    }
+
+    /*
+     * Server is using push client address when sending push messages. Client
+     * address is used if PushAddress is zero.
+     * @param value Push client address.
+     */
+    public void setPushClientAddress(final int value) {
+        settings.setPushClientAddress(value);
+    }
+
+    /*
+     * @return FLAG ID.
+     */
+    public String getFlaID() {
+        return flaID;
+    }
+
+    /*
+     * @param value FLAG ID.
+     */
+    public void setFlaID(final String value) {
+        if (value == null || value.length() != 3) {
+            throw new IllegalArgumentException("Invalid FLAG ID.");
+        }
+        flaID = value;
+    }
+
+    /*
+     * Local port setup is used when communicating with optical probe.
+     * @return Local port setup object.
+     */
+    public GXDLMSIECLocalPortSetup getLocalPortSetup() {
+        return localPortSetup;
+    }
+
+    /*
+     * Local port setup is used when communicating with optical probe.
+     * @param value Local port setup object.
+     */
+    public void setLocalPortSetup(final GXDLMSIECLocalPortSetup value) {
+        localPortSetup = value;
+    }
+
+    /*
+     * @return Client connection state.
+     */
+    public byte getConnectionState() {
+        return settings.getConnected();
+    }
+
+    /*
      * Long get or read transaction information.
      */
     private GXDLMSLongTransaction transaction;
@@ -76,7 +160,7 @@ public class GXDLMSServerBase {
      */
     private boolean initialized = false;
 
-    /**
+    /*
      * When data was received last time.
      */
     private long dataReceived = 0;
@@ -186,9 +270,8 @@ public class GXDLMSServerBase {
         settings.setPriority(value);
     }
 
-    /**
-     * @param value
-     *            Current association of the server.
+    /*
+     * @param value Current association of the server.
      */
     public final void setAssignedAssociation(final GXDLMSAssociationLogicalName value) {
         settings.setAssignedAssociation(value);
@@ -224,7 +307,7 @@ public class GXDLMSServerBase {
         return settings.getObjects();
     }
 
-    /**
+    /*
      * @return HDLC connection settings.
      * @deprecated use {@link getHdlcSettings} instead.
      */
@@ -232,48 +315,44 @@ public class GXDLMSServerBase {
         return (GXDLMSLimits) settings.getHdlcSettings();
     }
 
-    /**
+    /*
      * @return HDLC connection settings.
      */
     public final GXHdlcSettings getHdlcSettings() {
         return settings.getHdlcSettings();
     }
 
-    /**
+    /*
      * Standard says that Time zone is from normal time to UTC in minutes. If
      * meter is configured to use UTC time (UTC to normal time) set this to
      * true.
-     * 
      * @return True, if UTC time is used.
      */
     public boolean getUseUtc2NormalTime() {
         return settings.getUseUtc2NormalTime();
     }
 
-    /**
+    /*
      * Standard says that Time zone is from normal time to UTC in minutes. If
      * meter is configured to use UTC time (UTC to normal time) set this to
      * true.
-     * 
-     * @param value
-     *            True, if UTC time is used.
+     * @param value True, if UTC time is used.
      */
     public void setUseUtc2NormalTime(final boolean value) {
         settings.setUseUtc2NormalTime(value);
     }
 
-    /**
+    /*
      * @return Skipped date time fields. This value can be used if meter can't
-     *         handle deviation or status.
+     * handle deviation or status.
      */
     public java.util.Set<DateTimeSkips> getDateTimeSkips() {
         return settings.getDateTimeSkips();
     }
 
-    /**
-     * @param value
-     *            Skipped date time fields. This value can be used if meter
-     *            can't handle deviation or status.
+    /*
+     * @param value Skipped date time fields. This value can be used if meter
+     * can't handle deviation or status.
      */
     public void setDateTimeSkips(final java.util.Set<DateTimeSkips> value) {
         settings.setDateTimeSkips(value);
@@ -755,6 +834,46 @@ public class GXDLMSServerBase {
     }
 
     /**
+     * Find IEC frame. Sometimes there are extra bytes or multiple packets on
+     * the data so they are removed.
+     * 
+     * @return
+     */
+    private boolean GetIecPacket() {
+        if (receivedData.size() < 5) {
+            return false;
+        }
+        int eop = -1;
+        int bop = -1;
+        // Find EOP.
+        for (int pos = receivedData.size() - 2; pos != 2; --pos) {
+            if (receivedData.getUInt8(pos) == 0x0D && receivedData.getUInt8(pos + 1) == 0x0A) {
+                eop = pos;
+                break;
+            }
+        }
+        if (eop == -1) {
+            return false;
+        }
+        // Find BOP
+        short ch;
+        for (int pos = eop - 1; pos != -1; --pos) {
+            ch = receivedData.getUInt8(pos);
+            if (ch == 6 || (pos + 2 < receivedData.size() && ch == '/'
+                    && receivedData.getUInt8(pos + 1) == '?'
+                    && receivedData.getUInt8(pos + 2) == '!')) {
+                bop = pos;
+                break;
+            }
+        }
+        if (bop == -1) {
+            return false;
+        }
+        receivedData.position(bop);
+        return true;
+    }
+
+    /**
      * Handles client request.
      * 
      * @param sr
@@ -778,6 +897,7 @@ public class GXDLMSServerBase {
     public final void handleRequest(GXServerReply sr) throws InvalidKeyException,
             NoSuchAlgorithmException, NoSuchPaddingException, InvalidAlgorithmParameterException,
             IllegalBlockSizeException, BadPaddingException, SignatureException {
+        sr.setReply(null);
         if (!sr.isStreaming() && (sr.getData() == null || sr.getData().length == 0)) {
             return;
         }
@@ -789,6 +909,68 @@ public class GXDLMSServerBase {
                 receivedData.set(sr.getData());
                 boolean first =
                         settings.getServerAddress() == 0 && settings.getClientAddress() == 0;
+                // If using optical probe.
+                if (settings.getInterfaceType() == InterfaceType.HDLC_WITH_MODE_E) {
+                    if (settings.getConnected() == ConnectionState.NONE) {
+                        // If IEC packet not found.
+                        if (!GetIecPacket()) {
+                            return;
+                        }
+                        if (receivedData.getUInt8(receivedData.position()) == 6) {
+                            // User changes the baud rate.
+                            // Only Mode E is allowed.
+                            if (receivedData.getUInt8(receivedData.position() + 1) != 0x32
+                                    || receivedData.getUInt8(receivedData.position() + 3) != 0x32) {
+                                // Return error.
+                            }
+                            BaudRate baudrate = BaudRate
+                                    .values()[receivedData.getUInt8(receivedData.position() + 2)
+                                            - '0'];
+                            if (baudrate.ordinal() > localPortSetup.getProposedBaudrate()
+                                    .ordinal()) {
+                                baudrate = localPortSetup.getProposedBaudrate();
+                            }
+                            receivedData.clear();
+                            // Return used baud rate.
+                            settings.setConnected(ConnectionState.IEC);
+                            // "2" //(HDLC protocol procedure) (Binary mode)
+                            // Set mode E.
+                            sr.setReply(new byte[] { 0x06,
+                                    // "2" HDLC protocol procedure (Mode E)
+                                    (byte) '2',
+                                    // Send Baud rate character
+                                    (byte) ('0' + baudrate.ordinal()),
+                                    // Mode control character
+                                    (byte) '2', 13, 10 });
+                            // Change the baud rate.
+                            sr.setNewBaudRate(300 << baudrate.ordinal());
+                            settings.setConnected(ConnectionState.IEC);
+                        } else if (receivedData.getUInt8(receivedData.position()) == '/') {
+                            String meterAddress =
+                                    new String(receivedData.subArray(receivedData.position() + 3,
+                                            receivedData.available() - 5));
+                            // If meter address is wrong.
+                            if (meterAddress.length() != 0
+                                    && meterAddress != localPortSetup.getDeviceAddress()) {
+                                receivedData.clear();
+                                return;
+                            }
+                            receivedData.clear();
+                            receivedData.setUInt8((byte) '/');
+                            // Add flag ID.
+                            receivedData.set(flaID.getBytes());
+                            // Add proposed baud rate.
+                            receivedData
+                                    .setUInt8('0' + localPortSetup.getProposedBaudrate().ordinal());
+                            // Add device address.
+                            receivedData.add(localPortSetup.getDeviceAddress());
+                            receivedData.add("\r\n");
+                            sr.setReply(receivedData.array());
+                            receivedData.clear();
+                        }
+                        return;
+                    }
+                }
                 try {
                     GXDLMS.getData(settings, receivedData, info, null);
                 } catch (GXDLMSExceptionResponse ex) {
@@ -888,6 +1070,7 @@ public class GXDLMSServerBase {
                         // If inactivity time out is elapsed.
                         if (elapsed >= settings.getHdlc().getInactivityTimeout()) {
                             reset();
+                            UpdateDefaultBaudRate(sr);
                             dataReceived = 0;
                             return;
                         }
@@ -949,12 +1132,19 @@ public class GXDLMSServerBase {
                         GXDLMSServer2 b = (GXDLMSServer2) owner;
                         try {
                             b.onDisconnected(sr.getConnectionInfo());
+                            UpdateDefaultBaudRate(sr);
                         } catch (Exception ex) {
                             // It's OK if this fails.
                         }
                     }
                 }
             }
+        }
+    }
+
+    private void UpdateDefaultBaudRate(GXServerReply sr) {
+        if (settings.getInterfaceType() == InterfaceType.HDLC_WITH_MODE_E) {
+            sr.setNewBaudRate(300 << (int) localPortSetup.getDefaultBaudrate().ordinal());
         }
     }
 
@@ -1122,14 +1312,18 @@ public class GXDLMSServerBase {
             case Command.DISCONNECT_REQUEST:
                 replyData.clear();
                 generateDisconnectRequest();
-                if ((settings.getConnected() & ConnectionState.DLMS) != 0) {
-                    if (owner instanceof GXDLMSServer) {
-                        ((GXDLMSServer) owner).disconnected(sr.getConnectionInfo());
-                    } else {
-                        ((GXDLMSServer2) owner).onDisconnected(sr.getConnectionInfo());
+                if (settings.getConnected() != ConnectionState.NONE) {
+                    if ((settings.getConnected() & ConnectionState.DLMS) != 0) {
+                        if (owner instanceof GXDLMSServer) {
+                            ((GXDLMSServer) owner).disconnected(sr.getConnectionInfo());
+                        } else {
+                            ((GXDLMSServer2) owner).onDisconnected(sr.getConnectionInfo());
+                        }
                     }
+                    settings.setConnected(ConnectionState.NONE);
+                    setAssignedAssociation(null);
+                    UpdateDefaultBaudRate(sr);
                 }
-                settings.setConnected(settings.getConnected() & ~ConnectionState.DLMS);
                 frame = Command.UA;
                 break;
             case Command.GENERAL_BLOCK_TRANSFER:

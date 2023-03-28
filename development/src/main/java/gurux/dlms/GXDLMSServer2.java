@@ -63,6 +63,7 @@ import gurux.dlms.objects.GXDLMSAssociationLogicalName;
 import gurux.dlms.objects.GXDLMSAssociationShortName;
 import gurux.dlms.objects.GXDLMSCaptureObject;
 import gurux.dlms.objects.GXDLMSHdlcSetup;
+import gurux.dlms.objects.GXDLMSIECLocalPortSetup;
 import gurux.dlms.objects.GXDLMSObject;
 import gurux.dlms.objects.GXDLMSObjectCollection;
 import gurux.dlms.objects.GXDLMSPushSetup;
@@ -83,8 +84,7 @@ public abstract class GXDLMSServer2 {
      * @param type
      *            Interface type.
      */
-    public GXDLMSServer2(final boolean logicalNameReferencing,
-            final InterfaceType type) {
+    public GXDLMSServer2(final boolean logicalNameReferencing, final InterfaceType type) {
         base = new GXDLMSServerBase(this, true, type);
         getSettings().setUseLogicalNameReferencing(logicalNameReferencing);
     }
@@ -97,8 +97,7 @@ public abstract class GXDLMSServer2 {
      * @param type
      *            Interface type.
      */
-    public GXDLMSServer2(final GXDLMSAssociationLogicalName ln,
-            final InterfaceType type) {
+    public GXDLMSServer2(final GXDLMSAssociationLogicalName ln, final InterfaceType type) {
         base = new GXDLMSServerBase(this, true, type);
         base.getItems().add(ln);
     }
@@ -111,8 +110,7 @@ public abstract class GXDLMSServer2 {
      * @param type
      *            Interface type.
      */
-    public GXDLMSServer2(final GXDLMSAssociationShortName sn,
-            final InterfaceType type) {
+    public GXDLMSServer2(final GXDLMSAssociationShortName sn, final InterfaceType type) {
         base = new GXDLMSServerBase(this, false, type);
         base.getItems().add(sn);
     }
@@ -125,8 +123,7 @@ public abstract class GXDLMSServer2 {
      * @param hdlc
      *            HDLC settings.
      */
-    public GXDLMSServer2(final GXDLMSAssociationLogicalName ln,
-            final GXDLMSHdlcSetup hdlc) {
+    public GXDLMSServer2(final GXDLMSAssociationLogicalName ln, final GXDLMSHdlcSetup hdlc) {
         base = new GXDLMSServerBase(this, true, InterfaceType.HDLC);
         base.setHdlc(hdlc);
         base.getItems().add(ln);
@@ -141,8 +138,7 @@ public abstract class GXDLMSServer2 {
      * @param hdlc
      *            HDLC settings.
      */
-    public GXDLMSServer2(final GXDLMSAssociationShortName sn,
-            final GXDLMSHdlcSetup hdlc) {
+    public GXDLMSServer2(final GXDLMSAssociationShortName sn, final GXDLMSHdlcSetup hdlc) {
         base = new GXDLMSServerBase(this, false, InterfaceType.HDLC);
         getSettings().setHdlc(hdlc);
         base.getItems().add(sn);
@@ -157,8 +153,7 @@ public abstract class GXDLMSServer2 {
      * @param wrapper
      *            WRAPPER settings.
      */
-    public GXDLMSServer2(final GXDLMSAssociationLogicalName ln,
-            final GXDLMSTcpUdpSetup wrapper) {
+    public GXDLMSServer2(final GXDLMSAssociationLogicalName ln, final GXDLMSTcpUdpSetup wrapper) {
         base = new GXDLMSServerBase(this, true, InterfaceType.WRAPPER);
         getSettings().setWrapper(wrapper);
         base.getItems().add(ln);
@@ -173,8 +168,7 @@ public abstract class GXDLMSServer2 {
      * @param wrapper
      *            WRAPPER settings.
      */
-    public GXDLMSServer2(final GXDLMSAssociationShortName sn,
-            final GXDLMSTcpUdpSetup wrapper) {
+    public GXDLMSServer2(final GXDLMSAssociationShortName sn, final GXDLMSTcpUdpSetup wrapper) {
         base = new GXDLMSServerBase(this, false, InterfaceType.WRAPPER);
         getSettings().setWrapper(wrapper);
         base.getItems().add(sn);
@@ -360,6 +354,36 @@ public abstract class GXDLMSServer2 {
         base.setCipher(value);
     }
 
+    public String getFlaID() {
+        return base.getFlaID();
+    }
+
+    public void setFlaID(final String value) {
+        if (value == null || value.length() != 3) {
+            throw new IllegalArgumentException("Invalid FLAG ID.");
+        }
+        base.setFlaID(value);
+    }
+
+    /**
+     * Local port setup is used when communicating with optical probe.
+     * 
+     * @return Local port setup object.
+     */
+    public GXDLMSIECLocalPortSetup getLocalPortSetup() {
+        return base.getLocalPortSetup();
+    }
+
+    /**
+     * Local port setup is used when communicating with optical probe.
+     * 
+     * @param value
+     *            Local port setup object.
+     */
+    public void setLocalPortSetup(final GXDLMSIECLocalPortSetup value) {
+        base.setLocalPortSetup(value);
+    }
+
     /**
      * Initialize server. This must call after server objects are set.
      */
@@ -500,8 +524,7 @@ public abstract class GXDLMSServer2 {
      * @param value
      *            Current association of the server.
      */
-    public final void
-            setAssignedAssociation(final GXDLMSAssociationLogicalName value) {
+    public final void setAssignedAssociation(final GXDLMSAssociationLogicalName value) {
         base.setAssignedAssociation(value);
     }
 
@@ -534,9 +557,8 @@ public abstract class GXDLMSServer2 {
      * @throws SignatureException
      *             Signature exception.
      */
-    public final byte[] handleRequest(final byte[] buff)
-            throws InvalidKeyException, NoSuchAlgorithmException,
-            NoSuchPaddingException, InvalidAlgorithmParameterException,
+    public final byte[] handleRequest(final byte[] buff) throws InvalidKeyException,
+            NoSuchAlgorithmException, NoSuchPaddingException, InvalidAlgorithmParameterException,
             IllegalBlockSizeException, BadPaddingException, SignatureException {
         return handleRequest(buff, new GXDLMSConnectionEventArgs());
     }
@@ -566,9 +588,8 @@ public abstract class GXDLMSServer2 {
      *             Signature exception.
      */
     public final byte[] handleRequest(final byte[] buff,
-            final GXDLMSConnectionEventArgs connectionInfo)
-            throws InvalidKeyException, NoSuchAlgorithmException,
-            NoSuchPaddingException, InvalidAlgorithmParameterException,
+            final GXDLMSConnectionEventArgs connectionInfo) throws InvalidKeyException,
+            NoSuchAlgorithmException, NoSuchPaddingException, InvalidAlgorithmParameterException,
             IllegalBlockSizeException, BadPaddingException, SignatureException {
         GXServerReply sr = new GXServerReply(buff);
         sr.setConnectionInfo(connectionInfo);
@@ -596,9 +617,8 @@ public abstract class GXDLMSServer2 {
      * @throws SignatureException
      *             Signature exception.
      */
-    public final void handleRequest(GXServerReply sr)
-            throws InvalidKeyException, NoSuchAlgorithmException,
-            NoSuchPaddingException, InvalidAlgorithmParameterException,
+    public final void handleRequest(GXServerReply sr) throws InvalidKeyException,
+            NoSuchAlgorithmException, NoSuchPaddingException, InvalidAlgorithmParameterException,
             IllegalBlockSizeException, BadPaddingException, SignatureException {
         base.handleRequest(sr);
     }
@@ -614,8 +634,7 @@ public abstract class GXDLMSServer2 {
      * @throws Exception
      *             Server handler occurred exceptions.
      */
-    protected abstract boolean isTarget(int serverAddress, int clientAddress)
-            throws Exception;
+    protected abstract boolean isTarget(int serverAddress, int clientAddress) throws Exception;
 
     /**
      * Check whether the authentication and password are correct.
@@ -628,8 +647,8 @@ public abstract class GXDLMSServer2 {
      * @throws Exception
      *             Server handler occurred exceptions.
      */
-    protected abstract SourceDiagnostic onValidateAuthentication(
-            Authentication authentication, byte[] password) throws Exception;
+    protected abstract SourceDiagnostic onValidateAuthentication(Authentication authentication,
+            byte[] password) throws Exception;
 
     /**
      * Get selected value(s). This is called when example profile generic
@@ -666,8 +685,8 @@ public abstract class GXDLMSServer2 {
      * @throws Exception
      *             Server handler occurred exceptions.
      */
-    protected abstract GXDLMSObject onFindObject(ObjectType objectType, int sn,
-            String ln) throws Exception;
+    protected abstract GXDLMSObject onFindObject(ObjectType objectType, int sn, String ln)
+            throws Exception;
 
     /**
      * Called before read is executed.
@@ -718,8 +737,7 @@ public abstract class GXDLMSServer2 {
      * @throws Exception
      *             Server handler occurred exceptions.
      */
-    protected abstract void onConnected(
-            GXDLMSConnectionEventArgs connectionInfo) throws Exception;
+    protected abstract void onConnected(GXDLMSConnectionEventArgs connectionInfo) throws Exception;
 
     /**
      * Client has try to made invalid connection. Password is incorrect.
@@ -729,8 +747,8 @@ public abstract class GXDLMSServer2 {
      * @throws Exception
      *             Server handler occurred exceptions.
      */
-    protected abstract void onInvalidConnection(
-            GXDLMSConnectionEventArgs connectionInfo) throws Exception;
+    protected abstract void onInvalidConnection(GXDLMSConnectionEventArgs connectionInfo)
+            throws Exception;
 
     /**
      * Server has close the connection. All clean up is made here.
@@ -740,8 +758,8 @@ public abstract class GXDLMSServer2 {
      * @throws Exception
      *             Server handler occurred exceptions.
      */
-    protected abstract void onDisconnected(
-            GXDLMSConnectionEventArgs connectionInfo) throws Exception;
+    protected abstract void onDisconnected(GXDLMSConnectionEventArgs connectionInfo)
+            throws Exception;
 
     /**
      * Get attribute access mode.
@@ -752,8 +770,7 @@ public abstract class GXDLMSServer2 {
      * @throws Exception
      *             Server handler occurred exceptions.
      */
-    protected abstract AccessMode onGetAttributeAccess(ValueEventArgs arg)
-            throws Exception;
+    protected abstract AccessMode onGetAttributeAccess(ValueEventArgs arg) throws Exception;
 
     /**
      * Get method access mode.
@@ -764,8 +781,7 @@ public abstract class GXDLMSServer2 {
      * @throws Exception
      *             Server handler occurred exceptions.
      */
-    protected abstract MethodAccessMode onGetMethodAccess(ValueEventArgs arg)
-            throws Exception;
+    protected abstract MethodAccessMode onGetMethodAccess(ValueEventArgs arg) throws Exception;
 
     /**
      * Called before action is executed.
@@ -785,8 +801,7 @@ public abstract class GXDLMSServer2 {
      * @throws Exception
      *             Server handler occurred exceptions.
      */
-    protected abstract void onPostAction(ValueEventArgs[] args)
-            throws Exception;
+    protected abstract void onPostAction(ValueEventArgs[] args) throws Exception;
 
     /**
      * Add value of COSEM object to byte buffer. AddData method can be used with
@@ -801,8 +816,7 @@ public abstract class GXDLMSServer2 {
      * @param buff
      *            Byte buffer.
      */
-    public final void addData(final GXDLMSObject obj, final int index,
-            final GXByteBuffer buff) {
+    public final void addData(final GXDLMSObject obj, final int index, final GXByteBuffer buff) {
         DataType dt;
         ValueEventArgs e = new ValueEventArgs(obj, index, 0, null);
         Object value = obj.getValue(getSettings(), e);
@@ -836,16 +850,14 @@ public abstract class GXDLMSServer2 {
      * @throws SignatureException
      *             Signature exception.
      */
-    public final byte[][] generateDataNotificationMessages(final Date time,
-            final GXByteBuffer data)
-            throws InvalidKeyException, NoSuchAlgorithmException,
-            NoSuchPaddingException, InvalidAlgorithmParameterException,
-            IllegalBlockSizeException, BadPaddingException, SignatureException {
+    public final byte[][] generateDataNotificationMessages(final Date time, final GXByteBuffer data)
+            throws InvalidKeyException, NoSuchAlgorithmException, NoSuchPaddingException,
+            InvalidAlgorithmParameterException, IllegalBlockSizeException, BadPaddingException,
+            SignatureException {
         List<byte[]> reply;
         if (getUseLogicalNameReferencing()) {
             GXDLMSLNParameters p = new GXDLMSLNParameters(getSettings(), 0,
-                    Command.DATA_NOTIFICATION, 0, null, data, 0xff,
-                    Command.NONE);
+                    Command.DATA_NOTIFICATION, 0, null, data, 0xff, Command.NONE);
             if (time == null) {
                 p.setTime(null);
             } else {
@@ -853,12 +865,11 @@ public abstract class GXDLMSServer2 {
             }
             reply = GXDLMS.getLnMessages(p);
         } else {
-            GXDLMSSNParameters p = new GXDLMSSNParameters(getSettings(),
-                    Command.DATA_NOTIFICATION, 1, 0, data, null);
+            GXDLMSSNParameters p = new GXDLMSSNParameters(getSettings(), Command.DATA_NOTIFICATION,
+                    1, 0, data, null);
             reply = GXDLMS.getSnMessages(p);
         }
-        if (!getSettings().getNegotiatedConformance()
-                .contains(Conformance.GENERAL_BLOCK_TRANSFER)
+        if (!getSettings().getNegotiatedConformance().contains(Conformance.GENERAL_BLOCK_TRANSFER)
                 && reply.size() != 1) {
             throw new IllegalArgumentException(
                     "Data is not fit to one PDU. Use general block transfer.");
@@ -889,19 +900,17 @@ public abstract class GXDLMSServer2 {
      * @throws SignatureException
      *             Signature exception.
      */
-    public final byte[][] generatePushSetupMessages(final Date date,
-            final GXDLMSPushSetup push)
-            throws InvalidKeyException, NoSuchAlgorithmException,
-            NoSuchPaddingException, InvalidAlgorithmParameterException,
-            IllegalBlockSizeException, BadPaddingException, SignatureException {
+    public final byte[][] generatePushSetupMessages(final Date date, final GXDLMSPushSetup push)
+            throws InvalidKeyException, NoSuchAlgorithmException, NoSuchPaddingException,
+            InvalidAlgorithmParameterException, IllegalBlockSizeException, BadPaddingException,
+            SignatureException {
         if (push == null) {
             throw new IllegalArgumentException("push");
         }
         GXByteBuffer buff = new GXByteBuffer();
         buff.setUInt8((byte) DataType.STRUCTURE.getValue());
         GXCommon.setObjectCount(push.getPushObjectList().size(), buff);
-        for (Entry<GXDLMSObject, GXDLMSCaptureObject> it : push
-                .getPushObjectList()) {
+        for (Entry<GXDLMSObject, GXDLMSCaptureObject> it : push.getPushObjectList()) {
             addData(it.getKey(), it.getValue().getAttributeIndex(), buff);
         }
         return generateDataNotificationMessages(date, buff);
@@ -935,11 +944,9 @@ public abstract class GXDLMSServer2 {
      * @return Returns true if object is modified with action.
      */
     public boolean isChangedWithAction(ObjectType objectType, int methodIndex) {
-        if ((objectType == ObjectType.ASSOCIATION_LOGICAL_NAME
-                && methodIndex != 1)
-                || (objectType == ObjectType.SECURITY_SETUP && (methodIndex == 1
-                        || methodIndex == 4 || methodIndex == 6
-                        || methodIndex == 7 || methodIndex == 8))) {
+        if ((objectType == ObjectType.ASSOCIATION_LOGICAL_NAME && methodIndex != 1)
+                || (objectType == ObjectType.SECURITY_SETUP && (methodIndex == 1 || methodIndex == 4
+                        || methodIndex == 6 || methodIndex == 7 || methodIndex == 8))) {
             return true;
         }
         // SAP assignment is added or removed.

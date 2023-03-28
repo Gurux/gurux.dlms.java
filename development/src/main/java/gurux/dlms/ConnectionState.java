@@ -58,4 +58,8 @@ public final class ConnectionState {
      * Connection is made for DLMS level.
      */
     public static final byte DLMS = 2;
+    /**
+     * Connection is made for optical IEC 62056-21 level.
+     */
+    public static final byte IEC = 4;
 }
