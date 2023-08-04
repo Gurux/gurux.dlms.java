@@ -299,7 +299,9 @@ public class GXCiphering implements GXICipher {
     }
 
     public final void setBlockCipherKey(final byte[] value) {
-        if (value != null && value.length != 16) {
+        if (value != null && value.length != 0
+                && ((getSecuritySuite() != SecuritySuite.SUITE_2 && value.length != 16)
+                        || (getSecuritySuite() == SecuritySuite.SUITE_2 && value.length != 32))) {
             throw new IllegalArgumentException("Invalid Block Cipher Key.");
         }
         blockCipherKey = value;
@@ -313,7 +315,9 @@ public class GXCiphering implements GXICipher {
     }
 
     public final void setAuthenticationKey(final byte[] value) {
-        if (value != null && value.length != 16) {
+        if (value != null && value.length != 0
+                && ((getSecuritySuite() != SecuritySuite.SUITE_2 && value.length != 16)
+                        || (getSecuritySuite() == SecuritySuite.SUITE_2 && value.length != 32))) {
             throw new IllegalArgumentException("Invalid Authentication Key.");
         }
         authenticationKey = value;
@@ -324,7 +328,9 @@ public class GXCiphering implements GXICipher {
      *            Broadcast block cipher key.
      */
     public final void setBroadcastBlockCipherKey(byte[] value) {
-        if (value != null && value.length != 16) {
+        if (value != null && value.length != 0
+                && ((getSecuritySuite() != SecuritySuite.SUITE_2 && value.length != 16)
+                        || (getSecuritySuite() == SecuritySuite.SUITE_2 && value.length != 32))) {
             throw new IllegalArgumentException("Invalid Block Cipher Key.");
         }
         broadcastBlockCipherKey = value;
