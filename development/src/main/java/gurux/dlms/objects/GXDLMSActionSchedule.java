@@ -282,10 +282,7 @@ public class GXDLMSActionSchedule extends GXDLMSObject implements IGXDLMSBase {
             }
             setExecutedScriptSelector(((Number) ((List<?>) e.getValue()).get(1)).intValue());
         } else if (e.getIndex() == 3) {
-            int tmp = ((Number) e.getValue()).intValue();
-            if (tmp != 0) {
-                setType(SingleActionScheduleType.forValue(tmp));
-            }
+            setType(SingleActionScheduleType.forValue(((Number) e.getValue()).intValue()));
         } else if (e.getIndex() == 4) {
             setExecutionTime(null);
             if (e.getValue() != null) {

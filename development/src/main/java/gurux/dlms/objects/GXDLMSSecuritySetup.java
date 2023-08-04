@@ -205,9 +205,7 @@ public class GXDLMSSecuritySetup extends GXDLMSObject implements IGXDLMSBase {
      *            Block cipher key.
      */
     public void setGuek(final byte[] value) {
-        if (value != null && value.length != 0
-                && (getSecuritySuite() != SecuritySuite.SUITE_2 && value.length != 16)
-                || (getSecuritySuite() == SecuritySuite.SUITE_2 && value.length != 32)) {
+        if (getVersion() < 2 && value != null && value.length != 16 && value.length != 0) {
             throw new IllegalArgumentException("Invalid Guek");
         }
         guek = value;
@@ -225,11 +223,10 @@ public class GXDLMSSecuritySetup extends GXDLMSObject implements IGXDLMSBase {
      *            Broadcast block cipher key.
      */
     public void setGbek(final byte[] value) {
-        if (value != null && value.length != 0
-                && (getSecuritySuite() != SecuritySuite.SUITE_2 && value.length != 16)
-                || (getSecuritySuite() == SecuritySuite.SUITE_2 && value.length != 32)) {
+        if (getVersion() < 2 && value != null && value.length != 16 && value.length != 0) {
             throw new IllegalArgumentException("Invalid Gbek");
         }
+
         gbek = value;
     }
 
@@ -245,9 +242,7 @@ public class GXDLMSSecuritySetup extends GXDLMSObject implements IGXDLMSBase {
      *            Authentication key.
      */
     public void setGak(final byte[] value) {
-        if (value != null && value.length != 0
-                && (getSecuritySuite() != SecuritySuite.SUITE_2 && value.length != 16)
-                || (getSecuritySuite() == SecuritySuite.SUITE_2 && value.length != 32)) {
+        if (getVersion() < 2 && value != null && value.length != 16 && value.length != 0) {
             throw new IllegalArgumentException("Invalid Gak");
         }
         gak = value;
@@ -310,9 +305,6 @@ public class GXDLMSSecuritySetup extends GXDLMSObject implements IGXDLMSBase {
      *            Client system title.
      */
     public final void setClientSystemTitle(final byte[] value) {
-        if (value != null && value.length != 0 && value.length != 8) {
-            throw new IllegalArgumentException("Invalid client system title.");
-        }
         clientSystemTitle = value;
     }
 
@@ -328,9 +320,6 @@ public class GXDLMSSecuritySetup extends GXDLMSObject implements IGXDLMSBase {
      *            Server system title.
      */
     public final void setServerSystemTitle(final byte[] value) {
-        if (value != null && value.length != 0 && value.length != 8) {
-            throw new IllegalArgumentException("Invalid server system title.");
-        }
         serverSystemTitle = value;
     }
 

@@ -270,10 +270,12 @@ public class Settings {
                 } else if ("Suite1".compareTo(it.getValue()) == 0) {
                     settings.client.getCiphering().setSecuritySuite(SecuritySuite.SUITE_1);
                 } else if ("Suite2".compareTo(it.getValue()) == 0) {
-                    settings.client.getCiphering().setSecuritySuite(SecuritySuite.SUITE_2);
+                    // Java doesn't support ECDSA 384 at the moment.
+                    throw new IllegalArgumentException(
+                            "Invalid Ciphering option '" + it.getValue() + "'. (Suite0, Suite1)");
                 } else {
-                    throw new IllegalArgumentException("Invalid Ciphering option '" + it.getValue()
-                            + "'. (Suite0, Suite1, Suite2)");
+                    throw new IllegalArgumentException(
+                            "Invalid Ciphering option '" + it.getValue() + "'. (Suite0, Suite1)");
                 }
                 break;
             case 'K':
