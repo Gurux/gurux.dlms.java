@@ -713,10 +713,14 @@ public class GXDLMSReader {
                         new ArrayList<Entry<GXDLMSObject, Integer>>();
                 for (GXDLMSObject it : objs) {
                     if (it instanceof GXDLMSRegister) {
-                        list.add(new GXSimpleEntry<GXDLMSObject, Integer>(it, 3));
+                        if ((it.getAccess(3).ordinal() & AccessMode.READ.ordinal()) != 0) {
+                            list.add(new GXSimpleEntry<GXDLMSObject, Integer>(it, 3));
+                        }
                     }
                     if (it instanceof GXDLMSDemandRegister) {
-                        list.add(new GXSimpleEntry<GXDLMSObject, Integer>(it, 4));
+                        if ((it.getAccess(4).ordinal() & AccessMode.READ.ordinal()) != 0) {
+                            list.add(new GXSimpleEntry<GXDLMSObject, Integer>(it, 4));
+                        }
                     }
                 }
                 readList(list);

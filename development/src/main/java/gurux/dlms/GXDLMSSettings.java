@@ -995,6 +995,54 @@ public class GXDLMSSettings {
         serviceClass = value;
     }
 
+    private void updateSecurity(byte[] systemTitle, GXDLMSSecuritySetup ss) {
+        if (ss != null) {
+            getCipher().setSecuritySuite(ss.getSecuritySuite());
+            getCipher().setSecurityPolicy(ss.getSecurityPolicy());
+            getCipher().setBlockCipherKey(ss.getGuek());
+            getCipher().setBroadcastBlockCipherKey(ss.getGbek());
+            getCipher().setAuthenticationKey(ss.getGak());
+            setEphemeralBlockCipherKey(ss.getGuek());
+            setEphemeralBroadcastBlockCipherKey(ss.getGbek());
+            setEphemeralAuthenticationKey(ss.getGak());
+            setKek(ss.getKek());
+            // Update certificates for pre-established connections.
+            byte[] st;
+            if (systemTitle == null) {
+                st = ss.getClientSystemTitle();
+            } else {
+                st = systemTitle;
+            }
+            if (st != null) {
+                GXx509Certificate cert =
+                        ss.serverCertificates.findBySystemTitle(st, KeyUsage.DIGITAL_SIGNATURE);
+                if (cert != null) {
+                    getCipher().setSigningKeyPair(
+                            new KeyPair(cert.getPublicKey(), ss.signingKey.getPrivate()));
+                }
+                cert = ss.serverCertificates.findBySystemTitle(st, KeyUsage.KEY_AGREEMENT);
+                if (cert != null) {
+                    getCipher().setKeyAgreementKeyPair(
+                            new KeyPair(cert.getPublicKey(), ss.keyAgreement.getPrivate()));
+                }
+                setSourceSystemTitle(st);
+            }
+            getCipher().setSystemTitle(ss.getServerSystemTitle());
+            // Find Invocation counter and use it if it exists.
+            String ln = "0.0.43.1." + ss.getLogicalName().split("[.]")[4] + ".255";
+            invocationCounter = (GXDLMSData) getObjects().findByLN(ObjectType.DATA, ln);
+            if (invocationCounter != null && invocationCounter.getValue() == null) {
+                if (invocationCounter.getDataType(2) == DataType.NONE) {
+                    invocationCounter.setDataType(2, DataType.UINT32);
+                }
+                invocationCounter.setValue(0);
+            }
+        } else {
+            assignedAssociation.getApplicationContextName()
+                    .setContextId(ApplicationContextName.LOGICAL_NAME);
+        }
+    }
+
     void updateSecuritySettings(final byte[] systemTitle) {
         if (assignedAssociation != null) {
             // Update security settings.
@@ -1008,59 +1056,12 @@ public class GXDLMSSettings {
                 GXDLMSSecuritySetup ss = (GXDLMSSecuritySetup) assignedAssociation.getObjectList()
                         .findByLN(ObjectType.SECURITY_SETUP,
                                 assignedAssociation.getSecuritySetupReference());
-                if (ss != null) {
-                    getCipher().setSecurityPolicy(ss.getSecurityPolicy());
-                    getCipher().setBlockCipherKey(ss.getGuek());
-                    getCipher().setBroadcastBlockCipherKey(ss.getGbek());
-                    getCipher().setAuthenticationKey(ss.getGak());
-                    setEphemeralBlockCipherKey(ss.getGuek());
-                    setEphemeralBroadcastBlockCipherKey(ss.getGbek());
-                    setEphemeralAuthenticationKey(ss.getGak());
-                    setKek(ss.getKek());
-                    // Update certificates for pre-established connections.
-                    byte[] st;
-                    if (systemTitle == null) {
-                        st = ss.getClientSystemTitle();
-                    } else {
-                        st = systemTitle;
-                    }
-                    if (st != null) {
-                        GXx509Certificate cert = ss.serverCertificates.findBySystemTitle(st,
-                                KeyUsage.DIGITAL_SIGNATURE);
-                        if (cert != null) {
-                            getCipher().setSigningKeyPair(
-                                    new KeyPair(cert.getPublicKey(), ss.signingKey.getPrivate()));
-                        }
-                        cert = ss.serverCertificates.findBySystemTitle(st, KeyUsage.KEY_AGREEMENT);
-                        if (cert != null) {
-                            getCipher().setKeyAgreementKeyPair(
-                                    new KeyPair(cert.getPublicKey(), ss.keyAgreement.getPrivate()));
-                        }
-                        setSourceSystemTitle(st);
-                    }
-                    getCipher().setSecuritySuite(ss.getSecuritySuite());
-                    getCipher().setSystemTitle(ss.getServerSystemTitle());
-                    // Find Invocation counter and use it if it exists.
-                    String ln = "0.0.43.1." + ss.getLogicalName().split("[.]")[4] + ".255";
-                    invocationCounter = (GXDLMSData) getObjects().findByLN(ObjectType.DATA, ln);
-                    if (invocationCounter != null && invocationCounter.getValue() == null) {
-                        if (invocationCounter.getDataType(2) == DataType.NONE) {
-                            invocationCounter.setDataType(2, DataType.UINT32);
-                        }
-                        invocationCounter.setValue(0);
-                    }
-                } else {
-                    assignedAssociation.getApplicationContextName()
-                            .setContextId(ApplicationContextName.LOGICAL_NAME);
-                }
+                updateSecurity(systemTitle, ss);
             } else {
-                // Update server system title if security setup is set.
                 GXDLMSSecuritySetup ss = (GXDLMSSecuritySetup) assignedAssociation.getObjectList()
                         .findByLN(ObjectType.SECURITY_SETUP,
                                 assignedAssociation.getSecuritySetupReference());
-                if (ss != null) {
-                    getCipher().setSystemTitle(ss.getServerSystemTitle());
-                }
+                updateSecurity(systemTitle, ss);
             }
         }
     }
