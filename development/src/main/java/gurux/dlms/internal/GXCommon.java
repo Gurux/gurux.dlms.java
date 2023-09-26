@@ -42,6 +42,7 @@ import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Calendar;
+import java.util.Collections;
 import java.util.Date;
 import java.util.HashSet;
 import java.util.List;
@@ -1283,14 +1284,20 @@ public final class GXCommon {
         if (dt == DataType.ARRAY) {
             throw new IllegalArgumentException("Invalid compact array data.");
         }
-        int len = GXCommon.getObjectCount(buff);
-        List<Object> list = new ArrayList<Object>();
+        int colCount = GXCommon.getObjectCount(buff);
+        if (colCount < 0) {
+            throw new IllegalArgumentException("Invalid compact array column count.");
+        }
+        final List<Object> list;
 
         if (dt == DataType.STRUCTURE) {
             // Get data types.
             GXStructure cols = new GXStructure();
-            getDataTypes(buff, cols, len);
-            len = GXCommon.getObjectCount(buff);
+            getDataTypes(buff, cols, colCount);
+            int rowCount = GXCommon.getObjectCount(buff);
+            if (rowCount < 0) {
+                throw new IllegalArgumentException("Invalid compact array row count.");
+            }
             if (info.getXml() != null) {
                 info.getXml().appendStartTag(info.getXml().getDataType(DataType.COMPACT_ARRAY),
                         null, null);
@@ -1306,28 +1313,33 @@ public final class GXCommon {
                     info.getXml().appendStartTag(ARRAY_CONTENTS);
                 }
             }
-            int start = buff.position();
-            while (buff.position() - start < len) {
-                List<Object> row = new ArrayList<Object>();
-                for (int pos = 0; pos != cols.size(); ++pos) {
-                    if (cols.get(pos) instanceof GXStructure) {
-                        getCompactArrayItem(settings, buff, (List<?>) cols.get(pos), row, 1);
-                    } else if (cols.get(pos) instanceof GXArray) {
-                        List<Object> tmp2 = new ArrayList<Object>();
-                        getCompactArrayItem(settings, buff, ((List<?>) cols.get(pos)), tmp2, 1);
-                        row.add((List<?>) tmp2.get(0));
-                    } else {
-                        getCompactArrayItem(settings, buff, (DataType) cols.get(pos), row, 1);
+            if (colCount == 0) {
+                list = Collections.nCopies(rowCount, (Object) Collections.EMPTY_LIST);
+            } else {
+                list = new ArrayList<Object>(rowCount);
+                int start = buff.position();
+                while (buff.position() - start < rowCount) {
+                    List<Object> row = new ArrayList<Object>(colCount);
+                    for (int pos = 0; pos != cols.size(); ++pos) {
+                        if (cols.get(pos) instanceof GXStructure) {
+                            getCompactArrayItem(settings, buff, (List<?>) cols.get(pos), row, 1);
+                        } else if (cols.get(pos) instanceof GXArray) {
+                            List<Object> tmp2 = new ArrayList<Object>();
+                            getCompactArrayItem(settings, buff, ((List<?>) cols.get(pos)), tmp2, 1);
+                            row.add((List<?>) tmp2.get(0));
+                        } else {
+                            getCompactArrayItem(settings, buff, (DataType) cols.get(pos), row, 1);
+                        }
+                        if (buff.position() == buff.size()) {
+                            break;
+                        }
                     }
-                    if (buff.position() == buff.size()) {
+                    // If all columns are read.
+                    if (row.size() >= cols.size()) {
+                        list.add(row);
+                    } else {
                         break;
                     }
-                }
-                // If all columns are read.
-                if (row.size() >= cols.size()) {
-                    list.add(row);
-                } else {
-                    break;
                 }
             }
             if (info.getXml() != null
@@ -1381,7 +1393,8 @@ public final class GXCommon {
                     info.getXml().appendEndTag(info.getXml().getDataType(DataType.COMPACT_ARRAY));
                 }
             }
-            getCompactArrayItem(settings, buff, dt, list, len);
+            list = new ArrayList<Object>();
+            getCompactArrayItem(settings, buff, dt, list, colCount);
             if (info.getXml() != null
                     && info.getXml().getOutputType() == TranslatorOutputType.SIMPLE_XML) {
                 for (Object it : list) {
