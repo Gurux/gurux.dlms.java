@@ -80,7 +80,7 @@ public class GXDLMSTranslatorMessage {
      * Is more data available. Return None if more data is not available or
      * Frame or Block type.
      */
-    private RequestTypes moreData;
+    private java.util.Set<RequestTypes> moreData;
     /**
      * Occurred exception.
      */
@@ -203,7 +203,7 @@ public class GXDLMSTranslatorMessage {
      * @return Is more data available. Return None if more data is not available
      *         or Frame or Block type.
      */
-    public final RequestTypes getMoreData() {
+    public final java.util.Set<RequestTypes> getMoreData() {
         return moreData;
     }
 
@@ -212,7 +212,7 @@ public class GXDLMSTranslatorMessage {
      *            Is more data available. Return None if more data is not
      *            available or Frame or Block type.
      */
-    public final void setMoreData(final RequestTypes value) {
+    public final void setMoreData(final java.util.Set<RequestTypes> value) {
         moreData = value;
     }
 

@@ -94,7 +94,15 @@ public enum InterfaceType {
     /**
      * SMS short wrapper scheme is used.
      */
-    SMS;
+    SMS,
+    /**
+     * PRIME data concentrator wrapper.
+     */
+    PRIME_DC_WRAPPER,
+    /**
+     * Constrained Application Protocol (CoAP).
+     */
+    COAP;
 
     /**
      * @return Get integer value for enumeration.
