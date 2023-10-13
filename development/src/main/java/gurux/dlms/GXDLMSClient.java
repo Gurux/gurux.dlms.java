@@ -944,6 +944,7 @@ public class GXDLMSClient {
         } else {
             settings.setCtoSChallenge(null);
         }
+        GXAPDU.generateAarq(settings, settings.getCipher(), null, buff);
         List<byte[]> reply;
         if (settings.getUseLogicalNameReferencing()) {
             GXDLMSLNParameters p = new GXDLMSLNParameters(settings, 0,
