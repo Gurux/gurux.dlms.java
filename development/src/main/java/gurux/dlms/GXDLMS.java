@@ -5747,8 +5747,13 @@ abstract class GXDLMS {
             data.getData().position(0);
         }
         try {
-            if (!target.getMoreData().contains(RequestTypes.FRAME)) {
-                target.getData().position(0);
+            if (settings.getInterfaceType() == InterfaceType.COAP) {
+                if (!target.getMoreData().contains(RequestTypes.FRAME)) {
+                    // Only full PDUs are handled with CoAP.
+                    target.getData().position(0);
+                    getPdu(settings, target);
+                }
+            } else {
                 getPdu(settings, target);
             }
         } catch (Exception ex) {
