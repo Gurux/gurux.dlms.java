@@ -1418,12 +1418,12 @@ public class GXDLMSClient {
                         String str =
                                 "Inactive object : " + String.valueOf(classID)
                                         + " " + String.valueOf(baseName);
-                        LOGGER.log(Level.INFO, str);
+                        LOGGER.log(Level.FINE, str);
                     }
                 } else {
                     String str = "Unknown object : " + String.valueOf(classID)
                             + " " + String.valueOf(baseName);
-                    LOGGER.log(Level.INFO, str);
+                    LOGGER.log(Level.FINE, str);
                 }
             }
         }
