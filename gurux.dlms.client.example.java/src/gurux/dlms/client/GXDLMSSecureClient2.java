@@ -55,7 +55,8 @@ import gurux.dlms.objects.enums.CertificateType;
 import gurux.dlms.objects.enums.SecuritySuite;
 import gurux.dlms.secure.GXDLMSSecureClient;
 
-public class GXDLMSSecureClient2 extends GXDLMSSecureClient implements IGXCryptoNotifier {
+public class GXDLMSSecureClient2 extends GXDLMSSecureClient
+        implements IGXCryptoNotifier {
 
     /**
      * Constructor.
@@ -81,8 +82,9 @@ public class GXDLMSSecureClient2 extends GXDLMSSecureClient implements IGXCrypto
      * @return Path to the certificate file or folder if system title is not
      *         given.
      */
-    private static Path getPath(final SecuritySuite securitySuite, final CertificateType type,
-            final String path, final byte[] systemTitle) {
+    private static Path getPath(final SecuritySuite securitySuite,
+            final CertificateType type, final String path,
+            final byte[] systemTitle) {
         String pre;
         Path tmp;
         if (securitySuite == SecuritySuite.SUITE_2) {
@@ -103,7 +105,8 @@ public class GXDLMSSecureClient2 extends GXDLMSSecureClient implements IGXCrypto
         default:
             throw new RuntimeException("Invalid type.");
         }
-        return Paths.get(tmp.toString(), pre + GXDLMSTranslator.toHex(systemTitle, false) + ".pem");
+        return Paths.get(tmp.toString(),
+                pre + GXDLMSTranslator.toHex(systemTitle, false) + ".pem");
     }
 
     @Override
@@ -121,13 +124,15 @@ public class GXDLMSSecureClient2 extends GXDLMSSecureClient implements IGXCrypto
         try {
             if (args.getEncrypt()) {
                 // Find private key.
-                Path path = getPath(args.getSecuritySuite(), args.getCertificateType(), "Keys",
+                Path path = getPath(args.getSecuritySuite(),
+                        args.getCertificateType(), "Keys",
                         args.getSystemTitle());
                 args.setPrivateKey(GXPkcs8.load(path).getPrivateKey());
             } else {
                 // Find public key.
-                Path path = getPath(args.getSecuritySuite(), args.getCertificateType(),
-                        "Certificates", args.getSystemTitle());
+                Path path = getPath(args.getSecuritySuite(),
+                        args.getCertificateType(), "Certificates",
+                        args.getSystemTitle());
                 args.setPublicKey(GXx509Certificate.load(path).getPublicKey());
             }
         } catch (IOException e) {
@@ -135,9 +140,10 @@ public class GXDLMSSecureClient2 extends GXDLMSSecureClient implements IGXCrypto
         }
     }
 
-    private static Cipher getCipher(final GXCryptoKeyParameter p, final boolean encrypt)
-            throws NoSuchAlgorithmException, NoSuchPaddingException, InvalidKeyException,
-            InvalidAlgorithmParameterException {
+    private static Cipher getCipher(final GXCryptoKeyParameter p,
+            final boolean encrypt)
+            throws NoSuchAlgorithmException, NoSuchPaddingException,
+            InvalidKeyException, InvalidAlgorithmParameterException {
         GXByteBuffer iv = new GXByteBuffer();
         if (encrypt) {
             iv.set(p.getSystemTitle());

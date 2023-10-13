@@ -42,7 +42,7 @@
     <dependency>
       <groupId>org.gurux</groupId>
       <artifactId>gurux.net</artifactId>
-      <version>1.0.22</version>
+      <version>1.0.27</version>
     </dependency>
     <dependency>
       <groupId>org.gurux</groupId>
@@ -52,7 +52,7 @@
     <dependency>
       <groupId>org.gurux</groupId>
       <artifactId>gurux.dlms</artifactId>
-      <version>4.0.42</version>
+      <version>4.0.43</version>
     </dependency>
     <dependency>
       <groupId>org.gurux</groupId>

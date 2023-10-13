@@ -35,10 +35,12 @@ package gurux.dlms.client;
 
 import java.io.File;
 import java.io.IOException;
+import java.math.BigInteger;
 import java.security.InvalidAlgorithmParameterException;
 import java.security.InvalidKeyException;
 import java.security.NoSuchAlgorithmException;
 import java.security.SignatureException;
+import java.util.List;
 import java.util.Map;
 
 import javax.crypto.BadPaddingException;
@@ -46,11 +48,14 @@ import javax.crypto.IllegalBlockSizeException;
 import javax.crypto.NoSuchPaddingException;
 import javax.xml.stream.XMLStreamException;
 
+import gurux.common.GXCommon;
+import gurux.dlms.enums.InterfaceType;
 import gurux.dlms.enums.ObjectType;
 import gurux.dlms.objects.GXDLMSObjectCollection;
 import gurux.dlms.objects.GXXmlWriterSettings;
 import gurux.mqtt.GXMqtt;
 import gurux.net.GXNet;
+import gurux.net.enums.NetworkType;
 import gurux.serial.GXSerial;
 
 public class sampleclient {
@@ -68,10 +73,10 @@ public class sampleclient {
      * @throws NoSuchAlgorithmException
      * @throws InvalidKeyException
      */
-    public static void main(String[] args)
-            throws XMLStreamException, IOException, InvalidKeyException, NoSuchAlgorithmException,
-            NoSuchPaddingException, InvalidAlgorithmParameterException, IllegalBlockSizeException,
-            BadPaddingException, SignatureException {
+    public static void main(String[] args) throws XMLStreamException,
+            IOException, InvalidKeyException, NoSuchAlgorithmException,
+            NoSuchPaddingException, InvalidAlgorithmParameterException,
+            IllegalBlockSizeException, BadPaddingException, SignatureException {
         Settings settings = new Settings();
         GXDLMSReader reader = null;
         try {
@@ -82,28 +87,29 @@ public class sampleclient {
                 System.exit(1);
                 return;
             }
-
             ////////////////////////////////////////
             // Initialize connection settings.
             if (settings.media instanceof GXSerial) {
-                System.out.println(
-                        "Connect using serial port connection " + settings.media.toString());
+                System.out.println("Connect using serial port connection "
+                        + settings.media.toString());
             } else if (settings.media instanceof GXNet) {
-                System.out.println("Connect using network connection " + settings.media.toString());
+                System.out.println("Connect using network connection "
+                        + settings.media.toString());
             } else if (settings.media instanceof GXMqtt) {
-                System.out.println("Connect using MQTT connection " + settings.media.toString());
+                System.out.println("Connect using MQTT connection "
+                        + settings.media.toString());
             } else {
                 throw new Exception("Unknown media type.");
             }
             ////////////////////////////////////////
-            reader = new GXDLMSReader(settings.client, settings.media, settings.trace,
-                    settings.invocationCounter);
+            reader = new GXDLMSReader(settings.client, settings.media,
+                    settings.trace, settings.invocationCounter);
             try {
                 settings.media.open();
             } catch (Exception ex) {
                 if (settings.media instanceof GXSerial) {
-                    System.out
-                            .println("----------------------------------------------------------");
+                    System.out.println(
+                            "----------------------------------------------------------");
                     System.out.println(ex.getMessage());
                     System.out.println("Available ports:");
                     StringBuilder sb = new StringBuilder();
@@ -117,6 +123,30 @@ public class sampleclient {
                 }
                 throw ex;
             }
+
+            if (settings.client.getInterfaceType() == InterfaceType.COAP
+                    && settings.media instanceof GXNet) {
+                // Default CoAP settings.
+                GXNet net = (GXNet) settings.media;
+                net.setProtocol(NetworkType.UDP);
+                // Set token.
+                settings.client.getCoap().setToken(BigInteger.valueOf(0x45));
+                // Set message ID.
+                settings.client.getCoap().setMessageId(1);
+                settings.client.getCoap().setHost(net.getHostName());
+                settings.client.getCoap().setPort(net.getPort());
+                ///////////////////////////////////
+                // Manufacturer depended settings.
+                // Example settings are for Kamstrup e-meter.
+                // Get correct settings from the meter's documentation.
+                // DLMS version.
+                settings.client.getCoap().getOptions().put(65001, (byte) 1);
+                // Client SAP.
+                settings.client.getCoap().getOptions().put(65003, (byte) 16);
+                // Server SAP
+                settings.client.getCoap().getOptions().put(65005, (byte) 1);
+                ///////////////////////////////////
+            }
             // Export client and server certificates from the meter.
             if (settings.exportSecuritySetupLN != null) {
                 reader.exportMeterCertificates(settings.exportSecuritySetupLN);
@@ -128,9 +158,11 @@ public class sampleclient {
             } else if (!settings.readObjects.isEmpty()) {
                 reader.initializeConnection();
                 boolean read = false;
-                if (settings.outputFile != null && new File(settings.outputFile).exists()) {
+                if (settings.outputFile != null
+                        && new File(settings.outputFile).exists()) {
                     try {
-                        GXDLMSObjectCollection c = GXDLMSObjectCollection.load(settings.outputFile);
+                        GXDLMSObjectCollection c = GXDLMSObjectCollection
+                                .load(settings.outputFile);
                         settings.client.getObjects().addAll(c);
                         read = true;
                     } catch (Exception ex) {
@@ -147,7 +179,8 @@ public class sampleclient {
                 }
                 for (Map.Entry<String, Integer> it : settings.readObjects) {
                     Object val = reader.read(
-                            settings.client.getObjects().findByLN(ObjectType.NONE, it.getKey()),
+                            settings.client.getObjects()
+                                    .findByLN(ObjectType.NONE, it.getKey()),
                             it.getValue());
                     reader.showValue(it.getValue(), val);
                 }
@@ -170,5 +203,4 @@ public class sampleclient {
             System.out.println("Ended. Press any key to continue.");
         }
     }
-
 }
