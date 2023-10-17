@@ -2063,12 +2063,12 @@ abstract class GXDLMS {
         if (data instanceof Byte) {
             len = 1;
             value.setUInt8((Byte) data);
-        } else if (data instanceof Short) {
-            len = 2;
-            value.setUInt16((Short) data);
         } else if (data instanceof Integer) {
+            len = 2;
+            value.setUInt16((Integer) data);
+        } else if (data instanceof Long) {
             len = 4;
-            value.setUInt32((Integer) data);
+            value.setUInt32((Long) data);
         } else if (data instanceof byte[]) {
             value.set((byte[]) data);
             len = ((byte[]) data).length;
@@ -2171,7 +2171,7 @@ abstract class GXDLMS {
         }
         lastOptionType = addOpt(bb, CoAPOptionType.CONTENT_FORMAT.getValue(),
                 lastOptionType,
-                settings.getCoap().getContentFormat().getValue());
+                (Integer) settings.getCoap().getContentFormat().getValue());
         if (settings.getCoap().getMaxAge() != 0) {
             lastOptionType = addOpt(bb, CoAPOptionType.MAX_AGE.getValue(),
                     lastOptionType, settings.getCoap().getMaxAge());
