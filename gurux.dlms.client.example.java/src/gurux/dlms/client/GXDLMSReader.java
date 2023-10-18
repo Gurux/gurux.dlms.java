@@ -97,6 +97,7 @@ import gurux.dlms.objects.enums.CertificateType;
 import gurux.io.BaudRate;
 import gurux.io.Parity;
 import gurux.io.StopBits;
+import gurux.net.GXNet;
 import gurux.serial.GXSerial;
 
 public class GXDLMSReader {
@@ -394,6 +395,8 @@ public class GXDLMSReader {
             GXReplyData reply = new GXReplyData();
             reply.clear();
             int add = dlms.getClientAddress();
+            int serverAdd = dlms.getServerAddress();
+            boolean preEstablished = dlms.isPreEstablishedConnection();
             Authentication auth = dlms.getAuthentication();
             Security security = dlms.getCiphering().getSecurity();
             Signing signing = dlms.getCiphering().getSigning();
@@ -403,6 +406,14 @@ public class GXDLMSReader {
                 dlms.setAuthentication(Authentication.NONE);
                 dlms.getCiphering().setSecurity(Security.NONE);
                 dlms.getCiphering().setSigning(Signing.NONE);
+                
+                if (dlms.getInterfaceType() == InterfaceType.COAP
+                        && Media instanceof GXNet) {
+                    dlms.setPreEstablishedConnection(true);
+                    // Update Server SAP for CoAP.
+                    dlms.getCoap().getOptions().put(65005, (byte) 1);
+                }
+                
                 data = dlms.snrmRequest();
                 if (data != null) {
                     readDLMSPacket(data, reply);
@@ -439,7 +450,9 @@ public class GXDLMSReader {
                     throw Ex;
                 }
             } finally {
+                dlms.setPreEstablishedConnection(preEstablished);
                 dlms.setClientAddress(add);
+                dlms.setServerAddress(serverAdd);
                 dlms.setAuthentication(auth);
                 dlms.getCiphering().setSecurity(security);
                 dlms.setCtoSChallenge(challenge);
