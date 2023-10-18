@@ -430,11 +430,14 @@ public class GXDLMSReader {
                 // Generate AARQ request.
                 // Split requests to multiple packets if needed.
                 // If password is used all data might not fit to one packet.
-                reply.clear();
-                readDataBlock(dlms.aarqRequest(), reply);
                 try {
-                    // Parse reply.
-                    dlms.parseAareResponse(reply.getData());
+                	if (!dlms.isPreEstablishedConnection())
+                	{
+                        reply.clear();
+                        readDataBlock(dlms.aarqRequest(), reply);
+                        // Parse reply.
+                        dlms.parseAareResponse(reply.getData());                		
+                	}
                     reply.clear();
                     GXDLMSData d = new GXDLMSData(invocationCounter);
                     read(d, 2);
