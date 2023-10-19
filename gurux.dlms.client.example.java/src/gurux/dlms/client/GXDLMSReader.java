@@ -54,6 +54,7 @@ import gurux.common.GXCommon;
 import gurux.common.IGXMedia;
 import gurux.common.ReceiveParameters;
 import gurux.common.enums.TraceLevel;
+import gurux.dlms.ConnectionState;
 import gurux.dlms.GXByteBuffer;
 import gurux.dlms.GXDLMSAccessItem;
 import gurux.dlms.GXDLMSConverter;
@@ -134,7 +135,7 @@ public class GXDLMSReader {
     }
 
     void disconnect() throws Exception {
-        if (Media != null && Media.isOpen()) {
+        if (Media != null && Media.isOpen() && !dlms.isPreEstablishedConnection()) {
             System.out.println("DisconnectRequest");
             GXReplyData reply = new GXReplyData();
             readDLMSPacket(dlms.disconnectRequest(), reply);
@@ -409,7 +410,8 @@ public class GXDLMSReader {
                 
                 if (dlms.getInterfaceType() == InterfaceType.COAP
                         && Media instanceof GXNet) {
-                    dlms.setPreEstablishedConnection(true);
+                    // Update client SAP for CoAP.
+                    dlms.getCoap().getOptions().put(65003, (byte) 16);
                     // Update Server SAP for CoAP.
                     dlms.getCoap().getOptions().put(65005, (byte) 1);
                 }
@@ -460,6 +462,14 @@ public class GXDLMSReader {
                 dlms.getCiphering().setSecurity(security);
                 dlms.setCtoSChallenge(challenge);
                 dlms.getCiphering().setSigning(signing);
+
+                if (dlms.getInterfaceType() == InterfaceType.COAP
+                        && Media instanceof GXNet) {
+                    // Update client SAP for CoAP.
+                    dlms.getCoap().getOptions().put(65003, (byte) add);
+                    // Update Server SAP for CoAP.
+                    dlms.getCoap().getOptions().put(65005, (byte) serverAdd);
+                }
             }
         }
     }
@@ -1491,6 +1501,10 @@ public class GXDLMSReader {
                 System.out.print(ex.getMessage());
             }
         }
+        //dlms.getNegotiatedConformance().add(Conformance.GENERAL_PROTECTION);
+        //MIKKO
+       // GXDLMSData d = new GXDLMSData("1.1.0.0.0.255");
+       // read(d, 2);
         if (!read) {
             getAssociationView();
             // Read Scalers and units from the register objects.

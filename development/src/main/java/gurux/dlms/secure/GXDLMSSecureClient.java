@@ -155,13 +155,13 @@ public class GXDLMSSecureClient extends GXDLMSClient {
 	 * @return Server system title.
 	 */
 	public byte[] getServerSystemTitle() {
-		return getSettings().getSourceSystemTitle();
+		return getSettings().getPreEstablishedSystemTitle();
 	}
 
 	/**
 	 * @param value Server system title.
 	 */
 	public void setServerSystemTitle(final byte[] value) {
-		getSettings().setSourceSystemTitle(value);
+		getSettings().setPreEstablishedSystemTitle(value);
 	}
 }
