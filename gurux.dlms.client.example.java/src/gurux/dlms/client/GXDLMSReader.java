@@ -1501,10 +1501,6 @@ public class GXDLMSReader {
                 System.out.print(ex.getMessage());
             }
         }
-        //dlms.getNegotiatedConformance().add(Conformance.GENERAL_PROTECTION);
-        //MIKKO
-       // GXDLMSData d = new GXDLMSData("1.1.0.0.0.255");
-       // read(d, 2);
         if (!read) {
             getAssociationView();
             // Read Scalers and units from the register objects.
