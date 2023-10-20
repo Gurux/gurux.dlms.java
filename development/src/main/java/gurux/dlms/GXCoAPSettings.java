@@ -141,7 +141,7 @@ public class GXCoAPSettings {
         serverError = CoAPServerError.INTERNAL;
         signaling = CoAPSignaling.UNASSIGNED;
         ifNoneMatch = CoAPContentType.NONE;
-        contentFormat = CoAPContentType.NONE;
+        contentFormat = CoAPContentType.APPLICATION_OSCORE;
         options = new TreeMap<>();
     }
 
