@@ -441,7 +441,8 @@ abstract class GXDLMS {
                 return GXDLMS.getMacHdlcFrame(settings, id, (byte) 0, null);
             }
             if (settings.getInterfaceType() == InterfaceType.COAP) {
-                return getCoAPFrame(settings, Command.GET_REQUEST, null);
+                return getCoAPFrame(settings, Command.GET_REQUEST, null,
+                        RequestTypes.toInteger(reply.getMoreData()));
             }
             return getHdlcFrame(settings, id, null);
         }
@@ -1709,7 +1710,7 @@ abstract class GXDLMS {
                     break;
                 case COAP:
                     messages.add(
-                            getCoAPFrame(p.getSettings(), p.command, reply));
+                            getCoAPFrame(p.getSettings(), p.command, reply, 0));
                     break;
                 default:
                     throw new IllegalArgumentException("InterfaceType");
@@ -2056,9 +2057,12 @@ abstract class GXDLMS {
         return bb.array();
     }
 
-    private static int addOpt(GXByteBuffer bb, int type, int last,
-            Object data) {
+    private static int addOpt(final GXByteBuffer bb, final int type, int last,
+            final Object data) {
         int len;
+        if (type < last) {
+            last = 0;
+        }
         GXByteBuffer value = new GXByteBuffer();
         if (data instanceof Byte) {
             len = 1;
@@ -2083,12 +2087,11 @@ abstract class GXDLMS {
             len |= ((type - last) << 4);
             bb.setUInt8(len);
         } else if (type - last < 269) {
-            len |= (byte) (13 << 4);
+            len |= (13 << 4);
             bb.setUInt8(len);
             // Opt delta extended.
-            int delta = type;
-            delta -= (short) (13 + last);
-            bb.setUInt16(delta);
+            int delta = (type - last + 1);
+            bb.setUInt8(delta);
         } else {
             len |= (byte) (14 << 4);
             bb.setUInt8(len);
@@ -2110,10 +2113,12 @@ abstract class GXDLMS {
      *            DLMS command.
      * @param data
      *            Wrapped data.
+     * @param moreData
+     *            moreData.
      * @return SMS frame
      */
     static byte[] getCoAPFrame(GXDLMSSettings settings, int command,
-            GXByteBuffer data) {
+            GXByteBuffer data, int moreData) {
         GXByteBuffer bb = new GXByteBuffer();
         // Add version.
         byte version = 1;
@@ -2129,7 +2134,11 @@ abstract class GXDLMS {
         } else {
             tokenLen = 8;
         }
-        if (!settings.isServer() || command == Command.DATA_NOTIFICATION
+        if ((moreData & RequestTypes.FRAME.getValue()) != 0) {
+            type = CoAPType.ACKNOWLEDGEMENT.getValue();
+            code = (byte) CoAPClass.SUCCESS.getValue() << 5
+                    | CoAPSuccess.CONTINUE.getValue();
+        } else if (!settings.isServer() || command == Command.DATA_NOTIFICATION
                 || command == Command.EVENT_NOTIFICATION) {
             code = (CoAPClass.METHOD.getValue() << 5)
                     | CoAPMethod.POST.getValue();
@@ -2143,7 +2152,10 @@ abstract class GXDLMS {
         bb.setUInt8((version << 6 | (type << 4) | tokenLen));
         // Add code.
         bb.setUInt8(code);
-        settings.getCoap().setMessageId(1 + settings.getCoap().getMessageId());
+        if ((moreData & RequestTypes.FRAME.getValue()) == 0) {
+            settings.getCoap()
+                    .setMessageId(1 + settings.getCoap().getMessageId());
+        }
         bb.setUInt16(settings.getCoap().getMessageId());
         if (settings.getCoap().getToken().longValue() < 0x100) {
             bb.setUInt8((byte) settings.getCoap().getToken().longValue());
@@ -2154,29 +2166,41 @@ abstract class GXDLMS {
         } else {
             bb.setUInt64(settings.getCoap().getToken().longValue());
         }
-        int lastOptionType = 0;
+        int lastOptionType = 14;
         if (type == CoAPType.CONFIRMABLE.getValue()) {
             // Add Uri-host.
-            lastOptionType = addOpt(bb, CoAPOptionType.URI_HOST.getValue(),
-                    lastOptionType, settings.getCoap().getHost());
-            // Add Uri-port.
-            lastOptionType = addOpt(bb, CoAPOptionType.URI_PORT.getValue(),
-                    lastOptionType, settings.getCoap().getPort());
+            if (settings.getCoap().getHost() != null
+                    && !settings.getCoap().getHost().equals("")) {
+                lastOptionType = addOpt(bb, CoAPOptionType.URI_HOST.getValue(),
+                        lastOptionType, settings.getCoap().getHost());
+            }
+            if (settings.getCoap().getPort() != 0) {
+                // Add Uri-port.
+                lastOptionType = addOpt(bb, CoAPOptionType.URI_PORT.getValue(),
+                        lastOptionType, settings.getCoap().getPort());
+            }
             // Add Uri-port.
             if (settings.getCoap().getPath() != null
-                    && settings.getCoap().getPath() != "") {
+                    && !settings.getCoap().getPath().equals("")) {
                 lastOptionType = addOpt(bb, CoAPOptionType.URI_PATH.getValue(),
                         lastOptionType, settings.getCoap().getPath());
             }
         }
-        lastOptionType = addOpt(bb, CoAPOptionType.CONTENT_FORMAT.getValue(),
-                lastOptionType,
-                (Integer) settings.getCoap().getContentFormat().getValue());
+        if ((moreData & RequestTypes.FRAME.getValue()) == 0) {
+            lastOptionType = addOpt(bb,
+                    CoAPOptionType.CONTENT_FORMAT.getValue(), lastOptionType,
+                    (Integer) settings.getCoap().getContentFormat().getValue());
+        }
         if (settings.getCoap().getMaxAge() != 0) {
             lastOptionType = addOpt(bb, CoAPOptionType.MAX_AGE.getValue(),
                     lastOptionType, settings.getCoap().getMaxAge());
         }
 
+        if ((moreData & RequestTypes.FRAME.getValue()) != 0) {
+            lastOptionType = addOpt(bb, CoAPOptionType.BLOCK1.getValue(),
+                    lastOptionType,
+                    (byte) ((settings.getCoap().getBlockNumber() << 4) | 0xE));
+        }
         if (settings.getCoap().getBlockNumber() != 0) {
             lastOptionType = addOpt(bb, CoAPOptionType.BLOCK2.getValue(),
                     lastOptionType,
@@ -3186,6 +3210,7 @@ abstract class GXDLMS {
         // Get msg ID.
         int msgId = buff.getUInt16();
         if (data != null && data.getXml() == null
+                && settings.getCoap().getMessageId() != 0
                 && settings.getCoap().getMessageId() != msgId) {
             return false;
         }
@@ -3194,6 +3219,7 @@ abstract class GXDLMS {
         short option;
         int moreData = 0;
         int type = 0;
+        int frameSize = 0;
         if (coapClass != CoAPClass.CLIENT_ERROR.getValue()) {
             while (buff.available() != 0
                     && (option = buff.getUInt8()) != 0xFF) {
@@ -3205,14 +3231,12 @@ abstract class GXDLMS {
                 byte delta = (byte) (option >>> 4);
                 if (delta == 13) {
                     // Extended delta value.
-                    type = buff.getUInt8();
+                    type += buff.getUInt8();
                     type += 13;
-                    type += 12;
                 } else if (delta == 14) {
                     // Extended delta value.
-                    type = buff.getUInt16();
+                    type += buff.getUInt16();
                     type += 269;
-                    type += 12;
                 } else {
                     type += delta;
                 }
@@ -3237,14 +3261,27 @@ abstract class GXDLMS {
                                 CoAPContentType.forValue(tmp));
                     }
                     continue;
+                } else if (type == CoAPOptionType.BLOCK1.getValue()) {
+                    int tmp = getCoAPValueAsInteger(buff, optionLen).intValue();
+                    if ((tmp & 0x8) != 0) {
+                        moreData |= RequestTypes.FRAME.getValue();
+                        ;
+                    }
+                    if (data != null) {
+                        settings.getCoap().setBlockNumber((tmp >> 8));
+                        data.getMoreData()
+                                .addAll(RequestTypes.forValue(moreData));
+                    }
+                    frameSize = (int) Math.pow(2, (tmp & 0x7) + 4);
+                    continue;
                 } else if (type == CoAPOptionType.BLOCK2.getValue()) {
                     // More flag.
-                    byte more = (byte) getCoAPValueAsInteger(buff, optionLen)
-                            .byteValue();
-                    byte blockNumber = (byte) (more >>> 4);
-                    if ((more & 0x8) != 0) {
+                    int tmp = getCoAPValueAsInteger(buff, optionLen).intValue();
+                    byte blockNumber = (byte) (tmp >> 4);
+                    if ((tmp & 0x8) != 0) {
                         moreData = RequestTypes.FRAME.getValue();
                     }
+                    frameSize = (int) Math.pow(2, (tmp & 0x7) + 4);
                     if (data != null) {
                         if (settings != null
                                 && blockNumber != settings.getCoap()
@@ -3334,6 +3371,7 @@ abstract class GXDLMS {
                 case CREATED:
                 case DELETED:
                 case VALID:
+                case CONTINUE:
                     break;
                 default:
                     return false;

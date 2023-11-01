@@ -69,7 +69,7 @@ public class GXDLMSPushListener
     /**
      * Are messages traced.
      */
-    private boolean trace = false;
+    private boolean trace = true;
     /**
      * TCP/IP port to listen.
      */
@@ -88,8 +88,7 @@ public class GXDLMSPushListener
     /**
      * Client used to parse received data.
      */
-    private GXDLMSSecureClient client = new GXDLMSSecureClient(true, 1, 1,
-            Authentication.NONE, null, InterfaceType.WRAPPER);
+    private GXDLMSSecureClient client;
 
     GXDLMSPushSetup push = new GXDLMSPushSetup();
 
@@ -99,8 +98,14 @@ public class GXDLMSPushListener
      * @param port
      *            Listener port.
      */
-    public GXDLMSPushListener(int port) throws Exception {
-        media = new gurux.net.GXNet(NetworkType.TCP, port);
+    public GXDLMSPushListener(int port, InterfaceType interfaceType)
+            throws Exception {
+        client = new GXDLMSSecureClient(true, 1, 1, Authentication.NONE, null,
+                interfaceType);
+        media = new gurux.net.GXNet(
+                interfaceType == InterfaceType.COAP ? NetworkType.UDP
+                        : NetworkType.TCP,
+                port);
         media.setTrace(TraceLevel.VERBOSE);
         media.addListener(this);
         media.open();
@@ -165,12 +170,20 @@ public class GXDLMSPushListener
                             .bytesToHex((byte[]) e.getData()));
                 }
                 reply.set((byte[]) e.getData());
-                GXReplyData data = new GXReplyData();
-                client.getData(reply, data, notify);
+                // Example handles only notify messages.
+                client.getData(reply, notify);
                 // If all data is received.
                 if (notify.isComplete()) {
-                    reply.clear();
-                    if (!notify.isMoreData()) {
+                    // Don't call clear here.
+                    // There might be bytes from the next frame waiting.
+                    reply.trim();
+                    if (notify.isMoreData()) {
+                        if (client.getInterfaceType() == InterfaceType.COAP) {
+                            // Send ACK for the meter.
+                            byte[] data = client.receiverReady(notify);
+                            media.send(data, e.getSenderInfo());
+                        }
+                    } else {
                         // Comment this if the meter describes the content of
                         // the push message for the
                         // client in the received data.
@@ -216,7 +229,7 @@ public class GXDLMSPushListener
                         } catch (Exception ex) {
                             System.out.println(ex.getMessage());
                         } finally {
-                            data.clear();
+                            notify.clear();
                         }
                     }
                 }

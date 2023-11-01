@@ -128,7 +128,8 @@ public class sampleclient {
                 // Default CoAP settings.
                 GXNet net = (GXNet) settings.media;
                 net.setProtocol(NetworkType.UDP);
-                settings.client.getCoap().setContentFormat(CoAPContentType.APPLICATION_OSCORE);                
+                settings.client.getCoap()
+                        .setContentFormat(CoAPContentType.APPLICATION_OSCORE);
                 // Set token.
                 settings.client.getCoap().setToken(BigInteger.valueOf(0x45));
                 // Set message ID.
@@ -142,9 +143,11 @@ public class sampleclient {
                 // DLMS version.
                 settings.client.getCoap().getOptions().put(65001, (byte) 1);
                 // Client SAP.
-                settings.client.getCoap().getOptions().put(65003, (byte) settings.client.getClientAddress());
+                settings.client.getCoap().getOptions().put(65003,
+                        (byte) settings.client.getClientAddress());
                 // Server SAP
-                settings.client.getCoap().getOptions().put(65005, (byte) settings.client.getServerAddress());
+                settings.client.getCoap().getOptions().put(65005,
+                        (byte) settings.client.getServerAddress());
                 ///////////////////////////////////
             }
             // Export client and server certificates from the meter.
