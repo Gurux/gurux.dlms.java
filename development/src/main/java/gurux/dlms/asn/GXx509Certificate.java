@@ -104,6 +104,11 @@ public class GXx509Certificate {
     private String issuer;
 
     /**
+     * Raw Issuer in ASN1 format.
+     */
+    private byte[] issuerRaw;
+
+    /**
      * Authority Cert Issuer. Example: "CN=Test O=Gurux, L=Tampere, C=FI".
      */
     private String authorityCertIssuer;
@@ -288,6 +293,7 @@ public class GXx509Certificate {
             parameters = ((GXAsn1Sequence) reqInfo.get(2)).get(1);
         }
         // Issuer
+        issuerRaw = GXAsn1Converter.toByteArray(reqInfo.get(3));
         issuer = GXAsn1Converter.getSubject((GXAsn1Sequence) reqInfo.get(3));
         boolean basicConstraintsExists = false;
         // Validity
@@ -960,5 +966,12 @@ public class GXx509Certificate {
      */
     public String toDer() {
         return GXCommon.toBase64(getEncoded());
+    }
+
+    /**
+     * @return Raw Issuer in ASN1 format.
+     */
+    public byte[] getIssuerRaw() {
+        return issuerRaw;
     }
 }

@@ -125,7 +125,7 @@ public class Settings {
         System.out.println(
                 " -E \t Export client and server certificates from the meter. Ex -E 0.0.43.0.0.255. ");
         System.out.println(
-                " -R \t Generate new client and server certificates and import them to the server. Ex. -R 0.0.43.0.0.255.");
+                " -N \t Generate new client and server certificates and import them to the server. Ex. -N 0.0.43.0.0.255.");
         System.out.println(
                 " -i \t Used communication interface. Ex. -i WRAPPER.");
         System.out.println(" -m \t Used PLC MAC address. Ex. -m 1.");
@@ -134,8 +134,6 @@ public class Settings {
         System.out.println(" -f \t HDLC Frame size. Default is 128");
         System.out.println(
                 " -L \t Manufacturer ID (Flag ID) is used to use manufacturer depending functionality. -L LGZ");
-        System.out.println(" -e \t Pre-established connection is used");
-
         System.out.println("Example:");
         System.out.println("Read LG device using TCP/IP connection.");
         System.out.println(
@@ -152,7 +150,7 @@ public class Settings {
     static int getParameters(String[] args, Settings settings)
             throws IOException {
         List<GXCmdParameter> parameters = GXCommon.getParameters(args,
-                "h:p:c:s:r:i:It:a:pP:g:S:n:C:v:o:T:A:B:D:d:l:E:V:M:K:N:W:w:f:L:q:e");
+                "h:p:c:s:r:i:It:a:pP:g:S:n:C:v:o:T:A:B:D:d:l:E:V:M:K:N:W:w:f:L:q");
         GXNet net = null;
         GXMqtt mqtt = null;
         // Has user give the custom serial port settings or are the default
@@ -232,9 +230,6 @@ public class Settings {
                 break;
             case 'P':// Password
                 settings.client.setPassword(it.getValue().getBytes());
-                break;
-            case 'e':// Pre-established connection is used
-                settings.client.setPreEstablishedConnection(true);
                 break;
             case 'i':// Interface type.
                 if ("HDLC".equalsIgnoreCase(it.getValue()))

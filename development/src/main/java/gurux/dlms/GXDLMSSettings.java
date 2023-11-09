@@ -1518,6 +1518,9 @@ public class GXDLMSSettings {
      *            Pre-established system title.
      */
     public void setPreEstablishedSystemTitle(final byte[] value) {
+        if (value != null && value.length != 8) {
+            throw new IllegalArgumentException("Invalid system title.");
+        }
         preEstablishedSystemTitle = value;
     }
 

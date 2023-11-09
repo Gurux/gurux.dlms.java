@@ -63,7 +63,10 @@ public abstract class GXDLMSSecureServer2 extends GXDLMSServer2 {
     public GXDLMSSecureServer2(final boolean logicalNameReferencing,
             final InterfaceType type) {
         super(logicalNameReferencing, type);
-        ciphering = new GXCiphering("ABCDEFGH".getBytes());
+        // System title format is FLAG ID + serial number.
+        byte[] st =
+                new byte[] { 0x47, 0x52, 0x58, 0x00, 0x00, 0x00, 0x00, 0x01 };
+        ciphering = new GXCiphering(st);
         setCipher(ciphering);
     }
 
@@ -78,7 +81,10 @@ public abstract class GXDLMSSecureServer2 extends GXDLMSServer2 {
     public GXDLMSSecureServer2(final GXDLMSAssociationLogicalName ln,
             final InterfaceType type) {
         super(ln, type);
-        ciphering = new GXCiphering("ABCDEFGH".getBytes());
+        // System title format is FLAG ID + serial number.
+        byte[] st =
+                new byte[] { 0x47, 0x52, 0x58, 0x00, 0x00, 0x00, 0x00, 0x01 };
+        ciphering = new GXCiphering(st);
         setCipher(ciphering);
     }
 
@@ -93,7 +99,10 @@ public abstract class GXDLMSSecureServer2 extends GXDLMSServer2 {
     public GXDLMSSecureServer2(final GXDLMSAssociationShortName sn,
             final InterfaceType type) {
         super(sn, type);
-        ciphering = new GXCiphering("ABCDEFGH".getBytes());
+        // System title format is FLAG ID + serial number.
+        byte[] st =
+                new byte[] { 0x47, 0x52, 0x58, 0x00, 0x00, 0x00, 0x00, 0x01 };
+        ciphering = new GXCiphering(st);
         setCipher(ciphering);
     }
 
@@ -108,7 +117,10 @@ public abstract class GXDLMSSecureServer2 extends GXDLMSServer2 {
     public GXDLMSSecureServer2(final GXDLMSAssociationLogicalName ln,
             final GXDLMSHdlcSetup hdlc) {
         super(ln, hdlc);
-        ciphering = new GXCiphering("ABCDEFGH".getBytes());
+        // System title format is FLAG ID + serial number.
+        byte[] st =
+                new byte[] { 0x47, 0x52, 0x58, 0x00, 0x00, 0x00, 0x00, 0x01 };
+        ciphering = new GXCiphering(st);
         setCipher(ciphering);
     }
 
@@ -123,7 +135,10 @@ public abstract class GXDLMSSecureServer2 extends GXDLMSServer2 {
     public GXDLMSSecureServer2(final GXDLMSAssociationShortName sn,
             final GXDLMSHdlcSetup hdlc) {
         super(sn, hdlc);
-        ciphering = new GXCiphering("ABCDEFGH".getBytes());
+        // System title format is FLAG ID + serial number.
+        byte[] st =
+                new byte[] { 0x47, 0x52, 0x58, 0x00, 0x00, 0x00, 0x00, 0x01 };
+        ciphering = new GXCiphering(st);
         setCipher(ciphering);
     }
 
@@ -138,7 +153,10 @@ public abstract class GXDLMSSecureServer2 extends GXDLMSServer2 {
     public GXDLMSSecureServer2(final GXDLMSAssociationLogicalName ln,
             final GXDLMSTcpUdpSetup wrapper) {
         super(ln, wrapper);
-        ciphering = new GXCiphering("ABCDEFGH".getBytes());
+        // System title format is FLAG ID + serial number.
+        byte[] st =
+                new byte[] { 0x47, 0x52, 0x58, 0x00, 0x00, 0x00, 0x00, 0x01 };
+        ciphering = new GXCiphering(st);
         setCipher(ciphering);
     }
 
@@ -153,7 +171,10 @@ public abstract class GXDLMSSecureServer2 extends GXDLMSServer2 {
     public GXDLMSSecureServer2(final GXDLMSAssociationShortName sn,
             final GXDLMSTcpUdpSetup wrapper) {
         super(sn, wrapper);
-        ciphering = new GXCiphering("ABCDEFGH".getBytes());
+        // System title format is FLAG ID + serial number.
+        byte[] st =
+                new byte[] { 0x47, 0x52, 0x58, 0x00, 0x00, 0x00, 0x00, 0x01 };
+        ciphering = new GXCiphering(st);
         setCipher(ciphering);
     }
 

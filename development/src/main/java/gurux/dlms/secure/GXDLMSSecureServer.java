@@ -59,7 +59,10 @@ public abstract class GXDLMSSecureServer extends GXDLMSServer {
     public GXDLMSSecureServer(final boolean logicalNameReferencing,
             final InterfaceType type) {
         super(logicalNameReferencing, type);
-        ciphering = new GXCiphering("ABCDEFGH".getBytes());
+        // System title format is FLAG ID + serial number.
+        byte[] st =
+                new byte[] { 0x47, 0x52, 0x58, 0x00, 0x00, 0x00, 0x00, 0x01 };
+        ciphering = new GXCiphering(st);
         setCipher(ciphering);
     }
 

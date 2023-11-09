@@ -40,117 +40,183 @@ import gurux.dlms.objects.enums.CertificateEntity;
 import gurux.dlms.objects.enums.CertificateType;
 
 public class GXDLMSCertificateInfo {
-	/**
-	 * Used certificate entity.
-	 */
-	private CertificateEntity entity = CertificateEntity.SERVER;
+    /**
+     * Used certificate entity.
+     */
+    private CertificateEntity entity = CertificateEntity.SERVER;
 
-	/**
-	 * Used certificate type.
-	 */
-	private CertificateType type = CertificateType.DIGITAL_SIGNATURE;
+    /**
+     * Used certificate type.
+     */
+    private CertificateType type = CertificateType.DIGITAL_SIGNATURE;
 
-	/**
-	 * Certificate serial number.
-	 */
-	private BigInteger serialNumber;
+    /**
+     * Certificate serial number.
+     */
+    private BigInteger serialNumber;
 
-	/**
-	 * Certificate issuer.
-	 */
-	private String issuer;
-	/**
-	 * Certificate subject.
-	 */
-	private String subject;
+    /**
+     * Certificate issuer.
+     */
+    private String issuer;
 
-	/**
-	 * Certificate subject alt name.
-	 */
-	private String subjectAltName;
+    /**
+     * Raw issuer in ASN1 format.
+     */
+    private byte[] issuerRaw;
 
-	/**
-	 * @return Used certificate entity.
-	 */
-	public final CertificateEntity getEntity() {
-		return entity;
-	}
+    /**
+     * Certificate subject.
+     */
+    private String subject;
 
-	/**
-	 * @param value Used certificate entity.
-	 */
-	public final void setEntity(final CertificateEntity value) {
-		entity = value;
-	}
+    /**
+     * Raw subject in ASN1 format.
+     */
+    private byte[] subjectRaw;
 
-	/**
-	 * @return Used certificate type.
-	 */
-	public final CertificateType getType() {
-		return type;
-	}
+    /**
+     * Certificate subject alt name.
+     */
+    private String subjectAltName;
 
-	/**
-	 * @param value Used certificate type.
-	 */
-	public final void setType(final CertificateType value) {
-		type = value;
-	}
+    /**
+     * Raw subject alt name in ASN1 format.
+     */
+    private byte[] subjectAltNameRaw;
 
-	/**
-	 * @return Certificate serial number.
-	 */
-	public final BigInteger getSerialNumber() {
-		return serialNumber;
-	}
+    /**
+     * @return Used certificate entity.
+     */
+    public final CertificateEntity getEntity() {
+        return entity;
+    }
 
-	/**
-	 * @param value Certificate serial number.
-	 */
-	public final void setSerialNumber(final BigInteger value) {
-		serialNumber = value;
-	}
+    /**
+     * @param value
+     *            Used certificate entity.
+     */
+    public final void setEntity(final CertificateEntity value) {
+        entity = value;
+    }
 
-	/**
-	 * @return Certificate issuer.
-	 */
-	public final String getIssuer() {
-		return issuer;
-	}
+    /**
+     * @return Used certificate type.
+     */
+    public final CertificateType getType() {
+        return type;
+    }
 
-	/**
-	 * @param value Certificate issuer.
-	 */
-	public final void setIssuer(final String value) {
-		issuer = value;
-	}
+    /**
+     * @param value
+     *            Used certificate type.
+     */
+    public final void setType(final CertificateType value) {
+        type = value;
+    }
 
-	/**
-	 * @return Certificate subject.
-	 */
-	public final String getSubject() {
-		return subject;
-	}
+    /**
+     * @return Certificate serial number.
+     */
+    public final BigInteger getSerialNumber() {
+        return serialNumber;
+    }
 
-	/**
-	 * @param value Certificate subject.
-	 */
-	public final void setSubject(final String value) {
-		subject = value;
-	}
+    /**
+     * @param value
+     *            Certificate serial number.
+     */
+    public final void setSerialNumber(final BigInteger value) {
+        serialNumber = value;
+    }
 
-	/**
-	 * @return Certificate subject alt name.
-	 */
-	public final String getSubjectAltName() {
-		return subjectAltName;
-	}
+    /**
+     * @return Certificate issuer.
+     */
+    public final String getIssuer() {
+        return issuer;
+    }
 
-	/**
-	 * @param value Certificate subject alt name.
-	 */
-	public final void setSubjectAltName(final String value) {
-		subjectAltName = value;
-	}
+    /**
+     * @param value
+     *            Certificate issuer.
+     */
+    public final void setIssuer(final String value) {
+        issuer = value;
+    }
 
+    /**
+     * @return Certificate subject.
+     */
+    public final String getSubject() {
+        return subject;
+    }
+
+    /**
+     * @param value
+     *            Certificate subject.
+     */
+    public final void setSubject(final String value) {
+        subject = value;
+    }
+
+    /**
+     * @return Certificate subject alt name.
+     */
+    public final String getSubjectAltName() {
+        return subjectAltName;
+    }
+
+    /**
+     * @param value
+     *            Certificate subject alt name.
+     */
+    public final void setSubjectAltName(final String value) {
+        subjectAltName = value;
+    }
+
+    /**
+     * @return Raw Issuer in ASN1 format.
+     */
+    public byte[] getIssuerRaw() {
+        return issuerRaw;
+    }
+
+    /**
+     * @param value
+     *            Raw Issuer in ASN1 format.
+     */
+    public void setIssuerRaw(final byte[] value) {
+        issuerRaw = value;
+    }
+
+    /**
+     * @return Raw subject in ASN1 format.
+     */
+    public byte[] getSubjectRaw() {
+        return subjectRaw;
+    }
+
+    /**
+     * @param value
+     *            Raw subject in ASN1 format.
+     */
+    public void setSubjectRaw(final byte[] value) {
+        subjectRaw = value;
+    }
+
+    /**
+     * @return Raw subject alt name in ASN1 format.
+     */
+    public byte[] getSubjectAltNameRaw() {
+        return subjectAltNameRaw;
+    }
+
+    /**
+     * @param value
+     *            Raw subject alt name in ASN1 format.
+     */
+    public void setSubjectAltNameRaw(byte[] value) {
+        subjectAltNameRaw = value;
+    }
 }

@@ -54,7 +54,6 @@ import gurux.common.GXCommon;
 import gurux.common.IGXMedia;
 import gurux.common.ReceiveParameters;
 import gurux.common.enums.TraceLevel;
-import gurux.dlms.ConnectionState;
 import gurux.dlms.GXByteBuffer;
 import gurux.dlms.GXDLMSAccessItem;
 import gurux.dlms.GXDLMSConverter;
@@ -135,7 +134,8 @@ public class GXDLMSReader {
     }
 
     void disconnect() throws Exception {
-        if (Media != null && Media.isOpen() && !dlms.isPreEstablishedConnection()) {
+        if (Media != null && Media.isOpen()
+                && !dlms.isPreEstablishedConnection()) {
             System.out.println("DisconnectRequest");
             GXReplyData reply = new GXReplyData();
             readDLMSPacket(dlms.disconnectRequest(), reply);
@@ -391,23 +391,27 @@ public class GXDLMSReader {
         // Read frame counter if GeneralProtection is used.
         if (invocationCounter != null && dlms.getCiphering() != null
                 && dlms.getCiphering().getSecurity() != Security.NONE) {
+            // Media settings are saved and they are restored when HDLC with
+            // mode E is used.
+            String mediaSettings = Media.getSettings();
             initializeOpticalHead();
             byte[] data;
             GXReplyData reply = new GXReplyData();
             reply.clear();
             int add = dlms.getClientAddress();
             int serverAdd = dlms.getServerAddress();
-            boolean preEstablished = dlms.isPreEstablishedConnection();
+            byte[] serverSt = dlms.getServerSystemTitle();
             Authentication auth = dlms.getAuthentication();
             Security security = dlms.getCiphering().getSecurity();
             Signing signing = dlms.getCiphering().getSigning();
             byte[] challenge = dlms.getCtoSChallenge();
             try {
+                dlms.setServerSystemTitle(null);
                 dlms.setClientAddress(16);
                 dlms.setAuthentication(Authentication.NONE);
                 dlms.getCiphering().setSecurity(Security.NONE);
                 dlms.getCiphering().setSigning(Signing.NONE);
-                
+
                 if (dlms.getInterfaceType() == InterfaceType.COAP
                         && Media instanceof GXNet) {
                     // Update client SAP for CoAP.
@@ -415,7 +419,7 @@ public class GXDLMSReader {
                     // Update Server SAP for CoAP.
                     dlms.getCoap().getOptions().put(65005, (byte) 1);
                 }
-                
+
                 data = dlms.snrmRequest();
                 if (data != null) {
                     readDLMSPacket(data, reply);
@@ -433,13 +437,12 @@ public class GXDLMSReader {
                 // Split requests to multiple packets if needed.
                 // If password is used all data might not fit to one packet.
                 try {
-                	if (!dlms.isPreEstablishedConnection())
-                	{
+                    if (!dlms.isPreEstablishedConnection()) {
                         reply.clear();
                         readDataBlock(dlms.aarqRequest(), reply);
                         // Parse reply.
-                        dlms.parseAareResponse(reply.getData());                		
-                	}
+                        dlms.parseAareResponse(reply.getData());
+                    }
                     reply.clear();
                     GXDLMSData d = new GXDLMSData(invocationCounter);
                     read(d, 2);
@@ -450,19 +453,23 @@ public class GXDLMSReader {
                             TraceLevel.INFO);
                     reply.clear();
                     disconnect();
+                    // Reset media settings back to default.
+                    if (dlms.getInterfaceType() == InterfaceType.HDLC_WITH_MODE_E) {
+                        Media.close();
+                        Media.setSettings(mediaSettings);
+                    }
                 } catch (Exception Ex) {
                     disconnect();
                     throw Ex;
                 }
             } finally {
-                dlms.setPreEstablishedConnection(preEstablished);
+                dlms.setServerSystemTitle(serverSt);
                 dlms.setClientAddress(add);
                 dlms.setServerAddress(serverAdd);
                 dlms.setAuthentication(auth);
                 dlms.getCiphering().setSecurity(security);
                 dlms.setCtoSChallenge(challenge);
                 dlms.getCiphering().setSigning(signing);
-
                 if (dlms.getInterfaceType() == InterfaceType.COAP
                         && Media instanceof GXNet) {
                     // Update client SAP for CoAP.
@@ -1409,7 +1416,7 @@ public class GXDLMSReader {
         // Export server certificates using serial number and verify it.
         for (GXx509Certificate it : certs) {
             if (!readDataBlock(ss.exportCertificateBySerial(dlms,
-                    it.getSerialNumber(), it.getIssuer()), reply)) {
+                    it.getSerialNumber(), it.getIssuerRaw()), reply)) {
                 throw new GXDLMSException(reply.getError());
             }
             // Verify certificate.
@@ -1466,7 +1473,7 @@ public class GXDLMSReader {
                 reply.clear();
                 // Export certification and verify it.
                 if (!readDataBlock(ss.exportCertificateBySerial(dlms,
-                        it.getSerialNumber(), it.getIssuer()), reply)) {
+                        it.getSerialNumber(), it.getIssuerRaw()), reply)) {
                     throw new GXDLMSException(reply.getError());
                 }
                 GXx509Certificate cert =

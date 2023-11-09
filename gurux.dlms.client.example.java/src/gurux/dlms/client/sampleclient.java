@@ -76,6 +76,7 @@ public class sampleclient {
             IOException, InvalidKeyException, NoSuchAlgorithmException,
             NoSuchPaddingException, InvalidAlgorithmParameterException,
             IllegalBlockSizeException, BadPaddingException, SignatureException {
+
         Settings settings = new Settings();
         GXDLMSReader reader = null;
         try {

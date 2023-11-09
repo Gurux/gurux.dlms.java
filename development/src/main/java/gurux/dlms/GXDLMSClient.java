@@ -4066,14 +4066,6 @@ public class GXDLMSClient {
      * @return Is pre-established connection used.
      */
     public boolean isPreEstablishedConnection() {
-        return preEstablished;
-    }
-
-    /**
-     * @param value
-     *            Is pre-established connection used.
-     */
-    public void setPreEstablishedConnection(final boolean value) {
-        preEstablished = value;
+        return settings.getPreEstablishedSystemTitle() != null;
     }
 }

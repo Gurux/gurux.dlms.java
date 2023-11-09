@@ -61,6 +61,7 @@ import gurux.dlms.GXDLMSTranslator;
 import gurux.dlms.GXSimpleEntry;
 import gurux.dlms.ValueEventArgs;
 import gurux.dlms.asn.GXAsn1Converter;
+import gurux.dlms.asn.GXAsn1Sequence;
 import gurux.dlms.asn.GXPkcs10;
 import gurux.dlms.asn.GXPkcs8;
 import gurux.dlms.asn.GXx509Certificate;
@@ -126,7 +127,8 @@ public class GXDLMSSecuritySetup extends GXDLMSObject implements IGXDLMSBase {
     /**
      * Available certificates of the server.
      */
-    public GXx509CertificateCollection serverCertificates = new GXx509CertificateCollection();
+    public GXx509CertificateCollection serverCertificates =
+            new GXx509CertificateCollection();
 
     /**
      * Security policy.
@@ -185,11 +187,12 @@ public class GXDLMSSecuritySetup extends GXDLMSObject implements IGXDLMSBase {
         setVersion(1);
         // If Broadcast block cipher key is not defined GUEK is used.
         gbek = null;
-        guek = new byte[] { 0x00, 0x01, 0x02, 0x03, 0x04, 0x05, 0x06, 0x07, 0x08, 0x09, 0x0A, 0x0B,
-                0x0C, 0x0D, 0x0E, 0x0F };
-        gak = new byte[] { (byte) 0xD0, (byte) 0xD1, (byte) 0xD2, (byte) 0xD3, (byte) 0xD4,
-                (byte) 0xD5, (byte) 0xD6, (byte) 0xD7, (byte) 0xD8, (byte) 0xD9, (byte) 0xDA,
-                (byte) 0xDB, (byte) 0xDC, (byte) 0xDD, (byte) 0xDE, (byte) 0xDF };
+        guek = new byte[] { 0x00, 0x01, 0x02, 0x03, 0x04, 0x05, 0x06, 0x07,
+                0x08, 0x09, 0x0A, 0x0B, 0x0C, 0x0D, 0x0E, 0x0F };
+        gak = new byte[] { (byte) 0xD0, (byte) 0xD1, (byte) 0xD2, (byte) 0xD3,
+                (byte) 0xD4, (byte) 0xD5, (byte) 0xD6, (byte) 0xD7, (byte) 0xD8,
+                (byte) 0xD9, (byte) 0xDA, (byte) 0xDB, (byte) 0xDC, (byte) 0xDD,
+                (byte) 0xDE, (byte) 0xDF };
         setKek("1111111111111111".getBytes());
     }
 
@@ -206,8 +209,10 @@ public class GXDLMSSecuritySetup extends GXDLMSObject implements IGXDLMSBase {
      */
     public void setGuek(final byte[] value) {
         if (value != null && value.length != 0
-                && (getSecuritySuite() != SecuritySuite.SUITE_2 && value.length != 16)
-                || (getSecuritySuite() == SecuritySuite.SUITE_2 && value.length != 32)) {
+                && (getSecuritySuite() != SecuritySuite.SUITE_2
+                        && value.length != 16)
+                || (getSecuritySuite() == SecuritySuite.SUITE_2
+                        && value.length != 32)) {
             throw new IllegalArgumentException("Invalid Guek");
         }
         guek = value;
@@ -226,8 +231,10 @@ public class GXDLMSSecuritySetup extends GXDLMSObject implements IGXDLMSBase {
      */
     public void setGbek(final byte[] value) {
         if (value != null && value.length != 0
-                && (getSecuritySuite() != SecuritySuite.SUITE_2 && value.length != 16)
-                || (getSecuritySuite() == SecuritySuite.SUITE_2 && value.length != 32)) {
+                && (getSecuritySuite() != SecuritySuite.SUITE_2
+                        && value.length != 16)
+                || (getSecuritySuite() == SecuritySuite.SUITE_2
+                        && value.length != 32)) {
             throw new IllegalArgumentException("Invalid Gbek");
         }
         gbek = value;
@@ -246,8 +253,10 @@ public class GXDLMSSecuritySetup extends GXDLMSObject implements IGXDLMSBase {
      */
     public void setGak(final byte[] value) {
         if (value != null && value.length != 0
-                && (getSecuritySuite() != SecuritySuite.SUITE_2 && value.length != 16)
-                || (getSecuritySuite() == SecuritySuite.SUITE_2 && value.length != 32)) {
+                && (getSecuritySuite() != SecuritySuite.SUITE_2
+                        && value.length != 16)
+                || (getSecuritySuite() == SecuritySuite.SUITE_2
+                        && value.length != 32)) {
             throw new IllegalArgumentException("Invalid Gak");
         }
         gak = value;
@@ -343,8 +352,8 @@ public class GXDLMSSecuritySetup extends GXDLMSObject implements IGXDLMSBase {
 
     @Override
     public final Object[] getValues() {
-        return new Object[] { getLogicalName(), securityPolicy, securitySuite, clientSystemTitle,
-                serverSystemTitle, certificates };
+        return new Object[] { getLogicalName(), securityPolicy, securitySuite,
+                clientSystemTitle, serverSystemTitle, certificates };
     }
 
     /**
@@ -371,10 +380,11 @@ public class GXDLMSSecuritySetup extends GXDLMSObject implements IGXDLMSBase {
      * @throws SignatureException
      *             Signature exception.
      */
-    public final byte[][] activate(final GXDLMSClient client, final SecurityPolicy security)
-            throws InvalidKeyException, NoSuchAlgorithmException, NoSuchPaddingException,
-            InvalidAlgorithmParameterException, IllegalBlockSizeException, BadPaddingException,
-            SignatureException {
+    public final byte[][] activate(final GXDLMSClient client,
+            final SecurityPolicy security)
+            throws InvalidKeyException, NoSuchAlgorithmException,
+            NoSuchPaddingException, InvalidAlgorithmParameterException,
+            IllegalBlockSizeException, BadPaddingException, SignatureException {
         return client.method(this, 1, security.getValue(), DataType.ENUM);
     }
 
@@ -402,11 +412,13 @@ public class GXDLMSSecuritySetup extends GXDLMSObject implements IGXDLMSBase {
      * @throws SignatureException
      *             Signature exception.
      */
-    public final byte[][] activate(final GXDLMSClient client, final Set<SecurityPolicy> security)
-            throws InvalidKeyException, NoSuchAlgorithmException, NoSuchPaddingException,
-            InvalidAlgorithmParameterException, IllegalBlockSizeException, BadPaddingException,
-            SignatureException {
-        return client.method(this, 1, SecurityPolicy.toInteger(security), DataType.ENUM);
+    public final byte[][] activate(final GXDLMSClient client,
+            final Set<SecurityPolicy> security)
+            throws InvalidKeyException, NoSuchAlgorithmException,
+            NoSuchPaddingException, InvalidAlgorithmParameterException,
+            IllegalBlockSizeException, BadPaddingException, SignatureException {
+        return client.method(this, 1, SecurityPolicy.toInteger(security),
+                DataType.ENUM);
     }
 
     /**
@@ -447,9 +459,11 @@ public class GXDLMSSecuritySetup extends GXDLMSObject implements IGXDLMSBase {
      * @throws SignatureException
      *             Signature exception.
      */
-    public final byte[][] globalKeyTransfer(final GXDLMSClient client, final byte[] kek,
-            final List<GXSimpleEntry<GlobalKeyType, byte[]>> list) throws InvalidKeyException,
-            NoSuchAlgorithmException, NoSuchPaddingException, InvalidAlgorithmParameterException,
+    public final byte[][] globalKeyTransfer(final GXDLMSClient client,
+            final byte[] kek,
+            final List<GXSimpleEntry<GlobalKeyType, byte[]>> list)
+            throws InvalidKeyException, NoSuchAlgorithmException,
+            NoSuchPaddingException, InvalidAlgorithmParameterException,
             IllegalBlockSizeException, BadPaddingException, SignatureException {
         if (list == null || list.isEmpty()) {
             throw new IllegalArgumentException("Invalid list. It is empty.");
@@ -492,8 +506,9 @@ public class GXDLMSSecuritySetup extends GXDLMSObject implements IGXDLMSBase {
      *             Signature exception.
      */
     public final byte[][] keyAgreement(final GXDLMSClient client,
-            final List<GXSimpleEntry<GlobalKeyType, byte[]>> list) throws InvalidKeyException,
-            NoSuchAlgorithmException, NoSuchPaddingException, InvalidAlgorithmParameterException,
+            final List<GXSimpleEntry<GlobalKeyType, byte[]>> list)
+            throws InvalidKeyException, NoSuchAlgorithmException,
+            NoSuchPaddingException, InvalidAlgorithmParameterException,
             IllegalBlockSizeException, BadPaddingException, SignatureException {
         if (list == null || list.isEmpty()) {
             throw new IllegalArgumentException("Invalid list. It is empty.");
@@ -534,26 +549,28 @@ public class GXDLMSSecuritySetup extends GXDLMSObject implements IGXDLMSBase {
      * @throws SignatureException
      *             Signature exception.
      */
-    public final byte[][] keyAgreement(final GXDLMSSecureClient client, final GlobalKeyType type)
-            throws NoSuchAlgorithmException, InvalidKeyException, SignatureException,
-            NoSuchPaddingException, InvalidAlgorithmParameterException, IllegalBlockSizeException,
+    public final byte[][] keyAgreement(final GXDLMSSecureClient client,
+            final GlobalKeyType type) throws NoSuchAlgorithmException,
+            InvalidKeyException, SignatureException, NoSuchPaddingException,
+            InvalidAlgorithmParameterException, IllegalBlockSizeException,
             BadPaddingException {
         GXByteBuffer bb = new GXByteBuffer();
         byte[] data = GXSecure.getEphemeralPublicKeyData(type.ordinal(),
                 client.getCiphering().getEphemeralKeyPair().getPublic());
         bb.set(data, 1, 64);
         Logger.getLogger(GXDLMSSecuritySetup.class.getName()).log(Level.INFO,
-                "Signin public key: {0}", client.getCiphering().getSigningKeyPair().getPublic());
+                "Signin public key: {0}",
+                client.getCiphering().getSigningKeyPair().getPublic());
 
         // Add signature.
         byte[] sign = GXSecure.getEphemeralPublicKeySignature(type.ordinal(),
                 client.getCiphering().getEphemeralKeyPair().getPublic(),
                 client.getCiphering().getSigningKeyPair().getPrivate());
         bb.set(sign);
-        Logger.getLogger(GXDLMSSecuritySetup.class.getName()).log(Level.FINEST, "Data: {0}",
-                GXCommon.toHex(data));
-        Logger.getLogger(GXDLMSSecuritySetup.class.getName()).log(Level.FINEST, "Sign: {0}",
-                GXCommon.toHex(sign));
+        Logger.getLogger(GXDLMSSecuritySetup.class.getName()).log(Level.FINEST,
+                "Data: {0}", GXCommon.toHex(data));
+        Logger.getLogger(GXDLMSSecuritySetup.class.getName()).log(Level.FINEST,
+                "Sign: {0}", GXCommon.toHex(sign));
 
         List<GXSimpleEntry<GlobalKeyType, byte[]>> list =
                 new ArrayList<GXSimpleEntry<GlobalKeyType, byte[]>>();
@@ -585,10 +602,11 @@ public class GXDLMSSecuritySetup extends GXDLMSObject implements IGXDLMSBase {
      * @throws SignatureException
      *             Signature exception.
      */
-    public final byte[][] generateKeyPair(final GXDLMSClient client, final CertificateType type)
-            throws InvalidKeyException, NoSuchAlgorithmException, NoSuchPaddingException,
-            InvalidAlgorithmParameterException, IllegalBlockSizeException, BadPaddingException,
-            SignatureException {
+    public final byte[][] generateKeyPair(final GXDLMSClient client,
+            final CertificateType type)
+            throws InvalidKeyException, NoSuchAlgorithmException,
+            NoSuchPaddingException, InvalidAlgorithmParameterException,
+            IllegalBlockSizeException, BadPaddingException, SignatureException {
         return client.method(this, 4, type.getValue(), DataType.ENUM);
     }
 
@@ -616,10 +634,11 @@ public class GXDLMSSecuritySetup extends GXDLMSObject implements IGXDLMSBase {
      * @throws SignatureException
      *             Signature exception.
      */
-    public final byte[][] generateCertificate(final GXDLMSClient client, final CertificateType type)
-            throws InvalidKeyException, NoSuchAlgorithmException, NoSuchPaddingException,
-            InvalidAlgorithmParameterException, IllegalBlockSizeException, BadPaddingException,
-            SignatureException {
+    public final byte[][] generateCertificate(final GXDLMSClient client,
+            final CertificateType type)
+            throws InvalidKeyException, NoSuchAlgorithmException,
+            NoSuchPaddingException, InvalidAlgorithmParameterException,
+            IllegalBlockSizeException, BadPaddingException, SignatureException {
         return client.method(this, 5, type.getValue(), DataType.ENUM);
     }
 
@@ -648,8 +667,9 @@ public class GXDLMSSecuritySetup extends GXDLMSObject implements IGXDLMSBase {
      *             Signature exception.
      */
     public final byte[][] importCertificate(final GXDLMSClient client,
-            final GXx509Certificate certificate) throws InvalidKeyException,
-            NoSuchAlgorithmException, NoSuchPaddingException, InvalidAlgorithmParameterException,
+            final GXx509Certificate certificate)
+            throws InvalidKeyException, NoSuchAlgorithmException,
+            NoSuchPaddingException, InvalidAlgorithmParameterException,
             IllegalBlockSizeException, BadPaddingException, SignatureException {
         return importCertificate(client, certificate.getEncoded());
     }
@@ -677,10 +697,11 @@ public class GXDLMSSecuritySetup extends GXDLMSObject implements IGXDLMSBase {
      * @throws SignatureException
      *             Signature exception.
      */
-    public final byte[][] importCertificate(final GXDLMSClient client, final byte[] key)
-            throws InvalidKeyException, NoSuchAlgorithmException, NoSuchPaddingException,
-            InvalidAlgorithmParameterException, IllegalBlockSizeException, BadPaddingException,
-            SignatureException {
+    public final byte[][] importCertificate(final GXDLMSClient client,
+            final byte[] key)
+            throws InvalidKeyException, NoSuchAlgorithmException,
+            NoSuchPaddingException, InvalidAlgorithmParameterException,
+            IllegalBlockSizeException, BadPaddingException, SignatureException {
         return client.method(this, 6, key, DataType.OCTET_STRING);
     }
 
@@ -711,11 +732,12 @@ public class GXDLMSSecuritySetup extends GXDLMSObject implements IGXDLMSBase {
      * @throws SignatureException
      *             Signature exception.
      */
-    public final byte[][] exportCertificateByEntity(final GXDLMSSecureClient client,
-            final CertificateEntity entity, final CertificateType type, final byte[] systemTitle)
-            throws InvalidKeyException, NoSuchAlgorithmException, NoSuchPaddingException,
-            InvalidAlgorithmParameterException, IllegalBlockSizeException, BadPaddingException,
-            SignatureException {
+    public final byte[][] exportCertificateByEntity(
+            final GXDLMSSecureClient client, final CertificateEntity entity,
+            final CertificateType type, final byte[] systemTitle)
+            throws InvalidKeyException, NoSuchAlgorithmException,
+            NoSuchPaddingException, InvalidAlgorithmParameterException,
+            IllegalBlockSizeException, BadPaddingException, SignatureException {
         if (systemTitle == null || systemTitle.length == 0) {
             throw new IllegalArgumentException("Invalid system title.");
         }
@@ -737,6 +759,25 @@ public class GXDLMSSecuritySetup extends GXDLMSObject implements IGXDLMSBase {
         // system_title
         GXCommon.setData(null, bb, DataType.OCTET_STRING, systemTitle);
         return client.method(this, 7, bb.array(), DataType.STRUCTURE);
+    }
+
+    /**
+     * Verify that issuer is in ASN1 format.
+     * 
+     * @param issuer
+     *            Certificate issuer.
+     */
+    private static void verifyIssuer(byte[] issuer) {
+        // Verify that issuer is in ASN1 format.
+        try {
+            if (issuer == null || issuer.length == 0) {
+                throw new IllegalArgumentException();
+            }
+            GXAsn1Converter.fromByteArray(issuer);
+        } catch (Exception ex) {
+            throw new IllegalArgumentException(
+                    "Invalid issuer. Issuer must be in ASN1 format.");
+        }
     }
 
     /**
@@ -764,10 +805,13 @@ public class GXDLMSSecuritySetup extends GXDLMSObject implements IGXDLMSBase {
      * @throws SignatureException
      *             Signature exception.
      */
-    public final byte[][] exportCertificateBySerial(final GXDLMSSecureClient client,
-            final BigInteger serialNumber, final String issuer) throws InvalidKeyException,
-            NoSuchAlgorithmException, NoSuchPaddingException, InvalidAlgorithmParameterException,
+    public final byte[][] exportCertificateBySerial(
+            final GXDLMSSecureClient client, final BigInteger serialNumber,
+            final byte[] issuer)
+            throws InvalidKeyException, NoSuchAlgorithmException,
+            NoSuchPaddingException, InvalidAlgorithmParameterException,
             IllegalBlockSizeException, BadPaddingException, SignatureException {
+        verifyIssuer(issuer);
         GXByteBuffer bb = new GXByteBuffer();
         bb.setUInt8(DataType.STRUCTURE.getValue());
         bb.setUInt8(2);
@@ -778,9 +822,10 @@ public class GXDLMSSecuritySetup extends GXDLMSObject implements IGXDLMSBase {
         bb.setUInt8(DataType.STRUCTURE.getValue());
         bb.setUInt8(2);
         // serialNumber
-        GXCommon.setData(null, bb, DataType.OCTET_STRING, serialNumber.toByteArray());
+        GXCommon.setData(null, bb, DataType.OCTET_STRING,
+                serialNumber.toByteArray());
         // issuer
-        GXCommon.setData(null, bb, DataType.OCTET_STRING, issuer.getBytes());
+        GXCommon.setData(null, bb, DataType.OCTET_STRING, issuer);
         return client.method(this, 7, bb.array(), DataType.STRUCTURE);
     }
 
@@ -812,11 +857,12 @@ public class GXDLMSSecuritySetup extends GXDLMSObject implements IGXDLMSBase {
      * @throws SignatureException
      *             Signature exception.
      */
-    public final byte[][] removeCertificateByEntity(final GXDLMSSecureClient client,
-            final CertificateEntity entity, final CertificateType type, final byte[] systemTitle)
-            throws InvalidKeyException, NoSuchAlgorithmException, NoSuchPaddingException,
-            InvalidAlgorithmParameterException, IllegalBlockSizeException, BadPaddingException,
-            SignatureException {
+    public final byte[][] removeCertificateByEntity(
+            final GXDLMSSecureClient client, final CertificateEntity entity,
+            final CertificateType type, final byte[] systemTitle)
+            throws InvalidKeyException, NoSuchAlgorithmException,
+            NoSuchPaddingException, InvalidAlgorithmParameterException,
+            IllegalBlockSizeException, BadPaddingException, SignatureException {
         GXByteBuffer bb = new GXByteBuffer();
         bb.setUInt8(DataType.STRUCTURE.getValue());
         bb.setUInt8(2);
@@ -863,10 +909,13 @@ public class GXDLMSSecuritySetup extends GXDLMSObject implements IGXDLMSBase {
      * @throws SignatureException
      *             Signature exception.
      */
-    public final byte[][] removeCertificateBySerial(final GXDLMSSecureClient client,
-            final String serialNumber, final String issuer) throws InvalidKeyException,
-            NoSuchAlgorithmException, NoSuchPaddingException, InvalidAlgorithmParameterException,
+    public final byte[][] removeCertificateBySerial(
+            final GXDLMSSecureClient client, final String serialNumber,
+            final byte[] issuer)
+            throws InvalidKeyException, NoSuchAlgorithmException,
+            NoSuchPaddingException, InvalidAlgorithmParameterException,
             IllegalBlockSizeException, BadPaddingException, SignatureException {
+        verifyIssuer(issuer);
         GXByteBuffer bb = new GXByteBuffer();
         bb.setUInt8(DataType.STRUCTURE.getValue());
         bb.setUInt8(2);
@@ -877,16 +926,19 @@ public class GXDLMSSecuritySetup extends GXDLMSObject implements IGXDLMSBase {
         bb.setUInt8(DataType.STRUCTURE.getValue());
         bb.setUInt8(2);
         // serialNumber
-        GXCommon.setData(null, bb, DataType.OCTET_STRING, serialNumber.getBytes());
+        GXCommon.setData(null, bb, DataType.OCTET_STRING,
+                serialNumber.getBytes());
         // issuer
-        GXCommon.setData(null, bb, DataType.OCTET_STRING, issuer.getBytes());
+        GXCommon.setData(null, bb, DataType.OCTET_STRING, issuer);
         return client.method(this, 8, bb.array(), DataType.STRUCTURE);
     }
 
     @Override
-    public final byte[] invoke(final GXDLMSSettings settings, final ValueEventArgs e) {
+    public final byte[] invoke(final GXDLMSSettings settings,
+            final ValueEventArgs e) {
         if (securitySuite == SecuritySuite.SUITE_0 && e.getIndex() > 3) {
-            throw new IllegalArgumentException("Invalid Security Suite Version.");
+            throw new IllegalArgumentException(
+                    "Invalid Security Suite Version.");
         }
         switch (e.getIndex()) {
         case 1:
@@ -926,11 +978,13 @@ public class GXDLMSSecuritySetup extends GXDLMSObject implements IGXDLMSBase {
         GXx509Certificate cert = null;
         if (type == 0) {
             cert = findCertificateByEntity(serverCertificates,
-                    CertificateEntity.forValue(((Number) tmp.get(0)).intValue()),
+                    CertificateEntity
+                            .forValue(((Number) tmp.get(0)).intValue()),
                     CertificateType.forValue(((Number) tmp.get(1)).intValue()),
                     (byte[]) tmp.get(2));
         } else if (type == 1) {
-            cert = serverCertificates.findBySerial(new BigInteger((byte[]) tmp.get(0)),
+            cert = serverCertificates.findBySerial(
+                    new BigInteger((byte[]) tmp.get(0)),
                     new String((byte[]) tmp.get(1)));
         }
         if (cert == null) {
@@ -938,6 +992,14 @@ public class GXDLMSSecuritySetup extends GXDLMSObject implements IGXDLMSBase {
         } else {
             serverCertificates.remove(cert);
         }
+    }
+
+    private static String getStringFromAsn1(byte[] value) {
+        Object issuer = GXAsn1Converter.fromByteArray(value);
+        if (issuer instanceof GXAsn1Sequence) {
+            return GXAsn1Converter.getSubject((GXAsn1Sequence) issuer);
+        }
+        return issuer.toString();
     }
 
     private byte[] exportCertificate(final ValueEventArgs e) {
@@ -948,26 +1010,37 @@ public class GXDLMSSecuritySetup extends GXDLMSObject implements IGXDLMSBase {
         synchronized (serverCertificates) {
             if (type == 0) {
                 cert = findCertificateByEntity(serverCertificates,
-                        CertificateEntity.forValue(((Number) tmp.get(0)).shortValue()),
-                        CertificateType.forValue(((Number) tmp.get(1)).shortValue()),
+                        CertificateEntity
+                                .forValue(((Number) tmp.get(0)).shortValue()),
+                        CertificateType
+                                .forValue(((Number) tmp.get(1)).shortValue()),
                         (byte[]) tmp.get(2));
             } else if (type == 1) {
-                cert = serverCertificates.findBySerial(new BigInteger((byte[]) tmp.get(0)),
-                        new String((byte[]) tmp.get(1)));
+                String issuer;
+                try {
+                    issuer = getStringFromAsn1((byte[]) tmp.get(1));
+                } catch (Exception ex) {
+                    issuer = new String((byte[]) tmp.get(1));
+                }
+                cert = serverCertificates.findBySerial(
+                        new BigInteger((byte[]) tmp.get(0)), issuer);
             }
             if (cert == null) {
                 e.setError(ErrorCode.INCONSISTENT_CLASS);
             } else {
-                Logger.getLogger(GXDLMSSecuritySetup.class.getName()).log(Level.INFO,
-                        "Export certificate: {0}", cert.getSerialNumber());
+                Logger.getLogger(GXDLMSSecuritySetup.class.getName()).log(
+                        Level.INFO, "Export certificate: {0}",
+                        cert.getSerialNumber());
                 return cert.getEncoded();
             }
         }
         return null;
     }
 
-    private void importCertificate(final GXDLMSSettings settings, final ValueEventArgs e) {
-        GXx509Certificate cert = new GXx509Certificate((byte[]) e.getParameters());
+    private void importCertificate(final GXDLMSSettings settings,
+            final ValueEventArgs e) {
+        GXx509Certificate cert =
+                new GXx509Certificate((byte[]) e.getParameters());
         byte[] st = getServerSystemTitle();
         if (st == null) {
             st = settings.getCipher().getSystemTitle();
@@ -985,7 +1058,8 @@ public class GXDLMSSecuritySetup extends GXDLMSObject implements IGXDLMSBase {
             e.setError(ErrorCode.INCONSISTENT_CLASS);
         } else {
             // Remove old certificate if it exists.
-            List<GXx509Certificate> list = serverCertificates.getCertificates(cert.getKeyUsage());
+            List<GXx509Certificate> list =
+                    serverCertificates.getCertificates(cert.getKeyUsage());
             for (GXx509Certificate it : list) {
                 boolean isServer = it.getSubject().contains(serverSubject);
                 if (isServer == isServerCert) {
@@ -1000,7 +1074,8 @@ public class GXDLMSSecuritySetup extends GXDLMSObject implements IGXDLMSBase {
 
     private byte[] generateCertificateRequest(final GXDLMSSettings settings,
             final ValueEventArgs e) {
-        CertificateType key = CertificateType.forValue(((Number) e.getParameters()).intValue());
+        CertificateType key = CertificateType
+                .forValue(((Number) e.getParameters()).intValue());
         byte[] st = getServerSystemTitle();
         if (st == null) {
             st = settings.getCipher().getSystemTitle();
@@ -1033,8 +1108,10 @@ public class GXDLMSSecuritySetup extends GXDLMSObject implements IGXDLMSBase {
         return null;
     }
 
-    private void generateKeyPair(final GXDLMSSettings settings, final ValueEventArgs e) {
-        CertificateType key = CertificateType.forValue(((Number) e.getParameters()).intValue());
+    private void generateKeyPair(final GXDLMSSettings settings,
+            final ValueEventArgs e) {
+        CertificateType key = CertificateType
+                .forValue(((Number) e.getParameters()).intValue());
         try {
             KeyPair value = GXEcdsa.generateKeyPair(Ecc.P256);
             switch (key) {
@@ -1054,7 +1131,8 @@ public class GXDLMSSecuritySetup extends GXDLMSObject implements IGXDLMSBase {
         }
     }
 
-    private byte[] invokeKeyAgreement(final GXDLMSSettings settings, final ValueEventArgs e) {
+    private byte[] invokeKeyAgreement(final GXDLMSSettings settings,
+            final ValueEventArgs e) {
         try {
             List<?> tmp = (List<?>) ((List<?>) e.getParameters()).get(0);
             short keyId = ((Number) tmp.get(0)).shortValue();
@@ -1068,15 +1146,16 @@ public class GXDLMSSecuritySetup extends GXDLMSObject implements IGXDLMSBase {
                 data2.set(data, 0, 64);
                 GXByteBuffer sign = new GXByteBuffer();
                 sign.set(data, 64, 64);
-                PublicKey pk = settings.getCipher().getKeyAgreementKeyPair().getPublic();
-                if (pk == null || !GXSecure.validateEphemeralPublicKeySignature(data2.array(),
-                        sign.array(), pk)) {
+                PublicKey pk = settings.getCipher().getKeyAgreementKeyPair()
+                        .getPublic();
+                if (pk == null || !GXSecure.validateEphemeralPublicKeySignature(
+                        data2.array(), sign.array(), pk)) {
                     e.setError(ErrorCode.READ_WRITE_DENIED);
                     settings.setTargetEphemeralKey(null);
                 } else {
                     e.setByteArray(true);
-                    settings.setTargetEphemeralKey(
-                            GXAsn1Converter.getPublicKey(data2.subArray(1, 64)));
+                    settings.setTargetEphemeralKey(GXAsn1Converter
+                            .getPublicKey(data2.subArray(1, 64)));
                     // Generate ephemeral keys.
                     KeyPair eKpS = settings.getCipher().getEphemeralKeyPair();
                     eKpS = GXEcdsa.generateKeyPair(Ecc.P256);
@@ -1087,8 +1166,9 @@ public class GXDLMSSecuritySetup extends GXDLMSObject implements IGXDLMSBase {
                     ka.doPhase(settings.getTargetEphemeralKey(), true);
                     byte[] sharedSecret = ka.generateSecret();
                     // settings.getCipher().setSharedSecret(sharedSecret);
-                    Logger.getLogger(GXDLMSSecuritySetup.class.getName()).log(Level.FINEST,
-                            "Server shared secret: {0}", GXCommon.toHex(sharedSecret));
+                    Logger.getLogger(GXDLMSSecuritySetup.class.getName()).log(
+                            Level.FINEST, "Server shared secret: {0}",
+                            GXCommon.toHex(sharedSecret));
                     GXByteBuffer bb = new GXByteBuffer();
                     bb.setUInt8(DataType.ARRAY);
                     bb.setUInt8(1);
@@ -1099,24 +1179,28 @@ public class GXDLMSSecuritySetup extends GXDLMSObject implements IGXDLMSBase {
                     bb.setUInt8(0);
                     bb.setUInt8(DataType.OCTET_STRING);
                     GXCommon.setObjectCount(128, bb);
-                    data = GXSecure.getEphemeralPublicKeyData(keyId, eKpS.getPublic());
+                    data = GXSecure.getEphemeralPublicKeyData(keyId,
+                            eKpS.getPublic());
                     bb.set(data, 1, 64);
                     // Add signature.
-                    byte[] tmp2 = GXSecure.getEphemeralPublicKeySignature(keyId, eKpS.getPublic(),
-                            settings.getCipher().getSigningKeyPair().getPrivate());
+                    byte[] tmp2 = GXSecure.getEphemeralPublicKeySignature(keyId,
+                            eKpS.getPublic(), settings.getCipher()
+                                    .getSigningKeyPair().getPrivate());
                     bb.set(tmp2);
-                    Logger.getLogger(GXDLMSSecuritySetup.class.getName()).log(Level.FINEST,
-                            "Data: {0}", GXCommon.toHex(data));
-                    Logger.getLogger(GXDLMSSecuritySetup.class.getName()).log(Level.FINEST,
-                            "Sign: {0}", GXCommon.toHex(tmp2));
+                    Logger.getLogger(GXDLMSSecuritySetup.class.getName()).log(
+                            Level.FINEST, "Data: {0}", GXCommon.toHex(data));
+                    Logger.getLogger(GXDLMSSecuritySetup.class.getName()).log(
+                            Level.FINEST, "Sign: {0}", GXCommon.toHex(tmp2));
                     byte[] algID = GXCommon.hexToBytes("60857405080300"); // AES-GCM-128
                     GXByteBuffer kdf = new GXByteBuffer();
-                    kdf.set(GXSecure.generateKDF("SHA-256", sharedSecret, 256, algID,
-                            settings.getSourceSystemTitle(), settings.getCipher().getSystemTitle(),
-                            null, null), 0, 16);
-                    Logger.getLogger(GXDLMSSecuritySetup.class.getName()).log(Level.INFO,
-                            "GUEK: {0}", kdf);
-                    settings.getCipher().setSigning(Signing.EPHEMERAL_UNIFIED_MODEL);
+                    kdf.set(GXSecure.generateKDF("SHA-256", sharedSecret, 256,
+                            algID, settings.getSourceSystemTitle(),
+                            settings.getCipher().getSystemTitle(), null, null),
+                            0, 16);
+                    Logger.getLogger(GXDLMSSecuritySetup.class.getName())
+                            .log(Level.INFO, "GUEK: {0}", kdf);
+                    settings.getCipher()
+                            .setSigning(Signing.EPHEMERAL_UNIFIED_MODEL);
                     switch (GlobalKeyType.values()[keyId]) {
                     case BROADCAST_ENCRYPTION:
                         gbek = kdf.array();
@@ -1143,13 +1227,15 @@ public class GXDLMSSecuritySetup extends GXDLMSObject implements IGXDLMSBase {
         return null;
     }
 
-    private void keyTransfer(final GXDLMSSettings settings, final ValueEventArgs e) {
+    private void keyTransfer(final GXDLMSSettings settings,
+            final ValueEventArgs e) {
         // if settings.Cipher is null non secure server is used.
         // Keys are take in action after reply is generated.
         try {
             for (Object tmp : (List<?>) e.getParameters()) {
                 List<?> item = (List<?>) tmp;
-                GlobalKeyType type = GlobalKeyType.values()[((Number) item.get(0)).intValue()];
+                GlobalKeyType type = GlobalKeyType
+                        .values()[((Number) item.get(0)).intValue()];
                 byte[] data = (byte[]) item.get(1);
                 switch (type) {
                 case BROADCAST_ENCRYPTION:
@@ -1174,15 +1260,17 @@ public class GXDLMSSecuritySetup extends GXDLMSObject implements IGXDLMSBase {
     }
 
     private boolean isAssigned(final GXDLMSSettings settings) {
-        return settings.getAssignedAssociation() == null || getLogicalName()
-                .compareTo(settings.getAssignedAssociation().getSecuritySetupReference()) == 0;
+        return settings.getAssignedAssociation() == null
+                || getLogicalName().compareTo(settings.getAssignedAssociation()
+                        .getSecuritySetupReference()) == 0;
     }
 
-    private void securityActivate(final GXDLMSSettings settings, final ValueEventArgs e) {
+    private void securityActivate(final GXDLMSSettings settings,
+            final ValueEventArgs e) {
         Security security = settings.getCipher().getSecurity();
         if (getVersion() == 0) {
-            Set<SecurityPolicy> policy =
-                    SecurityPolicy.forValue(((Number) e.getParameters()).byteValue());
+            Set<SecurityPolicy> policy = SecurityPolicy
+                    .forValue(((Number) e.getParameters()).byteValue());
             setSecurityPolicy(policy);
             if (isAssigned(settings)) {
                 int val = SecurityPolicy.toInteger(policy);
@@ -1192,22 +1280,23 @@ public class GXDLMSSecuritySetup extends GXDLMSObject implements IGXDLMSBase {
                     settings.getCipher().setSecurity(Security.ENCRYPTION);
                 } else if (val == (SecurityPolicy.AUTHENTICATED.getValue()
                         | SecurityPolicy.ENCRYPTED.getValue())) {
-                    settings.getCipher().setSecurity(Security.AUTHENTICATION_ENCRYPTION);
+                    settings.getCipher()
+                            .setSecurity(Security.AUTHENTICATION_ENCRYPTION);
                 }
             }
         } else if (getVersion() == 1) {
-            java.util.Set<SecurityPolicy> policy =
-                    SecurityPolicy.forValue(((Number) e.getParameters()).byteValue());
+            java.util.Set<SecurityPolicy> policy = SecurityPolicy
+                    .forValue(((Number) e.getParameters()).byteValue());
             setSecurityPolicy(policy);
             if (isAssigned(settings)) {
                 if (policy.contains(SecurityPolicy.AUTHENTICATED_RESPONSE)) {
-                    security = Security
-                            .forValue(security.getValue() | Security.AUTHENTICATION.getValue());
+                    security = Security.forValue(security.getValue()
+                            | Security.AUTHENTICATION.getValue());
                     settings.getCipher().setSecurity(security);
                 }
                 if (policy.contains(SecurityPolicy.ENCRYPTED_RESPONSE)) {
-                    security =
-                            Security.forValue(security.getValue() | Security.ENCRYPTION.getValue());
+                    security = Security.forValue(security.getValue()
+                            | Security.ENCRYPTION.getValue());
                     settings.getCipher().setSecurity(security);
                 }
             }
@@ -1217,12 +1306,14 @@ public class GXDLMSSecuritySetup extends GXDLMSObject implements IGXDLMSBase {
     /*
      * Server uses this method to apply new keys.
      */
-    public final void applyKeys(final GXDLMSSettings settings, final ValueEventArgs e) {
+    public final void applyKeys(final GXDLMSSettings settings,
+            final ValueEventArgs e) {
         try {
             if (isAssigned(settings)) {
                 for (Object tmp : (List<?>) e.getParameters()) {
                     List<?> item = (List<?>) tmp;
-                    GlobalKeyType type = GlobalKeyType.values()[((Number) item.get(0)).intValue()];
+                    GlobalKeyType type = GlobalKeyType
+                            .values()[((Number) item.get(0)).intValue()];
                     switch (type) {
                     case UNICAST_ENCRYPTION:
                         if (e.getIndex() == 2) {
@@ -1234,7 +1325,8 @@ public class GXDLMSSecuritySetup extends GXDLMSObject implements IGXDLMSBase {
                         break;
                     case BROADCAST_ENCRYPTION:
                         if (e.getIndex() == 2) {
-                            settings.getCipher().setBroadcastBlockCipherKey(gbek);
+                            settings.getCipher()
+                                    .setBroadcastBlockCipherKey(gbek);
                         } else {
                             settings.setEphemeralBroadcastBlockCipherKey(gbek);
                         }
@@ -1274,12 +1366,15 @@ public class GXDLMSSecuritySetup extends GXDLMSObject implements IGXDLMSBase {
      * @return
      */
     private static GXx509Certificate findCertificateByEntity(
-            final GXx509CertificateCollection certificates, final CertificateEntity entity,
-            final CertificateType type, final byte[] systemtitle) {
+            final GXx509CertificateCollection certificates,
+            final CertificateEntity entity, final CertificateType type,
+            final byte[] systemtitle) {
         String subject = GXAsn1Converter.systemTitleToSubject(systemtitle);
-        int k = KeyUsage.toInteger(GXAsn1Converter.certificateTypeToKeyUsage(type));
+        int k = KeyUsage
+                .toInteger(GXAsn1Converter.certificateTypeToKeyUsage(type));
         for (GXx509Certificate it : certificates) {
-            if (KeyUsage.toInteger(it.getKeyUsage()) == k && it.getSubject().contains(subject)) {
+            if ((KeyUsage.toInteger(it.getKeyUsage()) & k) != 0
+                    && it.getSubject().contains(subject)) {
                 return it;
             }
         }
@@ -1288,9 +1383,11 @@ public class GXDLMSSecuritySetup extends GXDLMSObject implements IGXDLMSBase {
 
     @Override
     public final int[] getAttributeIndexToRead(final boolean all) {
-        java.util.ArrayList<Integer> attributes = new java.util.ArrayList<Integer>();
+        java.util.ArrayList<Integer> attributes =
+                new java.util.ArrayList<Integer>();
         // LN is static and read only once.
-        if (all || getLogicalName() == null || getLogicalName().compareTo("") == 0) {
+        if (all || getLogicalName() == null
+                || getLogicalName().compareTo("") == 0) {
             attributes.add(1);
         }
         // SecurityPolicy
@@ -1361,9 +1458,11 @@ public class GXDLMSSecuritySetup extends GXDLMSObject implements IGXDLMSBase {
             if (index == 6) {
                 return DataType.ARRAY;
             }
-            throw new IllegalArgumentException("getDataType failed. Invalid attribute index.");
+            throw new IllegalArgumentException(
+                    "getDataType failed. Invalid attribute index.");
         } else {
-            throw new IllegalArgumentException("getDataType failed. Invalid attribute index.");
+            throw new IllegalArgumentException(
+                    "getDataType failed. Invalid attribute index.");
         }
     }
 
@@ -1379,9 +1478,10 @@ public class GXDLMSSecuritySetup extends GXDLMSObject implements IGXDLMSBase {
             GXCommon.setObjectCount(6, bb);
             bb.setUInt8((byte) DataType.ENUM.getValue());
             if (it.isBasicConstraints()) {
-                bb.setUInt8((byte) CertificateEntity.CERTIFICATION_AUTHORITY.getValue());
-            } else if (it.getSubject()
-                    .contains(GXAsn1Converter.systemTitleToSubject(serverSystemTitle))) {
+                bb.setUInt8((byte) CertificateEntity.CERTIFICATION_AUTHORITY
+                        .getValue());
+            } else if (it.getSubject().contains(
+                    GXAsn1Converter.systemTitleToSubject(serverSystemTitle))) {
                 bb.setUInt8((byte) CertificateEntity.SERVER.getValue());
             } else {
                 bb.setUInt8((byte) CertificateEntity.CLIENT.getValue());
@@ -1391,7 +1491,8 @@ public class GXDLMSSecuritySetup extends GXDLMSObject implements IGXDLMSBase {
                     && it.getKeyUsage().contains(KeyUsage.KEY_AGREEMENT)) {
                 bb.setUInt8((byte) CertificateType.TLS.getValue());
             } else if (it.getKeyUsage().contains(KeyUsage.DIGITAL_SIGNATURE)) {
-                bb.setUInt8((byte) CertificateType.DIGITAL_SIGNATURE.getValue());
+                bb.setUInt8(
+                        (byte) CertificateType.DIGITAL_SIGNATURE.getValue());
             } else if (it.getKeyUsage().contains(KeyUsage.KEY_AGREEMENT)) {
                 bb.setUInt8((byte) CertificateType.KEY_AGREEMENT.getValue());
             } else {
@@ -1412,7 +1513,8 @@ public class GXDLMSSecuritySetup extends GXDLMSObject implements IGXDLMSBase {
      * Returns value of given attribute.
      */
     @Override
-    public final Object getValue(final GXDLMSSettings settings, final ValueEventArgs e) {
+    public final Object getValue(final GXDLMSSettings settings,
+            final ValueEventArgs e) {
         if (e.getIndex() == 1) {
             return GXCommon.logicalNameToBytes(getLogicalName());
         }
@@ -1441,12 +1543,33 @@ public class GXDLMSSecuritySetup extends GXDLMSObject implements IGXDLMSBase {
             for (Object tmp : list) {
                 List<?> it = (List<?>) tmp;
                 GXDLMSCertificateInfo info = new GXDLMSCertificateInfo();
-                info.setEntity(CertificateEntity.forValue(((Number) it.get(0)).intValue()));
-                info.setType(CertificateType.forValue(((Number) it.get(1)).intValue()));
+                info.setEntity(CertificateEntity
+                        .forValue(((Number) it.get(0)).intValue()));
+                info.setType(CertificateType
+                        .forValue(((Number) it.get(1)).intValue()));
                 info.setSerialNumber(new BigInteger((byte[]) it.get(2)));
-                info.setIssuer(new String((byte[]) it.get(3)));
-                info.setSubject(new String((byte[]) it.get(4)));
-                info.setSubjectAltName(new String((byte[]) it.get(5)));
+                try {
+                    info.setIssuerRaw((byte[]) it.get(3));
+                    info.setIssuer(getStringFromAsn1(info.getIssuerRaw()));
+                } catch (Exception ex) {
+                    // Show issuer as a octet-string.
+                    info.setIssuer(new String((byte[]) it.get(3)));
+                }
+                try {
+                    info.setSubjectRaw((byte[]) it.get(4));
+                    info.setSubject(getStringFromAsn1(info.getIssuerRaw()));
+                } catch (Exception ex) {
+                    // Show subject as a octet-string.
+                    info.setSubject(new String((byte[]) it.get(4)));
+                }
+                try {
+                    info.setSubjectAltNameRaw((byte[]) it.get(5));
+                    info.setSubjectAltName(
+                            getStringFromAsn1(info.getSubjectAltNameRaw()));
+                } catch (Exception ex) {
+                    // Show subject Alt as a octet-string.
+                    info.setSubjectAltName(new String((byte[]) it.get(5)));
+                }
                 certificates.add(info);
             }
         }
@@ -1456,7 +1579,8 @@ public class GXDLMSSecuritySetup extends GXDLMSObject implements IGXDLMSBase {
      * Set value of given attribute.
      */
     @Override
-    public final void setValue(final GXDLMSSettings settings, final ValueEventArgs e) {
+    public final void setValue(final GXDLMSSettings settings,
+            final ValueEventArgs e) {
         if (e.getIndex() == 1) {
             setLogicalName(GXCommon.toLogicalName(e.getValue()));
         } else if (e.getIndex() == 2) {
@@ -1464,10 +1588,12 @@ public class GXDLMSSecuritySetup extends GXDLMSObject implements IGXDLMSBase {
             if (settings.isServer()) {
                 e.setError(ErrorCode.INCONSISTENT_CLASS);
             } else {
-                securityPolicy = SecurityPolicy.forValue(((Number) e.getValue()).intValue());
+                securityPolicy = SecurityPolicy
+                        .forValue(((Number) e.getValue()).intValue());
             }
         } else if (e.getIndex() == 3) {
-            setSecuritySuite(SecuritySuite.forValue(((Number) e.getValue()).byteValue()));
+            setSecuritySuite(SecuritySuite
+                    .forValue(((Number) e.getValue()).byteValue()));
         } else if (e.getIndex() == 4) {
             if (e.getValue() != null && ((byte[]) e.getValue()).length != 8
                     && ((byte[]) e.getValue()).length != 0) {
@@ -1490,13 +1616,15 @@ public class GXDLMSSecuritySetup extends GXDLMSObject implements IGXDLMSBase {
 
     @Override
     public final void load(final GXXmlReader reader) throws XMLStreamException {
-        securityPolicy = SecurityPolicy.forValue(reader.readElementContentAsInt("SecurityPolicy"));
+        securityPolicy = SecurityPolicy
+                .forValue(reader.readElementContentAsInt("SecurityPolicy"));
         // Handle old way.
         int value = reader.readElementContentAsInt("SecurityPolicy0");
         if (value != 0) {
             securityPolicy = SecurityPolicy.forValue(value);
         }
-        securitySuite = SecuritySuite.values()[reader.readElementContentAsInt("SecuritySuite")];
+        securitySuite = SecuritySuite.values()[reader
+                .readElementContentAsInt("SecuritySuite")];
         String str = reader.readElementContentAsString("ClientSystemTitle");
         if (str == null) {
             clientSystemTitle = null;
@@ -1514,13 +1642,16 @@ public class GXDLMSSecuritySetup extends GXDLMSObject implements IGXDLMSBase {
             while (reader.isStartElement("Item", true)) {
                 GXDLMSCertificateInfo it = new GXDLMSCertificateInfo();
                 certificates.add(it);
-                it.setEntity(CertificateEntity.forValue(reader.readElementContentAsInt("Entity")));
-                it.setType(CertificateType.forValue(reader.readElementContentAsInt("Type")));
-                it.setSerialNumber(
-                        new BigInteger(reader.readElementContentAsString("SerialNumber")));
+                it.setEntity(CertificateEntity
+                        .forValue(reader.readElementContentAsInt("Entity")));
+                it.setType(CertificateType
+                        .forValue(reader.readElementContentAsInt("Type")));
+                it.setSerialNumber(new BigInteger(
+                        reader.readElementContentAsString("SerialNumber")));
                 it.setIssuer(reader.readElementContentAsString("Issuer"));
                 it.setSubject(reader.readElementContentAsString("Subject"));
-                it.setSubjectAltName(reader.readElementContentAsString("SubjectAltName"));
+                it.setSubjectAltName(
+                        reader.readElementContentAsString("SubjectAltName"));
             }
             reader.readEndElement("Certificates");
         }
@@ -1549,8 +1680,8 @@ public class GXDLMSSecuritySetup extends GXDLMSObject implements IGXDLMSBase {
         serverCertificates.clear();
         if (reader.isStartElement("ServerCertificates", true)) {
             while (reader.isStartElement("Cert", false)) {
-                GXx509Certificate cert =
-                        GXx509Certificate.fromDer(reader.readElementContentAsString("Cert"));
+                GXx509Certificate cert = GXx509Certificate
+                        .fromDer(reader.readElementContentAsString("Cert"));
                 if (serverCertificates.find(cert) == null) {
                     serverCertificates.add(cert);
                 }
@@ -1577,20 +1708,25 @@ public class GXDLMSSecuritySetup extends GXDLMSObject implements IGXDLMSBase {
 
     @Override
     public final void save(final GXXmlWriter writer) throws XMLStreamException {
-        writer.writeElementString("SecurityPolicy", SecurityPolicy.toInteger(securityPolicy));
+        writer.writeElementString("SecurityPolicy",
+                SecurityPolicy.toInteger(securityPolicy));
         writer.writeElementString("SecuritySuite", securitySuite.ordinal());
-        writer.writeElementString("ClientSystemTitle", GXDLMSTranslator.toHex(clientSystemTitle));
-        writer.writeElementString("ServerSystemTitle", GXDLMSTranslator.toHex(serverSystemTitle));
+        writer.writeElementString("ClientSystemTitle",
+                GXDLMSTranslator.toHex(clientSystemTitle));
+        writer.writeElementString("ServerSystemTitle",
+                GXDLMSTranslator.toHex(serverSystemTitle));
         if (certificates != null && certificates.size() != 0) {
             writer.writeStartElement("Certificates");
             for (GXDLMSCertificateInfo it : certificates) {
                 writer.writeStartElement("Item");
                 writer.writeElementString("Entity", it.getEntity().getValue());
                 writer.writeElementString("Type", it.getType().getValue());
-                writer.writeElementString("SerialNumber", it.getSerialNumber().toString());
+                writer.writeElementString("SerialNumber",
+                        it.getSerialNumber().toString());
                 writer.writeElementString("Issuer", it.getIssuer());
                 writer.writeElementString("Subject", it.getSubject());
-                writer.writeElementString("SubjectAltName", it.getSubjectAltName());
+                writer.writeElementString("SubjectAltName",
+                        it.getSubjectAltName());
                 writer.writeEndElement();
             }
             writer.writeEndElement();
@@ -1635,8 +1771,9 @@ public class GXDLMSSecuritySetup extends GXDLMSObject implements IGXDLMSBase {
 
     @Override
     public String[] getNames() {
-        return new String[] { "Logical Name", "Security Policy", "Security Suite",
-                "Client System Title", "Server System Title" };
+        return new String[] { "Logical Name", "Security Policy",
+                "Security Suite", "Client System Title",
+                "Server System Title" };
     }
 
     @Override

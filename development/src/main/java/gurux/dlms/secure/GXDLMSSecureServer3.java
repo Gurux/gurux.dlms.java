@@ -47,111 +47,152 @@ import gurux.dlms.objects.GXDLMSTcpUdpSetup;
  * 
  * @author Gurux Ltd.
  */
-public abstract class GXDLMSSecureServer3 extends GXDLMSServer3 implements IGXCryptoNotifier {
-	/**
-	 * Ciphering settings.
-	 */
-	private GXCiphering ciphering;
+public abstract class GXDLMSSecureServer3 extends GXDLMSServer3
+        implements IGXCryptoNotifier {
+    /**
+     * Ciphering settings.
+     */
+    private GXCiphering ciphering;
 
-	/**
-	 * Constructor.
-	 * 
-	 * @param logicalNameReferencing Is logical name referencing used.
-	 * @param type                   Interface type.
-	 */
-	public GXDLMSSecureServer3(final boolean logicalNameReferencing, final InterfaceType type) {
-		super(logicalNameReferencing, type);
-		ciphering = new GXCiphering("ABCDEFGH".getBytes());
-		setCipher(ciphering);
-	}
+    /**
+     * Constructor.
+     * 
+     * @param logicalNameReferencing
+     *            Is logical name referencing used.
+     * @param type
+     *            Interface type.
+     */
+    public GXDLMSSecureServer3(final boolean logicalNameReferencing,
+            final InterfaceType type) {
+        super(logicalNameReferencing, type);
+        // System title format is FLAG ID + serial number.
+        byte[] st =
+                new byte[] { 0x47, 0x52, 0x58, 0x00, 0x00, 0x00, 0x00, 0x01 };
+        ciphering = new GXCiphering(st);
+        setCipher(ciphering);
+    }
 
-	/**
-	 * Constructor.
-	 * 
-	 * @param ln   Association logical name.
-	 * @param type Interface type.
-	 */
-	public GXDLMSSecureServer3(final GXDLMSAssociationLogicalName ln, final InterfaceType type) {
-		super(ln, type);
-		ciphering = new GXCiphering("ABCDEFGH".getBytes());
-		setCipher(ciphering);
-	}
+    /**
+     * Constructor.
+     * 
+     * @param ln
+     *            Association logical name.
+     * @param type
+     *            Interface type.
+     */
+    public GXDLMSSecureServer3(final GXDLMSAssociationLogicalName ln,
+            final InterfaceType type) {
+        super(ln, type);
+        // System title format is FLAG ID + serial number.
+        byte[] st =
+                new byte[] { 0x47, 0x52, 0x58, 0x00, 0x00, 0x00, 0x00, 0x01 };
+        ciphering = new GXCiphering(st);
+        setCipher(ciphering);
+    }
 
-	/**
-	 * Constructor.
-	 * 
-	 * @param sn   Association short name.
-	 * @param type Interface type.
-	 */
-	public GXDLMSSecureServer3(final GXDLMSAssociationShortName sn, final InterfaceType type) {
-		super(sn, type);
-		ciphering = new GXCiphering("ABCDEFGH".getBytes());
-		setCipher(ciphering);
-	}
+    /**
+     * Constructor.
+     * 
+     * @param sn
+     *            Association short name.
+     * @param type
+     *            Interface type.
+     */
+    public GXDLMSSecureServer3(final GXDLMSAssociationShortName sn,
+            final InterfaceType type) {
+        super(sn, type);
+        // System title format is FLAG ID + serial number.
+        byte[] st =
+                new byte[] { 0x47, 0x52, 0x58, 0x00, 0x00, 0x00, 0x00, 0x01 };
+        ciphering = new GXCiphering(st);
+        setCipher(ciphering);
+    }
 
-	/**
-	 * Constructor.
-	 * 
-	 * @param ln   Association logical name.
-	 * @param hdlc HDLC settings.
-	 */
-	public GXDLMSSecureServer3(final GXDLMSAssociationLogicalName ln, final GXDLMSHdlcSetup hdlc) {
-		super(ln, hdlc);
-		ciphering = new GXCiphering("ABCDEFGH".getBytes());
-		setCipher(ciphering);
-	}
+    /**
+     * Constructor.
+     * 
+     * @param ln
+     *            Association logical name.
+     * @param hdlc
+     *            HDLC settings.
+     */
+    public GXDLMSSecureServer3(final GXDLMSAssociationLogicalName ln,
+            final GXDLMSHdlcSetup hdlc) {
+        super(ln, hdlc);
+        // System title format is FLAG ID + serial number.
+        byte[] st =
+                new byte[] { 0x47, 0x52, 0x58, 0x00, 0x00, 0x00, 0x00, 0x01 };
+        ciphering = new GXCiphering(st);
+        setCipher(ciphering);
+    }
 
-	/**
-	 * Constructor.
-	 * 
-	 * @param sn   Association short name.
-	 * @param hdlc HDLC settings.
-	 */
-	public GXDLMSSecureServer3(final GXDLMSAssociationShortName sn, final GXDLMSHdlcSetup hdlc) {
-		super(sn, hdlc);
-		ciphering = new GXCiphering("ABCDEFGH".getBytes());
-		setCipher(ciphering);
-	}
+    /**
+     * Constructor.
+     * 
+     * @param sn
+     *            Association short name.
+     * @param hdlc
+     *            HDLC settings.
+     */
+    public GXDLMSSecureServer3(final GXDLMSAssociationShortName sn,
+            final GXDLMSHdlcSetup hdlc) {
+        super(sn, hdlc);
+        byte[] st =
+                new byte[] { 0x47, 0x52, 0x58, 0x00, 0x00, 0x00, 0x00, 0x01 };
+        ciphering = new GXCiphering(st);
+        setCipher(ciphering);
+    }
 
-	/**
-	 * Constructor.
-	 * 
-	 * @param ln      Association logical name.
-	 * @param wrapper Wrapper settings.
-	 */
-	public GXDLMSSecureServer3(final GXDLMSAssociationLogicalName ln, final GXDLMSTcpUdpSetup wrapper) {
-		super(ln, wrapper);
-		ciphering = new GXCiphering("ABCDEFGH".getBytes());
-		setCipher(ciphering);
-	}
+    /**
+     * Constructor.
+     * 
+     * @param ln
+     *            Association logical name.
+     * @param wrapper
+     *            Wrapper settings.
+     */
+    public GXDLMSSecureServer3(final GXDLMSAssociationLogicalName ln,
+            final GXDLMSTcpUdpSetup wrapper) {
+        super(ln, wrapper);
+        byte[] st =
+                new byte[] { 0x47, 0x52, 0x58, 0x00, 0x00, 0x00, 0x00, 0x01 };
+        ciphering = new GXCiphering(st);
+        setCipher(ciphering);
+    }
 
-	/**
-	 * Constructor.
-	 * 
-	 * @param sn      Association short name.
-	 * @param wrapper Wrapper settings.
-	 */
-	public GXDLMSSecureServer3(final GXDLMSAssociationShortName sn, final GXDLMSTcpUdpSetup wrapper) {
-		super(sn, wrapper);
-		ciphering = new GXCiphering("ABCDEFGH".getBytes());
-		setCipher(ciphering);
-	}
+    /**
+     * Constructor.
+     * 
+     * @param sn
+     *            Association short name.
+     * @param wrapper
+     *            Wrapper settings.
+     */
+    public GXDLMSSecureServer3(final GXDLMSAssociationShortName sn,
+            final GXDLMSTcpUdpSetup wrapper) {
+        super(sn, wrapper);
+        byte[] st =
+                new byte[] { 0x47, 0x52, 0x58, 0x00, 0x00, 0x00, 0x00, 0x01 };
+        ciphering = new GXCiphering(st);
+        setCipher(ciphering);
+    }
 
-	public final GXCiphering getCiphering() {
-		return ciphering;
-	}
+    public final GXCiphering getCiphering() {
+        return ciphering;
+    }
 
-	/**
-	 * @return Key Encrypting Key, also known as Master key.
-	 */
-	public final byte[] getKek() {
-		return getSettings().getKek();
-	}
+    /**
+     * @return Key Encrypting Key, also known as Master key.
+     */
+    public final byte[] getKek() {
+        return getSettings().getKek();
+    }
 
-	/**
-	 * @param value Key Encrypting Key, also known as Master key.
-	 */
-	public final void setKek(final byte[] value) {
-		getSettings().setKek(value);
-	}
+    /**
+     * @param value
+     *            Key Encrypting Key, also known as Master key.
+     */
+    public final void setKek(final byte[] value) {
+        getSettings().setKek(value);
+    }
 }

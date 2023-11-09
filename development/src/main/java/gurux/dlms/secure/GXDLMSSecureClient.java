@@ -53,115 +53,141 @@ import gurux.dlms.enums.InterfaceType;
  * @author Gurux Ltd.
  */
 public class GXDLMSSecureClient extends GXDLMSClient {
-	/**
-	 * Ciphering settings.
-	 */
-	private GXCiphering ciphering;
+    /**
+     * Ciphering settings.
+     */
+    private GXCiphering ciphering;
 
-	/**
-	 * Constructor.
-	 */
-	public GXDLMSSecureClient() {
-		this(false);
-	}
+    /**
+     * Constructor.
+     */
+    public GXDLMSSecureClient() {
+        this(false);
+    }
 
-	/**
-	 * Constructor.
-	 * 
-	 * @param useLogicalNameReferencing Is Logical Name referencing used.
-	 */
-	public GXDLMSSecureClient(final boolean useLogicalNameReferencing) {
-		this(useLogicalNameReferencing, 16, 1, Authentication.NONE, null, InterfaceType.HDLC);
-	}
+    /**
+     * Constructor.
+     * 
+     * @param useLogicalNameReferencing
+     *            Is Logical Name referencing used.
+     */
+    public GXDLMSSecureClient(final boolean useLogicalNameReferencing) {
+        this(useLogicalNameReferencing, 16, 1, Authentication.NONE, null,
+                InterfaceType.HDLC);
+    }
 
-	/**
-	 * Constructor.
-	 * 
-	 * @param useLogicalNameReferencing Is Logical Name referencing used.
-	 * @param clientAddress             Server address.
-	 * @param serverAddress             Client address.
-	 * @param forAuthentication         Authentication type.
-	 * @param password                  Password if authentication is used.
-	 * @param interfaceType             Object type.
-	 */
-	public GXDLMSSecureClient(final boolean useLogicalNameReferencing, final int clientAddress, final int serverAddress,
-			final Authentication forAuthentication, final String password, final InterfaceType interfaceType) {
-		super(useLogicalNameReferencing, clientAddress, serverAddress, forAuthentication, password, interfaceType);
-		ciphering = new GXCiphering("ABCDEFGH".getBytes());
-		setCipher(ciphering);
-	}
+    /**
+     * Constructor.
+     * 
+     * @param useLogicalNameReferencing
+     *            Is Logical Name referencing used.
+     * @param clientAddress
+     *            Server address.
+     * @param serverAddress
+     *            Client address.
+     * @param forAuthentication
+     *            Authentication type.
+     * @param password
+     *            Password if authentication is used.
+     * @param interfaceType
+     *            Object type.
+     */
+    public GXDLMSSecureClient(final boolean useLogicalNameReferencing,
+            final int clientAddress, final int serverAddress,
+            final Authentication forAuthentication, final String password,
+            final InterfaceType interfaceType) {
+        super(useLogicalNameReferencing, clientAddress, serverAddress,
+                forAuthentication, password, interfaceType);
+        ciphering = new GXCiphering("ABCDEFGH".getBytes());
+        setCipher(ciphering);
+    }
 
-	/**
-	 * @return Ciphering settings.
-	 */
-	public final GXCiphering getCiphering() {
-		return ciphering;
-	}
+    /**
+     * @return Ciphering settings.
+     */
+    public final GXCiphering getCiphering() {
+        return ciphering;
+    }
 
-	/**
-	 * Encrypt data using Key Encrypting Key.
-	 * 
-	 * @param kek  Key Encrypting Key, also known as Master key.
-	 * @param data Data to encrypt.
-	 * @return Encrypted data.
-	 * @throws NoSuchPaddingException             No such padding exception.
-	 * @throws NoSuchAlgorithmException           No such algorithm exception.
-	 * @throws InvalidAlgorithmParameterException Invalid algorithm parameter
-	 *                                            exception.
-	 * @throws InvalidKeyException                Invalid key exception.
-	 * @throws BadPaddingException                Bad padding exception.
-	 * @throws IllegalBlockSizeException          Illegal block size exception.
-	 */
-	public static byte[] encrypt(final byte[] kek, final byte[] data)
-			throws NoSuchAlgorithmException, NoSuchPaddingException, InvalidKeyException,
-			InvalidAlgorithmParameterException, IllegalBlockSizeException, BadPaddingException {
-		return GXSecure.encryptAesKeyWrapping(data, kek);
-	}
+    /**
+     * Encrypt data using Key Encrypting Key.
+     * 
+     * @param kek
+     *            Key Encrypting Key, also known as Master key.
+     * @param data
+     *            Data to encrypt.
+     * @return Encrypted data.
+     * @throws NoSuchPaddingException
+     *             No such padding exception.
+     * @throws NoSuchAlgorithmException
+     *             No such algorithm exception.
+     * @throws InvalidAlgorithmParameterException
+     *             Invalid algorithm parameter exception.
+     * @throws InvalidKeyException
+     *             Invalid key exception.
+     * @throws BadPaddingException
+     *             Bad padding exception.
+     * @throws IllegalBlockSizeException
+     *             Illegal block size exception.
+     */
+    public static byte[] encrypt(final byte[] kek, final byte[] data)
+            throws NoSuchAlgorithmException, NoSuchPaddingException,
+            InvalidKeyException, InvalidAlgorithmParameterException,
+            IllegalBlockSizeException, BadPaddingException {
+        return GXSecure.encryptAesKeyWrapping(data, kek);
+    }
 
-	/**
-	 * Decrypt data using Key Encrypting Key.
-	 * 
-	 * @param kek  Key Encrypting Key, also known as Master key.
-	 * @param data Data to decrypt.
-	 * @return Decrypted data.
-	 */
-	public static byte[] decrypt(final byte[] kek, final byte[] data) {
-		if (kek == null) {
-			throw new NullPointerException("Key Encrypting Key");
-		}
-		if (kek.length < 16) {
-			throw new IllegalArgumentException("Key Encrypting Key");
-		}
-		if (kek.length % 8 != 0) {
-			throw new IllegalArgumentException("Key Encrypting Key");
-		}
-		if (data == null) {
-			throw new NullPointerException("data");
-		}
-		if (data.length < 16) {
-			throw new IllegalArgumentException("data");
-		}
-		if (data.length % 8 != 0) {
-			throw new IllegalArgumentException("data");
-		}
-		try {
-			return GXSecure.decryptAesKeyWrapping(data, kek);
-		} catch (Exception ex) {
-			throw new RuntimeException(ex.getMessage());
-		}
-	}
+    /**
+     * Decrypt data using Key Encrypting Key.
+     * 
+     * @param kek
+     *            Key Encrypting Key, also known as Master key.
+     * @param data
+     *            Data to decrypt.
+     * @return Decrypted data.
+     */
+    public static byte[] decrypt(final byte[] kek, final byte[] data) {
+        if (kek == null) {
+            throw new NullPointerException("Key Encrypting Key");
+        }
+        if (kek.length < 16) {
+            throw new IllegalArgumentException("Key Encrypting Key");
+        }
+        if (kek.length % 8 != 0) {
+            throw new IllegalArgumentException("Key Encrypting Key");
+        }
+        if (data == null) {
+            throw new NullPointerException("data");
+        }
+        if (data.length < 16) {
+            throw new IllegalArgumentException("data");
+        }
+        if (data.length % 8 != 0) {
+            throw new IllegalArgumentException("data");
+        }
+        try {
+            return GXSecure.decryptAesKeyWrapping(data, kek);
+        } catch (Exception ex) {
+            throw new RuntimeException(ex.getMessage());
+        }
+    }
 
-	/**
-	 * @return Server system title.
-	 */
-	public byte[] getServerSystemTitle() {
-		return getSettings().getPreEstablishedSystemTitle();
-	}
+    /**
+     * Server system title is set for pre-established connection.
+     * 
+     * @return Server system title.
+     */
+    public byte[] getServerSystemTitle() {
+        return getSettings().getPreEstablishedSystemTitle();
+    }
 
-	/**
-	 * @param value Server system title.
-	 */
-	public void setServerSystemTitle(final byte[] value) {
-		getSettings().setPreEstablishedSystemTitle(value);
-	}
+    /**
+     * Server system title is set for pre-established connection.
+     * 
+     * @param value
+     *            Server system title.
+     */
+    public void setServerSystemTitle(final byte[] value) {
+        getSettings().setPreEstablishedSystemTitle(value);
+    }
 }
