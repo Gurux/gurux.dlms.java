@@ -200,6 +200,19 @@ public class GXx509Certificate {
     }
 
     /**
+     * Create x509Certificate from the hex string.
+     * 
+     * @param data
+     *            x509Certificate as a hex string.
+     * @return x509 certificate
+     */
+    public static GXx509Certificate fromHexString(String data) {
+        GXx509Certificate cert = new GXx509Certificate();
+        cert.init(GXCommon.hexToBytes(data));
+        return cert;
+    }
+
+    /**
      * Create x509Certificate from PEM string.
      * 
      * @param data
@@ -284,7 +297,8 @@ public class GXx509Certificate {
         String tmp = ((GXAsn1Sequence) reqInfo.get(2)).get(0).toString();
         // Signature Algorithm
         signatureAlgorithm = HashAlgorithm.forValue(tmp);
-        if (signatureAlgorithm != HashAlgorithm.SHA256withECDSA) {
+        if (signatureAlgorithm != HashAlgorithm.SHA256withECDSA
+                && signatureAlgorithm != HashAlgorithm.SHA384withECDSA) {
             throw new IllegalArgumentException(
                     "DLMS certificate must be signed with ecdsa-with-SHA256.");
         }

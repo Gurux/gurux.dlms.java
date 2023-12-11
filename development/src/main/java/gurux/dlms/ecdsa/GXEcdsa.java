@@ -17,23 +17,28 @@ import gurux.dlms.asn.enums.Ecc;
  */
 final public class GXEcdsa {
 
-	/**
-	 * Generates new key pair.
-	 * 
-	 * @return New Key pair.
-	 * @throws NoSuchAlgorithmException           No such algorithm.
-	 * @throws InvalidAlgorithmParameterException Invalid algorithm parameter.
-	 */
-	public static KeyPair generateKeyPair(final Ecc ecc)
-			throws NoSuchAlgorithmException, InvalidAlgorithmParameterException {
-		// Generate keys.
-		if (ecc == Ecc.P256) {
-			KeyPairGenerator g = KeyPairGenerator.getInstance("EC");
-			ECGenParameterSpec kpgparams = new ECGenParameterSpec("secp256r1");
-			g.initialize(kpgparams);
-			return g.generateKeyPair();
-		}
-		throw new IllegalArgumentException("P384 is not supported.");
-	}
-
+    /**
+     * Generates new key pair.
+     * 
+     * @return New Key pair.
+     * @throws NoSuchAlgorithmException
+     *             No such algorithm.
+     * @throws InvalidAlgorithmParameterException
+     *             Invalid algorithm parameter.
+     */
+    public static KeyPair generateKeyPair(final Ecc ecc)
+            throws NoSuchAlgorithmException,
+            InvalidAlgorithmParameterException {
+        // Generate keys.
+        if (ecc == Ecc.P256) {
+            KeyPairGenerator g = KeyPairGenerator.getInstance("EC");
+            ECGenParameterSpec kpgparams = new ECGenParameterSpec("secp256r1");
+            g.initialize(kpgparams);
+            return g.generateKeyPair();
+        }
+        KeyPairGenerator g = KeyPairGenerator.getInstance("EC");
+        ECGenParameterSpec kpgparams = new ECGenParameterSpec("secp384r1");
+        g.initialize(kpgparams);
+        return g.generateKeyPair();
+    }
 }
