@@ -351,7 +351,8 @@ public final class GXSecure {
         // Random challenge is 8 to 64 bytes.
         Random r = new Random();
         int len = size;
-        if (size == 0) {
+        if (size == 0 || (size == 16
+                && authentication == Authentication.HIGH_ECDSA)) {
             if (authentication == Authentication.HIGH_ECDSA) {
                 len = r.nextInt(32) + 32;
             } else {
