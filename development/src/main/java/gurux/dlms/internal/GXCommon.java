@@ -376,6 +376,40 @@ public final class GXCommon {
         return ((Number) value).intValue();
     }
 
+    /**
+     * Insert item count to the begin of the buffer.
+     * 
+     * @param count
+     *            Count.
+     * @param buff
+     *            Buffer.
+     * @param index
+     *            byte index.
+     */
+    public static void insertObjectCount(int count, GXByteBuffer buff,
+            int index) {
+        if (count < 0x80) {
+            buff.move(index, index + 1, buff.size());
+            buff.size(buff.size() - index);
+            buff.setUInt8(index, (byte) count);
+        } else if (count < 0x100) {
+            buff.move(index, index + 2, buff.size());
+            buff.size(buff.size() - index);
+            buff.setUInt8(index, 0x81);
+            buff.setUInt8(index + 1, (byte) count);
+        } else if (count < 0x10000) {
+            buff.move(index, index + 4, buff.size());
+            buff.size(buff.size() - index);
+            buff.setUInt8(index, 0x82);
+            buff.setUInt16(index + 1, count);
+        } else {
+            buff.move(index, index + 5, buff.size());
+            buff.size(buff.size() - index);
+            buff.setUInt8(index, 0x84);
+            buff.setUInt32(index + 1, count);
+        }
+    }
+
     /*
      * Get object count. If first byte is 0x80 or higger it will tell bytes
      * count.
