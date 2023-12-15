@@ -501,8 +501,6 @@ public class GXPkcs10 {
     /**
      * Create Certificate Signing Request.
      * 
-     * @param securitySuite
-     *            SecuritySuite
      * @param kp
      *            KeyPair
      * @param subject
@@ -536,6 +534,7 @@ public class GXPkcs10 {
      *            Certificate usage.
      * @return Generated certificate.
      * @throws IOException
+     *             IOException
      */
     public static GXx509Certificate getCertificate(final String address,
             final GXPkcs10 cert, final KeyUsage usage) throws IOException {
@@ -603,6 +602,7 @@ public class GXPkcs10 {
      *            List of certification requests.
      * @return Generated certificate(s).
      * @throws IOException
+     *             IOException
      */
     public static GXx509Certificate[] getCertificate(final String address,
             final List<GXCertificateRequest> certifications)
