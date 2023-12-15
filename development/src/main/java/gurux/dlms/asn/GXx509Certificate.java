@@ -300,7 +300,7 @@ public class GXx509Certificate {
         if (signatureAlgorithm != HashAlgorithm.SHA256withECDSA
                 && signatureAlgorithm != HashAlgorithm.SHA384withECDSA) {
             throw new IllegalArgumentException(
-                    "DLMS certificate must be signed with ecdsa-with-SHA256.");
+                    "DLMS certificate must be signed with ecdsa-with-SHA256 or ecdsa-with-SHA384.");
         }
         // Optional.
         if (((GXAsn1Sequence) reqInfo.get(2)).size() > 1) {

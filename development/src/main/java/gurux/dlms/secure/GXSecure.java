@@ -310,13 +310,21 @@ public final class GXSecure {
                 d = challenge.array();
                 break;
             case HIGH_ECDSA:
-                Signature sig = Signature.getInstance("SHA256withECDSA");
+                Signature sig;
+                if (settings.getCipher()
+                        .getSecuritySuite() == SecuritySuite.SUITE_1) {
+                    sig = Signature.getInstance("SHA256withECDSA");
+                } else if (settings.getCipher()
+                        .getSecuritySuite() == SecuritySuite.SUITE_2) {
+                    sig = Signature.getInstance("SHA384withECDSA");
+                } else {
+                    throw new IllegalArgumentException(
+                            "Invalid security suite.");
+                }
                 if (cipher.getSigningKeyPair() == null) {
                     throw new IllegalArgumentException(
                             "SigningKeyPair is empty.");
                 }
-                System.out.println(GXCommon.toHex(GXAsn1Converter
-                        .rawValue(cipher.getSigningKeyPair().getPrivate())));
                 sig.initSign(cipher.getSigningKeyPair().getPrivate());
                 sig.update(secret);
                 d = sig.sign();
@@ -324,12 +332,24 @@ public final class GXSecure {
                         (GXAsn1Sequence) GXAsn1Converter.fromByteArray(d);
                 GXByteBuffer bb = new GXByteBuffer();
                 bb.set(((GXAsn1Integer) seq.get(0)).getByteArray());
-                if (bb.size() != 32) {
-                    bb.move(1, 0, 32);
-                }
-                bb.set(((GXAsn1Integer) seq.get(1)).getByteArray());
-                if (bb.size() != 64) {
-                    bb.move(33, 32, 32);
+                if (settings.getCipher()
+                        .getSecuritySuite() == SecuritySuite.SUITE_1) {
+                    if (bb.size() != 32) {
+                        bb.move(1, 0, 32);
+                    }
+                    bb.set(((GXAsn1Integer) seq.get(1)).getByteArray());
+                    if (bb.size() != 64) {
+                        bb.move(33, 32, 32);
+                    }
+                } else {
+                    // Security Suite 2.
+                    if (bb.size() != 48) {
+                        bb.move(1, 0, 48);
+                    }
+                    bb.set(((GXAsn1Integer) seq.get(1)).getByteArray());
+                    if (bb.size() != 96) {
+                        bb.move(49, 48, 48);
+                    }
                 }
                 d = bb.array();
                 break;

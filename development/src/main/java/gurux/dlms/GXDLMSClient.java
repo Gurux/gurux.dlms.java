@@ -89,6 +89,7 @@ import gurux.dlms.objects.GXDLMSObjectCollection;
 import gurux.dlms.objects.GXDLMSProfileGeneric;
 import gurux.dlms.objects.IGXDLMSBase;
 import gurux.dlms.objects.enums.CertificateType;
+import gurux.dlms.objects.enums.SecuritySuite;
 import gurux.dlms.secure.GXSecure;
 
 /**
@@ -1132,8 +1133,17 @@ public class GXDLMSClient {
             if (value != null) {
                 if (settings.getAuthentication() == Authentication.HIGH_ECDSA) {
                     try {
-                        Signature ver =
-                                Signature.getInstance("SHA256withECDSA");
+                        Signature ver;
+                        if (settings.getCipher()
+                                .getSecuritySuite() == SecuritySuite.SUITE_1) {
+                            ver = Signature.getInstance("SHA256withECDSA");
+                        } else if (settings.getCipher()
+                                .getSecuritySuite() == SecuritySuite.SUITE_2) {
+                            ver = Signature.getInstance("SHA384withECDSA");
+                        } else {
+                            throw new IllegalArgumentException(
+                                    "Invalid security suite.");
+                        }
                         ver.initVerify(settings.getCipher().getSigningKeyPair()
                                 .getPublic());
                         GXByteBuffer bb = new GXByteBuffer();
@@ -1144,9 +1154,16 @@ public class GXDLMSClient {
                         ver.update(bb.array());
                         bb.size(0);
                         bb.set(value);
-                        value = GXAsn1Converter.toByteArray(new Object[] {
-                                new GXAsn1Integer(bb.subArray(0, 32)),
-                                new GXAsn1Integer(bb.subArray(32, 32)) });
+                        if (settings.getCipher()
+                                .getSecuritySuite() == SecuritySuite.SUITE_1) {
+                            value = GXAsn1Converter.toByteArray(new Object[] {
+                                    new GXAsn1Integer(bb.subArray(0, 32)),
+                                    new GXAsn1Integer(bb.subArray(32, 32)) });
+                        } else {
+                            value = GXAsn1Converter.toByteArray(new Object[] {
+                                    new GXAsn1Integer(bb.subArray(0, 48)),
+                                    new GXAsn1Integer(bb.subArray(48, 48)) });
+                        }
                         equals = ver.verify(value);
 
                     } catch (Exception ex) {

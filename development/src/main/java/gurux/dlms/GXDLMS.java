@@ -1527,7 +1527,16 @@ abstract class GXDLMS {
         signedData.set(tmp);
         if (sign) {
             // Signature
-            Signature sig = Signature.getInstance("SHA256withECDSA");
+            Signature sig;
+            if (p.getSettings().getCipher()
+                    .getSecuritySuite() == SecuritySuite.SUITE_1) {
+                sig = Signature.getInstance("SHA256withECDSA");
+            } else if (p.getSettings().getCipher()
+                    .getSecuritySuite() == SecuritySuite.SUITE_2) {
+                sig = Signature.getInstance("SHA384withECDSA");
+            } else {
+                throw new IllegalArgumentException("Invalid security suite.");
+            }
             if (c.getSigningKeyPair() == null) {
                 throw new IllegalArgumentException("SigningKeyPair is empty.");
             }
