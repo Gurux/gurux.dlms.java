@@ -421,7 +421,7 @@ public class GXDLMSReader {
                 }
 
                 data = dlms.snrmRequest();
-                if (data != null) {
+                if (data.length != 0) {
                     readDLMSPacket(data, reply);
                     // Has server accepted client.
                     dlms.parseUAResponse(reply.getData());
