@@ -38,17 +38,17 @@
     <dependency>
       <groupId>org.gurux</groupId>
       <artifactId>gurux.net</artifactId>
-      <version>1.0.22</version>
+      <version>1.0.27</version>
     </dependency>
     <dependency>
       <groupId>org.gurux</groupId>
       <artifactId>gurux.serial</artifactId>
-      <version>1.0.22</version>
+      <version>1.0.27</version>
     </dependency>
     <dependency>
       <groupId>org.gurux</groupId>
       <artifactId>gurux.dlms</artifactId>
-      <version>4.0.47</version>
+      <version>4.0.50</version>
     </dependency>
   </dependencies>
   <licenses>
