@@ -126,11 +126,11 @@ public class GXPkcs10 {
     }
 
     /**
-     * Create x509Certificate from PEM string.
+     * Create GXPkcs10 certificate request from PEM string.
      * 
      * @param data
      *            PEM string.
-     * @return x509 certificate.
+     * @return GXPkcs10 certificate request.
      */
     public static GXPkcs10 fromPem(final String data) {
         final String START = "CERTIFICATE REQUEST-----\n";
@@ -702,7 +702,7 @@ public class GXPkcs10 {
     }
 
     /**
-     * Save public key to PEM file.
+     * Save Certificate Signing Request to PEM file.
      * 
      * @param path
      *            File path.
@@ -714,7 +714,7 @@ public class GXPkcs10 {
     }
 
     /**
-     * @return Public key in PEM format.
+     * @return Certificate Signing Request in PEM format.
      */
     public String toPem() {
         StringBuilder sb = new StringBuilder();
@@ -728,7 +728,7 @@ public class GXPkcs10 {
     }
 
     /**
-     * @return Public key in DER format.
+     * @return Certificate Signing Request in DER format.
      */
     public String toDer() {
         return GXCommon.toBase64(getEncoded());

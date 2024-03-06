@@ -36,6 +36,7 @@ package gurux.dlms;
 
 import java.security.InvalidAlgorithmParameterException;
 import java.security.InvalidKeyException;
+import java.security.KeyPair;
 import java.security.NoSuchAlgorithmException;
 import java.util.Set;
 import java.util.logging.Level;
@@ -46,6 +47,7 @@ import javax.crypto.BadPaddingException;
 import javax.crypto.IllegalBlockSizeException;
 import javax.crypto.NoSuchPaddingException;
 
+import gurux.dlms.asn.GXx509Certificate;
 import gurux.dlms.enums.AcseServiceProvider;
 import gurux.dlms.enums.AssociationResult;
 import gurux.dlms.enums.Authentication;
@@ -1158,14 +1160,31 @@ final class GXAPDU {
                 buff.getUInt8();
                 // tag =
                 buff.getUInt8();
-                // len =
-                buff.getUInt8();
-                settings.setUserId(buff.getUInt8());
-                if (xml != null) {
-                    // CallingAPTitle
-                    xml.appendLine(
-                            TranslatorGeneralTags.RESPONDING_AE_INVOCATION_ID,
-                            "Value", xml.integerToHex(settings.getUserId(), 2));
+                len = buff.getUInt8();
+                if (settings.getAuthentication() == Authentication.HIGH_ECDSA
+                        && tag == (byte) BerType.OCTET_STRING) {
+                    // If public key certificate is coming part of AARQ.
+                    byte[] tmp2 = new byte[len];
+                    GXx509Certificate cert = new GXx509Certificate(tmp2);
+                    settings.getCipher()
+                            .setSigningKeyPair(new KeyPair(cert.getPublicKey(),
+                                    settings.getCipher().getSigningKeyPair()
+                                            .getPrivate()));
+                } else {
+                    settings.setUserId(buff.getUInt8());
+                    if (xml != null) {
+                        if (settings.isServer()) {
+                            xml.appendLine(
+                                    TranslatorGeneralTags.CALLING_AE_QUALIFIER,
+                                    "Value",
+                                    xml.integerToHex(settings.getUserId(), 2));
+                        } else {
+                            xml.appendLine(
+                                    TranslatorGeneralTags.RESPONDING_AE_INVOCATION_ID,
+                                    "Value",
+                                    xml.integerToHex(settings.getUserId(), 2));
+                        }
+                    }
                 }
                 break;
             case BerType.CONTEXT | BerType.CONSTRUCTED
