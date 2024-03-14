@@ -71,7 +71,20 @@ public enum ServiceType {
     /**
      * Transport service type is ZigBee.
      */
-    ZIGBEE(7);
+    ZIGBEE(7),
+
+    /**
+     * DLMS Gateway.
+     */
+    DLMS_GATEWAY(8),
+    /**
+     * Reliable CoAP.
+     */
+    RELIABLE_COAP(9),
+    /**
+     * Unreliable CoAP.
+     */
+    UNRELIABLE_COAP(10);
 
     private int intValue;
     private static java.util.HashMap<Integer, ServiceType> mappings;
@@ -99,8 +112,7 @@ public enum ServiceType {
     public static ServiceType forValue(final int value) {
         ServiceType ret = getMappings().get(value);
         if (ret == null) {
-            throw new IllegalArgumentException(
-                    "Invalid service type enum value.");
+            throw new IllegalArgumentException("Invalid service type enum value.");
         }
         return ret;
     }
