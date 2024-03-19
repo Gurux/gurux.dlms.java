@@ -201,10 +201,10 @@ final class GXAPDU {
                 byte[] raw = settings.getClientPublicKeyCertificate().getEncoded();
                 data.setUInt8(BerType.CONTEXT | BerType.CONSTRUCTED | PduType.CALLING_AE_QUALIFIER);
                 // LEN
-                data.setUInt8(2 + raw.length);
+                GXCommon.setObjectCount(2 + raw.length, data);
                 data.setUInt8(BerType.OCTET_STRING);
                 // LEN
-                data.setUInt8(raw.length);
+                GXCommon.setObjectCount(raw.length, data);
                 data.set(raw);
             }
         }
@@ -1034,13 +1034,14 @@ final class GXAPDU {
             // Server RespondingAEInvocationId.
             case BerType.CONTEXT | BerType.CONSTRUCTED | 7:// 0xA7
                 // len =
-                buff.getUInt8();
+                GXCommon.getObjectCount(buff);
                 // tag =
                 buff.getUInt8();
-                len = buff.getUInt8();
-                if (settings.getAuthentication() == Authentication.HIGH_ECDSA && tag == (byte) BerType.OCTET_STRING) {
+                len = GXCommon.getObjectCount(buff);
+                if (tag == (byte) BerType.OCTET_STRING) {
                     // If public key certificate is coming part of AARQ.
                     byte[] tmp2 = new byte[len];
+                    buff.get(tmp2);
                     GXx509Certificate cert = new GXx509Certificate(tmp2);
                     settings.getCipher().setKeyAgreementKeyPair(new KeyPair(cert.getPublicKey(),
                             settings.getCipher().getKeyAgreementKeyPair().getPrivate()));
