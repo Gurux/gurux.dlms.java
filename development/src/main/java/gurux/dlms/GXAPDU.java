@@ -38,7 +38,6 @@ import java.security.InvalidAlgorithmParameterException;
 import java.security.InvalidKeyException;
 import java.security.KeyPair;
 import java.security.NoSuchAlgorithmException;
-import java.security.PublicKey;
 import java.util.Set;
 import java.util.logging.Level;
 import java.util.logging.Logger;
@@ -48,7 +47,6 @@ import javax.crypto.BadPaddingException;
 import javax.crypto.IllegalBlockSizeException;
 import javax.crypto.NoSuchPaddingException;
 
-import gurux.dlms.asn.GXAsn1Converter;
 import gurux.dlms.asn.GXx509Certificate;
 import gurux.dlms.enums.AcseServiceProvider;
 import gurux.dlms.enums.AssociationResult;
@@ -198,20 +196,16 @@ final class GXAPDU {
             // LEN
             data.setUInt8(cipher.getSystemTitle().length);
             data.set(cipher.getSystemTitle());
-            if (settings.isKeyAgreementInAARE() && settings.getCipher().getKeyAgreementKeyPair().getPrivate() != null) {
-                PublicKey pub = GXAsn1Converter
-                        .getPublicKey(settings.getCipher().getKeyAgreementKeyPair().getPrivate().getEncoded());
-                if (pub != null) {
-                    // Add calling-AE-qualifier.
-                    byte[] raw = GXAsn1Converter.rawValue(pub);
-                    data.setUInt8(BerType.CONTEXT | BerType.CONSTRUCTED | PduType.CALLING_AE_QUALIFIER);
-                    // LEN
-                    data.setUInt8(2 + raw.length);
-                    data.setUInt8(BerType.OCTET_STRING);
-                    // LEN
-                    data.setUInt8(raw.length);
-                    data.set(raw);
-                }
+            if (settings.getClientPublicKeyCertificate() != null) {
+                // Add calling-AE-qualifier.
+                byte[] raw = settings.getClientPublicKeyCertificate().getEncoded();
+                data.setUInt8(BerType.CONTEXT | BerType.CONSTRUCTED | PduType.CALLING_AE_QUALIFIER);
+                // LEN
+                data.setUInt8(2 + raw.length);
+                data.setUInt8(BerType.OCTET_STRING);
+                // LEN
+                data.setUInt8(raw.length);
+                data.set(raw);
             }
         }
         // Add CallingAEInvocationId.

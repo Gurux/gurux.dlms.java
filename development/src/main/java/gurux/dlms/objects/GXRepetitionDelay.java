@@ -44,6 +44,16 @@ public class GXRepetitionDelay {
     private int min;
 
     /**
+     * Calculating the next delay.
+     */
+    private int exponent;
+
+    /**
+     * The maximum delay until a next push attempt is started in seconds.
+     */
+    private int max;
+
+    /**
      * @return The minimum delay until a next push attempt is started in
      *         seconds.
      */
@@ -61,11 +71,6 @@ public class GXRepetitionDelay {
     }
 
     /**
-     * Calculating the next delay.
-     */
-    private int exponent;
-
-    /**
      * @return Calculating the next delay.
      */
     public final int getExponent() {
@@ -79,11 +84,6 @@ public class GXRepetitionDelay {
     public final void setExponent(final int value) {
         exponent = value;
     }
-
-    /**
-     * The maximum delay until a next push attempt is started in seconds.
-     */
-    private int max;
 
     /**
      * @return The maximum delay until a next push attempt is started in

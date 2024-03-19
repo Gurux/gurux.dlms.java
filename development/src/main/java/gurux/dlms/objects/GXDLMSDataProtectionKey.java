@@ -48,16 +48,16 @@ public class GXDLMSDataProtectionKey {
     /**
      * Identified key parameters.
      */
-    GXDLMSDataProtectionIdentifiedKey identifiedKey = new GXDLMSDataProtectionIdentifiedKey();
+    private GXDLMSDataProtectionIdentifiedKey identifiedKey = new GXDLMSDataProtectionIdentifiedKey();
 
     /**
      * Wrapped key parameters.
      */
-    GXDLMSDataProtectionWrappeddKey wrappedKey = new GXDLMSDataProtectionWrappeddKey();
+    private GXDLMSDataProtectionWrappeddKey wrappedKey = new GXDLMSDataProtectionWrappeddKey();
     /**
      * Agreed key parameters.
      */
-    GXDLMSDataProtectionAgreedKey agreedKey = new GXDLMSDataProtectionAgreedKey();
+    private GXDLMSDataProtectionAgreedKey agreedKey = new GXDLMSDataProtectionAgreedKey();
 
     public final DataProtectionKeyType getDataProtectionKeyType() {
         return dataProtectionKeyType;

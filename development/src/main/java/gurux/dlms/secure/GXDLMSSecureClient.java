@@ -43,6 +43,7 @@ import javax.crypto.IllegalBlockSizeException;
 import javax.crypto.NoSuchPaddingException;
 
 import gurux.dlms.GXDLMSClient;
+import gurux.dlms.asn.GXx509Certificate;
 import gurux.dlms.enums.Authentication;
 import gurux.dlms.enums.InterfaceType;
 
@@ -72,8 +73,7 @@ public class GXDLMSSecureClient extends GXDLMSClient {
      *            Is Logical Name referencing used.
      */
     public GXDLMSSecureClient(final boolean useLogicalNameReferencing) {
-        this(useLogicalNameReferencing, 16, 1, Authentication.NONE, null,
-                InterfaceType.HDLC);
+        this(useLogicalNameReferencing, 16, 1, Authentication.NONE, null, InterfaceType.HDLC);
     }
 
     /**
@@ -92,12 +92,9 @@ public class GXDLMSSecureClient extends GXDLMSClient {
      * @param interfaceType
      *            Object type.
      */
-    public GXDLMSSecureClient(final boolean useLogicalNameReferencing,
-            final int clientAddress, final int serverAddress,
-            final Authentication forAuthentication, final String password,
-            final InterfaceType interfaceType) {
-        super(useLogicalNameReferencing, clientAddress, serverAddress,
-                forAuthentication, password, interfaceType);
+    public GXDLMSSecureClient(final boolean useLogicalNameReferencing, final int clientAddress, final int serverAddress,
+            final Authentication forAuthentication, final String password, final InterfaceType interfaceType) {
+        super(useLogicalNameReferencing, clientAddress, serverAddress, forAuthentication, password, interfaceType);
         ciphering = new GXCiphering("ABCDEFGH".getBytes());
         setCipher(ciphering);
     }
@@ -131,9 +128,8 @@ public class GXDLMSSecureClient extends GXDLMSClient {
      *             Illegal block size exception.
      */
     public static byte[] encrypt(final byte[] kek, final byte[] data)
-            throws NoSuchAlgorithmException, NoSuchPaddingException,
-            InvalidKeyException, InvalidAlgorithmParameterException,
-            IllegalBlockSizeException, BadPaddingException {
+            throws NoSuchAlgorithmException, NoSuchPaddingException, InvalidKeyException,
+            InvalidAlgorithmParameterException, IllegalBlockSizeException, BadPaddingException {
         return GXSecure.encryptAesKeyWrapping(data, kek);
     }
 
@@ -189,5 +185,22 @@ public class GXDLMSSecureClient extends GXDLMSClient {
      */
     public void setServerSystemTitle(final byte[] value) {
         getSettings().setPreEstablishedSystemTitle(value);
+    }
+
+    /**
+     * @return Optional ECDSA public key certificate that is send in part of
+     *         AARE.
+     */
+    public GXx509Certificate getClientPublicKeyCertificate() {
+        return getSettings().getClientPublicKeyCertificate();
+    }
+
+    /**
+     * @param value
+     *            Optional ECDSA public key certificate that is send in part of
+     *            AARE.
+     */
+    public void setClientPublicKeyCertificate(final GXx509Certificate value) {
+        getSettings().setClientPublicKeyCertificate(value);
     }
 }

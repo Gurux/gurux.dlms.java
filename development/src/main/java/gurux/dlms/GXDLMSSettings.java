@@ -408,12 +408,12 @@ public class GXDLMSSettings {
      */
     private byte challengeSize = 16;
 
-    boolean overwriteAttributeAccessRights;
+    private boolean overwriteAttributeAccessRights;
 
     /**
-     * ECDSA key agreement key is send in part of AARE.
+     * Optional ECDSA public key certificate that is send in part of AARE.
      */
-    private boolean keyAgreementInAARE;
+    private GXx509Certificate clientPublicKeyCertificate;
 
     /**
      * @return Ephemeral Block cipher key.
@@ -1702,17 +1702,19 @@ public class GXDLMSSettings {
     }
 
     /**
-     * @return ECDSA key agreement key is send in part of AARE.
+     * @return Optional ECDSA public key certificate that is send in part of
+     *         AARE.
      */
-    public boolean isKeyAgreementInAARE() {
-        return keyAgreementInAARE;
+    public GXx509Certificate getClientPublicKeyCertificate() {
+        return clientPublicKeyCertificate;
     }
 
     /**
      * @param value
-     *            ECDSA key agreement key is send in part of AARE.
+     *            Optional ECDSA public key certificate that is send in part of
+     *            AARE.
      */
-    public void setKeyAgreementInAARE(final boolean value) {
-        keyAgreementInAARE = value;
+    public void setClientPublicKeyCertificate(final GXx509Certificate value) {
+        clientPublicKeyCertificate = value;
     }
 }

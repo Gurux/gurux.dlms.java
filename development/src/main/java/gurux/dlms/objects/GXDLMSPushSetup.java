@@ -150,8 +150,8 @@ public class GXDLMSPushSetup extends GXDLMSObject implements IGXDLMSBase {
         super(ObjectType.PUSH_SETUP, ln, sn);
         pushObjectList = new ArrayList<Entry<GXDLMSObject, GXDLMSCaptureObject>>();
         communicationWindow = new ArrayList<Map.Entry<GXDateTime, GXDateTime>>();
-        setRepetitionDelay2(new GXRepetitionDelay());
-        setConfirmationParameters(new GXPushConfirmationParameter());
+        repetitionDelay2 = new GXRepetitionDelay();
+        confirmationParameters = new GXPushConfirmationParameter();
         service = ServiceType.TCP;
         message = MessageType.COSEM_APDU;
         pushOperationMethod = PushOperationMethod.UNCONFIRMED_FAILURE;
@@ -449,7 +449,7 @@ public class GXDLMSPushSetup extends GXDLMSObject implements IGXDLMSBase {
             if (index == 10) {
                 return DataType.ARRAY;
             }
-            if (version < 1) {
+            if (version > 1) {
                 // PushOperationMethod
                 if (index == 11) {
                     return DataType.ENUM;
@@ -714,7 +714,7 @@ public class GXDLMSPushSetup extends GXDLMSObject implements IGXDLMSBase {
             GXStructure tmp = (GXStructure) e.getValue();
             if (tmp != null) {
                 confirmationParameters.setStartDate((GXDateTime) tmp.get(0));
-                confirmationParameters.setInterval(((Number) tmp.get(0)).intValue());
+                confirmationParameters.setInterval(((Number) tmp.get(0)).longValue());
             }
         } else if (version > 1 && e.getIndex() == 13) {
             lastConfirmationDateTime = (GXDateTime) e.getValue();

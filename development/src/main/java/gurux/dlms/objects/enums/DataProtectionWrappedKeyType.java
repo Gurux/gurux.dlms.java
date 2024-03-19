@@ -34,17 +34,14 @@
 
 package gurux.dlms.objects.enums;
 
-import java.util.HashMap;
-
-/** 
-Data protection wrapped key types.
-*/
-public enum DataProtectionWrappedKeyType
-{
-   /** 
-    Master key.
-   */
-   MASTER_KEY;
+/**
+ * Data protection wrapped key types.
+ */
+public enum DataProtectionWrappedKeyType {
+    /**
+     * Master key.
+     */
+    MASTER_KEY;
 
     /*
      * Get integer value for enum.
