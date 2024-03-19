@@ -201,7 +201,7 @@ final class GXAPDU {
                 byte[] raw = settings.getClientPublicKeyCertificate().getEncoded();
                 data.setUInt8(BerType.CONTEXT | BerType.CONSTRUCTED | PduType.CALLING_AE_QUALIFIER);
                 // LEN
-                GXCommon.setObjectCount(2 + raw.length, data);
+                GXCommon.setObjectCount(4 + raw.length, data);
                 data.setUInt8(BerType.OCTET_STRING);
                 // LEN
                 GXCommon.setObjectCount(raw.length, data);
