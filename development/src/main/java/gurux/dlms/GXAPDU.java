@@ -1034,7 +1034,7 @@ final class GXAPDU {
                         settings.setServerPublicKeyCertificate(cert);
                         settings.getCipher().setKeyAgreementKeyPair(new KeyPair(cert.getPublicKey(),
                                 settings.getCipher().getKeyAgreementKeyPair().getPrivate()));
-                        if (xml.isComments()) {
+                        if (xml != null && xml.isComments()) {
                             xml.appendComment(cert.toString());
                         }
                     } catch (Exception ex) {
@@ -1071,6 +1071,9 @@ final class GXAPDU {
                         settings.setClientPublicKeyCertificate(cert);
                         settings.getCipher().setKeyAgreementKeyPair(new KeyPair(cert.getPublicKey(),
                                 settings.getCipher().getKeyAgreementKeyPair().getPrivate()));
+                        if (xml != null && xml.isComments()) {
+                            xml.appendComment(cert.toString());
+                        }
                     } catch (Exception ex) {
                         if (xml == null) {
                             throw ex;
