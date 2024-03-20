@@ -411,9 +411,14 @@ public class GXDLMSSettings {
     private boolean overwriteAttributeAccessRights;
 
     /**
-     * Optional ECDSA public key certificate that is send in part of AARE.
+     * Optional ECDSA public key certificate that is send in part of AARQ.
      */
     private GXx509Certificate clientPublicKeyCertificate;
+
+    /**
+     * Optional ECDSA public key certificate that is send in part of AARE.
+     */
+    private GXx509Certificate serverPublicKeyCertificate;
 
     /**
      * @return Ephemeral Block cipher key.
@@ -1703,7 +1708,7 @@ public class GXDLMSSettings {
 
     /**
      * @return Optional ECDSA public key certificate that is send in part of
-     *         AARE.
+     *         AARQ.
      */
     public GXx509Certificate getClientPublicKeyCertificate() {
         return clientPublicKeyCertificate;
@@ -1712,9 +1717,26 @@ public class GXDLMSSettings {
     /**
      * @param value
      *            Optional ECDSA public key certificate that is send in part of
-     *            AARE.
+     *            AARQ.
      */
     public void setClientPublicKeyCertificate(final GXx509Certificate value) {
         clientPublicKeyCertificate = value;
+    }
+
+    /**
+     * @return Optional ECDSA public key certificate that is send in part of
+     *         AARE.
+     */
+    public GXx509Certificate getServerPublicKeyCertificate() {
+        return serverPublicKeyCertificate;
+    }
+
+    /**
+     * @param value
+     *            Optional ECDSA public key certificate that is send in part of
+     *            AARE.
+     */
+    public void setServerPublicKeyCertificate(final GXx509Certificate value) {
+        serverPublicKeyCertificate = value;
     }
 }

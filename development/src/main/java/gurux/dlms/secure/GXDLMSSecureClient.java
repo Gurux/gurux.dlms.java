@@ -189,7 +189,7 @@ public class GXDLMSSecureClient extends GXDLMSClient {
 
     /**
      * @return Optional ECDSA public key certificate that is send in part of
-     *         AARE.
+     *         AARQ.
      */
     public GXx509Certificate getClientPublicKeyCertificate() {
         return getSettings().getClientPublicKeyCertificate();
@@ -202,5 +202,13 @@ public class GXDLMSSecureClient extends GXDLMSClient {
      */
     public void setClientPublicKeyCertificate(final GXx509Certificate value) {
         getSettings().setClientPublicKeyCertificate(value);
+    }
+
+    /**
+     * @return Optional ECDSA public key certificate that server send in part of
+     *         AARQ.
+     */
+    public GXx509Certificate getServerPublicKeyCertificate() {
+        return getSettings().getServerPublicKeyCertificate();
     }
 }

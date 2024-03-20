@@ -162,8 +162,7 @@ public class GXDLMSClient {
      */
     private boolean preEstablished;
 
-    private static final Logger LOGGER =
-            Logger.getLogger(GXDLMSClient.class.getName());
+    private static final Logger LOGGER = Logger.getLogger(GXDLMSClient.class.getName());
 
     /**
      * Is authentication required.
@@ -184,8 +183,7 @@ public class GXDLMSClient {
      *            Is Logical Name referencing used.
      */
     public GXDLMSClient(final boolean useLogicalNameReferencing) {
-        this(useLogicalNameReferencing, 16, 1, Authentication.NONE, null,
-                InterfaceType.HDLC);
+        this(useLogicalNameReferencing, 16, 1, Authentication.NONE, null, InterfaceType.HDLC);
     }
 
     /**
@@ -204,13 +202,9 @@ public class GXDLMSClient {
      * @param interfaceType
      *            Object type.
      */
-    public GXDLMSClient(final boolean useLogicalNameReferencing,
-            final int clientAddress, final int serverAddress,
-            final Authentication forAuthentication, final String password,
-            final InterfaceType interfaceType) {
-        settings = new GXDLMSSettings(false,
-                this instanceof IGXCryptoNotifier ? (IGXCryptoNotifier) this
-                        : null);
+    public GXDLMSClient(final boolean useLogicalNameReferencing, final int clientAddress, final int serverAddress,
+            final Authentication forAuthentication, final String password, final InterfaceType interfaceType) {
+        settings = new GXDLMSSettings(false, this instanceof IGXCryptoNotifier ? (IGXCryptoNotifier) this : null);
         setUseLogicalNameReferencing(useLogicalNameReferencing);
         setClientAddress(clientAddress);
         setServerAddress(serverAddress);
@@ -493,8 +487,7 @@ public class GXDLMSClient {
      *            Some meters expect that Invocation Counter is increased for
      *            Authentication when connection is established.
      */
-    public void setIncreaseInvocationCounterForGMacAuthentication(
-            final boolean value) {
+    public void setIncreaseInvocationCounterForGMacAuthentication(final boolean value) {
         settings.setIncreaseInvocationCounterForGMacAuthentication(value);
     }
 
@@ -528,8 +521,7 @@ public class GXDLMSClient {
      *            Skipped date time fields on read. This value can be used if
      *            meter returns invalid deviation on read.
      */
-    public void
-            setDateTimeSkipsOnRead(final java.util.Set<DateTimeSkips> value) {
+    public void setDateTimeSkipsOnRead(final java.util.Set<DateTimeSkips> value) {
         settings.setDateTimeSkipsOnRead(value);
     }
 
@@ -595,8 +587,7 @@ public class GXDLMSClient {
      *            When connection is made client tells what kind of services it
      *            want's to use.
      */
-    public final void
-            setProposedConformance(final java.util.Set<Conformance> value) {
+    public final void setProposedConformance(final java.util.Set<Conformance> value) {
         settings.setProposedConformance(value);
     }
 
@@ -814,37 +805,27 @@ public class GXDLMSClient {
         if (getInterfaceType() == InterfaceType.PLC_HDLC) {
             return GXDLMS.getMacHdlcFrame(settings, Command.SNRM, 0, null);
         }
-        if (getInterfaceType() != InterfaceType.HDLC
-                && getInterfaceType() != InterfaceType.HDLC_WITH_MODE_E) {
+        if (getInterfaceType() != InterfaceType.HDLC && getInterfaceType() != InterfaceType.HDLC_WITH_MODE_E) {
             return new byte[0];
         }
         GXByteBuffer data = new GXByteBuffer(25);
         data.setUInt8(0x81); // FromatID
         data.setUInt8(0x80); // GroupID
         data.setUInt8(0); // Length.
-        int maxInfoTX = getHdlcSettings().getMaxInfoTX(),
-                maxInfoRX = getHdlcSettings().getMaxInfoRX();
+        int maxInfoTX = getHdlcSettings().getMaxInfoTX(), maxInfoRX = getHdlcSettings().getMaxInfoRX();
         if (getHdlcSettings().isUseFrameSize()) {
             byte[] primaryAddress, secondaryAddress;
-            primaryAddress =
-                    GXDLMS.getHdlcAddressBytes(settings.getServerAddress(),
-                            settings.getServerAddressSize());
-            secondaryAddress =
-                    GXDLMS.getHdlcAddressBytes(settings.getClientAddress(), 0);
+            primaryAddress = GXDLMS.getHdlcAddressBytes(settings.getServerAddress(), settings.getServerAddressSize());
+            secondaryAddress = GXDLMS.getHdlcAddressBytes(settings.getClientAddress(), 0);
             maxInfoTX -= (10 + secondaryAddress.length);
             maxInfoRX -= (10 + primaryAddress.length);
         }
 
         // If custom HDLC parameters are used.
-        if (forceParameters
-                || GXDLMSLimits.DEFAULT_MAX_INFO_TX != getHdlcSettings()
-                        .getMaxInfoTX()
-                || GXDLMSLimits.DEFAULT_MAX_INFO_RX != getHdlcSettings()
-                        .getMaxInfoRX()
-                || GXDLMSLimits.DEFAULT_WINDOWS_SIZE_TX != getHdlcSettings()
-                        .getWindowSizeTX()
-                || GXDLMSLimits.DEFAULT_WINDOWS_SIZE_RX != getHdlcSettings()
-                        .getWindowSizeRX()) {
+        if (forceParameters || GXDLMSLimits.DEFAULT_MAX_INFO_TX != getHdlcSettings().getMaxInfoTX()
+                || GXDLMSLimits.DEFAULT_MAX_INFO_RX != getHdlcSettings().getMaxInfoRX()
+                || GXDLMSLimits.DEFAULT_WINDOWS_SIZE_TX != getHdlcSettings().getWindowSizeTX()
+                || GXDLMSLimits.DEFAULT_WINDOWS_SIZE_RX != getHdlcSettings().getWindowSizeRX()) {
             data.setUInt8(HDLCInfo.MAX_INFO_TX);
             GXDLMS.appendHdlcParameter(data, maxInfoTX);
             data.setUInt8(HDLCInfo.MAX_INFO_RX);
@@ -911,10 +892,8 @@ public class GXDLMSClient {
      * @throws SignatureException
      *             Signature exception.
      */
-    public final byte[][] aarqRequest()
-            throws InvalidKeyException, NoSuchAlgorithmException,
-            NoSuchPaddingException, InvalidAlgorithmParameterException,
-            IllegalBlockSizeException, BadPaddingException, SignatureException {
+    public final byte[][] aarqRequest() throws InvalidKeyException, NoSuchAlgorithmException, NoSuchPaddingException,
+            InvalidAlgorithmParameterException, IllegalBlockSizeException, BadPaddingException, SignatureException {
         if (preEstablished) {
             // AARQ is not generate for pre-established connections.
             return new byte[][] {};
@@ -926,6 +905,7 @@ public class GXDLMSClient {
         settings.setConnected(settings.getConnected() & ~ConnectionState.DLMS);
         GXByteBuffer buff = new GXByteBuffer(20);
         settings.resetBlockIndex();
+        settings.setServerPublicKeyCertificate(null);
         GXDLMS.checkInit(settings);
         settings.setStoCChallenge(null);
         if (getAutoIncreaseInvokeID()) {
@@ -940,20 +920,18 @@ public class GXDLMSClient {
 
         // If authentication or ciphering is used.
         if (getAuthentication().ordinal() > Authentication.LOW.ordinal()) {
-            settings.setCtoSChallenge(GXSecure.generateChallenge(
-                    settings.getAuthentication(), settings.getChallengeSize()));
+            settings.setCtoSChallenge(
+                    GXSecure.generateChallenge(settings.getAuthentication(), settings.getChallengeSize()));
         } else {
             settings.setCtoSChallenge(null);
         }
         GXAPDU.generateAarq(settings, settings.getCipher(), null, buff);
         List<byte[]> reply;
         if (settings.getUseLogicalNameReferencing()) {
-            GXDLMSLNParameters p = new GXDLMSLNParameters(settings, 0,
-                    Command.AARQ, 0, buff, null, 0xff, Command.NONE);
+            GXDLMSLNParameters p = new GXDLMSLNParameters(settings, 0, Command.AARQ, 0, buff, null, 0xff, Command.NONE);
             reply = GXDLMS.getLnMessages(p);
         } else {
-            GXDLMSSNParameters p = new GXDLMSSNParameters(settings,
-                    Command.AARQ, 0, 0, null, buff);
+            GXDLMSSNParameters p = new GXDLMSSNParameters(settings, Command.AARQ, 0, 0, null, buff);
             reply = GXDLMS.getSnMessages(p);
         }
         return reply.toArray(new byte[][] {});
@@ -978,15 +956,13 @@ public class GXDLMSClient {
      * @see GXDLMSClient#getProposedConformance
      */
     public final void parseAareResponse(final GXByteBuffer reply) {
-        isAuthenticationRequired =
-                GXAPDU.parsePDU(settings, settings.getCipher(), reply,
-                        null) == SourceDiagnostic.AUTHENTICATION_REQUIRED;
+        isAuthenticationRequired = GXAPDU.parsePDU(settings, settings.getCipher(), reply,
+                null) == SourceDiagnostic.AUTHENTICATION_REQUIRED;
         if (settings.getDLMSVersion() != 6) {
             throw new IllegalArgumentException("Invalid DLMS version number.");
         }
         if (!isAuthenticationRequired) {
-            settings.setConnected(
-                    settings.getConnected() | ConnectionState.DLMS);
+            settings.setConnected(settings.getConnected() | ConnectionState.DLMS);
         }
     }
 
@@ -1015,30 +991,23 @@ public class GXDLMSClient {
      *             Signature exception.
      */
     public final byte[][] getApplicationAssociationRequest()
-            throws InvalidKeyException, NoSuchAlgorithmException,
-            NoSuchPaddingException, InvalidAlgorithmParameterException,
-            IllegalBlockSizeException, BadPaddingException, SignatureException {
+            throws InvalidKeyException, NoSuchAlgorithmException, NoSuchPaddingException,
+            InvalidAlgorithmParameterException, IllegalBlockSizeException, BadPaddingException, SignatureException {
         if (settings.getAuthentication() != Authentication.HIGH_ECDSA
                 && settings.getAuthentication() != Authentication.HIGH_GMAC
-                && (settings.getPassword() == null
-                        || settings.getPassword().length == 0)) {
+                && (settings.getPassword() == null || settings.getPassword().length == 0)) {
             throw new IllegalArgumentException("Password is invalid.");
         }
         settings.resetBlockIndex();
         byte[] pw;
         // Count challenge for Landis+Gyr. L+G is using custom way to count the
         // challenge.
-        if (manufacturerId == "LGZ"
-                && getAuthentication() == Authentication.HIGH) {
-            pw = encryptLandisGyrHighLevelAuthentication(settings.getPassword(),
-                    settings.getStoCChallenge());
+        if (manufacturerId == "LGZ" && getAuthentication() == Authentication.HIGH) {
+            pw = encryptLandisGyrHighLevelAuthentication(settings.getPassword(), settings.getStoCChallenge());
             if (getUseLogicalNameReferencing()) {
-                return method("0.0.40.0.0.255",
-                        ObjectType.ASSOCIATION_LOGICAL_NAME, 1, pw,
-                        DataType.OCTET_STRING);
+                return method("0.0.40.0.0.255", ObjectType.ASSOCIATION_LOGICAL_NAME, 1, pw, DataType.OCTET_STRING);
             }
-            return method(0xFA00, ObjectType.ASSOCIATION_SHORT_NAME, 8, pw,
-                    DataType.OCTET_STRING);
+            return method(0xFA00, ObjectType.ASSOCIATION_SHORT_NAME, 8, pw, DataType.OCTET_STRING);
         }
 
         if (settings.getAuthentication() == Authentication.HIGH_GMAC) {
@@ -1059,14 +1028,12 @@ public class GXDLMSClient {
                 pk = settings.getCipher().getSigningKeyPair().getPrivate();
             }
             if (pub == null) {
-                pub = (PublicKey) settings.getKey(
-                        CertificateType.DIGITAL_SIGNATURE,
-                        settings.getSourceSystemTitle(), false);
+                pub = (PublicKey) settings.getKey(CertificateType.DIGITAL_SIGNATURE, settings.getSourceSystemTitle(),
+                        false);
                 settings.getCipher().setSigningKeyPair(new KeyPair(pub, pk));
             }
             if (pk == null) {
-                pk = (PrivateKey) settings.getKey(
-                        CertificateType.DIGITAL_SIGNATURE,
+                pk = (PrivateKey) settings.getKey(CertificateType.DIGITAL_SIGNATURE,
                         settings.getCipher().getSystemTitle(), true);
                 settings.getCipher().setSigningKeyPair(new KeyPair(pub, pk));
             }
@@ -1080,19 +1047,15 @@ public class GXDLMSClient {
             pw = settings.getPassword();
         }
         long ic = settings.getCipher().getInvocationCounter();
-        byte[] challenge = GXSecure.secure(settings, settings.getCipher(), ic,
-                settings.getStoCChallenge(), pw);
-        if (settings.getCipher() != null && settings
-                .getIncreaseInvocationCounterForGMacAuthentication()) {
+        byte[] challenge = GXSecure.secure(settings, settings.getCipher(), ic, settings.getStoCChallenge(), pw);
+        if (settings.getCipher() != null && settings.getIncreaseInvocationCounterForGMacAuthentication()) {
             ++ic;
             settings.getCipher().setInvocationCounter(ic);
         }
         if (getUseLogicalNameReferencing()) {
-            return method("0.0.40.0.0.255", ObjectType.ASSOCIATION_LOGICAL_NAME,
-                    1, challenge, DataType.OCTET_STRING);
+            return method("0.0.40.0.0.255", ObjectType.ASSOCIATION_LOGICAL_NAME, 1, challenge, DataType.OCTET_STRING);
         }
-        return method(0xFA00, ObjectType.ASSOCIATION_SHORT_NAME, 8, challenge,
-                DataType.OCTET_STRING);
+        return method(0xFA00, ObjectType.ASSOCIATION_SHORT_NAME, 8, challenge, DataType.OCTET_STRING);
     }
 
     /**
@@ -1114,16 +1077,13 @@ public class GXDLMSClient {
      *             Signature exception.
      */
     @SuppressWarnings("squid:S00112")
-    public final void parseApplicationAssociationResponse(
-            final GXByteBuffer reply) throws InvalidKeyException,
-            NoSuchPaddingException, InvalidAlgorithmParameterException,
+    public final void parseApplicationAssociationResponse(final GXByteBuffer reply)
+            throws InvalidKeyException, NoSuchPaddingException, InvalidAlgorithmParameterException,
             IllegalBlockSizeException, BadPaddingException, SignatureException {
         // Landis+Gyr is not returning StoC.
-        if (manufacturerId != null
-                && settings.getAuthentication() == Authentication.HIGH
+        if (manufacturerId != null && settings.getAuthentication() == Authentication.HIGH
                 && "LGZ".compareTo(manufacturerId) == 0) {
-            settings.setConnected(
-                    settings.getConnected() | ConnectionState.DLMS);
+            settings.setConnected(settings.getConnected() | ConnectionState.DLMS);
         } else {
             GXDataInfo info = new GXDataInfo();
             boolean equals = false;
@@ -1134,18 +1094,14 @@ public class GXDLMSClient {
                 if (settings.getAuthentication() == Authentication.HIGH_ECDSA) {
                     try {
                         Signature ver;
-                        if (settings.getCipher()
-                                .getSecuritySuite() == SecuritySuite.SUITE_1) {
+                        if (settings.getCipher().getSecuritySuite() == SecuritySuite.SUITE_1) {
                             ver = Signature.getInstance("SHA256withECDSA");
-                        } else if (settings.getCipher()
-                                .getSecuritySuite() == SecuritySuite.SUITE_2) {
+                        } else if (settings.getCipher().getSecuritySuite() == SecuritySuite.SUITE_2) {
                             ver = Signature.getInstance("SHA384withECDSA");
                         } else {
-                            throw new IllegalArgumentException(
-                                    "Invalid security suite.");
+                            throw new IllegalArgumentException("Invalid security suite.");
                         }
-                        ver.initVerify(settings.getCipher().getSigningKeyPair()
-                                .getPublic());
+                        ver.initVerify(settings.getCipher().getSigningKeyPair().getPublic());
                         GXByteBuffer bb = new GXByteBuffer();
                         bb.set(settings.getSourceSystemTitle());
                         bb.set(settings.getCipher().getSystemTitle());
@@ -1154,14 +1110,11 @@ public class GXDLMSClient {
                         ver.update(bb.array());
                         bb.size(0);
                         bb.set(value);
-                        if (settings.getCipher()
-                                .getSecuritySuite() == SecuritySuite.SUITE_1) {
-                            value = GXAsn1Converter.toByteArray(new Object[] {
-                                    new GXAsn1Integer(bb.subArray(0, 32)),
+                        if (settings.getCipher().getSecuritySuite() == SecuritySuite.SUITE_1) {
+                            value = GXAsn1Converter.toByteArray(new Object[] { new GXAsn1Integer(bb.subArray(0, 32)),
                                     new GXAsn1Integer(bb.subArray(32, 32)) });
                         } else {
-                            value = GXAsn1Converter.toByteArray(new Object[] {
-                                    new GXAsn1Integer(bb.subArray(0, 48)),
+                            value = GXAsn1Converter.toByteArray(new Object[] { new GXAsn1Integer(bb.subArray(0, 48)),
                                     new GXAsn1Integer(bb.subArray(48, 48)) });
                         }
                         equals = ver.verify(value);
@@ -1170,14 +1123,12 @@ public class GXDLMSClient {
                         throw new RuntimeException(ex.getMessage());
                     }
                 } else {
-                    if (settings
-                            .getAuthentication() == Authentication.HIGH_GMAC) {
+                    if (settings.getAuthentication() == Authentication.HIGH_GMAC) {
                         secret = settings.getSourceSystemTitle();
                         GXByteBuffer bb = new GXByteBuffer(value);
                         bb.getUInt8();
                         ic = bb.getUInt32();
-                    } else if (settings
-                            .getAuthentication() == Authentication.HIGH_SHA256) {
+                    } else if (settings.getAuthentication() == Authentication.HIGH_SHA256) {
                         GXByteBuffer tmp2 = new GXByteBuffer();
                         tmp2.set(settings.getPassword());
                         tmp2.set(settings.getSourceSystemTitle());
@@ -1188,14 +1139,12 @@ public class GXDLMSClient {
                     } else {
                         secret = settings.getPassword();
                     }
-                    byte[] tmp = GXSecure.secure(settings, settings.getCipher(),
-                            ic, settings.getCtoSChallenge(), secret);
+                    byte[] tmp =
+                            GXSecure.secure(settings, settings.getCipher(), ic, settings.getCtoSChallenge(), secret);
                     GXByteBuffer challenge = new GXByteBuffer(tmp);
                     equals = challenge.compare(value);
                     if (!equals) {
-                        String str =
-                                "Invalid StoC:" + GXCommon.toHex(value, true)
-                                        + "-" + GXCommon.toHex(tmp, true);
+                        String str = "Invalid StoC:" + GXCommon.toHex(value, true) + "-" + GXCommon.toHex(tmp, true);
                         LOGGER.log(Level.INFO, str);
                     }
                 }
@@ -1205,11 +1154,9 @@ public class GXDLMSClient {
 
             if (!equals) {
                 throw new GXDLMSException(
-                        "parseApplicationAssociationResponse failed. "
-                                + " Server to Client do not match.");
+                        "parseApplicationAssociationResponse failed. " + " Server to Client do not match.");
             } else {
-                settings.setConnected(
-                        settings.getConnected() | ConnectionState.DLMS);
+                settings.setConnected(settings.getConnected() | ConnectionState.DLMS);
             }
         }
     }
@@ -1231,10 +1178,8 @@ public class GXDLMSClient {
      * @throws SignatureException
      *             Signature exception.
      */
-    public byte[][] releaseRequest()
-            throws InvalidKeyException, NoSuchAlgorithmException,
-            NoSuchPaddingException, InvalidAlgorithmParameterException,
-            IllegalBlockSizeException, BadPaddingException, SignatureException {
+    public byte[][] releaseRequest() throws InvalidKeyException, NoSuchAlgorithmException, NoSuchPaddingException,
+            InvalidAlgorithmParameterException, IllegalBlockSizeException, BadPaddingException, SignatureException {
         // If connection is not established, there is no need to send
         // release request.
         if ((settings.getConnected() & ConnectionState.DLMS) == 0) {
@@ -1256,22 +1201,20 @@ public class GXDLMSClient {
             buff.setUInt8(0x80);
             buff.setUInt8(01);
             buff.setUInt8(00);
-            GXAPDU.generateUserInformation(settings, settings.getCipher(), null,
-                    buff);
+            GXAPDU.generateUserInformation(settings, settings.getCipher(), null, buff);
             if (settings.isCiphered(false)) {
-                settings.getCipher().setInvocationCounter(
-                        settings.getCipher().getInvocationCounter() + 1);
+                settings.getCipher().setInvocationCounter(settings.getCipher().getInvocationCounter() + 1);
             }
             buff.setUInt8(0, (byte) (buff.size() - 1));
         }
         List<byte[]> reply;
         if (getUseLogicalNameReferencing()) {
-            GXDLMSLNParameters p = new GXDLMSLNParameters(settings, 0,
-                    Command.RELEASE_REQUEST, 0, buff, null, 0xff, Command.NONE);
+            GXDLMSLNParameters p =
+                    new GXDLMSLNParameters(settings, 0, Command.RELEASE_REQUEST, 0, buff, null, 0xff, Command.NONE);
             reply = GXDLMS.getLnMessages(p);
         } else {
-            reply = GXDLMS.getSnMessages(new GXDLMSSNParameters(settings,
-                    Command.RELEASE_REQUEST, 0xFF, 0xFF, null, buff));
+            reply = GXDLMS
+                    .getSnMessages(new GXDLMSSNParameters(settings, Command.RELEASE_REQUEST, 0xFF, 0xFF, null, buff));
         }
         settings.setConnected(settings.getConnected() & ~ConnectionState.DLMS);
         // Restore default values.
@@ -1299,9 +1242,8 @@ public class GXDLMSClient {
      *             Signature exception.
      */
     public final byte[] disconnectRequest()
-            throws InvalidKeyException, NoSuchAlgorithmException,
-            NoSuchPaddingException, InvalidAlgorithmParameterException,
-            IllegalBlockSizeException, BadPaddingException, SignatureException {
+            throws InvalidKeyException, NoSuchAlgorithmException, NoSuchPaddingException,
+            InvalidAlgorithmParameterException, IllegalBlockSizeException, BadPaddingException, SignatureException {
         return disconnectRequest(false);
     }
 
@@ -1327,9 +1269,8 @@ public class GXDLMSClient {
      *             Signature exception.
      */
     public final byte[] disconnectRequest(final boolean force)
-            throws InvalidKeyException, NoSuchAlgorithmException,
-            NoSuchPaddingException, InvalidAlgorithmParameterException,
-            IllegalBlockSizeException, BadPaddingException, SignatureException {
+            throws InvalidKeyException, NoSuchAlgorithmException, NoSuchPaddingException,
+            InvalidAlgorithmParameterException, IllegalBlockSizeException, BadPaddingException, SignatureException {
         if (preEstablished) {
             // Disconnect message is not used for pre-established connections.
             return new byte[0];
@@ -1340,11 +1281,9 @@ public class GXDLMSClient {
         if (force || settings.getConnected() != ConnectionState.NONE) {
             if (GXDLMS.useHdlc(getInterfaceType())) {
                 if (settings.getInterfaceType() == InterfaceType.PLC_HDLC) {
-                    reply = GXDLMS.getMacHdlcFrame(settings,
-                            Command.DISCONNECT_REQUEST, 0, null);
+                    reply = GXDLMS.getMacHdlcFrame(settings, Command.DISCONNECT_REQUEST, 0, null);
                 } else {
-                    reply = GXDLMS.getHdlcFrame(settings,
-                            Command.DISCONNECT_REQUEST, null);
+                    reply = GXDLMS.getHdlcFrame(settings, Command.DISCONNECT_REQUEST, null);
                 }
             } else if ((settings.getConnected() & ConnectionState.DLMS) != 0) {
                 reply = releaseRequest()[0];
@@ -1375,13 +1314,11 @@ public class GXDLMSClient {
      *            Array of access rights.
      * @return Created COSEM object.
      */
-    static GXDLMSObject createDLMSObject(final int classID,
-            final Object version, final int baseName, final Object ln,
+    static GXDLMSObject createDLMSObject(final int classID, final Object version, final int baseName, final Object ln,
             final Object accessRights, final int lnVersion) {
         ObjectType type = ObjectType.forValue(classID);
         GXDLMSObject obj = createObject(type);
-        updateObjectData(obj, type, version, baseName, (byte[]) ln,
-                accessRights, lnVersion);
+        updateObjectData(obj, type, version, baseName, (byte[]) ln, accessRights, lnVersion);
         return obj;
     }
 
@@ -1396,8 +1333,7 @@ public class GXDLMSClient {
      *            Inactive objects are ignored.
      * @return Collection of COSEM objects.
      */
-    private GXDLMSObjectCollection parseSNObjects(final GXByteBuffer buff,
-            final boolean onlyKnownObjects,
+    private GXDLMSObjectCollection parseSNObjects(final GXByteBuffer buff, final boolean onlyKnownObjects,
             final boolean ignoreInactiveObjects) {
         // Get array tag.
         buff.position(0);
@@ -1424,22 +1360,16 @@ public class GXDLMSClient {
             int classID = ((Number) (objects.get(1))).intValue() & 0xFFFF;
             int baseName = ((Number) (objects.get(0))).intValue() & 0xFFFF;
             if (baseName > 0) {
-                GXDLMSObject comp = createDLMSObject(classID, objects.get(2),
-                        baseName, objects.get(3), null, 2);
-                if (!onlyKnownObjects
-                        || comp.getClass() != GXDLMSObject.class) {
-                    if ((!ignoreInactiveObjects || !"0.0.127.0.0.0"
-                            .equals(comp.getLogicalName()))) {
+                GXDLMSObject comp = createDLMSObject(classID, objects.get(2), baseName, objects.get(3), null, 2);
+                if (!onlyKnownObjects || comp.getClass() != GXDLMSObject.class) {
+                    if ((!ignoreInactiveObjects || !"0.0.127.0.0.0".equals(comp.getLogicalName()))) {
                         items.add(comp);
                     } else {
-                        String str =
-                                "Inactive object : " + String.valueOf(classID)
-                                        + " " + String.valueOf(baseName);
+                        String str = "Inactive object : " + String.valueOf(classID) + " " + String.valueOf(baseName);
                         LOGGER.log(Level.FINE, str);
                     }
                 } else {
-                    String str = "Unknown object : " + String.valueOf(classID)
-                            + " " + String.valueOf(baseName);
+                    String str = "Unknown object : " + String.valueOf(classID) + " " + String.valueOf(baseName);
                     LOGGER.log(Level.FINE, str);
                 }
             }
@@ -1455,23 +1385,18 @@ public class GXDLMSClient {
      * @param logicalName
      * @param accessRights
      */
-    private static void updateObjectData(final GXDLMSObject obj,
-            final ObjectType objectType, final Object version,
-            final Object baseName, final byte[] logicalName,
-            final Object accessRights, final int lnVersion) {
+    private static void updateObjectData(final GXDLMSObject obj, final ObjectType objectType, final Object version,
+            final Object baseName, final byte[] logicalName, final Object accessRights, final int lnVersion) {
         obj.setObjectType(objectType);
         // Check access rights.
-        if (accessRights instanceof List<?>
-                && ((List<?>) accessRights).size() == 2) {
+        if (accessRights instanceof List<?> && ((List<?>) accessRights).size() == 2) {
             // access_rights: access_right
             List<?> access = (List<?>) accessRights;
             for (Object attributeAccess : (List<?>) access.get(0)) {
-                int id = ((Number) ((List<?>) attributeAccess).get(0))
-                        .intValue();
+                int id = ((Number) ((List<?>) attributeAccess).get(0)).intValue();
                 // Kamstrup is returning -1 here.
                 if (id > 0) {
-                    int tmp = ((Number) ((List<?>) attributeAccess).get(1))
-                            .intValue();
+                    int tmp = ((Number) ((List<?>) attributeAccess).get(1)).intValue();
                     if (lnVersion < 3) {
                         obj.setAccess(id, AccessMode.forValue(tmp));
                     } else {
@@ -1519,8 +1444,7 @@ public class GXDLMSClient {
      *            Only known objects are parsed.
      * @return Collection of COSEM objects.
      */
-    public final GXDLMSObjectCollection parseObjects(final GXByteBuffer data,
-            final boolean onlyKnownObjects) {
+    public final GXDLMSObjectCollection parseObjects(final GXByteBuffer data, final boolean onlyKnownObjects) {
         return parseObjects(data, onlyKnownObjects, true);
     }
 
@@ -1535,12 +1459,10 @@ public class GXDLMSClient {
      *            Inactive objects are ignored.
      * @return Collection of COSEM objects.
      */
-    public final GXDLMSObjectCollection parseObjects(final GXByteBuffer data,
-            final boolean onlyKnownObjects,
+    public final GXDLMSObjectCollection parseObjects(final GXByteBuffer data, final boolean onlyKnownObjects,
             final boolean ignoreInactiveObjects) {
         GXDLMSConverter converter = new GXDLMSConverter(getStandard());
-        return parseObjects(data, onlyKnownObjects, ignoreInactiveObjects,
-                converter);
+        return parseObjects(data, onlyKnownObjects, ignoreInactiveObjects, converter);
     }
 
     /**
@@ -1556,19 +1478,16 @@ public class GXDLMSClient {
      *            Converter used to update OBIS code descriptions.
      * @return Collection of COSEM objects.
      */
-    public final GXDLMSObjectCollection parseObjects(final GXByteBuffer data,
-            final boolean onlyKnownObjects, final boolean ignoreInactiveObjects,
-            final GXDLMSConverter converter) {
+    public final GXDLMSObjectCollection parseObjects(final GXByteBuffer data, final boolean onlyKnownObjects,
+            final boolean ignoreInactiveObjects, final GXDLMSConverter converter) {
         if (data == null) {
             throw new GXDLMSException("Invalid parameter.");
         }
         GXDLMSObjectCollection objects;
         if (getUseLogicalNameReferencing()) {
-            objects = parseLNObjects(data, onlyKnownObjects,
-                    ignoreInactiveObjects);
+            objects = parseLNObjects(data, onlyKnownObjects, ignoreInactiveObjects);
         } else {
-            objects = parseSNObjects(data, onlyKnownObjects,
-                    ignoreInactiveObjects);
+            objects = parseSNObjects(data, onlyKnownObjects, ignoreInactiveObjects);
         }
         settings.getObjects().addAll(objects);
         // Update description of the objects.
@@ -1589,8 +1508,7 @@ public class GXDLMSClient {
      *            Inactive objects are ignored.
      * @return Collection of COSEM objects.
      */
-    private GXDLMSObjectCollection parseLNObjects(final GXByteBuffer buff,
-            final boolean onlyKnownObjects,
+    private GXDLMSObjectCollection parseLNObjects(final GXByteBuffer buff, final boolean onlyKnownObjects,
             final boolean ignoreInactiveObjects) {
         // Get array tag.
         byte size = buff.getInt8();
@@ -1616,8 +1534,7 @@ public class GXDLMSClient {
             int ot = ((Number) (objects.get(0))).intValue() & 0xFFFF;
             // Get LN association version.
             if (ot == ObjectType.ASSOCIATION_LOGICAL_NAME.getValue()
-                    && "0.0.40.0.0.255".equals(
-                            GXCommon.toLogicalName((byte[]) objects.get(2)))) {
+                    && "0.0.40.0.0.255".equals(GXCommon.toLogicalName((byte[]) objects.get(2)))) {
                 lnVersion = ((Number) (objects.get(1))).intValue();
                 break;
             }
@@ -1639,22 +1556,17 @@ public class GXDLMSClient {
             }
             int classID = ((Number) (objects.get(0))).intValue() & 0xFFFF;
             if (classID > 0) {
-                GXDLMSObject comp = createDLMSObject(classID, objects.get(1), 0,
-                        objects.get(2), objects.get(3), lnVersion);
-                if (!onlyKnownObjects
-                        || comp.getClass() != GXDLMSObject.class) {
-                    if ((!ignoreInactiveObjects || !"0.0.127.0.0.0"
-                            .equals(comp.getLogicalName()))) {
+                GXDLMSObject comp =
+                        createDLMSObject(classID, objects.get(1), 0, objects.get(2), objects.get(3), lnVersion);
+                if (!onlyKnownObjects || comp.getClass() != GXDLMSObject.class) {
+                    if ((!ignoreInactiveObjects || !"0.0.127.0.0.0".equals(comp.getLogicalName()))) {
                         items.add(comp);
                     } else {
-                        String str =
-                                "Inactive object : " + String.valueOf(classID)
-                                        + " " + comp.getLogicalName();
+                        String str = "Inactive object : " + String.valueOf(classID) + " " + comp.getLogicalName();
                         LOGGER.log(Level.INFO, str);
                     }
                 } else {
-                    String str = "Unknown object : " + String.valueOf(classID)
-                            + " "
+                    String str = "Unknown object : " + String.valueOf(classID) + " "
                             + GXCommon.toLogicalName((byte[]) objects.get(2));
                     LOGGER.log(Level.INFO, str);
                 }
@@ -1674,8 +1586,7 @@ public class GXDLMSClient {
      *            Value to update.
      * @return Updated value.
      */
-    public final Object updateValue(final GXDLMSObject target,
-            final int attributeIndex, final Object value) {
+    public final Object updateValue(final GXDLMSObject target, final int attributeIndex, final Object value) {
         return updateValue(target, attributeIndex, value, null);
     }
 
@@ -1692,8 +1603,7 @@ public class GXDLMSClient {
      *            Optional parameters.
      * @return Updated value.
      */
-    public final Object updateValue(final GXDLMSObject target,
-            final int attributeIndex, final Object value,
+    public final Object updateValue(final GXDLMSObject target, final int attributeIndex, final Object value,
             final Object parameters) {
         Object val = value;
         if (val instanceof byte[]) {
@@ -1706,8 +1616,7 @@ public class GXDLMSClient {
                 val = changeType((byte[]) value, type, settings);
             }
         }
-        ValueEventArgs e = new ValueEventArgs(settings, target, attributeIndex,
-                0, parameters);
+        ValueEventArgs e = new ValueEventArgs(settings, target, attributeIndex, 0, parameters);
         e.setValue(val);
         target.setValue(settings, e);
         return target.getValues()[attributeIndex - 1];
@@ -1736,8 +1645,7 @@ public class GXDLMSClient {
      *            time) set this to true.
      * @return Received data.
      */
-    public static Object getValue(final GXByteBuffer data,
-            final boolean useUtc) {
+    public static Object getValue(final GXByteBuffer data, final boolean useUtc) {
         GXDataInfo info = new GXDataInfo();
         GXDLMSSettings settings = new GXDLMSSettings(false, null);
         settings.setUseUtc2NormalTime(useUtc);
@@ -1752,13 +1660,10 @@ public class GXDLMSClient {
      * @param values
      *            Received values.
      */
-    public final void updateValues(
-            final List<Entry<GXDLMSObject, Integer>> list,
-            final List<?> values) {
+    public final void updateValues(final List<Entry<GXDLMSObject, Integer>> list, final List<?> values) {
         int pos = 0;
         for (Entry<GXDLMSObject, Integer> it : list) {
-            ValueEventArgs e = new ValueEventArgs(settings, it.getKey(),
-                    it.getValue(), 0, null);
+            ValueEventArgs e = new ValueEventArgs(settings, it.getKey(), it.getValue(), 0, null);
             e.setValue(values.get(pos));
             it.getKey().setValue(settings, e);
             ++pos;
@@ -1791,8 +1696,7 @@ public class GXDLMSClient {
      *            time) set this to true.
      * @return Value changed by type.
      */
-    public static Object changeType(final byte[] value, final DataType type,
-            final boolean useUtc) {
+    public static Object changeType(final byte[] value, final DataType type, final boolean useUtc) {
         if (value == null) {
             return null;
         }
@@ -1828,8 +1732,7 @@ public class GXDLMSClient {
      *            DLMS settings.
      * @return Value changed by type.
      */
-    public static Object changeType(final byte[] value, final DataType type,
-            final GXDLMSSettings settings) {
+    public static Object changeType(final byte[] value, final DataType type, final GXDLMSSettings settings) {
         if (value == null) {
             return null;
         }
@@ -1842,8 +1745,7 @@ public class GXDLMSClient {
         if (type == DataType.STRING && !GXByteBuffer.isAsciiString(value)) {
             return new GXByteBuffer(value);
         }
-        if (value.length == 0
-                && (type == DataType.STRING || type == DataType.OCTET_STRING)) {
+        if (value.length == 0 && (type == DataType.STRING || type == DataType.OCTET_STRING)) {
             return "";
         }
         if (value.length == 0 && type == DataType.DATETIME) {
@@ -1859,8 +1761,7 @@ public class GXDLMSClient {
         info.setType(type);
         Object ret = GXCommon.getData(settings, new GXByteBuffer(value), info);
         if (!info.isComplete()) {
-            throw new IllegalArgumentException(
-                    "Change type failed. Not enought data.");
+            throw new IllegalArgumentException("Change type failed. Not enought data.");
         }
         return ret;
     }
@@ -1886,9 +1787,8 @@ public class GXDLMSClient {
      *             Signature exception.
      */
     public final byte[][] getObjectsRequest()
-            throws InvalidKeyException, NoSuchAlgorithmException,
-            NoSuchPaddingException, InvalidAlgorithmParameterException,
-            IllegalBlockSizeException, BadPaddingException, SignatureException {
+            throws InvalidKeyException, NoSuchAlgorithmException, NoSuchPaddingException,
+            InvalidAlgorithmParameterException, IllegalBlockSizeException, BadPaddingException, SignatureException {
         return getObjectsRequest(null);
     }
 
@@ -1915,9 +1815,8 @@ public class GXDLMSClient {
      *             Signature exception.
      */
     public final byte[][] getObjectsRequest(final String ln)
-            throws InvalidKeyException, NoSuchAlgorithmException,
-            NoSuchPaddingException, InvalidAlgorithmParameterException,
-            IllegalBlockSizeException, BadPaddingException, SignatureException {
+            throws InvalidKeyException, NoSuchAlgorithmException, NoSuchPaddingException,
+            InvalidAlgorithmParameterException, IllegalBlockSizeException, BadPaddingException, SignatureException {
         Object name;
         settings.resetBlockIndex();
         if (getUseLogicalNameReferencing()) {
@@ -1959,11 +1858,9 @@ public class GXDLMSClient {
      * @throws SignatureException
      *             Signature exception.
      */
-    public final byte[][] method(final GXDLMSObject item, final int index,
-            final Object data, final DataType type)
-            throws InvalidKeyException, NoSuchAlgorithmException,
-            NoSuchPaddingException, InvalidAlgorithmParameterException,
-            IllegalBlockSizeException, BadPaddingException, SignatureException {
+    public final byte[][] method(final GXDLMSObject item, final int index, final Object data, final DataType type)
+            throws InvalidKeyException, NoSuchAlgorithmException, NoSuchPaddingException,
+            InvalidAlgorithmParameterException, IllegalBlockSizeException, BadPaddingException, SignatureException {
         return method(item.getName(), item.getObjectType(), index, data, type);
     }
 
@@ -1996,11 +1893,10 @@ public class GXDLMSClient {
      * @throws SignatureException
      *             Signature exception.
      */
-    public final byte[][] method(final Object name, final ObjectType objectType,
-            final int methodIndex, final Object value, final DataType dataType)
-            throws InvalidKeyException, NoSuchAlgorithmException,
-            NoSuchPaddingException, InvalidAlgorithmParameterException,
-            IllegalBlockSizeException, BadPaddingException, SignatureException {
+    public final byte[][] method(final Object name, final ObjectType objectType, final int methodIndex,
+            final Object value, final DataType dataType)
+            throws InvalidKeyException, NoSuchAlgorithmException, NoSuchPaddingException,
+            InvalidAlgorithmParameterException, IllegalBlockSizeException, BadPaddingException, SignatureException {
         return method(name, objectType, methodIndex, value, dataType, 0);
     }
 
@@ -2035,11 +1931,10 @@ public class GXDLMSClient {
      * @throws SignatureException
      *             Signature exception.
      */
-    public final byte[][] method(final Object name, final ObjectType objectType,
-            final int methodIndex, final Object value, final DataType dataType,
-            int mode) throws InvalidKeyException, NoSuchAlgorithmException,
-            NoSuchPaddingException, InvalidAlgorithmParameterException,
-            IllegalBlockSizeException, BadPaddingException, SignatureException {
+    public final byte[][] method(final Object name, final ObjectType objectType, final int methodIndex,
+            final Object value, final DataType dataType, int mode)
+            throws InvalidKeyException, NoSuchAlgorithmException, NoSuchPaddingException,
+            InvalidAlgorithmParameterException, IllegalBlockSizeException, BadPaddingException, SignatureException {
         if (name == null || methodIndex < 1) {
             throw new IllegalArgumentException("Invalid parameter");
         }
@@ -2049,8 +1944,7 @@ public class GXDLMSClient {
         if (type == DataType.NONE && value != null) {
             type = GXDLMSConverter.getDLMSDataType(value);
             if (type == DataType.NONE) {
-                throw new GXDLMSException(
-                        "Invalid parameter. In java value type must give.");
+                throw new GXDLMSException("Invalid parameter. In java value type must give.");
             }
         }
         List<byte[]> reply;
@@ -2071,8 +1965,7 @@ public class GXDLMSClient {
             } else {
                 attributeDescriptor.setUInt8(1);
             }
-            GXDLMSLNParameters p = new GXDLMSLNParameters(settings, 0,
-                    Command.METHOD_REQUEST, ActionRequestType.NORMAL,
+            GXDLMSLNParameters p = new GXDLMSLNParameters(settings, 0, Command.METHOD_REQUEST, ActionRequestType.NORMAL,
                     attributeDescriptor, data, 0xff, Command.NONE);
             p.accessMode = mode;
             reply = GXDLMS.getLnMessages(p);
@@ -2094,10 +1987,8 @@ public class GXDLMSClient {
             } else {
                 attributeDescriptor.setUInt8(0);
             }
-            GXDLMSSNParameters p =
-                    new GXDLMSSNParameters(settings, Command.WRITE_REQUEST, 1,
-                            VariableAccessSpecification.VARIABLE_NAME,
-                            attributeDescriptor, data);
+            GXDLMSSNParameters p = new GXDLMSSNParameters(settings, Command.WRITE_REQUEST, 1,
+                    VariableAccessSpecification.VARIABLE_NAME, attributeDescriptor, data);
             reply = GXDLMS.getSnMessages(p);
         }
         return reply.toArray(new byte[][] {});
@@ -2127,17 +2018,15 @@ public class GXDLMSClient {
      *             Signature exception.
      */
     public final byte[][] write(final GXDLMSObject item, final int index)
-            throws InvalidKeyException, NoSuchAlgorithmException,
-            NoSuchPaddingException, InvalidAlgorithmParameterException,
-            IllegalBlockSizeException, BadPaddingException, SignatureException {
+            throws InvalidKeyException, NoSuchAlgorithmException, NoSuchPaddingException,
+            InvalidAlgorithmParameterException, IllegalBlockSizeException, BadPaddingException, SignatureException {
         ValueEventArgs e = new ValueEventArgs(settings, item, index, 0, null);
         Object value = item.getValue(settings, e);
         DataType type = item.getDataType(index);
         if (type == DataType.OCTET_STRING && value instanceof String) {
             DataType ui = item.getUIDataType(index);
             if (ui == DataType.STRING) {
-                return write(item.getName(), ((String) value).getBytes(), type,
-                        item.getObjectType(), index);
+                return write(item.getName(), ((String) value).getBytes(), type, item.getObjectType(), index);
             }
         }
         return write(item.getName(), value, type, item.getObjectType(), index);
@@ -2172,12 +2061,10 @@ public class GXDLMSClient {
      * @throws SignatureException
      *             Signature exception.
      */
-    public final byte[][] write(final Object name, final Object value,
-            final DataType dataType, final ObjectType objectType,
-            final int index)
-            throws InvalidKeyException, NoSuchAlgorithmException,
-            NoSuchPaddingException, InvalidAlgorithmParameterException,
-            IllegalBlockSizeException, BadPaddingException, SignatureException {
+    public final byte[][] write(final Object name, final Object value, final DataType dataType,
+            final ObjectType objectType, final int index)
+            throws InvalidKeyException, NoSuchAlgorithmException, NoSuchPaddingException,
+            InvalidAlgorithmParameterException, IllegalBlockSizeException, BadPaddingException, SignatureException {
         return write(name, value, dataType, objectType, index, 0);
     }
 
@@ -2209,12 +2096,10 @@ public class GXDLMSClient {
      *             Illegal block size exception.
      * @throws SignatureException
      */
-    final byte[][] write(final Object name, final Object value,
-            final DataType dataType, final ObjectType objectType,
+    final byte[][] write(final Object name, final Object value, final DataType dataType, final ObjectType objectType,
             final int index, final int mode)
-            throws InvalidKeyException, NoSuchAlgorithmException,
-            NoSuchPaddingException, InvalidAlgorithmParameterException,
-            IllegalBlockSizeException, BadPaddingException, SignatureException {
+            throws InvalidKeyException, NoSuchAlgorithmException, NoSuchPaddingException,
+            InvalidAlgorithmParameterException, IllegalBlockSizeException, BadPaddingException, SignatureException {
         if (index < 1) {
             throw new GXDLMSException("Invalid parameter");
         }
@@ -2223,8 +2108,7 @@ public class GXDLMSClient {
         if (type == DataType.NONE && value != null) {
             type = GXDLMSConverter.getDLMSDataType(value);
             if (type == DataType.NONE) {
-                throw new GXDLMSException(
-                        "Invalid parameter. In java value type must give.");
+                throw new GXDLMSException("Invalid parameter. In java value type must give.");
             }
         }
         List<byte[]> reply;
@@ -2240,8 +2124,7 @@ public class GXDLMSClient {
             attributeDescriptor.setUInt8(index);
             // Access selection is not used.
             attributeDescriptor.setUInt8(0);
-            GXDLMSLNParameters p = new GXDLMSLNParameters(settings, 0,
-                    Command.SET_REQUEST, SetRequestType.NORMAL,
+            GXDLMSLNParameters p = new GXDLMSLNParameters(settings, 0, Command.SET_REQUEST, SetRequestType.NORMAL,
                     attributeDescriptor, data, 0xff, Command.NONE);
             p.accessMode = mode;
             p.blockIndex = settings.getBlockIndex();
@@ -2255,10 +2138,8 @@ public class GXDLMSClient {
             attributeDescriptor.setUInt16(sn);
             // Add data count.
             attributeDescriptor.setUInt8(1);
-            GXDLMSSNParameters p =
-                    new GXDLMSSNParameters(settings, Command.WRITE_REQUEST, 1,
-                            VariableAccessSpecification.VARIABLE_NAME,
-                            attributeDescriptor, data);
+            GXDLMSSNParameters p = new GXDLMSSNParameters(settings, Command.WRITE_REQUEST, 1,
+                    VariableAccessSpecification.VARIABLE_NAME, attributeDescriptor, data);
             reply = GXDLMS.getSnMessages(p);
         }
         return reply.toArray(new byte[0][0]);
@@ -2287,9 +2168,8 @@ public class GXDLMSClient {
      * @deprecated use {@link writeList} instead.
      */
     public final byte[][] writeList2(final List<GXWriteItem> list)
-            throws InvalidKeyException, NoSuchAlgorithmException,
-            NoSuchPaddingException, InvalidAlgorithmParameterException,
-            IllegalBlockSizeException, BadPaddingException, SignatureException {
+            throws InvalidKeyException, NoSuchAlgorithmException, NoSuchPaddingException,
+            InvalidAlgorithmParameterException, IllegalBlockSizeException, BadPaddingException, SignatureException {
         if (list == null || list.isEmpty()) {
             throw new IllegalArgumentException("Invalid parameter.");
         }
@@ -2304,8 +2184,7 @@ public class GXDLMSClient {
             for (GXWriteItem it : list) {
                 // CI.
                 bb.setUInt16(it.getTarget().getObjectType().getValue());
-                bb.set(GXCommon
-                        .logicalNameToBytes(it.getTarget().getLogicalName()));
+                bb.set(GXCommon.logicalNameToBytes(it.getTarget().getLogicalName()));
                 // Attribute ID.
                 bb.setUInt8(it.getIndex());
                 // Attribute selector is not used.
@@ -2323,8 +2202,8 @@ public class GXDLMSClient {
         // Write values.
         GXCommon.setObjectCount(list.size(), bb);
         for (GXWriteItem it : list) {
-            ValueEventArgs e = new ValueEventArgs(settings, it.getTarget(),
-                    it.getIndex(), it.getSelector(), it.getParameters());
+            ValueEventArgs e =
+                    new ValueEventArgs(settings, it.getTarget(), it.getIndex(), it.getSelector(), it.getParameters());
             value = it.getTarget().getValue(settings, e);
             DataType type = it.getDataType();
             if ((type == null || type == DataType.NONE) && value != null) {
@@ -2332,21 +2211,18 @@ public class GXDLMSClient {
                 if (type == DataType.NONE) {
                     type = GXDLMSConverter.getDLMSDataType(value);
                     if (type == DataType.NONE) {
-                        throw new GXDLMSException("Invalid parameter. "
-                                + " In java value type must give.");
+                        throw new GXDLMSException("Invalid parameter. " + " In java value type must give.");
                     }
                 }
             }
             GXCommon.setData(settings, data, type, value);
         }
         if (this.getUseLogicalNameReferencing()) {
-            GXDLMSLNParameters p = new GXDLMSLNParameters(settings, 0,
-                    Command.SET_REQUEST, SetRequestType.WITH_LIST, bb, data,
-                    0xff, Command.NONE);
+            GXDLMSLNParameters p = new GXDLMSLNParameters(settings, 0, Command.SET_REQUEST, SetRequestType.WITH_LIST,
+                    bb, data, 0xff, Command.NONE);
             reply = GXDLMS.getLnMessages(p);
         } else {
-            GXDLMSSNParameters p = new GXDLMSSNParameters(settings,
-                    Command.WRITE_REQUEST, list.size(), 4, bb, data);
+            GXDLMSSNParameters p = new GXDLMSSNParameters(settings, Command.WRITE_REQUEST, list.size(), 4, bb, data);
             reply = GXDLMS.getSnMessages(p);
         }
         return reply.toArray(new byte[0][0]);
@@ -2373,15 +2249,11 @@ public class GXDLMSClient {
      * @throws SignatureException
      *             Signature exception.
      */
-    public final byte[][] writeList(
-            final List<Entry<GXDLMSObject, Integer>> list)
-            throws InvalidKeyException, NoSuchAlgorithmException,
-            NoSuchPaddingException, InvalidAlgorithmParameterException,
-            IllegalBlockSizeException, BadPaddingException, SignatureException {
-        if (!getNegotiatedConformance()
-                .contains(Conformance.MULTIPLE_REFERENCES)) {
-            throw new IllegalArgumentException(
-                    "Meter doesn't support multiple objects writing with one request.");
+    public final byte[][] writeList(final List<Entry<GXDLMSObject, Integer>> list)
+            throws InvalidKeyException, NoSuchAlgorithmException, NoSuchPaddingException,
+            InvalidAlgorithmParameterException, IllegalBlockSizeException, BadPaddingException, SignatureException {
+        if (!getNegotiatedConformance().contains(Conformance.MULTIPLE_REFERENCES)) {
+            throw new IllegalArgumentException("Meter doesn't support multiple objects writing with one request.");
         }
         if (list == null || list.isEmpty()) {
             throw new IllegalArgumentException("Invalid parameter.");
@@ -2397,8 +2269,7 @@ public class GXDLMSClient {
             for (Entry<GXDLMSObject, Integer> it : list) {
                 // CI.
                 bb.setUInt16(it.getKey().getObjectType().getValue());
-                bb.set(GXCommon
-                        .logicalNameToBytes(it.getKey().getLogicalName()));
+                bb.set(GXCommon.logicalNameToBytes(it.getKey().getLogicalName()));
                 // Attribute ID.
                 bb.setUInt8(it.getValue());
                 // Attribute selector is not used.
@@ -2416,15 +2287,13 @@ public class GXDLMSClient {
         // Write values.
         GXCommon.setObjectCount(list.size(), bb);
         for (Entry<GXDLMSObject, Integer> it : list) {
-            ValueEventArgs e = new ValueEventArgs(settings, it.getKey(),
-                    it.getValue(), 0, null);
+            ValueEventArgs e = new ValueEventArgs(settings, it.getKey(), it.getValue(), 0, null);
             value = it.getKey().getValue(settings, e);
             DataType type = it.getKey().getDataType(it.getValue());
             if ((type == null || type == DataType.NONE) && value != null) {
                 type = GXDLMSConverter.getDLMSDataType(value);
                 if (type == DataType.NONE) {
-                    throw new GXDLMSException("Invalid parameter. "
-                            + " In java value type must give.");
+                    throw new GXDLMSException("Invalid parameter. " + " In java value type must give.");
                 }
             }
             GXCommon.setData(settings, data, type, value);
@@ -2433,20 +2302,17 @@ public class GXDLMSClient {
             // Find highest access mode.
             int mode = 0;
             for (Entry<GXDLMSObject, Integer> it : list) {
-                int m = AccessMode3
-                        .toInteger(it.getKey().getAccess3(it.getValue()));
+                int m = AccessMode3.toInteger(it.getKey().getAccess3(it.getValue()));
                 if (m > mode) {
                     mode = m;
                 }
             }
-            GXDLMSLNParameters p = new GXDLMSLNParameters(settings, 0,
-                    Command.SET_REQUEST, SetRequestType.WITH_LIST, bb, data,
-                    0xff, Command.NONE);
+            GXDLMSLNParameters p = new GXDLMSLNParameters(settings, 0, Command.SET_REQUEST, SetRequestType.WITH_LIST,
+                    bb, data, 0xff, Command.NONE);
             p.accessMode = mode;
             reply = GXDLMS.getLnMessages(p);
         } else {
-            GXDLMSSNParameters p = new GXDLMSSNParameters(settings,
-                    Command.WRITE_REQUEST, list.size(), 4, bb, data);
+            GXDLMSSNParameters p = new GXDLMSSNParameters(settings, Command.WRITE_REQUEST, list.size(), 4, bb, data);
             reply = GXDLMS.getSnMessages(p);
         }
         return reply.toArray(new byte[0][0]);
@@ -2477,11 +2343,9 @@ public class GXDLMSClient {
      * @throws SignatureException
      *             Signature exception.
      */
-    public final byte[][] read(final Object name, final ObjectType objectType,
-            final int attributeOrdinal)
-            throws InvalidKeyException, NoSuchAlgorithmException,
-            NoSuchPaddingException, InvalidAlgorithmParameterException,
-            IllegalBlockSizeException, BadPaddingException, SignatureException {
+    public final byte[][] read(final Object name, final ObjectType objectType, final int attributeOrdinal)
+            throws InvalidKeyException, NoSuchAlgorithmException, NoSuchPaddingException,
+            InvalidAlgorithmParameterException, IllegalBlockSizeException, BadPaddingException, SignatureException {
         return read(name, objectType, attributeOrdinal, null, 0);
     }
 
@@ -2502,11 +2366,10 @@ public class GXDLMSClient {
      * @throws SignatureException
      *             Signature exception.
      */
-    private byte[][] read(final Object name, final ObjectType objectType,
-            final int attributeOrdinal, final GXByteBuffer data, final int mode)
-            throws InvalidKeyException, NoSuchAlgorithmException,
-            NoSuchPaddingException, InvalidAlgorithmParameterException,
-            IllegalBlockSizeException, BadPaddingException, SignatureException {
+    private byte[][] read(final Object name, final ObjectType objectType, final int attributeOrdinal,
+            final GXByteBuffer data, final int mode)
+            throws InvalidKeyException, NoSuchAlgorithmException, NoSuchPaddingException,
+            InvalidAlgorithmParameterException, IllegalBlockSizeException, BadPaddingException, SignatureException {
         if ((attributeOrdinal < 1)) {
             throw new IllegalArgumentException("Invalid parameter");
         }
@@ -2527,8 +2390,7 @@ public class GXDLMSClient {
                 // Access selection is used.
                 attributeDescriptor.setUInt8(1);
             }
-            GXDLMSLNParameters p = new GXDLMSLNParameters(settings, 0,
-                    Command.GET_REQUEST, GetCommandType.NORMAL,
+            GXDLMSLNParameters p = new GXDLMSLNParameters(settings, 0, Command.GET_REQUEST, GetCommandType.NORMAL,
                     attributeDescriptor, data, 0xFF, Command.NONE);
             p.accessMode = mode;
             reply = GXDLMS.getLnMessages(p);
@@ -2545,8 +2407,7 @@ public class GXDLMSClient {
                 requestType = VariableAccessSpecification.VARIABLE_NAME;
             }
             GXDLMSSNParameters p =
-                    new GXDLMSSNParameters(settings, Command.READ_REQUEST, 1,
-                            requestType, attributeDescriptor, data);
+                    new GXDLMSSNParameters(settings, Command.READ_REQUEST, 1, requestType, attributeDescriptor, data);
             reply = GXDLMS.getSnMessages(p);
         }
         return reply.toArray(new byte[0][0]);
@@ -2575,11 +2436,9 @@ public class GXDLMSClient {
      * @throws SignatureException
      *             Signature exception.
      */
-    public final byte[][] read(final GXDLMSObject item,
-            final int attributeOrdinal)
-            throws InvalidKeyException, NoSuchAlgorithmException,
-            NoSuchPaddingException, InvalidAlgorithmParameterException,
-            IllegalBlockSizeException, BadPaddingException, SignatureException {
+    public final byte[][] read(final GXDLMSObject item, final int attributeOrdinal)
+            throws InvalidKeyException, NoSuchAlgorithmException, NoSuchPaddingException,
+            InvalidAlgorithmParameterException, IllegalBlockSizeException, BadPaddingException, SignatureException {
         return read(item.getName(), item.getObjectType(), attributeOrdinal);
     }
 
@@ -2604,18 +2463,14 @@ public class GXDLMSClient {
      * @throws SignatureException
      *             Signature exception.
      */
-    public final byte[][] readList(
-            final List<Entry<GXDLMSObject, Integer>> list)
-            throws InvalidKeyException, NoSuchAlgorithmException,
-            NoSuchPaddingException, InvalidAlgorithmParameterException,
-            IllegalBlockSizeException, BadPaddingException, SignatureException {
+    public final byte[][] readList(final List<Entry<GXDLMSObject, Integer>> list)
+            throws InvalidKeyException, NoSuchAlgorithmException, NoSuchPaddingException,
+            InvalidAlgorithmParameterException, IllegalBlockSizeException, BadPaddingException, SignatureException {
         if (list == null || list.isEmpty()) {
             throw new IllegalArgumentException("Invalid parameter.");
         }
-        if (!getNegotiatedConformance()
-                .contains(Conformance.MULTIPLE_REFERENCES)) {
-            throw new IllegalArgumentException(
-                    "Meter doesn't support multiple objects reading with one request.");
+        if (!getNegotiatedConformance().contains(Conformance.MULTIPLE_REFERENCES)) {
+            throw new IllegalArgumentException("Meter doesn't support multiple objects reading with one request.");
         }
         List<byte[]> messages = new ArrayList<byte[]>();
         GXByteBuffer data = new GXByteBuffer();
@@ -2624,16 +2479,14 @@ public class GXDLMSClient {
             // Find highest access mode.
             int mode = 0;
             for (Entry<GXDLMSObject, Integer> it : list) {
-                int m = AccessMode3
-                        .toInteger(it.getKey().getAccess3(it.getValue()));
+                int m = AccessMode3.toInteger(it.getKey().getAccess3(it.getValue()));
                 if (m > mode) {
                     mode = m;
                 }
             }
 
-            GXDLMSLNParameters p = new GXDLMSLNParameters(settings, 0,
-                    Command.GET_REQUEST, GetCommandType.WITH_LIST, data, null,
-                    0xff, Command.NONE);
+            GXDLMSLNParameters p = new GXDLMSLNParameters(settings, 0, Command.GET_REQUEST, GetCommandType.WITH_LIST,
+                    data, null, 0xff, Command.NONE);
             p.accessMode = mode;
             // Request service primitive shall always fit in a single APDU.
             int pos = 0, count = (settings.getMaxPduSize() - 12) / 10;
@@ -2649,8 +2502,7 @@ public class GXDLMSClient {
             for (Entry<GXDLMSObject, Integer> it : list) {
                 // CI.
                 data.setUInt16(it.getKey().getObjectType().getValue());
-                List<String> items =
-                        GXCommon.split(it.getKey().getLogicalName(), '.');
+                List<String> items = GXCommon.split(it.getKey().getLogicalName(), '.');
                 if (items.size() != 6) {
                     throw new IllegalArgumentException("Invalid Logical Name.");
                 }
@@ -2675,8 +2527,8 @@ public class GXDLMSClient {
             }
             messages.addAll(GXDLMS.getLnMessages(p));
         } else {
-            GXDLMSSNParameters p = new GXDLMSSNParameters(settings,
-                    Command.READ_REQUEST, list.size(), 0xFF, data, null);
+            GXDLMSSNParameters p =
+                    new GXDLMSSNParameters(settings, Command.READ_REQUEST, list.size(), 0xFF, data, null);
             for (Entry<GXDLMSObject, Integer> it : list) {
                 // Add variable type.
                 data.setUInt8(VariableAccessSpecification.VARIABLE_NAME);
@@ -2728,11 +2580,9 @@ public class GXDLMSClient {
      * @throws SignatureException
      *             Signature exception.
      */
-    public final byte[][] readRowsByEntry(final GXDLMSProfileGeneric pg,
-            final int index, final int count)
-            throws InvalidKeyException, NoSuchAlgorithmException,
-            NoSuchPaddingException, InvalidAlgorithmParameterException,
-            IllegalBlockSizeException, BadPaddingException, SignatureException {
+    public final byte[][] readRowsByEntry(final GXDLMSProfileGeneric pg, final int index, final int count)
+            throws InvalidKeyException, NoSuchAlgorithmException, NoSuchPaddingException,
+            InvalidAlgorithmParameterException, IllegalBlockSizeException, BadPaddingException, SignatureException {
         return readRowsByEntry(pg, index, count, null);
     }
 
@@ -2763,37 +2613,28 @@ public class GXDLMSClient {
      * @throws SignatureException
      *             Signature exception.
      */
-    public final byte[][] readRowsByEntry(final GXDLMSProfileGeneric pg,
-            final int index, final int count,
+    public final byte[][] readRowsByEntry(final GXDLMSProfileGeneric pg, final int index, final int count,
             final List<Entry<GXDLMSObject, GXDLMSCaptureObject>> columns)
-            throws InvalidKeyException, NoSuchAlgorithmException,
-            NoSuchPaddingException, InvalidAlgorithmParameterException,
-            IllegalBlockSizeException, BadPaddingException, SignatureException {
+            throws InvalidKeyException, NoSuchAlgorithmException, NoSuchPaddingException,
+            InvalidAlgorithmParameterException, IllegalBlockSizeException, BadPaddingException, SignatureException {
         int pos = 0;
         int columnStart = 1, columnEnd = 0;
         // If columns are given find indexes.
         if (columns != null && !columns.isEmpty()) {
-            if (pg.getCaptureObjects() == null
-                    || pg.getCaptureObjects().isEmpty()) {
-                throw new IllegalArgumentException(
-                        "Read capture objects first.");
+            if (pg.getCaptureObjects() == null || pg.getCaptureObjects().isEmpty()) {
+                throw new IllegalArgumentException("Read capture objects first.");
             }
             columnStart = pg.getCaptureObjects().size();
             columnEnd = 1;
             for (Entry<GXDLMSObject, GXDLMSCaptureObject> c : columns) {
                 pos = 0;
                 boolean found = false;
-                for (Entry<GXDLMSObject, GXDLMSCaptureObject> it : pg
-                        .getCaptureObjects()) {
+                for (Entry<GXDLMSObject, GXDLMSCaptureObject> it : pg.getCaptureObjects()) {
                     ++pos;
-                    if (it.getKey().getObjectType() == c.getKey()
-                            .getObjectType()
-                            && it.getKey().getLogicalName()
-                                    .compareTo(c.getKey().getLogicalName()) == 0
-                            && it.getValue().getAttributeIndex() == c.getValue()
-                                    .getAttributeIndex()
-                            && it.getValue().getDataIndex() == c.getValue()
-                                    .getDataIndex()) {
+                    if (it.getKey().getObjectType() == c.getKey().getObjectType()
+                            && it.getKey().getLogicalName().compareTo(c.getKey().getLogicalName()) == 0
+                            && it.getValue().getAttributeIndex() == c.getValue().getAttributeIndex()
+                            && it.getValue().getDataIndex() == c.getValue().getDataIndex()) {
                         found = true;
                         if (pos < columnStart) {
                             columnStart = pos;
@@ -2803,8 +2644,7 @@ public class GXDLMSClient {
                     }
                 }
                 if (!found) {
-                    throw new IllegalArgumentException(
-                            "Invalid column: " + c.getKey().getLogicalName());
+                    throw new IllegalArgumentException("Invalid column: " + c.getKey().getLogicalName());
                 }
             }
         }
@@ -2840,12 +2680,10 @@ public class GXDLMSClient {
      * @throws SignatureException
      *             Signature exception.
      */
-    public final byte[][] readRowsByEntry(final GXDLMSProfileGeneric pg,
-            final int index, final int count, final int columnStart,
-            final int columnEnd)
-            throws InvalidKeyException, NoSuchAlgorithmException,
-            NoSuchPaddingException, InvalidAlgorithmParameterException,
-            IllegalBlockSizeException, BadPaddingException, SignatureException {
+    public final byte[][] readRowsByEntry(final GXDLMSProfileGeneric pg, final int index, final int count,
+            final int columnStart, final int columnEnd)
+            throws InvalidKeyException, NoSuchAlgorithmException, NoSuchPaddingException,
+            InvalidAlgorithmParameterException, IllegalBlockSizeException, BadPaddingException, SignatureException {
         if (pg.getCaptureObjects().isEmpty()) {
             throw new RuntimeException("Capture objects not read.");
         }
@@ -2875,8 +2713,7 @@ public class GXDLMSClient {
         if (count == 0) {
             GXCommon.setData(settings, buff, DataType.UINT32, count);
         } else {
-            GXCommon.setData(settings, buff, DataType.UINT32,
-                    index + count - 1);
+            GXCommon.setData(settings, buff, DataType.UINT32, index + count - 1);
         }
         // Select columns to read.
         GXCommon.setData(settings, buff, DataType.UINT16, columnStart);
@@ -2911,11 +2748,9 @@ public class GXDLMSClient {
      * @throws SignatureException
      *             Signature exception.
      */
-    public final byte[][] readRowsByRange(final GXDLMSProfileGeneric pg,
-            final GXDateTime start, final GXDateTime end)
-            throws InvalidKeyException, NoSuchAlgorithmException,
-            NoSuchPaddingException, InvalidAlgorithmParameterException,
-            IllegalBlockSizeException, BadPaddingException, SignatureException {
+    public final byte[][] readRowsByRange(final GXDLMSProfileGeneric pg, final GXDateTime start, final GXDateTime end)
+            throws InvalidKeyException, NoSuchAlgorithmException, NoSuchPaddingException,
+            InvalidAlgorithmParameterException, IllegalBlockSizeException, BadPaddingException, SignatureException {
         return readByRange(pg, start, end, null);
     }
 
@@ -2945,82 +2780,9 @@ public class GXDLMSClient {
      * @throws SignatureException
      *             Signature exception.
      */
-    public final byte[][] readRowsByRange(final GXDLMSProfileGeneric pg,
-            final java.util.Date start, final java.util.Date end)
-            throws InvalidKeyException, NoSuchAlgorithmException,
-            NoSuchPaddingException, InvalidAlgorithmParameterException,
-            IllegalBlockSizeException, BadPaddingException, SignatureException {
-        return readByRange(pg, start, end, null);
-    }
-
-    /**
-     * Read rows by range. Use this method to read Profile Generic table between
-     * dates.
-     * 
-     * @param pg
-     *            Profile generic object to read.
-     * @param start
-     *            Start time.
-     * @param end
-     *            End time.
-     * @param columns
-     *            Columns to read.
-     * @return Generated read message.
-     * @throws NoSuchPaddingException
-     *             No such padding exception.
-     * @throws NoSuchAlgorithmException
-     *             No such algorithm exception.
-     * @throws InvalidAlgorithmParameterException
-     *             Invalid algorithm parameter exception.
-     * @throws InvalidKeyException
-     *             Invalid key exception.
-     * @throws BadPaddingException
-     *             Bad padding exception.
-     * @throws IllegalBlockSizeException
-     *             Illegal block size exception.
-     * @throws SignatureException
-     *             Signature exception.
-     */
-    public final byte[][] readRowsByRange(final GXDLMSProfileGeneric pg,
-            final java.util.Date start, final java.util.Date end,
-            final List<Entry<GXDLMSObject, GXDLMSCaptureObject>> columns)
-            throws InvalidKeyException, NoSuchAlgorithmException,
-            NoSuchPaddingException, InvalidAlgorithmParameterException,
-            IllegalBlockSizeException, BadPaddingException, SignatureException {
-        return readByRange(pg, start, end, columns);
-    }
-
-    /**
-     * Read rows by range. Use this method to read Profile Generic table between
-     * dates.
-     * 
-     * @param pg
-     *            Profile generic object to read.
-     * @param start
-     *            Start time.
-     * @param end
-     *            End time.
-     * @return Generated read message.
-     * @throws NoSuchPaddingException
-     *             No such padding exception.
-     * @throws NoSuchAlgorithmException
-     *             No such algorithm exception.
-     * @throws InvalidAlgorithmParameterException
-     *             Invalid algorithm parameter exception.
-     * @throws InvalidKeyException
-     *             Invalid key exception.
-     * @throws BadPaddingException
-     *             Bad padding exception.
-     * @throws IllegalBlockSizeException
-     *             Illegal block size exception.
-     * @throws SignatureException
-     *             Signature exception.
-     */
-    public final byte[][] readRowsByRange(final GXDLMSProfileGeneric pg,
-            final Calendar start, final Calendar end)
-            throws InvalidKeyException, NoSuchAlgorithmException,
-            NoSuchPaddingException, InvalidAlgorithmParameterException,
-            IllegalBlockSizeException, BadPaddingException, SignatureException {
+    public final byte[][] readRowsByRange(final GXDLMSProfileGeneric pg, final java.util.Date start,
+            final java.util.Date end) throws InvalidKeyException, NoSuchAlgorithmException, NoSuchPaddingException,
+            InvalidAlgorithmParameterException, IllegalBlockSizeException, BadPaddingException, SignatureException {
         return readByRange(pg, start, end, null);
     }
 
@@ -3052,12 +2814,77 @@ public class GXDLMSClient {
      * @throws SignatureException
      *             Signature exception.
      */
-    public final byte[][] readRowsByRange(final GXDLMSProfileGeneric pg,
-            final Calendar start, final Calendar end,
+    public final byte[][] readRowsByRange(final GXDLMSProfileGeneric pg, final java.util.Date start,
+            final java.util.Date end, final List<Entry<GXDLMSObject, GXDLMSCaptureObject>> columns)
+            throws InvalidKeyException, NoSuchAlgorithmException, NoSuchPaddingException,
+            InvalidAlgorithmParameterException, IllegalBlockSizeException, BadPaddingException, SignatureException {
+        return readByRange(pg, start, end, columns);
+    }
+
+    /**
+     * Read rows by range. Use this method to read Profile Generic table between
+     * dates.
+     * 
+     * @param pg
+     *            Profile generic object to read.
+     * @param start
+     *            Start time.
+     * @param end
+     *            End time.
+     * @return Generated read message.
+     * @throws NoSuchPaddingException
+     *             No such padding exception.
+     * @throws NoSuchAlgorithmException
+     *             No such algorithm exception.
+     * @throws InvalidAlgorithmParameterException
+     *             Invalid algorithm parameter exception.
+     * @throws InvalidKeyException
+     *             Invalid key exception.
+     * @throws BadPaddingException
+     *             Bad padding exception.
+     * @throws IllegalBlockSizeException
+     *             Illegal block size exception.
+     * @throws SignatureException
+     *             Signature exception.
+     */
+    public final byte[][] readRowsByRange(final GXDLMSProfileGeneric pg, final Calendar start, final Calendar end)
+            throws InvalidKeyException, NoSuchAlgorithmException, NoSuchPaddingException,
+            InvalidAlgorithmParameterException, IllegalBlockSizeException, BadPaddingException, SignatureException {
+        return readByRange(pg, start, end, null);
+    }
+
+    /**
+     * Read rows by range. Use this method to read Profile Generic table between
+     * dates.
+     * 
+     * @param pg
+     *            Profile generic object to read.
+     * @param start
+     *            Start time.
+     * @param end
+     *            End time.
+     * @param columns
+     *            Columns to read.
+     * @return Generated read message.
+     * @throws NoSuchPaddingException
+     *             No such padding exception.
+     * @throws NoSuchAlgorithmException
+     *             No such algorithm exception.
+     * @throws InvalidAlgorithmParameterException
+     *             Invalid algorithm parameter exception.
+     * @throws InvalidKeyException
+     *             Invalid key exception.
+     * @throws BadPaddingException
+     *             Bad padding exception.
+     * @throws IllegalBlockSizeException
+     *             Illegal block size exception.
+     * @throws SignatureException
+     *             Signature exception.
+     */
+    public final byte[][] readRowsByRange(final GXDLMSProfileGeneric pg, final Calendar start, final Calendar end,
             final List<Entry<GXDLMSObject, GXDLMSCaptureObject>> columns)
-            throws InvalidKeyException, NoSuchAlgorithmException,
-            NoSuchPaddingException, InvalidAlgorithmParameterException,
-            IllegalBlockSizeException, BadPaddingException, SignatureException {
+            throws InvalidKeyException, NoSuchAlgorithmException, NoSuchPaddingException,
+            InvalidAlgorithmParameterException, IllegalBlockSizeException, BadPaddingException, SignatureException {
         return readByRange(pg, start, end, columns);
     }
 
@@ -3075,12 +2902,10 @@ public class GXDLMSClient {
      * @throws SignatureException
      *             Signature exception.
      */
-    private byte[][] readByRange(final GXDLMSProfileGeneric pg,
-            final Object start, final Object end,
+    private byte[][] readByRange(final GXDLMSProfileGeneric pg, final Object start, final Object end,
             final List<Entry<GXDLMSObject, GXDLMSCaptureObject>> columns)
-            throws InvalidKeyException, NoSuchAlgorithmException,
-            NoSuchPaddingException, InvalidAlgorithmParameterException,
-            IllegalBlockSizeException, BadPaddingException, SignatureException {
+            throws InvalidKeyException, NoSuchAlgorithmException, NoSuchPaddingException,
+            InvalidAlgorithmParameterException, IllegalBlockSizeException, BadPaddingException, SignatureException {
 
         if (pg.getCaptureObjects().isEmpty()) {
             throw new RuntimeException("Capture objects not read.");
@@ -3124,8 +2949,7 @@ public class GXDLMSClient {
         // CI
         GXCommon.setData(settings, buff, DataType.UINT16, type.getValue());
         // LN
-        GXCommon.setData(settings, buff, DataType.OCTET_STRING,
-                GXCommon.logicalNameToBytes(ln));
+        GXCommon.setData(settings, buff, DataType.OCTET_STRING, GXCommon.logicalNameToBytes(ln));
         // Add attribute index.
         GXCommon.setData(settings, buff, DataType.INT8, 2);
         // Add version
@@ -3138,18 +2962,14 @@ public class GXDLMSClient {
 
         } else if (clockType == ClockType.UNIX) {
             // Add start time
-            GXCommon.setData(settings, buff, DataType.UINT32,
-                    GXDateTime.toUnixTime(s));
+            GXCommon.setData(settings, buff, DataType.UINT32, GXDateTime.toUnixTime(s));
             // Add end time
-            GXCommon.setData(settings, buff, DataType.UINT32,
-                    GXDateTime.toUnixTime(e));
+            GXCommon.setData(settings, buff, DataType.UINT32, GXDateTime.toUnixTime(e));
         } else if (clockType == ClockType.HIGH_RESOLUTION) {
             // Add start time
-            GXCommon.setData(settings, buff, DataType.UINT64,
-                    GXDateTime.toHighResolutionTime(s));
+            GXCommon.setData(settings, buff, DataType.UINT64, GXDateTime.toHighResolutionTime(s));
             // Add end time
-            GXCommon.setData(settings, buff, DataType.UINT64,
-                    GXDateTime.toHighResolutionTime(e));
+            GXCommon.setData(settings, buff, DataType.UINT64, GXDateTime.toHighResolutionTime(e));
         }
 
         // Add array of read columns.
@@ -3164,17 +2984,14 @@ public class GXDLMSClient {
                 // Add items count.
                 buff.setUInt8(4);
                 // CI
-                GXCommon.setData(settings, buff, DataType.UINT16,
-                        it.getKey().getObjectType().getValue());
+                GXCommon.setData(settings, buff, DataType.UINT16, it.getKey().getObjectType().getValue());
                 // LN
-                GXCommon.setData(settings, buff, DataType.OCTET_STRING, GXCommon
-                        .logicalNameToBytes(it.getKey().getLogicalName()));
+                GXCommon.setData(settings, buff, DataType.OCTET_STRING,
+                        GXCommon.logicalNameToBytes(it.getKey().getLogicalName()));
                 // Add attribute index.
-                GXCommon.setData(settings, buff, DataType.INT8,
-                        it.getValue().getAttributeIndex());
+                GXCommon.setData(settings, buff, DataType.INT8, it.getValue().getAttributeIndex());
                 // Add data index.
-                GXCommon.setData(settings, buff, DataType.INT16,
-                        it.getValue().getDataIndex());
+                GXCommon.setData(settings, buff, DataType.INT16, it.getValue().getDataIndex());
             }
         }
         int mode = AccessMode3.toInteger(pg.getAccess3(2));
@@ -3258,9 +3075,8 @@ public class GXDLMSClient {
      *             Signature exception.
      */
     public final boolean getData(final byte[] reply, final GXReplyData data)
-            throws InvalidKeyException, NoSuchAlgorithmException,
-            NoSuchPaddingException, InvalidAlgorithmParameterException,
-            IllegalBlockSizeException, BadPaddingException, SignatureException {
+            throws InvalidKeyException, NoSuchAlgorithmException, NoSuchPaddingException,
+            InvalidAlgorithmParameterException, IllegalBlockSizeException, BadPaddingException, SignatureException {
         return getData(new GXByteBuffer(reply), data, null);
     }
 
@@ -3289,11 +3105,9 @@ public class GXDLMSClient {
      * @throws SignatureException
      *             Signature exception.
      */
-    public final boolean getData(final byte[] reply, final GXReplyData data,
-            final GXReplyData notify)
-            throws InvalidKeyException, NoSuchAlgorithmException,
-            NoSuchPaddingException, InvalidAlgorithmParameterException,
-            IllegalBlockSizeException, BadPaddingException, SignatureException {
+    public final boolean getData(final byte[] reply, final GXReplyData data, final GXReplyData notify)
+            throws InvalidKeyException, NoSuchAlgorithmException, NoSuchPaddingException,
+            InvalidAlgorithmParameterException, IllegalBlockSizeException, BadPaddingException, SignatureException {
         return getData(new GXByteBuffer(reply), data, notify);
     }
 
@@ -3320,11 +3134,9 @@ public class GXDLMSClient {
      * @throws SignatureException
      *             Signature exception.
      */
-    public final boolean getData(final GXByteBuffer reply,
-            final GXReplyData data)
-            throws InvalidKeyException, NoSuchAlgorithmException,
-            NoSuchPaddingException, InvalidAlgorithmParameterException,
-            IllegalBlockSizeException, BadPaddingException, SignatureException {
+    public final boolean getData(final GXByteBuffer reply, final GXReplyData data)
+            throws InvalidKeyException, NoSuchAlgorithmException, NoSuchPaddingException,
+            InvalidAlgorithmParameterException, IllegalBlockSizeException, BadPaddingException, SignatureException {
         return getData(reply, data, null);
     }
 
@@ -3353,11 +3165,9 @@ public class GXDLMSClient {
      * @throws SignatureException
      *             Signature exception.
      */
-    public final boolean getData(final GXByteBuffer reply,
-            final GXReplyData data, final GXReplyData notify)
-            throws InvalidKeyException, NoSuchAlgorithmException,
-            NoSuchPaddingException, InvalidAlgorithmParameterException,
-            IllegalBlockSizeException, BadPaddingException, SignatureException {
+    public final boolean getData(final GXByteBuffer reply, final GXReplyData data, final GXReplyData notify)
+            throws InvalidKeyException, NoSuchAlgorithmException, NoSuchPaddingException,
+            InvalidAlgorithmParameterException, IllegalBlockSizeException, BadPaddingException, SignatureException {
         data.setXml(null);
         boolean ret = false;
         try {
@@ -3370,18 +3180,14 @@ public class GXDLMSClient {
         }
         if (ret && translator != null && data.getMoreData().isEmpty()) {
             if (data.getXml() == null) {
-                data.setXml(new GXDLMSTranslatorStructure(
-                        translator.getOutputType(),
-                        translator.isOmitXmlNameSpace(), translator.isHex(),
-                        translator.getShowStringAsHex(),
-                        translator.isComments(), translator.tags));
+                data.setXml(new GXDLMSTranslatorStructure(translator.getOutputType(), translator.isOmitXmlNameSpace(),
+                        translator.isHex(), translator.getShowStringAsHex(), translator.isComments(), translator.tags));
             }
             int pos = data.getData().position();
             try {
                 GXByteBuffer data2 = data.getData();
                 if (data.getCommand() == Command.GET_RESPONSE) {
-                    GXByteBuffer tmp =
-                            new GXByteBuffer((4 + data.getData().size()));
+                    GXByteBuffer tmp = new GXByteBuffer((4 + data.getData().size()));
                     tmp.setUInt8(data.getCommand());
                     tmp.setUInt8(GetCommandType.NORMAL);
                     tmp.setUInt8((byte) data.getInvokeId());
@@ -3389,8 +3195,7 @@ public class GXDLMSClient {
                     tmp.set(data.getData());
                     data.setData(tmp);
                 } else if (data.getCommand() == Command.METHOD_RESPONSE) {
-                    GXByteBuffer tmp =
-                            new GXByteBuffer((6 + data.getData().size()));
+                    GXByteBuffer tmp = new GXByteBuffer((6 + data.getData().size()));
                     tmp.setUInt8(data.getCommand());
                     tmp.setUInt8(GetCommandType.NORMAL);
                     tmp.setUInt8((byte) data.getInvokeId());
@@ -3400,8 +3205,7 @@ public class GXDLMSClient {
                     tmp.set(data.getData());
                     data.setData(tmp);
                 } else if (data.getCommand() == Command.READ_RESPONSE) {
-                    GXByteBuffer tmp =
-                            new GXByteBuffer(3 + data.getData().size());
+                    GXByteBuffer tmp = new GXByteBuffer(3 + data.getData().size());
                     tmp.setUInt8(data.getCommand());
                     tmp.setUInt8(VariableAccessSpecification.VARIABLE_NAME);
                     tmp.setUInt8((byte) data.getInvokeId());
@@ -3410,19 +3214,16 @@ public class GXDLMSClient {
                     data.setData(tmp);
                 }
                 data.getData().position(0);
-                if (data.getCommand() == Command.SNRM
-                        || data.getCommand() == Command.UA) {
+                if (data.getCommand() == Command.SNRM || data.getCommand() == Command.UA) {
                     data.getXml().appendStartTag(data.getCommand());
                     if (data.getData().size() != 0) {
-                        translator.pduToXml(data.getXml(), data.getData(),
-                                translator.isOmitXmlDeclaration(),
+                        translator.pduToXml(data.getXml(), data.getData(), translator.isOmitXmlDeclaration(),
                                 translator.isOmitXmlNameSpace(), true, null);
                     }
                     data.getXml().appendEndTag(data.getCommand());
                 } else {
                     if (data.getData().size() != 0) {
-                        translator.pduToXml(data.getXml(), data.getData(),
-                                translator.isOmitXmlDeclaration(),
+                        translator.pduToXml(data.getXml(), data.getData(), translator.isOmitXmlDeclaration(),
                                 translator.isOmitXmlNameSpace(), true, null);
                     }
                     data.setData(data2);
@@ -3459,13 +3260,11 @@ public class GXDLMSClient {
      * @return Server address.
      */
 
-    public static int getServerAddress(final int serialNumber,
-            final String formula) {
+    public static int getServerAddress(final int serialNumber, final String formula) {
         // If formula is not given use default formula.
         // This formula is defined in DLMS specification.
         if (formula == null || formula.length() == 0) {
-            return 0x4000 | SerialNumberCounter.count(serialNumber,
-                    "SN % 10000 + 1000");
+            return 0x4000 | SerialNumberCounter.count(serialNumber, "SN % 10000 + 1000");
         }
         return 0x4000 | SerialNumberCounter.count(serialNumber, formula);
     }
@@ -3479,8 +3278,7 @@ public class GXDLMSClient {
      *            Server physical address.
      * @return Server address.
      */
-    public static int getServerAddress(final int logicalAddress,
-            final int physicalAddress) {
+    public static int getServerAddress(final int logicalAddress, final int physicalAddress) {
         return getServerAddress(logicalAddress, physicalAddress, 0);
     }
 
@@ -3495,17 +3293,14 @@ public class GXDLMSClient {
      *            Address size in bytes.
      * @return Server address.
      */
-    public static int getServerAddress(final int logicalAddress,
-            final int physicalAddress, final int addressSize) {
-        if (addressSize < 4 && physicalAddress < 0x80
-                && logicalAddress < 0x80) {
+    public static int getServerAddress(final int logicalAddress, final int physicalAddress, final int addressSize) {
+        if (addressSize < 4 && physicalAddress < 0x80 && logicalAddress < 0x80) {
             return logicalAddress << 7 | physicalAddress;
         }
         if (physicalAddress < 0x4000 && logicalAddress < 0x4000) {
             return logicalAddress << 14 | physicalAddress;
         }
-        throw new IllegalArgumentException(
-                "Invalid logical or physical address.");
+        throw new IllegalArgumentException("Invalid logical or physical address.");
     }
 
     /**
@@ -3531,11 +3326,9 @@ public class GXDLMSClient {
      * @throws SignatureException
      *             Signature exception.
      */
-    public final byte[][] accessRequest(final Date time,
-            final List<GXDLMSAccessItem> list)
-            throws InvalidKeyException, NoSuchAlgorithmException,
-            NoSuchPaddingException, InvalidAlgorithmParameterException,
-            IllegalBlockSizeException, BadPaddingException, SignatureException {
+    public final byte[][] accessRequest(final Date time, final List<GXDLMSAccessItem> list)
+            throws InvalidKeyException, NoSuchAlgorithmException, NoSuchPaddingException,
+            InvalidAlgorithmParameterException, IllegalBlockSizeException, BadPaddingException, SignatureException {
         GXByteBuffer bb = new GXByteBuffer();
         GXCommon.setObjectCount(list.size(), bb);
         int mode = 0;
@@ -3543,12 +3336,10 @@ public class GXDLMSClient {
             bb.setUInt8(it.getCommand());
             bb.setUInt16(it.getTarget().getObjectType().getValue());
             // LN
-            bb.set(GXCommon
-                    .logicalNameToBytes(it.getTarget().getLogicalName()));
+            bb.set(GXCommon.logicalNameToBytes(it.getTarget().getLogicalName()));
             // Attribute ID.
             bb.setUInt8(it.getIndex());
-            int m = AccessMode3
-                    .toInteger(it.getTarget().getAccess3(it.getIndex()));
+            int m = AccessMode3.toInteger(it.getTarget().getAccess3(it.getIndex()));
             if (m > mode) {
                 mode = m;
             }
@@ -3561,8 +3352,7 @@ public class GXDLMSClient {
             } else if (it.getCommand() == AccessServiceCommandType.SET
                     || it.getCommand() == AccessServiceCommandType.ACTION) {
                 Object value = ((IGXDLMSBase) it.getTarget()).getValue(settings,
-                        new ValueEventArgs(it.getTarget(), it.getIndex(), 0,
-                                null));
+                        new ValueEventArgs(it.getTarget(), it.getIndex(), 0, null));
                 DataType type = it.getTarget().getDataType(it.getIndex());
                 if (type == DataType.NONE) {
                     type = GXDLMSConverter.getDLMSDataType(value);
@@ -3572,8 +3362,8 @@ public class GXDLMSClient {
                 throw new IllegalArgumentException("Invalid command.");
             }
         }
-        GXDLMSLNParameters p = new GXDLMSLNParameters(settings, 0,
-                Command.ACCESS_REQUEST, 0xFF, null, bb, 0xff, Command.NONE);
+        GXDLMSLNParameters p =
+                new GXDLMSLNParameters(settings, 0, Command.ACCESS_REQUEST, 0xFF, null, bb, 0xff, Command.NONE);
         p.accessMode = mode;
         if (time != null && time != new Date(0)) {
             p.setTime(new GXDateTime(time));
@@ -3589,14 +3379,12 @@ public class GXDLMSClient {
      * @param data
      *            Received data from the meter.
      */
-    public final void parseAccessResponse(final List<GXDLMSAccessItem> list,
-            final GXByteBuffer data) {
+    public final void parseAccessResponse(final List<GXDLMSAccessItem> list, final GXByteBuffer data) {
         // Get count
         GXDataInfo info = new GXDataInfo();
         int cnt = GXCommon.getObjectCount(data);
         if (list.size() != cnt) {
-            throw new IllegalArgumentException(
-                    "List size and values size do not match.");
+            throw new IllegalArgumentException("List size and values size do not match.");
         }
         for (GXDLMSAccessItem it : list) {
             info.clear();
@@ -3605,18 +3393,15 @@ public class GXDLMSClient {
         // Get status codes.
         cnt = GXCommon.getObjectCount(data);
         if (list.size() != cnt) {
-            throw new IllegalArgumentException(
-                    "List size and values size do not match.");
+            throw new IllegalArgumentException("List size and values size do not match.");
         }
         for (GXDLMSAccessItem it : list) {
             // Get access type.
             data.getUInt8();
             // Get status.
             it.setError(ErrorCode.forValue(data.getUInt8()));
-            if (it.getCommand() == AccessServiceCommandType.GET
-                    && it.getError() == ErrorCode.OK) {
-                ValueEventArgs ve = new ValueEventArgs(settings, it.getTarget(),
-                        it.getIndex(), 0, null);
+            if (it.getCommand() == AccessServiceCommandType.GET && it.getError() == ErrorCode.OK) {
+                ValueEventArgs ve = new ValueEventArgs(settings, it.getTarget(), it.getIndex(), 0, null);
                 ve.setValue(it.getValue());
                 ((IGXDLMSBase) it.getTarget()).setValue(settings, ve);
             }
@@ -3635,19 +3420,14 @@ public class GXDLMSClient {
             getInitialConformance(final boolean useLogicalNameReferencing) {
         Set<Conformance> list = new HashSet<Conformance>();
         if (useLogicalNameReferencing) {
-            list.addAll(Arrays.asList(Conformance.BLOCK_TRANSFER_WITH_ACTION,
-                    Conformance.BLOCK_TRANSFER_WITH_SET_OR_WRITE,
-                    Conformance.BLOCK_TRANSFER_WITH_GET_OR_READ,
-                    Conformance.SET, Conformance.SELECTIVE_ACCESS,
-                    Conformance.ACTION, Conformance.MULTIPLE_REFERENCES,
-                    Conformance.GET, Conformance.ACCESS,
-                    Conformance.GENERAL_PROTECTION,
-                    Conformance.DELTA_VALUE_ENCODING));
+            list.addAll(
+                    Arrays.asList(Conformance.BLOCK_TRANSFER_WITH_ACTION, Conformance.BLOCK_TRANSFER_WITH_SET_OR_WRITE,
+                            Conformance.BLOCK_TRANSFER_WITH_GET_OR_READ, Conformance.SET, Conformance.SELECTIVE_ACCESS,
+                            Conformance.ACTION, Conformance.MULTIPLE_REFERENCES, Conformance.GET, Conformance.ACCESS,
+                            Conformance.GENERAL_PROTECTION, Conformance.DELTA_VALUE_ENCODING));
         } else {
-            list.addAll(Arrays.asList(Conformance.INFORMATION_REPORT,
-                    Conformance.READ, Conformance.UN_CONFIRMED_WRITE,
-                    Conformance.WRITE, Conformance.PARAMETERIZED_ACCESS,
-                    Conformance.MULTIPLE_REFERENCES,
+            list.addAll(Arrays.asList(Conformance.INFORMATION_REPORT, Conformance.READ, Conformance.UN_CONFIRMED_WRITE,
+                    Conformance.WRITE, Conformance.PARAMETERIZED_ACCESS, Conformance.MULTIPLE_REFERENCES,
                     Conformance.DELTA_VALUE_ENCODING));
         }
         return list;
@@ -3664,22 +3444,18 @@ public class GXDLMSClient {
      * @throws Exception
      *             Occurred exception
      */
-    public Object parseReport(final GXReplyData reply,
-            final List<Entry<GXDLMSObject, Integer>> list) throws Exception {
+    public Object parseReport(final GXReplyData reply, final List<Entry<GXDLMSObject, Integer>> list) throws Exception {
 
         if (reply.getCommand() == Command.EVENT_NOTIFICATION) {
-            GXDLMSLNCommandHandler.handleEventNotification(settings, reply,
-                    list);
+            GXDLMSLNCommandHandler.handleEventNotification(settings, reply, list);
             return null;
         } else if (reply.getCommand() == Command.INFORMATION_REPORT) {
-            GXDLMSSNCommandHandler.handleInformationReport(settings, reply,
-                    list);
+            GXDLMSSNCommandHandler.handleInformationReport(settings, reply, list);
             return null;
         } else if (reply.getCommand() == Command.DATA_NOTIFICATION) {
             return reply.getValue();
         } else {
-            throw new IllegalArgumentException(
-                    "Invalid command. " + reply.getCommand());
+            throw new IllegalArgumentException("Invalid command. " + reply.getCommand());
         }
     }
 
@@ -3690,10 +3466,8 @@ public class GXDLMSClient {
      *            Received value.
      * @return Array of objects and called indexes.
      */
-    public final List<Entry<GXDLMSObject, Integer>>
-            parsePushObjects(final List<?> data) {
-        List<Entry<GXDLMSObject, Integer>> objects =
-                new ArrayList<Entry<GXDLMSObject, Integer>>();
+    public final List<Entry<GXDLMSObject, Integer>> parsePushObjects(final List<?> data) {
+        List<Entry<GXDLMSObject, Integer>> objects = new ArrayList<Entry<GXDLMSObject, Integer>>();
         if (data != null) {
             GXDLMSConverter c = new GXDLMSConverter(getStandard());
             for (Object it : data) {
@@ -3704,17 +3478,14 @@ public class GXDLMSClient {
                     comp = getObjects().findByLN(ObjectType.forValue(classID),
                             GXCommon.toLogicalName((byte[]) tmp.get(1)));
                     if (comp == null) {
-                        comp = GXDLMSClient.createDLMSObject(classID, 0, 0,
-                                tmp.get(1), null, 2);
+                        comp = GXDLMSClient.createDLMSObject(classID, 0, 0, tmp.get(1), null, 2);
                         settings.getObjects().add(comp);
                         c.updateOBISCodeInformation(comp);
                     }
                     if (comp.getClass() != GXDLMSObject.class) {
-                        objects.add(new GXSimpleEntry<GXDLMSObject, Integer>(
-                                comp, ((Number) tmp.get(2)).intValue()));
+                        objects.add(new GXSimpleEntry<GXDLMSObject, Integer>(comp, ((Number) tmp.get(2)).intValue()));
                     } else {
-                        String str = "Unknown object: "
-                                + String.valueOf(classID) + " "
+                        String str = "Unknown object: " + String.valueOf(classID) + " "
                                 + GXCommon.toLogicalName((byte[]) tmp.get(1));
                         LOGGER.log(Level.INFO, str);
                     }
@@ -3768,8 +3539,7 @@ public class GXDLMSClient {
             if (data.available() < 8 || data.getUInt16(data.position()) != 1) {
                 ret = 8 - data.available();
             } else {
-                ret = 8 + data.getUInt16(data.position() + 6)
-                        - data.available();
+                ret = 8 + data.getUInt16(data.position() + 6) - data.available();
             }
             break;
         case PLC:
@@ -3824,8 +3594,8 @@ public class GXDLMSClient {
      * @param type
      *            DLMS frame type.
      */
-    public static void getHdlcAddressInfo(final GXByteBuffer reply,
-            final int[] target, final int[] source, final short[] type) {
+    public static void getHdlcAddressInfo(final GXByteBuffer reply, final int[] target, final int[] source,
+            final short[] type) {
         GXDLMS.getHdlcAddressInfo(reply, target, source, type);
     }
 
@@ -3863,8 +3633,7 @@ public class GXDLMSClient {
      */
     public void setManufacturerId(final String value) {
         if (value != null && value.length() != 3) {
-            throw new IllegalArgumentException(
-                    "Manufacturer ID is 3 chars long string");
+            throw new IllegalArgumentException("Manufacturer ID is 3 chars long string");
         }
         manufacturerId = value;
     }
@@ -3878,8 +3647,7 @@ public class GXDLMSClient {
      *            Seed received from the meter.
      * @return Encrypted challenge.
      */
-    public static byte[] encryptLandisGyrHighLevelAuthentication(
-            final byte[] password, final byte[] seed) {
+    public static byte[] encryptLandisGyrHighLevelAuthentication(final byte[] password, final byte[] seed) {
         byte[] crypted = seed.clone();
         for (int pos = 0; pos != password.length; ++pos) {
             if (password[pos] != 0x30) {
@@ -3926,8 +3694,7 @@ public class GXDLMSClient {
      */
     public final boolean canRead(GXDLMSObject target, int index) {
         // Handle access rights for Association LN Version < 3.
-        if ((target.getAccess(index).getValue()
-                & AccessMode.READ.getValue()) == 0) {
+        if ((target.getAccess(index).getValue() & AccessMode.READ.getValue()) == 0) {
             // If bit mask is used.
             Set<AccessMode3> m = target.getAccess3(index);
             if (!m.isEmpty()) {
@@ -3942,25 +3709,20 @@ public class GXDLMSClient {
                 }
                 // If authentication is expected, but secured connection is not
                 // used.
-                if (m.contains(AccessMode3.AUTHENTICATED_REQUEST) || m
-                        .contains(AccessMode3.AUTHENTICATED_RESPONSE)
-                        && (security.getValue()
-                                & (Security.AUTHENTICATION.getValue())) == 0) {
+                if (m.contains(AccessMode3.AUTHENTICATED_REQUEST) || m.contains(AccessMode3.AUTHENTICATED_RESPONSE)
+                        && (security.getValue() & (Security.AUTHENTICATION.getValue())) == 0) {
                     return false;
                 }
                 // If encryption is expected, but secured connection is not
                 // used.
-                if (m.contains(AccessMode3.ENCRYPTED_REQUEST) || m
-                        .contains(AccessMode3.ENCRYPTED_RESPONSE)
-                        && (security.getValue()
-                                & (Security.ENCRYPTION.getValue())) == 0) {
+                if (m.contains(AccessMode3.ENCRYPTED_REQUEST) || m.contains(AccessMode3.ENCRYPTED_RESPONSE)
+                        && (security.getValue() & (Security.ENCRYPTION.getValue())) == 0) {
                     return false;
                 }
                 // If signing is expected, but it's not used.
-                if (m.contains(AccessMode3.DIGITALLY_SIGNED_REQUEST) || m
-                        .contains(AccessMode3.DIGITALLY_SIGNED_RESPONSE)
-                        && (signing.ordinal()
-                                & (Signing.GENERAL_SIGNING.ordinal())) == 0) {
+                if (m.contains(AccessMode3.DIGITALLY_SIGNED_REQUEST)
+                        || m.contains(AccessMode3.DIGITALLY_SIGNED_RESPONSE)
+                                && (signing.ordinal() & (Signing.GENERAL_SIGNING.ordinal())) == 0) {
                     return false;
                 }
             }
@@ -3981,8 +3743,7 @@ public class GXDLMSClient {
      */
     public final boolean canWrite(GXDLMSObject target, int index) {
         // Handle access rights for Association LN Version < 3.
-        if ((target.getAccess(index).getValue()
-                & AccessMode.WRITE.getValue()) == 0) {
+        if ((target.getAccess(index).getValue() & AccessMode.WRITE.getValue()) == 0) {
             // If bit mask is used.
             Set<AccessMode3> m = target.getAccess3(index);
             if (!m.isEmpty()) {
@@ -3997,25 +3758,20 @@ public class GXDLMSClient {
                 }
                 // If authentication is expected, but secured connection is not
                 // used.
-                if (m.contains(AccessMode3.AUTHENTICATED_REQUEST) || m
-                        .contains(AccessMode3.AUTHENTICATED_RESPONSE)
-                        && (security.getValue()
-                                & (Security.AUTHENTICATION.getValue())) == 0) {
+                if (m.contains(AccessMode3.AUTHENTICATED_REQUEST) || m.contains(AccessMode3.AUTHENTICATED_RESPONSE)
+                        && (security.getValue() & (Security.AUTHENTICATION.getValue())) == 0) {
                     return false;
                 }
                 // If encryption is expected, but secured connection is not
                 // used.
-                if (m.contains(AccessMode3.ENCRYPTED_REQUEST) || m
-                        .contains(AccessMode3.ENCRYPTED_RESPONSE)
-                        && (security.getValue()
-                                & (Security.ENCRYPTION.getValue())) == 0) {
+                if (m.contains(AccessMode3.ENCRYPTED_REQUEST) || m.contains(AccessMode3.ENCRYPTED_RESPONSE)
+                        && (security.getValue() & (Security.ENCRYPTION.getValue())) == 0) {
                     return false;
                 }
                 // If signing is expected, but it's not used.
-                if (m.contains(AccessMode3.DIGITALLY_SIGNED_REQUEST) || m
-                        .contains(AccessMode3.DIGITALLY_SIGNED_RESPONSE)
-                        && (signing.ordinal()
-                                & (Signing.GENERAL_SIGNING.ordinal())) == 0) {
+                if (m.contains(AccessMode3.DIGITALLY_SIGNED_REQUEST)
+                        || m.contains(AccessMode3.DIGITALLY_SIGNED_RESPONSE)
+                                && (signing.ordinal() & (Signing.GENERAL_SIGNING.ordinal())) == 0) {
                     return false;
                 }
             }
@@ -4037,8 +3793,7 @@ public class GXDLMSClient {
     public final boolean canInvoke(GXDLMSObject target, int index) {
 
         // Handle access rights for Association LN Version < 3.
-        if (target.getMethodAccess(index)
-                .getValue() == MethodAccessMode.NO_ACCESS.getValue()) {
+        if (target.getMethodAccess(index).getValue() == MethodAccessMode.NO_ACCESS.getValue()) {
             // If bit mask is used.
             Set<MethodAccessMode3> m = target.getMethodAccess3(index);
             if (!m.isEmpty()) {
@@ -4053,25 +3808,21 @@ public class GXDLMSClient {
                 }
                 // If authentication is expected, but secured connection is not
                 // used.
-                if (m.contains(MethodAccessMode3.AUTHENTICATED_REQUEST) || m
-                        .contains(MethodAccessMode3.AUTHENTICATED_RESPONSE)
-                        && (security.getValue()
-                                & (Security.AUTHENTICATION.getValue())) == 0) {
+                if (m.contains(MethodAccessMode3.AUTHENTICATED_REQUEST)
+                        || m.contains(MethodAccessMode3.AUTHENTICATED_RESPONSE)
+                                && (security.getValue() & (Security.AUTHENTICATION.getValue())) == 0) {
                     return false;
                 }
                 // If encryption is expected, but secured connection is not
                 // used.
-                if (m.contains(MethodAccessMode3.ENCRYPTED_REQUEST) || m
-                        .contains(MethodAccessMode3.ENCRYPTED_RESPONSE)
-                        && (security.getValue()
-                                & (Security.ENCRYPTION.getValue())) == 0) {
+                if (m.contains(MethodAccessMode3.ENCRYPTED_REQUEST) || m.contains(MethodAccessMode3.ENCRYPTED_RESPONSE)
+                        && (security.getValue() & (Security.ENCRYPTION.getValue())) == 0) {
                     return false;
                 }
                 // If signing is expected, but it's not used.
-                if (m.contains(MethodAccessMode3.DIGITALLY_SIGNED_REQUEST) || m
-                        .contains(MethodAccessMode3.DIGITALLY_SIGNED_RESPONSE)
-                        && (signing.ordinal()
-                                & (Signing.GENERAL_SIGNING.ordinal())) == 0) {
+                if (m.contains(MethodAccessMode3.DIGITALLY_SIGNED_REQUEST)
+                        || m.contains(MethodAccessMode3.DIGITALLY_SIGNED_RESPONSE)
+                                && (signing.ordinal() & (Signing.GENERAL_SIGNING.ordinal())) == 0) {
                     return false;
                 }
             }

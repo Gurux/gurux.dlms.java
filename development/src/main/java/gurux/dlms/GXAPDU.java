@@ -1018,33 +1018,65 @@ final class GXAPDU {
                 break;
             // Client CalledAeInvocationId.
             case BerType.CONTEXT | BerType.CONSTRUCTED | PduType.CALLED_AE_INVOCATION_ID:// 0xA5
-                // len =
-                buff.getUInt8();
-                // tag =
-                buff.getUInt8();
-                // len =
-                buff.getUInt8();
-                settings.setUserId(buff.getUInt8());
-                if (xml != null) {
-                    // CallingAPTitle
-                    xml.appendLine(TranslatorGeneralTags.CALLED_AE_INVOCATION_ID, "Value",
-                            xml.integerToHex(settings.getUserId(), 2));
+                len = GXCommon.getObjectCount(buff);
+                tag = buff.getUInt8();
+                len = GXCommon.getObjectCount(buff);
+                if (tag == BerType.OCTET_STRING) {
+                    byte[] tmp2 = new byte[len];
+                    buff.get(tmp2);
+                    if (xml != null) {
+                        xml.appendLine(TranslatorGeneralTags.CALLING_AE_QUALIFIER, "Value",
+                                GXCommon.toHex(tmp2, false));
+                    }
+                    try {
+                        // If public key certificate is coming part of AARE.
+                        GXx509Certificate cert = new GXx509Certificate(tmp2);
+                        settings.setServerPublicKeyCertificate(cert);
+                        settings.getCipher().setKeyAgreementKeyPair(new KeyPair(cert.getPublicKey(),
+                                settings.getCipher().getKeyAgreementKeyPair().getPrivate()));
+                        if (xml.isComments()) {
+                            xml.appendComment(cert.toString());
+                        }
+                    } catch (Exception ex) {
+                        if (xml == null) {
+                            throw ex;
+                        }
+                        xml.appendLine("Invalid certificate.");
+                    }
+                } else {
+                    settings.setUserId(buff.getUInt8());
+                    if (xml != null) {
+                        // CallingAPTitle
+                        xml.appendLine(TranslatorGeneralTags.CALLED_AE_INVOCATION_ID, "Value",
+                                xml.integerToHex(settings.getUserId(), 2));
+                    }
                 }
                 break;
             // Server RespondingAEInvocationId.
             case BerType.CONTEXT | BerType.CONSTRUCTED | 7:// 0xA7
                 // len =
                 GXCommon.getObjectCount(buff);
-                // tag =
-                buff.getUInt8();
+                tag = buff.getUInt8();
                 len = GXCommon.getObjectCount(buff);
                 if (tag == (byte) BerType.OCTET_STRING) {
                     // If public key certificate is coming part of AARQ.
                     byte[] tmp2 = new byte[len];
                     buff.get(tmp2);
-                    GXx509Certificate cert = new GXx509Certificate(tmp2);
-                    settings.getCipher().setKeyAgreementKeyPair(new KeyPair(cert.getPublicKey(),
-                            settings.getCipher().getKeyAgreementKeyPair().getPrivate()));
+                    if (xml != null) {
+                        xml.appendLine(TranslatorGeneralTags.CALLING_AE_QUALIFIER, "Value",
+                                GXCommon.toHex(tmp2, false));
+                    }
+                    try {
+                        GXx509Certificate cert = new GXx509Certificate(tmp2);
+                        settings.setClientPublicKeyCertificate(cert);
+                        settings.getCipher().setKeyAgreementKeyPair(new KeyPair(cert.getPublicKey(),
+                                settings.getCipher().getKeyAgreementKeyPair().getPrivate()));
+                    } catch (Exception ex) {
+                        if (xml == null) {
+                            throw ex;
+                        }
+                        xml.appendLine("Invalid certificate.");
+                    }
                 } else {
                     settings.setUserId(buff.getUInt8());
                     if (xml != null) {
@@ -1218,7 +1250,8 @@ final class GXAPDU {
         // ACSE service user tag.
         tag = buff.getUInt8();
         len = buff.getUInt8();
-        if (settings.isServer()) {
+        tag = buff.getUInt8();
+        if (tag == BerType.OCTET_STRING) {
             byte[] calledAEQualifier = new byte[len];
             buff.get(calledAEQualifier);
             if (xml != null) {
@@ -1226,7 +1259,7 @@ final class GXAPDU {
             }
         } else {
             // Result source diagnostic component.
-            if (buff.getUInt8() != BerType.INTEGER) {
+            if (tag != BerType.INTEGER) {
                 throw new IllegalArgumentException("Invalid tag.");
             }
             if (buff.getUInt8() != 1) {
@@ -1457,7 +1490,15 @@ final class GXAPDU {
             data.set(cipher.getSystemTitle());
         }
         // Add CalledAEInvocationId.
-        if (settings.getUserId() != -1) {
+        if (settings.getAuthentication() == Authentication.HIGH_ECDSA
+                && settings.getServerPublicKeyCertificate() != null) {
+            byte[] raw = settings.getServerPublicKeyCertificate().getEncoded();
+            data.setUInt8(BerType.CONTEXT | BerType.CONSTRUCTED | PduType.CALLING_AE_QUALIFIER);
+            GXCommon.setObjectCount(4 + raw.length, data);
+            data.setUInt8(BerType.OCTET_STRING);
+            GXCommon.setObjectCount(raw.length, data);
+            data.set(raw);
+        } else if (settings.getUserId() != -1) {
             data.setUInt8(BerType.CONTEXT | BerType.CONSTRUCTED | PduType.CALLED_AE_INVOCATION_ID);
             // LEN
             data.setUInt8(3);
