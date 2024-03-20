@@ -198,7 +198,7 @@ public class GXDLMSSecureClient extends GXDLMSClient {
     /**
      * @param value
      *            Optional ECDSA public key certificate that is send in part of
-     *            AARE.
+     *            AARQ.
      */
     public void setClientPublicKeyCertificate(final GXx509Certificate value) {
         getSettings().setClientPublicKeyCertificate(value);

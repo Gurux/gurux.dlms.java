@@ -1242,7 +1242,7 @@ final class GXAPDU {
 
     private static Object parseSourceDiagnostic(final GXDLMSSettings settings, final GXByteBuffer buff,
             final GXDLMSTranslatorStructure xml) {
-        int tag;
+        int tag, tag2;
         int len;
         Object ret = 0;
         // len =
@@ -1250,8 +1250,8 @@ final class GXAPDU {
         // ACSE service user tag.
         tag = buff.getUInt8();
         len = buff.getUInt8();
-        tag = buff.getUInt8();
-        if (tag == BerType.OCTET_STRING) {
+        tag2 = buff.getUInt8();
+        if (tag2 == BerType.OCTET_STRING) {
             byte[] calledAEQualifier = new byte[len];
             buff.get(calledAEQualifier);
             if (xml != null) {
@@ -1259,7 +1259,7 @@ final class GXAPDU {
             }
         } else {
             // Result source diagnostic component.
-            if (tag != BerType.INTEGER) {
+            if (tag2 != BerType.INTEGER) {
                 throw new IllegalArgumentException("Invalid tag.");
             }
             if (buff.getUInt8() != 1) {
