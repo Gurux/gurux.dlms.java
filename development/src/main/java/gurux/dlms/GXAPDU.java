@@ -38,6 +38,7 @@ import java.security.InvalidAlgorithmParameterException;
 import java.security.InvalidKeyException;
 import java.security.KeyPair;
 import java.security.NoSuchAlgorithmException;
+import java.security.PrivateKey;
 import java.util.Set;
 import java.util.logging.Level;
 import java.util.logging.Logger;
@@ -48,6 +49,7 @@ import javax.crypto.IllegalBlockSizeException;
 import javax.crypto.NoSuchPaddingException;
 
 import gurux.dlms.asn.GXx509Certificate;
+import gurux.dlms.asn.enums.KeyUsage;
 import gurux.dlms.enums.AcseServiceProvider;
 import gurux.dlms.enums.AssociationResult;
 import gurux.dlms.enums.Authentication;
@@ -1032,8 +1034,19 @@ final class GXAPDU {
                         // If public key certificate is coming part of AARE.
                         GXx509Certificate cert = new GXx509Certificate(tmp2);
                         settings.setServerPublicKeyCertificate(cert);
-                        settings.getCipher().setKeyAgreementKeyPair(new KeyPair(cert.getPublicKey(),
-                                settings.getCipher().getKeyAgreementKeyPair().getPrivate()));
+                        PrivateKey pk = null;
+                        if (cert.getKeyUsage().contains(KeyUsage.KEY_CERT_SIGN)) {
+                            if (settings.getCipher().getKeyAgreementKeyPair() != null) {
+                                pk = settings.getCipher().getKeyAgreementKeyPair().getPrivate();
+                            }
+                            settings.getCipher().setKeyAgreementKeyPair(new KeyPair(cert.getPublicKey(), pk));
+                        }
+                        if (cert.getKeyUsage().contains(KeyUsage.DIGITAL_SIGNATURE)) {
+                            if (settings.getCipher().getSigningKeyPair() != null) {
+                                pk = settings.getCipher().getSigningKeyPair().getPrivate();
+                            }
+                            settings.getCipher().setSigningKeyPair(new KeyPair(cert.getPublicKey(), pk));
+                        }
                         if (xml != null && xml.isComments()) {
                             xml.appendComment(cert.toString());
                         }
@@ -1069,8 +1082,19 @@ final class GXAPDU {
                     try {
                         GXx509Certificate cert = new GXx509Certificate(tmp2);
                         settings.setClientPublicKeyCertificate(cert);
-                        settings.getCipher().setKeyAgreementKeyPair(new KeyPair(cert.getPublicKey(),
-                                settings.getCipher().getKeyAgreementKeyPair().getPrivate()));
+                        PrivateKey pk = null;
+                        if (cert.getKeyUsage().contains(KeyUsage.KEY_CERT_SIGN)) {
+                            if (settings.getCipher().getKeyAgreementKeyPair() != null) {
+                                pk = settings.getCipher().getKeyAgreementKeyPair().getPrivate();
+                            }
+                            settings.getCipher().setKeyAgreementKeyPair(new KeyPair(cert.getPublicKey(), pk));
+                        }
+                        if (cert.getKeyUsage().contains(KeyUsage.DIGITAL_SIGNATURE)) {
+                            if (settings.getCipher().getSigningKeyPair() != null) {
+                                pk = settings.getCipher().getSigningKeyPair().getPrivate();
+                            }
+                            settings.getCipher().setSigningKeyPair(new KeyPair(cert.getPublicKey(), pk));
+                        }
                         if (xml != null && xml.isComments()) {
                             xml.appendComment(cert.toString());
                         }
