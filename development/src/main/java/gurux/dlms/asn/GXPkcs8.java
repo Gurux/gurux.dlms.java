@@ -88,12 +88,10 @@ public class GXPkcs8 {
      * @throws NoSuchAlgorithmException
      * @throws InvalidKeySpecException
      */
-    public GXPkcs8(final PrivateKey priv)
-            throws NoSuchAlgorithmException, InvalidKeySpecException {
+    public GXPkcs8(final PrivateKey priv) throws NoSuchAlgorithmException, InvalidKeySpecException {
         this();
         privateKey = priv;
-        PKCS8EncodedKeySpec keySpec =
-                new PKCS8EncodedKeySpec(priv.getEncoded());
+        PKCS8EncodedKeySpec keySpec = new PKCS8EncodedKeySpec(priv.getEncoded());
         KeyFactory kf = KeyFactory.getInstance("EC");
         publicKey = kf.generatePublic(keySpec);
     }
@@ -157,11 +155,9 @@ public class GXPkcs8 {
 
     private void init(final byte[] data) {
         rawData = data;
-        GXAsn1Sequence seq =
-                (GXAsn1Sequence) GXAsn1Converter.fromByteArray(data);
+        GXAsn1Sequence seq = (GXAsn1Sequence) GXAsn1Converter.fromByteArray(data);
         if (seq.size() < 3) {
-            throw new IllegalArgumentException(
-                    "Wrong number of elements in sequence.");
+            throw new IllegalArgumentException("Wrong number of elements in sequence.");
         }
         if (!(seq.get(0) instanceof Byte)) {
             PkcsType type = GXAsn1Converter.getCertificateType(data, seq);
@@ -170,11 +166,9 @@ public class GXPkcs8 {
                 throw new GXDLMSCertificateException(
                         "Invalid Certificate. This is PKCS 10 certification requests, not PKCS 8.");
             case x509_CERTIFICATE:
-                throw new GXDLMSCertificateException(
-                        "Invalid Certificate. This is PKCS x509 certificate, not PKCS 8.");
+                throw new GXDLMSCertificateException("Invalid Certificate. This is PKCS x509 certificate, not PKCS 8.");
             default:
-                throw new GXDLMSCertificateException(
-                        "Invalid Certificate Version.");
+                throw new GXDLMSCertificateException("Invalid Certificate Version.");
             }
         }
         version = CertificateVersion.forValue(((Number) seq.get(0)).intValue());
@@ -194,24 +188,23 @@ public class GXPkcs8 {
             } else if (name.contains("ec")) {
                 eckf = KeyFactory.getInstance("EC");
             } else {
-                throw new IllegalStateException(
-                        "Unknown algorithm:" + algorithm.toString());
+                throw new IllegalStateException("Unknown algorithm:" + algorithm.toString());
             }
         } catch (NoSuchAlgorithmException e) {
-            throw new IllegalStateException(algorithm.toString().substring(0, 2)
-                    + "key factory not present in runtime");
+            throw new IllegalStateException(
+                    algorithm.toString().substring(0, 2) + "key factory not present in runtime");
         }
         try {
-            PKCS8EncodedKeySpec ecpks =
-                    new PKCS8EncodedKeySpec(data, tmp.get(0).toString());
+            PKCS8EncodedKeySpec ecpks = new PKCS8EncodedKeySpec(data, tmp.get(0).toString());
             privateKey = eckf.generatePrivate(ecpks);
             tmp = (List<?>) seq.get(2);
             privateKey = GXAsn1Converter.getPrivateKey((byte[]) tmp.get(1));
-            tmp = (List<?>) tmp.get(2);
-            GXByteBuffer tmp2 = new GXByteBuffer();
-            tmp2.set(((GXAsn1BitString) tmp.get(0)).getValue());
-            publicKey = GXAsn1Converter
-                    .getPublicKey(tmp2.subArray(1, tmp2.size() - 1));
+            if (tmp.size() > 2) {
+                tmp = (List<?>) tmp.get(2);
+                GXByteBuffer tmp2 = new GXByteBuffer();
+                tmp2.set(((GXAsn1BitString) tmp.get(0)).getValue());
+                publicKey = GXAsn1Converter.getPublicKey(tmp2.subArray(1, tmp2.size() - 1));
+            }
         } catch (Exception e) {
             throw new IllegalArgumentException(e.getMessage());
         }
