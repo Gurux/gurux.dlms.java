@@ -4478,7 +4478,7 @@ abstract class GXDLMS {
             reply.getXml().appendLine(TranslatorTags.BLOCK_NUMBER, "Value", reply.getXml().integerToHex(number, 8));
         } else {
             // If meter's block index is zero based.
-            if (number != 0 && settings.getBlockIndex() == 1) {
+            if (number != 1 && settings.getBlockIndex() == 1) {
                 settings.setBlockIndex((int) number);
             }
             int expectedIndex = settings.getBlockIndex();
