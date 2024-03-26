@@ -1042,7 +1042,7 @@ public class GXDLMSClient {
             tmp.set(settings.getSourceSystemTitle());
             tmp.set(settings.getStoCChallenge());
             tmp.set(settings.getCtoSChallenge());
-            LOGGER.log(Level.INFO, "CtoS" + tmp.toHex(true, 0));
+            LOGGER.log(Level.INFO, "StoC " + tmp.toHex(true, 0));
             pw = tmp.array();
         } else {
             pw = settings.getPassword();
