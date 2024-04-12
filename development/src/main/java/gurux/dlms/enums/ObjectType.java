@@ -236,8 +236,21 @@ public enum ObjectType {
 
     COMPACT_DATA(62),
 
-    PARAMETER_MONITOR(65), WIRELESS_MODE_Q_CHANNEL(73),
+    PARAMETER_MONITOR(65),
+
+    WIRELESS_MODE_Q_CHANNEL(73),
+
     MBUS_MASTER_PORT_SETUP(74),
+
+    /**
+     * Servers hosted by M-Bus slave devices.
+     */
+    MBUS_PORT_SETUP(76),
+
+    /**
+     * Holds information related to the operation of the M-Bus network
+     */
+    MBUS_DIAGNOSTIC(77),
 
     /**
      * Addresses that are provided by the base node during the opening of the
@@ -321,6 +334,10 @@ public enum ObjectType {
     CHARGE(113),
 
     TOKEN_GATEWAY(115),
+    /*
+     * Allow managing attributes of type array of other interface objects.
+     */
+    ARRAY_MANAGER(123),
     /*
      * SapAssigment stores information of assignment of the logical devices to
      * their SAP = Service Access Points.
@@ -423,12 +440,39 @@ public enum ObjectType {
      */
     G3_PLC6_LO_WPAN(92),
 
+    /**
+     * Function control.
+     */
+    FUNCTION_CONTROL(122),
     /*
      * Communication port protection.
      */
     COMMUNICATION_PORT_PROTECTION(124),
-
-    /**
+    /*
+     * LTE monitoring.
+     */
+    LTE_MONITORING(151),
+    /*
+     * CoAP setup.
+     */
+    COAP_SETUP(152),
+    /*
+     * CoAP diagnostic.
+     */
+    COAP_DIAGNOSTIC(153),
+    /*
+     * G3-PLC Hybrid RF MAC layer counters.
+     */
+    G3_PLC_HYBRID_RF_MAC_LAYER_COUNTERS(160),
+    /*
+     * G3-PLC Hybrid RF MAC setup.
+     */
+    G3_PLC_HYBRID_RF_MAC_SETUP(161),
+    /*
+     * G3-PLC Hybrid 6LoWPAN adaptation layer setup.
+     */
+    G3_PLC_HYBRID_6LO_WPAN_ADAPTATION_LAYER_SETUP(162),
+    /*
      * Tariff Plan (Piano Tariffario) is used in Italian standard UNI/TS
      * 11291-11.
      */
@@ -468,13 +512,11 @@ public enum ObjectType {
 
     public static ObjectType getEnum(final String value) {
         String tmp = value.toUpperCase();
-        Iterator<Entry<Integer, ObjectType>> it =
-                mappings.entrySet().iterator();
+        Iterator<Entry<Integer, ObjectType>> it = mappings.entrySet().iterator();
         while (it.hasNext()) {
-            Map.Entry<Integer, ObjectType> pair =
-                    (Map.Entry<Integer, ObjectType>) it.next();
-            if (tmp.compareTo(pair.getValue().toString()) == 0 || tmp.compareTo(
-                    pair.getValue().toString().replaceAll("_", "")) == 0) {
+            Map.Entry<Integer, ObjectType> pair = (Map.Entry<Integer, ObjectType>) it.next();
+            if (tmp.compareTo(pair.getValue().toString()) == 0
+                    || tmp.compareTo(pair.getValue().toString().replaceAll("_", "")) == 0) {
                 return pair.getValue();
             }
         }

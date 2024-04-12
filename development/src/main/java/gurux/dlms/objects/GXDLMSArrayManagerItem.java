@@ -34,41 +34,44 @@
 
 package gurux.dlms.objects;
 
-import java.util.List;
-
-final class GXDLMSObjectHelpers {
+public class GXDLMSArrayManagerItem {
+    /**
+     * Array object ID.
+     */
+    private short id;
 
     /**
-     * Constructor.
+     * @return Array object ID.
      */
-    private GXDLMSObjectHelpers() {
-
+    public final short getId() {
+        return id;
     }
 
-    public static short[] toShortArray(final List<Short> list) {
-        short[] ret = new short[list.size()];
-        int i = -1;
-        for (Short e : list) {
-            ret[++i] = e.shortValue();
-        }
-        return ret;
+    /**
+     * Array objects.
+     */
+    private GXDLMSTargetObject element;
+
+    /**
+     * @param value
+     *            Array object ID.
+     */
+    public final void setId(final short value) {
+        id = value;
     }
 
-    public static int[] toIntArray(final List<Integer> list) {
-        int[] ret = new int[list.size()];
-        int i = -1;
-        for (Integer e : list) {
-            ret[++i] = e.intValue();
-        }
-        return ret;
+    /**
+     * @return Array objects.
+     */
+    public final GXDLMSTargetObject getElement() {
+        return element;
     }
 
-    public static long[] toLongArray(final List<Long> list) {
-        long[] ret = new long[list.size()];
-        int i = -1;
-        for (Long e : list) {
-            ret[++i] = e.longValue();
-        }
-        return ret;
+    /**
+     * @param value
+     *            Array objects.
+     */
+    public final void setElement(final GXDLMSTargetObject value) {
+        element = value;
     }
 }

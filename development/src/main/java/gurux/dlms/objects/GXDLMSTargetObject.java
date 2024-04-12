@@ -34,41 +34,67 @@
 
 package gurux.dlms.objects;
 
-import java.util.List;
+/**
+ * Target object.
+ */
+public class GXDLMSTargetObject {
+    /**
+     * Target object.
+     */
+    private GXDLMSObject target;
 
-final class GXDLMSObjectHelpers {
+    /**
+     * Attribute Index of DLMS object.
+     */
+    private int attributeIndex;
+
+    /**
+     * @return Target object.
+     */
+    public final GXDLMSObject getTarget() {
+        return target;
+    }
+
+    /**
+     * @param value
+     *            Target object.
+     */
+    public final void setTarget(final GXDLMSObject value) {
+        target = value;
+    }
+
+    /**
+     * @return Attribute Index of DLMS object.
+     */
+    public final int getAttributeIndex() {
+        return attributeIndex;
+    }
+
+    /**
+     * @param value
+     *            Attribute Index of DLMS object.
+     */
+    public final void setAttributeIndex(final int value) {
+        attributeIndex = value;
+    }
+
+    /**
+     * Constructor
+     */
+    public GXDLMSTargetObject() {
+
+    }
 
     /**
      * Constructor.
+     * 
+     * @param target
+     *            Target object.
+     * @param attributeIndex
+     *            Attribute index.
      */
-    private GXDLMSObjectHelpers() {
-
-    }
-
-    public static short[] toShortArray(final List<Short> list) {
-        short[] ret = new short[list.size()];
-        int i = -1;
-        for (Short e : list) {
-            ret[++i] = e.shortValue();
-        }
-        return ret;
-    }
-
-    public static int[] toIntArray(final List<Integer> list) {
-        int[] ret = new int[list.size()];
-        int i = -1;
-        for (Integer e : list) {
-            ret[++i] = e.intValue();
-        }
-        return ret;
-    }
-
-    public static long[] toLongArray(final List<Long> list) {
-        long[] ret = new long[list.size()];
-        int i = -1;
-        for (Long e : list) {
-            ret[++i] = e.longValue();
-        }
-        return ret;
+    public GXDLMSTargetObject(GXDLMSObject target, int attributeIndex) {
+        setTarget(target);
+        setAttributeIndex(attributeIndex);
     }
 }

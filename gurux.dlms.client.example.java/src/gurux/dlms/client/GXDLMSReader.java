@@ -110,21 +110,18 @@ public class GXDLMSReader {
     // Invocation counter (frame counter).
     String invocationCounter = null;
 
-    public GXDLMSReader(GXDLMSSecureClient2 client, IGXMedia media,
-            TraceLevel trace, final String frameCounter) throws Exception {
+    public GXDLMSReader(GXDLMSSecureClient2 client, IGXMedia media, TraceLevel trace, final String frameCounter)
+            throws Exception {
         Files.deleteIfExists(Paths.get("trace.txt"));
-        logFile = new PrintWriter(
-                new BufferedWriter(new FileWriter("logFile.txt")));
+        logFile = new PrintWriter(new BufferedWriter(new FileWriter("logFile.txt")));
         Trace = trace;
         Media = media;
         dlms = client;
         invocationCounter = frameCounter;
         if (trace.ordinal() > TraceLevel.WARNING.ordinal()) {
             System.out.println("Authentication: " + dlms.getAuthentication());
-            System.out.println("ClientAddress: 0x"
-                    + Integer.toHexString(dlms.getClientAddress()));
-            System.out.println("ServerAddress: 0x"
-                    + Integer.toHexString(dlms.getServerAddress()));
+            System.out.println("ClientAddress: 0x" + Integer.toHexString(dlms.getClientAddress()));
+            System.out.println("ServerAddress: 0x" + Integer.toHexString(dlms.getServerAddress()));
         }
         if (dlms.getInterfaceType() == InterfaceType.WRAPPER) {
             replyBuff = java.nio.ByteBuffer.allocate(8 + 1024);
@@ -134,8 +131,7 @@ public class GXDLMSReader {
     }
 
     void disconnect() throws Exception {
-        if (Media != null && Media.isOpen()
-                && !dlms.isPreEstablishedConnection()) {
+        if (Media != null && Media.isOpen() && !dlms.isPreEstablishedConnection()) {
             System.out.println("DisconnectRequest");
             GXReplyData reply = new GXReplyData();
             readDLMSPacket(dlms.disconnectRequest(), reply);
@@ -149,10 +145,8 @@ public class GXDLMSReader {
                 // Release is call only for secured connections.
                 // All meters are not supporting Release and it's causing
                 // problems.
-                if (dlms.getInterfaceType() == InterfaceType.WRAPPER
-                        || (dlms.getInterfaceType() == InterfaceType.HDLC
-                                && dlms.getCiphering()
-                                        .getSecurity() != Security.NONE)) {
+                if (dlms.getInterfaceType() == InterfaceType.WRAPPER || (dlms.getInterfaceType() == InterfaceType.HDLC
+                        && dlms.getCiphering().getSecurity() != Security.NONE)) {
                     System.out.println("release");
                     readDataBlock(dlms.releaseRequest(), reply);
                 }
@@ -170,10 +164,8 @@ public class GXDLMSReader {
                 // Release is call only for secured connections.
                 // All meters are not supporting Release and it's causing
                 // problems.
-                if (dlms.getInterfaceType() == InterfaceType.WRAPPER
-                        || (dlms.getInterfaceType() == InterfaceType.HDLC
-                                && dlms.getCiphering()
-                                        .getSecurity() != Security.NONE)) {
+                if (dlms.getInterfaceType() == InterfaceType.WRAPPER || (dlms.getInterfaceType() == InterfaceType.HDLC
+                        && dlms.getCiphering().getSecurity() != Security.NONE)) {
                     readDataBlock(dlms.releaseRequest(), reply);
                 }
             } catch (Exception e) {
@@ -186,8 +178,7 @@ public class GXDLMSReader {
     }
 
     String now() {
-        return new SimpleDateFormat("HH:mm:ss.SSS")
-                .format(java.util.Calendar.getInstance().getTime());
+        return new SimpleDateFormat("HH:mm:ss.SSS").format(java.util.Calendar.getInstance().getTime());
     }
 
     void writeTrace(String line, TraceLevel level) {
@@ -196,8 +187,7 @@ public class GXDLMSReader {
         }
         PrintWriter logFile = null;
         try {
-            logFile = new PrintWriter(
-                    new BufferedWriter(new FileWriter("trace.txt", true)));
+            logFile = new PrintWriter(new BufferedWriter(new FileWriter("trace.txt", true)));
             logFile.println(line);
         } catch (IOException ex) {
             throw new RuntimeException(ex.getMessage());
@@ -223,16 +213,13 @@ public class GXDLMSReader {
      *            Received data.
      * @throws Exception
      */
-    private void handleNotifyMessages(final GXReplyData reply)
-            throws Exception {
-        List<Entry<GXDLMSObject, Integer>> items =
-                new ArrayList<Entry<GXDLMSObject, Integer>>();
+    private void handleNotifyMessages(final GXReplyData reply) throws Exception {
+        List<Entry<GXDLMSObject, Integer>> items = new ArrayList<Entry<GXDLMSObject, Integer>>();
         Object value = dlms.parseReport(reply, items);
         // If Event notification or Information report.
         if (value == null) {
             for (Entry<GXDLMSObject, Integer> it : items) {
-                System.out.println(it.getKey().toString() + " Value:"
-                        + it.getKey().getValues()[it.getValue() - 1]);
+                System.out.println(it.getKey().toString() + " Value:" + it.getKey().getValues()[it.getValue() - 1]);
             }
         } else // Show data notification.
         {
@@ -251,8 +238,7 @@ public class GXDLMSReader {
     /*
      * Read DLMS Data from the device. If access is denied return null.
      */
-    public void readDLMSPacket(byte[] data, GXReplyData reply)
-            throws Exception {
+    public void readDLMSPacket(byte[] data, GXReplyData reply) throws Exception {
         if (!reply.getStreaming() && (data == null || data.length == 0)) {
             return;
         }
@@ -267,8 +253,7 @@ public class GXDLMSReader {
         GXByteBuffer rd = new GXByteBuffer();
         int pos = 0;
         boolean succeeded = false;
-        ReceiveParameters<byte[]> p =
-                new ReceiveParameters<byte[]>(byte[].class);
+        ReceiveParameters<byte[]> p = new ReceiveParameters<byte[]>(byte[].class);
         p.setEop(eop);
         p.setAllData(true);
         p.setCount(dlms.getFrameSize(rd));
@@ -276,9 +261,7 @@ public class GXDLMSReader {
         synchronized (Media.getSynchronous()) {
             while (!succeeded) {
                 if (!reply.isStreaming()) {
-                    writeTrace(
-                            "TX: " + now() + "\t" + GXCommon.bytesToHex(data),
-                            TraceLevel.VERBOSE);
+                    writeTrace("TX: " + now() + "\t" + GXCommon.bytesToHex(data), TraceLevel.VERBOSE);
                     Media.send(data, null);
                 }
                 succeeded = Media.receive(p);
@@ -288,11 +271,9 @@ public class GXDLMSReader {
                     }
                     // Try to read again...
                     if (pos++ == 3) {
-                        throw new RuntimeException(
-                                "Failed to receive reply from the device in given time.");
+                        throw new RuntimeException("Failed to receive reply from the device in given time.");
                     }
-                    System.out.println("Data send failed. Try to resend "
-                            + String.valueOf(pos) + "/3");
+                    System.out.println("Data send failed. Try to resend " + String.valueOf(pos) + "/3");
                 }
             }
             rd = new GXByteBuffer(p.getReply());
@@ -305,8 +286,7 @@ public class GXDLMSReader {
                         // Handle notify.
                         if (!notify.isMoreData()) {
                             // Show received push message as XML.
-                            GXDLMSTranslator t = new GXDLMSTranslator(
-                                    TranslatorOutputType.SIMPLE_XML);
+                            GXDLMSTranslator t = new GXDLMSTranslator(TranslatorOutputType.SIMPLE_XML);
                             String xml = t.dataToXml(notify.getData());
                             System.out.println(xml);
                             notify.clear();
@@ -325,18 +305,18 @@ public class GXDLMSReader {
                         }
                         // Try to read again...
                         if (++pos == 3) {
-                            throw new Exception(
-                                    "Failed to receive reply from the device in given time.");
+                            throw new Exception("Failed to receive reply from the device in given time.");
                         }
-                        System.out.println("Data send failed. Try to resend "
-                                + String.valueOf(pos) + "/3");
+                        System.out.println("Data send failed. Try to resend " + String.valueOf(pos) + "/3");
+                        if (p.getEop() == null) {
+                            p.setCount(dlms.getFrameSize(rd));
+                        }
                     }
                     rd.position(msgPos);
                     rd.set(p.getReply());
                 }
             } catch (Exception e) {
-                writeTrace("RX: " + now() + "\t" + rd.toString(),
-                        TraceLevel.ERROR);
+                writeTrace("RX: " + now() + "\t" + rd.toString(), TraceLevel.ERROR);
                 throw e;
             }
         }
@@ -412,8 +392,7 @@ public class GXDLMSReader {
                 dlms.getCiphering().setSecurity(Security.NONE);
                 dlms.getCiphering().setSigning(Signing.NONE);
 
-                if (dlms.getInterfaceType() == InterfaceType.COAP
-                        && Media instanceof GXNet) {
+                if (dlms.getInterfaceType() == InterfaceType.COAP && Media instanceof GXNet) {
                     // Update client SAP for CoAP.
                     dlms.getCoap().getOptions().put(65003, (byte) 16);
                     // Update Server SAP for CoAP.
@@ -429,8 +408,7 @@ public class GXDLMSReader {
                     // Allocate buffer to same size as transmit buffer of the
                     // meter.
                     // Size of replyBuff is payload and frame (Bop, EOP, crc).
-                    int size = (int) ((((Number) dlms.getHdlcSettings()
-                            .getMaxInfoTX()).intValue() & 0xFFFFFFFFL) + 40);
+                    int size = (int) ((((Number) dlms.getHdlcSettings().getMaxInfoTX()).intValue() & 0xFFFFFFFFL) + 40);
                     replyBuff = java.nio.ByteBuffer.allocate(size);
                 }
                 // Generate AARQ request.
@@ -449,8 +427,7 @@ public class GXDLMSReader {
                     long iv = ((Number) d.getValue()).longValue();
                     iv += 1;
                     dlms.getCiphering().setInvocationCounter(iv);
-                    writeTrace("Invocation counter: " + String.valueOf(iv),
-                            TraceLevel.INFO);
+                    writeTrace("Invocation counter: " + String.valueOf(iv), TraceLevel.INFO);
                     reply.clear();
                     disconnect();
                     // Reset media settings back to default.
@@ -470,8 +447,7 @@ public class GXDLMSReader {
                 dlms.getCiphering().setSecurity(security);
                 dlms.setCtoSChallenge(challenge);
                 dlms.getCiphering().setSigning(signing);
-                if (dlms.getInterfaceType() == InterfaceType.COAP
-                        && Media instanceof GXNet) {
+                if (dlms.getInterfaceType() == InterfaceType.COAP && Media instanceof GXNet) {
                     // Update client SAP for CoAP.
                     dlms.getCoap().getOptions().put(65003, (byte) add);
                     // Update Server SAP for CoAP.
@@ -485,8 +461,7 @@ public class GXDLMSReader {
         if (dlms.getInterfaceType() != InterfaceType.HDLC_WITH_MODE_E) {
             return;
         }
-        ReceiveParameters<byte[]> p =
-                new ReceiveParameters<byte[]>(byte[].class);
+        ReceiveParameters<byte[]> p = new ReceiveParameters<byte[]>(byte[].class);
         p.setAllData(false);
         p.setEop((byte) '\n');
         p.setWaitTime(waitTime);
@@ -494,30 +469,20 @@ public class GXDLMSReader {
         String replyStr;
         synchronized (Media.getSynchronous()) {
             data = "/?!\r\n";
-            writeTrace(
-                    "TX: " + now() + "\t"
-                            + GXCommon.bytesToHex(data.getBytes("ASCII")),
-                    TraceLevel.VERBOSE);
+            writeTrace("TX: " + now() + "\t" + GXCommon.bytesToHex(data.getBytes("ASCII")), TraceLevel.VERBOSE);
             Media.send(data, null);
             if (!Media.receive(p)) {
-                throw new RuntimeException(
-                        "Failed to received reply from the media.");
+                throw new RuntimeException("Failed to received reply from the media.");
             }
-            writeTrace(
-                    "RX: " + now() + "\t" + GXCommon.bytesToHex(p.getReply()),
-                    TraceLevel.VERBOSE);
+            writeTrace("RX: " + now() + "\t" + GXCommon.bytesToHex(p.getReply()), TraceLevel.VERBOSE);
             // If echo is used.
             replyStr = new String(p.getReply());
             if (data.equals(replyStr)) {
                 p.setReply(null);
                 if (!Media.receive(p)) {
-                    throw new Exception(
-                            "Failed to received reply from the media.");
+                    throw new Exception("Failed to received reply from the media.");
                 }
-                writeTrace(
-                        "RX: " + now() + "\t"
-                                + GXCommon.bytesToHex(p.getReply()),
-                        TraceLevel.VERBOSE);
+                writeTrace("RX: " + now() + "\t" + GXCommon.bytesToHex(p.getReply()), TraceLevel.VERBOSE);
                 replyStr = new String(p.getReply());
             }
         }
@@ -562,19 +527,14 @@ public class GXDLMSReader {
                                                // procedure) (Binary
                                                // mode)
         // Set mode E.
-        byte[] tmp = new byte[] { 0x06, controlCharacter, (byte) baudrate,
-                ModeControlCharacter, 13, 10 };
+        byte[] tmp = new byte[] { 0x06, controlCharacter, (byte) baudrate, ModeControlCharacter, 13, 10 };
         p.setReply(null);
         synchronized (Media.getSynchronous()) {
             Media.send(tmp, null);
-            writeTrace("RX: " + now() + "\t" + GXCommon.bytesToHex(tmp),
-                    TraceLevel.VERBOSE);
+            writeTrace("RX: " + now() + "\t" + GXCommon.bytesToHex(tmp), TraceLevel.VERBOSE);
             p.setWaitTime(100);
             if (Media.receive(p)) {
-                writeTrace(
-                        "RX: " + now() + "\t"
-                                + GXCommon.bytesToHex(p.getReply()),
-                        TraceLevel.VERBOSE);
+                writeTrace("RX: " + now() + "\t" + GXCommon.bytesToHex(p.getReply()), TraceLevel.VERBOSE);
             }
             Media.close();
             // This sleep make sure that all meters can be read.
@@ -606,17 +566,13 @@ public class GXDLMSReader {
         }
         System.out.println("Standard: " + dlms.getStandard().toString());
         if (dlms.getCiphering().getSecurity() != Security.NONE) {
+            System.out.println("Security: " + dlms.getCiphering().getSecurity());
+            System.out.println("System title: " + GXCommon.bytesToHex(dlms.getCiphering().getSystemTitle()));
             System.out
-                    .println("Security: " + dlms.getCiphering().getSecurity());
-            System.out.println("System title: " + GXCommon
-                    .bytesToHex(dlms.getCiphering().getSystemTitle()));
-            System.out.println("Authentication key: " + GXCommon
-                    .bytesToHex(dlms.getCiphering().getAuthenticationKey()));
-            System.out.println("Block cipher key " + GXCommon
-                    .bytesToHex(dlms.getCiphering().getBlockCipherKey()));
+                    .println("Authentication key: " + GXCommon.bytesToHex(dlms.getCiphering().getAuthenticationKey()));
+            System.out.println("Block cipher key " + GXCommon.bytesToHex(dlms.getCiphering().getBlockCipherKey()));
             if (dlms.getCiphering().getDedicatedKey() != null) {
-                System.out.println("Dedicated key: " + GXCommon
-                        .bytesToHex(dlms.getCiphering().getDedicatedKey()));
+                System.out.println("Dedicated key: " + GXCommon.bytesToHex(dlms.getCiphering().getDedicatedKey()));
             }
         }
         updateFrameCounter();
@@ -630,8 +586,7 @@ public class GXDLMSReader {
 
             // Allocate buffer to same size as transmit buffer of the meter.
             // Size of replyBuff is payload and frame (Bop, EOP, crc).
-            int size = (int) ((((Number) dlms.getHdlcSettings().getMaxInfoTX())
-                    .intValue() & 0xFFFFFFFFL) + 40);
+            int size = (int) ((((Number) dlms.getHdlcSettings().getMaxInfoTX()).intValue() & 0xFFFFFFFFL) + 40);
             replyBuff = java.nio.ByteBuffer.allocate(size);
         }
         reply.clear();
@@ -647,34 +602,23 @@ public class GXDLMSReader {
             System.out.println(dlms.getProposedConformance());
             System.out.println("Negotiated conformance:");
             System.out.println(dlms.getNegotiatedConformance());
-            System.out.println(
-                    "MaxReceivePDUSize: " + dlms.getMaxReceivePDUSize());
+            System.out.println("MaxReceivePDUSize: " + dlms.getMaxReceivePDUSize());
             // Get challenge Is HLS authentication is used.
-            if (dlms.getAuthentication().getValue() > Authentication.LOW
-                    .getValue()) {
+            if (dlms.getAuthentication().getValue() > Authentication.LOW.getValue()) {
                 // Update public key certificate and private key.
                 if (dlms.getAuthentication() == Authentication.HIGH_ECDSA) {
                     Path path = Paths.get("Keys",
-                            "D" + GXDLMSTranslator.toHex(
-                                    dlms.getCiphering().getSystemTitle(), false)
-                                    + ".pem");
+                            "D" + GXDLMSTranslator.toHex(dlms.getCiphering().getSystemTitle(), false) + ".pem");
                     if (!Files.exists(path)) {
-                        throw new IllegalArgumentException(
-                                "Client Private key file is missing. "
-                                        + GXDLMSTranslator.toHex(
-                                                dlms.getCiphering()
-                                                        .getSystemTitle(),
-                                                false));
+                        throw new IllegalArgumentException("Client Private key file is missing. "
+                                + GXDLMSTranslator.toHex(dlms.getCiphering().getSystemTitle(), false));
                     }
                     GXPkcs8 key = GXPkcs8.load(path);
                     // Load public key of the server.
                     path = Paths.get("Certificates",
-                            "D" + GXDLMSTranslator
-                                    .toHex(dlms.getSourceSystemTitle(), false)
-                                    + ".pem");
+                            "D" + GXDLMSTranslator.toHex(dlms.getSourceSystemTitle(), false) + ".pem");
                     GXx509Certificate cert = GXx509Certificate.load(path);
-                    dlms.getCiphering().setSigningKeyPair(new KeyPair(
-                            cert.getPublicKey(), key.getPrivateKey()));
+                    dlms.getCiphering().setSigningKeyPair(new KeyPair(cert.getPublicKey(), key.getPrivateKey()));
                 }
                 for (byte[] it : dlms.getApplicationAssociationRequest()) {
                     readDLMSPacket(it, reply);
@@ -693,8 +637,7 @@ public class GXDLMSReader {
      * @throws Exception
      */
     public Object read(GXDLMSObject item, int attributeIndex) throws Exception {
-        byte[][] data =
-                dlms.read(item.getName(), item.getObjectType(), attributeIndex);
+        byte[][] data = dlms.read(item.getName(), item.getObjectType(), attributeIndex);
         GXReplyData reply = new GXReplyData();
         readDataBlock(data, reply);
         // Update data type on read.
@@ -707,8 +650,7 @@ public class GXDLMSReader {
     /*
      * Read list of attributes.
      */
-    public void readList(List<Entry<GXDLMSObject, Integer>> list)
-            throws Exception {
+    public void readList(List<Entry<GXDLMSObject, Integer>> list) throws Exception {
         if (!list.isEmpty()) {
             byte[][] data = dlms.readList(list);
             GXReplyData reply = new GXReplyData();
@@ -722,8 +664,7 @@ public class GXDLMSReader {
                 reply.clear();
             }
             if (values.size() != list.size()) {
-                throw new Exception(
-                        "Invalid reply. Read items count do not match.");
+                throw new Exception("Invalid reply. Read items count do not match.");
             }
             dlms.updateValues(list, values);
         }
@@ -736,8 +677,7 @@ public class GXDLMSReader {
      * @param attributeIndex
      * @throws Exception
      */
-    public void writeObject(GXDLMSObject item, int attributeIndex)
-            throws Exception {
+    public void writeObject(GXDLMSObject item, int attributeIndex) throws Exception {
         byte[][] data = dlms.write(item, attributeIndex);
         readDLMSPacket(data);
     }
@@ -745,11 +685,10 @@ public class GXDLMSReader {
     /*
      * Returns columns of profile Generic.
      */
-    public List<Entry<GXDLMSObject, GXDLMSCaptureObject>>
-            GetColumns(GXDLMSProfileGeneric pg) throws Exception {
+    public List<Entry<GXDLMSObject, GXDLMSCaptureObject>> GetColumns(GXDLMSProfileGeneric pg) throws Exception {
         Object entries = read(pg, 7);
-        System.out.println("Reading Profile Generic: " + pg.getLogicalName()
-                + " " + pg.getDescription() + " entries:" + entries.toString());
+        System.out.println("Reading Profile Generic: " + pg.getLogicalName() + " " + pg.getDescription() + " entries:"
+                + entries.toString());
         GXReplyData reply = new GXReplyData();
         byte[] data = dlms.read(pg.getName(), pg.getObjectType(), 3)[0];
         readDataBlock(data, reply);
@@ -766,8 +705,7 @@ public class GXDLMSReader {
      * @return
      * @throws Exception
      */
-    public Object[] readRowsByEntry(GXDLMSProfileGeneric pg, int index,
-            int count) throws Exception {
+    public Object[] readRowsByEntry(GXDLMSProfileGeneric pg, int index, int count) throws Exception {
         byte[][] data = dlms.readRowsByEntry(pg, index, count);
         GXReplyData reply = new GXReplyData();
         readDataBlock(data, reply);
@@ -784,8 +722,7 @@ public class GXDLMSReader {
      * @return
      * @throws Exception
      */
-    public Object[] readRowsByRange(final GXDLMSProfileGeneric pg,
-            final Date start, final Date end) throws Exception {
+    public Object[] readRowsByRange(final GXDLMSProfileGeneric pg, final Date start, final Date end) throws Exception {
         GXReplyData reply = new GXReplyData();
         byte[][] data = dlms.readRowsByRange(pg, start, end);
         readDataBlock(data, reply);
@@ -802,8 +739,8 @@ public class GXDLMSReader {
      * @return
      * @throws Exception
      */
-    public Object[] readRowsByRange(final GXDLMSProfileGeneric pg,
-            final GXDateTime start, final GXDateTime end) throws Exception {
+    public Object[] readRowsByRange(final GXDLMSProfileGeneric pg, final GXDateTime start, final GXDateTime end)
+            throws Exception {
         GXReplyData reply = new GXReplyData();
         byte[][] data = dlms.readRowsByRange(pg, start, end);
         readDataBlock(data, reply);
@@ -814,47 +751,37 @@ public class GXDLMSReader {
      * Read Scalers and units from the register objects.
      */
     void readScalerAndUnits() throws Exception {
-        GXDLMSObjectCollection objs = dlms.getObjects()
-                .getObjects(new ObjectType[] { ObjectType.REGISTER,
-                        ObjectType.DEMAND_REGISTER,
-                        ObjectType.EXTENDED_REGISTER });
+        GXDLMSObjectCollection objs = dlms.getObjects().getObjects(
+                new ObjectType[] { ObjectType.REGISTER, ObjectType.DEMAND_REGISTER, ObjectType.EXTENDED_REGISTER });
         try {
             if (dlms.getNegotiatedConformance().contains(Conformance.ACCESS)) {
                 List<GXDLMSAccessItem> list = new ArrayList<GXDLMSAccessItem>();
                 for (GXDLMSObject it : objs) {
                     if (it instanceof GXDLMSRegister) {
-                        list.add(new GXDLMSAccessItem(
-                                AccessServiceCommandType.GET, it, 3));
+                        list.add(new GXDLMSAccessItem(AccessServiceCommandType.GET, it, 3));
                     }
                     if (it instanceof GXDLMSDemandRegister) {
-                        list.add(new GXDLMSAccessItem(
-                                AccessServiceCommandType.GET, it, 4));
+                        list.add(new GXDLMSAccessItem(AccessServiceCommandType.GET, it, 4));
                     }
                 }
                 readByAccess(list);
-            } else if (dlms.getNegotiatedConformance()
-                    .contains(Conformance.MULTIPLE_REFERENCES)) {
-                List<Entry<GXDLMSObject, Integer>> list =
-                        new ArrayList<Entry<GXDLMSObject, Integer>>();
+            } else if (dlms.getNegotiatedConformance().contains(Conformance.MULTIPLE_REFERENCES)) {
+                List<Entry<GXDLMSObject, Integer>> list = new ArrayList<Entry<GXDLMSObject, Integer>>();
                 for (GXDLMSObject it : objs) {
                     if (it instanceof GXDLMSRegister) {
-                        list.add(new GXSimpleEntry<GXDLMSObject, Integer>(it,
-                                3));
+                        list.add(new GXSimpleEntry<GXDLMSObject, Integer>(it, 3));
                     }
                     if (it instanceof GXDLMSDemandRegister) {
-                        list.add(new GXSimpleEntry<GXDLMSObject, Integer>(it,
-                                4));
+                        list.add(new GXSimpleEntry<GXDLMSObject, Integer>(it, 4));
                     }
                 }
                 readList(list);
             }
         } catch (Exception e) {
             // Some meters are set multiple references, but don't support it.
-            dlms.getNegotiatedConformance()
-                    .remove(Conformance.MULTIPLE_REFERENCES);
+            dlms.getNegotiatedConformance().remove(Conformance.MULTIPLE_REFERENCES);
         }
-        if (!dlms.getNegotiatedConformance()
-                .contains(Conformance.MULTIPLE_REFERENCES)) {
+        if (!dlms.getNegotiatedConformance().contains(Conformance.MULTIPLE_REFERENCES)) {
             for (GXDLMSObject it : objs) {
                 try {
                     if (it instanceof GXDLMSRegister) {
@@ -873,11 +800,9 @@ public class GXDLMSReader {
      * Read profile generic columns from the meter.
      */
     void getProfileGenericColumns() {
-        GXDLMSObjectCollection profileGenerics =
-                dlms.getObjects().getObjects(ObjectType.PROFILE_GENERIC);
+        GXDLMSObjectCollection profileGenerics = dlms.getObjects().getObjects(ObjectType.PROFILE_GENERIC);
         for (GXDLMSObject it : profileGenerics) {
-            writeTrace("Profile Generic " + it.getName() + "Columns:",
-                    TraceLevel.INFO);
+            writeTrace("Profile Generic " + it.getName() + "Columns:", TraceLevel.INFO);
             GXDLMSProfileGeneric pg = (GXDLMSProfileGeneric) it;
             // Read columns.
             try {
@@ -885,8 +810,7 @@ public class GXDLMSReader {
                 if (Trace.ordinal() > TraceLevel.WARNING.ordinal()) {
                     boolean first = true;
                     StringBuilder sb = new StringBuilder();
-                    for (Entry<GXDLMSObject, GXDLMSCaptureObject> col : pg
-                            .getCaptureObjects()) {
+                    for (Entry<GXDLMSObject, GXDLMSCaptureObject> col : pg.getCaptureObjects()) {
                         if (!first) {
                             sb.append(" | ");
                         }
@@ -901,8 +825,7 @@ public class GXDLMSReader {
                     writeTrace(sb.toString(), TraceLevel.INFO);
                 }
             } catch (Exception ex) {
-                writeTrace("Err! Failed to read columns:" + ex.getMessage(),
-                        TraceLevel.ERROR);
+                writeTrace("Err! Failed to read columns:" + ex.getMessage(), TraceLevel.ERROR);
                 // Continue reading.
             }
         }
@@ -915,8 +838,7 @@ public class GXDLMSReader {
         for (GXDLMSObject it : dlms.getObjects()) {
             if (!(it instanceof IGXDLMSBase)) {
                 // If interface is not implemented.
-                System.out.println(
-                        "Unknown Interface: " + it.getObjectType().toString());
+                System.out.println("Unknown Interface: " + it.getObjectType().toString());
                 continue;
             }
 
@@ -926,9 +848,8 @@ public class GXDLMSReader {
                 // and this is only a example.
                 continue;
             }
-            writeTrace("-------- Reading " + it.getClass().getSimpleName() + " "
-                    + it.getName().toString() + " " + it.getDescription(),
-                    TraceLevel.INFO);
+            writeTrace("-------- Reading " + it.getClass().getSimpleName() + " " + it.getName().toString() + " "
+                    + it.getDescription(), TraceLevel.INFO);
             for (int pos : ((IGXDLMSBase) it).getAttributeIndexToRead(true)) {
                 try {
                     if (pos == 1) {
@@ -937,8 +858,7 @@ public class GXDLMSReader {
                     Object val = read(it, pos);
                     showValue(pos, val);
                 } catch (Exception ex) {
-                    writeTrace("Error! Index: " + pos + " " + ex.getMessage(),
-                            TraceLevel.ERROR);
+                    writeTrace("Error! Index: " + pos + " " + ex.getMessage(), TraceLevel.ERROR);
                     writeTrace(ex.toString(), TraceLevel.ERROR);
                     // Continue reading.
                 }
@@ -981,8 +901,7 @@ public class GXDLMSReader {
             }
             val = sb.toString();
         }
-        writeTrace("Index: " + pos + " Value: " + String.valueOf(val),
-                TraceLevel.INFO);
+        writeTrace("Index: " + pos + " Value: " + String.valueOf(val), TraceLevel.INFO);
     }
 
     /**
@@ -990,16 +909,13 @@ public class GXDLMSReader {
      */
     void getProfileGenerics() throws Exception {
         Object[] cells;
-        GXDLMSObjectCollection profileGenerics =
-                dlms.getObjects().getObjects(ObjectType.PROFILE_GENERIC);
+        GXDLMSObjectCollection profileGenerics = dlms.getObjects().getObjects(ObjectType.PROFILE_GENERIC);
         for (GXDLMSObject it : profileGenerics) {
-            writeTrace("-------- Reading " + it.getClass().getSimpleName() + " "
-                    + it.getName().toString() + " " + it.getDescription(),
-                    TraceLevel.INFO);
+            writeTrace("-------- Reading " + it.getClass().getSimpleName() + " " + it.getName().toString() + " "
+                    + it.getDescription(), TraceLevel.INFO);
             long entriesInUse = ((Number) read(it, 7)).longValue();
             long entries = ((Number) read(it, 8)).longValue();
-            writeTrace("Entries: " + String.valueOf(entriesInUse) + "/"
-                    + String.valueOf(entries), TraceLevel.INFO);
+            writeTrace("Entries: " + String.valueOf(entriesInUse) + "/" + String.valueOf(entries), TraceLevel.INFO);
             GXDLMSProfileGeneric pg = (GXDLMSProfileGeneric) it;
             // If there are no columns.
             if (entriesInUse == 0 || pg.getCaptureObjects().isEmpty()) {
@@ -1025,9 +941,7 @@ public class GXDLMSReader {
                     }
                 }
             } catch (Exception ex) {
-                writeTrace(
-                        "Error! Failed to read first row: " + ex.getMessage(),
-                        TraceLevel.ERROR);
+                writeTrace("Error! Failed to read first row: " + ex.getMessage(), TraceLevel.ERROR);
                 // Continue reading if device returns access denied error.
             }
             ///////////////////////////////////////////////////////////////////
@@ -1065,8 +979,7 @@ public class GXDLMSReader {
                     writeTrace(sb.toString(), TraceLevel.INFO);
                 }
             } catch (Exception ex) {
-                writeTrace("Error! Failed to read last day: " + ex.getMessage(),
-                        TraceLevel.ERROR);
+                writeTrace("Error! Failed to read last day: " + ex.getMessage(), TraceLevel.ERROR);
                 // Continue reading if device returns access denied error.
             }
         }
@@ -1085,8 +998,7 @@ public class GXDLMSReader {
         // Access rights must read differently when short Name referencing is
         // used.
         if (!dlms.getUseLogicalNameReferencing()) {
-            GXDLMSAssociationShortName sn = (GXDLMSAssociationShortName) dlms
-                    .getObjects().findBySN(0xFA00);
+            GXDLMSAssociationShortName sn = (GXDLMSAssociationShortName) dlms.getObjects().findBySN(0xFA00);
             if (sn != null && sn.getVersion() > 0) {
                 read(sn, 3);
             }
@@ -1101,12 +1013,10 @@ public class GXDLMSReader {
      * @throws Exception
      */
     public void keyTransfer(final String logicalName) throws Exception {
-        String address =
-                "https://certificates.gurux.fi/api/CertificateGenerator";
+        String address = "https://certificates.gurux.fi/api/CertificateGenerator";
         try {
             if (dlms.getAuthentication() == Authentication.NONE) {
-                throw new IllegalArgumentException(
-                        "High authentication must be used to change the certificate keys.");
+                throw new IllegalArgumentException("High authentication must be used to change the certificate keys.");
             }
             GXx509Certificate cert;
             GXPkcs10 pkc10;
@@ -1122,11 +1032,7 @@ public class GXDLMSReader {
             }
             // Read client private key if exists or create private key for the
             // client.
-            path = Paths
-                    .get("Keys",
-                            GXDLMSTranslator.toHex(
-                                    dlms.getCiphering().getSystemTitle(), false)
-                                    + ".pem");
+            path = Paths.get("Keys", GXDLMSTranslator.toHex(dlms.getCiphering().getSystemTitle(), false) + ".pem");
             if (Files.exists(path)) {
                 GXPkcs8.load(path);
             } else {
@@ -1135,16 +1041,12 @@ public class GXDLMSReader {
                 GXPkcs8 key = new GXPkcs8(kp);
                 // Generate certificate request and ask new x509Certificate.
                 pkc10 = GXPkcs10.createCertificateSigningRequest(kp,
-                        GXAsn1Converter.systemTitleToSubject(
-                                dlms.getCiphering().getSystemTitle()));
+                        GXAsn1Converter.systemTitleToSubject(dlms.getCiphering().getSystemTitle()));
                 // Note! There is a limit how many request you can do in a day.
-                cert = GXPkcs10.getCertificate(address, pkc10,
-                        KeyUsage.DIGITAL_SIGNATURE);
+                cert = GXPkcs10.getCertificate(address, pkc10, KeyUsage.DIGITAL_SIGNATURE);
                 // Save client certificate.
                 cert.save(Paths.get("Certificates",
-                        GXDLMSTranslator.toHex(
-                                dlms.getCiphering().getSystemTitle(), false)
-                                + ".pem"));
+                        GXDLMSTranslator.toHex(dlms.getCiphering().getSystemTitle(), false) + ".pem"));
                 // Private key is saved after a new certificate is received as
                 // saved.
                 key.save(path);
@@ -1157,30 +1059,24 @@ public class GXDLMSReader {
             read(ss, 6);
             GXReplyData reply = new GXReplyData();
             // Check is server key pair generated and generate it if not exists.
-            GXDLMSCertificateInfo server = ss.getCertificates().find(
-                    CertificateEntity.SERVER, CertificateType.DIGITAL_SIGNATURE,
-                    ss.getServerSystemTitle());
+            GXDLMSCertificateInfo server = ss.getCertificates().find(CertificateEntity.SERVER,
+                    CertificateType.DIGITAL_SIGNATURE, ss.getServerSystemTitle());
             if (server == null) {
                 // Generate public/private key for authentication.
-                if (!readDataBlock(ss.generateKeyPair(dlms,
-                        CertificateType.DIGITAL_SIGNATURE), reply)) {
+                if (!readDataBlock(ss.generateKeyPair(dlms, CertificateType.DIGITAL_SIGNATURE), reply)) {
                     throw new GXDLMSException(reply.getError());
                 }
                 reply.clear();
                 // Generate certification request.
-                if (!readDataBlock(ss.generateCertificate(dlms,
-                        CertificateType.DIGITAL_SIGNATURE), reply)) {
+                if (!readDataBlock(ss.generateCertificate(dlms, CertificateType.DIGITAL_SIGNATURE), reply)) {
                     throw new GXDLMSException(reply.getError());
                 }
                 // Generate server certification.
                 pkc10 = new GXPkcs10((byte[]) reply.getValue());
                 // Note! There is a limit how many request you can do in a day.
-                cert = GXPkcs10.getCertificate(address, pkc10,
-                        KeyUsage.DIGITAL_SIGNATURE);
+                cert = GXPkcs10.getCertificate(address, pkc10, KeyUsage.DIGITAL_SIGNATURE);
                 // Save server certificate.
-                cert.save(Paths.get("Certificates",
-                        GXDLMSTranslator.toHex(ss.getServerSystemTitle(), false)
-                                + ".pem"));
+                cert.save(Paths.get("Certificates", GXDLMSTranslator.toHex(ss.getServerSystemTitle(), false) + ".pem"));
                 // Import server certification.
                 reply.clear();
                 if (!readDataBlock(ss.importCertificate(dlms, cert), reply)) {
@@ -1189,33 +1085,25 @@ public class GXDLMSReader {
                 reply.clear();
             }
             // Export server certification and save it.
-            if (!readDataBlock(ss.exportCertificateByEntity(dlms,
-                    CertificateEntity.SERVER, CertificateType.DIGITAL_SIGNATURE,
-                    ss.getServerSystemTitle()), reply)) {
+            if (!readDataBlock(ss.exportCertificateByEntity(dlms, CertificateEntity.SERVER,
+                    CertificateType.DIGITAL_SIGNATURE, ss.getServerSystemTitle()), reply)) {
                 throw new GXDLMSException(reply.getError());
             }
             // Save certificate.
             cert = new GXx509Certificate((byte[]) reply.getValue());
-            path = Paths.get("Certificates",
-                    GXDLMSTranslator.toHex(ss.getServerSystemTitle(), false)
-                            + ".pem");
+            path = Paths.get("Certificates", GXDLMSTranslator.toHex(ss.getServerSystemTitle(), false) + ".pem");
             cert.save(path);
-            if (!cert.getSubject().contains(
-                    GXDLMSTranslator.toHex(ss.getServerSystemTitle(), false))) {
-                throw new IllegalArgumentException(
-                        "Invalid meter certificate." + cert.getSubject());
+            if (!cert.getSubject().contains(GXDLMSTranslator.toHex(ss.getServerSystemTitle(), false))) {
+                throw new IllegalArgumentException("Invalid meter certificate." + cert.getSubject());
             }
 
             reply.clear();
             // Check is client certificate already imported to the server.
-            GXDLMSCertificateInfo client = ss.getCertificates().find(
-                    CertificateEntity.CLIENT, CertificateType.DIGITAL_SIGNATURE,
-                    dlms.getCiphering().getSystemTitle());
+            GXDLMSCertificateInfo client = ss.getCertificates().find(CertificateEntity.CLIENT,
+                    CertificateType.DIGITAL_SIGNATURE, dlms.getCiphering().getSystemTitle());
             if (client == null) {
                 path = Paths.get("Certificates",
-                        GXDLMSTranslator.toHex(
-                                dlms.getCiphering().getSystemTitle(), false)
-                                + ".pem");
+                        GXDLMSTranslator.toHex(dlms.getCiphering().getSystemTitle(), false) + ".pem");
                 cert = GXx509Certificate.load(path);
                 // import client certification to the server.
                 if (!readDataBlock(ss.importCertificate(dlms, cert), reply)) {
@@ -1224,24 +1112,20 @@ public class GXDLMSReader {
                 reply.clear();
             }
             // Export client certification and save it.
-            if (!readDataBlock(ss.exportCertificateByEntity(dlms,
-                    CertificateEntity.CLIENT, CertificateType.DIGITAL_SIGNATURE,
-                    dlms.getCiphering().getSystemTitle()), reply)) {
+            if (!readDataBlock(ss.exportCertificateByEntity(dlms, CertificateEntity.CLIENT,
+                    CertificateType.DIGITAL_SIGNATURE, dlms.getCiphering().getSystemTitle()), reply)) {
                 throw new GXDLMSException(reply.getError());
             }
             cert = new GXx509Certificate((byte[]) reply.getValue());
-            if (!cert.getSubject().contains(GXDLMSTranslator
-                    .toHex(dlms.getCiphering().getSystemTitle(), false))) {
-                throw new IllegalArgumentException(
-                        "Invalid client certificate." + cert.getSubject());
+            if (!cert.getSubject().contains(GXDLMSTranslator.toHex(dlms.getCiphering().getSystemTitle(), false))) {
+                throw new IllegalArgumentException("Invalid client certificate." + cert.getSubject());
             }
         } finally {
             close();
         }
     }
 
-    public void generateCertificates(final String logicalName)
-            throws Exception {
+    public void generateCertificates(final String logicalName) throws Exception {
         // Client private keys are saved to this directory.
         // Client might be different system title for each meter.
         File dir = new File("Keys");
@@ -1262,15 +1146,11 @@ public class GXDLMSReader {
             dir.mkdirs();
         }
 
-        String address =
-                "https://certificates.gurux.fi/api/CertificateGenerator";
-        List<GXCertificateRequest> certifications =
-                new ArrayList<GXCertificateRequest>();
+        String address = "https://certificates.gurux.fi/api/CertificateGenerator";
+        List<GXCertificateRequest> certifications = new ArrayList<GXCertificateRequest>();
         GXx509Certificate[] certs;
-        if (dlms.getAuthentication().getValue() < Authentication.LOW
-                .getValue()) {
-            throw new Exception(
-                    "High authentication must be used to change the certificate keys.");
+        if (dlms.getAuthentication().getValue() < Authentication.LOW.getValue()) {
+            throw new Exception("High authentication must be used to change the certificate keys.");
         }
 
         GXReplyData reply = new GXReplyData();
@@ -1281,76 +1161,60 @@ public class GXDLMSReader {
         // Read server system title.
         read(ss, 5);
         // Get client subject.
-        String subject = GXAsn1Converter
-                .systemTitleToSubject(dlms.getCiphering().getSystemTitle());
+        String subject = GXAsn1Converter.systemTitleToSubject(dlms.getCiphering().getSystemTitle());
         // Generate new digital signature for the client. In this example P-256
         // keys are used.
         KeyPair kp = GXEcdsa.generateKeyPair(Ecc.P256);
         // Save private key in PKCS #8 format.
         GXPkcs8 key = new GXPkcs8(kp);
-        key.save(GXAsn1Converter.getFilePath(Ecc.P256,
-                CertificateType.DIGITAL_SIGNATURE,
+        key.save(GXAsn1Converter.getFilePath(Ecc.P256, CertificateType.DIGITAL_SIGNATURE,
                 dlms.getCiphering().getSystemTitle()));
         // Generate x509 certificates.
         GXPkcs10 pkc10 = GXPkcs10.createCertificateSigningRequest(kp, subject);
         // All certificates are generated with one request.
-        certifications.add(new GXCertificateRequest(
-                CertificateType.DIGITAL_SIGNATURE, pkc10));
+        certifications.add(new GXCertificateRequest(CertificateType.DIGITAL_SIGNATURE, pkc10));
 
         // Generate new key agreement for the client. In this example P-256 keys
         // are used.
         kp = GXEcdsa.generateKeyPair(Ecc.P256);
         // Save private key in PKCS #8 format.
         key = new GXPkcs8(kp);
-        key.save(GXAsn1Converter.getFilePath(Ecc.P256,
-                CertificateType.KEY_AGREEMENT,
+        key.save(GXAsn1Converter.getFilePath(Ecc.P256, CertificateType.KEY_AGREEMENT,
                 dlms.getCiphering().getSystemTitle()));
         // Generate x509 certificates.
         pkc10 = GXPkcs10.createCertificateSigningRequest(kp, subject);
         // All certificates are generated with one request.
-        certifications.add(
-                new GXCertificateRequest(CertificateType.KEY_AGREEMENT, pkc10));
+        certifications.add(new GXCertificateRequest(CertificateType.KEY_AGREEMENT, pkc10));
 
         // Generate public/private key for digital signature.
-        if (!readDataBlock(
-                ss.generateKeyPair(dlms, CertificateType.DIGITAL_SIGNATURE),
-                reply)) {
+        if (!readDataBlock(ss.generateKeyPair(dlms, CertificateType.DIGITAL_SIGNATURE), reply)) {
             throw new GXDLMSException(reply.getError());
         }
         reply.clear();
         // Generate public/private key for key agreement.
-        if (!readDataBlock(
-                ss.generateKeyPair(dlms, CertificateType.KEY_AGREEMENT),
-                reply)) {
+        if (!readDataBlock(ss.generateKeyPair(dlms, CertificateType.KEY_AGREEMENT), reply)) {
             throw new GXDLMSException(reply.getError());
         }
         reply.clear();
         // Generate certification request.
-        if (!readDataBlock(
-                ss.generateCertificate(dlms, CertificateType.DIGITAL_SIGNATURE),
-                reply)) {
+        if (!readDataBlock(ss.generateCertificate(dlms, CertificateType.DIGITAL_SIGNATURE), reply)) {
             throw new GXDLMSException(reply.getError());
         }
         // Generate server certification.
         pkc10 = new GXPkcs10((byte[]) reply.getValue());
-        subject =
-                GXAsn1Converter.systemTitleToSubject(ss.getServerSystemTitle());
+        subject = GXAsn1Converter.systemTitleToSubject(ss.getServerSystemTitle());
         // Validate subject.
         if (!pkc10.getSubject().contains(subject)) {
             throw new Exception(String.format(
                     "Server system title '{0}' is not the same as in the generated certificate request '{1}'.",
                     GXDLMSTranslator.toHex(ss.getServerSystemTitle()),
-                    GXAsn1Converter
-                            .hexSystemTitleFromSubject(pkc10.getSubject())));
+                    GXAsn1Converter.hexSystemTitleFromSubject(pkc10.getSubject())));
         }
-        certifications.add(new GXCertificateRequest(
-                CertificateType.DIGITAL_SIGNATURE, pkc10));
+        certifications.add(new GXCertificateRequest(CertificateType.DIGITAL_SIGNATURE, pkc10));
         reply.clear();
 
         // Generate certification request for key agreement.
-        if (!readDataBlock(
-                ss.generateCertificate(dlms, CertificateType.KEY_AGREEMENT),
-                reply)) {
+        if (!readDataBlock(ss.generateCertificate(dlms, CertificateType.KEY_AGREEMENT), reply)) {
             throw new GXDLMSException(reply.getError());
         }
         // Generate server certification.
@@ -1360,11 +1224,9 @@ public class GXDLMSReader {
             throw new Exception(String.format(
                     "Server system title '{0}' is not the same as in the generated certificate request '{1}'.",
                     GXDLMSTranslator.toHex(ss.getServerSystemTitle()),
-                    GXAsn1Converter
-                            .hexSystemTitleFromSubject(pkc10.getSubject())));
+                    GXAsn1Converter.hexSystemTitleFromSubject(pkc10.getSubject())));
         }
-        certifications.add(
-                new GXCertificateRequest(CertificateType.KEY_AGREEMENT, pkc10));
+        certifications.add(new GXCertificateRequest(CertificateType.KEY_AGREEMENT, pkc10));
         reply.clear();
 
         // Note! There is a limit how many request you can do in a day.
@@ -1385,46 +1247,37 @@ public class GXDLMSReader {
         for (GXx509Certificate it : certs) {
             CertificateEntity entity;
             byte[] st;
-            if (it.getSubject().contains(GXAsn1Converter
-                    .systemTitleToSubject(ss.getServerSystemTitle()))) {
+            if (it.getSubject().contains(GXAsn1Converter.systemTitleToSubject(ss.getServerSystemTitle()))) {
                 st = ss.getServerSystemTitle();
                 entity = CertificateEntity.SERVER;
             } else if (it.getSubject()
-                    .contains(GXAsn1Converter.systemTitleToSubject(
-                            dlms.getCiphering().getSystemTitle()))) {
+                    .contains(GXAsn1Converter.systemTitleToSubject(dlms.getCiphering().getSystemTitle()))) {
                 st = dlms.getCiphering().getSystemTitle();
                 entity = CertificateEntity.CLIENT;
             } else {
                 // This is another certificate.
                 continue;
             }
-            if (!readDataBlock(
-                    ss.exportCertificateByEntity(dlms, entity, GXDLMSConverter
-                            .keyUsageToCertificateType(it.getKeyUsage()), st),
-                    reply)) {
+            if (!readDataBlock(ss.exportCertificateByEntity(dlms, entity,
+                    GXDLMSConverter.keyUsageToCertificateType(it.getKeyUsage()), st), reply)) {
                 throw new GXDLMSException(reply.getError());
             }
             // Verify certificate.
-            GXx509Certificate exported =
-                    new GXx509Certificate((byte[]) reply.getValue());
+            GXx509Certificate exported = new GXx509Certificate((byte[]) reply.getValue());
             if (!exported.getSerialNumber().equals(it.getSerialNumber())) {
-                throw new IllegalArgumentException(
-                        "Invalid server certificate.");
+                throw new IllegalArgumentException("Invalid server certificate.");
             }
             reply.clear();
         }
         // Export server certificates using serial number and verify it.
         for (GXx509Certificate it : certs) {
-            if (!readDataBlock(ss.exportCertificateBySerial(dlms,
-                    it.getSerialNumber(), it.getIssuerRaw()), reply)) {
+            if (!readDataBlock(ss.exportCertificateBySerial(dlms, it.getSerialNumber(), it.getIssuerRaw()), reply)) {
                 throw new GXDLMSException(reply.getError());
             }
             // Verify certificate.
-            GXx509Certificate exported =
-                    new GXx509Certificate((byte[]) reply.getValue());
+            GXx509Certificate exported = new GXx509Certificate((byte[]) reply.getValue());
             if (!exported.getSerialNumber().equals(it.getSerialNumber())) {
-                throw new IllegalArgumentException(
-                        "Invalid server certificate.");
+                throw new IllegalArgumentException("Invalid server certificate.");
             }
             reply.clear();
         }
@@ -1437,8 +1290,7 @@ public class GXDLMSReader {
      *            Logical name of the security setup object.
      * @throws Exception
      */
-    public void exportMeterCertificates(final String logicalName)
-            throws Exception {
+    public void exportMeterCertificates(final String logicalName) throws Exception {
         try {
             initializeConnection();
             GXDLMSSecuritySetup ss = new GXDLMSSecuritySetup(logicalName);
@@ -1472,15 +1324,13 @@ public class GXDLMSReader {
             for (GXDLMSCertificateInfo it : ss.getCertificates()) {
                 reply.clear();
                 // Export certification and verify it.
-                if (!readDataBlock(ss.exportCertificateBySerial(dlms,
-                        it.getSerialNumber(), it.getIssuerRaw()), reply)) {
+                if (!readDataBlock(ss.exportCertificateBySerial(dlms, it.getSerialNumber(), it.getIssuerRaw()),
+                        reply)) {
                     throw new GXDLMSException(reply.getError());
                 }
-                GXx509Certificate cert =
-                        new GXx509Certificate((byte[]) reply.getValue());
+                GXx509Certificate cert = new GXx509Certificate((byte[]) reply.getValue());
                 Path path = GXAsn1Converter.getFilePath(Ecc.P256, it.getType(),
-                        GXAsn1Converter
-                                .systemTitleFromSubject(it.getSubject()));
+                        GXAsn1Converter.systemTitleFromSubject(it.getSubject()));
                 cert.save(path);
             }
         } finally {
@@ -1497,8 +1347,7 @@ public class GXDLMSReader {
         boolean read = false;
         if (outputFile != null && new File(outputFile).exists()) {
             try {
-                GXDLMSObjectCollection list =
-                        GXDLMSObjectCollection.load(outputFile);
+                GXDLMSObjectCollection list = GXDLMSObjectCollection.load(outputFile);
                 dlms.getObjects().addAll(list);
                 GXDLMSConverter c = new GXDLMSConverter(dlms.getStandard());
                 c.updateOBISCodeInformation(dlms.getObjects());
@@ -1530,8 +1379,7 @@ public class GXDLMSReader {
     /*
      * Read list using access service.
      */
-    public void readByAccess(final List<GXDLMSAccessItem> list)
-            throws Exception {
+    public void readByAccess(final List<GXDLMSAccessItem> list) throws Exception {
         if (!list.isEmpty()) {
             byte[][] data = dlms.accessRequest(null, list);
             GXReplyData reply = new GXReplyData();

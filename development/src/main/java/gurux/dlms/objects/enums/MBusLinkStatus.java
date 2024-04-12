@@ -32,43 +32,46 @@
 // Full text may be retrieved at http://www.gnu.org/licenses/gpl-2.0.txt
 //---------------------------------------------------------------------------
 
-package gurux.dlms.objects;
+package gurux.dlms.objects.enums;
 
-import java.util.List;
-
-final class GXDLMSObjectHelpers {
+/**
+ * M-Bus link status.
+ */
+public enum MBusLinkStatus {
+    /**
+     * Data never received.
+     */
+    NONE,
+    /**
+     * Normal operation.
+     */
+    NORMAL,
+    /**
+     * Link temporarily interrupted.
+     */
+    TEMPORARILY_INTERRUPTED,
+    /**
+     * Link permanently interrupted.
+     */
+    PERMANENTLY_INTERRUPTED;
 
     /**
-     * Constructor.
+     * Get integer value for enumerator.
+     * 
+     * @return Enumerator integer value.
      */
-    private GXDLMSObjectHelpers() {
-
+    public int getValue() {
+        return this.ordinal();
     }
 
-    public static short[] toShortArray(final List<Short> list) {
-        short[] ret = new short[list.size()];
-        int i = -1;
-        for (Short e : list) {
-            ret[++i] = e.shortValue();
-        }
-        return ret;
-    }
-
-    public static int[] toIntArray(final List<Integer> list) {
-        int[] ret = new int[list.size()];
-        int i = -1;
-        for (Integer e : list) {
-            ret[++i] = e.intValue();
-        }
-        return ret;
-    }
-
-    public static long[] toLongArray(final List<Long> list) {
-        long[] ret = new long[list.size()];
-        int i = -1;
-        for (Long e : list) {
-            ret[++i] = e.longValue();
-        }
-        return ret;
+    /**
+     * Returns enumerator value from an integer value.
+     * 
+     * @param value
+     *            Integer value.
+     * @return Enumeration value.
+     */
+    public static MBusLinkStatus forValue(int value) {
+        return values()[value];
     }
 }

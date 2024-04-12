@@ -90,12 +90,15 @@ import gurux.dlms.objects.GXDLMSAccount;
 import gurux.dlms.objects.GXDLMSActionSchedule;
 import gurux.dlms.objects.GXDLMSActivityCalendar;
 import gurux.dlms.objects.GXDLMSArbitrator;
+import gurux.dlms.objects.GXDLMSArrayManager;
 import gurux.dlms.objects.GXDLMSAssociationLogicalName;
 import gurux.dlms.objects.GXDLMSAssociationShortName;
 import gurux.dlms.objects.GXDLMSAutoAnswer;
 import gurux.dlms.objects.GXDLMSAutoConnect;
 import gurux.dlms.objects.GXDLMSCharge;
 import gurux.dlms.objects.GXDLMSClock;
+import gurux.dlms.objects.GXDLMSCoAPDiagnostic;
+import gurux.dlms.objects.GXDLMSCoAPSetup;
 import gurux.dlms.objects.GXDLMSCommunicationPortProtection;
 import gurux.dlms.objects.GXDLMSCompactData;
 import gurux.dlms.objects.GXDLMSCredit;
@@ -103,6 +106,10 @@ import gurux.dlms.objects.GXDLMSData;
 import gurux.dlms.objects.GXDLMSDemandRegister;
 import gurux.dlms.objects.GXDLMSDisconnectControl;
 import gurux.dlms.objects.GXDLMSExtendedRegister;
+import gurux.dlms.objects.GXDLMSFunctionControl;
+import gurux.dlms.objects.GXDLMSG3Plc6LoWPan;
+import gurux.dlms.objects.GXDLMSG3PlcMacLayerCounters;
+import gurux.dlms.objects.GXDLMSG3PlcMacSetup;
 import gurux.dlms.objects.GXDLMSGSMDiagnostic;
 import gurux.dlms.objects.GXDLMSGprsSetup;
 import gurux.dlms.objects.GXDLMSHdlcSetup;
@@ -116,8 +123,11 @@ import gurux.dlms.objects.GXDLMSIp4Setup;
 import gurux.dlms.objects.GXDLMSIp6Setup;
 import gurux.dlms.objects.GXDLMSLimiter;
 import gurux.dlms.objects.GXDLMSLlcSscsSetup;
+import gurux.dlms.objects.GXDLMSLteMonitoring;
 import gurux.dlms.objects.GXDLMSMBusClient;
+import gurux.dlms.objects.GXDLMSMBusDiagnostic;
 import gurux.dlms.objects.GXDLMSMBusMasterPortSetup;
+import gurux.dlms.objects.GXDLMSMBusPortSetup;
 import gurux.dlms.objects.GXDLMSMBusSlavePortSetup;
 import gurux.dlms.objects.GXDLMSMacAddressSetup;
 import gurux.dlms.objects.GXDLMSModemConfiguration;
@@ -358,6 +368,26 @@ abstract class GXDLMS {
             return new GXDLMSNtpSetup();
         case COMMUNICATION_PORT_PROTECTION:
             return new GXDLMSCommunicationPortProtection();
+        case G3_PLC_MAC_LAYER_COUNTERS:
+            return new GXDLMSG3PlcMacLayerCounters();
+        case G3_PLC6_LO_WPAN:
+            return new GXDLMSG3Plc6LoWPan();
+        case G3_PLC_MAC_SETUP:
+            return new GXDLMSG3PlcMacSetup();
+        case ARRAY_MANAGER:
+            return new GXDLMSArrayManager();
+        case LTE_MONITORING:
+            return new GXDLMSLteMonitoring();
+        case FUNCTION_CONTROL:
+            return new GXDLMSFunctionControl();
+        case COAP_SETUP:
+            return new GXDLMSCoAPSetup();
+        case COAP_DIAGNOSTIC:
+            return new GXDLMSCoAPDiagnostic();
+        case MBUS_PORT_SETUP:
+            return new GXDLMSMBusPortSetup();
+        case MBUS_DIAGNOSTIC:
+            return new GXDLMSMBusDiagnostic();
         default:
             return new GXDLMSObject();
         }

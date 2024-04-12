@@ -32,42 +32,45 @@
 // Full text may be retrieved at http://www.gnu.org/licenses/gpl-2.0.txt
 //---------------------------------------------------------------------------
 
-package gurux.dlms.objects;
+package gurux.dlms.objects.enums;
 
-import java.util.List;
-
-final class GXDLMSObjectHelpers {
+/**
+ * Lte coverage enhancement.
+ */
+public enum LteCoverageEnhancement {
+    /**
+     * CE Mode A in LTE Cat M1 and CE Level 0 in NB-Iot.
+     */
+    LEVEL0,
+    /**
+     * CE Mode B in LTE Cat M1 and CE Level 1 in NB-Iot.
+     */
+    LEVEL1,
+    /**
+     * CE Level 2 in NB-Iot.
+     */
+    LEVEL2;
 
     /**
-     * Constructor.
+     * Get integer value for enumerator.
+     * 
+     * @return Enumerator integer value.
      */
-    private GXDLMSObjectHelpers() {
-
+    public int getValue() {
+        return ordinal();
     }
 
-    public static short[] toShortArray(final List<Short> list) {
-        short[] ret = new short[list.size()];
-        int i = -1;
-        for (Short e : list) {
-            ret[++i] = e.shortValue();
-        }
-        return ret;
-    }
-
-    public static int[] toIntArray(final List<Integer> list) {
-        int[] ret = new int[list.size()];
-        int i = -1;
-        for (Integer e : list) {
-            ret[++i] = e.intValue();
-        }
-        return ret;
-    }
-
-    public static long[] toLongArray(final List<Long> list) {
-        long[] ret = new long[list.size()];
-        int i = -1;
-        for (Long e : list) {
-            ret[++i] = e.longValue();
+    /**
+     * Returns enumerator value from an integer value.
+     * 
+     * @param value
+     *            Integer value.
+     * @return Enumeration value.
+     */
+    public static LteCoverageEnhancement forValue(final int value) {
+        LteCoverageEnhancement ret = LteCoverageEnhancement.values()[value];
+        if (ret == null) {
+            throw new IllegalArgumentException("Invalid LTE coverage enhancement enum value.");
         }
         return ret;
     }
