@@ -36,6 +36,9 @@ package gurux.dlms.objects;
 
 import gurux.dlms.objects.enums.ProtectionType;
 
+/**
+ * Push protection parameters.
+ */
 public class GXPushProtectionParameters {
     /**
      * Protection type.

@@ -34,36 +34,32 @@
 
 package gurux.dlms.objects.enums;
 
-import java.util.HashMap;
-/** 
-Enumerated data protection types.
-*/
-public enum ProtectionType
-{
-   /** 
-    Authentication.
-   */
-   AUTHENTICATION,
-   /** 
-   Encryption
-   */
-   ENCRYPTION,
-   /** 
-    Authentication and encryption. 
-   */
-   AUTHENTICATION_ENCRYPTION,
-   /** 
-    Digital signature
-   */
-   DIGITAL_SIGNATURE;
+/**
+ * Enumerated data protection types.
+ */
+public enum ProtectionType {
+    /**
+     * Authentication.
+     */
+    AUTHENTICATION,
+    /**
+     * Encryption
+     */
+    ENCRYPTION,
+    /**
+     * Authentication and encryption.
+     */
+    AUTHENTICATION_ENCRYPTION,
+    /**
+     * Digital signature
+     */
+    DIGITAL_SIGNATURE;
 
-   public int getValue()
-   {
-       return this.ordinal();
-   }
+    public int getValue() {
+        return this.ordinal();
+    }
 
-   public static ProtectionType forValue(int value)
-   {
-       return values()[value];
-   }
+    public static ProtectionType forValue(int value) {
+        return values()[value];
+    }
 }

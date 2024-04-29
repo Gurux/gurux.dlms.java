@@ -34,32 +34,28 @@
 
 package gurux.dlms.objects.enums;
 
-import java.util.HashMap;
 /**
- *  Enumerates data protection key types.
+ * Enumerates data protection key types.
  */
-public enum DataProtectionKeyType
-{
-    /** 
-     Identified key.
-    */
+public enum DataProtectionKeyType {
+    /**
+     * Identified key.
+     */
     IDENTIFIED,
-    /** 
-     Wrapped key.
-    */
+    /**
+     * Wrapped key.
+     */
     WRAPPED,
-    /** 
-     Agreed.
-    */
+    /**
+     * Agreed.
+     */
     AGREED;
 
-    public int getValue()
-    {
+    public int getValue() {
         return this.ordinal();
     }
 
-    public static DataProtectionKeyType forValue(int value)
-    {
+    public static DataProtectionKeyType forValue(int value) {
         return values()[value];
     }
 }

@@ -3034,8 +3034,7 @@ abstract class GXDLMS {
                 } else if (type == CoAPOptionType.BLOCK1.getValue()) {
                     int tmp = getCoAPValueAsInteger(buff, optionLen).intValue();
                     if ((tmp & 0x8) != 0) {
-                        moreData |= RequestTypes.FRAME.getValue();
-                        ;
+                        moreData |= RequestTypes.DATABLOCK.getValue();
                     }
                     if (data != null) {
                         settings.getCoap().setBlockNumber((tmp >> 8));
@@ -3048,7 +3047,7 @@ abstract class GXDLMS {
                     int tmp = getCoAPValueAsInteger(buff, optionLen).intValue();
                     byte blockNumber = (byte) (tmp >> 4);
                     if ((tmp & 0x8) != 0) {
-                        moreData = RequestTypes.FRAME.getValue();
+                        moreData = RequestTypes.DATABLOCK.getValue();
                     }
                     frameSize = (int) Math.pow(2, (tmp & 0x7) + 4);
                     if (data != null) {
@@ -3068,15 +3067,15 @@ abstract class GXDLMS {
                         }
                         if (coapType == CoAPType.ACKNOWLEDGEMENT.getValue()) {
                             if (moreData == 0) {
-                                if (data.getMoreData().contains(RequestTypes.FRAME)) {
-                                    data.getMoreData().remove(RequestTypes.FRAME);
+                                if (data.getMoreData().contains(RequestTypes.DATABLOCK)) {
+                                    data.getMoreData().remove(RequestTypes.DATABLOCK);
                                 }
                                 // Last block.
                                 data.setPacketLength(buff.size());
                                 data.setComplete(true);
                                 settings.getCoap().setBlockNumber(0);
                             } else {
-                                data.getMoreData().add(RequestTypes.FRAME);
+                                data.getMoreData().add(RequestTypes.DATABLOCK);
                             }
                         }
                     }
@@ -5308,7 +5307,7 @@ abstract class GXDLMS {
         }
         try {
             if (settings.getInterfaceType() == InterfaceType.COAP) {
-                if (!target.getMoreData().contains(RequestTypes.FRAME)) {
+                if (!target.getMoreData().contains(RequestTypes.DATABLOCK)) {
                     // Only full PDUs are handled with CoAP.
                     target.getData().position(0);
                     getPdu(settings, target);

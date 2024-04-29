@@ -59,34 +59,62 @@ public class GXDLMSDataProtectionKey {
      */
     private GXDLMSDataProtectionAgreedKey agreedKey = new GXDLMSDataProtectionAgreedKey();
 
+    /**
+     * @return Data protectionKey type.
+     */
     public final DataProtectionKeyType getDataProtectionKeyType() {
         return dataProtectionKeyType;
     }
 
+    /**
+     * @param value
+     *            Data protectionKey type.
+     */
     public final void setDataProtectionKeyType(DataProtectionKeyType value) {
         dataProtectionKeyType = value;
     }
 
+    /**
+     * @return Identified key parameters.
+     */
     public final GXDLMSDataProtectionIdentifiedKey getIdentifiedKey() {
         return identifiedKey;
     }
 
+    /**
+     * @param value
+     *            Identified key parameters.
+     */
     public final void setIdentifiedKey(GXDLMSDataProtectionIdentifiedKey value) {
         identifiedKey = value;
     }
 
+    /**
+     * @return Wrapped key parameters.
+     */
     public final GXDLMSDataProtectionWrappeddKey getWrappedKey() {
         return wrappedKey;
     }
 
+    /**
+     * @param value
+     *            Wrapped key parameters.
+     */
     public final void setWrappedKey(final GXDLMSDataProtectionWrappeddKey value) {
         wrappedKey = value;
     }
 
+    /**
+     * @return Agreed key parameters.
+     */
     public final GXDLMSDataProtectionAgreedKey getAgreedKey() {
         return agreedKey;
     }
 
+    /**
+     * @param value
+     *            Agreed key parameters.
+     */
     public final void setAgreedKey(final GXDLMSDataProtectionAgreedKey value) {
         agreedKey = value;
     }
