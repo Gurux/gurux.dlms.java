@@ -157,10 +157,6 @@ public class GXDLMSClient {
      */
     protected final GXDLMSSettings settings;
     private GXObisCodeCollection obisCodes;
-    /**
-     * Is pre-established connection used.
-     */
-    private boolean preEstablished;
 
     private static final Logger LOGGER = Logger.getLogger(GXDLMSClient.class.getName());
 
@@ -894,7 +890,7 @@ public class GXDLMSClient {
      */
     public final byte[][] aarqRequest() throws InvalidKeyException, NoSuchAlgorithmException, NoSuchPaddingException,
             InvalidAlgorithmParameterException, IllegalBlockSizeException, BadPaddingException, SignatureException {
-        if (preEstablished) {
+        if (isPreEstablishedConnection()) {
             // AARQ is not generate for pre-established connections.
             return new byte[][] {};
         }
@@ -1272,7 +1268,7 @@ public class GXDLMSClient {
     public final byte[] disconnectRequest(final boolean force)
             throws InvalidKeyException, NoSuchAlgorithmException, NoSuchPaddingException,
             InvalidAlgorithmParameterException, IllegalBlockSizeException, BadPaddingException, SignatureException {
-        if (preEstablished) {
+        if (isPreEstablishedConnection()) {
             // Disconnect message is not used for pre-established connections.
             return new byte[0];
         }

@@ -464,7 +464,7 @@ abstract class GXDLMS {
                 return GXDLMS.getMacHdlcFrame(settings, id, (byte) 0, null);
             }
             if (settings.getInterfaceType() == InterfaceType.COAP) {
-                return getCoAPFrame(settings, Command.GET_REQUEST, null, RequestTypes.toInteger(reply.getMoreData()));
+                return getCoAPFrame(settings, Command.GET_REQUEST, null, 0);
             }
             return getHdlcFrame(settings, id, null);
         }
@@ -3067,15 +3067,15 @@ abstract class GXDLMS {
                         }
                         if (coapType == CoAPType.ACKNOWLEDGEMENT.getValue()) {
                             if (moreData == 0) {
-                                if (data.getMoreData().contains(RequestTypes.DATABLOCK)) {
-                                    data.getMoreData().remove(RequestTypes.DATABLOCK);
+                                if (data.getMoreData().contains(RequestTypes.FRAME)) {
+                                    data.getMoreData().remove(RequestTypes.FRAME);
                                 }
-                                // Last block.
+                                // Last CoAP block.
                                 data.setPacketLength(buff.size());
                                 data.setComplete(true);
                                 settings.getCoap().setBlockNumber(0);
                             } else {
-                                data.getMoreData().add(RequestTypes.DATABLOCK);
+                                data.getMoreData().add(RequestTypes.FRAME);
                             }
                         }
                     }
@@ -5307,7 +5307,7 @@ abstract class GXDLMS {
         }
         try {
             if (settings.getInterfaceType() == InterfaceType.COAP) {
-                if (!target.getMoreData().contains(RequestTypes.DATABLOCK)) {
+                if (target.getMoreData().isEmpty()) {
                     // Only full PDUs are handled with CoAP.
                     target.getData().position(0);
                     getPdu(settings, target);
