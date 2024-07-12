@@ -399,6 +399,11 @@ public class GXDLMSSettings {
     private byte[] ephemeralAuthenticationKey;
 
     /**
+     * Data is only decrypted and PDU is not parsed.
+     */
+    private boolean decryptOnly;
+
+    /**
      * XML needs list of certificates to decrypt the data.
      */
     private List<Map.Entry<GXPkcs8, GXx509Certificate>> keys;
@@ -1738,5 +1743,20 @@ public class GXDLMSSettings {
      */
     public void setServerPublicKeyCertificate(final GXx509Certificate value) {
         serverPublicKeyCertificate = value;
+    }
+
+    /**
+     * @return Data is only decrypted and PDU is not parsed.
+     */
+    public boolean isDecryptOnly() {
+        return decryptOnly;
+    }
+
+    /**
+     * @param value
+     *            Data is only decrypted and PDU is not parsed.
+     */
+    public void setDecryptOnly(final boolean value) {
+        decryptOnly = value;
     }
 }

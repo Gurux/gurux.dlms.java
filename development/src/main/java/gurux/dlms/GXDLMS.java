@@ -5098,8 +5098,12 @@ abstract class GXDLMS {
                 // Get command.
                 data.setCipheredCommand(data.getCommand());
                 data.setCommand(Command.NONE);
-                getPdu(settings, data);
-                data.setCipherIndex(data.getData().size());
+                if (!settings.isDecryptOnly()) {
+                    getPdu(settings, data);
+                    data.setCipherIndex(data.getData().size());
+                } else {
+                    data.setCipherIndex(data.getCipherIndex() + bb.position());
+                }
             }
         }
     }

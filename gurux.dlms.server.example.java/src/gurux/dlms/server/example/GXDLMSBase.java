@@ -138,8 +138,7 @@ import gurux.serial.GXSerial;
 /**
  * All example servers are using same objects.
  */
-public class GXDLMSBase extends GXDLMSSecureServer2
-        implements IGXMediaListener, gurux.net.IGXNetListener {
+public class GXDLMSBase extends GXDLMSSecureServer2 implements IGXMediaListener, gurux.net.IGXNetListener {
 
     String settingsPath;
     // Serial number of the meter.
@@ -165,8 +164,7 @@ public class GXDLMSBase extends GXDLMSSecureServer2
     static final String getDataFile() {
         if (isWindows(System.getProperty("os.name").toLowerCase())) {
             final String dir = Paths
-                    .get(GXDLMSBase.class.getProtectionDomain().getCodeSource()
-                            .getLocation().getPath().substring(1))
+                    .get(GXDLMSBase.class.getProtectionDomain().getCodeSource().getLocation().getPath().substring(1))
                     .getParent().toString();
             return dir + "/data.csv";
         }
@@ -177,8 +175,7 @@ public class GXDLMSBase extends GXDLMSSecureServer2
     static final String getSettingsFile(final String preFix) {
         if (isWindows(System.getProperty("os.name").toLowerCase())) {
             final String dir = Paths
-                    .get(GXDLMSBase.class.getProtectionDomain().getCodeSource()
-                            .getLocation().getPath().substring(1))
+                    .get(GXDLMSBase.class.getProtectionDomain().getCodeSource().getLocation().getPath().substring(1))
                     .getParent().toString();
             return dir + "/" + preFix + "settings.xml";
         }
@@ -189,8 +186,7 @@ public class GXDLMSBase extends GXDLMSSecureServer2
      * Add low level security object and set parameters.
      */
     private void addLowLevelAssociation() {
-        GXDLMSAssociationLogicalName obj =
-                new GXDLMSAssociationLogicalName("0.0.40.0.2.255");
+        GXDLMSAssociationLogicalName obj = new GXDLMSAssociationLogicalName("0.0.40.0.2.255");
         obj.setClientSAP(17);
         obj.getXDLMSContextInfo().setMaxReceivePduSize(1024);
         obj.getXDLMSContextInfo().setMaxSendPduSize(1024);
@@ -201,114 +197,92 @@ public class GXDLMSBase extends GXDLMSSecureServer2
         // are allowed. https://www.gurux.fi/Gurux.DLMS.Conformance
         obj.getXDLMSContextInfo().getConformance().clear();
         obj.getXDLMSContextInfo().getConformance().add(Conformance.GET);
-        obj.getXDLMSContextInfo().getConformance()
-                .add(Conformance.MULTIPLE_REFERENCES);
-        obj.getXDLMSContextInfo().getConformance()
-                .add(Conformance.SELECTIVE_ACCESS);
+        obj.getXDLMSContextInfo().getConformance().add(Conformance.MULTIPLE_REFERENCES);
+        obj.getXDLMSContextInfo().getConformance().add(Conformance.SELECTIVE_ACCESS);
         obj.getXDLMSContextInfo().getConformance().add(Conformance.SET);
         getItems().add(obj);
     }
 
     private void addHighLevelAssociation() {
-        GXDLMSAssociationLogicalName obj =
-                new GXDLMSAssociationLogicalName("0.0.40.0.3.255");
+        GXDLMSAssociationLogicalName obj = new GXDLMSAssociationLogicalName("0.0.40.0.3.255");
         obj.setClientSAP(18);
         obj.getXDLMSContextInfo().setMaxReceivePduSize(1024);
         obj.getXDLMSContextInfo().setMaxSendPduSize(1024);
         byte[] secret = "Gurux".getBytes();
         obj.setSecret(secret);
-        obj.getAuthenticationMechanismName()
-                .setMechanismId(Authentication.HIGH);
+        obj.getAuthenticationMechanismName().setMechanismId(Authentication.HIGH);
         // Add supported services.
         // https://www.gurux.fi/Gurux.DLMS.Conformance
-        obj.getXDLMSContextInfo().getConformance()
-                .addAll(GXDLMSClient.getInitialConformance(true));
-        obj.getXDLMSContextInfo().getConformance()
-                .add(Conformance.MULTIPLE_REFERENCES);
-        obj.getXDLMSContextInfo().getConformance()
-                .add(Conformance.PARAMETERIZED_ACCESS);
+        obj.getXDLMSContextInfo().getConformance().addAll(GXDLMSClient.getInitialConformance(true));
+        obj.getXDLMSContextInfo().getConformance().add(Conformance.MULTIPLE_REFERENCES);
+        obj.getXDLMSContextInfo().getConformance().add(Conformance.PARAMETERIZED_ACCESS);
         obj.getXDLMSContextInfo().getConformance().add(Conformance.SET);
         getItems().add(obj);
     }
 
     private void addHighLevelAssociationMd5() {
-        GXDLMSAssociationLogicalName obj =
-                new GXDLMSAssociationLogicalName("0.0.40.0.4.255");
+        GXDLMSAssociationLogicalName obj = new GXDLMSAssociationLogicalName("0.0.40.0.4.255");
         obj.setClientSAP(19);
         obj.getXDLMSContextInfo().setMaxReceivePduSize(1024);
         obj.getXDLMSContextInfo().setMaxSendPduSize(1024);
         byte[] secret = "Gurux".getBytes();
         obj.setSecret(secret);
-        obj.getAuthenticationMechanismName()
-                .setMechanismId(Authentication.HIGH_MD5);
+        obj.getAuthenticationMechanismName().setMechanismId(Authentication.HIGH_MD5);
         // Add supported services.
         // https://www.gurux.fi/Gurux.DLMS.Conformance
-        obj.getXDLMSContextInfo().getConformance()
-                .addAll(GXDLMSClient.getInitialConformance(true));
+        obj.getXDLMSContextInfo().getConformance().addAll(GXDLMSClient.getInitialConformance(true));
         getItems().add(obj);
     }
 
     private void addHighLevelAssociationSha1() {
-        GXDLMSAssociationLogicalName obj =
-                new GXDLMSAssociationLogicalName("0.0.40.0.5.255");
+        GXDLMSAssociationLogicalName obj = new GXDLMSAssociationLogicalName("0.0.40.0.5.255");
         obj.setClientSAP(20);
         obj.getXDLMSContextInfo().setMaxReceivePduSize(1024);
         obj.getXDLMSContextInfo().setMaxSendPduSize(1024);
         byte[] secret = "Gurux".getBytes();
         obj.setSecret(secret);
-        obj.getAuthenticationMechanismName()
-                .setMechanismId(Authentication.HIGH_SHA1);
+        obj.getAuthenticationMechanismName().setMechanismId(Authentication.HIGH_SHA1);
         // Add supported services.
         // https://www.gurux.fi/Gurux.DLMS.Conformance
-        obj.getXDLMSContextInfo().getConformance()
-                .addAll(GXDLMSClient.getInitialConformance(true));
+        obj.getXDLMSContextInfo().getConformance().addAll(GXDLMSClient.getInitialConformance(true));
         getItems().add(obj);
     }
 
     private void addHighLevelAssociationGmac() {
-        GXDLMSAssociationLogicalName obj =
-                new GXDLMSAssociationLogicalName("0.0.40.0.6.255");
+        GXDLMSAssociationLogicalName obj = new GXDLMSAssociationLogicalName("0.0.40.0.6.255");
         obj.setClientSAP(21);
         obj.getXDLMSContextInfo().setMaxReceivePduSize(1024);
         obj.getXDLMSContextInfo().setMaxSendPduSize(1024);
-        obj.getAuthenticationMechanismName()
-                .setMechanismId(Authentication.HIGH_GMAC);
+        obj.getAuthenticationMechanismName().setMechanismId(Authentication.HIGH_GMAC);
         // Add supported services.
         // https://www.gurux.fi/Gurux.DLMS.Conformance
-        obj.getXDLMSContextInfo().getConformance()
-                .addAll(GXDLMSClient.getInitialConformance(true));
+        obj.getXDLMSContextInfo().getConformance().addAll(GXDLMSClient.getInitialConformance(true));
         getItems().add(obj);
     }
 
     private void addHighLevelAssociationSha256() {
-        GXDLMSAssociationLogicalName obj =
-                new GXDLMSAssociationLogicalName("0.0.40.0.7.255");
+        GXDLMSAssociationLogicalName obj = new GXDLMSAssociationLogicalName("0.0.40.0.7.255");
         byte[] secret = "Gurux".getBytes();
         obj.setSecret(secret);
         obj.setClientSAP(22);
         obj.getXDLMSContextInfo().setMaxReceivePduSize(1024);
         obj.getXDLMSContextInfo().setMaxSendPduSize(1024);
-        obj.getAuthenticationMechanismName()
-                .setMechanismId(Authentication.HIGH_SHA256);
+        obj.getAuthenticationMechanismName().setMechanismId(Authentication.HIGH_SHA256);
         // Add supported services.
         // https://www.gurux.fi/Gurux.DLMS.Conformance
-        obj.getXDLMSContextInfo().getConformance()
-                .addAll(GXDLMSClient.getInitialConformance(true));
+        obj.getXDLMSContextInfo().getConformance().addAll(GXDLMSClient.getInitialConformance(true));
         getItems().add(obj);
     }
 
     private void addHighLevelAssociationEcdsa() {
-        GXDLMSAssociationLogicalName obj =
-                new GXDLMSAssociationLogicalName("0.0.40.0.8.255");
+        GXDLMSAssociationLogicalName obj = new GXDLMSAssociationLogicalName("0.0.40.0.8.255");
         obj.setClientSAP(23);
         obj.getXDLMSContextInfo().setMaxReceivePduSize(1024);
         obj.getXDLMSContextInfo().setMaxSendPduSize(1024);
-        obj.getAuthenticationMechanismName()
-                .setMechanismId(Authentication.HIGH_ECDSA);
+        obj.getAuthenticationMechanismName().setMechanismId(Authentication.HIGH_ECDSA);
         // Add supported services.
         // https://www.gurux.fi/Gurux.DLMS.Conformance
-        obj.getXDLMSContextInfo().getConformance()
-                .addAll(GXDLMSClient.getInitialConformance(true));
+        obj.getXDLMSContextInfo().getConformance().addAll(GXDLMSClient.getInitialConformance(true));
         getItems().add(obj);
         GXDLMSSecuritySetup s = new GXDLMSSecuritySetup("0.0.43.0.7.255");
         s.setSecuritySuite(SecuritySuite.SUITE_1);
@@ -321,31 +295,25 @@ public class GXDLMSBase extends GXDLMSSecureServer2
      * Add ciphered High level association.
      */
     private void addSecuredHighLevelAssociation() {
-        GXDLMSAssociationLogicalName obj =
-                new GXDLMSAssociationLogicalName("0.0.40.0.9.255");
+        GXDLMSAssociationLogicalName obj = new GXDLMSAssociationLogicalName("0.0.40.0.9.255");
         obj.setClientSAP(24);
         obj.getXDLMSContextInfo().setMaxReceivePduSize(1024);
         obj.getXDLMSContextInfo().setMaxSendPduSize(1024);
         byte[] secret = "Gurux".getBytes();
         obj.setSecret(secret);
-        obj.getAuthenticationMechanismName()
-                .setMechanismId(Authentication.HIGH);
+        obj.getAuthenticationMechanismName().setMechanismId(Authentication.HIGH);
         // Add supported services.
         // https://www.gurux.fi/Gurux.DLMS.Conformance
-        obj.getXDLMSContextInfo().getConformance()
-                .addAll(GXDLMSClient.getInitialConformance(true));
+        obj.getXDLMSContextInfo().getConformance().addAll(GXDLMSClient.getInitialConformance(true));
         getItems().add(obj);
         GXDLMSSecuritySetup s = new GXDLMSSecuritySetup("0.0.43.0.8.255");
         s.setSecuritySuite(SecuritySuite.SUITE_0);
-        s.setGak(GXCommon
-                .hexToBytes("D0 D1 D2 D3 D4 D5 D6 D7 D8 D9 DA DB DC DD DE DF"));
-        s.setGuek(GXCommon
-                .hexToBytes("00 01 02 03 04 05 06 07 08 09 0A 0B 0C 0D 0E 0F"));
+        s.setGak(GXCommon.hexToBytes("D0 D1 D2 D3 D4 D5 D6 D7 D8 D9 DA DB DC DD DE DF"));
+        s.setGuek(GXCommon.hexToBytes("00 01 02 03 04 05 06 07 08 09 0A 0B 0C 0D 0E 0F"));
 
         obj.setSecuritySetupReference(s.getLogicalName());
         s.setServerSystemTitle(getCiphering().getSystemTitle());
-        obj.getApplicationContextName().setContextId(
-                ApplicationContextName.LOGICAL_NAME_WITH_CIPHERING);
+        obj.getApplicationContextName().setContextId(ApplicationContextName.LOGICAL_NAME_WITH_CIPHERING);
         getItems().add(s);
         // Add invocation counter.
         GXDLMSData d = new GXDLMSData("0.0.43.1.8.255");
@@ -356,9 +324,8 @@ public class GXDLMSBase extends GXDLMSSecureServer2
         getItems().add(d);
         // Add invocation counter for the public association as well so it can
         // be read.
-        GXDLMSAssociationLogicalName publicAssociation =
-                (GXDLMSAssociationLogicalName) getItems().findByLN(
-                        ObjectType.ASSOCIATION_LOGICAL_NAME, "0.0.40.0.1.255");
+        GXDLMSAssociationLogicalName publicAssociation = (GXDLMSAssociationLogicalName) getItems()
+                .findByLN(ObjectType.ASSOCIATION_LOGICAL_NAME, "0.0.40.0.1.255");
         publicAssociation.getObjectList().add(d);
     }
 
@@ -372,8 +339,7 @@ public class GXDLMSBase extends GXDLMSSecureServer2
      * @throws IOException
      * @throws XMLStreamException
      */
-    public GXDLMSBase(final GXDLMSAssociationLogicalName ln,
-            final GXDLMSHdlcSetup hdlc, final String port)
+    public GXDLMSBase(final GXDLMSAssociationLogicalName ln, final GXDLMSHdlcSetup hdlc, final String port)
             throws XMLStreamException, IOException {
         super(ln, hdlc);
         getConformance().clear();
@@ -391,8 +357,7 @@ public class GXDLMSBase extends GXDLMSSecureServer2
         ln.getObjectList().clear();
         ln.getObjectList().add(ln);
         // Add Logical Device Name
-        GXDLMSObject obj =
-                getItems().findByLN(ObjectType.DATA, "0.0.42.0.0.255");
+        GXDLMSObject obj = getItems().findByLN(ObjectType.DATA, "0.0.42.0.0.255");
         if (obj != null) {
             ln.getObjectList().add(obj);
         }
@@ -413,10 +378,8 @@ public class GXDLMSBase extends GXDLMSSecureServer2
      * @throws IOException
      * @throws XMLStreamException
      */
-    public GXDLMSBase(final GXDLMSAssociationLogicalName ln,
-            final GXDLMSHdlcSetup hdlc, final String port,
-            InterfaceType interfaceType)
-            throws XMLStreamException, IOException {
+    public GXDLMSBase(final GXDLMSAssociationLogicalName ln, final GXDLMSHdlcSetup hdlc, final String port,
+            InterfaceType interfaceType) throws XMLStreamException, IOException {
         super(true, interfaceType);
         getConformance().clear();
         ln.setClientSAP(16);
@@ -435,8 +398,7 @@ public class GXDLMSBase extends GXDLMSSecureServer2
         ln.getObjectList().clear();
         ln.getObjectList().add(ln);
         // Add Logical Device Name
-        GXDLMSObject obj =
-                getItems().findByLN(ObjectType.DATA, "0.0.42.0.0.255");
+        GXDLMSObject obj = getItems().findByLN(ObjectType.DATA, "0.0.42.0.0.255");
         if (obj != null) {
             ln.getObjectList().add(obj);
         }
@@ -457,8 +419,7 @@ public class GXDLMSBase extends GXDLMSSecureServer2
      * @throws IOException
      * @throws XMLStreamException
      */
-    public GXDLMSBase(final GXDLMSAssociationShortName sn,
-            final GXDLMSHdlcSetup hdlc, final String port)
+    public GXDLMSBase(final GXDLMSAssociationShortName sn, final GXDLMSHdlcSetup hdlc, final String port)
             throws XMLStreamException, IOException {
         super(sn, hdlc);
         setPushClientAddress(64);
@@ -479,8 +440,7 @@ public class GXDLMSBase extends GXDLMSSecureServer2
      * @throws IOException
      * @throws XMLStreamException
      */
-    public GXDLMSBase(final GXDLMSAssociationLogicalName ln,
-            final GXDLMSTcpUdpSetup wrapper, final String port)
+    public GXDLMSBase(final GXDLMSAssociationLogicalName ln, final GXDLMSTcpUdpSetup wrapper, final String port)
             throws XMLStreamException, IOException {
         super(ln, wrapper);
         getConformance().clear();
@@ -499,8 +459,7 @@ public class GXDLMSBase extends GXDLMSSecureServer2
         ln.getObjectList().clear();
         ln.getObjectList().add(ln);
         // Add Logical Device Name
-        GXDLMSObject obj =
-                getItems().findByLN(ObjectType.DATA, "0.0.42.0.0.255");
+        GXDLMSObject obj = getItems().findByLN(ObjectType.DATA, "0.0.42.0.0.255");
         if (obj != null) {
             ln.getObjectList().add(obj);
         }
@@ -521,8 +480,7 @@ public class GXDLMSBase extends GXDLMSSecureServer2
      * @throws IOException
      * @throws XMLStreamException
      */
-    public GXDLMSBase(final GXDLMSAssociationShortName sn,
-            final GXDLMSTcpUdpSetup wrapper, final String port)
+    public GXDLMSBase(final GXDLMSAssociationShortName sn, final GXDLMSTcpUdpSetup wrapper, final String port)
             throws XMLStreamException, IOException {
         super(sn, wrapper);
         setPushClientAddress(64);
@@ -587,8 +545,8 @@ public class GXDLMSBase extends GXDLMSSecureServer2
      */
     GXDLMSClock addClock() {
         GXDLMSClock clock = new GXDLMSClock();
-        clock.setBegin(new GXDateTime(-1, 9, 1, -1, -1, -1, -1));
-        clock.setEnd(new GXDateTime(-1, 3, 1, -1, -1, -1, -1));
+        clock.setBegin(new GXDateTime(-1, 9, 1, 3, 0, 0, -1));
+        clock.setEnd(new GXDateTime(-1, 3, 1, 3, 0, 0, -1));
         clock.setDeviation(0);
         getItems().add(clock);
         return clock;
@@ -605,8 +563,7 @@ public class GXDLMSBase extends GXDLMSSecureServer2
     /*
      * Add profile generic (historical) object.
      */
-    GXDLMSProfileGeneric addProfileGeneric(final GXDLMSClock clock,
-            final GXDLMSRegister register) {
+    GXDLMSProfileGeneric addProfileGeneric(final GXDLMSClock clock, final GXDLMSRegister register) {
         GXDLMSProfileGeneric pg = new GXDLMSProfileGeneric("1.0.99.1.0.255");
         // Set capture period to 60 second.
         pg.setCapturePeriod(60);
@@ -664,10 +621,8 @@ public class GXDLMSBase extends GXDLMSSecureServer2
         ac.setRepetitions(10);
         ac.setRepetitionDelay(60);
         // Calling is allowed between 1am to 6am.
-        ac.getCallingWindow()
-                .add(new AbstractMap.SimpleEntry<GXDateTime, GXDateTime>(
-                        new GXDateTime(-1, -1, -1, 1, 0, 0, -1),
-                        new GXDateTime(-1, -1, -1, 6, 0, 0, -1)));
+        ac.getCallingWindow().add(new AbstractMap.SimpleEntry<GXDateTime, GXDateTime>(
+                new GXDateTime(-1, -1, -1, 1, 0, 0, -1), new GXDateTime(-1, -1, -1, 6, 0, 0, -1)));
         ac.setDestinations(new String[] { "www.gurux.org" });
         getItems().add(ac);
     }
@@ -681,8 +636,7 @@ public class GXDLMSBase extends GXDLMSSecureServer2
         GXDLMSActivityCalendar activity = new GXDLMSActivityCalendar();
         activity.setCalendarNameActive("Active");
         activity.setSeasonProfileActive(new GXDLMSSeasonProfile[] {
-                new GXDLMSSeasonProfile("Summer time",
-                        new GXDateTime(-1, -1, -1, -1, -1, 3, 31), "") });
+                new GXDLMSSeasonProfile("Summer time", new GXDateTime(-1, -1, -1, -1, -1, 3, 31), "") });
         GXDLMSWeekProfile wp = new GXDLMSWeekProfile();
         wp.setName("Monday");
         wp.setMonday(1);
@@ -693,15 +647,11 @@ public class GXDLMSBase extends GXDLMSSecureServer2
         wp.setSaturday(1);
         wp.setSunday(1);
         activity.setWeekProfileTableActive(new GXDLMSWeekProfile[] { wp });
-        activity.setDayProfileTableActive(
-                new GXDLMSDayProfile[] { new GXDLMSDayProfile(1,
-                        new GXDLMSDayProfileAction[] {
-                                new GXDLMSDayProfileAction(new GXTime(now),
-                                        "0.1.10.1.101.255", 1) }) });
+        activity.setDayProfileTableActive(new GXDLMSDayProfile[] { new GXDLMSDayProfile(1,
+                new GXDLMSDayProfileAction[] { new GXDLMSDayProfileAction(new GXTime(now), "0.1.10.1.101.255", 1) }) });
         activity.setCalendarNamePassive("Passive");
         activity.setSeasonProfilePassive(new GXDLMSSeasonProfile[] {
-                new GXDLMSSeasonProfile("Winter time",
-                        new GXDateTime(-1, -1, -1, -1, -1, 10, 30), "") });
+                new GXDLMSSeasonProfile("Winter time", new GXDateTime(-1, -1, -1, -1, -1, 10, 30), "") });
         wp = new GXDLMSWeekProfile();
         wp.setName("Tuesday");
         wp.setMonday(1);
@@ -712,11 +662,8 @@ public class GXDLMSBase extends GXDLMSSecureServer2
         wp.setSaturday(1);
         wp.setSunday(1);
         activity.setWeekProfileTablePassive(new GXDLMSWeekProfile[] { wp });
-        activity.setDayProfileTablePassive(
-                new GXDLMSDayProfile[] { new GXDLMSDayProfile(1,
-                        new GXDLMSDayProfileAction[] {
-                                new GXDLMSDayProfileAction(new GXTime(now),
-                                        "0.0.1.0.0.255", 1) }) });
+        activity.setDayProfileTablePassive(new GXDLMSDayProfile[] { new GXDLMSDayProfile(1,
+                new GXDLMSDayProfileAction[] { new GXDLMSDayProfileAction(new GXTime(now), "0.0.1.0.0.255", 1) }) });
         activity.setTime(new GXDateTime(now));
         getItems().add(activity);
 
@@ -785,8 +732,7 @@ public class GXDLMSBase extends GXDLMSSecureServer2
         actionS.setTarget(st);
         actionS.setExecutedScriptSelector(1);
         actionS.setType(SingleActionScheduleType.SingleActionScheduleType1);
-        actionS.setExecutionTime(new GXDateTime[] {
-                new GXDateTime(Calendar.getInstance().getTime()) });
+        actionS.setExecutionTime(new GXDateTime[] { new GXDateTime(Calendar.getInstance().getTime()) });
         getItems().add(actionS);
     }
 
@@ -795,10 +741,8 @@ public class GXDLMSBase extends GXDLMSSecureServer2
      */
     void addSapAssignment() {
         GXDLMSSapAssignment sap = new GXDLMSSapAssignment();
-        sap.getSapAssignmentList()
-                .add(new AbstractMap.SimpleEntry<Integer, String>(1, "Gurux"));
-        sap.getSapAssignmentList().add(
-                new AbstractMap.SimpleEntry<Integer, String>(16, "Gurux-2"));
+        sap.getSapAssignmentList().add(new AbstractMap.SimpleEntry<Integer, String>(1, "Gurux"));
+        sap.getSapAssignmentList().add(new AbstractMap.SimpleEntry<Integer, String>(16, "Gurux-2"));
         getItems().add(sap);
     }
 
@@ -808,10 +752,8 @@ public class GXDLMSBase extends GXDLMSSecureServer2
     void addAutoAnswer() {
         GXDLMSAutoAnswer aa = new GXDLMSAutoAnswer();
         aa.setMode(AutoAnswerMode.CALL);
-        aa.getListeningWindow()
-                .add(new AbstractMap.SimpleEntry<GXDateTime, GXDateTime>(
-                        new GXDateTime(-1, -1, -1, 6, -1, -1, -1),
-                        new GXDateTime(-1, -1, -1, 8, -1, -1, -1)));
+        aa.getListeningWindow().add(new AbstractMap.SimpleEntry<GXDateTime, GXDateTime>(
+                new GXDateTime(-1, -1, -1, 6, -1, -1, -1), new GXDateTime(-1, -1, -1, 8, -1, -1, -1)));
         aa.setStatus(AutoAnswerStatus.INACTIVE);
         aa.setNumberOfCalls(0);
         aa.setNumberOfRingsInListeningWindow(1);
@@ -870,25 +812,20 @@ public class GXDLMSBase extends GXDLMSSecureServer2
     void addPushSetup() {
         GXDLMSPushSetup push = new GXDLMSPushSetup();
         getItems().add(push);
-        GXDLMSIp4Setup ip4 = (GXDLMSIp4Setup) getItems()
-                .findByLN(ObjectType.IP4_SETUP, "0.0.25.1.0.255");
+        GXDLMSIp4Setup ip4 = (GXDLMSIp4Setup) getItems().findByLN(ObjectType.IP4_SETUP, "0.0.25.1.0.255");
         // Send Push messages to this address as default.
         push.setDestination(ip4.getIPAddress().getHostAddress() + ":7000");
         // Add push object itself. This is needed to tell structure of data to
         // the Push listener.
         push.getPushObjectList()
-                .add(new GXSimpleEntry<GXDLMSObject, GXDLMSCaptureObject>(push,
-                        new GXDLMSCaptureObject(2, 0)));
+                .add(new GXSimpleEntry<GXDLMSObject, GXDLMSCaptureObject>(push, new GXDLMSCaptureObject(2, 0)));
         // Add logical device name.
-        GXDLMSObject ldn =
-                getItems().findByLN(ObjectType.DATA, "0.0.42.0.0.255");
+        GXDLMSObject ldn = getItems().findByLN(ObjectType.DATA, "0.0.42.0.0.255");
         push.getPushObjectList()
-                .add(new GXSimpleEntry<GXDLMSObject, GXDLMSCaptureObject>(ldn,
-                        new GXDLMSCaptureObject(2, 0)));
+                .add(new GXSimpleEntry<GXDLMSObject, GXDLMSCaptureObject>(ldn, new GXDLMSCaptureObject(2, 0)));
         // Add .0.0.25.1.0.255 Ch. 0 IPv4 setup IP address.
         push.getPushObjectList()
-                .add(new GXSimpleEntry<GXDLMSObject, GXDLMSCaptureObject>(ip4,
-                        new GXDLMSCaptureObject(3, 0)));
+                .add(new GXSimpleEntry<GXDLMSObject, GXDLMSCaptureObject>(ip4, new GXDLMSCaptureObject(3, 0)));
     }
 
     /**
@@ -906,8 +843,7 @@ public class GXDLMSBase extends GXDLMSSecureServer2
      * @throws Exception
      */
     public void initialize(String port, TraceLevel trace) throws Exception {
-        media = new GXSerial(port, gurux.io.BaudRate.BAUD_RATE_9600, 8,
-                Parity.NONE, StopBits.ONE);
+        media = new GXSerial(port, gurux.io.BaudRate.BAUD_RATE_9600, 8, Parity.NONE, StopBits.ONE);
         media.setTrace(TraceLevel.VERBOSE);
         Trace = trace;
         media.addListener(this);
@@ -1012,11 +948,9 @@ public class GXDLMSBase extends GXDLMSSecureServer2
         addGSMDiagnostic();
         GXDLMSCompactData cd = new GXDLMSCompactData();
         cd.getCaptureObjects()
-                .add(new SimpleEntry<GXDLMSObject, GXDLMSCaptureObject>(clock,
-                        new GXDLMSCaptureObject(2, 0)));
-        cd.getCaptureObjects().add(
-                new SimpleEntry<GXDLMSObject, GXDLMSCaptureObject>(register,
-                        new GXDLMSCaptureObject(2, 0)));
+                .add(new SimpleEntry<GXDLMSObject, GXDLMSCaptureObject>(clock, new GXDLMSCaptureObject(2, 0)));
+        cd.getCaptureObjects()
+                .add(new SimpleEntry<GXDLMSObject, GXDLMSCaptureObject>(register, new GXDLMSCaptureObject(2, 0)));
         getItems().add(cd);
         getItems().add(new GXDLMSDisconnectControl());
         ///////////////////////////////////////////////////////////////////////
@@ -1028,8 +962,7 @@ public class GXDLMSBase extends GXDLMSSecureServer2
         super.initialize();
         GXXmlWriterSettings settings = new GXXmlWriterSettings();
         // Profile generic buffer is not serialized.
-        settings.getIgnored()
-                .add(new GXIgnoreSerialize(ObjectType.PROFILE_GENERIC, 2));
+        settings.getIgnored().add(new GXIgnoreSerialize(ObjectType.PROFILE_GENERIC, 2));
         getItems().save(settingsPath, settings);
         return true;
     }
@@ -1049,8 +982,7 @@ public class GXDLMSBase extends GXDLMSSecureServer2
      * @param count
      * @return Add data Rows
      */
-    private void getProfileGenericDataByEntry(final GXDLMSProfileGeneric p,
-            long index, final long count) {
+    private void getProfileGenericDataByEntry(final GXDLMSProfileGeneric p, long index, final long count) {
         // Clear old data. It's already serialized.
         p.clearBuffer();
         BufferedReader reader = null;
@@ -1066,8 +998,7 @@ public class GXDLMSBase extends GXDLMSSecureServer2
                         continue;
                     } else if (line.length() != 0) {
                         String[] values = line.split("[;]", -1);
-                        p.addRow(new Object[] { df.parse(values[0]),
-                                Integer.parseInt(values[1]) });
+                        p.addRow(new Object[] { df.parse(values[0]), Integer.parseInt(values[1]) });
                     }
                     if (p.getBuffer().length == count) {
                         break;
@@ -1100,10 +1031,8 @@ public class GXDLMSBase extends GXDLMSSecureServer2
      */
     private void getProfileGenericDataByRange(ValueEventArgs e) {
         List<?> arr = (List<?>) e.getParameters();
-        GXDateTime start = (GXDateTime) GXDLMSClient
-                .changeType((byte[]) arr.get(1), DataType.DATETIME);
-        GXDateTime end = (GXDateTime) GXDLMSClient
-                .changeType((byte[]) arr.get(1), DataType.DATETIME);
+        GXDateTime start = (GXDateTime) GXDLMSClient.changeType((byte[]) arr.get(1), DataType.DATETIME);
+        GXDateTime end = (GXDateTime) GXDLMSClient.changeType((byte[]) arr.get(1), DataType.DATETIME);
 
         synchronized (fileLock) {
             BufferedReader reader = null;
@@ -1170,8 +1099,7 @@ public class GXDLMSBase extends GXDLMSSecureServer2
         for (ValueEventArgs e : args) {
             // Framework will handle Association objects automatically.
             if (e.getTarget() instanceof GXDLMSAssociationLogicalName
-                    || e.getTarget() instanceof GXDLMSAssociationShortName
-                    || e.getTarget() instanceof GXDLMSIp4Setup) {
+                    || e.getTarget() instanceof GXDLMSAssociationShortName || e.getTarget() instanceof GXDLMSIp4Setup) {
                 continue;
             }
             if (e.getTarget() instanceof GXDLMSClock && e.getIndex() == 2) {
@@ -1183,14 +1111,12 @@ public class GXDLMSBase extends GXDLMSSecureServer2
                 // If buffer is read and we want to save memory.
                 if (e.getIndex() == 7) {
                     // If client wants to know EntriesInUse.
-                    GXDLMSProfileGeneric p =
-                            (GXDLMSProfileGeneric) e.getTarget();
+                    GXDLMSProfileGeneric p = (GXDLMSProfileGeneric) e.getTarget();
                     p.setEntriesInUse(getProfileGenericDataCount());
                 }
                 if (e.getIndex() == 2) {
                     // Client reads buffer.
-                    GXDLMSProfileGeneric p =
-                            (GXDLMSProfileGeneric) e.getTarget();
+                    GXDLMSProfileGeneric p = (GXDLMSProfileGeneric) e.getTarget();
                     // Read rows from file.
                     // If reading first time.
                     if (e.getRowEndIndex() == 0) {
@@ -1202,14 +1128,11 @@ public class GXDLMSBase extends GXDLMSSecureServer2
                         } else if (e.getSelector() == 2) {
                             // Read by range.
                             List<?> arr = (List<?>) e.getParameters();
-                            e.setRowBeginIndex(
-                                    ((GXUInt32) arr.get(0)).longValue() - 1);
-                            e.setRowEndIndex(
-                                    ((GXUInt32) arr.get(1)).longValue());
+                            e.setRowBeginIndex(((GXUInt32) arr.get(0)).longValue() - 1);
+                            e.setRowEndIndex(((GXUInt32) arr.get(1)).longValue());
                             // If client wants to read more data what we have.
                             int cnt = getProfileGenericDataCount();
-                            if (e.getRowEndIndex() - e.getRowBeginIndex() > cnt
-                                    - e.getRowBeginIndex()) {
+                            if (e.getRowEndIndex() - e.getRowBeginIndex() > cnt - e.getRowBeginIndex()) {
                                 e.setRowEndIndex(cnt - e.getRowBeginIndex());
                                 if (e.getRowEndIndex() < 0) {
                                     e.setRowEndIndex(0);
@@ -1219,31 +1142,25 @@ public class GXDLMSBase extends GXDLMSSecureServer2
                     }
                     long count = e.getRowEndIndex() - e.getRowBeginIndex();
                     // Read only rows that can fit to one PDU.
-                    if (e.getRowEndIndex() - e.getRowBeginIndex() > e
-                            .getRowToPdu()) {
+                    if (e.getRowEndIndex() - e.getRowBeginIndex() > e.getRowToPdu()) {
                         count = e.getRowToPdu();
                     }
-                    getProfileGenericDataByEntry(p, e.getRowBeginIndex(),
-                            count);
+                    getProfileGenericDataByEntry(p, e.getRowBeginIndex(), count);
                 }
                 continue;
             }
             System.out.println(
-                    String.format("Client Read value from %s attribute: %d.",
-                            e.getTarget().getName(), e.getIndex()));
+                    String.format("Client Read value from %s attribute: %d.", e.getTarget().getName(), e.getIndex()));
             if ((e.getTarget().getUIDataType(e.getIndex()) == DataType.DATETIME
-                    || e.getTarget()
-                            .getDataType(e.getIndex()) == DataType.DATETIME)
+                    || e.getTarget().getDataType(e.getIndex()) == DataType.DATETIME)
                     && !(e.getTarget() instanceof GXDLMSClock)) {
                 e.setValue(Calendar.getInstance().getTime());
                 e.setHandled(true);
             } else if (e.getTarget() instanceof GXDLMSClock) {
                 continue;
-            } else if (e.getTarget() instanceof GXDLMSRegisterMonitor
-                    && e.getIndex() == 2) {
+            } else if (e.getTarget() instanceof GXDLMSRegisterMonitor && e.getIndex() == 2) {
                 // Update Register Monitor Thresholds values.
-                e.setValue(
-                        new Object[] { new java.util.Random().nextInt(1000) });
+                e.setValue(new Object[] { new java.util.Random().nextInt(1000) });
                 e.setHandled(true);
             } else {
                 // If data is not assigned and value type is unknown return
@@ -1252,12 +1169,9 @@ public class GXDLMSBase extends GXDLMSSecureServer2
                 if (e.getIndex() <= values.length) {
                     if (values[e.getIndex() - 1] == null) {
                         DataType tp = e.getTarget().getDataType(e.getIndex());
-                        if (tp == DataType.NONE || tp == DataType.INT8
-                                || tp == DataType.INT16 || tp == DataType.INT32
-                                || tp == DataType.INT64 || tp == DataType.UINT8
-                                || tp == DataType.UINT16
-                                || tp == DataType.UINT32
-                                || tp == DataType.UINT64) {
+                        if (tp == DataType.NONE || tp == DataType.INT8 || tp == DataType.INT16 || tp == DataType.INT32
+                                || tp == DataType.INT64 || tp == DataType.UINT8 || tp == DataType.UINT16
+                                || tp == DataType.UINT32 || tp == DataType.UINT64) {
                             e.setValue(new java.util.Random().nextInt(1000));
                             e.setHandled(true);
                         }
@@ -1279,9 +1193,8 @@ public class GXDLMSBase extends GXDLMSSecureServer2
     @Override
     public void onPreWrite(ValueEventArgs[] args) {
         for (ValueEventArgs e : args) {
-            System.out.println(String.format(
-                    "Client Write new value %1$s to object: %2$s.",
-                    e.getValue(), e.getTarget().getName()));
+            System.out.println(String.format("Client Write new value %1$s to object: %2$s.", e.getValue(),
+                    e.getTarget().getName()));
         }
     }
 
@@ -1297,8 +1210,7 @@ public class GXDLMSBase extends GXDLMSSecureServer2
                     // Load default values if user has try to save invalid
                     // data.
                     getItems().clear();
-                    getItems()
-                            .addAll(GXDLMSObjectCollection.load(settingsPath));
+                    getItems().addAll(GXDLMSObjectCollection.load(settingsPath));
                     return;
                 }
             }
@@ -1330,8 +1242,7 @@ public class GXDLMSBase extends GXDLMSSecureServer2
     @Override
     public void onPreAction(ValueEventArgs[] args) throws Exception {
         for (ValueEventArgs e : args) {
-            if (e.getIndex() == 1
-                    && e.getTarget().getObjectType() == ObjectType.PUSH_SETUP) {
+            if (e.getIndex() == 1 && e.getTarget().getObjectType() == ObjectType.PUSH_SETUP) {
                 sendPush((GXDLMSPushSetup) e.getTarget());
                 e.setHandled(true);
             }
@@ -1345,15 +1256,13 @@ public class GXDLMSBase extends GXDLMSSecureServer2
             FileWriter writer = new FileWriter(getDataFile(), true);
             try {
                 StringBuilder sb = new StringBuilder();
-                for (Entry<GXDLMSObject, GXDLMSCaptureObject> it : pg
-                        .getCaptureObjects()) {
+                for (Entry<GXDLMSObject, GXDLMSCaptureObject> it : pg.getCaptureObjects()) {
                     if (sb.length() != 0) {
                         sb.append(';');
                     }
                     // TODO: Read value here example from the meter if it's not
                     // updated automatically.
-                    Object value = it.getKey()
-                            .getValues()[it.getValue().getAttributeIndex() - 1];
+                    Object value = it.getKey().getValues()[it.getValue().getAttributeIndex() - 1];
                     if (value == null) {
                         // Generate random value here.
                         value = getProfileGenericDataCount() + 1;
@@ -1361,8 +1270,7 @@ public class GXDLMSBase extends GXDLMSSecureServer2
                     if (value instanceof Date) {
                         sb.append(df.format((Date) value));
                     } else if (value instanceof GXDateTime) {
-                        sb.append(df.format(((GXDateTime) value)
-                                .getLocalCalendar().getTime()));
+                        sb.append(df.format(((GXDateTime) value).getLocalCalendar().getTime()));
                     } else {
                         sb.append(value);
                     }
@@ -1375,8 +1283,7 @@ public class GXDLMSBase extends GXDLMSSecureServer2
         }
     }
 
-    private void handleProfileGenericActions(ValueEventArgs it)
-            throws IOException {
+    private void handleProfileGenericActions(ValueEventArgs it) throws IOException {
         GXDLMSProfileGeneric pg = (GXDLMSProfileGeneric) it.getTarget();
         FileWriter writer = null;
         synchronized (fileLock) {
@@ -1409,26 +1316,18 @@ public class GXDLMSBase extends GXDLMSSecureServer2
                 return;
             }
             // Save value if it's updated with action.
-            if (isChangedWithAction(it.getTarget().getObjectType(),
-                    it.getIndex())) {
+            if (isChangedWithAction(it.getTarget().getObjectType(), it.getIndex())) {
                 GXXmlWriterSettings settings = new GXXmlWriterSettings();
                 getItems().save(settingsPath, settings);
             }
-            if (it.getTarget() instanceof GXDLMSSecuritySetup
-                    && it.getIndex() == 2) {
-                System.out.println(
-                        "----------------------------------------------------------");
+            if (it.getTarget() instanceof GXDLMSSecuritySetup && it.getIndex() == 2) {
+                System.out.println("----------------------------------------------------------");
                 System.out.println("Updated keys:");
-                System.out.println("Server System title: "
-                        + GXCommon.bytesToHex(getCiphering().getSystemTitle()));
-                System.out.println("Authentication key: " + GXCommon
-                        .bytesToHex(getCiphering().getAuthenticationKey()));
-                System.out.println("Block cipher key: " + GXCommon
-                        .bytesToHex(getCiphering().getBlockCipherKey()));
-                System.out.println("Client System title: "
-                        + GXDLMSTranslator.toHex(getClientSystemTitle()));
-                System.out.println("Master key (KEK) title: "
-                        + GXDLMSTranslator.toHex(getKek()));
+                System.out.println("Server System title: " + GXCommon.bytesToHex(getCiphering().getSystemTitle()));
+                System.out.println("Authentication key: " + GXCommon.bytesToHex(getCiphering().getAuthenticationKey()));
+                System.out.println("Block cipher key: " + GXCommon.bytesToHex(getCiphering().getBlockCipherKey()));
+                System.out.println("Client System title: " + GXDLMSTranslator.toHex(getClientSystemTitle()));
+                System.out.println("Master key (KEK) title: " + GXDLMSTranslator.toHex(getKek()));
             }
         }
     }
@@ -1448,8 +1347,7 @@ public class GXDLMSBase extends GXDLMSSecureServer2
         try {
             synchronized (this) {
                 if (Trace == TraceLevel.VERBOSE) {
-                    System.out.println("RX:\t" + gurux.common.GXCommon
-                            .bytesToHex((byte[]) e.getData()));
+                    System.out.println("RX:\t" + gurux.common.GXCommon.bytesToHex((byte[]) e.getData()));
                 }
                 GXServerReply sr = new GXServerReply((byte[]) e.getData());
                 do {
@@ -1460,8 +1358,7 @@ public class GXDLMSBase extends GXDLMSSecureServer2
                     // server or client address.
                     if (sr.getReply() != null) {
                         if (Trace == TraceLevel.VERBOSE) {
-                            System.out.println("TX:\t" + gurux.common.GXCommon
-                                    .bytesToHex(sr.getReply()));
+                            System.out.println("TX:\t" + gurux.common.GXCommon.bytesToHex(sr.getReply()));
                         }
                         media.send(sr.getReply(), e.getSenderInfo());
                         sr.setData(null);
@@ -1482,8 +1379,7 @@ public class GXDLMSBase extends GXDLMSSecureServer2
      * Client has made connection.
      */
     @Override
-    public void onClientConnected(Object sender,
-            gurux.net.ConnectionEventArgs e) {
+    public void onClientConnected(Object sender, gurux.net.ConnectionEventArgs e) {
         // Reset server settings when connection is established.
         this.reset();
         System.out.println("Client Connected.");
@@ -1493,8 +1389,7 @@ public class GXDLMSBase extends GXDLMSSecureServer2
      * Client has close connection.
      */
     @Override
-    public void onClientDisconnected(Object sender,
-            gurux.net.ConnectionEventArgs e) {
+    public void onClientDisconnected(Object sender, gurux.net.ConnectionEventArgs e) {
         System.out.println("Client Disconnected.");
     }
 
@@ -1513,14 +1408,10 @@ public class GXDLMSBase extends GXDLMSSecureServer2
         if (objectType == ObjectType.ASSOCIATION_LOGICAL_NAME) {
             for (GXDLMSObject it : getItems()) {
                 if (it.getObjectType() == ObjectType.ASSOCIATION_LOGICAL_NAME) {
-                    GXDLMSAssociationLogicalName a =
-                            (GXDLMSAssociationLogicalName) it;
+                    GXDLMSAssociationLogicalName a = (GXDLMSAssociationLogicalName) it;
                     if (a.getClientSAP() == getSettings().getClientAddress()
-                            && a.getAuthenticationMechanismName()
-                                    .getMechanismId() == getSettings()
-                                            .getAuthentication()
-                            && (ln.compareTo(a.getLogicalName()) == 0
-                                    || ln.compareTo("0.0.40.0.0.255") == 0))
+                            && a.getAuthenticationMechanismName().getMechanismId() == getSettings().getAuthentication()
+                            && (ln.compareTo(a.getLogicalName()) == 0 || ln.compareTo("0.0.40.0.0.255") == 0))
                         return it;
                 }
             }
@@ -1539,26 +1430,21 @@ public class GXDLMSBase extends GXDLMSSecureServer2
      * @return True.
      */
     @Override
-    public final boolean isTarget(final int serverAddress,
-            final int clientAddress) {
+    public final boolean isTarget(final int serverAddress, final int clientAddress) {
         // Only one connection per meter at the time is allowed.
         if (getAssignedAssociation() != null) {
             return false;
         }
         boolean ret = false;
         // Check HDLC station address if it's used.
-        if (getInterfaceType() == InterfaceType.HDLC && getHdlc() != null
-                && getHdlc().getDeviceAddress() != 0) {
+        if (getInterfaceType() == InterfaceType.HDLC && getHdlc() != null && getHdlc().getDeviceAddress() != 0) {
             ret = getHdlc().getDeviceAddress() == serverAddress;
         }
         // Check server address using serial number.
-        boolean broadcast = (serverAddress & 0x3FFF) == 0x3FFF
-                || (serverAddress & 0x7F) == 0x7F;
-        if (!(broadcast
-                || (serverAddress & 0x3FFF) == SERIAL_NUMBER % 10000 + 1000)) {
+        boolean broadcast = (serverAddress & 0x3FFF) == 0x3FFF || (serverAddress & 0x7F) == 0x7F;
+        if (!(broadcast || (serverAddress & 0x3FFF) == SERIAL_NUMBER % 10000 + 1000)) {
             // Find address from the SAP table.
-            GXDLMSObjectCollection saps =
-                    getItems().getObjects(ObjectType.SAP_ASSIGNMENT);
+            GXDLMSObjectCollection saps = getItems().getObjects(ObjectType.SAP_ASSIGNMENT);
             if (saps.size() != 0) {
                 for (GXDLMSObject s : saps) {
                     GXDLMSSapAssignment sap = (GXDLMSSapAssignment) s;
@@ -1566,17 +1452,14 @@ public class GXDLMSBase extends GXDLMSSecureServer2
                         ret = true;
                         break;
                     }
-                    for (Map.Entry<Integer, String> e : sap
-                            .getSapAssignmentList()) {
+                    for (Map.Entry<Integer, String> e : sap.getSapAssignmentList()) {
                         // Check server address with two bytes.
-                        if ((serverAddress & 0xFFFF0000) == 0
-                                && (serverAddress & 0x7FFF) == e.getKey()) {
+                        if ((serverAddress & 0xFFFF0000) == 0 && (serverAddress & 0x7FFF) == e.getKey()) {
                             ret = true;
                             break;
                         }
                         // Check server address with one byte.
-                        if ((serverAddress & 0xFFFFFF00) == 0
-                                && (serverAddress & 0x7F) == e.getKey()) {
+                        if ((serverAddress & 0xFFFFFF00) == 0 && (serverAddress & 0x7F) == e.getKey()) {
                             ret = true;
                             break;
                         }
@@ -1590,10 +1473,8 @@ public class GXDLMSBase extends GXDLMSSecureServer2
         }
         if (ret) {
             setAssignedAssociation(null);
-            for (GXDLMSObject it : getItems()
-                    .getObjects(ObjectType.ASSOCIATION_LOGICAL_NAME)) {
-                GXDLMSAssociationLogicalName ln =
-                        (GXDLMSAssociationLogicalName) it;
+            for (GXDLMSObject it : getItems().getObjects(ObjectType.ASSOCIATION_LOGICAL_NAME)) {
+                GXDLMSAssociationLogicalName ln = (GXDLMSAssociationLogicalName) it;
                 if (ln.getClientSAP() == clientAddress) {
                     setAssignedAssociation(ln);
                     break;
@@ -1604,29 +1485,23 @@ public class GXDLMSBase extends GXDLMSSecureServer2
     }
 
     @Override
-    public final SourceDiagnostic onValidateAuthentication(
-            final Authentication authentication, final byte[] password) {
+    public final SourceDiagnostic onValidateAuthentication(final Authentication authentication, final byte[] password) {
         // Accept all passwords.
         // return SourceDiagnostic.NONE;
         // Uncomment checkPassword if you want to check password.
         return checkPassword(authentication, password);
     }
 
-    SourceDiagnostic checkPassword(final Authentication authentication,
-            final byte[] password) {
+    SourceDiagnostic checkPassword(final Authentication authentication, final byte[] password) {
         if (authentication == Authentication.LOW) {
             byte[] expected;
             if (getUseLogicalNameReferencing()) {
-                GXDLMSAssociationLogicalName ln =
-                        (GXDLMSAssociationLogicalName) getItems().findByLN(
-                                ObjectType.ASSOCIATION_LOGICAL_NAME,
-                                "0.0.40.0.2.255");
+                GXDLMSAssociationLogicalName ln = (GXDLMSAssociationLogicalName) getItems()
+                        .findByLN(ObjectType.ASSOCIATION_LOGICAL_NAME, "0.0.40.0.2.255");
                 expected = ln.getSecret();
             } else {
-                GXDLMSAssociationShortName sn =
-                        (GXDLMSAssociationShortName) getItems().findByLN(
-                                ObjectType.ASSOCIATION_SHORT_NAME,
-                                "0.0.40.0.0.255");
+                GXDLMSAssociationShortName sn = (GXDLMSAssociationShortName) getItems()
+                        .findByLN(ObjectType.ASSOCIATION_SHORT_NAME, "0.0.40.0.0.255");
                 expected = sn.getSecret();
             }
             if (java.util.Arrays.equals(expected, password)) {
@@ -1636,8 +1511,8 @@ public class GXDLMSBase extends GXDLMSSecureServer2
             if (password != null) {
                 actual = new String(password);
             }
-            System.out.println("Password does not match. Actual: '" + actual
-                    + "' Expected: '" + new String(expected) + "'");
+            System.out.println(
+                    "Password does not match. Actual: '" + actual + "' Expected: '" + new String(expected) + "'");
             return SourceDiagnostic.AUTHENTICATION_FAILURE;
         }
         // Other authentication levels are check on phase two.
@@ -1689,8 +1564,7 @@ public class GXDLMSBase extends GXDLMSSecureServer2
      * DLMS client connection failed.
      */
     @Override
-    protected void
-            onInvalidConnection(GXDLMSConnectionEventArgs connectionInfo) {
+    protected void onInvalidConnection(GXDLMSConnectionEventArgs connectionInfo) {
 
     }
 

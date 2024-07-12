@@ -149,8 +149,8 @@ public class GXDateTime {
      * @param millisecond
      *            Used millisecond.
      */
-    public GXDateTime(final int year, final int month, final int day, final int hour,
-            final int minute, final int second, final int millisecond) {
+    public GXDateTime(final int year, final int month, final int day, final int hour, final int minute,
+            final int second, final int millisecond) {
         meterCalendar = Calendar.getInstance();
         init(year, month, day, hour, minute, second, millisecond);
     }
@@ -178,8 +178,8 @@ public class GXDateTime {
      */
     @Deprecated
     @SuppressWarnings("squid:S00107")
-    public GXDateTime(final int year, final int month, final int day, final int hour,
-            final int minute, final int second, final int millisecond, final int timeZone) {
+    public GXDateTime(final int year, final int month, final int day, final int hour, final int minute,
+            final int second, final int millisecond, final int timeZone) {
         meterCalendar = Calendar.getInstance(getTimeZone(timeZone, true));
         init(year, month, day, hour, minute, second, millisecond);
     }
@@ -202,8 +202,8 @@ public class GXDateTime {
      * @param millisecond
      *            Used millisecond.
      */
-    protected void init(final int year, final int month, final int day, final int hour,
-            final int minute, final int second, final int millisecond) {
+    protected void init(final int year, final int month, final int day, final int hour, final int minute,
+            final int second, final int millisecond) {
         int y = year;
         int m = month;
         int d = day;
@@ -295,8 +295,7 @@ public class GXDateTime {
                 if (locale == Locale.ROOT) {
                     sd = new SimpleDateFormat("MM/dd/yyyy HH:mm:ss");
                 } else {
-                    sd = (SimpleDateFormat) DateFormat.getDateTimeInstance(DateFormat.SHORT,
-                            DateFormat.SHORT, locale);
+                    sd = (SimpleDateFormat) DateFormat.getDateTimeInstance(DateFormat.SHORT, DateFormat.SHORT, locale);
                 }
             } else {
                 sd = new SimpleDateFormat();
@@ -357,6 +356,8 @@ public class GXDateTime {
         if (skip == null) {
             skip = new HashSet<DateTimeSkips>();
         }
+        skip.add(DateTimeSkips.DAY_OF_WEEK);
+
         if (extra == null) {
             extra = new HashSet<DateTimeExtraInfo>();
         }
@@ -409,8 +410,8 @@ public class GXDateTime {
                             } else if (tmp.equals("dd") || tmp.equals("d")) {
                                 addTimeZone = false;
                                 skip.add(DateTimeSkips.DAY);
-                            } else if (tmp.equals("h") || tmp.equals("hh") || tmp.equals("HH")
-                                    || tmp.equals("H") || tmp.equals("a")) {
+                            } else if (tmp.equals("h") || tmp.equals("hh") || tmp.equals("HH") || tmp.equals("H")
+                                    || tmp.equals("a")) {
                                 addTimeZone = false;
                                 skip.add(DateTimeSkips.HOUR);
                                 int pos2 = format.indexOf("a");
@@ -426,8 +427,7 @@ public class GXDateTime {
                                 throw new IllegalArgumentException("Invalid date time format.");
                             }
                         } else {
-                            lastFormatIndex =
-                                    format.indexOf(String.valueOf(c), lastFormatIndex + 1);
+                            lastFormatIndex = format.indexOf(String.valueOf(c), lastFormatIndex + 1);
                         }
                     }
                 }
@@ -630,8 +630,7 @@ public class GXDateTime {
      */
     @Deprecated
     public final int getDeviation() {
-        return -((meterCalendar.get(Calendar.ZONE_OFFSET) + meterCalendar.get(Calendar.DST_OFFSET))
-                / 60000);
+        return -((meterCalendar.get(Calendar.ZONE_OFFSET) + meterCalendar.get(Calendar.DST_OFFSET)) / 60000);
     }
 
     /**
@@ -699,8 +698,7 @@ public class GXDateTime {
         return toFormatString(pattern, true, null);
     }
 
-    private String toFormatString(final String pattern, final boolean useLocalTime,
-            final Locale locale) {
+    private String toFormatString(final String pattern, final boolean useLocalTime, final Locale locale) {
         StringBuilder format = new StringBuilder();
         // Separate date and time parts.
         format.append(pattern);
@@ -742,8 +740,7 @@ public class GXDateTime {
             remove(format, "a", false);
             remove(format, "XXX", false);
         }
-        if (getSkip().contains(DateTimeSkips.MILLISECOND)
-                || getMeterCalendar().get(Calendar.MILLISECOND) == 0) {
+        if (getSkip().contains(DateTimeSkips.MILLISECOND) || getMeterCalendar().get(Calendar.MILLISECOND) == 0) {
             replace(format, "SSS");
         } else {
             int index = format.indexOf("ss");
@@ -816,8 +813,7 @@ public class GXDateTime {
                 // Hour is save in 24 format.
                 sd = new SimpleDateFormat("MM/dd/yyyy HH:mm:ss");
             } else {
-                sd = (SimpleDateFormat) DateFormat.getDateTimeInstance(DateFormat.SHORT,
-                        DateFormat.SHORT, locale);
+                sd = (SimpleDateFormat) DateFormat.getDateTimeInstance(DateFormat.SHORT, DateFormat.SHORT, locale);
             }
         } else {
             sd = new SimpleDateFormat();
@@ -835,8 +831,7 @@ public class GXDateTime {
         return sd.format(getMeterCalendar().getTime());
     }
 
-    private void remove(final StringBuilder value, final String tag,
-            final boolean removeSeparator) {
+    private void remove(final StringBuilder value, final String tag, final boolean removeSeparator) {
         int pos = value.indexOf(tag);
         if (pos != -1) {
             int len = pos + tag.length();
@@ -891,8 +886,7 @@ public class GXDateTime {
                 // Hour is save in 24 format.
                 sd = new SimpleDateFormat("MM/dd/yyyy HH:mm:ss");
             } else {
-                sd = (SimpleDateFormat) DateFormat.getDateTimeInstance(DateFormat.SHORT,
-                        DateFormat.MEDIUM, locale);
+                sd = (SimpleDateFormat) DateFormat.getDateTimeInstance(DateFormat.SHORT, DateFormat.MEDIUM, locale);
             }
         } else {
             sd = new SimpleDateFormat();
@@ -937,8 +931,7 @@ public class GXDateTime {
      *            Is UTC deviation used.
      * @return Date time value as a string.
      */
-    private final String toString(final String pattern, final Locale locale,
-            final boolean useLocalTime) {
+    private final String toString(final String pattern, final Locale locale, final boolean useLocalTime) {
         if (!getSkip().isEmpty()) {
             StringBuilder format = new StringBuilder();
             // Separate date and time parts.
@@ -1095,11 +1088,9 @@ public class GXDateTime {
         // Compare hours.
         if (!to.getSkip().contains(DateTimeSkips.HOUR)) {
             if (start.get(Calendar.HOUR_OF_DAY) < cal.get(Calendar.HOUR_OF_DAY)) {
-                diff += (cal.get(Calendar.HOUR_OF_DAY) - start.get(Calendar.HOUR_OF_DAY)) * 60
-                        * 60000L;
+                diff += (cal.get(Calendar.HOUR_OF_DAY) - start.get(Calendar.HOUR_OF_DAY)) * 60 * 60000L;
             } else {
-                diff -= (start.get(Calendar.HOUR_OF_DAY) - cal.get(Calendar.HOUR_OF_DAY)) * 60
-                        * 60000L;
+                diff -= (start.get(Calendar.HOUR_OF_DAY) - cal.get(Calendar.HOUR_OF_DAY)) * 60 * 60000L;
             }
         } else if (diff < 0) {
             diff = 60 * 60000 + diff;
@@ -1107,16 +1098,14 @@ public class GXDateTime {
         // Compare days.
         if (!to.getSkip().contains(DateTimeSkips.DAY)) {
             if (start.get(Calendar.DAY_OF_MONTH) < cal.get(Calendar.DAY_OF_MONTH)) {
-                diff += (cal.get(Calendar.DAY_OF_MONTH) - start.get(Calendar.DAY_OF_MONTH)) * 24
-                        * 60 * 60000;
+                diff += (cal.get(Calendar.DAY_OF_MONTH) - start.get(Calendar.DAY_OF_MONTH)) * 24 * 60 * 60000;
             } else if (start.get(Calendar.DAY_OF_MONTH) != cal.get(Calendar.DAY_OF_MONTH)) {
                 if (!to.getSkip().contains(DateTimeSkips.DAY)) {
-                    diff += (cal.get(Calendar.DAY_OF_MONTH) - start.get(Calendar.DAY_OF_MONTH)) * 24
-                            * 60 * 60000L;
+                    diff += (cal.get(Calendar.DAY_OF_MONTH) - start.get(Calendar.DAY_OF_MONTH)) * 24 * 60 * 60000L;
                 } else {
-                    diff = ((GXCommon.daysInMonth(start.get(Calendar.YEAR),
-                            start.get(Calendar.MONTH)) - start.get(Calendar.DAY_OF_MONTH)
-                            + cal.get(Calendar.DAY_OF_MONTH)) * 24 * 60 * 60000L) + diff;
+                    diff = ((GXCommon.daysInMonth(start.get(Calendar.YEAR), start.get(Calendar.MONTH))
+                            - start.get(Calendar.DAY_OF_MONTH) + cal.get(Calendar.DAY_OF_MONTH)) * 24 * 60 * 60000L)
+                            + diff;
                 }
             }
         } else if (diff < 0) {
@@ -1134,8 +1123,7 @@ public class GXDateTime {
                 }
             }
         } else if (diff < 0) {
-            diff = GXCommon.daysInMonth(start.get(Calendar.YEAR), start.get(Calendar.MONTH)) * 24
-                    * 60 * 60000L + diff;
+            diff = GXCommon.daysInMonth(start.get(Calendar.YEAR), start.get(Calendar.MONTH)) * 24 * 60 * 60000L + diff;
         }
         return diff;
     }

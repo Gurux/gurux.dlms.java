@@ -659,7 +659,7 @@ public final class GXCommon {
             tmp = ((Number) value).longValue();
         }
         String str = Long.toString(tmp, 16).toUpperCase();
-        if (desimals == 0 || str.length() == zeroes.length()) {
+        if (desimals == 0 || str.length() >= desimals || str.length() == zeroes.length()) {
             return str;
         }
         return zeroes.substring(0, desimals - str.length()) + str;

@@ -64,8 +64,7 @@ public class Settings {
     public GXDLMSSecureClient2 client = new GXDLMSSecureClient2(true);
     String invocationCounter;
     // Objects to read.
-    public List<Map.Entry<String, Integer>> readObjects =
-            new ArrayList<Map.Entry<String, Integer>>();
+    public List<Map.Entry<String, Integer>> readObjects = new ArrayList<Map.Entry<String, Integer>>();
 
     // Cache file.
     String outputFile;
@@ -80,54 +79,40 @@ public class Settings {
      * Show help.
      */
     static void showHelp() {
-        System.out.println(
-                "GuruxDlmsSample reads data from the DLMS/COSEM device.");
-        System.out.println(
-                "GuruxDlmsSample -h [Meter IP Address] -p [Meter Port No] -c 16 -s 1 -r sn");
+        System.out.println("GuruxDlmsSample reads data from the DLMS/COSEM device.");
+        System.out.println("GuruxDlmsSample -h [Meter IP Address] -p [Meter Port No] -c 16 -s 1 -r sn");
         System.out.println(" -h \t host name or IP address.");
         System.out.println(" -p \t port number or name (Example: 1000).");
         System.out.println(" -q \t MQTT topic.");
         System.out.println(" -S [COM1:9600:8None1]\t serial port.");
-        System.out.println(
-                " -a \t Authentication (None, Low, High, HighMd5, HighSha1, HighGMac, HighSha256).");
+        System.out.println(" -a \t Authentication (None, Low, High, HighMd5, HighSha1, HighGMac, HighSha256).");
         System.out.println(" -P \t Password for authentication.");
         System.out.println(" -c \t Client address. (Default: 16)");
         System.out.println(" -s \t Server address. (Default: 1)");
         System.out.println(" -n \t Server address as serial number.");
         System.out.println(" -l \t Logical Server address.");
-        System.out.println(
-                " -r [sn, ln]\t Short name or Logical Name (default) referencing is used.");
+        System.out.println(" -r [sn, ln]\t Short name or Logical Name (default) referencing is used.");
+        System.out.println(" -t [Error, Warning, Info, Verbose] Trace messages.");
         System.out
-                .println(" -t [Error, Warning, Info, Verbose] Trace messages.");
-        System.out.println(
-                " -g \"0.0.1.0.0.255:1; 0.0.1.0.0.255:2\" Get selected object(s) with given attribute index.");
+                .println(" -g \"0.0.1.0.0.255:1; 0.0.1.0.0.255:2\" Get selected object(s) with given attribute index.");
         System.out.println(
                 " -C \t Security Level. (None, Authentication, Encrypted, AuthenticationEncryption or DigitallySigned)");
-        System.out.println(
-                " -V \t Security Suite version. (Default: Suite0). (Suite0, Suite1 or Suite2)");
-        System.out.println(
-                " -K \t Used Key agreement scheme (OnePassDiffieHellman or StaticUnifiedModel).");
-        System.out.println(
-                " -v \t Invocation counter data object Logical Name. Ex. 0.0.43.1.1.255");
+        System.out.println(" -V \t Security Suite version. (Default: Suite0). (Suite0, Suite1 or Suite2)");
+        System.out.println(" -K \t Used Key agreement scheme (OnePassDiffieHellman or StaticUnifiedModel).");
+        System.out.println(" -v \t Invocation counter data object Logical Name. Ex. 0.0.43.1.1.255");
         System.out.println(" -I \t Auto increase invoke ID");
-        System.out.println(
-                " -o \t Cache association view to make reading faster. Ex. -o C:\\device.xml");
-        System.out.println(
-                " -T \t System title that is used with chiphering. Ex -T 4775727578313233");
+        System.out.println(" -o \t Cache association view to make reading faster. Ex. -o C:\\device.xml");
+        System.out.println(" -T \t System title that is used with chiphering. Ex -T 4775727578313233");
         System.out.println(
                 " -A \t Authentication key that is used with chiphering. Ex -A D0D1D2D3D4D5D6D7D8D9DADBDCDDDEDF");
         System.out.println(
                 " -B \t Block cipher key that is used with chiphering. Ex -B 000102030405060708090A0B0C0D0E0F");
-        System.out.println(
-                " -D \t Dedicated key that is used with chiphering. Ex -D 00112233445566778899AABBCCDDEEFF");
-        System.out.println(
-                " -d \t Used DLMS standard. Ex -d India (DLMS, India, Italy, SaudiArabia, IDIS)");
-        System.out.println(
-                " -E \t Export client and server certificates from the meter. Ex -E 0.0.43.0.0.255. ");
+        System.out.println(" -D \t Dedicated key that is used with chiphering. Ex -D 00112233445566778899AABBCCDDEEFF");
+        System.out.println(" -d \t Used DLMS standard. Ex -d India (DLMS, India, Italy, SaudiArabia, IDIS)");
+        System.out.println(" -E \t Export client and server certificates from the meter. Ex -E 0.0.43.0.0.255. ");
         System.out.println(
                 " -N \t Generate new client and server certificates and import them to the server. Ex. -N 0.0.43.0.0.255.");
-        System.out.println(
-                " -i \t Used communication interface. Ex. -i WRAPPER.");
+        System.out.println(" -i \t Used communication interface. Ex. -i WRAPPER.");
         System.out.println(" -m \t Used PLC MAC address. Ex. -m 1.");
         System.out.println(" -W \t General Block Transfer window size.");
         System.out.println(" -w \t HDLC Window size. Default is 1");
@@ -136,21 +121,17 @@ public class Settings {
                 " -L \t Manufacturer ID (Flag ID) is used to use manufacturer depending functionality. -L LGZ");
         System.out.println("Example:");
         System.out.println("Read LG device using TCP/IP connection.");
-        System.out.println(
-                "GuruxDlmsSample -r sn -c 16 -s 1 -h [Meter IP Address] -p [Meter Port No]");
+        System.out.println("GuruxDlmsSample -r sn -c 16 -s 1 -h [Meter IP Address] -p [Meter Port No]");
         System.out.println("Read LG device using serial port connection.");
         System.out.println("GuruxDlmsSample -r sn -c 16 -s 1 -S COM1 -i");
         System.out.println("Read Indian device using serial port connection.");
-        System.out.println(
-                "GuruxDlmsSample -S COM1 -c 16 -s 1 -a Low -P [password]");
-        System.out.println(
-                "Read MQTT device -h [Broker address] -q [Topic/meterId]");
+        System.out.println("GuruxDlmsSample -S COM1 -c 16 -s 1 -a Low -P [password]");
+        System.out.println("Read MQTT device -h [Broker address] -q [Topic/meterId]");
     }
 
-    static int getParameters(String[] args, Settings settings)
-            throws IOException {
-        List<GXCmdParameter> parameters = GXCommon.getParameters(args,
-                "h:p:c:s:r:i:It:a:pP:g:S:n:C:v:o:T:A:B:D:d:l:E:V:M:K:N:W:w:f:L:q");
+    static int getParameters(String[] args, Settings settings) throws IOException {
+        List<GXCmdParameter> parameters =
+                GXCommon.getParameters(args, "h:p:c:s:r:i:It:a:pP:g:S:n:C:v:o:T:A:B:D:d:l:E:V:M:K:N:W:w:f:L:q");
         GXNet net = null;
         GXMqtt mqtt = null;
         // Has user give the custom serial port settings or are the default
@@ -164,8 +145,7 @@ public class Settings {
                 } else if ("ln".compareTo(it.getValue()) == 0) {
                     settings.client.setUseLogicalNameReferencing(true);
                 } else {
-                    throw new IllegalArgumentException(
-                            "Invalid reference option.");
+                    throw new IllegalArgumentException("Invalid reference option.");
                 }
                 break;
             case 'h':
@@ -176,8 +156,7 @@ public class Settings {
                 if (settings.media instanceof GXNet) {
                     net = (GXNet) settings.media;
                     net.setHostName(it.getValue());
-                    if (settings.client
-                            .getInterfaceType() == InterfaceType.COAP) {
+                    if (settings.client.getInterfaceType() == InterfaceType.COAP) {
                         net.setProtocol(NetworkType.UDP);
                     }
 
@@ -199,9 +178,8 @@ public class Settings {
                 else if ("Off".compareTo(it.getValue()) == 0)
                     settings.trace = TraceLevel.OFF;
                 else
-                    throw new IllegalArgumentException(
-                            "Invalid Authentication option '" + it.getValue()
-                                    + "'. (Error, Warning, Info, Verbose, Off).");
+                    throw new IllegalArgumentException("Invalid Authentication option '" + it.getValue()
+                            + "'. (Error, Warning, Info, Verbose, Off).");
                 break;
             case 'p':
                 // Port.
@@ -237,8 +215,7 @@ public class Settings {
                 else if ("WRAPPER".equalsIgnoreCase(it.getValue()))
                     settings.client.setInterfaceType(InterfaceType.WRAPPER);
                 else if ("HdlcWithModeE".equalsIgnoreCase(it.getValue()))
-                    settings.client
-                            .setInterfaceType(InterfaceType.HDLC_WITH_MODE_E);
+                    settings.client.setInterfaceType(InterfaceType.HDLC_WITH_MODE_E);
                 else if ("Plc".equalsIgnoreCase(it.getValue()))
                     settings.client.setInterfaceType(InterfaceType.PLC);
                 else if ("PlcHdlc".equalsIgnoreCase(it.getValue()))
@@ -246,12 +223,10 @@ public class Settings {
                 else if ("CoAP".equalsIgnoreCase(it.getValue()))
                     settings.client.setInterfaceType(InterfaceType.COAP);
                 else
-                    throw new IllegalArgumentException(
-                            "Invalid interface type option." + it.getValue()
-                                    + " (HDLC, WRAPPER, HdlcWithModeE, Plc, PlcHdlc, CoAP)");
+                    throw new IllegalArgumentException("Invalid interface type option." + it.getValue()
+                            + " (HDLC, WRAPPER, HdlcWithModeE, Plc, PlcHdlc, CoAP)");
 
-                if (modeEDefaultValues && settings.client
-                        .getInterfaceType() == InterfaceType.HDLC_WITH_MODE_E) {
+                if (modeEDefaultValues && settings.client.getInterfaceType() == InterfaceType.HDLC_WITH_MODE_E) {
                     GXSerial serial = (GXSerial) settings.media;
                     serial.setBaudRate(BaudRate.BAUD_RATE_300);
                     serial.setDataBits(7);
@@ -274,74 +249,56 @@ public class Settings {
                 settings.client.getCiphering().getSecurityPolicy().clear();
                 if ("None".compareTo(it.getValue()) == 0) {
                 } else if ("Authentication".compareTo(it.getValue()) == 0) {
-                    settings.client.getCiphering()
-                            .setSecurity(Security.AUTHENTICATION);
+                    settings.client.getCiphering().setSecurity(Security.AUTHENTICATION);
                 } else if ("Encryption".compareTo(it.getValue()) == 0) {
-                    settings.client.getCiphering()
-                            .setSecurity(Security.ENCRYPTION);
-                } else if ("AuthenticationEncryption"
-                        .compareTo(it.getValue()) == 0) {
-                    settings.client.getCiphering()
-                            .setSecurity(Security.AUTHENTICATION_ENCRYPTION);
+                    settings.client.getCiphering().setSecurity(Security.ENCRYPTION);
+                } else if ("AuthenticationEncryption".compareTo(it.getValue()) == 0) {
+                    settings.client.getCiphering().setSecurity(Security.AUTHENTICATION_ENCRYPTION);
                 } else {
-                    throw new IllegalArgumentException(
-                            "Invalid Ciphering option '" + it.getValue()
-                                    + "'. (None, Authentication, Encryption, AuthenticationEncryption)");
+                    throw new IllegalArgumentException("Invalid Ciphering option '" + it.getValue()
+                            + "'. (None, Authentication, Encryption, AuthenticationEncryption)");
                 }
                 break;
             case 'V':
                 if ("None".compareTo(it.getValue()) == 0) {
                 } else if ("Suite0".compareTo(it.getValue()) == 0) {
-                    settings.client.getCiphering()
-                            .setSecuritySuite(SecuritySuite.SUITE_0);
+                    settings.client.getCiphering().setSecuritySuite(SecuritySuite.SUITE_0);
                 } else if ("Suite1".compareTo(it.getValue()) == 0) {
-                    settings.client.getCiphering()
-                            .setSecuritySuite(SecuritySuite.SUITE_1);
+                    settings.client.getCiphering().setSecuritySuite(SecuritySuite.SUITE_1);
                 } else if ("Suite2".compareTo(it.getValue()) == 0) {
-                    settings.client.getCiphering()
-                            .setSecuritySuite(SecuritySuite.SUITE_2);
+                    settings.client.getCiphering().setSecuritySuite(SecuritySuite.SUITE_2);
                 } else {
                     throw new IllegalArgumentException(
-                            "Invalid Ciphering option '" + it.getValue()
-                                    + "'. (Suite0, Suite1, Suite2)");
+                            "Invalid Ciphering option '" + it.getValue() + "'. (Suite0, Suite1, Suite2)");
                 }
                 break;
             case 'K':
                 if ("GeneralSigning".compareTo(it.getValue()) == 0) {
-                    settings.client.getCiphering()
-                            .setSigning(Signing.GENERAL_SIGNING);
-                } else if ("OnePassDiffieHellman"
-                        .compareTo(it.getValue()) == 0) {
-                    settings.client.getCiphering()
-                            .setSigning(Signing.ONE_PASS_DIFFIE_HELLMAN);
+                    settings.client.getCiphering().setSigning(Signing.GENERAL_SIGNING);
+                } else if ("OnePassDiffieHellman".compareTo(it.getValue()) == 0) {
+                    settings.client.getCiphering().setSigning(Signing.ONE_PASS_DIFFIE_HELLMAN);
                 } else if ("StaticUnifiedModel".compareTo(it.getValue()) == 0) {
-                    settings.client.getCiphering()
-                            .setSigning(Signing.STATIC_UNIFIED_MODEL);
+                    settings.client.getCiphering().setSigning(Signing.STATIC_UNIFIED_MODEL);
                 } else {
-                    throw new IllegalArgumentException(
-                            "Invalid Ciphering option '" + it.getValue()
-                                    + "'. (OnePassDiffieHellman, StaticUnifiedModel)");
+                    throw new IllegalArgumentException("Invalid Ciphering option '" + it.getValue()
+                            + "'. (OnePassDiffieHellman, StaticUnifiedModel)");
                 }
                 break;
             case 'T':
-                settings.client.getCiphering()
-                        .setSystemTitle(GXCommon.hexToBytes(it.getValue()));
+                settings.client.getCiphering().setSystemTitle(GXCommon.hexToBytes(it.getValue()));
                 break;
             case 'M':
                 settings.client.setServerSystemTitle(
-                        GXCommon.hexToBytes(it.getValue()));
+                settings.client.setServerSystemTitle(GXCommon.hexToBytes(it.getValue()));
                 break;
             case 'A':
-                settings.client.getCiphering().setAuthenticationKey(
-                        GXCommon.hexToBytes(it.getValue()));
+                settings.client.getCiphering().setAuthenticationKey(GXCommon.hexToBytes(it.getValue()));
                 break;
             case 'B':
-                settings.client.getCiphering()
-                        .setBlockCipherKey(GXCommon.hexToBytes(it.getValue()));
+                settings.client.getCiphering().setBlockCipherKey(GXCommon.hexToBytes(it.getValue()));
                 break;
             case 'D':
-                settings.client.getCiphering()
-                        .setDedicatedKey(GXCommon.hexToBytes(it.getValue()));
+                settings.client.getCiphering().setDedicatedKey(GXCommon.hexToBytes(it.getValue()));
                 break;
             case 'N':
                 settings.generateSecuritySetupLN = it.getValue().trim();
@@ -354,18 +311,15 @@ public class Settings {
                 break;
             case 'd':
                 try {
-                    settings.client
-                            .setStandard(Standard.valueOfString(it.getValue()));
+                    settings.client.setStandard(Standard.valueOfString(it.getValue()));
                     if (settings.client.getStandard() == Standard.ITALY
                             || settings.client.getStandard() == Standard.INDIA
-                            || settings.client
-                                    .getStandard() == Standard.SAUDI_ARABIA) {
+                            || settings.client.getStandard() == Standard.SAUDI_ARABIA) {
                         settings.client.setUseUtc2NormalTime(true);
                     }
                 } catch (Exception e) {
-                    throw new IllegalArgumentException(
-                            "Invalid DLMS standard option: '" + it.getValue()
-                                    + "'. (DLMS, India, Italy, SaudiArabia, IDIS)");
+                    throw new IllegalArgumentException("Invalid DLMS standard option: '" + it.getValue()
+                            + "'. (DLMS, India, Italy, SaudiArabia, IDIS)");
                 }
                 break;
             case 'v':
@@ -378,11 +332,10 @@ public class Settings {
                 for (String o : it.getValue().split("[;,]")) {
                     String[] tmp = o.split("[:]");
                     if (tmp.length != 2) {
-                        throw new IllegalArgumentException(
-                                "Invalid Logical name or attribute index.");
+                        throw new IllegalArgumentException("Invalid Logical name or attribute index.");
                     }
-                    settings.readObjects.add(new GXSimpleEntry<String, Integer>(
-                            tmp[0].trim(), Integer.parseInt(tmp[1].trim())));
+                    settings.readObjects
+                            .add(new GXSimpleEntry<String, Integer>(tmp[0].trim(), Integer.parseInt(tmp[1].trim())));
                 }
                 break;
             case 'S':// Serial Port
@@ -392,10 +345,8 @@ public class Settings {
                 serial.setPortName(tmp[0]);
                 if (tmp.length > 1) {
                     modeEDefaultValues = false;
-                    serial.setBaudRate(
-                            BaudRate.forValue(Integer.parseInt(tmp[1])));
-                    serial.setDataBits(
-                            Integer.parseInt(tmp[2].substring(0, 1)));
+                    serial.setBaudRate(BaudRate.forValue(Integer.parseInt(tmp[1])));
+                    serial.setDataBits(Integer.parseInt(tmp[2].substring(0, 1)));
                     String parity = tmp[2].substring(1, tmp[2].length() - 1);
                     if ("NONE".equalsIgnoreCase(parity)) {
                         serial.setParity(Parity.NONE);
@@ -408,12 +359,10 @@ public class Settings {
                     } else if ("SPACE".equalsIgnoreCase(parity)) {
                         serial.setParity(Parity.SPACE);
                     }
-                    serial.setStopBits(StopBits.values()[Integer.parseInt(
-                            tmp[2].substring(tmp[2].length() - 1)) - 1]);
+                    serial.setStopBits(StopBits.values()[Integer.parseInt(tmp[2].substring(tmp[2].length() - 1)) - 1]);
 
                 } else {
-                    if (settings.client
-                            .getInterfaceType() == InterfaceType.HDLC_WITH_MODE_E) {
+                    if (settings.client.getInterfaceType() == InterfaceType.HDLC_WITH_MODE_E) {
                         serial.setBaudRate(BaudRate.BAUD_RATE_300);
                         serial.setDataBits(7);
                         serial.setParity(Parity.EVEN);
@@ -428,52 +377,40 @@ public class Settings {
                 break;
             case 'a':
                 try {
-                    settings.client.setAuthentication(
-                            Authentication.valueOfString(it.getValue()));
+                    settings.client.setAuthentication(Authentication.valueOfString(it.getValue()));
                 } catch (Exception e) {
-                    throw new IllegalArgumentException(
-                            "Invalid Authentication option: '" + it.getValue()
-                                    + "'. (None, Low, High, HighMd5, HighSha1, HighGmac, HighSha256, HighECDSA)");
+                    throw new IllegalArgumentException("Invalid Authentication option: '" + it.getValue()
+                            + "'. (None, Low, High, HighMd5, HighSha1, HighGmac, HighSha256, HighECDSA)");
                 }
                 break;
             case 'c':
-                settings.client
-                        .setClientAddress(Integer.parseInt(it.getValue()));
+                settings.client.setClientAddress(Integer.parseInt(it.getValue()));
                 break;
             case 's':
                 if (settings.client.getServerAddress() != 1) {
-                    settings.client
-                            .setServerAddress(GXDLMSClient.getServerAddress(
-                                    settings.client.getServerAddress(),
-                                    Integer.parseInt(it.getValue())));
+                    settings.client.setServerAddress(GXDLMSClient.getServerAddress(settings.client.getServerAddress(),
+                            Integer.parseInt(it.getValue())));
                 } else {
-                    settings.client
-                            .setServerAddress(Integer.parseInt(it.getValue()));
+                    settings.client.setServerAddress(Integer.parseInt(it.getValue()));
                 }
                 break;
             case 'l':
-                settings.client.setServerAddress(GXDLMSClient.getServerAddress(
-                        Integer.parseInt(it.getValue()),
+                settings.client.setServerAddress(GXDLMSClient.getServerAddress(Integer.parseInt(it.getValue()),
                         settings.client.getServerAddress()));
                 break;
             case 'n':
-                settings.client.setServerAddress(GXDLMSClient
-                        .getServerAddress(Integer.parseInt(it.getValue())));
+                settings.client.setServerAddress(GXDLMSClient.getServerAddress(Integer.parseInt(it.getValue())));
                 break;
             case 'W':
                 settings.client.setGbtWindowSize(Byte.parseByte(it.getValue()));
                 break;
             case 'w':
-                settings.client.getHdlcSettings()
-                        .setWindowSizeRX(Integer.parseInt(it.getValue()));
-                settings.client.getHdlcSettings()
-                        .setWindowSizeTX(Integer.parseInt(it.getValue()));
+                settings.client.getHdlcSettings().setWindowSizeRX(Integer.parseInt(it.getValue()));
+                settings.client.getHdlcSettings().setWindowSizeTX(Integer.parseInt(it.getValue()));
                 break;
             case 'f':
-                settings.client.getHdlcSettings()
-                        .setMaxInfoRX(Integer.parseInt(it.getValue()));
-                settings.client.getHdlcSettings()
-                        .setMaxInfoTX(Integer.parseInt(it.getValue()));
+                settings.client.getHdlcSettings().setMaxInfoRX(Integer.parseInt(it.getValue()));
+                settings.client.getHdlcSettings().setMaxInfoTX(Integer.parseInt(it.getValue()));
                 break;
             case 'L':
                 settings.client.setManufacturerId(it.getValue());
@@ -482,65 +419,45 @@ public class Settings {
             case '?':
                 switch (it.getTag()) {
                 case 'c':
-                    throw new IllegalArgumentException(
-                            "Missing mandatory client option.");
+                    throw new IllegalArgumentException("Missing mandatory client option.");
                 case 's':
-                    throw new IllegalArgumentException(
-                            "Missing mandatory server option.");
+                    throw new IllegalArgumentException("Missing mandatory server option.");
                 case 'h':
-                    throw new IllegalArgumentException(
-                            "Missing mandatory host name option.");
+                    throw new IllegalArgumentException("Missing mandatory host name option.");
                 case 'p':
-                    throw new IllegalArgumentException(
-                            "Missing mandatory port option.");
+                    throw new IllegalArgumentException("Missing mandatory port option.");
                 case 'r':
-                    throw new IllegalArgumentException(
-                            "Missing mandatory reference option.");
+                    throw new IllegalArgumentException("Missing mandatory reference option.");
                 case 'a':
-                    throw new IllegalArgumentException(
-                            "Missing mandatory authentication option.");
+                    throw new IllegalArgumentException("Missing mandatory authentication option.");
                 case 'S':
-                    throw new IllegalArgumentException(
-                            "Missing mandatory Serial port option.\n");
+                    throw new IllegalArgumentException("Missing mandatory Serial port option.\n");
                 case 't':
-                    throw new IllegalArgumentException(
-                            "Missing mandatory trace option.\n");
+                    throw new IllegalArgumentException("Missing mandatory trace option.\n");
                 case 'g':
-                    throw new IllegalArgumentException(
-                            "Missing mandatory OBIS code option.");
+                    throw new IllegalArgumentException("Missing mandatory OBIS code option.");
                 case 'C':
-                    throw new IllegalArgumentException(
-                            "Missing mandatory Ciphering option.");
+                    throw new IllegalArgumentException("Missing mandatory Ciphering option.");
                 case 'v':
-                    throw new IllegalArgumentException(
-                            "Missing mandatory invocation counter logical name option.");
+                    throw new IllegalArgumentException("Missing mandatory invocation counter logical name option.");
                 case 'T':
-                    throw new IllegalArgumentException(
-                            "Missing mandatory system title option.");
+                    throw new IllegalArgumentException("Missing mandatory system title option.");
                 case 'A':
-                    throw new IllegalArgumentException(
-                            "Missing mandatory authentication key option.");
+                    throw new IllegalArgumentException("Missing mandatory authentication key option.");
                 case 'B':
-                    throw new IllegalArgumentException(
-                            "Missing mandatory block cipher key option.");
+                    throw new IllegalArgumentException("Missing mandatory block cipher key option.");
                 case 'D':
-                    throw new IllegalArgumentException(
-                            "Missing mandatory dedicated key option.");
+                    throw new IllegalArgumentException("Missing mandatory dedicated key option.");
                 case 'd':
-                    throw new IllegalArgumentException(
-                            "Missing mandatory DLMS standard option.");
+                    throw new IllegalArgumentException("Missing mandatory DLMS standard option.");
                 case 'K':
-                    throw new IllegalArgumentException(
-                            "Missing mandatory key agreement scheme option.");
+                    throw new IllegalArgumentException("Missing mandatory key agreement scheme option.");
                 case 'l':
-                    throw new IllegalArgumentException(
-                            "Missing mandatory logical server address option.");
+                    throw new IllegalArgumentException("Missing mandatory logical server address option.");
                 case 'i':
-                    throw new IllegalArgumentException(
-                            "Missing mandatory interface type option.");
+                    throw new IllegalArgumentException("Missing mandatory interface type option.");
                 case 'R':
-                    throw new IllegalArgumentException(
-                            "Missing mandatory logical name of security setup object.");
+                    throw new IllegalArgumentException("Missing mandatory logical name of security setup object.");
                 default:
                     showHelp();
                     return 1;

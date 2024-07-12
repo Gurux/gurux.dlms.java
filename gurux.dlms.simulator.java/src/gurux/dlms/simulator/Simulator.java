@@ -83,8 +83,7 @@ public class Simulator {
             throw new RuntimeException("Unknown media type.");
         }
         ////////////////////////////////////////
-        reader = new GXDLMSReader(settings.client, settings.media, settings.trace,
-                settings.invocationCounter);
+        reader = new GXDLMSReader(settings.client, settings.media, settings.trace, settings.invocationCounter);
         try {
             settings.media.open();
         } catch (Exception ex) {
@@ -120,8 +119,7 @@ public class Simulator {
                 }
             }
             for (Map.Entry<String, Integer> it : settings.readObjects) {
-                GXDLMSObject obj =
-                        settings.client.getObjects().findByLN(ObjectType.NONE, it.getKey());
+                GXDLMSObject obj = settings.client.getObjects().findByLN(ObjectType.NONE, it.getKey());
                 if ((obj.getAccess(it.getValue()).ordinal() & AccessMode.READ.ordinal()) != 0) {
                     Object val = reader.read(obj, it.getValue());
                     reader.showValue(it.getValue(), val);
@@ -138,13 +136,11 @@ public class Simulator {
     static void startSimulator(final Settings settings) throws Exception {
         if (settings.media instanceof GXSerial) {
             GXDLMSMeter server = new GXDLMSMeter(settings.client.getUseLogicalNameReferencing(),
-                    settings.client.getInterfaceType());
+                    settings.client.getInterfaceType(), settings.client.getManufacturerId());
             if (settings.client.getUseLogicalNameReferencing()) {
-                System.out.println(String.format("Logical Name DLMS Server in serial port %1$s.",
-                        settings.media));
+                System.out.println(String.format("Logical Name DLMS Server in serial port %1$s.", settings.media));
             } else {
-                System.out.println(String.format("Short Name DLMS Server in serial port %1$s.",
-                        settings.media));
+                System.out.println(String.format("Short Name DLMS Server in serial port %1$s.", settings.media));
             }
             server.initialize(settings.media, settings.trace, settings.inputFile, 1, false);
             System.out.println("----------------------------------------------------------");
@@ -174,57 +170,50 @@ public class Simulator {
             GXNet net = (GXNet) settings.media;
             net.setServer(true);
             if (settings.exclusive) {
-                System.out.println(str
-                        + String.format("simulator start in port %1$d implementing %2$d meters.",
-                                net.getPort(), settings.serverCount));
+                System.out.println(str + String.format("simulator start in port %1$d implementing %2$d meters.",
+                        net.getPort(), settings.serverCount));
             } else {
-                System.out.println(str + String.format("simulator start in ports %1$d-%2$d.",
-                        net.getPort(), net.getPort() + settings.serverCount - 1));
+                System.out.println(str + String.format("simulator start in ports %1$d-%2$d.", net.getPort(),
+                        net.getPort() + settings.serverCount - 1));
             }
             for (int pos = 0; pos != settings.serverCount; ++pos) {
                 GXDLMSMeter server = new GXDLMSMeter(settings.client.getUseLogicalNameReferencing(),
-                        settings.client.getInterfaceType());
+                        settings.client.getInterfaceType(), settings.client.getManufacturerId());
                 servers.add(server);
                 if (settings.exclusive) {
-                    server.initialize(net, settings.trace, settings.inputFile, pos + 1,
-                            settings.exclusive);
+                    server.initialize(net, settings.trace, settings.inputFile, pos + 1, settings.exclusive);
                 } else {
-                    server.initialize(new GXNet(net.getProtocol(), net.getPort() + pos),
-                            settings.trace, settings.inputFile, pos + 1, settings.exclusive);
+                    server.initialize(new GXNet(net.getProtocol(), net.getPort() + pos), settings.trace,
+                            settings.inputFile, pos + 1, settings.exclusive);
                 }
                 if (pos == 0 && settings.client.getUseLogicalNameReferencing()) {
                     str = "Server address: " + String.valueOf(settings.client.getServerAddress());
                     System.out.println(str);
                     System.out.println("Associations:");
-                    for (GXDLMSObject tmp : server.getItems()
-                            .getObjects(ObjectType.ASSOCIATION_LOGICAL_NAME)) {
+                    for (GXDLMSObject tmp : server.getItems().getObjects(ObjectType.ASSOCIATION_LOGICAL_NAME)) {
                         GXDLMSAssociationLogicalName it = (GXDLMSAssociationLogicalName) tmp;
                         str = "++++++++++++++++++++++++++++" + System.lineSeparator();
                         // Overwrite the password.
-                        if (settings.client.getPassword() != null
-                                && settings.client.getPassword().length != 0) {
+                        if (settings.client.getPassword() != null && settings.client.getPassword().length != 0) {
                             it.setSecret(settings.client.getPassword());
                         }
                         str += "Client address: " + String.valueOf(it.getClientSAP());
-                        if (it.getAuthenticationMechanismName()
-                                .getMechanismId() == Authentication.NONE) {
+                        if (it.getAuthenticationMechanismName().getMechanismId() == Authentication.NONE) {
                             str += " Without authentication.";
                         } else {
                             if (it.getSecret() != null) {
-                                str += String.format(
-                                        " %1$s authentication, Client address: %2$s, password: %3$s",
-                                        it.getAuthenticationMechanismName().getMechanismId(),
-                                        it.getClientSAP(), new String(it.getSecret()));
+                                str += String.format(" %1$s authentication, Client address: %2$s, password: %3$s",
+                                        it.getAuthenticationMechanismName().getMechanismId(), it.getClientSAP(),
+                                        new String(it.getSecret()));
                             }
                         }
                         str += System.lineSeparator() + " Conformance:" + System.lineSeparator();
                         str += it.getXDLMSContextInfo().getConformance() + System.lineSeparator();
-                        str += " MaxReceivePduSize: "
-                                + it.getXDLMSContextInfo().getMaxReceivePduSize();
+                        str += " MaxReceivePduSize: " + it.getXDLMSContextInfo().getMaxReceivePduSize();
                         str += " MaxSendPduSize: " + it.getXDLMSContextInfo().getMaxSendPduSize()
                                 + System.lineSeparator();
-                        GXDLMSSecuritySetup ss = (GXDLMSSecuritySetup) server.getItems().findByLN(
-                                ObjectType.SECURITY_SETUP, it.getSecuritySetupReference());
+                        GXDLMSSecuritySetup ss = (GXDLMSSecuritySetup) server.getItems()
+                                .findByLN(ObjectType.SECURITY_SETUP, it.getSecuritySetupReference());
                         if (ss != null) {
                             str += System.lineSeparator();
                             str += " Security suite: " + ss.getSecuritySuite();
@@ -236,8 +225,7 @@ public class Simulator {
                             str += " Block cipher key: " + GXDLMSTranslator.toHex(ss.getGuek());
                             str += System.lineSeparator();
                             if (ss.getGbek() != null) {
-                                str += " Broadcast block cipher key: "
-                                        + GXDLMSTranslator.toHex(ss.getGbek());
+                                str += " Broadcast block cipher key: " + GXDLMSTranslator.toHex(ss.getGbek());
                             }
                             str += System.lineSeparator();
                         }

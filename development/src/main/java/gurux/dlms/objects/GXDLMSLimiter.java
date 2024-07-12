@@ -213,14 +213,32 @@ public class GXDLMSLimiter extends GXDLMSObject implements IGXDLMSBase {
         minUnderThresholdDuration = value;
     }
 
+    /**
+     * @return Emergency profile.
+     */
     public final GXDLMSEmergencyProfile getEmergencyProfile() {
         return emergencyProfile;
     }
 
+    /**
+     * @param value
+     *            Emergency profile.
+     */
+    public final void setEmergencyProfile(final GXDLMSEmergencyProfile value) {
+        emergencyProfile = value;
+    }
+
+    /**
+     * @return Emergency profile group IDs.
+     */
     public final int[] getEmergencyProfileGroupIDs() {
         return emergencyProfileGroupIDs;
     }
 
+    /**
+     * @param value
+     *            Emergency profile group IDs.
+     */
     public final void setEmergencyProfileGroupIDs(final int[] value) {
         emergencyProfileGroupIDs = value;
     }

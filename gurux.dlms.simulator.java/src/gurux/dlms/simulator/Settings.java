@@ -60,8 +60,7 @@ public class Settings {
     public GXDLMSSecureClient client = new GXDLMSSecureClient(true);
     String invocationCounter;
     // Objects to read.
-    public List<Map.Entry<String, Integer>> readObjects =
-            new ArrayList<Map.Entry<String, Integer>>();
+    public List<Map.Entry<String, Integer>> readObjects = new ArrayList<Map.Entry<String, Integer>>();
     public int serverCount = 1;
     // Simulator file.
     public String outputFile = null;
@@ -83,47 +82,39 @@ public class Settings {
         System.out.println(" -w WRAPPER profile is used. HDLC is default.");
         System.out.println(" -S Serial port.");
         System.out.println(" -x input XML file.");
+        System.out.println(" -r [sn, sn]\t Short name or Logican Name (default) referencing is used.");
         System.out.println(
-                " -r [sn, sn]\t Short name or Logican Name (default) referencing is used.");
+                " -L \t Manufacturer ID (Flag ID) is used to use manufacturer depending functionality. -L GRX");
         System.out.println("Example:");
         System.out.println("Start DLMS simulator using TCP/IP.");
         System.out.println("Gurux.Dlms.Simulator.Net -p [Meter Port No] -x meter-template.xml");
-        System.out.println(
-                "------------------------------------------------------------------------");
+        System.out.println("------------------------------------------------------------------------");
         System.out.println("Reading parameters:");
         System.out.println(" -h \t host name or IP address.");
         System.out.println(" -p \t port number or name (Example: 1000).");
         System.out.println(" -S \t serial port.");
         System.out.println(" -i IEC is a start protocol.");
-        System.out.println(
-                " -a \t Authentication (None, Low, High, HighMd5, HighSha1, HighGMac, HighSha256).");
+        System.out.println(" -a \t Authentication (None, Low, High, HighMd5, HighSha1, HighGMac, HighSha256).");
         System.out.println(" -P \t Password for authentication.");
         System.out.println(" -c \t Client address. (Default: 16)");
         System.out.println(" -s \t Server address. (Default: 1)");
         System.out.println(" -n \t Server address as serial number.");
-        System.out.println(
-                " -r [sn, ln]\t Short name or Logical Name (default) referencing is used.");
-        System.out.println(" -w WRAPPER profile is used. HDLC is default.");
+        System.out.println(" -r [sn, ln]\t Short name or Logical Name (default) referencing is used.");
+        System.out.println(" -i \t Used communication interface. Ex. -i WRAPPER.");
         System.out.println(" -t [Error, Warning, Info, Verbose] Trace messages.");
-        System.out.println(
-                " -g \"0.0.1.0.0.255:1; 0.0.1.0.0.255:2\" Get selected object(s) with given attribute index.");
-        System.out.println(
-                " -C \t Security Level. (None, Authentication, Encrypted, AuthenticationEncryption)");
         System.out
-                .println(" -v \t Invocation counter data object Logical Name. Ex. 0.0.43.1.1.255");
+                .println(" -g \"0.0.1.0.0.255:1; 0.0.1.0.0.255:2\" Get selected object(s) with given attribute index.");
+        System.out.println(" -C \t Security Level. (None, Authentication, Encrypted, AuthenticationEncryption)");
+        System.out.println(" -v \t Invocation counter data object Logical Name. Ex. 0.0.43.1.1.255");
         System.out.println(" -I \t Auto increase invoke ID");
-        System.out.println(
-                " -o \t Cache association view to make reading faster. Ex. -o C:\\device.xml");
-        System.out.println(
-                " -T \t System title that is used with chiphering. Ex -D 4775727578313233");
+        System.out.println(" -o \t Cache association view to make reading faster. Ex. -o C:\\device.xml");
+        System.out.println(" -T \t System title that is used with chiphering. Ex -D 4775727578313233");
         System.out.println(
                 " -A \t Authentication key that is used with chiphering. Ex -D D0D1D2D3D4D5D6D7D8D9DADBDCDDDEDF");
         System.out.println(
                 " -B \t Block cipher key that is used with chiphering. Ex -D 000102030405060708090A0B0C0D0E0F");
-        System.out.println(
-                " -D \t Dedicated key that is used with chiphering. Ex -D 00112233445566778899AABBCCDDEEFF");
-        System.out.println(
-                " -d \t Used DLMS standard. Ex -d India (DLMS, India, Italy, SaudiArabia, IDIS)");
+        System.out.println(" -D \t Dedicated key that is used with chiphering. Ex -D 00112233445566778899AABBCCDDEEFF");
+        System.out.println(" -d \t Used DLMS standard. Ex -d India (DLMS, India, Italy, SaudiArabia, IDIS)");
         System.out.println("Example:");
         System.out.println("Read DLMS device using TCP/IP connection.");
         System.out.println(
@@ -131,8 +122,8 @@ public class Settings {
     }
 
     static int getParameters(String[] args, Settings settings) {
-        List<GXCmdParameter> parameters = GXCommon.getParameters(args,
-                "h:p:c:s:r:i:It:a:p:wP:g:S:n:C:v:o:T:A:B:D:d:l:F:r:x:N:Xx:");
+        List<GXCmdParameter> parameters =
+                GXCommon.getParameters(args, "h:p:c:s:r:i:It:a:p:wP:g:S:n:C:v:o:T:A:B:D:d:l:F:r:x:N:Xx:L:");
         GXNet net = null;
         // Has user give the custom serial port settings or are the default
         // values used in mode E.
@@ -172,8 +163,8 @@ public class Settings {
                 else if ("Off".compareTo(it.getValue()) == 0)
                     settings.trace = TraceLevel.OFF;
                 else
-                    throw new IllegalArgumentException("Invalid Trace level option '"
-                            + it.getValue() + "'. (Error, Warning, Info, Verbose, Off).");
+                    throw new IllegalArgumentException("Invalid Trace level option '" + it.getValue()
+                            + "'. (Error, Warning, Info, Verbose, Off).");
                 break;
             case 'p':
                 // Port.
@@ -198,16 +189,16 @@ public class Settings {
                 else if ("PlcHdlc".equalsIgnoreCase(it.getValue()))
                     settings.client.setInterfaceType(InterfaceType.PLC_HDLC);
                 else
-                    throw new IllegalArgumentException("Invalid interface type option."
-                            + it.getValue() + " (HDLC, WRAPPER, HdlcWithModeE, Plc, PlcHdlc)");
-
-                if (modeEDefaultValues
-                        && settings.client.getInterfaceType() == InterfaceType.HDLC_WITH_MODE_E) {
-                    GXSerial serial = (GXSerial) settings.media;
-                    serial.setBaudRate(BaudRate.BAUD_RATE_300);
-                    serial.setDataBits(7);
-                    serial.setParity(Parity.EVEN);
-                    serial.setStopBits(StopBits.ONE);
+                    throw new IllegalArgumentException("Invalid interface type option." + it.getValue()
+                            + " (HDLC, WRAPPER, HdlcWithModeE, Plc, PlcHdlc)");
+                if (modeEDefaultValues && settings.client.getInterfaceType() == InterfaceType.HDLC_WITH_MODE_E) {
+                    if (settings.media instanceof GXSerial) {
+                        GXSerial serial = (GXSerial) settings.media;
+                        serial.setBaudRate(BaudRate.BAUD_RATE_300);
+                        serial.setDataBits(7);
+                        serial.setParity(Parity.EVEN);
+                        serial.setStopBits(StopBits.ONE);
+                    }
                 }
                 settings.client.getPlc().reset();
                 break;
@@ -233,19 +224,16 @@ public class Settings {
                 settings.client.getCiphering().setSystemTitle(GXCommon.hexToBytes(it.getValue()));
                 break;
             case 'A':
-                settings.client.getCiphering()
-                        .setAuthenticationKey(GXCommon.hexToBytes(it.getValue()));
+                settings.client.getCiphering().setAuthenticationKey(GXCommon.hexToBytes(it.getValue()));
                 break;
             case 'B':
-                settings.client.getCiphering()
-                        .setBlockCipherKey(GXCommon.hexToBytes(it.getValue()));
+                settings.client.getCiphering().setBlockCipherKey(GXCommon.hexToBytes(it.getValue()));
                 break;
             case 'D':
                 settings.client.getCiphering().setDedicatedKey(GXCommon.hexToBytes(it.getValue()));
                 break;
             case 'F':
-                settings.client.getCiphering()
-                        .setInvocationCounter(Integer.parseInt(it.getValue().trim()));
+                settings.client.getCiphering().setInvocationCounter(Integer.parseInt(it.getValue().trim()));
                 break;
             case 'o':
                 settings.outputFile = it.getValue();
@@ -262,8 +250,8 @@ public class Settings {
                         settings.client.setUseUtc2NormalTime(true);
                     }
                 } catch (Exception e) {
-                    throw new IllegalArgumentException("Invalid DLMS standard option: '"
-                            + it.getValue() + "'. (DLMS, India, Italy, SaudiArabia, IDIS)");
+                    throw new IllegalArgumentException("Invalid DLMS standard option: '" + it.getValue()
+                            + "'. (DLMS, India, Italy, SaudiArabia, IDIS)");
                 }
                 break;
             case 'N':
@@ -282,11 +270,10 @@ public class Settings {
                 for (String o : it.getValue().split("[;,]")) {
                     String[] tmp = o.split("[:]");
                     if (tmp.length != 2) {
-                        throw new IllegalArgumentException(
-                                "Invalid Logical name or attribute index.");
+                        throw new IllegalArgumentException("Invalid Logical name or attribute index.");
                     }
-                    settings.readObjects.add(new GXSimpleEntry<String, Integer>(tmp[0].trim(),
-                            Integer.parseInt(tmp[1].trim())));
+                    settings.readObjects
+                            .add(new GXSimpleEntry<String, Integer>(tmp[0].trim(), Integer.parseInt(tmp[1].trim())));
                 }
                 break;
             case 'S':// Serial Port
@@ -310,8 +297,7 @@ public class Settings {
                     } else if ("SPACE".equalsIgnoreCase(parity)) {
                         serial.setParity(Parity.SPACE);
                     }
-                    serial.setStopBits(StopBits
-                            .values()[Integer.parseInt(tmp[2].substring(tmp[2].length() - 1)) - 1]);
+                    serial.setStopBits(StopBits.values()[Integer.parseInt(tmp[2].substring(tmp[2].length() - 1)) - 1]);
 
                 } else {
                     if (settings.client.getInterfaceType() == InterfaceType.HDLC_WITH_MODE_E) {
@@ -331,8 +317,7 @@ public class Settings {
                 try {
                     settings.client.setAuthentication(Authentication.valueOfString(it.getValue()));
                 } catch (Exception e) {
-                    throw new IllegalArgumentException("Invalid Authentication option: '"
-                            + it.getValue()
+                    throw new IllegalArgumentException("Invalid Authentication option: '" + it.getValue()
                             + "'. (None, Low, High, HighMd5, HighSha1, HighGmac, HighSha256)");
                 }
                 break;
@@ -343,12 +328,14 @@ public class Settings {
                 settings.client.setServerAddress(Integer.parseInt(it.getValue()));
                 break;
             case 'l':
-                settings.client.setServerAddress(GXDLMSClient.getServerAddress(
-                        Integer.parseInt(it.getValue()), settings.client.getServerAddress()));
+                settings.client.setServerAddress(GXDLMSClient.getServerAddress(Integer.parseInt(it.getValue()),
+                        settings.client.getServerAddress()));
                 break;
             case 'n':
-                settings.client.setServerAddress(
-                        GXDLMSClient.getServerAddress(Integer.parseInt(it.getValue())));
+                settings.client.setServerAddress(GXDLMSClient.getServerAddress(Integer.parseInt(it.getValue())));
+                break;
+            case 'L':
+                settings.client.setManufacturerId(it.getValue());
                 break;
             case '?':
                 switch (it.getTag()) {
@@ -373,16 +360,13 @@ public class Settings {
                 case 'C':
                     throw new IllegalArgumentException("Missing mandatory Ciphering option.");
                 case 'v':
-                    throw new IllegalArgumentException(
-                            "Missing mandatory invocation counter logical name option.");
+                    throw new IllegalArgumentException("Missing mandatory invocation counter logical name option.");
                 case 'T':
                     throw new IllegalArgumentException("Missing mandatory system title option.");
                 case 'A':
-                    throw new IllegalArgumentException(
-                            "Missing mandatory authentication key option.");
+                    throw new IllegalArgumentException("Missing mandatory authentication key option.");
                 case 'B':
-                    throw new IllegalArgumentException(
-                            "Missing mandatory block cipher key option.");
+                    throw new IllegalArgumentException("Missing mandatory block cipher key option.");
                 case 'D':
                     throw new IllegalArgumentException("Missing mandatory dedicated key option.");
                 case 'd':

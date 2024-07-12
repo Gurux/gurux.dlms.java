@@ -214,10 +214,26 @@ public abstract class GXDLMSServer2 {
     }
 
     /**
+     * @param value
+     *            HDLC settings.
+     */
+    public void setHdlc(final GXDLMSHdlcSetup value) {
+        getSettings().setHdlc(value);
+    }
+
+    /**
      * @return HDLC settings.
      */
     public final GXDLMSHdlcSetup getHdlc() {
         return getSettings().getHdlc();
+    }
+
+    /**
+     * @param value
+     *            Wrapper settings.
+     */
+    public void setWrapper(final GXDLMSTcpUdpSetup value) {
+        getSettings().setWrapper(value);
     }
 
     /**
@@ -557,9 +573,9 @@ public abstract class GXDLMSServer2 {
      * @throws SignatureException
      *             Signature exception.
      */
-    public final byte[] handleRequest(final byte[] buff) throws InvalidKeyException,
-            NoSuchAlgorithmException, NoSuchPaddingException, InvalidAlgorithmParameterException,
-            IllegalBlockSizeException, BadPaddingException, SignatureException {
+    public final byte[] handleRequest(final byte[] buff)
+            throws InvalidKeyException, NoSuchAlgorithmException, NoSuchPaddingException,
+            InvalidAlgorithmParameterException, IllegalBlockSizeException, BadPaddingException, SignatureException {
         return handleRequest(buff, new GXDLMSConnectionEventArgs());
     }
 
@@ -587,10 +603,9 @@ public abstract class GXDLMSServer2 {
      * @throws SignatureException
      *             Signature exception.
      */
-    public final byte[] handleRequest(final byte[] buff,
-            final GXDLMSConnectionEventArgs connectionInfo) throws InvalidKeyException,
-            NoSuchAlgorithmException, NoSuchPaddingException, InvalidAlgorithmParameterException,
-            IllegalBlockSizeException, BadPaddingException, SignatureException {
+    public final byte[] handleRequest(final byte[] buff, final GXDLMSConnectionEventArgs connectionInfo)
+            throws InvalidKeyException, NoSuchAlgorithmException, NoSuchPaddingException,
+            InvalidAlgorithmParameterException, IllegalBlockSizeException, BadPaddingException, SignatureException {
         GXServerReply sr = new GXServerReply(buff);
         sr.setConnectionInfo(connectionInfo);
         base.handleRequest(sr);
@@ -617,9 +632,9 @@ public abstract class GXDLMSServer2 {
      * @throws SignatureException
      *             Signature exception.
      */
-    public final void handleRequest(GXServerReply sr) throws InvalidKeyException,
-            NoSuchAlgorithmException, NoSuchPaddingException, InvalidAlgorithmParameterException,
-            IllegalBlockSizeException, BadPaddingException, SignatureException {
+    public final void handleRequest(GXServerReply sr)
+            throws InvalidKeyException, NoSuchAlgorithmException, NoSuchPaddingException,
+            InvalidAlgorithmParameterException, IllegalBlockSizeException, BadPaddingException, SignatureException {
         base.handleRequest(sr);
     }
 
@@ -647,8 +662,8 @@ public abstract class GXDLMSServer2 {
      * @throws Exception
      *             Server handler occurred exceptions.
      */
-    protected abstract SourceDiagnostic onValidateAuthentication(Authentication authentication,
-            byte[] password) throws Exception;
+    protected abstract SourceDiagnostic onValidateAuthentication(Authentication authentication, byte[] password)
+            throws Exception;
 
     /**
      * Get selected value(s). This is called when example profile generic
@@ -685,8 +700,7 @@ public abstract class GXDLMSServer2 {
      * @throws Exception
      *             Server handler occurred exceptions.
      */
-    protected abstract GXDLMSObject onFindObject(ObjectType objectType, int sn, String ln)
-            throws Exception;
+    protected abstract GXDLMSObject onFindObject(ObjectType objectType, int sn, String ln) throws Exception;
 
     /**
      * Called before read is executed.
@@ -747,8 +761,7 @@ public abstract class GXDLMSServer2 {
      * @throws Exception
      *             Server handler occurred exceptions.
      */
-    protected abstract void onInvalidConnection(GXDLMSConnectionEventArgs connectionInfo)
-            throws Exception;
+    protected abstract void onInvalidConnection(GXDLMSConnectionEventArgs connectionInfo) throws Exception;
 
     /**
      * Server has close the connection. All clean up is made here.
@@ -758,8 +771,7 @@ public abstract class GXDLMSServer2 {
      * @throws Exception
      *             Server handler occurred exceptions.
      */
-    protected abstract void onDisconnected(GXDLMSConnectionEventArgs connectionInfo)
-            throws Exception;
+    protected abstract void onDisconnected(GXDLMSConnectionEventArgs connectionInfo) throws Exception;
 
     /**
      * Get attribute access mode.
@@ -852,12 +864,11 @@ public abstract class GXDLMSServer2 {
      */
     public final byte[][] generateDataNotificationMessages(final Date time, final GXByteBuffer data)
             throws InvalidKeyException, NoSuchAlgorithmException, NoSuchPaddingException,
-            InvalidAlgorithmParameterException, IllegalBlockSizeException, BadPaddingException,
-            SignatureException {
+            InvalidAlgorithmParameterException, IllegalBlockSizeException, BadPaddingException, SignatureException {
         List<byte[]> reply;
         if (getUseLogicalNameReferencing()) {
-            GXDLMSLNParameters p = new GXDLMSLNParameters(getSettings(), 0,
-                    Command.DATA_NOTIFICATION, 0, null, data, 0xff, Command.NONE);
+            GXDLMSLNParameters p = new GXDLMSLNParameters(getSettings(), 0, Command.DATA_NOTIFICATION, 0, null, data,
+                    0xff, Command.NONE);
             if (time == null) {
                 p.setTime(null);
             } else {
@@ -865,14 +876,12 @@ public abstract class GXDLMSServer2 {
             }
             reply = GXDLMS.getLnMessages(p);
         } else {
-            GXDLMSSNParameters p = new GXDLMSSNParameters(getSettings(), Command.DATA_NOTIFICATION,
-                    1, 0, data, null);
+            GXDLMSSNParameters p = new GXDLMSSNParameters(getSettings(), Command.DATA_NOTIFICATION, 1, 0, data, null);
             reply = GXDLMS.getSnMessages(p);
         }
         if (!getSettings().getNegotiatedConformance().contains(Conformance.GENERAL_BLOCK_TRANSFER)
                 && reply.size() != 1) {
-            throw new IllegalArgumentException(
-                    "Data is not fit to one PDU. Use general block transfer.");
+            throw new IllegalArgumentException("Data is not fit to one PDU. Use general block transfer.");
         }
         return reply.toArray(new byte[0][0]);
     }
@@ -902,8 +911,7 @@ public abstract class GXDLMSServer2 {
      */
     public final byte[][] generatePushSetupMessages(final Date date, final GXDLMSPushSetup push)
             throws InvalidKeyException, NoSuchAlgorithmException, NoSuchPaddingException,
-            InvalidAlgorithmParameterException, IllegalBlockSizeException, BadPaddingException,
-            SignatureException {
+            InvalidAlgorithmParameterException, IllegalBlockSizeException, BadPaddingException, SignatureException {
         if (push == null) {
             throw new IllegalArgumentException("push");
         }
@@ -945,15 +953,14 @@ public abstract class GXDLMSServer2 {
      */
     public boolean isChangedWithAction(ObjectType objectType, int methodIndex) {
         if ((objectType == ObjectType.ASSOCIATION_LOGICAL_NAME && methodIndex != 1)
-                || (objectType == ObjectType.SECURITY_SETUP && (methodIndex == 1 || methodIndex == 4
-                        || methodIndex == 6 || methodIndex == 7 || methodIndex == 8))) {
+                || (objectType == ObjectType.SECURITY_SETUP && (methodIndex == 1 || methodIndex == 4 || methodIndex == 6
+                        || methodIndex == 7 || methodIndex == 8))) {
             return true;
         }
         // SAP assignment is added or removed.
         return objectType == ObjectType.SAP_ASSIGNMENT ||
         // Connection state is changed.
-                objectType == ObjectType.DISCONNECT_CONTROL
-                || objectType == ObjectType.SPECIAL_DAYS_TABLE
+                objectType == ObjectType.DISCONNECT_CONTROL || objectType == ObjectType.SPECIAL_DAYS_TABLE
                 || objectType == ObjectType.REGISTER_ACTIVATION;
     }
 }
