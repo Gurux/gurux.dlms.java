@@ -86,10 +86,12 @@ public class GXDLMSNotify {
      * @param interfaceType
      *            Object type.
      */
-    public GXDLMSNotify(final boolean useLogicalNameReferencing, final int clientAddress,
-            final int serverAddress, final InterfaceType interfaceType) {
-        settings = new GXDLMSSettings(true,
-                this instanceof IGXCryptoNotifier ? (IGXCryptoNotifier) this : null);
+    public GXDLMSNotify(final boolean useLogicalNameReferencing, final int clientAddress, final int serverAddress,
+            final InterfaceType interfaceType) {
+        IGXCryptoNotifier notifier1 = this instanceof IGXCryptoNotifier ? (IGXCryptoNotifier) this : null;
+        IGXCustomObjectNotifier notifier2 =
+                this instanceof IGXCustomObjectNotifier ? (IGXCustomObjectNotifier) this : null;
+        settings = new GXDLMSSettings(true, notifier1, notifier2);
         setUseLogicalNameReferencing(useLogicalNameReferencing);
         settings.setClientAddress(clientAddress);
         settings.setServerAddress(serverAddress);
@@ -256,8 +258,7 @@ public class GXDLMSNotify {
      */
     public final boolean getData(final GXByteBuffer reply, final GXReplyData data)
             throws InvalidKeyException, NoSuchAlgorithmException, NoSuchPaddingException,
-            InvalidAlgorithmParameterException, IllegalBlockSizeException, BadPaddingException,
-            SignatureException {
+            InvalidAlgorithmParameterException, IllegalBlockSizeException, BadPaddingException, SignatureException {
         return GXDLMS.getData(settings, reply, data, null);
     }
 
@@ -327,8 +328,7 @@ public class GXDLMSNotify {
      */
     public final byte[][] generateDataNotificationMessages(final Date time, final byte[] data)
             throws InvalidKeyException, NoSuchAlgorithmException, NoSuchPaddingException,
-            InvalidAlgorithmParameterException, IllegalBlockSizeException, BadPaddingException,
-            SignatureException {
+            InvalidAlgorithmParameterException, IllegalBlockSizeException, BadPaddingException, SignatureException {
         return generateDataNotificationMessages(time, new GXByteBuffer(data));
     }
 
@@ -357,12 +357,11 @@ public class GXDLMSNotify {
      */
     public final byte[][] generateDataNotificationMessages(final Date time, final GXByteBuffer data)
             throws InvalidKeyException, NoSuchAlgorithmException, NoSuchPaddingException,
-            InvalidAlgorithmParameterException, IllegalBlockSizeException, BadPaddingException,
-            SignatureException {
+            InvalidAlgorithmParameterException, IllegalBlockSizeException, BadPaddingException, SignatureException {
         List<byte[]> reply;
         if (getUseLogicalNameReferencing()) {
-            GXDLMSLNParameters p = new GXDLMSLNParameters(settings, 0, Command.DATA_NOTIFICATION, 0,
-                    null, data, 0xff, Command.NONE);
+            GXDLMSLNParameters p =
+                    new GXDLMSLNParameters(settings, 0, Command.DATA_NOTIFICATION, 0, null, data, 0xff, Command.NONE);
             if (time == null) {
                 p.setTime(null);
             } else {
@@ -370,14 +369,11 @@ public class GXDLMSNotify {
             }
             reply = GXDLMS.getLnMessages(p);
         } else {
-            GXDLMSSNParameters p =
-                    new GXDLMSSNParameters(settings, Command.DATA_NOTIFICATION, 1, 0, data, null);
+            GXDLMSSNParameters p = new GXDLMSSNParameters(settings, Command.DATA_NOTIFICATION, 1, 0, data, null);
             reply = GXDLMS.getSnMessages(p);
         }
-        if (!settings.getNegotiatedConformance().contains(Conformance.GENERAL_BLOCK_TRANSFER)
-                && reply.size() != 1) {
-            throw new IllegalArgumentException(
-                    "Data is not fit to one PDU. Use general block transfer.");
+        if (!settings.getNegotiatedConformance().contains(Conformance.GENERAL_BLOCK_TRANSFER) && reply.size() != 1) {
+            throw new IllegalArgumentException("Data is not fit to one PDU. Use general block transfer.");
         }
         return reply.toArray(new byte[0][0]);
     }
@@ -406,9 +402,9 @@ public class GXDLMSNotify {
      *             Signature exception.
      */
     public final byte[][] generateDataNotificationMessages(final Date date,
-            final List<Entry<GXDLMSObject, Integer>> objects) throws InvalidKeyException,
-            NoSuchAlgorithmException, NoSuchPaddingException, InvalidAlgorithmParameterException,
-            IllegalBlockSizeException, BadPaddingException, SignatureException {
+            final List<Entry<GXDLMSObject, Integer>> objects)
+            throws InvalidKeyException, NoSuchAlgorithmException, NoSuchPaddingException,
+            InvalidAlgorithmParameterException, IllegalBlockSizeException, BadPaddingException, SignatureException {
         if (objects == null) {
             throw new IllegalArgumentException("objects");
         }
@@ -446,8 +442,7 @@ public class GXDLMSNotify {
      */
     public final byte[][] generatePushSetupMessages(final Date date, final GXDLMSPushSetup push)
             throws InvalidKeyException, NoSuchAlgorithmException, NoSuchPaddingException,
-            InvalidAlgorithmParameterException, IllegalBlockSizeException, BadPaddingException,
-            SignatureException {
+            InvalidAlgorithmParameterException, IllegalBlockSizeException, BadPaddingException, SignatureException {
         if (push == null) {
             throw new IllegalArgumentException("push");
         }
@@ -484,17 +479,15 @@ public class GXDLMSNotify {
                     comp = getObjects().findByLN(ObjectType.forValue(classID),
                             GXCommon.toLogicalName((byte[]) tmp.get(1)));
                     if (comp == null) {
-                        comp = GXDLMSClient.createDLMSObject(classID, 0, 0, tmp.get(1), null, 2);
+                        comp = GXDLMSClient.createDLMSObject(settings, classID, 0, 0, tmp.get(1), null, 2);
                         settings.getObjects().add(comp);
                         c.updateOBISCodeInformation(comp);
                     }
                     if (comp.getClass() != GXDLMSObject.class) {
-                        items.add(new GXSimpleEntry<GXDLMSObject, Integer>(comp,
-                                ((Number) tmp.get(2)).intValue()));
+                        items.add(new GXSimpleEntry<GXDLMSObject, Integer>(comp, ((Number) tmp.get(2)).intValue()));
                     } else {
-                        Logger.getLogger(GXDLMS.class.getName()).log(Level.INFO,
-                                "Unknown object: " + String.valueOf(classID) + " "
-                                        + GXCommon.toLogicalName((byte[]) tmp.get(1)));
+                        Logger.getLogger(GXDLMS.class.getName()).log(Level.INFO, "Unknown object: "
+                                + String.valueOf(classID) + " " + GXCommon.toLogicalName((byte[]) tmp.get(1)));
                     }
                 }
             }
@@ -519,8 +512,7 @@ public class GXDLMSNotify {
                 obj.setValue(settings, e);
                 e.setValue(value);
 
-                e = new ValueEventArgs(settings, items.get(pos).getKey(), items.get(pos).getValue(),
-                        0, null);
+                e = new ValueEventArgs(settings, items.get(pos).getKey(), items.get(pos).getValue(), 0, null);
                 e.setValue(data.get(pos));
                 items.get(pos).getKey().setValue(settings, e);
             }
@@ -536,8 +528,7 @@ public class GXDLMSNotify {
      * @param data
      *            Received data.
      */
-    public final void parsePush(final List<Entry<GXDLMSObject, Integer>> objects,
-            final List<?> data) {
+    public final void parsePush(final List<Entry<GXDLMSObject, Integer>> objects, final List<?> data) {
         GXDLMSObject obj;
         int index;
         DataType dt;
@@ -555,8 +546,7 @@ public class GXDLMSNotify {
             if (value instanceof byte[]) {
                 dt = obj.getUIDataType(index);
                 if (dt != DataType.NONE) {
-                    value = GXDLMSClient.changeType((byte[]) value, dt,
-                            settings.getUseUtc2NormalTime());
+                    value = GXDLMSClient.changeType((byte[]) value, dt, settings.getUseUtc2NormalTime());
                 }
             }
             ValueEventArgs e = new ValueEventArgs(settings, obj, index, 0, null);
@@ -589,16 +579,14 @@ public class GXDLMSNotify {
      * @throws SignatureException
      *             Signature exception.
      */
-    public byte[][] generateReport(final GXDateTime time,
-            final List<Entry<GXDLMSObject, Integer>> list) throws InvalidKeyException,
-            NoSuchAlgorithmException, NoSuchPaddingException, InvalidAlgorithmParameterException,
-            IllegalBlockSizeException, BadPaddingException, SignatureException {
+    public byte[][] generateReport(final GXDateTime time, final List<Entry<GXDLMSObject, Integer>> list)
+            throws InvalidKeyException, NoSuchAlgorithmException, NoSuchPaddingException,
+            InvalidAlgorithmParameterException, IllegalBlockSizeException, BadPaddingException, SignatureException {
         if (list == null || list.size() == 0) {
             throw new IllegalArgumentException("list");
         }
         if (getUseLogicalNameReferencing() && list.size() != 1) {
-            throw new IllegalArgumentException(
-                    "Only one object can send with Event Notification request.");
+            throw new IllegalArgumentException("Only one object can send with Event Notification request.");
         }
 
         GXByteBuffer buff = new GXByteBuffer();
@@ -610,13 +598,13 @@ public class GXDLMSNotify {
                 buff.setUInt8(it.getValue());
                 addData(it.getKey(), it.getValue(), buff);
             }
-            GXDLMSLNParameters p = new GXDLMSLNParameters(settings, 0, Command.EVENT_NOTIFICATION,
-                    0, null, buff, 0xff, Command.NONE);
+            GXDLMSLNParameters p =
+                    new GXDLMSLNParameters(settings, 0, Command.EVENT_NOTIFICATION, 0, null, buff, 0xff, Command.NONE);
             p.setTime(time);
             reply = GXDLMS.getLnMessages(p);
         } else {
-            GXDLMSSNParameters p = new GXDLMSSNParameters(settings, Command.INFORMATION_REPORT,
-                    list.size(), 0xFF, null, buff);
+            GXDLMSSNParameters p =
+                    new GXDLMSSNParameters(settings, Command.INFORMATION_REPORT, list.size(), 0xFF, null, buff);
             for (Entry<GXDLMSObject, Integer> it : list) {
                 // Add variable type.
                 buff.setUInt8(VariableAccessSpecification.VARIABLE_NAME);

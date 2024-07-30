@@ -200,7 +200,10 @@ public class GXDLMSClient {
      */
     public GXDLMSClient(final boolean useLogicalNameReferencing, final int clientAddress, final int serverAddress,
             final Authentication forAuthentication, final String password, final InterfaceType interfaceType) {
-        settings = new GXDLMSSettings(false, this instanceof IGXCryptoNotifier ? (IGXCryptoNotifier) this : null);
+        IGXCryptoNotifier notifier1 = this instanceof IGXCryptoNotifier ? (IGXCryptoNotifier) this : null;
+        IGXCustomObjectNotifier notifier2 =
+                this instanceof IGXCustomObjectNotifier ? (IGXCustomObjectNotifier) this : null;
+        settings = new GXDLMSSettings(false, notifier1, notifier2);
         setUseLogicalNameReferencing(useLogicalNameReferencing);
         setClientAddress(clientAddress);
         setServerAddress(serverAddress);
@@ -1299,6 +1302,8 @@ public class GXDLMSClient {
     /**
      * Reserved for internal use.
      * 
+     * @param settings
+     *            DLMS settings.
      * @param classID
      *            Class ID.
      * @param version
@@ -1311,10 +1316,10 @@ public class GXDLMSClient {
      *            Array of access rights.
      * @return Created COSEM object.
      */
-    static GXDLMSObject createDLMSObject(final int classID, final Object version, final int baseName, final Object ln,
-            final Object accessRights, final int lnVersion) {
+    static GXDLMSObject createDLMSObject(final GXDLMSSettings settings, final int classID, final Object version,
+            final int baseName, final Object ln, final Object accessRights, final int lnVersion) {
         ObjectType type = ObjectType.forValue(classID);
-        GXDLMSObject obj = createObject(type);
+        GXDLMSObject obj = GXDLMS.createObject(settings, type, classID, ((Number) version).intValue());
         updateObjectData(obj, type, version, baseName, (byte[]) ln, accessRights, lnVersion);
         return obj;
     }
@@ -1357,7 +1362,8 @@ public class GXDLMSClient {
             int classID = ((Number) (objects.get(1))).intValue() & 0xFFFF;
             int baseName = ((Number) (objects.get(0))).intValue() & 0xFFFF;
             if (baseName > 0) {
-                GXDLMSObject comp = createDLMSObject(classID, objects.get(2), baseName, objects.get(3), null, 2);
+                GXDLMSObject comp =
+                        createDLMSObject(settings, classID, objects.get(2), baseName, objects.get(3), null, 2);
                 if (!onlyKnownObjects || comp.getClass() != GXDLMSObject.class) {
                     if ((!ignoreInactiveObjects || !"0.0.127.0.0.0".equals(comp.getLogicalName()))) {
                         items.add(comp);
@@ -1553,8 +1559,8 @@ public class GXDLMSClient {
             }
             int classID = ((Number) (objects.get(0))).intValue() & 0xFFFF;
             if (classID > 0) {
-                GXDLMSObject comp =
-                        createDLMSObject(classID, objects.get(1), 0, objects.get(2), objects.get(3), lnVersion);
+                GXDLMSObject comp = createDLMSObject(settings, classID, objects.get(1), 0, objects.get(2),
+                        objects.get(3), lnVersion);
                 if (!onlyKnownObjects || comp.getClass() != GXDLMSObject.class) {
                     if ((!ignoreInactiveObjects || !"0.0.127.0.0.0".equals(comp.getLogicalName()))) {
                         items.add(comp);
@@ -1644,7 +1650,7 @@ public class GXDLMSClient {
      */
     public static Object getValue(final GXByteBuffer data, final boolean useUtc) {
         GXDataInfo info = new GXDataInfo();
-        GXDLMSSettings settings = new GXDLMSSettings(false, null);
+        GXDLMSSettings settings = new GXDLMSSettings(false, null, null);
         settings.setUseUtc2NormalTime(useUtc);
         return GXCommon.getData(settings, data, info);
     }
@@ -1697,7 +1703,7 @@ public class GXDLMSClient {
         if (value == null) {
             return null;
         }
-        GXDLMSSettings settings = new GXDLMSSettings(false, null);
+        GXDLMSSettings settings = new GXDLMSSettings(false, null, null);
         settings.setUseUtc2NormalTime(useUtc);
         return changeType(value, type, settings);
     }
@@ -3003,7 +3009,7 @@ public class GXDLMSClient {
      * @return Created object.
      */
     public static GXDLMSObject createObject(final ObjectType type) {
-        return GXDLMS.createObject(type);
+        return GXDLMS.createObject(null, type, 0, 0);
     }
 
     /**
@@ -3475,7 +3481,7 @@ public class GXDLMSClient {
                     comp = getObjects().findByLN(ObjectType.forValue(classID),
                             GXCommon.toLogicalName((byte[]) tmp.get(1)));
                     if (comp == null) {
-                        comp = GXDLMSClient.createDLMSObject(classID, 0, 0, tmp.get(1), null, 2);
+                        comp = GXDLMSClient.createDLMSObject(settings, classID, 0, 0, tmp.get(1), null, 2);
                         settings.getObjects().add(comp);
                         c.updateOBISCodeInformation(comp);
                     }

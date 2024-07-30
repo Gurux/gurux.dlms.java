@@ -228,10 +228,18 @@ abstract class GXDLMS {
         return value;
     }
 
-    static GXDLMSObject createObject(final ObjectType type) {
+    static GXDLMSObject createObject(final GXDLMSSettings settings, final ObjectType type, final int classID,
+            final int version) {
         // If IC is manufacturer specific or unknown.
         if (type == null) {
-            return new GXDLMSObject();
+            GXDLMSObject obj = null;
+            if (settings.getCustomObjectNotifier() != null) {
+                obj = settings.getCustomObjectNotifier().onObjectCreateEventHandler(classID, version);
+            }
+            if (obj == null) {
+                obj = new GXDLMSObject();
+            }
+            return obj;
         }
         switch (type) {
         case ACTION_SCHEDULE:

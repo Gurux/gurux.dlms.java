@@ -288,7 +288,6 @@ public class Settings {
                 settings.client.getCiphering().setSystemTitle(GXCommon.hexToBytes(it.getValue()));
                 break;
             case 'M':
-                settings.client.setServerSystemTitle(
                 settings.client.setServerSystemTitle(GXCommon.hexToBytes(it.getValue()));
                 break;
             case 'A':

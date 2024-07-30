@@ -49,14 +49,15 @@ import gurux.dlms.GXByteBuffer;
 import gurux.dlms.GXCryptoKeyParameter;
 import gurux.dlms.GXDLMSTranslator;
 import gurux.dlms.IGXCryptoNotifier;
+import gurux.dlms.IGXCustomObjectNotifier;
 import gurux.dlms.asn.GXPkcs8;
 import gurux.dlms.asn.GXx509Certificate;
+import gurux.dlms.objects.GXDLMSObject;
 import gurux.dlms.objects.enums.CertificateType;
 import gurux.dlms.objects.enums.SecuritySuite;
 import gurux.dlms.secure.GXDLMSSecureClient;
 
-public class GXDLMSSecureClient2 extends GXDLMSSecureClient
-        implements IGXCryptoNotifier {
+public class GXDLMSSecureClient2 extends GXDLMSSecureClient implements IGXCryptoNotifier, IGXCustomObjectNotifier {
 
     /**
      * Constructor.
@@ -82,8 +83,7 @@ public class GXDLMSSecureClient2 extends GXDLMSSecureClient
      * @return Path to the certificate file or folder if system title is not
      *         given.
      */
-    private static Path getPath(final SecuritySuite securitySuite,
-            final CertificateType type, final String path,
+    private static Path getPath(final SecuritySuite securitySuite, final CertificateType type, final String path,
             final byte[] systemTitle) {
         String pre;
         Path tmp;
@@ -105,8 +105,7 @@ public class GXDLMSSecureClient2 extends GXDLMSSecureClient
         default:
             throw new RuntimeException("Invalid type.");
         }
-        return Paths.get(tmp.toString(),
-                pre + GXDLMSTranslator.toHex(systemTitle, false) + ".pem");
+        return Paths.get(tmp.toString(), pre + GXDLMSTranslator.toHex(systemTitle, false) + ".pem");
     }
 
     @Override
@@ -124,14 +123,11 @@ public class GXDLMSSecureClient2 extends GXDLMSSecureClient
         try {
             if (args.getEncrypt()) {
                 // Find private key.
-                Path path = getPath(args.getSecuritySuite(),
-                        args.getCertificateType(), "Keys",
-                        args.getSystemTitle());
+                Path path = getPath(args.getSecuritySuite(), args.getCertificateType(), "Keys", args.getSystemTitle());
                 args.setPrivateKey(GXPkcs8.load(path).getPrivateKey());
             } else {
                 // Find public key.
-                Path path = getPath(args.getSecuritySuite(),
-                        args.getCertificateType(), "Certificates",
+                Path path = getPath(args.getSecuritySuite(), args.getCertificateType(), "Certificates",
                         args.getSystemTitle());
                 args.setPublicKey(GXx509Certificate.load(path).getPublicKey());
             }
@@ -140,10 +136,9 @@ public class GXDLMSSecureClient2 extends GXDLMSSecureClient
         }
     }
 
-    private static Cipher getCipher(final GXCryptoKeyParameter p,
-            final boolean encrypt)
-            throws NoSuchAlgorithmException, NoSuchPaddingException,
-            InvalidKeyException, InvalidAlgorithmParameterException {
+    private static Cipher getCipher(final GXCryptoKeyParameter p, final boolean encrypt)
+            throws NoSuchAlgorithmException, NoSuchPaddingException, InvalidKeyException,
+            InvalidAlgorithmParameterException {
         GXByteBuffer iv = new GXByteBuffer();
         if (encrypt) {
             iv.set(p.getSystemTitle());
@@ -200,4 +195,14 @@ public class GXDLMSSecureClient2 extends GXDLMSSecureClient
         }
     }
 
+    /**
+     * Create manufacturer specific custom COSEM object.
+     */
+    @Override
+    public GXDLMSObject onObjectCreateEventHandler(int type, int version) {
+        // if (type == 10006 && version == 1) {
+        // return new ManufacturerSpecificObject();
+        // }
+        return null;
+    }
 }

@@ -317,6 +317,11 @@ public class GXDLMSSettings {
     private final IGXCryptoNotifier cryptoNotifier;
 
     /**
+     * Custom object notifier.
+     */
+    private final IGXCustomObjectNotifier customObjectNotifier;
+
+    /**
      * Block number acknowledged in GBT.
      */
     private int blockNumberAck;
@@ -473,9 +478,10 @@ public class GXDLMSSettings {
     /*
      * Constructor.
      */
-    GXDLMSSettings(final boolean isServer, final IGXCryptoNotifier notifier) {
+    GXDLMSSettings(final boolean isServer, final IGXCryptoNotifier notifier, final IGXCustomObjectNotifier notifier2) {
         server = isServer;
         cryptoNotifier = notifier;
+        customObjectNotifier = notifier2;
         objects = new GXDLMSObjectCollection();
         hdlcSettings = new GXDLMSLimits(this);
         plc = new GXPlcSettings(this);
@@ -1758,5 +1764,12 @@ public class GXDLMSSettings {
      */
     public void setDecryptOnly(final boolean value) {
         decryptOnly = value;
+    }
+
+    /**
+     * @return Custom object notifier.
+     */
+    public IGXCustomObjectNotifier getCustomObjectNotifier() {
+        return customObjectNotifier;
     }
 }
