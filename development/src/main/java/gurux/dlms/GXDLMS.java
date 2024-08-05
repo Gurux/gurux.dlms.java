@@ -231,10 +231,10 @@ abstract class GXDLMS {
     static GXDLMSObject createObject(final GXDLMSSettings settings, final ObjectType type, final int classID,
             final int version) {
         // If IC is manufacturer specific or unknown.
-        if (type == null) {
+        if (type == null || type == ObjectType.NONE) {
             GXDLMSObject obj = null;
             if (settings.getCustomObjectNotifier() != null) {
-                obj = settings.getCustomObjectNotifier().onObjectCreateEventHandler(classID, version);
+                obj = settings.getCustomObjectNotifier().onObjectCreate(classID, version);
             }
             if (obj == null) {
                 obj = new GXDLMSObject();

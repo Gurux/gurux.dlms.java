@@ -2032,7 +2032,11 @@ public class GXDLMSClient {
                 return write(item.getName(), ((String) value).getBytes(), type, item.getObjectType(), index);
             }
         }
-        return write(item.getName(), value, type, item.getObjectType(), index);
+        int objectType = item.getObjectType().getValue();
+        if (objectType == 0) {
+            item.getCustomObjectType();
+        }
+        return write(item.getName(), value, type, objectType, index, 0);
     }
 
     /**
@@ -2068,7 +2072,7 @@ public class GXDLMSClient {
             final ObjectType objectType, final int index)
             throws InvalidKeyException, NoSuchAlgorithmException, NoSuchPaddingException,
             InvalidAlgorithmParameterException, IllegalBlockSizeException, BadPaddingException, SignatureException {
-        return write(name, value, dataType, objectType, index, 0);
+        return write(name, value, dataType, objectType.getValue(), index, 0);
     }
 
     /**
@@ -2099,7 +2103,7 @@ public class GXDLMSClient {
      *             Illegal block size exception.
      * @throws SignatureException
      */
-    final byte[][] write(final Object name, final Object value, final DataType dataType, final ObjectType objectType,
+    final byte[][] write(final Object name, final Object value, final DataType dataType, final int objectType,
             final int index, final int mode)
             throws InvalidKeyException, NoSuchAlgorithmException, NoSuchPaddingException,
             InvalidAlgorithmParameterException, IllegalBlockSizeException, BadPaddingException, SignatureException {
@@ -2120,7 +2124,7 @@ public class GXDLMSClient {
         GXCommon.setData(settings, data, type, value);
         if (getUseLogicalNameReferencing()) {
             // Add CI.
-            attributeDescriptor.setUInt16(objectType.getValue());
+            attributeDescriptor.setUInt16(objectType);
             // Add LN.
             attributeDescriptor.set(GXCommon.logicalNameToBytes((String) name));
             // Attribute ID.
@@ -2349,7 +2353,7 @@ public class GXDLMSClient {
     public final byte[][] read(final Object name, final ObjectType objectType, final int attributeOrdinal)
             throws InvalidKeyException, NoSuchAlgorithmException, NoSuchPaddingException,
             InvalidAlgorithmParameterException, IllegalBlockSizeException, BadPaddingException, SignatureException {
-        return read(name, objectType, attributeOrdinal, null, 0);
+        return read(name, objectType.getValue(), attributeOrdinal, null, 0);
     }
 
     /**
@@ -2369,9 +2373,8 @@ public class GXDLMSClient {
      * @throws SignatureException
      *             Signature exception.
      */
-    private byte[][] read(final Object name, final ObjectType objectType, final int attributeOrdinal,
-            final GXByteBuffer data, final int mode)
-            throws InvalidKeyException, NoSuchAlgorithmException, NoSuchPaddingException,
+    private byte[][] read(final Object name, final int objectType, final int attributeOrdinal, final GXByteBuffer data,
+            final int mode) throws InvalidKeyException, NoSuchAlgorithmException, NoSuchPaddingException,
             InvalidAlgorithmParameterException, IllegalBlockSizeException, BadPaddingException, SignatureException {
         if ((attributeOrdinal < 1)) {
             throw new IllegalArgumentException("Invalid parameter");
@@ -2381,7 +2384,7 @@ public class GXDLMSClient {
         settings.resetBlockIndex();
         if (this.getUseLogicalNameReferencing()) {
             // CI
-            attributeDescriptor.setUInt16(objectType.getValue());
+            attributeDescriptor.setUInt16(objectType);
             // Add LN
             attributeDescriptor.set(GXCommon.logicalNameToBytes((String) name));
             // Attribute ID.
@@ -2442,7 +2445,12 @@ public class GXDLMSClient {
     public final byte[][] read(final GXDLMSObject item, final int attributeOrdinal)
             throws InvalidKeyException, NoSuchAlgorithmException, NoSuchPaddingException,
             InvalidAlgorithmParameterException, IllegalBlockSizeException, BadPaddingException, SignatureException {
-        return read(item.getName(), item.getObjectType(), attributeOrdinal);
+
+        int objectType = item.getObjectType().getValue();
+        if (objectType == 0) {
+            item.getCustomObjectType();
+        }
+        return read(item.getName(), objectType, attributeOrdinal, null, 0);
     }
 
     /**
@@ -2722,7 +2730,7 @@ public class GXDLMSClient {
         GXCommon.setData(settings, buff, DataType.UINT16, columnStart);
         GXCommon.setData(settings, buff, DataType.UINT16, columnEnd);
         int mode = AccessMode3.toInteger(pg.getAccess3(2));
-        return read(pg.getName(), ObjectType.PROFILE_GENERIC, 2, buff, mode);
+        return read(pg.getName(), ObjectType.PROFILE_GENERIC.getValue(), 2, buff, mode);
     }
 
     /**
@@ -2998,7 +3006,7 @@ public class GXDLMSClient {
             }
         }
         int mode = AccessMode3.toInteger(pg.getAccess3(2));
-        return read(pg.getName(), ObjectType.PROFILE_GENERIC, 2, buff, mode);
+        return read(pg.getName(), ObjectType.PROFILE_GENERIC.getValue(), 2, buff, mode);
     }
 
     /**

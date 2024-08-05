@@ -49,5 +49,5 @@ public interface IGXCustomObjectNotifier {
      * @param version
      *            Object Version.
      */
-    GXDLMSObject onObjectCreateEventHandler(int type, int version);
+    GXDLMSObject onObjectCreate(int type, int version);
 };
