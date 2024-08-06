@@ -2034,7 +2034,7 @@ public class GXDLMSClient {
         }
         int objectType = item.getObjectType().getValue();
         if (objectType == 0) {
-            item.getCustomObjectType();
+            objectType = item.getCustomObjectType();
         }
         return write(item.getName(), value, type, objectType, index, 0);
     }
@@ -2448,7 +2448,7 @@ public class GXDLMSClient {
 
         int objectType = item.getObjectType().getValue();
         if (objectType == 0) {
-            item.getCustomObjectType();
+            objectType = item.getCustomObjectType();
         }
         return read(item.getName(), objectType, attributeOrdinal, null, 0);
     }
