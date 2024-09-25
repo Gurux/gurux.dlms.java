@@ -48,9 +48,9 @@ import gurux.dlms.GXByteBuffer;
 import gurux.dlms.GXDLMSTranslator;
 import gurux.dlms.GXReplyData;
 import gurux.dlms.GXSimpleEntry;
-import gurux.dlms.TranslatorOutputType;
 import gurux.dlms.enums.Authentication;
 import gurux.dlms.enums.InterfaceType;
+import gurux.dlms.enums.TranslatorOutputType;
 import gurux.dlms.objects.GXDLMSCaptureObject;
 import gurux.dlms.objects.GXDLMSClock;
 import gurux.dlms.objects.GXDLMSObject;
@@ -63,8 +63,7 @@ import gurux.net.enums.NetworkType;
 /**
  * All example servers are using same objects.
  */
-public class GXDLMSPushListener
-        implements IGXMediaListener, gurux.net.IGXNetListener, AutoCloseable {
+public class GXDLMSPushListener implements IGXMediaListener, gurux.net.IGXNetListener, AutoCloseable {
 
     /**
      * Are messages traced.
@@ -98,21 +97,15 @@ public class GXDLMSPushListener
      * @param port
      *            Listener port.
      */
-    public GXDLMSPushListener(int port, InterfaceType interfaceType)
-            throws Exception {
-        client = new GXDLMSSecureClient(true, 1, 1, Authentication.NONE, null,
-                interfaceType);
-        media = new gurux.net.GXNet(
-                interfaceType == InterfaceType.COAP ? NetworkType.UDP
-                        : NetworkType.TCP,
-                port);
+    public GXDLMSPushListener(int port, InterfaceType interfaceType) throws Exception {
+        client = new GXDLMSSecureClient(true, 1, 1, Authentication.NONE, null, interfaceType);
+        media = new gurux.net.GXNet(interfaceType == InterfaceType.COAP ? NetworkType.UDP : NetworkType.TCP, port);
         media.setTrace(TraceLevel.VERBOSE);
         media.addListener(this);
         media.open();
         // TODO; Must set communication specific settings.
-        push.getPushObjectList()
-                .add(new GXSimpleEntry<GXDLMSObject, GXDLMSCaptureObject>(
-                        new GXDLMSClock(), new GXDLMSCaptureObject(2, 0)));
+        push.getPushObjectList().add(
+                new GXSimpleEntry<GXDLMSObject, GXDLMSCaptureObject>(new GXDLMSClock(), new GXDLMSCaptureObject(2, 0)));
     }
 
     /**
@@ -153,8 +146,7 @@ public class GXDLMSPushListener
 
     public static void printValue(Entry<GXDLMSObject, Integer> it) {
         // Print value
-        System.out.println(it.getKey().getObjectType() + " "
-                + it.getKey().getLogicalName() + " " + it.getValue() + ":"
+        System.out.println(it.getKey().getObjectType() + " " + it.getKey().getLogicalName() + " " + it.getValue() + ":"
                 + it.getKey().getValues()[it.getValue() - 1]);
     }
 
@@ -166,8 +158,7 @@ public class GXDLMSPushListener
         try {
             synchronized (this) {
                 if (trace) {
-                    System.out.println("<- " + gurux.common.GXCommon
-                            .bytesToHex((byte[]) e.getData()));
+                    System.out.println("<- " + gurux.common.GXCommon.bytesToHex((byte[]) e.getData()));
                 }
                 reply.set((byte[]) e.getData());
                 // Example handles only notify messages.
@@ -189,19 +180,15 @@ public class GXDLMSPushListener
                         // client in the received data.
                         // Make clone so we don't replace current values.
                         GXDLMSPushSetup clone = (GXDLMSPushSetup) push.clone();
-                        clone.getPushValues(client,
-                                (List<?>) notify.getValue());
-                        for (Entry<GXDLMSObject, GXDLMSCaptureObject> it : clone
-                                .getPushObjectList()) {
+                        clone.getPushValues(client, (List<?>) notify.getValue());
+                        for (Entry<GXDLMSObject, GXDLMSCaptureObject> it : clone.getPushObjectList()) {
                             int index = it.getValue().getAttributeIndex() - 1;
-                            System.out.println(((IGXDLMSBase) it.getKey())
-                                    .getNames()[index] + ": "
+                            System.out.println(((IGXDLMSBase) it.getKey()).getNames()[index] + ": "
                                     + it.getKey().getValues()[index]);
                         }
                         try {
                             // Show data as XML.
-                            GXDLMSTranslator t = new GXDLMSTranslator(
-                                    TranslatorOutputType.SIMPLE_XML);
+                            GXDLMSTranslator t = new GXDLMSTranslator(TranslatorOutputType.SIMPLE_XML);
                             String xml = t.dataToXml(notify.getData());
                             System.out.println(xml);
                             printData(notify.getValue());
@@ -250,8 +237,7 @@ public class GXDLMSPushListener
      * Client has made connection.
      */
     @Override
-    public void onClientConnected(Object sender,
-            gurux.net.ConnectionEventArgs e) {
+    public void onClientConnected(Object sender, gurux.net.ConnectionEventArgs e) {
         System.out.println("Client Connected.");
     }
 
@@ -259,8 +245,7 @@ public class GXDLMSPushListener
      * Client has close connection.
      */
     @Override
-    public void onClientDisconnected(Object sender,
-            gurux.net.ConnectionEventArgs e) {
+    public void onClientDisconnected(Object sender, gurux.net.ConnectionEventArgs e) {
         // Reset server settings when connection closed.
         System.out.println("Client Disconnected.");
     }
