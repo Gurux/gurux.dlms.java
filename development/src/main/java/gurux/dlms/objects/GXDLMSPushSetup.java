@@ -66,6 +66,7 @@ import gurux.dlms.objects.enums.DataProtectionWrappedKeyType;
 import gurux.dlms.objects.enums.MessageType;
 import gurux.dlms.objects.enums.ProtectionType;
 import gurux.dlms.objects.enums.PushOperationMethod;
+import gurux.dlms.objects.enums.RestrictionType;
 import gurux.dlms.objects.enums.ServiceType;
 
 /**
@@ -483,12 +484,58 @@ public class GXDLMSPushSetup extends GXDLMSObject implements IGXDLMSBase {
             GXCommon.setObjectCount(pushObjectList.size(), buff);
             for (Entry<GXDLMSObject, GXDLMSCaptureObject> it : pushObjectList) {
                 buff.setUInt8(DataType.STRUCTURE.getValue());
-                buff.setUInt8(4);
-                GXCommon.setData(settings, buff, DataType.UINT16, it.getKey().getObjectType().getValue());
-                GXCommon.setData(settings, buff, DataType.OCTET_STRING,
-                        GXCommon.logicalNameToBytes(it.getKey().getLogicalName()));
-                GXCommon.setData(settings, buff, DataType.INT8, it.getValue().getAttributeIndex());
-                GXCommon.setData(settings, buff, DataType.UINT16, it.getValue().getDataIndex());
+                if (version < 1) {
+                    buff.setUInt8(4);
+                    GXCommon.setData(settings, buff, DataType.UINT16, it.getKey().getObjectType().getValue());
+                    GXCommon.setData(settings, buff, DataType.OCTET_STRING,
+                            GXCommon.logicalNameToBytes(it.getKey().getLogicalName()));
+                    GXCommon.setData(settings, buff, DataType.INT8, it.getValue().getAttributeIndex());
+                    GXCommon.setData(settings, buff, DataType.UINT16, it.getValue().getDataIndex());
+                } else {
+                    buff.setUInt8(version == 1 ? 5 : 6);
+                    GXCommon.setData(settings, buff, DataType.UINT16, it.getKey().getObjectType().getValue());
+                    GXCommon.setData(settings, buff, DataType.OCTET_STRING,
+                            GXCommon.logicalNameToBytes(it.getKey().getLogicalName()));
+                    GXCommon.setData(settings, buff, DataType.INT8, it.getValue().getAttributeIndex());
+                    GXCommon.setData(settings, buff, DataType.UINT16, it.getValue().getDataIndex());
+                    GXCommon.setData(settings, buff, DataType.ENUM, it.getValue().getRestriction().getType());
+                    switch (it.getValue().getRestriction().getType()) {
+                    case NONE:
+                        GXCommon.setData(settings, buff, DataType.NONE, null);
+                        break;
+                    case DATE:
+                        buff.setUInt8(DataType.STRUCTURE);
+                        buff.setUInt8(2);
+                        GXCommon.setData(settings, buff, DataType.OCTET_STRING,
+                                it.getValue().getRestriction().getFrom());
+                        GXCommon.setData(settings, buff, DataType.OCTET_STRING, it.getValue().getRestriction().getTo());
+                        break;
+                    case ENTRY:
+                        buff.setUInt8(DataType.STRUCTURE);
+                        buff.setUInt8(2);
+                        GXCommon.setData(settings, buff, DataType.UINT16, it.getValue().getRestriction().getFrom());
+                        GXCommon.setData(settings, buff, DataType.UINT16, it.getValue().getRestriction().getTo());
+                        break;
+                    }
+                    if (version > 1) {
+                        if (it.getValue().getColumns() != null) {
+                            buff.setUInt8(DataType.ARRAY);
+                            GXCommon.setObjectCount(it.getValue().getColumns().size(), buff);
+                            for (Entry<GXDLMSObject, GXDLMSCaptureObject> it2 : it.getValue().getColumns()) {
+                                buff.setUInt8(DataType.STRUCTURE);
+                                buff.setUInt8(4);
+                                GXCommon.setData(settings, buff, DataType.UINT16, it2.getKey().getObjectType());
+                                GXCommon.setData(settings, buff, DataType.OCTET_STRING,
+                                        GXCommon.logicalNameToBytes(it2.getKey().getLogicalName()));
+                                GXCommon.setData(settings, buff, DataType.INT8, it2.getValue().getAttributeIndex());
+                                GXCommon.setData(settings, buff, DataType.UINT16, it2.getValue().getDataIndex());
+                            }
+                        } else {
+                            buff.setUInt8(DataType.ARRAY);
+                            buff.setUInt8(0);
+                        }
+                    }
+                }
             }
             ret = buff.array();
             break;
@@ -618,6 +665,10 @@ public class GXDLMSPushSetup extends GXDLMSObject implements IGXDLMSBase {
                     String ln = GXCommon.toLogicalName(tmp.get(1));
                     GXDLMSObject obj = settings.getObjects().findByLN(type, ln);
                     if (obj == null) {
+                        // Try to find from custom objects.
+                        obj = settings.getObjects().findByLN(type, ln);
+                    }
+                    if (obj == null) {
                         obj = gurux.dlms.GXDLMSClient.createObject(type);
                         obj.setLogicalName(ln);
                     }
@@ -626,6 +677,41 @@ public class GXDLMSPushSetup extends GXDLMSObject implements IGXDLMSBase {
                     co.setDataIndex(((Number) tmp.get(3)).intValue());
                     ent = new GXSimpleEntry<GXDLMSObject, GXDLMSCaptureObject>(obj, co);
                     pushObjectList.add(ent);
+                    if (version > 1) {
+                        GXStructure restriction = (GXStructure) tmp.get(4);
+                        co.getRestriction().setType(RestrictionType.forValue(((Number) restriction.get(0)).intValue()));
+                        switch (co.getRestriction().getType()) {
+                        case NONE:
+                            break;
+                        case DATE:
+                        case ENTRY:
+                            co.getRestriction().setFrom(restriction.get(1));
+                            co.getRestriction().setTo(restriction.get(2));
+                            break;
+                        default:
+                            throw new IllegalArgumentException("Invalid restriction type.");
+                        }
+                        if (tmp.get(5) != null) {
+                            for (Object tmp2 : (GXArray) tmp.get(5)) {
+                                GXStructure c = (GXStructure) tmp2;
+                                type = ObjectType.forValue(((Number) c.get(0)).intValue());
+                                ln = GXCommon.toLogicalName(c.get(1));
+                                obj = settings.getObjects().findByLN(type, ln);
+                                if (obj == null) {
+                                    // Try to find from custom objects.
+                                    obj = settings.getObjects().findByLN(type, ln);
+                                }
+                                if (obj == null) {
+                                    obj = gurux.dlms.GXDLMSClient.createObject(type);
+                                    obj.setLogicalName(ln);
+                                }
+                                co = new GXDLMSCaptureObject();
+                                co.setAttributeIndex(((Number) c.get(2)).intValue());
+                                co.setDataIndex(((Number) c.get(3)).intValue());
+                                co.getColumns().add(new GXSimpleEntry<GXDLMSObject, GXDLMSCaptureObject>(obj, co));
+                            }
+                        }
+                    }
                 }
             }
         } else if (e.getIndex() == 3) {

@@ -39,6 +39,7 @@ import java.util.HashMap;
 import gurux.dlms.enums.AssociationResult;
 import gurux.dlms.enums.InterfaceType;
 import gurux.dlms.enums.SourceDiagnostic;
+import gurux.dlms.enums.TranslatorOutputType;
 import gurux.dlms.secure.GXCiphering;
 
 class GXDLMSXmlSettings {

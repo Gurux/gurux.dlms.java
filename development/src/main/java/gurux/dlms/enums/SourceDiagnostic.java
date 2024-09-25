@@ -50,7 +50,7 @@ public enum SourceDiagnostic {
     /*
      * The application context name is not supported.
      */
-    NOT_SUPPORTED(2),
+    APPLICATION_CONTEXT_NAME_NOT_SUPPORTED(2),
     /**
      * Calling AP title not recognized.
      */
@@ -86,11 +86,11 @@ public enum SourceDiagnostic {
     /*
      * The authentication mechanism name is not recognized.
      */
-    NOT_RECOGNISED(11),
+    AUTHENTICATION_MECHANISM_NAME_NOT_RECOGNIZED(11),
     /*
      * Authentication mechanism name is required.
      */
-    MECHANISM_NAME_REGUIRED(12),
+    AUTHENTICATION_MECHANISM_NAME_REGUIRED(12),
     /*
      * Authentication failure.
      */

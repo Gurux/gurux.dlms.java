@@ -18,7 +18,9 @@ import gurux.dlms.enums.AcseServiceProvider;
 import gurux.dlms.enums.AssociationResult;
 import gurux.dlms.enums.Authentication;
 import gurux.dlms.enums.Command;
+import gurux.dlms.enums.ConfirmedServiceError;
 import gurux.dlms.enums.Conformance;
+import gurux.dlms.enums.ConnectionState;
 import gurux.dlms.enums.DateTimeSkips;
 import gurux.dlms.enums.ErrorCode;
 import gurux.dlms.enums.ExceptionServiceError;
@@ -31,6 +33,7 @@ import gurux.dlms.enums.ObjectType;
 import gurux.dlms.enums.Priority;
 import gurux.dlms.enums.RequestTypes;
 import gurux.dlms.enums.Security;
+import gurux.dlms.enums.Service;
 import gurux.dlms.enums.ServiceClass;
 import gurux.dlms.enums.SourceDiagnostic;
 import gurux.dlms.internal.GXCommon;
@@ -536,7 +539,7 @@ public class GXDLMSServerBase {
                 if (ret instanceof ApplicationContextName) {
                     name = ((ApplicationContextName) ret).ordinal();
                     result = AssociationResult.PERMANENT_REJECTED;
-                    ret = SourceDiagnostic.NOT_SUPPORTED;
+                    ret = SourceDiagnostic.APPLICATION_CONTEXT_NAME_NOT_SUPPORTED;
 
                 } else if (settings.getNegotiatedConformance().isEmpty()) {
                     result = AssociationResult.PERMANENT_REJECTED;
@@ -566,13 +569,13 @@ public class GXDLMSServerBase {
                     error.setUInt8(Initiate.DLMS_VERSION_TOO_LOW.getValue());
                 } else if (SourceDiagnostic.forValue((int) ret) != SourceDiagnostic.NONE) {
                     result = AssociationResult.PERMANENT_REJECTED;
-                    ret = SourceDiagnostic.NOT_SUPPORTED;
+                    ret = SourceDiagnostic.APPLICATION_CONTEXT_NAME_NOT_SUPPORTED;
                     notifyInvalidConnection(connectionInfo);
                 } else {
                     if (owner instanceof GXDLMSServer) {
                         if (getAssignedAssociation() != null && getAssignedAssociation()
                                 .getAuthenticationMechanismName().getMechanismId() != settings.getAuthentication()) {
-                            ret = SourceDiagnostic.NOT_SUPPORTED;
+                            ret = SourceDiagnostic.APPLICATION_CONTEXT_NAME_NOT_SUPPORTED;
                         } else {
                             GXDLMSServer b = (GXDLMSServer) owner;
                             ret = b.validateAuthentication(settings.getAuthentication(), settings.getPassword());
@@ -580,7 +583,7 @@ public class GXDLMSServerBase {
                     } else {
                         if (getAssignedAssociation() != null && getAssignedAssociation()
                                 .getAuthenticationMechanismName().getMechanismId() != settings.getAuthentication()) {
-                            ret = SourceDiagnostic.NOT_SUPPORTED;
+                            ret = SourceDiagnostic.APPLICATION_CONTEXT_NAME_NOT_SUPPORTED;
                         } else {
                             GXDLMSServer2 b = (GXDLMSServer2) owner;
                             ret = b.onValidateAuthentication(settings.getAuthentication(), settings.getPassword());

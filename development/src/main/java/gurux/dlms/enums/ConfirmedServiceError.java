@@ -32,7 +32,7 @@
 // Full text may be retrieved at http://www.gnu.org/licenses/gpl-2.0.txt
 //---------------------------------------------------------------------------
 
-package gurux.dlms;
+package gurux.dlms.enums;
 
 import java.util.HashMap;
 
@@ -108,8 +108,7 @@ public enum ConfirmedServiceError {
     public static ConfirmedServiceError forValue(final int value) {
         ConfirmedServiceError ret = getMappings().get(value);
         if (ret == null) {
-            throw new IllegalArgumentException(
-                    "Invalid confirmed service error enum value.");
+            throw new IllegalArgumentException("Invalid confirmed service error enum value.");
         }
         return ret;
     }

@@ -55,10 +55,13 @@ import gurux.dlms.enums.AssociationResult;
 import gurux.dlms.enums.Authentication;
 import gurux.dlms.enums.BerType;
 import gurux.dlms.enums.Command;
+import gurux.dlms.enums.ConfirmedServiceError;
 import gurux.dlms.enums.Conformance;
 import gurux.dlms.enums.ExceptionServiceError;
 import gurux.dlms.enums.Security;
+import gurux.dlms.enums.Service;
 import gurux.dlms.enums.SourceDiagnostic;
+import gurux.dlms.enums.TranslatorOutputType;
 import gurux.dlms.internal.GXCommon;
 import gurux.dlms.objects.enums.ApplicationContextName;
 import gurux.dlms.secure.AesGcmParameter;
@@ -434,7 +437,7 @@ final class GXAPDU {
             if (tag != 0) {
                 // Return error if ciphering is not used.
                 if (xml == null && (cipher == null || cipher.getSecurity() != Security.AUTHENTICATION_ENCRYPTION)) {
-                    return SourceDiagnostic.NOT_SUPPORTED;
+                    return SourceDiagnostic.APPLICATION_CONTEXT_NAME_NOT_SUPPORTED;
                 }
                 len = data.getUInt8();
                 byte[] tmp = new byte[len];
@@ -919,8 +922,8 @@ final class GXAPDU {
                         default:
                             break;
                         }
-                        throw new GXDLMSException(AssociationResult.PERMANENT_REJECTED, SourceDiagnostic.NOT_SUPPORTED,
-                                msg);
+                        throw new GXDLMSException(AssociationResult.PERMANENT_REJECTED,
+                                SourceDiagnostic.APPLICATION_CONTEXT_NAME_NOT_SUPPORTED, msg);
                     }
                     ret = name;
                 }

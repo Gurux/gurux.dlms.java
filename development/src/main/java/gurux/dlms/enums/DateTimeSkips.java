@@ -82,9 +82,9 @@ public enum DateTimeSkips {
     MILLISECOND(0x80),
 
     /**
-     * Devitation is not used.
+     * Deviation is not used.
      */
-    DEVITATION(0x100),
+    DEVIATION(0x100),
 
     /**
      * Status is not used.
@@ -111,8 +111,8 @@ public enum DateTimeSkips {
      * @return Get enumeration constant values.
      */
     private static DateTimeSkips[] getEnumConstants() {
-        return new DateTimeSkips[] { YEAR, MONTH, DAY, DAY_OF_WEEK, HOUR,
-                MINUTE, SECOND, MILLISECOND, DEVITATION, STATUS };
+        return new DateTimeSkips[] { YEAR, MONTH, DAY, DAY_OF_WEEK, HOUR, MINUTE, SECOND, MILLISECOND, DEVIATION,
+                STATUS };
 
     }
 

@@ -36,10 +36,12 @@ package gurux.dlms;
 
 import gurux.dlms.enums.Access;
 import gurux.dlms.enums.ApplicationReference;
+import gurux.dlms.enums.ConfirmedServiceError;
 import gurux.dlms.enums.Definition;
 import gurux.dlms.enums.HardwareResource;
 import gurux.dlms.enums.Initiate;
 import gurux.dlms.enums.LoadDataSet;
+import gurux.dlms.enums.Service;
 import gurux.dlms.enums.Task;
 import gurux.dlms.enums.VdeStateError;
 
@@ -59,10 +61,8 @@ public class GXDLMSConfirmedServiceError extends RuntimeException {
     /*
      * Constructor for Confirmed ServiceError.
      */
-    GXDLMSConfirmedServiceError(final ConfirmedServiceError service,
-            final ServiceError type, final int value) {
-        super("ServiceError " + getConfirmedServiceError(service)
-                + " exception. " + getServiceError(type) + " "
+    GXDLMSConfirmedServiceError(final ConfirmedServiceError service, final ServiceError type, final int value) {
+        super("ServiceError " + getConfirmedServiceError(service) + " exception. " + getServiceError(type) + " "
                 + getServiceErrorValue(type, (byte) value));
         confirmedServiceError = service;
         serviceError = type;
@@ -90,8 +90,7 @@ public class GXDLMSConfirmedServiceError extends RuntimeException {
         return serviceError;
     }
 
-    private static String
-            getConfirmedServiceError(final ConfirmedServiceError stateError) {
+    private static String getConfirmedServiceError(final ConfirmedServiceError stateError) {
         switch (stateError) {
         case INITIATE_ERROR:
             return "Initiate Error";
@@ -133,8 +132,7 @@ public class GXDLMSConfirmedServiceError extends RuntimeException {
         return "";
     }
 
-    private static String getServiceErrorValue(final ServiceError error,
-            final byte value) {
+    private static String getServiceErrorValue(final ServiceError error, final byte value) {
         switch (error) {
         case APPLICATION_REFERENCE:
             return ApplicationReference.forValue(value).toString();

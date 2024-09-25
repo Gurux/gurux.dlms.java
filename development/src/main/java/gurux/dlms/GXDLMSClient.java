@@ -65,6 +65,7 @@ import gurux.dlms.enums.AccessServiceCommandType;
 import gurux.dlms.enums.Authentication;
 import gurux.dlms.enums.Command;
 import gurux.dlms.enums.Conformance;
+import gurux.dlms.enums.ConnectionState;
 import gurux.dlms.enums.DataType;
 import gurux.dlms.enums.DateTimeSkips;
 import gurux.dlms.enums.ErrorCode;
@@ -1289,11 +1290,14 @@ public class GXDLMSClient {
                 reply = releaseRequest()[0];
             }
         }
-        // Restore default HDLC values.
-        getHdlcSettings().setMaxInfoTX(initializeMaxInfoTX);
-        getHdlcSettings().setMaxInfoRX(initializeMaxInfoRX);
-        getHdlcSettings().setWindowSizeTX(initializeWindowSizeTX);
-        getHdlcSettings().setWindowSizeRX(initializeWindowSizeRX);
+        if (GXDLMS.useHdlc(settings.getInterfaceType())) {
+            // Restore default HDLC values.
+            getHdlcSettings().setMaxInfoTX(initializeMaxInfoTX);
+            getHdlcSettings().setMaxInfoRX(initializeMaxInfoRX);
+            getHdlcSettings().setWindowSizeTX(initializeWindowSizeTX);
+            getHdlcSettings().setWindowSizeRX(initializeWindowSizeRX);
+        }
+        setMaxReceivePDUSize(initializePduSize);
         settings.setConnected(ConnectionState.NONE);
         settings.resetFrameSequence();
         return reply;
@@ -3021,6 +3025,17 @@ public class GXDLMSClient {
     }
 
     /**
+     * Create custom object by object type.
+     * 
+     * @param type
+     *            Object type as an integer.
+     * @return Created object.
+     */
+    public static GXDLMSObject createCustomObject(final GXDLMSSettings settings, final int type) {
+        return GXDLMS.createObject(settings, null, type, 0);
+    }
+
+    /**
      * Generates an acknowledgment message, with which the server is informed to
      * send next packets.
      * 
@@ -3431,11 +3446,11 @@ public class GXDLMSClient {
             getInitialConformance(final boolean useLogicalNameReferencing) {
         Set<Conformance> list = new HashSet<Conformance>();
         if (useLogicalNameReferencing) {
-            list.addAll(
-                    Arrays.asList(Conformance.BLOCK_TRANSFER_WITH_ACTION, Conformance.BLOCK_TRANSFER_WITH_SET_OR_WRITE,
-                            Conformance.BLOCK_TRANSFER_WITH_GET_OR_READ, Conformance.SET, Conformance.SELECTIVE_ACCESS,
-                            Conformance.ACTION, Conformance.MULTIPLE_REFERENCES, Conformance.GET, Conformance.ACCESS,
-                            Conformance.GENERAL_PROTECTION, Conformance.DELTA_VALUE_ENCODING));
+            list.addAll(Arrays.asList(Conformance.GENERAL_BLOCK_TRANSFER, Conformance.BLOCK_TRANSFER_WITH_ACTION,
+                    Conformance.BLOCK_TRANSFER_WITH_SET_OR_WRITE, Conformance.BLOCK_TRANSFER_WITH_GET_OR_READ,
+                    Conformance.SET, Conformance.SELECTIVE_ACCESS, Conformance.ACTION, Conformance.MULTIPLE_REFERENCES,
+                    Conformance.GET, Conformance.ACCESS, Conformance.GENERAL_PROTECTION,
+                    Conformance.DELTA_VALUE_ENCODING));
         } else {
             list.addAll(Arrays.asList(Conformance.INFORMATION_REPORT, Conformance.READ, Conformance.UN_CONFIRMED_WRITE,
                     Conformance.WRITE, Conformance.PARAMETERIZED_ACCESS, Conformance.MULTIPLE_REFERENCES,

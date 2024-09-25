@@ -47,7 +47,6 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.TimeZone;
 
-import gurux.dlms.ConnectionState;
 import gurux.dlms.GXArray;
 import gurux.dlms.GXBitString;
 import gurux.dlms.GXByteBuffer;
@@ -64,15 +63,16 @@ import gurux.dlms.GXUInt16;
 import gurux.dlms.GXUInt32;
 import gurux.dlms.GXUInt64;
 import gurux.dlms.GXUInt8;
-import gurux.dlms.TranslatorOutputType;
 import gurux.dlms.enums.ClockStatus;
 import gurux.dlms.enums.Command;
+import gurux.dlms.enums.ConnectionState;
 import gurux.dlms.enums.CryptoKeyType;
 import gurux.dlms.enums.DataType;
 import gurux.dlms.enums.DateTimeExtraInfo;
 import gurux.dlms.enums.DateTimeSkips;
 import gurux.dlms.enums.Security;
 import gurux.dlms.enums.Standard;
+import gurux.dlms.enums.TranslatorOutputType;
 import gurux.dlms.objects.enums.CertificateType;
 import gurux.dlms.objects.enums.SecuritySuite;
 
@@ -947,7 +947,7 @@ public final class GXCommon {
             }
             int deviation = buff.getInt16();
             if (deviation == -32768) {
-                skip.add(DateTimeSkips.DEVITATION);
+                skip.add(DateTimeSkips.DEVIATION);
             }
             int status = buff.getUInt8();
             dt.setStatus(ClockStatus.forValue(status));
@@ -993,7 +993,7 @@ public final class GXCommon {
             java.util.Calendar tm;
             boolean ignoreDeviation = deviation == -32768;
             if (!ignoreDeviation && settings != null
-                    && settings.getDateTimeSkipsOnRead().contains(DateTimeSkips.DEVITATION)) {
+                    && settings.getDateTimeSkipsOnRead().contains(DateTimeSkips.DEVIATION)) {
                 ignoreDeviation = true;
             }
             if (ignoreDeviation) {
@@ -2152,7 +2152,7 @@ public final class GXCommon {
             buff.setUInt8(ms);
         }
         // devitation not used.
-        if (dt.getSkip().contains(DateTimeSkips.DEVITATION)) {
+        if (dt.getSkip().contains(DateTimeSkips.DEVIATION)) {
             buff.setUInt16(0x8000);
         } else {
             int deviation =

@@ -32,22 +32,24 @@
 // Full text may be retrieved at http://www.gnu.org/licenses/gpl-2.0.txt
 //---------------------------------------------------------------------------
 
-package gurux.dlms;
-
-import java.util.HashMap;
+package gurux.dlms.enums;
 
 /**
- * Enumerates Translator output types.
+ * Service describes service errors.
  */
-public enum TranslatorOutputType {
+public enum Service {
     /**
-     * Simple XML format.
+     * Other error.
      */
-    SIMPLE_XML(0),
+    OTHER(0),
     /**
-     * Standard XML format.
+     * PDU size is wrong.
      */
-    STANDARD_XML(1);
+    PDU_SIZE(1),
+    /**
+     * Service is unsupported.
+     */
+    UNSUPPORTED(2);
 
     /**
      * Integer value of enumerator.
@@ -56,19 +58,18 @@ public enum TranslatorOutputType {
     /**
      * Collection of enumerator values.
      */
-    private static java.util.HashMap<Integer, TranslatorOutputType> mappings;
+    private static java.util.HashMap<Integer, Service> mappings;
 
     /**
      * Returns collection of enumerator values.
      * 
      * @return Enumerator values.
      */
-    private static java.util.HashMap<Integer, TranslatorOutputType>
-            getMappings() {
+    private static java.util.HashMap<Integer, Service> getMappings() {
         if (mappings == null) {
-            synchronized (TranslatorOutputType.class) {
+            synchronized (Service.class) {
                 if (mappings == null) {
-                    mappings = new HashMap<Integer, TranslatorOutputType>();
+                    mappings = new java.util.HashMap<Integer, Service>();
                 }
             }
         }
@@ -81,7 +82,7 @@ public enum TranslatorOutputType {
      * @param value
      *            Integer value of enumerator.
      */
-    TranslatorOutputType(final int value) {
+    Service(final int value) {
         intValue = value;
         getMappings().put(value, this);
     }
@@ -102,7 +103,7 @@ public enum TranslatorOutputType {
      *            Integer value.
      * @return Enumeration value.
      */
-    public static TranslatorOutputType forValue(final int value) {
+    public static Service forValue(final int value) {
         return getMappings().get(value);
     }
 }

@@ -133,13 +133,13 @@ public class GXDLMSException extends RuntimeException {
 		if (value == SourceDiagnostic.NO_REASON_GIVEN) {
 			return "No reason is given.";
 		}
-		if (value == SourceDiagnostic.NOT_SUPPORTED) {
+		if (value == SourceDiagnostic.APPLICATION_CONTEXT_NAME_NOT_SUPPORTED) {
 			return "The application context name is not supported.";
 		}
-		if (value == SourceDiagnostic.NOT_RECOGNISED) {
+		if (value == SourceDiagnostic.AUTHENTICATION_MECHANISM_NAME_NOT_RECOGNIZED) {
 			return "The authentication mechanism name is not recognized.";
 		}
-		if (value == SourceDiagnostic.MECHANISM_NAME_REGUIRED) {
+		if (value == SourceDiagnostic.AUTHENTICATION_MECHANISM_NAME_REGUIRED) {
 			return "Authentication mechanism name is required.";
 		}
 		if (value == SourceDiagnostic.AUTHENTICATION_FAILURE) {

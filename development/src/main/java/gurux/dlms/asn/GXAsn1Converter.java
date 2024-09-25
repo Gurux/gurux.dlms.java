@@ -71,8 +71,7 @@ public final class GXAsn1Converter {
      *            System title.
      * @return File path.
      */
-    public static Path getFilePath(Ecc scheme, CertificateType certificateType,
-            byte[] systemTitle) {
+    public static Path getFilePath(Ecc scheme, CertificateType certificateType, byte[] systemTitle) {
         Path path;
         switch (certificateType) {
         case DIGITAL_SIGNATURE:
@@ -87,8 +86,7 @@ public final class GXAsn1Converter {
         default:
             throw new IllegalArgumentException("Unknown certificate type.");
         }
-        path = Paths.get(path.toString()
-                + GXDLMSTranslator.toHex(systemTitle, false) + ".pem");
+        path = Paths.get(path.toString() + GXDLMSTranslator.toHex(systemTitle, false) + ".pem");
         if (scheme == Ecc.P256) {
             path = Paths.get("Keys", path.toString());
         } else {
@@ -113,13 +111,11 @@ public final class GXAsn1Converter {
         if (value != null && (value.length == 32 || value.length == 48)) {
             byte[] privKeyBytes;
             if (value.length == 32) {
-                privKeyBytes =
-                        GXCommon.hexToBytes("3041020100301306072A8648CE3D0201"
-                                + "06082A8648CE3D030107 042730250201010420");
+                privKeyBytes = GXCommon
+                        .hexToBytes("3041020100301306072A8648CE3D0201" + "06082A8648CE3D030107 042730250201010420");
             } else {
                 privKeyBytes =
-                        GXCommon.hexToBytes("304E020100301006072A8648CE3D0201"
-                                + "06052B81040022 043730350201010430");
+                        GXCommon.hexToBytes("304E020100301006072A8648CE3D0201" + "06052B81040022 043730350201010430");
             }
             byte[] key = new byte[privKeyBytes.length + value.length];
             System.arraycopy(privKeyBytes, 0, key, 0, privKeyBytes.length);
@@ -132,12 +128,10 @@ public final class GXAsn1Converter {
         }
     }
 
-    private static byte[] p256Head =
-            GXCommon.fromBase64("MFkwEwYHKoZIzj0CAQYIKoZIzj0DAQcDQgAE");
+    private static byte[] p256Head = GXCommon.fromBase64("MFkwEwYHKoZIzj0CAQYIKoZIzj0DAQcDQgAE");
 
     private static byte[] p384Head =
-            GXCommon.hexToBytes("30 76 30 10 06 07 2A 86 48 CE 3D 02 01"
-                    + "06 05 2B 81 04 00 22 03 62 00 04");
+            GXCommon.hexToBytes("30 76 30 10 06 07 2A 86 48 CE 3D 02 01" + "06 05 2B 81 04 00 22 03 62 00 04");
 
     /**
      * Get public key from bytes.
@@ -162,8 +156,7 @@ public final class GXAsn1Converter {
             try {
                 eckf = KeyFactory.getInstance("EC");
             } catch (NoSuchAlgorithmException e) {
-                throw new IllegalStateException(
-                        "EC key factory not present in runtime");
+                throw new IllegalStateException("EC key factory not present in runtime");
             }
             try {
                 X509EncodedKeySpec ecpks = new X509EncodedKeySpec(encodedKey);
@@ -189,8 +182,7 @@ public final class GXAsn1Converter {
             throw new IllegalArgumentException("Invalid public key.");
         }
         GXAsn1BitString tmp =
-                (GXAsn1BitString) ((GXAsn1Sequence) GXAsn1Converter
-                        .fromByteArray(key.getEncoded())).get(1);
+                (GXAsn1BitString) ((GXAsn1Sequence) GXAsn1Converter.fromByteArray(key.getEncoded())).get(1);
         GXByteBuffer bb = new GXByteBuffer();
         if (key.getEncoded().length == 91) {
             bb.set(tmp.getValue(), 1, 64);
@@ -214,19 +206,17 @@ public final class GXAsn1Converter {
             throw new IllegalArgumentException("Invalid private key.");
         }
         byte[] tmp =
-                (byte[]) ((GXAsn1Sequence) ((GXAsn1Sequence) GXAsn1Converter
-                        .fromByteArray(key.getEncoded())).get(2)).get(1);
+                (byte[]) ((GXAsn1Sequence) ((GXAsn1Sequence) GXAsn1Converter.fromByteArray(key.getEncoded())).get(2))
+                        .get(1);
         GXByteBuffer bb = new GXByteBuffer();
         bb.set(tmp);
         return bb.array();
     }
 
-    static List<GXSimpleEntry<Object, Object>>
-            encodeSubject(final String value) {
+    static List<GXSimpleEntry<Object, Object>> encodeSubject(final String value) {
         X509Name name;
         Object val;
-        List<GXSimpleEntry<Object, Object>> list =
-                new ArrayList<GXSimpleEntry<Object, Object>>();
+        List<GXSimpleEntry<Object, Object>> list = new ArrayList<GXSimpleEntry<Object, Object>>();
         for (String tmp : value.split("[,]")) {
             String[] it = tmp.split("[=]");
             if (it.length != 2) {
@@ -246,8 +236,7 @@ public final class GXAsn1Converter {
                 val = new GXAsn1Utf8String(it[1].trim());
             }
             String oid = name.getValue();
-            list.add(new GXSimpleEntry<Object, Object>(
-                    new GXAsn1ObjectIdentifier(oid), val));
+            list.add(new GXSimpleEntry<Object, Object>(new GXAsn1ObjectIdentifier(oid), val));
         }
         return list;
     }
@@ -270,8 +259,7 @@ public final class GXAsn1Converter {
         return sb.toString();
     }
 
-    private static void getValue(final GXByteBuffer bb,
-            final List<Object> objects, final GXAsn1Settings s,
+    private static void getValue(final GXByteBuffer bb, final List<Object> objects, final GXAsn1Settings s,
             final boolean getNext) {
         int len;
         short type;
@@ -350,11 +338,9 @@ public final class GXAsn1Converter {
             getValue(bb, tmp, s, false);
             if (tmp.get(0) instanceof GXAsn1Sequence) {
                 tmp = (GXAsn1Sequence) tmp.get(0);
-                objects.add(new GXSimpleEntry<Object, Object>(tmp.get(0),
-                        tmp.get(1)));
+                objects.add(new GXSimpleEntry<Object, Object>(tmp.get(0), tmp.get(1)));
             } else {
-                GXSimpleEntry<Object, Object> e =
-                        new GXSimpleEntry<Object, Object>(tmp, null);
+                GXSimpleEntry<Object, Object> e = new GXSimpleEntry<Object, Object>(tmp, null);
                 objects.add(e);
             }
             if (s != null) {
@@ -382,8 +368,7 @@ public final class GXAsn1Converter {
 
             break;
         case BerType.UTF8STRING:
-            objects.add(new GXAsn1Utf8String(
-                    bb.getString(bb.position(), len, "UTF-8")));
+            objects.add(new GXAsn1Utf8String(bb.getString(bb.position(), len, "UTF-8")));
             bb.position(bb.position() + len);
             if (s != null) {
                 s.append(String.valueOf(objects.get(objects.size() - 1)));
@@ -416,14 +401,12 @@ public final class GXAsn1Converter {
             objects.add(null);
             break;
         case BerType.BIT_STRING:
-            GXAsn1BitString tmp3 =
-                    new GXAsn1BitString(bb.subArray(bb.position(), len));
+            GXAsn1BitString tmp3 = new GXAsn1BitString(bb.subArray(bb.position(), len));
             objects.add(tmp3);
             bb.position(bb.position() + len);
             if (s != null) {
                 // Append comment.
-                s.appendComment(connectPos,
-                        String.valueOf(tmp3.length()) + " bit.");
+                s.appendComment(connectPos, String.valueOf(tmp3.length()) + " bit.");
                 s.append(tmp3.asString());
             }
             break;
@@ -515,9 +498,8 @@ public final class GXAsn1Converter {
             if (dateString.length() > 15) {
                 second = Integer.parseInt(dateString.substring(10, 12));
             }
-            calendar = Calendar.getInstance(TimeZone.getTimeZone(
-                    "GMT" + dateString.substring(dateString.length() - 6,
-                            dateString.length() - 1)));
+            calendar = Calendar.getInstance(TimeZone
+                    .getTimeZone("GMT" + dateString.substring(dateString.length() - 6, dateString.length() - 1)));
         }
         calendar.set(year, month, day, hour, minute, second);
         return calendar.getTime();
@@ -530,13 +512,10 @@ public final class GXAsn1Converter {
         calendar = Calendar.getInstance(TimeZone.getTimeZone("UTC"));
         calendar.setTimeInMillis(v);
         StringBuilder sb = new StringBuilder();
-        sb.append(
-                GXCommon.integerString(calendar.get(Calendar.YEAR) - 2000, 2));
+        sb.append(GXCommon.integerString(calendar.get(Calendar.YEAR) - 2000, 2));
         sb.append(GXCommon.integerString(1 + calendar.get(Calendar.MONTH), 2));
-        sb.append(
-                GXCommon.integerString(calendar.get(Calendar.DAY_OF_MONTH), 2));
-        sb.append(
-                GXCommon.integerString(calendar.get(Calendar.HOUR_OF_DAY), 2));
+        sb.append(GXCommon.integerString(calendar.get(Calendar.DAY_OF_MONTH), 2));
+        sb.append(GXCommon.integerString(calendar.get(Calendar.HOUR_OF_DAY), 2));
         sb.append(GXCommon.integerString(calendar.get(Calendar.MINUTE), 2));
         sb.append(GXCommon.integerString(calendar.get(Calendar.SECOND), 2));
         sb.append("Z");
@@ -592,8 +571,7 @@ public final class GXAsn1Converter {
             }
             start = bb.size();
             if (a.isConstructed()) {
-                bb.setUInt8(
-                        BerType.CONSTRUCTED | BerType.CONTEXT | a.getIndex());
+                bb.setUInt8(BerType.CONSTRUCTED | BerType.CONTEXT | a.getIndex());
                 GXCommon.setObjectCount(cnt, bb);
             } else {
                 tmp.setUInt8(0, BerType.CONTEXT | a.getIndex());
@@ -621,8 +599,7 @@ public final class GXAsn1Converter {
             if (target instanceof GXAsn1Context) {
                 GXAsn1Context c = (GXAsn1Context) target;
                 if (c.isConstructed()) {
-                    bb.setUInt8(BerType.CONSTRUCTED | BerType.SEQUENCE
-                            | c.getIndex());
+                    bb.setUInt8(BerType.CONSTRUCTED | BerType.SEQUENCE | c.getIndex());
                 } else {
                     bb.setUInt8(BerType.SEQUENCE | c.getIndex());
                 }
@@ -734,8 +711,7 @@ public final class GXAsn1Converter {
             bb.setUInt8(str.length());
             bb.add(str);
         } else {
-            throw new IllegalArgumentException(
-                    "Invalid type: " + target.getClass().toString());
+            throw new IllegalArgumentException("Invalid type: " + target.getClass().toString());
         }
         return bb.size() - start;
     }
@@ -814,8 +790,7 @@ public final class GXAsn1Converter {
      *            Are comments added to generated XML.
      * @return Converted XML.
      */
-    public static String pduToXml(final GXByteBuffer value,
-            final boolean comments) {
+    public static String pduToXml(final GXByteBuffer value, final boolean comments) {
         GXAsn1Settings s = new GXAsn1Settings();
         s.setComments(comments);
         List<Object> objects = new ArrayList<Object>();
@@ -826,8 +801,7 @@ public final class GXAsn1Converter {
     }
 
     @SuppressWarnings("rawtypes")
-    private static int readNode(final Node node, final GXAsn1Settings s,
-            final List<Object> list) {
+    private static int readNode(final Node node, final GXAsn1Settings s, final List<Object> list) {
         List<Object> tmp;
         String str = node.getNodeName().toLowerCase();
         int tag = s.getTag(str);
@@ -882,30 +856,25 @@ public final class GXAsn1Converter {
             }
             break;
         case BerType.OBJECT_IDENTIFIER:
-            list.add(new GXAsn1ObjectIdentifier(
-                    node.getChildNodes().item(0).getNodeValue()));
+            list.add(new GXAsn1ObjectIdentifier(node.getChildNodes().item(0).getNodeValue()));
             break;
         case BerType.PRINTABLE_STRING:
             list.add(node.getChildNodes().item(0).getNodeValue());
             break;
         case BerType.UTF8STRING:
-            list.add(new GXAsn1Utf8String(
-                    node.getChildNodes().item(0).getNodeValue()));
+            list.add(new GXAsn1Utf8String(node.getChildNodes().item(0).getNodeValue()));
             break;
         case BerType.IA5_STRING:
-            list.add(new GXAsn1Ia5String(
-                    node.getChildNodes().item(0).getNodeValue()));
+            list.add(new GXAsn1Ia5String(node.getChildNodes().item(0).getNodeValue()));
             break;
         case BerType.INTEGER:
-            list.add(new GXAsn1Integer(
-                    node.getChildNodes().item(0).getNodeValue()));
+            list.add(new GXAsn1Integer(node.getChildNodes().item(0).getNodeValue()));
             break;
         case BerType.NULL:
             list.add(null);
             break;
         case BerType.BIT_STRING:
-            list.add(new GXAsn1BitString(
-                    node.getChildNodes().item(0).getNodeValue()));
+            list.add(new GXAsn1BitString(node.getChildNodes().item(0).getNodeValue()));
             break;
         case BerType.UTC_TIME:
             try {
@@ -920,28 +889,22 @@ public final class GXAsn1Converter {
         case BerType.GENERALIZED_TIME:
             break;
         case BerType.OCTET_STRING:
-            list.add(GXCommon
-                    .hexToBytes(node.getChildNodes().item(0).getNodeValue()));
+            list.add(GXCommon.hexToBytes(node.getChildNodes().item(0).getNodeValue()));
             break;
         case -1:
-            list.add(Byte
-                    .parseByte(node.getChildNodes().item(0).getNodeValue()));
+            list.add(Byte.parseByte(node.getChildNodes().item(0).getNodeValue()));
             break;
         case -2:
-            list.add(Short
-                    .parseShort(node.getChildNodes().item(0).getNodeValue()));
+            list.add(Short.parseShort(node.getChildNodes().item(0).getNodeValue()));
             break;
         case -4:
-            list.add(Integer
-                    .parseInt(node.getChildNodes().item(0).getNodeValue()));
+            list.add(Integer.parseInt(node.getChildNodes().item(0).getNodeValue()));
             break;
         case -8:
-            list.add(Long
-                    .parseLong(node.getChildNodes().item(0).getNodeValue()));
+            list.add(Long.parseLong(node.getChildNodes().item(0).getNodeValue()));
             break;
         default:
-            throw new IllegalArgumentException(
-                    "Invalid node: " + node.getNodeName());
+            throw new IllegalArgumentException("Invalid node: " + node.getNodeName());
         }
         return 0;
     }
@@ -957,11 +920,9 @@ public final class GXAsn1Converter {
     public static byte[] xmlToPdu(final String xml) {
         DocumentBuilder docBuilder;
         Document doc;
-        DocumentBuilderFactory docBuilderFactory =
-                DocumentBuilderFactory.newInstance();
+        DocumentBuilderFactory docBuilderFactory = DocumentBuilderFactory.newInstance();
         try {
-            docBuilderFactory.setFeature(XMLConstants.FEATURE_SECURE_PROCESSING,
-                    true);
+            docBuilderFactory.setFeature(XMLConstants.FEATURE_SECURE_PROCESSING, true);
             docBuilder = docBuilderFactory.newDocumentBuilder();
             doc = docBuilder.parse(new InputSource(new StringReader(xml)));
         } catch (Exception e) {
@@ -1013,8 +974,7 @@ public final class GXAsn1Converter {
         return cn;
     }
 
-    public static Set<KeyUsage>
-            certificateTypeToKeyUsage(final CertificateType type) {
+    public static Set<KeyUsage> certificateTypeToKeyUsage(final CertificateType type) {
         Set<KeyUsage> k = new HashSet<KeyUsage>();
         switch (type) {
         case DIGITAL_SIGNATURE:
@@ -1056,8 +1016,7 @@ public final class GXAsn1Converter {
      *            parsed data.
      * @return certificate type.
      */
-    static PkcsType getCertificateType(final byte[] data,
-            final GXAsn1Sequence seq) {
+    static PkcsType getCertificateType(final byte[] data, final GXAsn1Sequence seq) {
         GXAsn1Sequence val = seq;
         if (val == null) {
             val = (GXAsn1Sequence) GXAsn1Converter.fromByteArray(data);

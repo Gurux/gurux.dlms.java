@@ -57,6 +57,7 @@ import gurux.dlms.enums.Command;
 import gurux.dlms.enums.DataType;
 import gurux.dlms.enums.InterfaceType;
 import gurux.dlms.enums.Security;
+import gurux.dlms.enums.TranslatorOutputType;
 import gurux.dlms.internal.GXCommon;
 import gurux.dlms.secure.GXDLMSSecureClient;
 
@@ -102,10 +103,8 @@ public class GXDLMSXmlClient extends GXDLMSSecureClient {
         throwExceptions = value;
     }
 
-    public static void removeRecursively(final Node node, final short nodeType,
-            final String name) {
-        if (node.getNodeType() == nodeType
-                && (name == null || node.getNodeName().equals(name))) {
+    public static void removeRecursively(final Node node, final short nodeType, final String name) {
+        if (node.getNodeType() == nodeType && (name == null || node.getNodeName().equals(name))) {
             node.getParentNode().removeChild(node);
         } else {
             // check the children recursively
@@ -140,11 +139,9 @@ public class GXDLMSXmlClient extends GXDLMSSecureClient {
     public List<GXDLMSXmlPdu> load(final File file, final GXXmlLoadSettings s) {
         DocumentBuilder docBuilder;
         Document doc;
-        DocumentBuilderFactory docBuilderFactory =
-                DocumentBuilderFactory.newInstance();
+        DocumentBuilderFactory docBuilderFactory = DocumentBuilderFactory.newInstance();
         try {
-            docBuilderFactory.setFeature(XMLConstants.FEATURE_SECURE_PROCESSING,
-                    true);
+            docBuilderFactory.setFeature(XMLConstants.FEATURE_SECURE_PROCESSING, true);
             docBuilder = docBuilderFactory.newDocumentBuilder();
             doc = docBuilder.parse(file);
         } catch (Exception e) {
@@ -163,15 +160,12 @@ public class GXDLMSXmlClient extends GXDLMSSecureClient {
      * @return Loaded XML objects.
      */
     @SuppressWarnings("squid:S00112")
-    public List<GXDLMSXmlPdu> load(final String xml,
-            final GXXmlLoadSettings s) {
+    public List<GXDLMSXmlPdu> load(final String xml, final GXXmlLoadSettings s) {
         DocumentBuilder docBuilder;
         Document doc;
-        DocumentBuilderFactory docBuilderFactory =
-                DocumentBuilderFactory.newInstance();
+        DocumentBuilderFactory docBuilderFactory = DocumentBuilderFactory.newInstance();
         try {
-            docBuilderFactory.setFeature(XMLConstants.FEATURE_SECURE_PROCESSING,
-                    true);
+            docBuilderFactory.setFeature(XMLConstants.FEATURE_SECURE_PROCESSING, true);
             docBuilder = docBuilderFactory.newDocumentBuilder();
             doc = docBuilder.parse(new InputSource(new StringReader(xml)));
         } catch (Exception e) {
@@ -190,8 +184,7 @@ public class GXDLMSXmlClient extends GXDLMSSecureClient {
      * @return Loaded XML objects.
      */
     @SuppressWarnings({ "squid:S00112", "squid:S1066", "squid:S135" })
-    private List<GXDLMSXmlPdu> load(final Document doc,
-            final GXXmlLoadSettings loadSettings) {
+    private List<GXDLMSXmlPdu> load(final Document doc, final GXXmlLoadSettings loadSettings) {
         // Remove comments.
         removeRecursively(doc, Node.COMMENT_NODE, null);
 
@@ -200,8 +193,7 @@ public class GXDLMSXmlClient extends GXDLMSSecureClient {
         for (int pos = 0; pos != doc.getChildNodes().getLength(); ++pos) {
             Node m1 = doc.getChildNodes().item(pos);
             if (m1.getNodeType() == Node.ELEMENT_NODE) {
-                for (int pos2 = 0; pos2 != m1.getChildNodes()
-                        .getLength(); ++pos2) {
+                for (int pos2 = 0; pos2 != m1.getChildNodes().getLength(); ++pos2) {
                     Node node = m1.getChildNodes().item(pos2);
                     if (node.getNodeType() == Node.ELEMENT_NODE) {
                         if (node.getNodeName().equals("Description")) {
@@ -220,91 +212,46 @@ public class GXDLMSXmlClient extends GXDLMSSecureClient {
                             sleep = node.getNodeValue();
                             continue;
                         }
-                        if (loadSettings != null
-                                && node.getNodeName().equals("GetRequest")) {
+                        if (loadSettings != null && node.getNodeName().equals("GetRequest")) {
                             if (loadSettings.getStart() != new java.util.Date(0)
-                                    && loadSettings
-                                            .getEnd() != new java.util.Date(
-                                                    0)) {
-                                for (int pos3 = 0; pos3 != node.getChildNodes()
-                                        .getLength(); ++pos3) {
+                                    && loadSettings.getEnd() != new java.util.Date(0)) {
+                                for (int pos3 = 0; pos3 != node.getChildNodes().getLength(); ++pos3) {
                                     Node n1 = node.getChildNodes().item(pos3);
-                                    if (n1.getNodeName()
-                                            .equals("GetRequestNormal")) {
-                                        for (int pos4 = 0; pos4 != n1
-                                                .getChildNodes()
-                                                .getLength(); ++pos4) {
-                                            Node n2 = n1.getChildNodes()
-                                                    .item(pos4);
-                                            if (n2.getNodeName().equals(
-                                                    "AccessSelection")) {
-                                                for (int pos5 = 0; pos5 != n2
-                                                        .getChildNodes()
-                                                        .getLength(); ++pos5) {
-                                                    Node n3 = n2.getChildNodes()
-                                                            .item(pos5);
-                                                    if (n3.getNodeName().equals(
-                                                            "AccessSelector")) {
-                                                        if (!n3.getAttributes()
-                                                                .getNamedItem(
-                                                                        "Value")
-                                                                .getNodeValue()
+                                    if (n1.getNodeName().equals("GetRequestNormal")) {
+                                        for (int pos4 = 0; pos4 != n1.getChildNodes().getLength(); ++pos4) {
+                                            Node n2 = n1.getChildNodes().item(pos4);
+                                            if (n2.getNodeName().equals("AccessSelection")) {
+                                                for (int pos5 = 0; pos5 != n2.getChildNodes().getLength(); ++pos5) {
+                                                    Node n3 = n2.getChildNodes().item(pos5);
+                                                    if (n3.getNodeName().equals("AccessSelector")) {
+                                                        if (!n3.getAttributes().getNamedItem("Value").getNodeValue()
                                                                 .equals("1")) {
                                                             break;
                                                         }
-                                                    } else if (n3.getNodeName()
-                                                            .equals("AccessParameters")) {
-                                                        for (int pos6 =
-                                                                0; pos6 != n3
-                                                                        .getChildNodes()
-                                                                        .getLength(); ++pos6) {
-                                                            Node n4 = n3
-                                                                    .getChildNodes()
-                                                                    .item(pos6);
-                                                            if (n4.getNodeName()
-                                                                    .equals("Structure")) {
-                                                                boolean start =
-                                                                        true;
-                                                                for (int pos7 =
-                                                                        0; pos7 != n4
-                                                                                .getChildNodes()
-                                                                                .getLength(); ++pos7) {
-                                                                    Node n5 = n4
-                                                                            .getChildNodes()
-                                                                            .item(pos7);
-                                                                    if (n5.getNodeName()
-                                                                            .equals("OctetString")) {
-                                                                        GXByteBuffer bb =
-                                                                                new GXByteBuffer();
+                                                    } else if (n3.getNodeName().equals("AccessParameters")) {
+                                                        for (int pos6 = 0; pos6 != n3.getChildNodes()
+                                                                .getLength(); ++pos6) {
+                                                            Node n4 = n3.getChildNodes().item(pos6);
+                                                            if (n4.getNodeName().equals("Structure")) {
+                                                                boolean start = true;
+                                                                for (int pos7 = 0; pos7 != n4.getChildNodes()
+                                                                        .getLength(); ++pos7) {
+                                                                    Node n5 = n4.getChildNodes().item(pos7);
+                                                                    if (n5.getNodeName().equals("OctetString")) {
+                                                                        GXByteBuffer bb = new GXByteBuffer();
                                                                         if (start) {
-                                                                            GXCommon.setData(
-                                                                                    settings,
-                                                                                    bb,
+                                                                            GXCommon.setData(settings, bb,
                                                                                     DataType.OCTET_STRING,
-                                                                                    loadSettings
-                                                                                            .getStart());
-                                                                            n5.getAttributes()
-                                                                                    .getNamedItem(
-                                                                                            "Value")
-                                                                                    .setNodeValue(
-                                                                                            bb.toHex(
-                                                                                                    false,
-                                                                                                    2));
+                                                                                    loadSettings.getStart());
+                                                                            n5.getAttributes().getNamedItem("Value")
+                                                                                    .setNodeValue(bb.toHex(false, 2));
                                                                             start = false;
                                                                         } else {
-                                                                            GXCommon.setData(
-                                                                                    settings,
-                                                                                    bb,
+                                                                            GXCommon.setData(settings, bb,
                                                                                     DataType.OCTET_STRING,
-                                                                                    loadSettings
-                                                                                            .getEnd());
-                                                                            n5.getAttributes()
-                                                                                    .getNamedItem(
-                                                                                            "Value")
-                                                                                    .setNodeValue(
-                                                                                            bb.toHex(
-                                                                                                    false,
-                                                                                                    2));
+                                                                                    loadSettings.getEnd());
+                                                                            n5.getAttributes().getNamedItem("Value")
+                                                                                    .setNodeValue(bb.toHex(false, 2));
                                                                             break;
                                                                         }
                                                                     }
@@ -324,43 +271,29 @@ public class GXDLMSXmlClient extends GXDLMSSecureClient {
                             }
                         }
 
-                        GXDLMSXmlSettings s = new GXDLMSXmlSettings(
-                                translator.getOutputType(), translator.isHex(),
-                                translator.getShowStringAsHex(),
-                                translator.tagsByName);
-                        s.getSettings()
-                                .setClientAddress(settings.getClientAddress());
-                        s.getSettings()
-                                .setServerAddress(settings.getServerAddress());
+                        GXDLMSXmlSettings s = new GXDLMSXmlSettings(translator.getOutputType(), translator.isHex(),
+                                translator.getShowStringAsHex(), translator.tagsByName);
+                        s.getSettings().setClientAddress(settings.getClientAddress());
+                        s.getSettings().setServerAddress(settings.getServerAddress());
                         byte[] reply;
                         try {
-                            reply = translator.xmlToPdu(
-                                    GXDLMSXmlPdu.getOuterXml(node), s);
+                            reply = translator.xmlToPdu(GXDLMSXmlPdu.getOuterXml(node), s);
                         } catch (Exception ex) {
                             throw new RuntimeException(ex.getMessage());
                         }
-                        if ((s.getCommand() == Command.SNRM
-                                && !s.getSettings().isServer())
-                                || (s.getCommand() == Command.UA
-                                        && s.getSettings().isServer())) {
+                        if ((s.getCommand() == Command.SNRM && !s.getSettings().isServer())
+                                || (s.getCommand() == Command.UA && s.getSettings().isServer())) {
+                            settings.getHdlcSettings().setMaxInfoTX(s.getSettings().getHdlcSettings().getMaxInfoTX());
+                            settings.getHdlcSettings().setMaxInfoRX(s.getSettings().getHdlcSettings().getMaxInfoRX());
                             settings.getHdlcSettings()
-                                    .setMaxInfoTX(s.getSettings()
-                                            .getHdlcSettings().getMaxInfoTX());
+                                    .setWindowSizeRX(s.getSettings().getHdlcSettings().getWindowSizeRX());
                             settings.getHdlcSettings()
-                                    .setMaxInfoRX(s.getSettings()
-                                            .getHdlcSettings().getMaxInfoRX());
-                            settings.getHdlcSettings().setWindowSizeRX(
-                                    s.getSettings().getHdlcSettings()
-                                            .getWindowSizeRX());
-                            settings.getHdlcSettings().setWindowSizeTX(
-                                    s.getSettings().getHdlcSettings()
-                                            .getWindowSizeTX());
+                                    .setWindowSizeTX(s.getSettings().getHdlcSettings().getWindowSizeTX());
                         }
                         if (s.isTemplate()) {
                             reply = null;
                         }
-                        GXDLMSXmlPdu p =
-                                new GXDLMSXmlPdu(s.getCommand(), node, reply);
+                        GXDLMSXmlPdu p = new GXDLMSXmlPdu(s.getCommand(), node, reply);
                         if (description != null && !description.equals("")) {
                             p.setDescription(description);
                         }
@@ -400,42 +333,36 @@ public class GXDLMSXmlClient extends GXDLMSSecureClient {
      * @throws IllegalBlockSizeException
      *             Illegal block size exception.
      */
-    public final byte[][] pduToMessages(final GXDLMSXmlPdu pdu)
-            throws InvalidKeyException, NoSuchAlgorithmException,
-            NoSuchPaddingException, InvalidAlgorithmParameterException,
-            IllegalBlockSizeException, BadPaddingException {
+    public final byte[][] pduToMessages(final GXDLMSXmlPdu pdu) throws InvalidKeyException, NoSuchAlgorithmException,
+            NoSuchPaddingException, InvalidAlgorithmParameterException, IllegalBlockSizeException, BadPaddingException {
         List<byte[]> messages = new ArrayList<byte[]>();
         if (pdu.getCommand() == Command.SNRM) {
             messages.add(pdu.getData());
         } else if (pdu.getCommand() == Command.UA) {
             messages.add(pdu.getData());
         } else if (pdu.getCommand() == Command.DISCONNECT_REQUEST) {
-            messages.add(GXDLMS.getHdlcFrame(settings,
-                    (byte) Command.DISCONNECT_REQUEST,
-                    new GXByteBuffer(pdu.getData())));
+            messages.add(
+                    GXDLMS.getHdlcFrame(settings, (byte) Command.DISCONNECT_REQUEST, new GXByteBuffer(pdu.getData())));
         } else {
             GXByteBuffer reply;
             if (settings.getInterfaceType() == InterfaceType.WRAPPER) {
                 if (getCiphering().getSecurity() != Security.NONE) {
-                    GXDLMSLNParameters p = new GXDLMSLNParameters(settings, 0,
-                            pdu.getCommand(), 0x0, null, null, 0xff,
-                            Command.NONE);
+                    GXDLMSLNParameters p =
+                            new GXDLMSLNParameters(settings, 0, pdu.getCommand(), 0x0, null, null, 0xff, Command.NONE);
                     reply = new GXByteBuffer(GXDLMS.cipher0(p, pdu.getData()));
                 } else {
                     reply = new GXByteBuffer(pdu.getData());
                 }
             } else {
                 if (getCiphering().getSecurity() != Security.NONE) {
-                    GXDLMSLNParameters p = new GXDLMSLNParameters(settings, 0,
-                            pdu.getCommand(), 0x0, null, null, 0xff,
-                            Command.NONE);
+                    GXDLMSLNParameters p =
+                            new GXDLMSLNParameters(settings, 0, pdu.getCommand(), 0x0, null, null, 0xff, Command.NONE);
                     byte[] tmp = GXDLMS.cipher0(p, pdu.getData());
                     reply = new GXByteBuffer((short) (3 + tmp.length));
                     reply.set(GXCommon.LLC_SEND_BYTES);
                     reply.set(tmp);
                 } else {
-                    reply = new GXByteBuffer(
-                            (short) (3 + pdu.getData().length));
+                    reply = new GXByteBuffer((short) (3 + pdu.getData().length));
                     reply.set(GXCommon.LLC_SEND_BYTES);
                     reply.set(pdu.getData());
                 }
@@ -443,8 +370,7 @@ public class GXDLMSXmlClient extends GXDLMSSecureClient {
             byte frame = 0;
             while (reply.position() != reply.size()) {
                 if (settings.getInterfaceType() == InterfaceType.WRAPPER) {
-                    messages.add(GXDLMS.getWrapperFrame(settings,
-                            pdu.getCommand(), reply));
+                    messages.add(GXDLMS.getWrapperFrame(settings, pdu.getCommand(), reply));
                 } else if (GXDLMS.useHdlc(settings.getInterfaceType())) {
                     if (pdu.getCommand() == Command.AARQ) {
                         frame = 0x10;

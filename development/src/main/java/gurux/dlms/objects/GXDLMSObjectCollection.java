@@ -44,6 +44,7 @@ import java.util.ArrayList;
 import javax.xml.stream.XMLStreamException;
 
 import gurux.dlms.GXDLMSClient;
+import gurux.dlms.GXDLMSSettings;
 import gurux.dlms.enums.AccessMode;
 import gurux.dlms.enums.AccessMode3;
 import gurux.dlms.enums.MethodAccessMode;
@@ -53,8 +54,7 @@ import gurux.dlms.enums.ObjectType;
 /**
  * Collection of DLMS objects.
  */
-public class GXDLMSObjectCollection extends ArrayList<GXDLMSObject>
-        implements java.util.List<GXDLMSObject> {
+public class GXDLMSObjectCollection extends ArrayList<GXDLMSObject> implements java.util.List<GXDLMSObject> {
     private static final long serialVersionUID = 1L;
     private Object parent;
 
@@ -105,10 +105,36 @@ public class GXDLMSObjectCollection extends ArrayList<GXDLMSObject>
         return items;
     }
 
+    /**
+     * Find COSEM object.
+     * 
+     * @param type
+     *            Object type.
+     * @param ln
+     *            Logical name.
+     * @return Found object or null if object is not found.
+     */
     public final GXDLMSObject findByLN(final ObjectType type, final String ln) {
         for (GXDLMSObject it : this) {
-            if ((type == ObjectType.NONE || it.getObjectType() == type)
-                    && it.getLogicalName().trim().equals(ln)) {
+            if ((type == ObjectType.NONE || it.getObjectType() == type) && it.getLogicalName().trim().equals(ln)) {
+                return it;
+            }
+        }
+        return null;
+    }
+
+    /**
+     * Find custom COSEM object.
+     * 
+     * @param type
+     *            Object type.
+     * @param ln
+     *            Logical name.
+     * @return Found object or null if object is not found.
+     */
+    public final GXDLMSObject findByLN(final int type, final String ln) {
+        for (GXDLMSObject it : this) {
+            if ((type == 0 || it.getCustomObjectType() == type) && it.getLogicalName().trim().equals(ln)) {
                 return it;
             }
         }
@@ -143,8 +169,7 @@ public class GXDLMSObjectCollection extends ArrayList<GXDLMSObject>
      * @param path File path.
      * @return Collection of serialized COSEM objects.
      */
-    public static GXDLMSObjectCollection load(final String path)
-            throws XMLStreamException, IOException {
+    public static GXDLMSObjectCollection load(final String path) throws XMLStreamException, IOException {
         FileInputStream stream = new FileInputStream(path);
         try {
             return load(stream);
@@ -164,6 +189,22 @@ public class GXDLMSObjectCollection extends ArrayList<GXDLMSObject>
      *             Stream exception.
      */
     public static GXDLMSObjectCollection load(final InputStream stream) throws XMLStreamException {
+        return load(null, stream);
+    }
+
+    /**
+     * Load COSEM objects from the stream.
+     * 
+     * @param settings
+     *            DLMS settings is need when custom objects are serialized.
+     * @param stream
+     *            XML stream.
+     * @return Collection of serialized COSEM objects.
+     * @throws XMLStreamException
+     *             Stream exception.
+     */
+    public static GXDLMSObjectCollection load(final GXDLMSSettings settings, final InputStream stream)
+            throws XMLStreamException {
         GXDLMSObject obj = null;
         String target;
         ObjectType type = null;
@@ -174,6 +215,9 @@ public class GXDLMSObjectCollection extends ArrayList<GXDLMSObject>
                 if ("Objects".equalsIgnoreCase(target)) {
                     // Skip.
                     reader.read();
+                } else if (target.startsWith("GXDLMSCustom")) {
+                    int ot = Integer.parseInt(target.substring(12));
+                    obj = GXDLMSClient.createCustomObject(settings, ot);
                 } else if (target.startsWith("GXDLMS")) {
                     type = ObjectType.getEnum(target.substring(6));
                     if (type == null) {
@@ -198,8 +242,7 @@ public class GXDLMSObjectCollection extends ArrayList<GXDLMSObject>
                     }
                 } else if ("LN".equalsIgnoreCase(target)) {
                     obj.setLogicalName(reader.readElementContentAsString("LN"));
-                    GXDLMSObject tmp =
-                            reader.getObjects().findByLN(obj.getObjectType(), obj.getLogicalName());
+                    GXDLMSObject tmp = reader.getObjects().findByLN(obj.getObjectType(), obj.getLogicalName());
                     if (tmp == null) {
                         reader.getObjects().add(obj);
                     } else {
@@ -236,8 +279,8 @@ public class GXDLMSObjectCollection extends ArrayList<GXDLMSObject>
                     String tmp = reader.readElementContentAsString("Access3");
                     if (tmp != null) {
                         for (int pos = 0; pos != tmp.length() / 4; ++pos) {
-                            obj.getAccess3(pos).addAll(AccessMode3.forValue(
-                                    Integer.parseInt(tmp.substring(4 * pos, 4 * pos + 4), 16)));
+                            obj.getAccess3(pos).addAll(
+                                    AccessMode3.forValue(Integer.parseInt(tmp.substring(4 * pos, 4 * pos + 4), 16)));
                         }
                     }
                 } else if ("MethodAccess".equalsIgnoreCase(target)) {
@@ -255,8 +298,8 @@ public class GXDLMSObjectCollection extends ArrayList<GXDLMSObject>
                     String tmp = reader.readElementContentAsString("MethodAccess3");
                     if (tmp != null) {
                         for (int pos = 0; pos != tmp.length() / 4; ++pos) {
-                            obj.getMethodAccess3(pos).addAll(MethodAccessMode3.forValue(
-                                    Integer.parseInt(tmp.substring(4 * pos, 4 * pos + 4), 16)));
+                            obj.getMethodAccess3(pos).addAll(MethodAccessMode3
+                                    .forValue(Integer.parseInt(tmp.substring(4 * pos, 4 * pos + 4), 16)));
                         }
                     }
                 } else {
@@ -267,7 +310,9 @@ public class GXDLMSObjectCollection extends ArrayList<GXDLMSObject>
                 reader.read();
             }
         }
-        for (GXDLMSObject it : reader.getObjects()) {
+        for (
+
+        GXDLMSObject it : reader.getObjects()) {
             ((IGXDLMSBase) it).postLoad(reader);
         }
         return reader.getObjects();
@@ -318,8 +363,7 @@ public class GXDLMSObjectCollection extends ArrayList<GXDLMSObject>
      * @throws XMLStreamException
      *             XML exception.
      */
-    public final void save(final OutputStream stream, final GXXmlWriterSettings settings)
-            throws XMLStreamException {
+    public final void save(final OutputStream stream, final GXXmlWriterSettings settings) throws XMLStreamException {
         GXXmlWriter writer = new GXXmlWriter(stream, settings);
         try {
             writer.writeStartDocument();
@@ -327,10 +371,14 @@ public class GXDLMSObjectCollection extends ArrayList<GXDLMSObject>
             int lnVersion = 2;
             for (GXDLMSObject it : this) {
                 if (settings == null || !settings.getOld()) {
-                    writer.writeStartElement("GXDLMS" + getObjectName(it.getObjectType()));
+                    ObjectType ot = it.getObjectType();
+                    if (ot != null) {
+                        writer.writeStartElement("GXDLMS" + getObjectName(ot));
+                    } else {
+                        writer.writeStartElement("GXDLMSCustom" + it.getCustomObjectType());
+                    }
                 } else {
-                    writer.writeStartElement("Object", "Type",
-                            String.valueOf(it.getObjectType().getValue()), true);
+                    writer.writeStartElement("Object", "Type", String.valueOf(it.getObjectType().getValue()), true);
                 }
                 // Add SN
                 if (it.getShortName() != 0) {

@@ -49,6 +49,7 @@ import gurux.dlms.asn.GXx509Certificate;
 import gurux.dlms.asn.enums.KeyUsage;
 import gurux.dlms.enums.Authentication;
 import gurux.dlms.enums.Conformance;
+import gurux.dlms.enums.ConnectionState;
 import gurux.dlms.enums.DataType;
 import gurux.dlms.enums.DateTimeSkips;
 import gurux.dlms.enums.InterfaceType;

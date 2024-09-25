@@ -244,7 +244,7 @@ public class GXDLMSClock extends GXDLMSObject implements IGXDLMSBase {
         Calendar now = Calendar.getInstance();
         GXDateTime tm = new GXDateTime(now);
         if (timeZone == -1 || timeZone == -32768 || timeZone == 0x8000) {
-            tm.getSkip().add(DateTimeSkips.DEVITATION);
+            tm.getSkip().add(DateTimeSkips.DEVIATION);
         } else {
             // If clock's time zone is different what user want's to use.
             int offset = timeZone + now.getTimeZone().getRawOffset() / 60000;

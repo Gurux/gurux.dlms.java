@@ -47,7 +47,6 @@ import javax.crypto.IllegalBlockSizeException;
 import javax.crypto.NoSuchPaddingException;
 import javax.xml.stream.XMLStreamException;
 
-import gurux.dlms.ConnectionState;
 import gurux.dlms.GXByteBuffer;
 import gurux.dlms.GXDLMSClient;
 import gurux.dlms.GXDLMSSettings;
@@ -55,6 +54,7 @@ import gurux.dlms.GXDLMSTranslator;
 import gurux.dlms.ValueEventArgs;
 import gurux.dlms.enums.AccessMode;
 import gurux.dlms.enums.Authentication;
+import gurux.dlms.enums.ConnectionState;
 import gurux.dlms.enums.DataType;
 import gurux.dlms.enums.ErrorCode;
 import gurux.dlms.enums.MethodAccessMode;
@@ -68,10 +68,8 @@ import gurux.dlms.secure.GXSecure;
  * Online help: <br>
  * https://www.gurux.fi/Gurux.DLMS.Objects.GXDLMSAssociationShortName
  */
-public class GXDLMSAssociationShortName extends GXDLMSObject
-        implements IGXDLMSBase {
-    private static final Logger LOGGER =
-            Logger.getLogger(GXDLMSAssociationShortName.class.getName());
+public class GXDLMSAssociationShortName extends GXDLMSObject implements IGXDLMSBase {
+    private static final Logger LOGGER = Logger.getLogger(GXDLMSAssociationShortName.class.getName());
     private GXDLMSObjectCollection objectList;
     private String securitySetupReference;
 
@@ -130,8 +128,7 @@ public class GXDLMSAssociationShortName extends GXDLMSObject
 
     @Override
     public final Object[] getValues() {
-        return new Object[] { getLogicalName(), getObjectList(), null,
-                getSecuritySetupReference() };
+        return new Object[] { getLogicalName(), getObjectList(), null, getSecuritySetupReference() };
     }
 
     /*
@@ -139,9 +136,8 @@ public class GXDLMSAssociationShortName extends GXDLMSObject
      * @param index Method index.
      */
     @Override
-    public final byte[] invoke(final GXDLMSSettings settings,
-            final ValueEventArgs e) throws InvalidKeyException,
-            NoSuchPaddingException, InvalidAlgorithmParameterException,
+    public final byte[] invoke(final GXDLMSSettings settings, final ValueEventArgs e)
+            throws InvalidKeyException, NoSuchPaddingException, InvalidAlgorithmParameterException,
             IllegalBlockSizeException, BadPaddingException, SignatureException {
         // Check reply_to_HLS_authentication
         if (e.getIndex() == 8) {
@@ -152,20 +148,15 @@ public class GXDLMSAssociationShortName extends GXDLMSObject
             Signature ver;
             if (settings.getAuthentication() == Authentication.HIGH_ECDSA) {
                 try {
-                    GXByteBuffer signature =
-                            new GXByteBuffer((byte[]) e.getParameters());
-                    if (settings.getCipher()
-                            .getSecuritySuite() == SecuritySuite.SUITE_1) {
+                    GXByteBuffer signature = new GXByteBuffer((byte[]) e.getParameters());
+                    if (settings.getCipher().getSecuritySuite() == SecuritySuite.SUITE_1) {
                         ver = Signature.getInstance("SHA256withECDSA");
-                    } else if (settings.getCipher()
-                            .getSecuritySuite() == SecuritySuite.SUITE_2) {
+                    } else if (settings.getCipher().getSecuritySuite() == SecuritySuite.SUITE_2) {
                         ver = Signature.getInstance("SHA384withECDSA");
                     } else {
-                        throw new IllegalArgumentException(
-                                "Invalid security suite.");
+                        throw new IllegalArgumentException("Invalid security suite.");
                     }
-                    ver.initVerify(settings.getCipher().getCertificates().get(0)
-                            .getPublicKey());
+                    ver.initVerify(settings.getCipher().getCertificates().get(0).getPublicKey());
                     GXByteBuffer bb = new GXByteBuffer();
                     bb.set(settings.getSourceSystemTitle());
                     bb.set(settings.getCipher().getSystemTitle());
@@ -180,12 +171,10 @@ public class GXDLMSAssociationShortName extends GXDLMSObject
             } else {
                 if (settings.getAuthentication() == Authentication.HIGH_GMAC) {
                     readSecret = settings.getSourceSystemTitle();
-                    GXByteBuffer bb =
-                            new GXByteBuffer((byte[]) e.getParameters());
+                    GXByteBuffer bb = new GXByteBuffer((byte[]) e.getParameters());
                     bb.getUInt8();
                     ic = bb.getUInt32();
-                } else if (settings
-                        .getAuthentication() == Authentication.HIGH_SHA256) {
+                } else if (settings.getAuthentication() == Authentication.HIGH_SHA256) {
                     GXByteBuffer tmp = new GXByteBuffer();
                     tmp.set(secret);
                     tmp.set(settings.getSourceSystemTitle());
@@ -197,8 +186,7 @@ public class GXDLMSAssociationShortName extends GXDLMSObject
                     readSecret = secret;
                 }
                 serverChallenge =
-                        GXSecure.secure(settings, settings.getCipher(), ic,
-                                settings.getStoCChallenge(), readSecret);
+                        GXSecure.secure(settings, settings.getCipher(), ic, settings.getStoCChallenge(), readSecret);
                 clientChallenge = (byte[]) e.getParameters();
                 accept = GXCommon.compare(serverChallenge, clientChallenge);
             }
@@ -209,10 +197,8 @@ public class GXDLMSAssociationShortName extends GXDLMSObject
                 } else {
                     readSecret = secret;
                 }
-                settings.setConnected(
-                        settings.getConnected() | ConnectionState.DLMS);
-                if (settings
-                        .getAuthentication() == Authentication.HIGH_SHA256) {
+                settings.setConnected(settings.getConnected() | ConnectionState.DLMS);
+                if (settings.getAuthentication() == Authentication.HIGH_SHA256) {
                     GXByteBuffer tmp = new GXByteBuffer();
                     tmp.set(secret);
                     tmp.set(settings.getCipher().getSystemTitle());
@@ -221,17 +207,14 @@ public class GXDLMSAssociationShortName extends GXDLMSObject
                     tmp.set(settings.getStoCChallenge());
                     readSecret = tmp.array();
                 }
-                return GXSecure.secure(settings, settings.getCipher(), ic,
-                        settings.getCtoSChallenge(), readSecret);
+                return GXSecure.secure(settings, settings.getCipher(), ic, settings.getCtoSChallenge(), readSecret);
             } else {
-                LOGGER.log(Level.INFO,
-                        "Invalid CtoS:" + GXCommon.toHex(serverChallenge, false)
-                                + "-" + GXCommon.toHex(clientChallenge, false));
+                LOGGER.log(Level.INFO, "Invalid CtoS:" + GXCommon.toHex(serverChallenge, false) + "-"
+                        + GXCommon.toHex(clientChallenge, false));
                 return null;
             }
         } else {
-            settings.setConnected(
-                    settings.getConnected() & ~ConnectionState.DLMS);
+            settings.setConnected(settings.getConnected() & ~ConnectionState.DLMS);
             e.setError(ErrorCode.READ_WRITE_DENIED);
             return null;
         }
@@ -243,11 +226,9 @@ public class GXDLMSAssociationShortName extends GXDLMSObject
      */
     @Override
     public final int[] getAttributeIndexToRead(final boolean all) {
-        java.util.ArrayList<Integer> attributes =
-                new java.util.ArrayList<Integer>();
+        java.util.ArrayList<Integer> attributes = new java.util.ArrayList<Integer>();
         // LN is static and read only once.
-        if (all || getLogicalName() == null
-                || getLogicalName().compareTo("") == 0) {
+        if (all || getLogicalName() == null || getLogicalName().compareTo("") == 0) {
             attributes.add(1);
         }
         // ObjectList is static and read only once.
@@ -283,8 +264,7 @@ public class GXDLMSAssociationShortName extends GXDLMSObject
         return 8;
     }
 
-    private void getAccessRights(final GXDLMSObject item,
-            final GXByteBuffer data) {
+    private void getAccessRights(final GXDLMSObject item, final GXByteBuffer data) {
         data.setUInt8((byte) DataType.STRUCTURE.getValue());
         data.setUInt8((byte) 3);
         GXCommon.setData(null, data, DataType.UINT16, item.getShortName());
@@ -295,8 +275,7 @@ public class GXDLMSAssociationShortName extends GXDLMSObject
             data.setUInt8((byte) DataType.STRUCTURE.getValue());
             data.setUInt8((byte) 3);
             GXCommon.setData(null, data, DataType.INT8, att.getIndex());
-            GXCommon.setData(null, data, DataType.ENUM,
-                    att.getAccess().getValue());
+            GXCommon.setData(null, data, DataType.ENUM, att.getAccess().getValue());
             GXCommon.setData(null, data, DataType.NONE, null);
         }
         data.setUInt8((byte) DataType.ARRAY.getValue());
@@ -306,8 +285,7 @@ public class GXDLMSAssociationShortName extends GXDLMSObject
             data.setUInt8((byte) DataType.STRUCTURE.getValue());
             data.setUInt8((byte) 2);
             GXCommon.setData(null, data, DataType.INT8, it.getIndex());
-            GXCommon.setData(null, data, DataType.ENUM,
-                    it.getMethodAccess().getValue());
+            GXCommon.setData(null, data, DataType.ENUM, it.getMethodAccess().getValue());
         }
     }
 
@@ -322,15 +300,13 @@ public class GXDLMSAssociationShortName extends GXDLMSObject
         } else if (index == 4) {
             return DataType.OCTET_STRING;
         }
-        throw new IllegalArgumentException(
-                "getDataType failed. Invalid attribute index.");
+        throw new IllegalArgumentException("getDataType failed. Invalid attribute index.");
     }
 
     /**
      * Returns Association View.
      */
-    private byte[] getObjects(final GXDLMSSettings settings,
-            final ValueEventArgs e) {
+    private byte[] getObjects(final GXDLMSSettings settings, final ValueEventArgs e) {
         GXByteBuffer bb = new GXByteBuffer();
         int cnt = objectList.size();
 
@@ -350,21 +326,17 @@ public class GXDLMSAssociationShortName extends GXDLMSObject
                     // Count
                     bb.setUInt8((byte) 4);
                     // base address.
-                    GXCommon.setData(null, bb, DataType.INT16,
-                            it.getShortName());
+                    GXCommon.setData(null, bb, DataType.INT16, it.getShortName());
                     // ClassID
-                    GXCommon.setData(null, bb, DataType.UINT16,
-                            it.getObjectType().getValue());
+                    GXCommon.setData(null, bb, DataType.UINT16, it.getObjectType().getValue());
                     // Version
                     GXCommon.setData(null, bb, DataType.UINT8, 0);
                     // LN
-                    GXCommon.setData(null, bb, DataType.OCTET_STRING,
-                            GXCommon.logicalNameToBytes(it.getLogicalName()));
+                    GXCommon.setData(null, bb, DataType.OCTET_STRING, GXCommon.logicalNameToBytes(it.getLogicalName()));
                     settings.setIndex(settings.getIndex() + 1);
                     if (settings.isServer()) {
                         // If PDU is full.
-                        if (!e.isSkipMaxPduSize()
-                                && bb.size() >= settings.getMaxPduSize()) {
+                        if (!e.isSkipMaxPduSize() && bb.size() >= settings.getMaxPduSize()) {
                             break;
                         }
                     }
@@ -378,8 +350,7 @@ public class GXDLMSAssociationShortName extends GXDLMSObject
      * Returns value of given attribute.
      */
     @Override
-    public final Object getValue(final GXDLMSSettings settings,
-            final ValueEventArgs e) {
+    public final Object getValue(final GXDLMSSettings settings, final ValueEventArgs e) {
         GXByteBuffer bb = new GXByteBuffer();
         if (e.getIndex() == 1) {
             return GXCommon.logicalNameToBytes(getLogicalName());
@@ -436,8 +407,7 @@ public class GXDLMSAssociationShortName extends GXDLMSObject
      * Set value of given attribute.
      */
     @Override
-    public final void setValue(final GXDLMSSettings settings,
-            final ValueEventArgs e) {
+    public final void setValue(final GXDLMSSettings settings, final ValueEventArgs e) {
         if (e.getIndex() == 1) {
             setLogicalName(GXCommon.toLogicalName(e.getValue()));
         } else if (e.getIndex() == 2) {
@@ -446,8 +416,7 @@ public class GXDLMSAssociationShortName extends GXDLMSObject
                 for (Object item : (List<?>) e.getValue()) {
                     List<?> arr = (List<?>) item;
                     int sn = ((Number) arr.get(0)).intValue() & 0xFFFF;
-                    ObjectType type = ObjectType
-                            .forValue(((Number) arr.get(1)).intValue());
+                    ObjectType type = ObjectType.forValue(((Number) arr.get(1)).intValue());
                     int version = ((Number) arr.get(2)).intValue();
                     String ln = GXCommon.toLogicalName((byte[]) arr.get(3));
                     GXDLMSObject obj = GXDLMSClient.createObject(type);
@@ -486,15 +455,13 @@ public class GXDLMSAssociationShortName extends GXDLMSObject
         } else {
             secret = GXDLMSTranslator.hexToBytes(str);
         }
-        securitySetupReference =
-                reader.readElementContentAsString("SecuritySetupReference");
+        securitySetupReference = reader.readElementContentAsString("SecuritySetupReference");
     }
 
     @Override
     public final void save(final GXXmlWriter writer) throws XMLStreamException {
         writer.writeElementString("Secret", GXDLMSTranslator.toHex(secret));
-        writer.writeElementString("SecuritySetupReference",
-                securitySetupReference);
+        writer.writeElementString("SecuritySetupReference", securitySetupReference);
     }
 
     @Override
@@ -506,15 +473,13 @@ public class GXDLMSAssociationShortName extends GXDLMSObject
         if (version < 2) {
             return new String[] { "Logical Name", "Object List" };
         }
-        return new String[] { "Logical Name", "Object List",
-                "Access Rights List", "Security Setup Reference" };
+        return new String[] { "Logical Name", "Object List", "Access Rights List", "Security Setup Reference" };
     }
 
     @Override
     public String[] getMethodNames() {
-        return new String[] { "Getlist by classid", "Getobj by logicalname",
-                "Read by logicalname", "Get attributes&services",
-                "Change LLS secret", "Change HLS secret", "Get HLS challenge",
+        return new String[] { "Getlist by classid", "Getobj by logicalname", "Read by logicalname",
+                "Get attributes&services", "Change LLS secret", "Change HLS secret", "Get HLS challenge",
                 "Reply to HLS challenge", "Add user", "Remove user" };
     }
 }

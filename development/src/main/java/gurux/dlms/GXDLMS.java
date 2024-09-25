@@ -61,7 +61,9 @@ import gurux.dlms.asn.enums.Ecc;
 import gurux.dlms.ecdsa.GXEcdsa;
 import gurux.dlms.enums.AccessMode3;
 import gurux.dlms.enums.Command;
+import gurux.dlms.enums.ConfirmedServiceError;
 import gurux.dlms.enums.Conformance;
+import gurux.dlms.enums.ConnectionState;
 import gurux.dlms.enums.CryptoKeyType;
 import gurux.dlms.enums.DataType;
 import gurux.dlms.enums.ErrorCode;
@@ -75,6 +77,7 @@ import gurux.dlms.enums.Security;
 import gurux.dlms.enums.ServiceClass;
 import gurux.dlms.enums.Signing;
 import gurux.dlms.enums.Standard;
+import gurux.dlms.enums.TranslatorOutputType;
 import gurux.dlms.internal.CoAPClass;
 import gurux.dlms.internal.CoAPClientError;
 import gurux.dlms.internal.CoAPContentType;
@@ -233,7 +236,7 @@ abstract class GXDLMS {
         // If IC is manufacturer specific or unknown.
         if (type == null || type == ObjectType.NONE) {
             GXDLMSObject obj = null;
-            if (settings.getCustomObjectNotifier() != null) {
+            if (settings != null && settings.getCustomObjectNotifier() != null) {
                 obj = settings.getCustomObjectNotifier().onObjectCreate(classID, version);
             }
             if (obj == null) {
