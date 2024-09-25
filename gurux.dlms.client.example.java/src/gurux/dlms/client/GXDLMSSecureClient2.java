@@ -199,7 +199,7 @@ public class GXDLMSSecureClient2 extends GXDLMSSecureClient implements IGXCrypto
      * Create manufacturer specific custom COSEM object.
      */
     @Override
-    public GXDLMSObject onObjectCreateEventHandler(int type, int version) {
+    public GXDLMSObject onObjectCreate(int type, int version) {
         // if (type == 10006 && version == 1) {
         // return new ManufacturerSpecificObject();
         // }

@@ -62,7 +62,6 @@ import gurux.dlms.GXDLMSTranslator;
 import gurux.dlms.GXDateTime;
 import gurux.dlms.GXReplyData;
 import gurux.dlms.GXSimpleEntry;
-import gurux.dlms.TranslatorOutputType;
 import gurux.dlms.asn.GXAsn1Converter;
 import gurux.dlms.asn.GXCertificateRequest;
 import gurux.dlms.asn.GXPkcs10;
@@ -80,6 +79,7 @@ import gurux.dlms.enums.InterfaceType;
 import gurux.dlms.enums.ObjectType;
 import gurux.dlms.enums.Security;
 import gurux.dlms.enums.Signing;
+import gurux.dlms.enums.TranslatorOutputType;
 import gurux.dlms.objects.GXDLMSAssociationShortName;
 import gurux.dlms.objects.GXDLMSCaptureObject;
 import gurux.dlms.objects.GXDLMSCertificateInfo;
@@ -637,7 +637,7 @@ public class GXDLMSReader {
      * @throws Exception
      */
     public Object read(GXDLMSObject item, int attributeIndex) throws Exception {
-        byte[][] data = dlms.read(item.getName(), item.getObjectType(), attributeIndex);
+        byte[][] data = dlms.read(item, attributeIndex);
         GXReplyData reply = new GXReplyData();
         readDataBlock(data, reply);
         // Update data type on read.
