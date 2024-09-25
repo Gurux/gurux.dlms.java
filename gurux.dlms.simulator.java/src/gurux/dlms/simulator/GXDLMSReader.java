@@ -59,7 +59,6 @@ import gurux.dlms.GXDLMSTranslator;
 import gurux.dlms.GXDateTime;
 import gurux.dlms.GXReplyData;
 import gurux.dlms.GXSimpleEntry;
-import gurux.dlms.TranslatorOutputType;
 import gurux.dlms.enums.AccessMode;
 import gurux.dlms.enums.Authentication;
 import gurux.dlms.enums.Conformance;
@@ -68,6 +67,7 @@ import gurux.dlms.enums.ErrorCode;
 import gurux.dlms.enums.InterfaceType;
 import gurux.dlms.enums.ObjectType;
 import gurux.dlms.enums.Security;
+import gurux.dlms.enums.TranslatorOutputType;
 import gurux.dlms.objects.GXDLMSAssociationShortName;
 import gurux.dlms.objects.GXDLMSCaptureObject;
 import gurux.dlms.objects.GXDLMSData;
@@ -95,8 +95,8 @@ public class GXDLMSReader {
     // Invocation counter (frame counter).
     String invocationCounter = null;
 
-    public GXDLMSReader(GXDLMSSecureClient client, IGXMedia media, TraceLevel trace,
-            final String frameCounter) throws Exception {
+    public GXDLMSReader(GXDLMSSecureClient client, IGXMedia media, TraceLevel trace, final String frameCounter)
+            throws Exception {
         Files.deleteIfExists(Paths.get("trace.txt"));
         logFile = new PrintWriter(new BufferedWriter(new FileWriter("logFile.txt")));
         Trace = trace;
@@ -130,9 +130,8 @@ public class GXDLMSReader {
                 // Release is call only for secured connections.
                 // All meters are not supporting Release and it's causing
                 // problems.
-                if (dlms.getInterfaceType() == InterfaceType.WRAPPER
-                        || (dlms.getInterfaceType() == InterfaceType.HDLC
-                                && dlms.getCiphering().getSecurity() != Security.NONE)) {
+                if (dlms.getInterfaceType() == InterfaceType.WRAPPER || (dlms.getInterfaceType() == InterfaceType.HDLC
+                        && dlms.getCiphering().getSecurity() != Security.NONE)) {
                     System.out.println("release");
                     readDataBlock(dlms.releaseRequest(), reply);
                 }
@@ -150,9 +149,8 @@ public class GXDLMSReader {
                 // Release is call only for secured connections.
                 // All meters are not supporting Release and it's causing
                 // problems.
-                if (dlms.getInterfaceType() == InterfaceType.WRAPPER
-                        || (dlms.getInterfaceType() == InterfaceType.HDLC
-                                && dlms.getCiphering().getSecurity() != Security.NONE)) {
+                if (dlms.getInterfaceType() == InterfaceType.WRAPPER || (dlms.getInterfaceType() == InterfaceType.HDLC
+                        && dlms.getCiphering().getSecurity() != Security.NONE)) {
                     readDataBlock(dlms.releaseRequest(), reply);
                 }
             } catch (Exception e) {
@@ -165,8 +163,7 @@ public class GXDLMSReader {
     }
 
     String now() {
-        return new SimpleDateFormat("HH:mm:ss.SSS")
-                .format(java.util.Calendar.getInstance().getTime());
+        return new SimpleDateFormat("HH:mm:ss.SSS").format(java.util.Calendar.getInstance().getTime());
     }
 
     void writeTrace(String line, TraceLevel level) {
@@ -207,8 +204,7 @@ public class GXDLMSReader {
         // If Event notification or Information report.
         if (value == null) {
             for (Entry<GXDLMSObject, Integer> it : items) {
-                System.out.println(it.getKey().toString() + " Value:"
-                        + it.getKey().getValues()[it.getValue() - 1]);
+                System.out.println(it.getKey().toString() + " Value:" + it.getKey().getValues()[it.getValue() - 1]);
             }
         } else // Show data notification.
         {
@@ -252,8 +248,7 @@ public class GXDLMSReader {
         synchronized (Media.getSynchronous()) {
             while (!succeeded) {
                 if (!reply.isStreaming()) {
-                    writeTrace("TX: " + now() + "\t" + GXCommon.bytesToHex(data),
-                            TraceLevel.VERBOSE);
+                    writeTrace("TX: " + now() + "\t" + GXCommon.bytesToHex(data), TraceLevel.VERBOSE);
                     Media.send(data, null);
                 }
                 if (p.getEop() == null) {
@@ -266,8 +261,7 @@ public class GXDLMSReader {
                     }
                     // Try to read again...
                     if (pos++ == 3) {
-                        throw new RuntimeException(
-                                "Failed to receive reply from the device in given time.");
+                        throw new RuntimeException("Failed to receive reply from the device in given time.");
                     }
                     System.out.println("Data send failed. Try to resend " + pos.toString() + "/3");
                 }
@@ -282,8 +276,7 @@ public class GXDLMSReader {
                         // Handle notify.
                         if (!notify.isMoreData()) {
                             // Show received push message as XML.
-                            GXDLMSTranslator t =
-                                    new GXDLMSTranslator(TranslatorOutputType.SIMPLE_XML);
+                            GXDLMSTranslator t = new GXDLMSTranslator(TranslatorOutputType.SIMPLE_XML);
                             String xml = t.dataToXml(notify.getData());
                             System.out.println(xml);
                             notify.clear();
@@ -302,11 +295,9 @@ public class GXDLMSReader {
                         }
                         // Try to read again...
                         if (++pos == 3) {
-                            throw new Exception(
-                                    "Failed to receive reply from the device in given time.");
+                            throw new Exception("Failed to receive reply from the device in given time.");
                         }
-                        System.out.println(
-                                "Data send failed. Try to resend " + pos.toString() + "/3");
+                        System.out.println("Data send failed. Try to resend " + pos.toString() + "/3");
                     }
                     rd.position(msgPos);
                     rd.set(p.getReply());
@@ -388,8 +379,7 @@ public class GXDLMSReader {
                     // Allocate buffer to same size as transmit buffer of the
                     // meter.
                     // Size of replyBuff is payload and frame (Bop, EOP, crc).
-                    int size = (int) ((((Number) dlms.getHdlcSettings().getMaxInfoTX()).intValue()
-                            & 0xFFFFFFFFL) + 40);
+                    int size = (int) ((((Number) dlms.getHdlcSettings().getMaxInfoTX()).intValue() & 0xFFFFFFFFL) + 40);
                     replyBuff = java.nio.ByteBuffer.allocate(size);
                 }
                 // Generate AARQ request.
@@ -431,14 +421,12 @@ public class GXDLMSReader {
             String replyStr;
             synchronized (Media.getSynchronous()) {
                 data = "/?!\r\n";
-                writeTrace("TX: " + now() + "\t" + GXCommon.bytesToHex(data.getBytes("ASCII")),
-                        TraceLevel.VERBOSE);
+                writeTrace("TX: " + now() + "\t" + GXCommon.bytesToHex(data.getBytes("ASCII")), TraceLevel.VERBOSE);
                 Media.send(data, null);
                 if (!Media.receive(p)) {
                     throw new Exception("Failed to received reply from the media.");
                 }
-                writeTrace("RX: " + now() + "\t" + GXCommon.bytesToHex(p.getReply()),
-                        TraceLevel.VERBOSE);
+                writeTrace("RX: " + now() + "\t" + GXCommon.bytesToHex(p.getReply()), TraceLevel.VERBOSE);
                 // If echo is used.
                 replyStr = new String(p.getReply());
                 if (data.equals(replyStr)) {
@@ -446,8 +434,7 @@ public class GXDLMSReader {
                     if (!Media.receive(p)) {
                         throw new Exception("Failed to received reply from the media.");
                     }
-                    writeTrace("RX: " + now() + "\t" + GXCommon.bytesToHex(p.getReply()),
-                            TraceLevel.VERBOSE);
+                    writeTrace("RX: " + now() + "\t" + GXCommon.bytesToHex(p.getReply()), TraceLevel.VERBOSE);
                     replyStr = new String(p.getReply());
                 }
             }
@@ -492,16 +479,14 @@ public class GXDLMSReader {
                                                    // procedure) (Binary
                                                    // mode)
             // Set mode E.
-            byte[] tmp = new byte[] { 0x06, controlCharacter, (byte) baudrate, ModeControlCharacter,
-                    13, 10 };
+            byte[] tmp = new byte[] { 0x06, controlCharacter, (byte) baudrate, ModeControlCharacter, 13, 10 };
             p.setReply(null);
             synchronized (Media.getSynchronous()) {
                 Media.send(tmp, null);
                 writeTrace("RX: " + now() + "\t" + GXCommon.bytesToHex(tmp), TraceLevel.VERBOSE);
                 p.setWaitTime(100);
                 if (Media.receive(p)) {
-                    writeTrace("RX: " + now() + "\t" + GXCommon.bytesToHex(p.getReply()),
-                            TraceLevel.VERBOSE);
+                    writeTrace("RX: " + now() + "\t" + GXCommon.bytesToHex(p.getReply()), TraceLevel.VERBOSE);
                 }
                 Media.close();
                 // This sleep make sure that all meters can be read.
@@ -535,15 +520,12 @@ public class GXDLMSReader {
         System.out.println("Standard: " + dlms.getStandard().toString());
         if (dlms.getCiphering().getSecurity() != Security.NONE) {
             System.out.println("Security: " + dlms.getCiphering().getSecurity());
-            System.out.println(
-                    "System title: " + GXCommon.bytesToHex(dlms.getCiphering().getSystemTitle()));
-            System.out.println("Authentication key: "
-                    + GXCommon.bytesToHex(dlms.getCiphering().getAuthenticationKey()));
-            System.out.println("Block cipher key "
-                    + GXCommon.bytesToHex(dlms.getCiphering().getBlockCipherKey()));
+            System.out.println("System title: " + GXCommon.bytesToHex(dlms.getCiphering().getSystemTitle()));
+            System.out
+                    .println("Authentication key: " + GXCommon.bytesToHex(dlms.getCiphering().getAuthenticationKey()));
+            System.out.println("Block cipher key " + GXCommon.bytesToHex(dlms.getCiphering().getBlockCipherKey()));
             if (dlms.getCiphering().getDedicatedKey() != null) {
-                System.out.println("Dedicated key: "
-                        + GXCommon.bytesToHex(dlms.getCiphering().getDedicatedKey()));
+                System.out.println("Dedicated key: " + GXCommon.bytesToHex(dlms.getCiphering().getDedicatedKey()));
             }
         }
         updateFrameCounter();
@@ -557,8 +539,7 @@ public class GXDLMSReader {
 
             // Allocate buffer to same size as transmit buffer of the meter.
             // Size of replyBuff is payload and frame (Bop, EOP, crc).
-            int size = (int) ((((Number) dlms.getHdlcSettings().getMaxInfoTX()).intValue()
-                    & 0xFFFFFFFFL) + 40);
+            int size = (int) ((((Number) dlms.getHdlcSettings().getMaxInfoTX()).intValue() & 0xFFFFFFFFL) + 40);
             replyBuff = java.nio.ByteBuffer.allocate(size);
         }
         reply.clear();
@@ -636,11 +617,10 @@ public class GXDLMSReader {
     /*
      * Returns columns of profile Generic.
      */
-    public List<Entry<GXDLMSObject, GXDLMSCaptureObject>> GetColumns(GXDLMSProfileGeneric pg)
-            throws Exception {
+    public List<Entry<GXDLMSObject, GXDLMSCaptureObject>> GetColumns(GXDLMSProfileGeneric pg) throws Exception {
         Object entries = read(pg, 7);
-        System.out.println("Reading Profile Generic: " + pg.getLogicalName() + " "
-                + pg.getDescription() + " entries:" + entries.toString());
+        System.out.println("Reading Profile Generic: " + pg.getLogicalName() + " " + pg.getDescription() + " entries:"
+                + entries.toString());
         GXReplyData reply = new GXReplyData();
         byte[] data = dlms.read(pg.getName(), pg.getObjectType(), 3)[0];
         readDataBlock(data, reply);
@@ -657,8 +637,7 @@ public class GXDLMSReader {
      * @return
      * @throws Exception
      */
-    public Object[] readRowsByEntry(GXDLMSProfileGeneric pg, int index, int count)
-            throws Exception {
+    public Object[] readRowsByEntry(GXDLMSProfileGeneric pg, int index, int count) throws Exception {
         byte[][] data = dlms.readRowsByEntry(pg, index, count);
         GXReplyData reply = new GXReplyData();
         readDataBlock(data, reply);
@@ -675,8 +654,7 @@ public class GXDLMSReader {
      * @return
      * @throws Exception
      */
-    public Object[] readRowsByRange(final GXDLMSProfileGeneric pg, final Date start, final Date end)
-            throws Exception {
+    public Object[] readRowsByRange(final GXDLMSProfileGeneric pg, final Date start, final Date end) throws Exception {
         GXReplyData reply = new GXReplyData();
         byte[][] data = dlms.readRowsByRange(pg, start, end);
         readDataBlock(data, reply);
@@ -693,8 +671,8 @@ public class GXDLMSReader {
      * @return
      * @throws Exception
      */
-    public Object[] readRowsByRange(final GXDLMSProfileGeneric pg, final GXDateTime start,
-            final GXDateTime end) throws Exception {
+    public Object[] readRowsByRange(final GXDLMSProfileGeneric pg, final GXDateTime start, final GXDateTime end)
+            throws Exception {
         GXReplyData reply = new GXReplyData();
         byte[][] data = dlms.readRowsByRange(pg, start, end);
         readDataBlock(data, reply);
@@ -705,12 +683,11 @@ public class GXDLMSReader {
      * Read Scalers and units from the register objects.
      */
     void readScalerAndUnits() throws Exception {
-        GXDLMSObjectCollection objs = dlms.getObjects().getObjects(new ObjectType[] {
-                ObjectType.REGISTER, ObjectType.DEMAND_REGISTER, ObjectType.EXTENDED_REGISTER });
+        GXDLMSObjectCollection objs = dlms.getObjects().getObjects(
+                new ObjectType[] { ObjectType.REGISTER, ObjectType.DEMAND_REGISTER, ObjectType.EXTENDED_REGISTER });
         try {
             if (dlms.getNegotiatedConformance().contains(Conformance.MULTIPLE_REFERENCES)) {
-                List<Entry<GXDLMSObject, Integer>> list =
-                        new ArrayList<Entry<GXDLMSObject, Integer>>();
+                List<Entry<GXDLMSObject, Integer>> list = new ArrayList<Entry<GXDLMSObject, Integer>>();
                 for (GXDLMSObject it : objs) {
                     if (it instanceof GXDLMSRegister) {
                         if ((it.getAccess(3).ordinal() & AccessMode.READ.ordinal()) != 0) {
@@ -748,8 +725,7 @@ public class GXDLMSReader {
      * Read profile generic columns from the meter.
      */
     void getProfileGenericColumns() {
-        GXDLMSObjectCollection profileGenerics =
-                dlms.getObjects().getObjects(ObjectType.PROFILE_GENERIC);
+        GXDLMSObjectCollection profileGenerics = dlms.getObjects().getObjects(ObjectType.PROFILE_GENERIC);
         for (GXDLMSObject it : profileGenerics) {
             writeTrace("Profile Generic " + it.getName() + "Columns:", TraceLevel.INFO);
             GXDLMSProfileGeneric pg = (GXDLMSProfileGeneric) it;
@@ -797,8 +773,8 @@ public class GXDLMSReader {
                 // and this is only a example.
                 continue;
             }
-            writeTrace("-------- Reading " + it.getClass().getSimpleName() + " "
-                    + it.getName().toString() + " " + it.getDescription(), TraceLevel.INFO);
+            writeTrace("-------- Reading " + it.getClass().getSimpleName() + " " + it.getName().toString() + " "
+                    + it.getDescription(), TraceLevel.INFO);
             for (int pos : ((IGXDLMSBase) it).getAttributeIndexToRead(true)) {
                 try {
                     if (pos == 1) {
@@ -858,15 +834,13 @@ public class GXDLMSReader {
      */
     void getProfileGenerics() throws Exception {
         Object[] cells;
-        GXDLMSObjectCollection profileGenerics =
-                dlms.getObjects().getObjects(ObjectType.PROFILE_GENERIC);
+        GXDLMSObjectCollection profileGenerics = dlms.getObjects().getObjects(ObjectType.PROFILE_GENERIC);
         for (GXDLMSObject it : profileGenerics) {
-            writeTrace("-------- Reading " + it.getClass().getSimpleName() + " "
-                    + it.getName().toString() + " " + it.getDescription(), TraceLevel.INFO);
+            writeTrace("-------- Reading " + it.getClass().getSimpleName() + " " + it.getName().toString() + " "
+                    + it.getDescription(), TraceLevel.INFO);
             long entriesInUse = ((Number) read(it, 7)).longValue();
             long entries = ((Number) read(it, 8)).longValue();
-            writeTrace("Entries: " + String.valueOf(entriesInUse) + "/" + String.valueOf(entries),
-                    TraceLevel.INFO);
+            writeTrace("Entries: " + String.valueOf(entriesInUse) + "/" + String.valueOf(entries), TraceLevel.INFO);
             GXDLMSProfileGeneric pg = (GXDLMSProfileGeneric) it;
             // If there are no columns.
             if (entriesInUse == 0 || pg.getCaptureObjects().size() == 0) {
@@ -949,8 +923,7 @@ public class GXDLMSReader {
         // Access rights must read differently when short Name referencing is
         // used.
         if (!dlms.getUseLogicalNameReferencing()) {
-            GXDLMSAssociationShortName sn =
-                    (GXDLMSAssociationShortName) dlms.getObjects().findBySN(0xFA00);
+            GXDLMSAssociationShortName sn = (GXDLMSAssociationShortName) dlms.getObjects().findBySN(0xFA00);
             if (sn != null && sn.getVersion() > 0) {
                 read(sn, 3);
             }
