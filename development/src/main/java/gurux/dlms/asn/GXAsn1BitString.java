@@ -52,22 +52,34 @@ public class GXAsn1BitString {
     private byte[] value;
 
     /**
+     * @return Number of extra bits at the end of the string.
+     */
+    public final int getPadBits() {
+        return padBits;
+    }
+
+    /**
+     * @return Bit string.
+     */
+    public final byte[] getValue() {
+        return value;
+    }
+
+    /**
+     * @return Number of extra bits at the end of the string.
+     */
+    public final int length() {
+        if (value == null) {
+            return 0;
+        }
+        return (8 * value.length) - padBits;
+    }
+
+    /**
      * Constructor.
      */
     public GXAsn1BitString() {
 
-    }
-
-    /**
-     * Append zeroes to the buffer.
-     * 
-     * @param count
-     *            Amount of zero.
-     */
-    private static void appendZeros(final StringBuilder sb, final int count) {
-        for (int pos = 0; pos != count; ++pos) {
-            sb.append('0');
-        }
     }
 
     /**
@@ -85,8 +97,7 @@ public class GXAsn1BitString {
         appendZeros(sb, padBits);
         value = new byte[sb.length() / 8];
         for (int pos = 0; pos != value.length; ++pos) {
-            value[pos] = (byte) Integer
-                    .parseInt(sb.substring(8 * pos, 8 * (pos + 1)), 2);
+            value[pos] = (byte) Integer.parseInt(sb.substring(8 * pos, 8 * (pos + 1)), 2);
         }
     }
 
@@ -103,8 +114,7 @@ public class GXAsn1BitString {
             throw new IllegalArgumentException("data");
         }
         if (padBits < 0 || padBits > 7) {
-            throw new IllegalArgumentException(
-                    "PadCount must be in the range 0 to 7");
+            throw new IllegalArgumentException("PadCount must be in the range 0 to 7");
         }
         value = str;
         padBits = padCount;
@@ -122,35 +132,22 @@ public class GXAsn1BitString {
         }
         padBits = str[0];
         if (padBits < 0 || padBits > 7) {
-            throw new IllegalArgumentException(
-                    "PadCount must be in the range 0 to 7");
+            throw new IllegalArgumentException("PadCount must be in the range 0 to 7");
         }
         value = new byte[str.length - 1];
         System.arraycopy(str, 1, value, 0, str.length - 1);
     }
 
     /**
-     * @return Bit string.
+     * Append zeroes to the buffer.
+     * 
+     * @param count
+     *            Amount of zero.
      */
-    public final byte[] getValue() {
-        return value;
-    }
-
-    /**
-     * @return Number of extra bits at the end of the string.
-     */
-    public final int getPadBits() {
-        return padBits;
-    }
-
-    /**
-     * @return Number of extra bits at the end of the string.
-     */
-    public final int length() {
-        if (value == null) {
-            return 0;
+    private static void appendZeros(final StringBuilder sb, final int count) {
+        for (int pos = 0; pos != count; ++pos) {
+            sb.append('0');
         }
-        return (8 * value.length) - padBits;
     }
 
     @Override
@@ -163,8 +160,7 @@ public class GXAsn1BitString {
             GXCommon.toBitString(sb, it, 8);
         }
         sb.setLength(sb.length() - padBits);
-        return String.valueOf((8 * value.length) - padBits) + " bit "
-                + sb.toString();
+        return String.valueOf((8 * value.length) - padBits) + " bit " + sb.toString();
     }
 
     public final String asString() {
