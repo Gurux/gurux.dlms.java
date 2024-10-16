@@ -101,6 +101,17 @@ public final class GXCommon {
     @SuppressWarnings("squid:S2386")
     public static final byte[] LLC_REPLY_BYTES = { (byte) 0xE6, (byte) 0xE7, 0x00 };
 
+    /**
+     * Check is string null or empty.
+     * 
+     * @param value
+     *            String value.
+     * @return True, if string is null or empty.
+     */
+    public static boolean isNullOrEmpty(final String value) {
+        return value == null || value.isEmpty();
+    }
+
     /*
      * Convert string to byte array.
      * @param value String value.
