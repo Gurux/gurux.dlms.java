@@ -757,10 +757,9 @@ public class GXDLMSReader {
             if (dlms.getNegotiatedConformance().contains(Conformance.ACCESS)) {
                 List<GXDLMSAccessItem> list = new ArrayList<GXDLMSAccessItem>();
                 for (GXDLMSObject it : objs) {
-                    if (it instanceof GXDLMSRegister) {
+                    if (it instanceof GXDLMSRegister && dlms.canRead(it, 3)) {
                         list.add(new GXDLMSAccessItem(AccessServiceCommandType.GET, it, 3));
-                    }
-                    if (it instanceof GXDLMSDemandRegister) {
+                    } else if (it instanceof GXDLMSDemandRegister && dlms.canRead(it, 4)) {
                         list.add(new GXDLMSAccessItem(AccessServiceCommandType.GET, it, 4));
                     }
                 }
@@ -768,10 +767,10 @@ public class GXDLMSReader {
             } else if (dlms.getNegotiatedConformance().contains(Conformance.MULTIPLE_REFERENCES)) {
                 List<Entry<GXDLMSObject, Integer>> list = new ArrayList<Entry<GXDLMSObject, Integer>>();
                 for (GXDLMSObject it : objs) {
-                    if (it instanceof GXDLMSRegister) {
+                    if (it instanceof GXDLMSRegister && dlms.canRead(it, 3)) {
                         list.add(new GXSimpleEntry<GXDLMSObject, Integer>(it, 3));
                     }
-                    if (it instanceof GXDLMSDemandRegister) {
+                    if (it instanceof GXDLMSDemandRegister && dlms.canRead(it, 4)) {
                         list.add(new GXSimpleEntry<GXDLMSObject, Integer>(it, 4));
                     }
                 }
@@ -784,9 +783,9 @@ public class GXDLMSReader {
         if (!dlms.getNegotiatedConformance().contains(Conformance.MULTIPLE_REFERENCES)) {
             for (GXDLMSObject it : objs) {
                 try {
-                    if (it instanceof GXDLMSRegister) {
+                    if (it instanceof GXDLMSRegister && dlms.canRead(it, 3)) {
                         read(it, 3);
-                    } else if (it instanceof GXDLMSDemandRegister) {
+                    } else if (it instanceof GXDLMSDemandRegister && dlms.canRead(it, 4)) {
                         read(it, 4);
                     }
                 } catch (Exception e) {
@@ -855,8 +854,12 @@ public class GXDLMSReader {
                     if (pos == 1) {
                         continue;
                     }
-                    Object val = read(it, pos);
-                    showValue(pos, val);
+                    if (dlms.canRead(it, pos)) {
+                        Object val = read(it, pos);
+                        showValue(pos, val);
+                    } else {
+                        writeTrace("Warning! Index: " + pos + " is not readable.", TraceLevel.INFO);
+                    }
                 } catch (Exception ex) {
                     writeTrace("Error! Index: " + pos + " " + ex.getMessage(), TraceLevel.ERROR);
                     writeTrace(ex.toString(), TraceLevel.ERROR);
@@ -913,8 +916,14 @@ public class GXDLMSReader {
         for (GXDLMSObject it : profileGenerics) {
             writeTrace("-------- Reading " + it.getClass().getSimpleName() + " " + it.getName().toString() + " "
                     + it.getDescription(), TraceLevel.INFO);
-            long entriesInUse = ((Number) read(it, 7)).longValue();
-            long entries = ((Number) read(it, 8)).longValue();
+            long entriesInUse = -1;
+            if (dlms.canRead(it, 7)) {
+                entriesInUse = ((Number) read(it, 7)).longValue();
+            }
+            long entries = -1;
+            if (dlms.canRead(it, 8)) {
+                entries = ((Number) read(it, 8)).longValue();
+            }
             writeTrace("Entries: " + String.valueOf(entriesInUse) + "/" + String.valueOf(entries), TraceLevel.INFO);
             GXDLMSProfileGeneric pg = (GXDLMSProfileGeneric) it;
             // If there are no columns.
