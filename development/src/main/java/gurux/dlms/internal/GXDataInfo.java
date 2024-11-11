@@ -60,6 +60,11 @@ public class GXDataInfo {
      */
     private boolean complete = true;
 
+    /**
+     * AA Added to compact data in Italy standard.
+     */
+    private boolean appendAA;
+
     private GXDLMSTranslatorStructure xml;
 
     /**
@@ -135,5 +140,20 @@ public class GXDataInfo {
         count = 0;
         type = DataType.NONE;
         complete = true;
+    }
+
+    /**
+     * @return AA Added to compact data in Italy standard.
+     */
+    public boolean isAppendAA() {
+        return appendAA;
+    }
+
+    /**
+     * @param value
+     *            AA Added to compact data in Italy standard.
+     */
+    public void setAppendAA(final boolean value) {
+        appendAA = value;
     }
 }

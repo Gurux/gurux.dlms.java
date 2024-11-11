@@ -54,8 +54,15 @@ import gurux.dlms.GXCryptoKeyParameter;
 import gurux.dlms.GXDLMSClient;
 import gurux.dlms.GXDLMSConverter;
 import gurux.dlms.GXDLMSSettings;
+import gurux.dlms.GXDLMSTranslatorStructure;
 import gurux.dlms.GXDate;
 import gurux.dlms.GXDateTime;
+import gurux.dlms.GXDeltaInt16;
+import gurux.dlms.GXDeltaInt32;
+import gurux.dlms.GXDeltaInt8;
+import gurux.dlms.GXDeltaUInt16;
+import gurux.dlms.GXDeltaUInt32;
+import gurux.dlms.GXDeltaUInt8;
 import gurux.dlms.GXEnum;
 import gurux.dlms.GXStructure;
 import gurux.dlms.GXTime;
@@ -73,6 +80,8 @@ import gurux.dlms.enums.DateTimeSkips;
 import gurux.dlms.enums.Security;
 import gurux.dlms.enums.Standard;
 import gurux.dlms.enums.TranslatorOutputType;
+import gurux.dlms.objects.GXDLMSObject;
+import gurux.dlms.objects.GXDLMSObjectCollection;
 import gurux.dlms.objects.enums.CertificateType;
 import gurux.dlms.objects.enums.SecuritySuite;
 
@@ -521,7 +530,6 @@ public final class GXCommon {
     /*
      * Reserved for internal use.
      */
-    @SuppressWarnings("squid:S3034")
     public static void toBitString(final StringBuilder sb, final byte value, final int count) {
         int count2 = count;
         if (count2 > 0) {
@@ -587,7 +595,7 @@ public final class GXCommon {
             value = getInt32(data, info);
             break;
         case UINT32:
-            value = getUInt32(settings, data, info);
+            value = new GXUInt32(getUInt32(data, info));
             break;
         case STRING:
             value = getString(data, info, knownType);
@@ -608,19 +616,19 @@ public final class GXCommon {
             value = getInt16(data, info);
             break;
         case UINT8:
-            value = getUInt8(settings, data, info);
+            value = new GXUInt8(getUInt8(data, info));
             break;
         case UINT16:
-            value = getUInt16(settings, data, info);
+            value = new GXUInt16(getUInt16(data, info));
             break;
         case COMPACT_ARRAY:
-            value = getCompactArray(settings, data, info);
+            value = getCompactArray(settings, data, info, false);
             break;
         case INT64:
             value = getInt64(data, info);
             break;
         case UINT64:
-            value = getUInt64(settings, data, info);
+            value = new GXUInt64(getUInt64(settings, data, info));
             break;
         case ENUM:
             value = getEnum(data, info);
@@ -640,6 +648,25 @@ public final class GXCommon {
         case TIME:
             value = getTime(data, info);
             break;
+        case DELTA_INT8:
+            value = new GXDeltaInt8(getInt8(data, info));
+            break;
+        case DELTA_INT16:
+            value = new GXDeltaInt16(getInt16(data, info));
+            break;
+        case DELTA_INT32:
+            value = new GXDeltaInt32(getInt32(data, info));
+            break;
+        case DELTA_UINT8:
+            value = new GXDeltaUInt8(getUInt8(data, info));
+            break;
+        case DELTA_UINT16:
+            value = new GXDeltaUInt16(getUInt16(data, info));
+            break;
+        case DELTA_UINT32:
+            value = new GXDeltaUInt32(getUInt32(data, info));
+            break;
+
         default:
             throw new IllegalArgumentException("Invalid data type.");
         }
@@ -1131,7 +1158,7 @@ public final class GXCommon {
      *            Data info.
      * @return parsed UInt64 value.
      */
-    private static Object getUInt64(final GXDLMSSettings settings, final GXByteBuffer buff, final GXDataInfo info) {
+    private static BigInteger getUInt64(final GXDLMSSettings settings, final GXByteBuffer buff, final GXDataInfo info) {
         // If there is not enough data available.
         if (buff.size() - buff.position() < 8) {
             info.setComplete(false);
@@ -1142,11 +1169,7 @@ public final class GXCommon {
             info.getXml().appendLine(info.getXml().getDataType(info.getType()), null,
                     info.getXml().integerToHex(value, 16));
         }
-        // Return old value.
-        if (settings == null || settings.getVersion() == 3) {
-            return value;
-        }
-        return new GXUInt64(value);
+        return value;
     }
 
     /**
@@ -1182,38 +1205,37 @@ public final class GXCommon {
      *            Data info.
      * @return parsed UInt16 value.
      */
-    private static Object getUInt16(final GXDLMSSettings settings, final GXByteBuffer buff, final GXDataInfo info) {
-        Object value;
+    private static int getUInt16(final GXByteBuffer buff, final GXDataInfo info) {
+        int value;
         // If there is not enough data available.
         if (buff.size() - buff.position() < 2) {
             info.setComplete(false);
-            return null;
+            return 0;
         }
         value = buff.getUInt16();
         if (info.getXml() != null) {
             info.getXml().appendLine(info.getXml().getDataType(info.getType()), null,
                     info.getXml().integerToHex(value, 4));
-
         }
-        // Return old value.
-        if (settings == null || settings.getVersion() == 3) {
-            return value;
-        }
-        return new GXUInt16((int) value);
+        return value;
     }
 
-    @SuppressWarnings("squid:S1172")
-    private static void getCompactArrayItem(final GXDLMSSettings settings, GXByteBuffer buff, List<?> dt,
-            List<Object> list, int len) {
-        List<Object> tmp2 = new ArrayList<Object>();
+    private static void getCompactArrayItem(final GXDLMSSettings settings, final GXByteBuffer buff, final List<?> dt,
+            final List<Object> list, final int len, final boolean array) {
+        List<Object> tmp;
+        if (array) {
+            tmp = new GXArray();
+        } else {
+            tmp = new GXStructure();
+        }
         for (Object it : dt) {
             if (it instanceof DataType) {
-                getCompactArrayItem(settings, buff, (DataType) it, tmp2, 1);
+                getCompactArrayItem(settings, buff, (DataType) it, tmp, 1);
             } else {
-                getCompactArrayItem(settings, buff, (List<?>) it, tmp2, 1);
+                getCompactArrayItem(settings, buff, (List<?>) it, tmp, 1, it instanceof GXArray);
             }
         }
-        list.add(tmp2.toArray());
+        list.add(tmp);
     }
 
     private static void getCompactArrayItem(final GXDLMSSettings settings, final GXByteBuffer buff, final DataType dt,
@@ -1264,16 +1286,18 @@ public final class GXCommon {
             if (dt == DataType.ARRAY) {
                 int cnt = buff.getUInt16();
                 List<Object> tmp = new ArrayList<Object>();
-                List<Object> tmp2 = new ArrayList<Object>();
-                getDataTypes(buff, tmp, 1);
-                for (int i = 0; i != cnt; ++i) {
-                    tmp2.addAll(tmp);
+                GXArray tmp2 = new GXArray();
+                if (cnt != 0) {
+                    getDataTypes(buff, tmp, 1);
+                    for (int i = 0; i != cnt; ++i) {
+                        tmp2.add(tmp.get(0));
+                    }
                 }
                 cols.add(tmp2);
             } else if (dt == DataType.STRUCTURE) {
-                List<Object> tmp = new ArrayList<Object>();
+                GXStructure tmp = new GXStructure();
                 getDataTypes(buff, tmp, buff.getUInt8());
-                cols.add(tmp.toArray(new Object[tmp.size()]));
+                cols.add(tmp);
             } else {
                 cols.add(dt);
             }
@@ -1306,8 +1330,8 @@ public final class GXCommon {
      *            Data info.
      * @return parsed UInt16 value.
      */
-    private static Object getCompactArray(final GXDLMSSettings settings, final GXByteBuffer buff,
-            final GXDataInfo info) {
+    public static Object getCompactArray(final GXDLMSSettings settings, final GXByteBuffer buff, final GXDataInfo info,
+            boolean onlyDataTypes) {
         // If there is not enough data available.
         if (buff.size() - buff.position() < 2) {
             info.setComplete(false);
@@ -1318,12 +1342,19 @@ public final class GXCommon {
             throw new IllegalArgumentException("Invalid compact array data.");
         }
         int len = GXCommon.getObjectCount(buff);
-        List<Object> list = new ArrayList<Object>();
-
+        List<Object> list;
+        if (dt == DataType.STRUCTURE) {
+            list = new GXStructure();
+        } else {
+            list = new GXArray();
+        }
         if (dt == DataType.STRUCTURE) {
             // Get data types.
             GXStructure cols = new GXStructure();
             getDataTypes(buff, cols, len);
+            if (onlyDataTypes) {
+                return cols;
+            }
             len = GXCommon.getObjectCount(buff);
             if (info.getXml() != null) {
                 info.getXml().appendStartTag(info.getXml().getDataType(DataType.COMPACT_ARRAY), null, null);
@@ -1341,14 +1372,17 @@ public final class GXCommon {
             }
             int start = buff.position();
             while (buff.position() - start < len) {
-                List<Object> row = new ArrayList<Object>();
+                GXStructure row = new GXStructure();
                 for (int pos = 0; pos != cols.size(); ++pos) {
                     if (cols.get(pos) instanceof GXStructure) {
-                        getCompactArrayItem(settings, buff, (List<?>) cols.get(pos), row, 1);
+                        getCompactArrayItem(settings, buff, (List<?>) cols.get(pos), row, 1, false);
                     } else if (cols.get(pos) instanceof GXArray) {
-                        List<Object> tmp2 = new ArrayList<Object>();
-                        getCompactArrayItem(settings, buff, ((List<?>) cols.get(pos)), tmp2, 1);
-                        row.add((List<?>) tmp2.get(0));
+                        // For some reason there is count here in Italy
+                        // standard. Remove it.
+                        if (info.isAppendAA()) {
+                            GXCommon.getObjectCount(buff);
+                        }
+                        getCompactArrayItem(settings, buff, ((List<?>) cols.get(pos)), row, 1, true);
                     } else {
                         getCompactArrayItem(settings, buff, (DataType) cols.get(pos), row, 1);
                     }
@@ -1440,24 +1474,19 @@ public final class GXCommon {
      *            Data info.
      * @return parsed UInt8 value.
      */
-    private static Object getUInt8(final GXDLMSSettings settings, final GXByteBuffer buff, final GXDataInfo info) {
+    private static short getUInt8(final GXByteBuffer buff, final GXDataInfo info) {
         int value;
         // If there is not enough data available.
         if (buff.size() - buff.position() < 1) {
             info.setComplete(false);
-            return null;
+            return 0;
         }
         value = buff.getUInt8() & 0xFF;
         if (info.getXml() != null) {
             info.getXml().appendLine(info.getXml().getDataType(info.getType()), null,
                     info.getXml().integerToHex(value, 2));
-
         }
-        // Return old value.
-        if (settings == null || settings.getVersion() == 3) {
-            return value;
-        }
-        return new GXUInt8((short) value);
+        return (short) value;
     }
 
     /**
@@ -1469,12 +1498,12 @@ public final class GXCommon {
      *            Data info.
      * @return parsed Int16 value.
      */
-    private static Object getInt16(final GXByteBuffer buff, final GXDataInfo info) {
-        Object value;
+    private static short getInt16(final GXByteBuffer buff, final GXDataInfo info) {
+        short value;
         // If there is not enough data available.
         if (buff.size() - buff.position() < 2) {
             info.setComplete(false);
-            return null;
+            return 0;
         }
         value = buff.getInt16();
         if (info.getXml() != null) {
@@ -1493,12 +1522,12 @@ public final class GXCommon {
      *            Data info.
      * @return parsed Int8 value.
      */
-    private static Object getInt8(final GXByteBuffer buff, final GXDataInfo info) {
-        Object value;
+    private static byte getInt8(final GXByteBuffer buff, final GXDataInfo info) {
+        byte value;
         // If there is not enough data available.
         if (buff.size() - buff.position() < 1) {
             info.setComplete(false);
-            return null;
+            return 0;
         }
         value = buff.getInt8();
         if (info.getXml() != null) {
@@ -1695,22 +1724,18 @@ public final class GXCommon {
      *            Data info.
      * @return parsed UInt32 value.
      */
-    private static Object getUInt32(final GXDLMSSettings settings, final GXByteBuffer buff, final GXDataInfo info) {
+    private static long getUInt32(final GXByteBuffer buff, final GXDataInfo info) {
         // If there is not enough data available.
         if (buff.size() - buff.position() < 4) {
             info.setComplete(false);
-            return null;
+            return 0;
         }
         long value = buff.getUInt32();
         if (info.getXml() != null) {
             info.getXml().appendLine(info.getXml().getDataType(info.getType()), null,
                     info.getXml().integerToHex(value, 8));
         }
-        // Return old value.
-        if (settings == null || settings.getVersion() == 3) {
-            return value;
-        }
-        return new GXUInt32(value);
+        return value;
     }
 
     /**
@@ -1722,13 +1747,13 @@ public final class GXCommon {
      *            Data info.
      * @return parsed Int32 value.
      */
-    private static Object getInt32(final GXByteBuffer buff, final GXDataInfo info) {
+    private static int getInt32(final GXByteBuffer buff, final GXDataInfo info) {
         // If there is not enough data available.
         if (buff.size() - buff.position() < 4) {
             info.setComplete(false);
-            return null;
+            return 0;
         }
-        Integer value = buff.getInt32();
+        int value = buff.getInt32();
         if (info.getXml() != null) {
             info.getXml().appendLine(info.getXml().getDataType(info.getType()), null,
                     info.getXml().integerToHex(value, 8));
@@ -2641,6 +2666,40 @@ public final class GXCommon {
         return ret;
     }
 
+    public static void datatoXml(Object value, GXDLMSTranslatorStructure xml) {
+        if (value == null) {
+            xml.appendEmptyTag(xml.getDataType(DataType.NONE));
+        } else if (value instanceof GXStructure) {
+            xml.appendStartTag(DATA_TYPE_OFFSET + DataType.STRUCTURE.getValue(), null, null);
+            for (Object it : (List<?>) value) {
+                datatoXml(it, xml);
+            }
+            xml.appendEndTag(DATA_TYPE_OFFSET + DataType.STRUCTURE.getValue());
+        } else if (value instanceof GXArray) {
+            xml.appendStartTag(DATA_TYPE_OFFSET + DataType.ARRAY.getValue(), null, null);
+            for (Object it : (List<?>) value) {
+                datatoXml(it, xml);
+            }
+            xml.appendEndTag(DATA_TYPE_OFFSET + DataType.ARRAY.getValue());
+        } else if (value instanceof GXDLMSObjectCollection) {
+            xml.appendStartTag(DATA_TYPE_OFFSET + DataType.ARRAY.getValue(), null, null);
+            for (GXDLMSObject it : (GXDLMSObjectCollection) value) {
+                datatoXml(it, xml);
+            }
+            xml.appendEndTag(DATA_TYPE_OFFSET + DataType.ARRAY.getValue());
+        } else if (value instanceof GXDLMSObject) {
+            xml.appendStartTag(DATA_TYPE_OFFSET + DataType.STRUCTURE.getValue(), null, null);
+            GXDLMSObject obj = (GXDLMSObject) value;
+            xml.appendLine(DATA_TYPE_OFFSET + DataType.UINT16.getValue(), null, obj.getObjectType());
+            xml.appendLine(DATA_TYPE_OFFSET + DataType.UINT8.getValue(), null, obj.getVersion());
+            xml.appendLine(DATA_TYPE_OFFSET + DataType.OCTET_STRING.getValue(), null, obj.getLogicalName());
+            xml.appendEndTag(DATA_TYPE_OFFSET + DataType.STRUCTURE.getValue());
+        } else {
+            DataType dt = GXDLMSConverter.getDLMSDataType(value);
+            xml.appendLine(DATA_TYPE_OFFSET + dt.getValue(), "", value);
+        }
+    }
+
     /**
      * Encrypt Flag name to two bytes.
      * 
@@ -2648,7 +2707,6 @@ public final class GXCommon {
      *            3 letter Flag name.
      * @return Encrypted Flag name.
      */
-    @SuppressWarnings("unused")
     public static int encryptManufacturer(final String flagName) {
         if (flagName.length() != 3) {
             throw new IllegalArgumentException("Invalid Flag name.");

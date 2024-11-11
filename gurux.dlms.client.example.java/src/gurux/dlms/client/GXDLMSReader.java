@@ -54,14 +54,17 @@ import gurux.common.GXCommon;
 import gurux.common.IGXMedia;
 import gurux.common.ReceiveParameters;
 import gurux.common.enums.TraceLevel;
+import gurux.dlms.GXArray;
 import gurux.dlms.GXByteBuffer;
 import gurux.dlms.GXDLMSAccessItem;
+import gurux.dlms.GXDLMSClient;
 import gurux.dlms.GXDLMSConverter;
 import gurux.dlms.GXDLMSException;
 import gurux.dlms.GXDLMSTranslator;
 import gurux.dlms.GXDateTime;
 import gurux.dlms.GXReplyData;
 import gurux.dlms.GXSimpleEntry;
+import gurux.dlms.GXStructure;
 import gurux.dlms.asn.GXAsn1Converter;
 import gurux.dlms.asn.GXCertificateRequest;
 import gurux.dlms.asn.GXPkcs10;
@@ -79,10 +82,12 @@ import gurux.dlms.enums.InterfaceType;
 import gurux.dlms.enums.ObjectType;
 import gurux.dlms.enums.Security;
 import gurux.dlms.enums.Signing;
+import gurux.dlms.enums.Standard;
 import gurux.dlms.enums.TranslatorOutputType;
 import gurux.dlms.objects.GXDLMSAssociationShortName;
 import gurux.dlms.objects.GXDLMSCaptureObject;
 import gurux.dlms.objects.GXDLMSCertificateInfo;
+import gurux.dlms.objects.GXDLMSCompactData;
 import gurux.dlms.objects.GXDLMSData;
 import gurux.dlms.objects.GXDLMSDemandRegister;
 import gurux.dlms.objects.GXDLMSObject;
@@ -830,6 +835,50 @@ public class GXDLMSReader {
         }
     }
 
+    public void getCompactData() throws Exception {
+        // Find compact data objects and read them.
+        for (GXDLMSObject it : dlms.getObjects().getObjects(ObjectType.COMPACT_DATA)) {
+            GXDLMSCompactData cd = (GXDLMSCompactData) it;
+            writeTrace("-------- Reading " + it.getClass().getSimpleName() + " " + it.getName().toString() + " "
+                    + it.getDescription(), TraceLevel.INFO);
+            // Read Capture objects.
+            if (dlms.canRead(it, 3)) {
+                read(it, 3);
+            }
+            // Read template description.
+            if (dlms.canRead(it, 5)) {
+                read(it, 5);
+            }
+            // Read buffer.
+            if (dlms.canRead(it, 2)) {
+                read(it, 2);
+            }
+            Standard standard = dlms.getStandard();
+            List<DataType> types = new ArrayList<DataType>();
+            for (Entry<GXDLMSObject, GXDLMSCaptureObject> c : cd.getCaptureObjects()) {
+                types.add(c.getKey().getUIDataType(c.getValue().getAttributeIndex()));
+            }
+            List<Object> rows =
+                    GXDLMSCompactData.getData(cd.getTemplateDescription(), cd.getBuffer(), standard == Standard.ITALY);
+            // Convert cols to readable format.
+            for (Object tmp : rows) {
+                GXStructure row = (GXStructure) tmp;
+                for (int col = 0; col != types.size(); ++col) {
+                    if (types.get(col) != DataType.NONE && row.get(col) instanceof byte[]) {
+                        row.set(col, GXDLMSClient.changeType((byte[]) row.get(col), types.get(col)));
+                    } else if (row.get(col) instanceof GXArray) {
+                        row.set(col, GXDLMSTranslator.valueToXml(row.get(col)));
+                    } else if (row.get(col) instanceof GXStructure) {
+                        row.set(col, GXDLMSTranslator.valueToXml(row.get(col)));
+                    } else if (row.get(col) instanceof byte[]) {
+                        row.set(col, GXDLMSTranslator.toHex((byte[]) row.get(col)));
+                    }
+                }
+                System.out.println(row);
+            }
+        }
+    }
+
     /**
      * Read all data from the meter except profile generic (Historical) data.
      */
@@ -1373,6 +1422,7 @@ public class GXDLMSReader {
             // Read Profile Generic columns.
             getProfileGenericColumns();
         }
+        getCompactData();
         // Read all attributes from all objects.
         getReadOut();
         // Read historical data.

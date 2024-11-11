@@ -554,8 +554,8 @@ public class GXByteBuffer {
         if (index + 4 > size) {
             throw new IllegalArgumentException("getUInt32");
         }
-        return (data[index] & 0xFF) << 24 | (data[index + 1] & 0xFF) << 16
-                | (data[index + 2] & 0xFF) << 8 | (data[index + 3] & 0xFF);
+        return (data[index] & 0xFF) << 24 | (data[index + 1] & 0xFF) << 16 | (data[index + 2] & 0xFF) << 8
+                | (data[index + 3] & 0xFF);
     }
 
     /**
@@ -569,8 +569,7 @@ public class GXByteBuffer {
         if (index + 3 > size) {
             throw new IllegalArgumentException("getUInt24");
         }
-        return (data[index] & 0xFF) << 16 | (data[index + 1] & 0xFF) << 8
-                | (data[index + 2] & 0xFF);
+        return (data[index] & 0xFF) << 16 | (data[index + 1] & 0xFF) << 8 | (data[index + 2] & 0xFF);
     }
 
     /**
@@ -751,8 +750,7 @@ public class GXByteBuffer {
             byte[] tmp = subArray(index, count);
             if (charsetName.equalsIgnoreCase("ASCII")) {
                 if (isAsciiString(tmp)) {
-                    return new String(getData(), index, count, charsetName).replaceAll("[\\x00]",
-                            "");
+                    return new String(getData(), index, count, charsetName).replaceAll("[\\x00]", "");
                 } else {
                     return GXCommon.toHex(tmp, true);
                 }

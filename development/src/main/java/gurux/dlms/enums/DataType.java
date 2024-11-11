@@ -139,6 +139,33 @@ public enum DataType {
     TIME(0x1b),
 
     /**
+     * Data type is delta integer.
+     */
+    DELTA_INT8(28),
+
+    /**
+     * Data type is delta long.
+     */
+    DELTA_INT16(29),
+    /**
+     * Data type is delta double long.
+     */
+    DELTA_INT32(30),
+
+    /**
+     * Data type is delta unsigned.
+     */
+    DELTA_UINT8(31),
+    /**
+     * Data type is delta UInt16.
+     */
+    DELTA_UINT16(32),
+    /**
+     * Data type is delta double long.
+     */
+    DELTA_UINT32(33),
+
+    /**
      * Data type is UInt16.
      */
     UINT16(0x12),
@@ -188,8 +215,7 @@ public enum DataType {
     public static DataType forValue(final int value) {
         DataType type = getMappings().get(value);
         if (type == null) {
-            throw new IllegalArgumentException(
-                    "Invalid data type: " + String.valueOf(value));
+            throw new IllegalArgumentException("Invalid data type: " + String.valueOf(value));
         }
         return type;
     }

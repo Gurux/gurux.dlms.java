@@ -82,7 +82,7 @@ public class GXDLMSObject {
     private GXAttributeCollection attributes = null;
     private GXAttributeCollection methodAttributes = null;
     private int shortName;
-    private String logicalName;
+    protected String logicalName;
     private String description;
 
     /**

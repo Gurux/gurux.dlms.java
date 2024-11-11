@@ -157,7 +157,7 @@ public class GXDLMSTranslatorStructure {
         sb.append('\n');
     }
 
-    public final void appendLine(final int tag, final String name, final String value) {
+    public final void appendLine(final int tag, final String name, final Object value) {
         String tmp = getTag(tag);
         if (tmp == null) {
             throw new IllegalArgumentException("Tag");
@@ -165,7 +165,7 @@ public class GXDLMSTranslatorStructure {
         appendLine(tmp, name, value);
     }
 
-    public final void appendLine(final String tag, final String name, final String value) {
+    public final void appendLine(final String tag, final String name, final Object value) {
         appendSpaces(sb, 2 * offset);
         sb.append('<');
         sb.append(tag);

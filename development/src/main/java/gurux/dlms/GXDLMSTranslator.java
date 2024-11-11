@@ -3513,6 +3513,22 @@ public class GXDLMSTranslator {
         return di.getXml().toString();
     }
 
+    /**
+     * Convert data to xml.
+     * 
+     * @param value
+     *            Converted value.
+     * @return
+     */
+    public static String valueToXml(Object value) {
+        HashMap<Integer, String> tags = new HashMap<Integer, String>();
+        TranslatorSimpleTags.getDataTypeTags(tags);
+        GXDLMSTranslatorStructure xml =
+                new GXDLMSTranslatorStructure(TranslatorOutputType.SIMPLE_XML, true, false, false, false, tags);
+        GXCommon.datatoXml(value, xml);
+        return xml.toString();
+    }
+
     private void getAllDataNodes(final NodeList nodes, final GXDLMSXmlSettings s) {
         GXByteBuffer preData;
         int tag;

@@ -55,6 +55,7 @@ import gurux.dlms.GXEnum;
 import gurux.dlms.GXSimpleEntry;
 import gurux.dlms.GXStructure;
 import gurux.dlms.GXUInt16;
+import gurux.dlms.GXUInt32;
 import gurux.dlms.GXUInt8;
 import gurux.dlms.ValueEventArgs;
 import gurux.dlms.enums.DataType;
@@ -93,7 +94,7 @@ public class GXDLMSG3PlcMacSetup extends GXDLMSObject implements IGXDLMSBase {
      * The outgoing frame counter for this device, used when ciphering frames at
      * MAC layer. PIB attribute 0x77.
      */
-    private short frameCounter;
+    private long frameCounter;
 
     /**
      * Defines the tone mask to use during symbol formation. PIB attribute
@@ -319,7 +320,7 @@ public class GXDLMSG3PlcMacSetup extends GXDLMSObject implements IGXDLMSBase {
      * @return The outgoing frame counter for this device, used when ciphering
      *         frames at MAC layer. PIB attribute 0x77.
      */
-    public final short getFrameCounter() {
+    public final long getFrameCounter() {
         return frameCounter;
     }
 
@@ -328,7 +329,7 @@ public class GXDLMSG3PlcMacSetup extends GXDLMSObject implements IGXDLMSBase {
      *            The outgoing frame counter for this device, used when
      *            ciphering frames at MAC layer. PIB attribute 0x77.
      */
-    public final void setFrameCounter(final short value) {
+    public final void setFrameCounter(final long value) {
         frameCounter = value;
     }
 
@@ -1020,7 +1021,7 @@ public class GXDLMSG3PlcMacSetup extends GXDLMSObject implements IGXDLMSBase {
             return DataType.ARRAY;
         // MacFrameCounter
         case 6:
-            return DataType.UINT16;
+            return DataType.UINT32;
         // MacToneMask
         case 7:
             return DataType.BITSTRING;
@@ -1203,7 +1204,7 @@ public class GXDLMSG3PlcMacSetup extends GXDLMSObject implements IGXDLMSBase {
                 }
             }
         } else if (e.getIndex() == 6) {
-            setFrameCounter(((GXUInt16) e.getValue()).shortValue());
+            setFrameCounter(((GXUInt32) e.getValue()).shortValue());
         } else if (e.getIndex() == 7) {
             setToneMask(((GXBitString) e.getValue()).toString());
         } else if (e.getIndex() == 8) {
@@ -1243,10 +1244,8 @@ public class GXDLMSG3PlcMacSetup extends GXDLMSObject implements IGXDLMSBase {
         } else if (e.getIndex() == 25) {
             setMacPosTable(parsePosTableEntry(e.getValue()));
         } else if (e.getIndex() == 26) {
-            setMacDuplicateDetectionTtl((byte) e.getValue());
-        }
-
-        else {
+            setMacDuplicateDetectionTtl(((GXUInt8) e.getValue()).shortValue());
+        } else {
             e.setError(ErrorCode.READ_WRITE_DENIED);
         }
     }
