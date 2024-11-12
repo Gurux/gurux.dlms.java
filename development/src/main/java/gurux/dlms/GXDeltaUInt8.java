@@ -34,14 +34,30 @@
 
 package gurux.dlms;
 
+import java.lang.annotation.Native;
+
 /**
- * Delta Int8 value.
+ * GXDeltaUInt8 class presents delta UInt8 value.
  */
 public class GXDeltaUInt8 extends Number implements Comparable<GXDeltaUInt8> {
     /**
      * 
      */
     private static final long serialVersionUID = 1L;
+
+    /**
+     * A constant holding the minimum value an {@code GXDeltaUInt8} can have.
+     */
+    @Native
+    public static final short MIN_VALUE = 0x0000000;
+
+    /**
+     * A constant holding the maximum value an {@code GXDeltaUInt8} can have,
+     * 2<sup>8</sup>.
+     */
+    @Native
+    public static final short MAX_VALUE = 0xff;
+
     /**
      * Delta value.
      */
@@ -56,7 +72,7 @@ public class GXDeltaUInt8 extends Number implements Comparable<GXDeltaUInt8> {
     /**
      * Constructor.
      * 
-     * @param forvalue
+     * @param value
      *            Date value.
      */
     public GXDeltaUInt8(final short value) {
@@ -71,7 +87,7 @@ public class GXDeltaUInt8 extends Number implements Comparable<GXDeltaUInt8> {
     }
 
     /**
-     * @param _value
+     * @param value
      *            Delta value.
      */
     public void set_value(final short value) {

@@ -75,14 +75,14 @@ public enum Access {
         getMappings().put(mode, this);
     }
 
-    /*
+    /**
      * Get integer value for enum.
      */
     public final int getValue() {
         return value;
     }
 
-    /*
+    /**
      * Convert integer for enum value.
      */
     public static Access forValue(final int value) {

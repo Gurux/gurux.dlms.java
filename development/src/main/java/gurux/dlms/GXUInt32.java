@@ -37,9 +37,6 @@ package gurux.dlms;
 import java.lang.annotation.Native;
 
 public class GXUInt32 extends Number implements Comparable<GXUInt32> {
-    /**
-     * 
-     */
     private static final long serialVersionUID = 1L;
     private long value;
 

@@ -34,10 +34,10 @@
 
 package gurux.dlms;
 
+/**
+ * 
+ */
 public class GXEnum extends Number implements Comparable<GXEnum> {
-    /**
-     * 
-     */
     private static final long serialVersionUID = 1L;
     private int value;
 

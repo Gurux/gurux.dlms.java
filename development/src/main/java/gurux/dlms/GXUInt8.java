@@ -41,7 +41,7 @@ public class GXUInt8 extends Number implements Comparable<GXUInt8> {
      * 
      */
     private static final long serialVersionUID = 1L;
-    private short value;
+    private short _value;
 
     /**
      * A constant holding the minimum value an {@code byte} can have.
@@ -69,37 +69,37 @@ public class GXUInt8 extends Number implements Comparable<GXUInt8> {
      *            Initial value.
      */
     public GXUInt8(final short val) {
-        value = val;
+        _value = val;
     }
 
     @Override
     public final String toString() {
-        return String.valueOf(value);
+        return String.valueOf(_value);
     }
 
     @Override
     public int intValue() {
-        return (int) value;
+        return (int) _value;
     }
 
     @Override
     public long longValue() {
-        return value;
+        return _value;
     }
 
     @Override
     public float floatValue() {
-        return value;
+        return _value;
     }
 
     @Override
     public double doubleValue() {
-        return value;
+        return _value;
     }
 
     @Override
     public int compareTo(GXUInt8 o) {
-        return compare(this.value, o.value);
+        return compare(this._value, o._value);
     }
 
     public static int compare(long x, long y) {
@@ -109,13 +109,13 @@ public class GXUInt8 extends Number implements Comparable<GXUInt8> {
     @Override
     public boolean equals(Object x) {
         if (x instanceof GXUInt8) {
-            return ((Short) value).equals(((GXUInt8) x).value);
+            return ((Short) _value).equals(((GXUInt8) x)._value);
         }
-        return ((Short) value).equals(x);
+        return ((Short) _value).equals(x);
     }
 
     @Override
     public int hashCode() {
-        return ((Short) value).hashCode();
+        return ((Short) _value).hashCode();
     }
 }

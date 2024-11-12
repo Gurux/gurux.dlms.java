@@ -35,7 +35,7 @@
 package gurux.dlms;
 
 /**
- *
+ * Get crypto keys.
  */
 public interface IGXCryptoNotifier {
     /**

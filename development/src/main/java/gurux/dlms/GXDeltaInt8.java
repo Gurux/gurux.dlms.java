@@ -35,7 +35,7 @@
 package gurux.dlms;
 
 /**
- * Delta Int8 value.
+ * GXDeltaInt8 class presents delta Int8 value.
  */
 public class GXDeltaInt8 extends Number implements Comparable<GXDeltaInt8> {
     /**
@@ -56,7 +56,7 @@ public class GXDeltaInt8 extends Number implements Comparable<GXDeltaInt8> {
     /**
      * Constructor.
      * 
-     * @param forvalue
+     * @param value
      *            Date value.
      */
     public GXDeltaInt8(final byte value) {
@@ -71,7 +71,7 @@ public class GXDeltaInt8 extends Number implements Comparable<GXDeltaInt8> {
     }
 
     /**
-     * @param _value
+     * @param value
      *            Delta value.
      */
     public void set_value(final byte value) {

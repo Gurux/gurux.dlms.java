@@ -34,14 +34,28 @@
 
 package gurux.dlms;
 
+import java.lang.annotation.Native;
+
 /**
- * Delta Int16 value.
+ * GXDeltaUInt32 class presents delta UInt32 value.
  */
 public class GXDeltaUInt32 extends Number implements Comparable<GXDeltaUInt32> {
-    /**
-     * 
-     */
+
     private static final long serialVersionUID = 1L;
+
+    /**
+     * A constant holding the minimum value an {@code GXDeltaUInt32} can have.
+     */
+    @Native
+    public static final long MIN_VALUE = 0x0000000;
+
+    /**
+     * A constant holding the maximum value an {@code GXDeltaUInt32} can have,
+     * 2<sup>32</sup>.
+     */
+    @Native
+    public static final long MAX_VALUE = 0xffffffff;
+
     /**
      * Delta value.
      */
@@ -56,7 +70,7 @@ public class GXDeltaUInt32 extends Number implements Comparable<GXDeltaUInt32> {
     /**
      * Constructor.
      * 
-     * @param forvalue
+     * @param value
      *            Date value.
      */
     public GXDeltaUInt32(final long value) {
@@ -71,7 +85,7 @@ public class GXDeltaUInt32 extends Number implements Comparable<GXDeltaUInt32> {
     }
 
     /**
-     * @param _value
+     * @param value
      *            Delta value.
      */
     public void set_value(final long value) {
