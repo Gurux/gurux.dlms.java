@@ -1008,8 +1008,8 @@ public class GXDLMSAssociationLogicalName extends GXDLMSObject implements IGXDLM
             GXByteBuffer data = new GXByteBuffer();
             data.setUInt8(DataType.STRUCTURE.getValue());
             data.setUInt8(6);
-            GXCommon.setData(settings, data, DataType.BITSTRING,
-                    GXBitString.toBitString(Conformance.toInteger(xDLMSContextInfo.getConformance()), 24));
+            GXBitString bs = new GXBitString(Conformance.toInteger(xDLMSContextInfo.getConformance()), 24);
+            GXCommon.setData(settings, data, DataType.BITSTRING, bs);
             GXCommon.setData(settings, data, DataType.UINT16, xDLMSContextInfo.getMaxReceivePduSize());
             GXCommon.setData(settings, data, DataType.UINT16, xDLMSContextInfo.getMaxSendPduSize());
             GXCommon.setData(settings, data, DataType.UINT8, xDLMSContextInfo.getDlmsVersionNumber());

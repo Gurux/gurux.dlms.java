@@ -57,6 +57,7 @@ import gurux.dlms.enums.BerType;
 import gurux.dlms.enums.Command;
 import gurux.dlms.enums.ConfirmedServiceError;
 import gurux.dlms.enums.Conformance;
+import gurux.dlms.enums.DataType;
 import gurux.dlms.enums.ExceptionServiceError;
 import gurux.dlms.enums.Security;
 import gurux.dlms.enums.Service;
@@ -225,23 +226,6 @@ final class GXAPDU {
         }
     }
 
-    // Reserved for internal use.
-    private static int getConformanceFromArray(GXByteBuffer data) {
-        int ret = GXCommon.swapBits(data.getUInt8());
-        ret |= GXCommon.swapBits(data.getUInt8()) << 8;
-        ret |= GXCommon.swapBits(data.getUInt8()) << 16;
-        return ret;
-    }
-
-    /*
-     * Reserved for internal use.
-     */
-    private static void setConformanceToArray(final int value, final GXByteBuffer data) {
-        data.setUInt8(GXCommon.swapBits((short) (value & 0xFF)));
-        data.setUInt8(GXCommon.swapBits((short) ((value >> 8) & 0xFF)));
-        data.setUInt8(GXCommon.swapBits((short) ((value >> 16) & 0xFF)));
-    }
-
     /**
      * Generate User information initiate request.
      * 
@@ -278,11 +262,11 @@ final class GXAPDU {
         // Tag for conformance block
         data.setUInt8(0x5F);
         data.setUInt8(0x1F);
-        // length of the conformance block
-        data.setUInt8(0x04);
-        // encoding the number of unused bits in the bit string
-        data.setUInt8(0x00);
-        setConformanceToArray(Conformance.toInteger(settings.getProposedConformance()), data);
+        data.setUInt8(DataType.BITSTRING);
+        // Pad bits.
+        data.setUInt8(0);
+        GXBitString bs = new GXBitString(Conformance.toInteger(settings.getProposedConformance()), 24);
+        data.set(bs.getValue());
         data.setUInt16(settings.getMaxPduSize());
     }
 
@@ -538,10 +522,10 @@ final class GXAPDU {
         }
         // len =
         data.getUInt8();
-        // The number of unused bits in the bit string.
-        // tag =
-        data.getUInt8();
-        int v = getConformanceFromArray(data);
+        byte[] conformance = new byte[4];
+        data.get(conformance);
+        GXBitString bs = new GXBitString(conformance);
+        int v = bs.toInteger();
         if (settings.isServer()) {
             settings.setNegotiatedConformance(
                     Conformance.forValue(v & Conformance.toInteger(settings.getProposedConformance())));
@@ -1446,11 +1430,11 @@ final class GXAPDU {
         data.setUInt8(06);
         data.setUInt8(0x5F);
         data.setUInt8(0x1F);
-        // length of the conformance block
-        data.setUInt8(0x04);
+        data.setUInt8(DataType.BITSTRING);
         // encoding the number of unused bits in the bit string
-        data.setUInt8(0x00);
-        setConformanceToArray(Conformance.toInteger(settings.getNegotiatedConformance()), data);
+        data.setUInt8(0);
+        GXBitString bs = new GXBitString(Conformance.toInteger(settings.getNegotiatedConformance()), 24);
+        data.set(bs.getValue());
         data.setUInt16(settings.getMaxPduSize());
         // VAA Name VAA name (0x0007 for LN referencing and 0xFA00 for SN)
         if (settings.getUseLogicalNameReferencing()) {

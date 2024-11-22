@@ -36,6 +36,7 @@ import org.w3c.dom.Document;
 import org.w3c.dom.Node;
 import org.xml.sax.InputSource;
 
+import gurux.dlms.GXBitString;
 import gurux.dlms.GXByteBuffer;
 import gurux.dlms.GXDLMSTranslator;
 import gurux.dlms.GXSimpleEntry;
@@ -181,8 +182,7 @@ public final class GXAsn1Converter {
         if (key == null) {
             throw new IllegalArgumentException("Invalid public key.");
         }
-        GXAsn1BitString tmp =
-                (GXAsn1BitString) ((GXAsn1Sequence) GXAsn1Converter.fromByteArray(key.getEncoded())).get(1);
+        GXBitString tmp = (GXBitString) ((GXAsn1Sequence) GXAsn1Converter.fromByteArray(key.getEncoded())).get(1);
         GXByteBuffer bb = new GXByteBuffer();
         if (key.getEncoded().length == 91) {
             bb.set(tmp.getValue(), 1, 64);
@@ -401,13 +401,13 @@ public final class GXAsn1Converter {
             objects.add(null);
             break;
         case BerType.BIT_STRING:
-            GXAsn1BitString tmp3 = new GXAsn1BitString(bb.subArray(bb.position(), len));
+            GXBitString tmp3 = new GXBitString(bb.subArray(bb.position(), len));
             objects.add(tmp3);
             bb.position(bb.position() + len);
             if (s != null) {
                 // Append comment.
                 s.appendComment(connectPos, String.valueOf(tmp3.length()) + " bit.");
-                s.append(tmp3.asString());
+                s.append(tmp3.toString());
             }
             break;
         case BerType.UTC_TIME:
@@ -685,8 +685,8 @@ public final class GXAsn1Converter {
             str = target.toString();
             GXCommon.setObjectCount(str.length(), bb);
             bb.add(str);
-        } else if (target instanceof GXAsn1BitString) {
-            GXAsn1BitString bs = (GXAsn1BitString) target;
+        } else if (target instanceof GXBitString) {
+            GXBitString bs = (GXBitString) target;
             bb.setUInt8(BerType.BIT_STRING);
             GXCommon.setObjectCount(1 + bs.getValue().length, bb);
             bb.setUInt8(bs.getPadBits());
@@ -874,7 +874,7 @@ public final class GXAsn1Converter {
             list.add(null);
             break;
         case BerType.BIT_STRING:
-            list.add(new GXAsn1BitString(node.getChildNodes().item(0).getNodeValue()));
+            list.add(new GXBitString(node.getChildNodes().item(0).getNodeValue()));
             break;
         case BerType.UTC_TIME:
             try {

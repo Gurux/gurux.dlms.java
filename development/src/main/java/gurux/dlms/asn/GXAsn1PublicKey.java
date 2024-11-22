@@ -34,6 +34,7 @@
 
 package gurux.dlms.asn;
 
+import gurux.dlms.GXBitString;
 import gurux.dlms.internal.GXCommon;
 
 /**
@@ -66,14 +67,12 @@ public class GXAsn1PublicKey {
      * @param data
      *            (PKCS#1) Public key.
      */
-    public GXAsn1PublicKey(final GXAsn1BitString data) {
+    public GXAsn1PublicKey(final GXBitString data) {
         if (data == null) {
             throw new IllegalArgumentException("key");
         }
-        GXAsn1Sequence seq =
-                (GXAsn1Sequence) GXAsn1Converter.fromByteArray(data.getValue());
-        init(GXAsn1Converter
-                .toByteArray(new Object[] { seq.get(0), seq.get(1) }));
+        GXAsn1Sequence seq = (GXAsn1Sequence) GXAsn1Converter.fromByteArray(data.getValue());
+        init(GXAsn1Converter.toByteArray(new Object[] { seq.get(0), seq.get(1) }));
     }
 
     /**

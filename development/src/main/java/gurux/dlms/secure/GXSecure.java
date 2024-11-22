@@ -60,13 +60,13 @@ import javax.crypto.spec.GCMParameterSpec;
 import javax.crypto.spec.IvParameterSpec;
 import javax.crypto.spec.SecretKeySpec;
 
+import gurux.dlms.GXBitString;
 import gurux.dlms.GXByteBuffer;
 import gurux.dlms.GXCryptoKeyParameter;
 import gurux.dlms.GXDLMSExceptionResponse;
 import gurux.dlms.GXDLMSSettings;
 import gurux.dlms.GXDLMSTranslator;
 import gurux.dlms.GXICipher;
-import gurux.dlms.asn.GXAsn1BitString;
 import gurux.dlms.asn.GXAsn1Converter;
 import gurux.dlms.asn.GXAsn1Integer;
 import gurux.dlms.asn.GXAsn1Sequence;
@@ -457,8 +457,8 @@ public final class GXSecure {
      * @return Ephemeral Public Key Signature.
      */
     public static byte[] getEphemeralPublicKeyData(final int keyId, final PublicKey ephemeralKey) {
-        GXAsn1BitString tmp =
-                (GXAsn1BitString) ((GXAsn1Sequence) GXAsn1Converter.fromByteArray(ephemeralKey.getEncoded())).get(1);
+        GXBitString tmp =
+                (GXBitString) ((GXAsn1Sequence) GXAsn1Converter.fromByteArray(ephemeralKey.getEncoded())).get(1);
 
         // Ephemeral public key client
         GXByteBuffer epk = new GXByteBuffer(tmp.getValue());

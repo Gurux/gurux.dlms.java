@@ -16,6 +16,7 @@ import java.security.spec.InvalidKeySpecException;
 import java.security.spec.PKCS8EncodedKeySpec;
 import java.util.List;
 
+import gurux.dlms.GXBitString;
 import gurux.dlms.GXByteBuffer;
 import gurux.dlms.GXDLMSCertificateException;
 import gurux.dlms.asn.enums.GXOid;
@@ -202,7 +203,7 @@ public class GXPkcs8 {
             if (tmp.size() > 2) {
                 tmp = (List<?>) tmp.get(2);
                 GXByteBuffer tmp2 = new GXByteBuffer();
-                tmp2.set(((GXAsn1BitString) tmp.get(0)).getValue());
+                tmp2.set(((GXBitString) tmp.get(0)).getValue());
                 publicKey = GXAsn1Converter.getPublicKey(tmp2.subArray(1, tmp2.size() - 1));
             }
         } catch (Exception e) {
@@ -333,7 +334,7 @@ public class GXPkcs8 {
         GXByteBuffer bb = new GXByteBuffer();
         bb.setUInt8(4);
         bb.set(GXAsn1Converter.rawValue(publicKey));
-        d3.add(new GXAsn1BitString(bb.array(), 0));
+        d3.add(new GXBitString(bb.array(), 0));
         d2.add(d3);
         d.add(GXAsn1Converter.toByteArray(d2));
         return GXCommon.toBase64(GXAsn1Converter.toByteArray(d));

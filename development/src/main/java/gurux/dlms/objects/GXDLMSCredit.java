@@ -310,9 +310,8 @@ public class GXDLMSCredit extends GXDLMSObject implements IGXDLMSBase {
 
     @Override
     public final Object[] getValues() {
-        return new Object[] { getLogicalName(), currentCreditAmount, type, priority,
-                warningThreshold, limit, creditConfiguration, status, presetCreditAmount,
-                creditAvailableThreshold, period };
+        return new Object[] { getLogicalName(), currentCreditAmount, type, priority, warningThreshold, limit,
+                creditConfiguration, status, presetCreditAmount, creditAvailableThreshold, period };
     }
 
     /**
@@ -338,8 +337,7 @@ public class GXDLMSCredit extends GXDLMSObject implements IGXDLMSBase {
      */
     public final byte[][] updateAmount(final GXDLMSClient client, final int value)
             throws InvalidKeyException, NoSuchAlgorithmException, NoSuchPaddingException,
-            InvalidAlgorithmParameterException, IllegalBlockSizeException, BadPaddingException,
-            SignatureException {
+            InvalidAlgorithmParameterException, IllegalBlockSizeException, BadPaddingException, SignatureException {
         return client.method(this, 1, value, DataType.INT32);
     }
 
@@ -366,8 +364,7 @@ public class GXDLMSCredit extends GXDLMSObject implements IGXDLMSBase {
      */
     public final byte[][] setAmountToValue(final GXDLMSClient client, final int value)
             throws InvalidKeyException, NoSuchAlgorithmException, NoSuchPaddingException,
-            InvalidAlgorithmParameterException, IllegalBlockSizeException, BadPaddingException,
-            SignatureException {
+            InvalidAlgorithmParameterException, IllegalBlockSizeException, BadPaddingException, SignatureException {
         return client.method(this, 2, value, DataType.INT32);
     }
 
@@ -394,8 +391,7 @@ public class GXDLMSCredit extends GXDLMSObject implements IGXDLMSBase {
      */
     public final byte[][] invokeCredit(final GXDLMSClient client, final CreditStatus value)
             throws InvalidKeyException, NoSuchAlgorithmException, NoSuchPaddingException,
-            InvalidAlgorithmParameterException, IllegalBlockSizeException, BadPaddingException,
-            SignatureException {
+            InvalidAlgorithmParameterException, IllegalBlockSizeException, BadPaddingException, SignatureException {
         return client.method(this, 3, value.getValue(), DataType.UINT8);
     }
 
@@ -409,8 +405,7 @@ public class GXDLMSCredit extends GXDLMSObject implements IGXDLMSBase {
             currentCreditAmount = ((Number) e.getValue()).intValue();
             break;
         case 3:
-            if (creditConfiguration.contains(CreditConfiguration.CONFIRMATION)
-                    && status == CreditStatus.SELECTABLE) {
+            if (creditConfiguration.contains(CreditConfiguration.CONFIRMATION) && status == CreditStatus.SELECTABLE) {
                 status = CreditStatus.INVOKED;
             }
             break;
@@ -540,7 +535,7 @@ public class GXDLMSCredit extends GXDLMSObject implements IGXDLMSBase {
         case 6:
             return limit;
         case 7:
-            return GXBitString.toBitString(CreditConfiguration.toInteger(creditConfiguration), 5);
+            return new GXBitString(CreditConfiguration.toInteger(creditConfiguration), 5);
         case 8:
             return status.getValue();
         case 9:
@@ -581,8 +576,7 @@ public class GXDLMSCredit extends GXDLMSObject implements IGXDLMSBase {
             limit = ((Number) e.getValue()).intValue();
             break;
         case 7:
-            creditConfiguration =
-                    CreditConfiguration.forValue(((GXBitString) e.getValue()).toInteger());
+            creditConfiguration = CreditConfiguration.forValue(((GXBitString) e.getValue()).toInteger());
             break;
         case 8:
             status = CreditStatus.forValue(((Number) e.getValue()).intValue());
@@ -599,8 +593,8 @@ public class GXDLMSCredit extends GXDLMSObject implements IGXDLMSBase {
             } else {
                 GXDateTime tmp;
                 if (e.getValue() instanceof byte[]) {
-                    tmp = (GXDateTime) GXDLMSClient.changeType((byte[]) e.getValue(),
-                            DataType.DATETIME, e.getSettings());
+                    tmp = (GXDateTime) GXDLMSClient.changeType((byte[]) e.getValue(), DataType.DATETIME,
+                            e.getSettings());
                 } else {
                     tmp = (GXDateTime) e.getValue();
                 }
@@ -620,8 +614,7 @@ public class GXDLMSCredit extends GXDLMSObject implements IGXDLMSBase {
         priority = (byte) reader.readElementContentAsInt("Priority");
         warningThreshold = reader.readElementContentAsInt("WarningThreshold");
         limit = reader.readElementContentAsInt("Limit");
-        creditConfiguration =
-                CreditConfiguration.forValue(reader.readElementContentAsInt("CreditConfiguration"));
+        creditConfiguration = CreditConfiguration.forValue(reader.readElementContentAsInt("CreditConfiguration"));
         status = CreditStatus.forValue(reader.readElementContentAsInt("Status"));
         presetCreditAmount = reader.readElementContentAsInt("PresetCreditAmount");
         creditAvailableThreshold = reader.readElementContentAsInt("CreditAvailableThreshold");
@@ -637,8 +630,7 @@ public class GXDLMSCredit extends GXDLMSObject implements IGXDLMSBase {
         writer.writeElementString("Priority", priority);
         writer.writeElementString("WarningThreshold", warningThreshold);
         writer.writeElementString("Limit", limit);
-        writer.writeElementString("CreditConfiguration",
-                CreditConfiguration.toInteger(creditConfiguration));
+        writer.writeElementString("CreditConfiguration", CreditConfiguration.toInteger(creditConfiguration));
         if (status != null) {
             writer.writeElementString("Status", status.getValue());
         }
@@ -653,9 +645,8 @@ public class GXDLMSCredit extends GXDLMSObject implements IGXDLMSBase {
 
     @Override
     public String[] getNames() {
-        return new String[] { "Logical Name", "CurrentCreditAmount", "Type", "Priority",
-                "WarningThreshold", "Limit", "CreditConfiguration", "Status", "PresetCreditAmount",
-                "CreditAvailableThreshold", "Period" };
+        return new String[] { "Logical Name", "CurrentCreditAmount", "Type", "Priority", "WarningThreshold", "Limit",
+                "CreditConfiguration", "Status", "PresetCreditAmount", "CreditAvailableThreshold", "Period" };
     }
 
     @Override

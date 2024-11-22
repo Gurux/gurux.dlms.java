@@ -1103,13 +1103,12 @@ public class GXDateTime {
                 if (!to.getSkip().contains(DateTimeSkips.DAY)) {
                     diff += (cal.get(Calendar.DAY_OF_MONTH) - start.get(Calendar.DAY_OF_MONTH)) * 24 * 60 * 60000L;
                 } else {
-                    diff = ((GXCommon.daysInMonth(start.get(Calendar.YEAR), start.get(Calendar.MONTH))
-                            - start.get(Calendar.DAY_OF_MONTH) + cal.get(Calendar.DAY_OF_MONTH)) * 24 * 60 * 60000L)
-                            + diff;
+                    diff += ((GXCommon.daysInMonth(start.get(Calendar.YEAR), start.get(Calendar.MONTH))
+                            - start.get(Calendar.DAY_OF_MONTH) + cal.get(Calendar.DAY_OF_MONTH)) * 24 * 60 * 60000L);
                 }
             }
         } else if (diff < 0) {
-            diff = 24 * 60 * 60000 + diff;
+            diff += 24 * 60 * 60000;
         }
         // Compare months.
         if (!to.getSkip().contains(DateTimeSkips.MONTH)) {
@@ -1123,7 +1122,32 @@ public class GXDateTime {
                 }
             }
         } else if (diff < 0) {
-            diff = GXCommon.daysInMonth(start.get(Calendar.YEAR), start.get(Calendar.MONTH)) * 24 * 60 * 60000L + diff;
+            diff += GXCommon.daysInMonth(start.get(Calendar.YEAR), start.get(Calendar.MONTH)) * 24 * 60 * 60000L;
+        }
+        // Compare years.
+        if (!to.getSkip().contains(DateTimeSkips.YEAR)) {
+            int s = cal.get(Calendar.YEAR);
+            int e = start.get(Calendar.YEAR);
+            if (s > e) {
+                for (int y = e; y != s; ++y) {
+                    for (int m = 1; m <= 12; ++m) {
+                        diff += GXCommon.daysInMonth(y, m) * 24 * 60 * 60000L;
+                    }
+                }
+            } else {
+                for (int y = s; y != e; ++y) {
+                    for (int m = 1; m <= 12; ++m) {
+                        diff -= GXCommon.daysInMonth(y, m) * 24 * 60 * 60000L;
+                    }
+                }
+            }
+        } else if (diff < 0) {
+            int y = start.get(Calendar.YEAR);
+            if (y != cal.get(Calendar.YEAR)) {
+                for (int m = 1; m <= 12; ++m) {
+                    diff += GXCommon.daysInMonth(y, m) * 24 * 60 * 60000L;
+                }
+            }
         }
         return diff;
     }

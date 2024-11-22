@@ -109,7 +109,6 @@ public class GXDLMSReader {
     IGXMedia Media;
     TraceLevel Trace;
     GXDLMSSecureClient2 dlms;
-    java.nio.ByteBuffer replyBuff;
     int waitTime = 60000;
     final PrintWriter logFile;
     // Invocation counter (frame counter).
@@ -127,11 +126,6 @@ public class GXDLMSReader {
             System.out.println("Authentication: " + dlms.getAuthentication());
             System.out.println("ClientAddress: 0x" + Integer.toHexString(dlms.getClientAddress()));
             System.out.println("ServerAddress: 0x" + Integer.toHexString(dlms.getServerAddress()));
-        }
-        if (dlms.getInterfaceType() == InterfaceType.WRAPPER) {
-            replyBuff = java.nio.ByteBuffer.allocate(8 + 1024);
-        } else {
-            replyBuff = java.nio.ByteBuffer.allocate(100);
         }
     }
 
@@ -409,12 +403,6 @@ public class GXDLMSReader {
                     readDLMSPacket(data, reply);
                     // Has server accepted client.
                     dlms.parseUAResponse(reply.getData());
-
-                    // Allocate buffer to same size as transmit buffer of the
-                    // meter.
-                    // Size of replyBuff is payload and frame (Bop, EOP, crc).
-                    int size = (int) ((((Number) dlms.getHdlcSettings().getMaxInfoTX()).intValue() & 0xFFFFFFFFL) + 40);
-                    replyBuff = java.nio.ByteBuffer.allocate(size);
                 }
                 // Generate AARQ request.
                 // Split requests to multiple packets if needed.
@@ -588,11 +576,6 @@ public class GXDLMSReader {
             readDLMSPacket(data, reply);
             // Has server accepted client.
             dlms.parseUAResponse(reply.getData());
-
-            // Allocate buffer to same size as transmit buffer of the meter.
-            // Size of replyBuff is payload and frame (Bop, EOP, crc).
-            int size = (int) ((((Number) dlms.getHdlcSettings().getMaxInfoTX()).intValue() & 0xFFFFFFFFL) + 40);
-            replyBuff = java.nio.ByteBuffer.allocate(size);
         }
         reply.clear();
         byte[][] aarq = dlms.aarqRequest();

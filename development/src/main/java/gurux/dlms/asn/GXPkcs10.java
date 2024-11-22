@@ -23,6 +23,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 
+import gurux.dlms.GXBitString;
 import gurux.dlms.GXByteBuffer;
 import gurux.dlms.GXDLMSCertificateException;
 import gurux.dlms.GXSimpleEntry;
@@ -163,29 +164,24 @@ public class GXPkcs10 {
     private void init(final byte[] data) {
         rawData = data;
         attributes = new ArrayList<Map.Entry<PkcsObjectIdentifier, Object[]>>();
-        GXAsn1Sequence seq =
-                (GXAsn1Sequence) GXAsn1Converter.fromByteArray(data);
+        GXAsn1Sequence seq = (GXAsn1Sequence) GXAsn1Converter.fromByteArray(data);
         if (seq.size() < 3) {
-            throw new IllegalArgumentException(
-                    "Wrong number of elements in sequence.");
+            throw new IllegalArgumentException("Wrong number of elements in sequence.");
         }
         if (!(seq.get(0) instanceof GXAsn1Sequence)) {
             PkcsType type = GXAsn1Converter.getCertificateType(data, seq);
             switch (type) {
             case PKCS_8:
-                throw new GXDLMSCertificateException(
-                        "Invalid Certificate. This is PKCS 8, not PKCS 10.");
+                throw new GXDLMSCertificateException("Invalid Certificate. This is PKCS 8, not PKCS 10.");
             case x509_CERTIFICATE:
                 throw new GXDLMSCertificateException(
                         "Invalid Certificate. This is PKCS x509 certificate, not PKCS 10.");
             default:
-                throw new GXDLMSCertificateException(
-                        "Invalid Certificate Version.");
+                throw new GXDLMSCertificateException("Invalid Certificate Version.");
             }
         }
         GXAsn1Sequence reqInfo = (GXAsn1Sequence) seq.get(0);
-        version = CertificateVersion
-                .forValue(((Number) reqInfo.get(0)).intValue());
+        version = CertificateVersion.forValue(((Number) reqInfo.get(0)).intValue());
         subject = GXAsn1Converter.getSubject((GXAsn1Sequence) reqInfo.get(1));
         // subject Public key info.
         GXAsn1Sequence subjectPKInfo = (GXAsn1Sequence) reqInfo.get(2);
@@ -194,15 +190,11 @@ public class GXPkcs10 {
             for (Object t : (GXAsn1Context) reqInfo.get(3)) {
                 GXAsn1Sequence it = (GXAsn1Sequence) t;
                 List<Object> values = new ArrayList<Object>();
-                for (Object v : (List<?>) ((Map.Entry<?, ?>) it.get(1))
-                        .getKey()) {
+                for (Object v : (List<?>) ((Map.Entry<?, ?>) it.get(1)).getKey()) {
                     values.add(v);
                 }
-                attributes
-                        .add(new GXSimpleEntry<PkcsObjectIdentifier, Object[]>(
-                                PkcsObjectIdentifier
-                                        .forValue(it.get(0).toString()),
-                                values.toArray()));
+                attributes.add(new GXSimpleEntry<PkcsObjectIdentifier, Object[]>(
+                        PkcsObjectIdentifier.forValue(it.get(0).toString()), values.toArray()));
             }
         }
         GXAsn1Sequence tmp = (GXAsn1Sequence) subjectPKInfo.get(0);
@@ -215,8 +207,7 @@ public class GXPkcs10 {
                     a = tmp.get(0).toString();
                 }
             }
-            throw new IllegalArgumentException(
-                    "Invalid PKCS #10 certificate algorithm. " + a);
+            throw new IllegalArgumentException("Invalid PKCS #10 certificate algorithm. " + a);
         }
         // Make public key.
         KeyFactory eckf;
@@ -229,12 +220,11 @@ public class GXPkcs10 {
             } else if (name.contains("ec")) {
                 eckf = KeyFactory.getInstance("EC");
             } else {
-                throw new IllegalStateException(
-                        "Unknown algorithm:" + algorithm.toString());
+                throw new IllegalStateException("Unknown algorithm:" + algorithm.toString());
             }
         } catch (NoSuchAlgorithmException e) {
-            throw new IllegalStateException(algorithm.toString().substring(0, 2)
-                    + "key factory not present in runtime");
+            throw new IllegalStateException(
+                    algorithm.toString().substring(0, 2) + "key factory not present in runtime");
         }
         try {
             byte[] encodedKey = GXAsn1Converter.toByteArray(subjectPKInfo);
@@ -252,7 +242,7 @@ public class GXPkcs10 {
         }
         /////////////////////////////
         // signature
-        signature = ((GXAsn1BitString) seq.get(2)).getValue();
+        signature = ((GXBitString) seq.get(2)).getValue();
 
         GXByteBuffer tmp2 = new GXByteBuffer();
         tmp2.set(data);
@@ -260,8 +250,7 @@ public class GXPkcs10 {
         tmp2.size(tmp2.position());
         tmp2.position(1);
         GXCommon.getObjectCount(tmp2);
-        if (!verify(tmp2.subArray(tmp2.position(), tmp2.available()),
-                signature)) {
+        if (!verify(tmp2.subArray(tmp2.position(), tmp2.available()), signature)) {
             throw new IllegalArgumentException("Invalid Signature.");
         }
     }
@@ -420,8 +409,7 @@ public class GXPkcs10 {
             } else if (signatureAlgorithm == HashAlgorithm.SHA_256_RSA) {
                 instance = Signature.getInstance("SHA256withRSA");
             } else {
-                throw new IllegalArgumentException(
-                        "Invalid Signature: " + signatureAlgorithm.toString());
+                throw new IllegalArgumentException("Invalid Signature: " + signatureAlgorithm.toString());
             }
             instance.initVerify(publicKey);
             instance.update(data);
@@ -435,10 +423,9 @@ public class GXPkcs10 {
         GXByteBuffer bb = new GXByteBuffer();
         bb.setUInt8(4);
         bb.set(GXAsn1Converter.rawValue(publicKey));
-        Object subjectPKInfo = new GXAsn1BitString(bb.array(), 0);
-        Object[] tmp =
-                new Object[] { new GXAsn1ObjectIdentifier("1.2.840.10045.2.1"),
-                        new GXAsn1ObjectIdentifier("1.2.840.10045.3.1.7") };
+        Object subjectPKInfo = new GXBitString(bb.array(), 0);
+        Object[] tmp = new Object[] { new GXAsn1ObjectIdentifier("1.2.840.10045.2.1"),
+                new GXAsn1ObjectIdentifier("1.2.840.10045.3.1.7") };
         GXAsn1Context list = new GXAsn1Context();
         for (Map.Entry<PkcsObjectIdentifier, Object[]> it : attributes) {
             GXAsn1Sequence s = new GXAsn1Sequence();
@@ -451,8 +438,7 @@ public class GXPkcs10 {
             s.add(new GXSimpleEntry<Object, Object>(values, null));
             list.add(s);
         }
-        return new Object[] { version.getValue(),
-                GXAsn1Converter.encodeSubject(subject),
+        return new Object[] { version.getValue(), GXAsn1Converter.encodeSubject(subject),
                 new Object[] { tmp, subjectPKInfo }, list };
     }
 
@@ -468,10 +454,8 @@ public class GXPkcs10 {
         }
         // Certification request info.
         // subject Public key info.
-        GXAsn1ObjectIdentifier sa =
-                new GXAsn1ObjectIdentifier(signatureAlgorithm.getValue());
-        Object[] list = new Object[] { getData(), new Object[] { sa },
-                new GXAsn1BitString(signature, 0) };
+        GXAsn1ObjectIdentifier sa = new GXAsn1ObjectIdentifier(signatureAlgorithm.getValue());
+        Object[] list = new Object[] { getData(), new Object[] { sa }, new GXBitString(signature, 0) };
         return GXAsn1Converter.toByteArray(list);
     }
 
@@ -487,8 +471,7 @@ public class GXPkcs10 {
     public void sign(final KeyPair kp, final HashAlgorithm hashAlgorithm) {
         byte[] data = GXAsn1Converter.toByteArray(getData());
         try {
-            Signature instance =
-                    Signature.getInstance(hashAlgorithm.toString());
+            Signature instance = Signature.getInstance(hashAlgorithm.toString());
             instance.initSign(kp.getPrivate());
             instance.update(data);
             signatureAlgorithm = hashAlgorithm;
@@ -507,8 +490,7 @@ public class GXPkcs10 {
      *            Subject.
      * @return Created GXPkcs10.
      */
-    public static GXPkcs10 createCertificateSigningRequest(final KeyPair kp,
-            final String subject) {
+    public static GXPkcs10 createCertificateSigningRequest(final KeyPair kp, final String subject) {
         GXPkcs10 pkc10 = new GXPkcs10();
         pkc10.setAlgorithm(X9ObjectIdentifier.IdECPublicKey);
         pkc10.setPublicKey(kp.getPublic());
@@ -536,10 +518,9 @@ public class GXPkcs10 {
      * @throws IOException
      *             IOException
      */
-    public static GXx509Certificate getCertificate(final String address,
-            final GXPkcs10 cert, final KeyUsage usage) throws IOException {
-        String der = "{\"KeyUsage\":" + usage.getValue() + ",\"CSR\":[\""
-                + cert.toDer() + "\"]}";
+    public static GXx509Certificate getCertificate(final String address, final GXPkcs10 cert, final KeyUsage usage)
+            throws IOException {
+        String der = "{\"KeyUsage\":" + usage.getValue() + ",\"CSR\":[\"" + cert.toDer() + "\"]}";
         URL url = new URL(address);
         HttpURLConnection connection = (HttpURLConnection) url.openConnection();
         try {
@@ -554,12 +535,10 @@ public class GXPkcs10 {
                 os.close();
             }
             int ret = connection.getResponseCode();
-            if (ret == HttpURLConnection.HTTP_CREATED
-                    || ret == HttpURLConnection.HTTP_OK) {
+            if (ret == HttpURLConnection.HTTP_CREATED || ret == HttpURLConnection.HTTP_OK) {
                 String str;
                 StringBuilder data = new StringBuilder();
-                BufferedReader in = new BufferedReader(
-                        new InputStreamReader(connection.getInputStream()));
+                BufferedReader in = new BufferedReader(new InputStreamReader(connection.getInputStream()));
                 try {
                     while ((str = in.readLine()) != null) {
                         data.append(str);
@@ -570,20 +549,17 @@ public class GXPkcs10 {
                 str = data.toString();
                 int pos = str.indexOf("[");
                 if (pos == -1) {
-                    throw new IllegalArgumentException(
-                            "Certificates are missing.");
+                    throw new IllegalArgumentException("Certificates are missing.");
                 }
                 str = str.substring(pos + 2);
                 pos = str.indexOf("]");
                 if (pos == -1) {
-                    throw new IllegalArgumentException(
-                            "Certificates are missing.");
+                    throw new IllegalArgumentException("Certificates are missing.");
                 }
                 str = str.substring(0, pos - 1);
                 GXx509Certificate x509 = GXx509Certificate.fromDer(str);
                 if (!cert.getPublicKey().equals(x509.getPublicKey())) {
-                    throw new IllegalArgumentException(
-                            "Create certificate signingRequest generated wrong public key.");
+                    throw new IllegalArgumentException("Create certificate signingRequest generated wrong public key.");
                 }
                 return x509;
             }
@@ -605,8 +581,7 @@ public class GXPkcs10 {
      *             IOException
      */
     public static GXx509Certificate[] getCertificate(final String address,
-            final List<GXCertificateRequest> certifications)
-            throws IOException {
+            final List<GXCertificateRequest> certifications) throws IOException {
         StringBuilder usage = new StringBuilder();
         for (GXCertificateRequest it : certifications) {
             if (usage.length() != 0) {
@@ -615,24 +590,20 @@ public class GXPkcs10 {
             usage.append("{\"KeyUsage\":");
             switch (it.getCertificateType()) {
             case DIGITAL_SIGNATURE:
-                usage.append(
-                        String.valueOf(KeyUsage.DIGITAL_SIGNATURE.getValue()));
+                usage.append(String.valueOf(KeyUsage.DIGITAL_SIGNATURE.getValue()));
                 break;
             case KEY_AGREEMENT:
                 usage.append(String.valueOf(KeyUsage.KEY_AGREEMENT.getValue()));
                 break;
             case TLS:
-                usage.append(
-                        String.valueOf(KeyUsage.DIGITAL_SIGNATURE.getValue()
-                                | KeyUsage.KEY_AGREEMENT.getValue()));
+                usage.append(String.valueOf(KeyUsage.DIGITAL_SIGNATURE.getValue() | KeyUsage.KEY_AGREEMENT.getValue()));
                 break;
             default:
                 throw new RuntimeException("Invalid type.");
             }
             if (!it.getExtendedKeyUsage().isEmpty()) {
                 usage.append(", \"ExtendedKeyUsage\":");
-                usage.append(String.valueOf(
-                        ExtendedKeyUsage.toInteger(it.getExtendedKeyUsage())));
+                usage.append(String.valueOf(ExtendedKeyUsage.toInteger(it.getExtendedKeyUsage())));
             }
             usage.append(", \"CSR\":\"");
             usage.append(it.getCertificate().toDer());
@@ -652,11 +623,9 @@ public class GXPkcs10 {
 
             if (conn.getResponseCode() != HttpURLConnection.HTTP_CREATED
                     && conn.getResponseCode() != HttpURLConnection.HTTP_OK) {
-                throw new RuntimeException(
-                        "Failed : HTTP error code : " + conn.getResponseCode());
+                throw new RuntimeException("Failed : HTTP error code : " + conn.getResponseCode());
             }
-            BufferedReader br = new BufferedReader(
-                    new InputStreamReader((conn.getInputStream())));
+            BufferedReader br = new BufferedReader(new InputStreamReader((conn.getInputStream())));
             String output;
             StringBuilder sb = new StringBuilder();
             while ((output = br.readLine()) != null) {
@@ -673,8 +642,7 @@ public class GXPkcs10 {
                 throw new RuntimeException("Certificates are missing.");
             }
             str = str.substring(0, pos - 1);
-            java.util.ArrayList<GXx509Certificate> list =
-                    new java.util.ArrayList<GXx509Certificate>();
+            java.util.ArrayList<GXx509Certificate> list = new java.util.ArrayList<GXx509Certificate>();
             String[] tmp = str.split("['\"]");
             for (String it : tmp) {
                 if (it.compareTo(",") != 0) {

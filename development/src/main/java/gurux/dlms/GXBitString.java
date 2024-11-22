@@ -32,23 +32,48 @@
 // Full text may be retrieved at http://www.gnu.org/licenses/gpl-2.0.txt
 //---------------------------------------------------------------------------
 
-//
-// --------------------------------------------------------------------------
 package gurux.dlms;
 
 import gurux.dlms.internal.GXCommon;
 
 /**
- * BitString class is used with Bit strings.
- * 
- * @author Gurux Ltd.
+ * Bit string class is used with Bit strings.
  */
 public class GXBitString {
 
     /**
-     * Bit string value.
+     * Number of extra bits at the end of the string.
      */
-    private String value;
+    private int padBits;
+
+    /**
+     * Bit string.
+     */
+    private byte[] _value;
+
+    /**
+     * @return Number of extra bits at the end of the string.
+     */
+    public final int getPadBits() {
+        return padBits;
+    }
+
+    /**
+     * @return Bit string.
+     */
+    public final byte[] getValue() {
+        return _value;
+    }
+
+    /**
+     * @return Number of extra bits at the end of the string.
+     */
+    public final int length() {
+        if (_value == null) {
+            return 0;
+        }
+        return (8 * _value.length) - padBits;
+    }
 
     /**
      * Constructor.
@@ -58,107 +83,131 @@ public class GXBitString {
     }
 
     /**
-     * Constructor.
+     * Constructor
      * 
-     * @param val
-     *            Bit string value.
+     * @param bitString
+     *            Bit string.
      */
-    public GXBitString(final String val) {
-        value = val;
-    }
-
-    /**
-     * Constructor.
-     * 
-     * @param val
-     *            Byte value.
-     * @param count
-     *            Bit count.
-     */
-    public GXBitString(final byte val, final int count) {
-        StringBuilder sb = new StringBuilder();
-        GXCommon.toBitString(sb, val, 8);
-        if (count != 8) {
-            value = sb.toString().substring(0, count);
-        } else {
-            value = sb.toString();
+    public GXBitString(final String bitString) {
+        padBits = 8 - (bitString.length() % 8);
+        if (padBits == 8) {
+            padBits = 0;
+        }
+        StringBuilder sb = new StringBuilder(bitString);
+        appendZeros(sb, padBits);
+        _value = new byte[sb.length() / 8];
+        for (int pos = 0; pos != _value.length; ++pos) {
+            _value[pos] = (byte) Integer.parseInt(sb.substring(8 * pos, 8 * (pos + 1)), 2);
         }
     }
 
     /**
-     * @return Bit string value.
+     * Constructor
+     * 
+     * @param str
+     *            Bit string.
+     * @param padCount
+     *            Number of extra bits at the end of the string.
      */
-    public String getValue() {
-        return value;
+    public GXBitString(final byte[] str, final int padCount) {
+        if (str == null) {
+            throw new IllegalArgumentException("data");
+        }
+        if (padBits < 0 || padBits > 7) {
+            throw new IllegalArgumentException("PadCount must be in the range 0 to 7");
+        }
+        _value = str;
+        padBits = padCount;
     }
 
     /**
-     * @param val
-     *            Bit string value.
+     * Constructor
+     * 
+     * @param str
+     *            Bit string.
      */
-    public void setValue(final String val) {
-        value = val;
+    public GXBitString(final byte[] str) {
+        if (str == null) {
+            throw new IllegalArgumentException("data");
+        }
+        padBits = str[0];
+        if (padBits < 0 || padBits > 7) {
+            throw new IllegalArgumentException("PadCount must be in the range 0 to 7");
+        }
+        _value = new byte[str.length - 1];
+        System.arraycopy(str, 1, _value, 0, str.length - 1);
+    }
+
+    /**
+     * Constructor
+     * 
+     * @param value
+     *            Interer value.
+     * @param count
+     *            Amount of the bits.
+     * @return Bit string.
+     */
+    public GXBitString(final long value, final int count) {
+        long tmp = value;
+        padBits = count % 8;
+        _value = new byte[count / 8 + padBits];
+        for (byte pos = 0; pos != _value.length; ++pos) {
+            _value[pos] = (byte) (GXCommon.swapBits((byte) tmp));
+            tmp >>= 8;
+        }
+    }
+
+    /**
+     * Append zeroes to the buffer.
+     * 
+     * @param count
+     *            Amount of zero.
+     */
+    private static void appendZeros(final StringBuilder sb, final int count) {
+        for (int pos = 0; pos != count; ++pos) {
+            sb.append('0');
+        }
     }
 
     @Override
     public final String toString() {
-        return value;
-    }
-
-    private static void toBitString(StringBuilder sb, int value, int count) {
-        if (count > 8) {
-            count = 8;
-        }
-        for (int pos = 0; pos != count; ++pos) {
-            if ((value & (1 << pos)) != 0) {
-                sb.append("1");
-            } else {
-                sb.append("0");
-            }
-        }
+        return toString(false);
     }
 
     /**
-     * Convert integer value to BitString.
+     * Convert bit string to string.
      * 
-     * @param value
-     *            Value to convert.
-     * @param count
-     *            Amount of the bits.
-     * @return Bitstring
+     * @param showBits
+     *            Is the number of the bits shown.
+     * @return Bit string as an string.
      */
-    public static String toBitString(long value, int count) {
-        StringBuilder sb = new StringBuilder();
-        toBitString(sb, (byte) (value & 0xFF), count);
-        if (count > 8) {
-            toBitString(sb, (byte) ((value >> 8) & 0xFF), count - 8);
-            if (count > 16) {
-                toBitString(sb, (byte) ((value >> 16) & 0xFF), count - 16);
-                if (count > 24) {
-                    toBitString(sb, (byte) ((value >> 24) & 0xFF), count - 24);
-                }
-            }
+    public final String toString(final boolean showBits) {
+        if (_value == null) {
+            return "";
         }
-        if (sb.length() > count) {
-            return sb.substring(0, count);
+        StringBuilder sb = new StringBuilder(8 * _value.length);
+        for (byte it : _value) {
+            GXCommon.toBitString(sb, it, 8);
+        }
+        sb.setLength(sb.length() - padBits);
+        if (showBits) {
+            sb.insert(0, String.valueOf((8 * _value.length) - padBits) + " bit ");
         }
         return sb.toString();
     }
 
     /**
-     * @return Bit string value as integer.
+     * @return Bit-string value as integer.
      */
     public int toInteger() {
-        int val = 0;
-        if (value != null) {
-            for (int pos = 0; pos != value.length(); ++pos) {
-                if (value.charAt(pos) == '1') {
-                    val |= (1 << pos);
-                } else if (value.charAt(pos) != '0') {
-                    throw new IllegalArgumentException("Invalid parameter");
-                }
+        int ret = 0;
+        if (_value != null) {
+            int bytePos = 0;
+            for (byte it : _value) {
+                ret |= (int) (GXCommon.swapBits(it) << bytePos);
+                bytePos += 8;
             }
         }
-        return val;
+        return ret;
     }
 }

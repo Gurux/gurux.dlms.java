@@ -63,7 +63,6 @@ public enum CreditConfiguration {
     /**
      * Able to receive credit amounts from tokens.
      */
-
     TOKENS(0x10);
 
     /**
@@ -112,8 +111,7 @@ public enum CreditConfiguration {
      * @return Get enumeration constant values.
      */
     private static CreditConfiguration[] getEnumConstants() {
-        return new CreditConfiguration[] { VISUAL, CONFIRMATION, PAID_BACK,
-                RESETTABLE, TOKENS };
+        return new CreditConfiguration[] { VISUAL, CONFIRMATION, PAID_BACK, RESETTABLE, TOKENS };
 
     }
 
@@ -125,8 +123,7 @@ public enum CreditConfiguration {
      * @return The enumerated value, which represents the integer.
      */
     public static java.util.Set<CreditConfiguration> forValue(final int value) {
-        java.util.Set<CreditConfiguration> types =
-                new HashSet<CreditConfiguration>();
+        java.util.Set<CreditConfiguration> types = new HashSet<CreditConfiguration>();
         if (value != 0) {
             types = new HashSet<CreditConfiguration>();
             CreditConfiguration[] enums = getEnumConstants();
@@ -146,8 +143,7 @@ public enum CreditConfiguration {
      *            The enumerated value.
      * @return The integer value.
      */
-    public static int
-            toInteger(final java.util.Set<CreditConfiguration> value) {
+    public static int toInteger(final java.util.Set<CreditConfiguration> value) {
         int tmp = 0;
         for (CreditConfiguration it : value) {
             tmp |= it.getValue();

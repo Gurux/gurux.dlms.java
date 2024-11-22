@@ -23,6 +23,7 @@ import java.util.Set;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
+import gurux.dlms.GXBitString;
 import gurux.dlms.GXByteBuffer;
 import gurux.dlms.GXDLMSCertificateException;
 import gurux.dlms.asn.enums.ExtendedKeyUsage;
@@ -351,12 +352,12 @@ public class GXx509Certificate {
                     }
                     break;
                 case KEY_USAGE:
-                    if (value instanceof GXAsn1BitString) {
+                    if (value instanceof GXBitString) {
                         // critical is optional. BOOLEAN DEFAULT FALSE,
-                        keyUsage = KeyUsage.forValue(((GXAsn1BitString) value).toInteger());
+                        keyUsage = KeyUsage.forValue(((GXBitString) value).toInteger());
                     } else if (value instanceof Boolean) {
                         value = s.get(2);
-                        keyUsage = KeyUsage.forValue(((GXAsn1BitString) value).toInteger());
+                        keyUsage = KeyUsage.forValue(((GXBitString) value).toInteger());
                     } else {
                         throw new IllegalStateException("Invalid key usage.");
                     }
@@ -451,7 +452,7 @@ public class GXx509Certificate {
             signatureParameters = ((GXAsn1Sequence) seq.get(1)).get(1);
         }
         // signature
-        signature = ((GXAsn1BitString) seq.get(2)).getValue();
+        signature = ((GXBitString) seq.get(2)).getValue();
     }
 
     /**
@@ -693,7 +694,7 @@ public class GXx509Certificate {
         while ((min >>= 1) != 0) {
             ++ignore;
         }
-        byte[] tmp = GXAsn1Converter.toByteArray(new GXAsn1BitString(new byte[] { (byte) (ignore % 8), (byte) value }));
+        byte[] tmp = GXAsn1Converter.toByteArray(new GXBitString(new byte[] { (byte) (ignore % 8), (byte) value }));
         s1.add(tmp);
         s.add(s1);
 
@@ -709,7 +710,7 @@ public class GXx509Certificate {
         GXByteBuffer bb = new GXByteBuffer();
         bb.setUInt8(4);
         bb.set(GXAsn1Converter.rawValue(publicKey));
-        Object[] tmp2 = new Object[] { tmp3, new GXAsn1BitString(bb.array(), 0) };
+        Object[] tmp2 = new Object[] { tmp3, new GXBitString(bb.array(), 0) };
         Object[] p2;
         if (signatureParameters == null) {
             p2 = new Object[] { a };
@@ -729,7 +730,7 @@ public class GXx509Certificate {
             return rawData;
         }
         Object tmp = new Object[] { new GXAsn1ObjectIdentifier(signatureAlgorithm.getValue()) };
-        Object[] list = new Object[] { getdata(), tmp, new GXAsn1BitString(signature, 0) };
+        Object[] list = new Object[] { getdata(), tmp, new GXBitString(signature, 0) };
         return GXAsn1Converter.toByteArray(list);
     }
 
