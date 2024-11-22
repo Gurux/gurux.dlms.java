@@ -145,7 +145,6 @@ public class GXBitString {
      *            Interer value.
      * @param count
      *            Amount of the bits.
-     * @return Bit string.
      */
     public GXBitString(final long value, final int count) {
         long tmp = value;
