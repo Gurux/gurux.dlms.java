@@ -49,7 +49,8 @@ import gurux.dlms.internal.GXCommon;
  * @author Gurux Ltd.
  */
 public class GXByteBuffer {
-    static final int ARRAY_CAPACITY = 10;
+    private static final int ARRAY_CAPACITY = 10;
+
     /**
      * Byte array data.
      */
@@ -106,8 +107,7 @@ public class GXByteBuffer {
      * Clear buffer but do not release memory.
      */
     public final void clear() {
-        position = 0;
-        size = 0;
+        size(0);
     }
 
     /**
@@ -164,7 +164,7 @@ public class GXByteBuffer {
      * @return Buffer position.
      */
     public final int position() {
-        return this.position;
+        return position;
     }
 
     /**
@@ -263,7 +263,6 @@ public class GXByteBuffer {
      *            The byte to be added.
      */
     public final void setUInt8(final int item) {
-
         setUInt8(size, item);
         ++size;
     }
@@ -289,7 +288,6 @@ public class GXByteBuffer {
      *            The UInt8 value to be added.
      */
     public final void setUInt8(final int index, final int item) {
-
         if (index >= capacity()) {
             capacity(index + ARRAY_CAPACITY);
         }
@@ -318,7 +316,6 @@ public class GXByteBuffer {
      *            The UInt16 value to be added.
      */
     public final void setUInt16(final int index, final int item) {
-
         if (index + 2 >= capacity()) {
             capacity(index + ARRAY_CAPACITY);
         }
@@ -334,7 +331,6 @@ public class GXByteBuffer {
      *            The UInt32 value to be added.
      */
     public final void setUInt32(final long item) {
-
         setUInt32(size, item);
         size += 4;
     }
@@ -349,7 +345,6 @@ public class GXByteBuffer {
      *            The UInt32 value to be added.
      */
     public final void setUInt32(final int index, final long item) {
-
         if (index + 4 >= capacity()) {
             capacity(index + ARRAY_CAPACITY);
         }
@@ -367,7 +362,6 @@ public class GXByteBuffer {
      *            The UInt64 value to be added.
      */
     public final void setUInt64(final long item) {
-
         setUInt64(size, item);
         size += 8;
     }
@@ -382,7 +376,6 @@ public class GXByteBuffer {
      *            The UInt64 value to be added.
      */
     public final void setUInt64(final int index, final long item) {
-
         if (index + 8 >= capacity()) {
             capacity(index + ARRAY_CAPACITY);
         }

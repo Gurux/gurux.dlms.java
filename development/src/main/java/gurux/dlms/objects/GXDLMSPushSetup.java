@@ -1017,47 +1017,55 @@ public class GXDLMSPushSetup extends GXDLMSObject implements IGXDLMSBase {
         return repetitionDelay2;
     }
 
-    public void setRepetitionDelay2(GXRepetitionDelay repetitionDelay2) {
-        this.repetitionDelay2 = repetitionDelay2;
+    public void setRepetitionDelay2(final GXRepetitionDelay value) {
+        repetitionDelay2 = value;
     }
+
+    public GXDLMSObject getPortReference() {
+        return portReference;
+    }
+
+    public void setPortReference(final GXDLMSObject value) {
+        portReference = value;
+    };
 
     public byte getPushClientSAP() {
         return pushClientSAP;
     }
 
-    public void setPushClientSAP(byte pushClientSAP) {
-        this.pushClientSAP = pushClientSAP;
+    public void setPushClientSAP(final byte value) {
+        pushClientSAP = value;
     }
 
     public GXPushProtectionParameters[] getPushProtectionParameters() {
         return pushProtectionParameters;
     }
 
-    public void setPushProtectionParameters(GXPushProtectionParameters[] pushProtectionParameters) {
-        this.pushProtectionParameters = pushProtectionParameters;
+    public void setPushProtectionParameters(final GXPushProtectionParameters[] value) {
+        pushProtectionParameters = value;
     }
 
     public PushOperationMethod getPushOperationMethod() {
         return pushOperationMethod;
     }
 
-    public void setPushOperationMethod(PushOperationMethod pushOperationMethod) {
-        this.pushOperationMethod = pushOperationMethod;
+    public void setPushOperationMethod(final PushOperationMethod value) {
+        pushOperationMethod = value;
     }
 
     public GXPushConfirmationParameter getConfirmationParameters() {
         return confirmationParameters;
     }
 
-    public void setConfirmationParameters(GXPushConfirmationParameter confirmationParameters) {
-        this.confirmationParameters = confirmationParameters;
+    public void setConfirmationParameters(final GXPushConfirmationParameter value) {
+        confirmationParameters = value;
     }
 
     public GXDateTime getLastConfirmationDateTime() {
         return lastConfirmationDateTime;
     }
 
-    public void setLastConfirmationDateTime(GXDateTime lastConfirmationDateTime) {
-        this.lastConfirmationDateTime = lastConfirmationDateTime;
+    public void setLastConfirmationDateTime(final GXDateTime value) {
+        lastConfirmationDateTime = value;
     }
 }
