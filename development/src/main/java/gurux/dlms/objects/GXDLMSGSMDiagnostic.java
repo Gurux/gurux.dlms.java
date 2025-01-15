@@ -384,9 +384,9 @@ public class GXDLMSGSMDiagnostic extends GXDLMSObject implements IGXDLMSBase {
         case 2:
             if (e.getValue() instanceof byte[]) {
                 operator = new String((byte[]) e.getValue());
-            } else if (operator instanceof String) {
+            } else if (e.getValue() instanceof String) {
                 operator = (String) e.getValue();
-            } else if (operator == null) {
+            } else if (e.getValue() == null) {
                 operator = null;
             } else {
                 e.setError(ErrorCode.READ_WRITE_DENIED);
