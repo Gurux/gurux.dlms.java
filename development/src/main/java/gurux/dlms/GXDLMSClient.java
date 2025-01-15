@@ -83,12 +83,7 @@ import gurux.dlms.enums.Standard;
 import gurux.dlms.internal.GXCommon;
 import gurux.dlms.internal.GXDataInfo;
 import gurux.dlms.manufacturersettings.GXObisCodeCollection;
-import gurux.dlms.objects.GXDLMSCaptureObject;
-import gurux.dlms.objects.GXDLMSData;
-import gurux.dlms.objects.GXDLMSObject;
-import gurux.dlms.objects.GXDLMSObjectCollection;
-import gurux.dlms.objects.GXDLMSProfileGeneric;
-import gurux.dlms.objects.IGXDLMSBase;
+import gurux.dlms.objects.*;
 import gurux.dlms.objects.enums.CertificateType;
 import gurux.dlms.objects.enums.SecuritySuite;
 import gurux.dlms.secure.GXSecure;
@@ -1323,7 +1318,7 @@ public class GXDLMSClient {
     static GXDLMSObject createDLMSObject(final GXDLMSSettings settings, final int classID, final Object version,
             final int baseName, final Object ln, final Object accessRights, final int lnVersion) {
         ObjectType type = ObjectType.forValue(classID);
-        GXDLMSObject obj = GXDLMS.createObject(settings, type, classID, ((Number) version).intValue());
+        GXDLMSObject obj = GXCreateObject.createObject(settings, type, classID, ((Number) version).intValue());
         updateObjectData(obj, type, version, baseName, (byte[]) ln, accessRights, lnVersion);
         return obj;
     }
@@ -3021,7 +3016,7 @@ public class GXDLMSClient {
      * @return Created object.
      */
     public static GXDLMSObject createObject(final ObjectType type) {
-        return GXDLMS.createObject(null, type, 0, 0);
+        return GXCreateObject.createObject(null, type, 0, 0);
     }
 
     /**
@@ -3032,7 +3027,7 @@ public class GXDLMSClient {
      * @return Created object.
      */
     public static GXDLMSObject createCustomObject(final GXDLMSSettings settings, final int type) {
-        return GXDLMS.createObject(settings, null, type, 0);
+        return GXCreateObject.createObject(settings, null, type, 0);
     }
 
     /**
