@@ -1625,6 +1625,10 @@ public class GXDLMSSettings {
         return invocationCounter;
     }
 
+    public void setInvocationCounter(GXDLMSData invocationCounter) {
+        this.invocationCounter = invocationCounter;
+    }
+
     /**
      * @return Crypto notifier.
      */

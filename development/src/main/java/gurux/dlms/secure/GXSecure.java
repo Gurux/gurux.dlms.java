@@ -815,67 +815,69 @@ public final class GXSecure {
                 if (cmd == Command.GENERAL_CIPHERING) {
                     // KeyInfo OPTIONAL
                     // len =
-                    data.getUInt8();
-                    // AgreedKey CHOICE tag.
-                    data.getUInt8();
-                    // key-parameters
-                    // len =
-                    data.getUInt8();
-                    value = data.getUInt8();
-                    p.setKeyParameters(value);
-                    if (value == KeyAgreementScheme.ONE_PASS_DIFFIE_HELLMAN.ordinal()) {
-                        p.getSettings().getCipher().setSigning(Signing.ONE_PASS_DIFFIE_HELLMAN);
-                        // key-ciphered-data
-                        len = GXCommon.getObjectCount(data);
-                        GXByteBuffer bb = new GXByteBuffer();
-                        bb.set(data, len);
-                        if (p.getXml() != null) {
-                            p.setKeyCipheredData(bb.array());
-                        }
-                        kp = p.getSettings().getCipher().getKeyAgreementKeyPair();
-                        if (kp == null || kp.getPublic() == null) {
-                            pub = (PublicKey) p.getSettings().getKey(CertificateType.KEY_AGREEMENT, p.getSystemTitle(),
-                                    false);
-                            if (pub != null) {
-                                p.getSettings().getCipher().setKeyAgreementKeyPair(new KeyPair(pub,
-                                        p.getSettings().getCipher().getKeyAgreementKeyPair().getPrivate()));
+                    short KeyInfoLen = data.getUInt8();
+                    if (KeyInfoLen != 0) {
+                        // AgreedKey CHOICE tag.
+                        data.getUInt8();
+                        // key-parameters
+                        // len =
+                        data.getUInt8();
+                        value = data.getUInt8();
+                        p.setKeyParameters(value);
+                        if (value == KeyAgreementScheme.ONE_PASS_DIFFIE_HELLMAN.ordinal()) {
+                            p.getSettings().getCipher().setSigning(Signing.ONE_PASS_DIFFIE_HELLMAN);
+                            // key-ciphered-data
+                            len = GXCommon.getObjectCount(data);
+                            GXByteBuffer bb = new GXByteBuffer();
+                            bb.set(data, len);
+                            if (p.getXml() != null) {
+                                p.setKeyCipheredData(bb.array());
                             }
-                        }
-                        if (kp.getPrivate() == null) {
-                            key = (PrivateKey) p.getSettings().getKey(CertificateType.KEY_AGREEMENT, p.getSystemTitle(),
-                                    true);
-                            if (key != null) {
-                                p.getSettings().getCipher().setKeyAgreementKeyPair(new KeyPair(
-                                        p.getSettings().getCipher().getKeyAgreementKeyPair().getPublic(), key));
+                            kp = p.getSettings().getCipher().getKeyAgreementKeyPair();
+                            if (kp == null || kp.getPublic() == null) {
+                                pub = (PublicKey) p.getSettings().getKey(CertificateType.KEY_AGREEMENT, p.getSystemTitle(),
+                                                                         false);
+                                if (pub != null) {
+                                    p.getSettings().getCipher().setKeyAgreementKeyPair(new KeyPair(pub,
+                                                                                                   p.getSettings().getCipher().getKeyAgreementKeyPair().getPrivate()));
+                                }
                             }
-                        }
-                        if (kp.getPublic() != null) {
-                            // Get Ephemeral public key.
-                            int keySize = len / 2;
-                            pub = GXAsn1Converter.getPublicKey(bb.subArray(0, keySize));
-                        }
-                    } else if (value == KeyAgreementScheme.STATIC_UNIFIED_MODEL.ordinal()) {
-                        p.getSettings().getCipher().setSigning(Signing.STATIC_UNIFIED_MODEL);
-                        len = GXCommon.getObjectCount(data);
-                        if (len != 0) {
-                            throw new IllegalArgumentException("Invalid key parameters");
-                        }
-                        kp = p.getSettings().getCipher().getKeyAgreementKeyPair();
-                        if (kp == null || kp.getPublic() == null) {
-                            pub = (PublicKey) p.getSettings().getKey(CertificateType.KEY_AGREEMENT, p.getSystemTitle(),
-                                    false);
-                        } else {
-                            pub = p.getSettings().getCipher().getKeyAgreementKeyPair().getPublic();
-                        }
-                        if (kp.getPrivate() == null) {
-                            key = (PrivateKey) p.getSettings().getKey(CertificateType.KEY_AGREEMENT,
-                                    p.getRecipientSystemTitle(), true);
-                        } else {
-                            key = p.getSettings().getCipher().getKeyAgreementKeyPair().getPrivate();
-                        }
-                        if (kp.getPublic() == null || kp.getPrivate() == null) {
-                            kp = new KeyPair(pub, key);
-                            p.getSettings().getCipher().setKeyAgreementKeyPair(kp);
+                            if (kp.getPrivate() == null) {
+                                key = (PrivateKey) p.getSettings().getKey(CertificateType.KEY_AGREEMENT, p.getSystemTitle(),
+                                                                          true);
+                                if (key != null) {
+                                    p.getSettings().getCipher().setKeyAgreementKeyPair(new KeyPair(
+                                            p.getSettings().getCipher().getKeyAgreementKeyPair().getPublic(), key));
+                                }
+                            }
+                            if (kp.getPublic() != null) {
+                                // Get Ephemeral public key.
+                                int keySize = len / 2;
+                                pub = GXAsn1Converter.getPublicKey(bb.subArray(0, keySize));
+                            }
+                        } else if (value == KeyAgreementScheme.STATIC_UNIFIED_MODEL.ordinal()) {
+                            p.getSettings().getCipher().setSigning(Signing.STATIC_UNIFIED_MODEL);
+                            len = GXCommon.getObjectCount(data);
+                            if (len != 0) {
+                                throw new IllegalArgumentException("Invalid key parameters");
+                            }
+                            kp = p.getSettings().getCipher().getKeyAgreementKeyPair();
+                            if (kp == null || kp.getPublic() == null) {
+                                pub = (PublicKey) p.getSettings().getKey(CertificateType.KEY_AGREEMENT, p.getSystemTitle(),
+                                                                         false);
+                            } else {
+                                pub = p.getSettings().getCipher().getKeyAgreementKeyPair().getPublic();
+                            }
+                            if (kp.getPrivate() == null) {
+                                key = (PrivateKey) p.getSettings().getKey(CertificateType.KEY_AGREEMENT,
+                                                                          p.getRecipientSystemTitle(), true);
+                            } else {
+                                key = p.getSettings().getCipher().getKeyAgreementKeyPair().getPrivate();
+                            }
+                            if (kp.getPublic() == null || kp.getPrivate() == null) {
+                                kp = new KeyPair(pub, key);
+                                p.getSettings().getCipher().setKeyAgreementKeyPair(kp);
+                            }
                         }
                     }
                 } else {
