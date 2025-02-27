@@ -261,8 +261,8 @@ public class GXDLMSGSMDiagnostic extends GXDLMSObject implements IGXDLMSBase {
 
     @Override
     public final Object[] getValues() {
-        return new Object[] { getLogicalName(), operator, status, circuitSwitchStatus,
-                packetSwitchStatus, cellInfo, adjacentCells, captureTime };
+        return new Object[] { getLogicalName(), operator, status, circuitSwitchStatus, packetSwitchStatus, cellInfo,
+                adjacentCells, captureTime };
     }
 
     /*
@@ -359,8 +359,7 @@ public class GXDLMSGSMDiagnostic extends GXDLMSObject implements IGXDLMSBase {
             for (GXAdjacentCell it : adjacentCells) {
                 bb.setUInt8(DataType.STRUCTURE.getValue());
                 bb.setUInt8(2);
-                GXCommon.setData(settings, bb,
-                        getVersion() == 0 ? DataType.UINT16 : DataType.UINT32, it.getCellId());
+                GXCommon.setData(settings, bb, getVersion() == 0 ? DataType.UINT16 : DataType.UINT32, it.getCellId());
                 GXCommon.setData(settings, bb, DataType.UINT8, it.getSignalQuality());
             }
             return bb.array();
@@ -382,11 +381,11 @@ public class GXDLMSGSMDiagnostic extends GXDLMSObject implements IGXDLMSBase {
             setLogicalName(GXCommon.toLogicalName(e.getValue()));
             break;
         case 2:
-            if (e.getValue() instanceof byte[]) {
-                operator = new String((byte[]) e.getValue());
-            } else if (operator instanceof String) {
+            if (e.getValue() instanceof String) {
                 operator = (String) e.getValue();
-            } else if (operator == null) {
+            } else if (e.getValue() instanceof byte[]) {
+                operator = new String((byte[]) e.getValue());
+            } else if (e.getValue() == null) {
                 operator = null;
             } else {
                 e.setError(ErrorCode.READ_WRITE_DENIED);
@@ -396,8 +395,7 @@ public class GXDLMSGSMDiagnostic extends GXDLMSObject implements IGXDLMSBase {
             status = GsmStatus.values()[((Number) e.getValue()).intValue()];
             break;
         case 4:
-            circuitSwitchStatus =
-                    GsmCircuitSwitchStatus.values()[((Number) e.getValue()).intValue()];
+            circuitSwitchStatus = GsmCircuitSwitchStatus.values()[((Number) e.getValue()).intValue()];
             break;
         case 5:
             packetSwitchStatus = GsmPacketSwitchStatus.values()[((Number) e.getValue()).intValue()];
@@ -430,8 +428,8 @@ public class GXDLMSGSMDiagnostic extends GXDLMSObject implements IGXDLMSBase {
             break;
         case 8:
             if (e.getValue() instanceof byte[]) {
-                captureTime = (GXDateTime) GXDLMSClient.changeType((byte[]) e.getValue(),
-                        DataType.DATETIME, e.getSettings());
+                captureTime =
+                        (GXDateTime) GXDLMSClient.changeType((byte[]) e.getValue(), DataType.DATETIME, e.getSettings());
             } else {
                 captureTime = (GXDateTime) e.getValue();
             }
@@ -446,10 +444,8 @@ public class GXDLMSGSMDiagnostic extends GXDLMSObject implements IGXDLMSBase {
     public final void load(final GXXmlReader reader) throws XMLStreamException {
         operator = reader.readElementContentAsString("Operator");
         status = GsmStatus.values()[reader.readElementContentAsInt("Status")];
-        circuitSwitchStatus = GsmCircuitSwitchStatus.values()[reader
-                .readElementContentAsInt("CircuitSwitchStatus")];
-        packetSwitchStatus = GsmPacketSwitchStatus.values()[reader
-                .readElementContentAsInt("PacketSwitchStatus")];
+        circuitSwitchStatus = GsmCircuitSwitchStatus.values()[reader.readElementContentAsInt("CircuitSwitchStatus")];
+        packetSwitchStatus = GsmPacketSwitchStatus.values()[reader.readElementContentAsInt("PacketSwitchStatus")];
         if (reader.isStartElement("CellInfo", true)) {
             cellInfo.setCellId(reader.readElementContentAsLong("CellId"));
             cellInfo.setLocationId(reader.readElementContentAsInt("LocationId"));
@@ -504,8 +500,8 @@ public class GXDLMSGSMDiagnostic extends GXDLMSObject implements IGXDLMSBase {
 
     @Override
     public String[] getNames() {
-        return new String[] { "Logical Name", "Operator", "Status", "CircuitSwitchStatus",
-                "PacketSwitchStatus", "CellInfo", "AdjacentCells", "CaptureTime" };
+        return new String[] { "Logical Name", "Operator", "Status", "CircuitSwitchStatus", "PacketSwitchStatus",
+                "CellInfo", "AdjacentCells", "CaptureTime" };
 
     }
 

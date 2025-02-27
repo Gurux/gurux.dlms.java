@@ -188,9 +188,9 @@ final class GXAPDU {
             }
         }
         // Add system title.
-        if (!settings.isServer() && (ciphered || settings.getAuthentication() == Authentication.HIGH_GMAC)
+        if (!settings.isServer() && (ciphered || settings.getAuthentication() == Authentication.HIGH_GMAC
                 || settings.getAuthentication() == Authentication.HIGH_SHA256
-                || settings.getAuthentication() == Authentication.HIGH_ECDSA) {
+                || settings.getAuthentication() == Authentication.HIGH_ECDSA)) {
             if (cipher.getSystemTitle() == null || cipher.getSystemTitle().length == 0) {
                 throw new IllegalArgumentException("SystemTitle");
             }

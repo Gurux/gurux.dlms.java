@@ -7,6 +7,9 @@ Credits
   - Profile generic scaler issue found.
     * [angelfmarcos](https://github.com/angelfmarcos)
   - gurux.dlms.client.example.java GXSerial dependency updated to latest version.
-    * [Hernán Eche](https://github.com/hernaneche)
+    * [Hernï¿½n Eche](https://github.com/hernaneche)
   - Missing "break" statement in GXDLMS.java - method getActionInfo()
-    * [mansour](http://www.gurux.fi/user/109756)
+    * [ENeMy235](https://github.com/ENeMy235)
+  - Invalid GXDLMSGSMDiagnostic operator handling fixed.
+    * [ENeMy235](https://github.com/ENeMy235)
+  - Server sends calling-AP-title with Sha256 and ECDSA.

@@ -117,6 +117,7 @@ import gurux.dlms.objects.GXDLMSGSMDiagnostic;
 import gurux.dlms.objects.GXDLMSGprsSetup;
 import gurux.dlms.objects.GXDLMSHdlcSetup;
 import gurux.dlms.objects.GXDLMSIECLocalPortSetup;
+import gurux.dlms.objects.GXDLMSIec6205541Attributes;
 import gurux.dlms.objects.GXDLMSIec8802LlcType1Setup;
 import gurux.dlms.objects.GXDLMSIec8802LlcType2Setup;
 import gurux.dlms.objects.GXDLMSIec8802LlcType3Setup;
@@ -399,6 +400,8 @@ abstract class GXDLMS {
             return new GXDLMSMBusPortSetup();
         case MBUS_DIAGNOSTIC:
             return new GXDLMSMBusDiagnostic();
+        case IEC_6205541_ATTRIBUTES:
+            return new GXDLMSIec6205541Attributes();
         default:
             return new GXDLMSObject();
         }

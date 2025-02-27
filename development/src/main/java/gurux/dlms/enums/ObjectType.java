@@ -334,6 +334,9 @@ public enum ObjectType {
     CHARGE(113),
 
     TOKEN_GATEWAY(115),
+
+    IEC_6205541_ATTRIBUTES(116),
+
     /*
      * Allow managing attributes of type array of other interface objects.
      */

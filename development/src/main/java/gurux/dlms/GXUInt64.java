@@ -88,6 +88,13 @@ public class GXUInt64 extends Number implements Comparable<GXUInt64> {
         return String.valueOf(value);
     }
 
+    /**
+     * @return Big integer value.
+     */
+    public BigInteger bigIntegerValue() {
+        return value;
+    }
+
     @Override
     public int intValue() {
         return value.intValueExact();

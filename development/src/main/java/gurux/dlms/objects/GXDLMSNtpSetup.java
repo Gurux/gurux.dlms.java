@@ -51,6 +51,7 @@ import gurux.dlms.GXByteBuffer;
 import gurux.dlms.GXDLMSClient;
 import gurux.dlms.GXDLMSSettings;
 import gurux.dlms.GXStructure;
+import gurux.dlms.GXUInt32;
 import gurux.dlms.ValueEventArgs;
 import gurux.dlms.enums.DataType;
 import gurux.dlms.enums.ErrorCode;
@@ -213,8 +214,7 @@ public class GXDLMSNtpSetup extends GXDLMSObject implements IGXDLMSBase {
 
     @Override
     public final Object[] getValues() {
-        return new Object[] { getLogicalName(), activated, serverAddress, port,
-                authentication, keys, clientKey };
+        return new Object[] { getLogicalName(), activated, serverAddress, port, authentication, keys, clientKey };
     }
 
     /**
@@ -232,9 +232,8 @@ public class GXDLMSNtpSetup extends GXDLMSObject implements IGXDLMSBase {
      * @throws InvalidKeyException
      */
     public final byte[][] synchronize(GXDLMSClient client)
-            throws InvalidKeyException, NoSuchAlgorithmException,
-            NoSuchPaddingException, InvalidAlgorithmParameterException,
-            IllegalBlockSizeException, BadPaddingException, SignatureException {
+            throws InvalidKeyException, NoSuchAlgorithmException, NoSuchPaddingException,
+            InvalidAlgorithmParameterException, IllegalBlockSizeException, BadPaddingException, SignatureException {
         return client.method(this, 1, 0, DataType.INT8);
     }
 
@@ -256,10 +255,9 @@ public class GXDLMSNtpSetup extends GXDLMSObject implements IGXDLMSBase {
      * @throws NoSuchAlgorithmException
      * @throws InvalidKeyException
      */
-    public final byte[][] addAuthenticationKey(GXDLMSClient client, int id,
-            byte[] key) throws InvalidKeyException, NoSuchAlgorithmException,
-            NoSuchPaddingException, InvalidAlgorithmParameterException,
-            IllegalBlockSizeException, BadPaddingException, SignatureException {
+    public final byte[][] addAuthenticationKey(GXDLMSClient client, int id, byte[] key)
+            throws InvalidKeyException, NoSuchAlgorithmException, NoSuchPaddingException,
+            InvalidAlgorithmParameterException, IllegalBlockSizeException, BadPaddingException, SignatureException {
         GXByteBuffer bb = new GXByteBuffer();
         bb.setUInt8(DataType.STRUCTURE);
         bb.setUInt8(2);
@@ -288,9 +286,8 @@ public class GXDLMSNtpSetup extends GXDLMSObject implements IGXDLMSBase {
      * @throws InvalidKeyException
      */
     public final byte[][] deleteAuthenticationKey(GXDLMSClient client, int id)
-            throws InvalidKeyException, NoSuchAlgorithmException,
-            NoSuchPaddingException, InvalidAlgorithmParameterException,
-            IllegalBlockSizeException, BadPaddingException, SignatureException {
+            throws InvalidKeyException, NoSuchAlgorithmException, NoSuchPaddingException,
+            InvalidAlgorithmParameterException, IllegalBlockSizeException, BadPaddingException, SignatureException {
         return client.method(this, 3, id, DataType.INT8);
     }
 
@@ -300,11 +297,9 @@ public class GXDLMSNtpSetup extends GXDLMSObject implements IGXDLMSBase {
      */
     @Override
     public final int[] getAttributeIndexToRead(final boolean all) {
-        java.util.ArrayList<Integer> attributes =
-                new java.util.ArrayList<Integer>();
+        java.util.ArrayList<Integer> attributes = new java.util.ArrayList<Integer>();
         // LN is static and read only once.
-        if (all || getLogicalName() == null
-                || getLogicalName().compareTo("") == 0) {
+        if (all || getLogicalName() == null || getLogicalName().compareTo("") == 0) {
             attributes.add(1);
         }
         // Activated
@@ -384,8 +379,7 @@ public class GXDLMSNtpSetup extends GXDLMSObject implements IGXDLMSBase {
             dt = DataType.OCTET_STRING;
             break;
         default:
-            throw new IllegalArgumentException(
-                    "getDataType failed. Invalid attribute index.");
+            throw new IllegalArgumentException("getDataType failed. Invalid attribute index.");
         }
         return dt;
     }
@@ -394,8 +388,7 @@ public class GXDLMSNtpSetup extends GXDLMSObject implements IGXDLMSBase {
      * Returns value of given attribute.
      */
     @Override
-    public final Object getValue(final GXDLMSSettings settings,
-            final ValueEventArgs e) {
+    public final Object getValue(final GXDLMSSettings settings, final ValueEventArgs e) {
         Object ret;
         switch (e.getIndex()) {
         case 1:
@@ -446,8 +439,7 @@ public class GXDLMSNtpSetup extends GXDLMSObject implements IGXDLMSBase {
      * Set value of given attribute.
      */
     @Override
-    public final void setValue(final GXDLMSSettings settings,
-            final ValueEventArgs e) {
+    public final void setValue(final GXDLMSSettings settings, final ValueEventArgs e) {
         switch (e.getIndex()) {
         case 1:
             setLogicalName(GXCommon.toLogicalName(e.getValue()));
@@ -468,15 +460,14 @@ public class GXDLMSNtpSetup extends GXDLMSObject implements IGXDLMSBase {
             port = ((Number) e.getValue()).intValue();
             break;
         case 5:
-            authentication = NtpAuthenticationMethod
-                    .values()[((Number) e.getValue()).intValue()];
+            authentication = NtpAuthenticationMethod.values()[((Number) e.getValue()).intValue()];
             break;
         case 6: {
             keys.clear();
             if (e.getValue() != null) {
                 for (Object tmp : (GXArray) e.getValue()) {
                     GXStructure it = (GXStructure) tmp;
-                    keys.put((long) it.get(0), (byte[]) it.get(1));
+                    keys.put(((GXUInt32) it.get(0)).longValue(), (byte[]) it.get(1));
                 }
             }
         }
@@ -493,22 +484,18 @@ public class GXDLMSNtpSetup extends GXDLMSObject implements IGXDLMSBase {
     @Override
     public final void load(final GXXmlReader reader) throws XMLStreamException {
         activated = reader.readElementContentAsInt("Activated", 1) != 0;
-        serverAddress =
-                reader.readElementContentAsString("ServerAddress", null);
+        serverAddress = reader.readElementContentAsString("ServerAddress", null);
         port = reader.readElementContentAsInt("Port", 0);
-        authentication = NtpAuthenticationMethod.values()[reader
-                .readElementContentAsInt("Authentication", 0)];
+        authentication = NtpAuthenticationMethod.values()[reader.readElementContentAsInt("Authentication", 0)];
         keys.clear();
         if (reader.isStartElement("Keys", true)) {
             while (reader.isStartElement("Item", true)) {
                 long id = reader.readElementContentAsLong("ID");
-                byte[] key = GXCommon
-                        .hexToBytes(reader.readElementContentAsString("Key"));
+                byte[] key = GXCommon.hexToBytes(reader.readElementContentAsString("Key"));
                 keys.put(id, key);
             }
         }
-        clientKey = GXCommon.hexToBytes(
-                reader.readElementContentAsString("ServerAddress", null));
+        clientKey = GXCommon.hexToBytes(reader.readElementContentAsString("ServerAddress", null));
     }
 
     @Override
@@ -523,13 +510,11 @@ public class GXDLMSNtpSetup extends GXDLMSObject implements IGXDLMSBase {
             Map.Entry<Long, byte[]> it = (Map.Entry<Long, byte[]>) tmp;
             writer.writeStartElement("Item");
             writer.writeElementString("ID", it.getKey().toString());
-            writer.writeElementString("Key",
-                    GXCommon.toHex(it.getValue(), false));
+            writer.writeElementString("Key", GXCommon.toHex(it.getValue(), false));
             writer.writeEndElement();
         }
         writer.writeEndElement();// Keys
-        writer.writeElementString("ClientKey",
-                GXCommon.toHex(clientKey, false));
+        writer.writeElementString("ClientKey", GXCommon.toHex(clientKey, false));
     }
 
     @Override
@@ -538,13 +523,12 @@ public class GXDLMSNtpSetup extends GXDLMSObject implements IGXDLMSBase {
 
     @Override
     public String[] getNames() {
-        return new String[] { "Logical Name", "Activated", "ServerAddress",
-                "Port", "Authentication", "Keys", "ClientKey" };
+        return new String[] { "Logical Name", "Activated", "ServerAddress", "Port", "Authentication", "Keys",
+                "ClientKey" };
     }
 
     @Override
     public String[] getMethodNames() {
-        return new String[] { "Synchronize", "Add authentication key",
-                "Delete authentication key" };
+        return new String[] { "Synchronize", "Add authentication key", "Delete authentication key" };
     }
 }

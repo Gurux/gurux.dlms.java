@@ -39,6 +39,7 @@ import java.security.InvalidKeyException;
 import java.security.NoSuchAlgorithmException;
 import java.security.SignatureException;
 import java.util.ArrayList;
+import java.util.List;
 import java.util.Map.Entry;
 
 import javax.crypto.BadPaddingException;
@@ -175,9 +176,10 @@ public class GXDLMSFunctionControl extends GXDLMSObject implements IGXDLMSBase {
      * 
      * @param client
      *            DLMS client.
+     * @param name
+     *            Name of the function.
      * @param functions
      *            Added functions.
-     * @return Action bytes.
      * @return Action bytes.
      * @throws NoSuchPaddingException
      *             No such padding exception.
@@ -194,40 +196,57 @@ public class GXDLMSFunctionControl extends GXDLMSObject implements IGXDLMSBase {
      * @throws SignatureException
      *             Signature exception.
      */
-    public final byte[][] addFunction(GXDLMSClient client, ArrayList<Entry<String, ArrayList<GXDLMSObject>>> functions)
+    public byte[][] addFunction(GXDLMSClient client, String name, List<GXDLMSObject> functions)
             throws InvalidKeyException, NoSuchAlgorithmException, NoSuchPaddingException,
             InvalidAlgorithmParameterException, IllegalBlockSizeException, BadPaddingException, SignatureException {
-        return client.method(this, 2, functionListToByteArray(functions), DataType.ARRAY);
+        GXByteBuffer bb = new GXByteBuffer();
+        bb.setUInt8(DataType.STRUCTURE);
+        bb.setUInt8(2);
+        bb.setUInt8(DataType.OCTET_STRING);
+        GXCommon.setObjectCount(name.length(), bb);
+        bb.set(name.getBytes());
+        bb.setUInt8(DataType.ARRAY);
+        GXCommon.setObjectCount(functions.size(), bb);
+        for (GXDLMSObject it : functions) {
+            bb.setUInt8(DataType.STRUCTURE);
+            bb.setUInt8(2);
+            GXCommon.setData(null, bb, DataType.UINT16, it.getObjectType().getValue());
+            GXCommon.setData(null, bb, DataType.OCTET_STRING, GXCommon.logicalNameToBytes(it.getLogicalName()));
+        }
+        return client.method(this, 2, bb.array(), DataType.ARRAY);
     }
 
     /**
-     * Adjusts the value of the current credit amount attribute.
+     * Removes a function from the attribute function list.
      * 
      * @param client
      *            DLMS client.
-     * @param functions
-     *            Added functions.
+     * @param name
+     *            Removed function name.
      * @return Action bytes.
-     * @throws NoSuchPaddingException
-     *             No such padding exception.
-     * @throws NoSuchAlgorithmException
-     *             No such algorithm exception.
-     * @throws InvalidAlgorithmParameterException
-     *             Invalid algorithm parameter exception.
-     * @throws InvalidKeyException
-     *             Invalid key exception.
+     * @throws SignatureException
+     *             Signature exception.
      * @throws BadPaddingException
      *             Bad padding exception.
      * @throws IllegalBlockSizeException
      *             Illegal block size exception.
-     * @throws SignatureException
-     *             Signature exception.
+     * @throws InvalidAlgorithmParameterException
+     *             Invalid algorithm parameter exception.
+     * @throws NoSuchPaddingException
+     *             No such algorithm exception.
+     * @throws NoSuchAlgorithmException
+     *             No such algorithm exception.
+     * @throws InvalidKeyException
+     *             Invalid key exception.
      */
-    public final byte[][] RemoveFunction(GXDLMSClient client,
-            ArrayList<Entry<String, ArrayList<GXDLMSObject>>> functions)
+    public byte[][] removeFunction(GXDLMSClient client, String name)
             throws InvalidKeyException, NoSuchAlgorithmException, NoSuchPaddingException,
             InvalidAlgorithmParameterException, IllegalBlockSizeException, BadPaddingException, SignatureException {
-        return client.method(this, 3, functionListToByteArray(functions), DataType.ARRAY);
+        GXByteBuffer bb = new GXByteBuffer();
+        bb.setUInt8(DataType.OCTET_STRING);
+        GXCommon.setObjectCount(name.length(), bb);
+        bb.set(name.getBytes());
+        return client.method(this, 3, bb.array(), DataType.ARRAY);
     }
 
     /**
