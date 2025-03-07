@@ -1771,9 +1771,8 @@ public class GXDLMSSecuritySetup extends GXDLMSObject implements IGXDLMSBase {
 
     @Override
     public String[] getNames() {
-        return new String[] { "Logical Name", "Security Policy",
-                "Security Suite", "Client System Title",
-                "Server System Title" };
+        return new String[] { "Logical Name", "Security Policy", "Security Suite",
+                "Client System Title", "Server System Title", "Certificates" };
     }
 
     @Override
