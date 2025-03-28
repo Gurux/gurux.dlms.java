@@ -1638,12 +1638,7 @@ abstract class GXDLMS {
         java.util.ArrayList<byte[]> messages = new java.util.ArrayList<byte[]>();
         byte frame = 0x0;
         if (p.getCommand() == Command.INFORMATION_REPORT || p.getCommand() == Command.DATA_NOTIFICATION) {
-            if ((p.getSettings().getConnected() & ConnectionState.DLMS) != 0) {
-                // If connection is established.
-                frame = 0x13;
-            } else {
-                frame = 0x3;
-            }
+            frame = 0x13;
         }
         do {
             getSNPdu(p, reply);
