@@ -13,3 +13,5 @@ Credits
   - Invalid GXDLMSGSMDiagnostic operator handling fixed.
     * [ENeMy235](https://github.com/ENeMy235)
   - Server sends calling-AP-title with Sha256 and ECDSA.
+      * [bbobcik](https://github.com/bbobcik)
+  - GXArray removeRange issue.
