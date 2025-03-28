@@ -65,5 +65,17 @@ public enum GsmPacketSwitchStatus {
     /**
      * CDMA
      */
-    CDMA
+    CDMA,
+    /**
+     * LTE Cat M1.
+     */
+    LTE_CAT_M1,
+    /**
+     * LTE Cat NB1.
+     */
+    LTE_CAT_NB1,
+    /**
+     * LTE Cat NB2.
+     */
+    LTE_CAT_NB2,
 }

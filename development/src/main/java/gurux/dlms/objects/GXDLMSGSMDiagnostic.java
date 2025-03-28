@@ -119,7 +119,7 @@ public class GXDLMSGSMDiagnostic extends GXDLMSObject implements IGXDLMSBase {
      */
     public GXDLMSGSMDiagnostic(final String ln, final int sn) {
         super(ObjectType.GSM_DIAGNOSTIC, ln, sn);
-        setVersion(1);
+        setVersion(2);
         cellInfo = new GXDLMSGSMCellInfo();
         adjacentCells = new ArrayList<GXAdjacentCell>();
         status = GsmStatus.NONE;
