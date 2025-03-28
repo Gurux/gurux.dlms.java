@@ -1638,7 +1638,12 @@ abstract class GXDLMS {
         java.util.ArrayList<byte[]> messages = new java.util.ArrayList<byte[]>();
         byte frame = 0x0;
         if (p.getCommand() == Command.INFORMATION_REPORT || p.getCommand() == Command.DATA_NOTIFICATION) {
-            frame = 0x13;
+            if ((p.getSettings().getConnected() & ConnectionState.DLMS) != 0) {
+                // If connection is established.
+                frame = 0x13;
+            } else {
+                frame = 0x3;
+            }
         }
         do {
             getSNPdu(p, reply);
@@ -1646,7 +1651,8 @@ abstract class GXDLMS {
             while (reply.position() != reply.size()) {
                 if (p.getSettings().getInterfaceType() == InterfaceType.WRAPPER) {
                     messages.add(getWrapperFrame(p.getSettings(), p.getCommand(), reply));
-                } else if (p.getSettings().getInterfaceType() == InterfaceType.HDLC) {
+                } else if (p.getSettings().getInterfaceType() == InterfaceType.HDLC
+                        || p.getSettings().getInterfaceType() == InterfaceType.HDLC_WITH_MODE_E) {
                     messages.add(getHdlcFrame(p.getSettings(), frame, reply));
                     if (reply.position() != reply.size()) {
                         frame = p.getSettings().getNextSend(false);
