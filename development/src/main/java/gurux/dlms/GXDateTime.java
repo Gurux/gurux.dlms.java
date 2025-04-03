@@ -483,7 +483,8 @@ public class GXDateTime {
                         sd.applyPattern(format.toString().trim());
                         meterCalendar.setTime(sd.parse(v));
                     } catch (java.text.ParseException e2) {
-                        throw new IllegalArgumentException(e2);
+                        throw new IllegalArgumentException(
+                                "Invalid date time: '" + v + "'. Expected format is '" + pattern + "'.");
                     } catch (Exception e2) {
                         throw new IllegalArgumentException(e);
                     }

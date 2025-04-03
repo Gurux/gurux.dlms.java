@@ -72,7 +72,12 @@ public enum ControlMode {
      * Disconnection: Remote (b, c), manual (-), local (g) Reconnection: Remote
      * (d), manual (e), local (h)
      */
-    MODE_6;
+    MODE_6,
+    /*
+     * Disconnection: Remote(b, c), manual(-), local(g) Reconnection: Remote (a,
+     * i), manual (e), local (h)
+     */
+    MODE_7;
 
     @Override
     public String toString() {

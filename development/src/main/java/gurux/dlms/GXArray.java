@@ -46,12 +46,6 @@ public class GXArray extends ArrayList<Object> implements java.util.List<Object>
      * Remove all elements within the specified range.
      */
     public void removeRange(int fromIndex, int toIndex) {
-        if (toIndex >= size()) {
-            throw new IndexOutOfBoundsException(toIndex);
-        }
-        while (fromIndex <= toIndex) {
-            this.remove(fromIndex);
-            --toIndex;
-        }
+        super.removeRange(fromIndex, toIndex);
     }
 }

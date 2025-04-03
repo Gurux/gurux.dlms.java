@@ -58,8 +58,7 @@ import gurux.dlms.objects.enums.ControlState;
  * Online help: <br>
  * https://www.gurux.fi/Gurux.DLMS.Objects.GXDLMSDisconnectControl
  */
-public class GXDLMSDisconnectControl extends GXDLMSObject
-        implements IGXDLMSBase {
+public class GXDLMSDisconnectControl extends GXDLMSObject implements IGXDLMSBase {
     private boolean outputState;
     private ControlState controlState;
     private ControlMode controlMode;
@@ -93,6 +92,7 @@ public class GXDLMSDisconnectControl extends GXDLMSObject
         super(ObjectType.DISCONNECT_CONTROL, ln, sn);
         controlState = ControlState.DISCONNECTED;
         controlMode = ControlMode.NONE;
+        setVersion(1);
     }
 
     /**
@@ -163,9 +163,8 @@ public class GXDLMSDisconnectControl extends GXDLMSObject
      *             Signature exception.
      */
     public final byte[][] remoteDisconnect(final GXDLMSClient client)
-            throws InvalidKeyException, NoSuchAlgorithmException,
-            NoSuchPaddingException, InvalidAlgorithmParameterException,
-            IllegalBlockSizeException, BadPaddingException, SignatureException {
+            throws InvalidKeyException, NoSuchAlgorithmException, NoSuchPaddingException,
+            InvalidAlgorithmParameterException, IllegalBlockSizeException, BadPaddingException, SignatureException {
         return client.method(this, 1, 0, DataType.INT8);
     }
 
@@ -174,25 +173,21 @@ public class GXDLMSDisconnectControl extends GXDLMSObject
      * state if a direct remote reconnection is disabled.
      */
     public final byte[][] remoteReconnect(final GXDLMSClient client)
-            throws InvalidKeyException, NoSuchAlgorithmException,
-            NoSuchPaddingException, InvalidAlgorithmParameterException,
-            IllegalBlockSizeException, BadPaddingException, SignatureException {
+            throws InvalidKeyException, NoSuchAlgorithmException, NoSuchPaddingException,
+            InvalidAlgorithmParameterException, IllegalBlockSizeException, BadPaddingException, SignatureException {
         return client.method(this, 2, 0, DataType.INT8);
     }
 
     @Override
     public final Object[] getValues() {
-        return new Object[] { getLogicalName(), getOutputState(),
-                getControlState(), getControlMode() };
+        return new Object[] { getLogicalName(), getOutputState(), getControlState(), getControlMode() };
     }
 
     @Override
     public final int[] getAttributeIndexToRead(final boolean all) {
-        java.util.ArrayList<Integer> attributes =
-                new java.util.ArrayList<Integer>();
+        java.util.ArrayList<Integer> attributes = new java.util.ArrayList<Integer>();
         // LN is static and read only once.
-        if (all || getLogicalName() == null
-                || getLogicalName().compareTo("") == 0) {
+        if (all || getLogicalName() == null || getLogicalName().compareTo("") == 0) {
             attributes.add(1);
         }
         // OutputState
@@ -234,13 +229,11 @@ public class GXDLMSDisconnectControl extends GXDLMSObject
         if (index == 4) {
             return DataType.ENUM;
         }
-        throw new IllegalArgumentException(
-                "getDataType failed. Invalid attribute index.");
+        throw new IllegalArgumentException("getDataType failed. Invalid attribute index.");
     }
 
     @Override
-    public final Object getValue(final GXDLMSSettings settings,
-            final ValueEventArgs e) {
+    public final Object getValue(final GXDLMSSettings settings, final ValueEventArgs e) {
         if (e.getIndex() == 1) {
             return GXCommon.logicalNameToBytes(getLogicalName());
         }
@@ -258,8 +251,7 @@ public class GXDLMSDisconnectControl extends GXDLMSObject
     }
 
     @Override
-    public final void setValue(final GXDLMSSettings settings,
-            final ValueEventArgs e) {
+    public final void setValue(final GXDLMSSettings settings, final ValueEventArgs e) {
         if (e.getIndex() == 1) {
             setLogicalName(GXCommon.toLogicalName(e.getValue()));
         } else if (e.getIndex() == 2) {
@@ -272,15 +264,13 @@ public class GXDLMSDisconnectControl extends GXDLMSObject
             if (e.getValue() == null) {
                 setControlState(ControlState.DISCONNECTED);
             } else {
-                setControlState(ControlState.values()[((Number) e.getValue())
-                        .intValue()]);
+                setControlState(ControlState.values()[((Number) e.getValue()).intValue()]);
             }
         } else if (e.getIndex() == 4) {
             if (e.getValue() == null) {
                 setControlMode(ControlMode.NONE);
             } else {
-                setControlMode(ControlMode.values()[((Number) e.getValue())
-                        .intValue()]);
+                setControlMode(ControlMode.values()[((Number) e.getValue()).intValue()]);
             }
 
         } else {
@@ -291,10 +281,8 @@ public class GXDLMSDisconnectControl extends GXDLMSObject
     @Override
     public final void load(final GXXmlReader reader) throws XMLStreamException {
         outputState = reader.readElementContentAsInt("OutputState") != 0;
-        controlState = ControlState.values()[reader
-                .readElementContentAsInt("ControlState")];
-        controlMode = ControlMode.values()[reader
-                .readElementContentAsInt("ControlMode")];
+        controlState = ControlState.values()[reader.readElementContentAsInt("ControlState")];
+        controlMode = ControlMode.values()[reader.readElementContentAsInt("ControlMode")];
     }
 
     @Override
@@ -315,8 +303,7 @@ public class GXDLMSDisconnectControl extends GXDLMSObject
 
     @Override
     public String[] getNames() {
-        return new String[] { "Logical Name", "Output State", "Control State",
-                "Control Mode" };
+        return new String[] { "Logical Name", "Output State", "Control State", "Control Mode" };
     }
 
     @Override
