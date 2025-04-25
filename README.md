@@ -8,7 +8,7 @@ For more info check out [Gurux.DLMS](https://www.gurux.fi/Gurux.DLMS "Gurux.DLMS
 
 We are updating documentation on Gurux web page. 
 
-Read should read [DLMS/COSEM FAQ](https://www.gurux.fi/DLMSCOSEMFAQ) and [basics] (https://www.gurux.fi/DLMSInNutshell) first to get started. 
+Read should read [DLMS/COSEM FAQ](https://www.gurux.fi/DLMSCOSEMFAQ) and [basics](https://www.gurux.fi/DLMSInNutshell) first to get started. 
 
 Read Instructions for making your own [meter reading application](https://www.gurux.org/DLMSIntro) or build own 
 DLMS/COSEM [meter/simulator/proxy](https://www.gurux.fi/Gurux.DLMS.Server).
@@ -33,8 +33,7 @@ You can report the [issues](https://www.gurux.fi/project/issues/gurux.dlms.java)
 
 Dual license
 =========================== 
-Gurux products are dual licensed. This means that there are companies who are using this commerially and the
-https://gurux.fi/OpenSource
+Gurux products are [dual licensed](https://gurux.fi/OpenSource).
 
 Development
 =========================== 
