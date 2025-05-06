@@ -50,7 +50,7 @@ You can get [source codes](https://www.github.com/gurux/gurux.dlms.java) or if y
   <version>4.0.78</version>
 </dependency>
 ```
-Note! Check the [latest version]("https://search.maven.org/#search%7Cga%7C1%7Ca%3A%22gurux.dlms%22").
+Note! Check the [latest version](https://central.sonatype.com/artifact/org.gurux/gurux.dlms).
 
 Import new Project selecting "Existing Maven Project". Import examples separately. If you import only main Project, you can't debug or run examples. 
 

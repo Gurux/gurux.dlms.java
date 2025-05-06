@@ -110,6 +110,23 @@ public final class GXCommon {
     @SuppressWarnings("squid:S2386")
     public static final byte[] LLC_REPLY_BYTES = { (byte) 0xE6, (byte) 0xE7, 0x00 };
 
+    public static String toCamelCase(final String value) {
+        String name = value.toLowerCase();
+        StringBuilder camelCaseName = new StringBuilder();
+        boolean nextUpper = true;
+        for (char c : name.toCharArray()) {
+            if (c == '_') {
+                nextUpper = true;
+            } else if (nextUpper) {
+                camelCaseName.append(Character.toUpperCase(c));
+                nextUpper = false;
+            } else {
+                camelCaseName.append(c);
+            }
+        }
+        return camelCaseName.toString();
+    }
+
     /**
      * Check is string null or empty.
      * 
@@ -2736,43 +2753,84 @@ public final class GXCommon {
         return new String(new char[] { c2, c1, c });
     }
 
+    /**
+     * Get serial number from the system title.
+     * 
+     * @param st
+     *            system title.
+     * @return serial number.
+     */
+    private static long getSerialNumber(byte[] st, boolean isIdis) {
+        long sn = 0;
+        if (!isIdis) {
+            sn = (st[3] << 8);
+            sn |= st[4];
+        }
+        sn <<= 8;
+        sn |= st[5];
+        sn <<= 8;
+        sn |= st[6];
+        sn <<= 8;
+        sn |= st[7];
+        return sn;
+    }
+
     static String idisSystemTitleToString(final byte[] st, final boolean addComments) {
         StringBuilder sb = new StringBuilder();
-        String newline = System.getProperty("line.separator");
-        sb.append("IDIS system title:");
-        sb.append(newline);
-        sb.append("Manufacturer Code: ");
-        sb.append(new String(new char[] { (char) st[0], (char) st[1], (char) st[2] }));
-        sb.append(newline);
-        sb.append(" Function type: ");
-        int ft = st[4] >> 4;
-        boolean add = false;
-        if ((ft & 0x1) != 0) {
-            sb.append("Disconnector");
-            add = true;
-        }
-        if ((ft & 0x2) != 0) {
-            if (add) {
-                sb.append(", ");
+        if (addComments) {
+            String newline = System.getProperty("line.separator");
+            sb.append("IDIS system title:");
+            sb.append(newline);
+            sb.append("Manufacturer Code: ");
+            sb.append(new String(new char[] { (char) st[0], (char) st[1], (char) st[2] }));
+            sb.append(newline);
+            switch (st[3]) {
+            case 99:
+                sb.append("DC");
+                break;
+            case 100:
+                sb.append("IDIS package1 PLC single phase meter");
+                break;
+            case 101:
+                sb.append("IDIS package1 PLC polyphase meter");
+                break;
+            case 102:
+                sb.append("IDIS package2 IP single phase meter");
+                break;
+            case 103:
+                sb.append("IDIS package2 IP polyphase meter");
+                break;
             }
-            add = true;
-            sb.append("Load Management");
-        }
-        if ((ft & 0x4) != 0) {
-            if (add) {
-                sb.append(", ");
+            sb.append(newline);
+            sb.append("Function type: ");
+            int ft = st[4] >> 4;
+            boolean add = false;
+            if ((ft & 0x1) != 0) {
+                sb.append("Disconnector");
+                add = true;
             }
-            sb.append("Multi Utility");
+            if ((ft & 0x2) != 0) {
+                if (add) {
+                    sb.append(", ");
+                }
+                add = true;
+                sb.append("Load Management");
+            }
+            if ((ft & 0x4) != 0) {
+                if (add) {
+                    sb.append(", ");
+                }
+                sb.append("Multi Utility");
+            }
+            sb.append(newline);
+            sb.append("Serial number: ");
+            sb.append(String.valueOf(getSerialNumber(st, true)));
+            sb.append(newline);
+        } else {
+            sb.append(new String(new char[] { (char) st[0], (char) st[1], (char) st[2] }));
+            sb.append(" ");
+            sb.append(String.valueOf(getSerialNumber(st, false)));
         }
-        // Serial number;
-        int sn = (st[4] & 0xF) << 24;
-        sn |= (st[5] << 16);
-        sn |= (st[6] << 8);
-        sn |= (st[7]);
-        sb.append(newline);
-        sb.append("Serial number: ");
-        sb.append(String.valueOf(sn));
-        sb.append(newline);
         return sb.toString();
     }
 
