@@ -1023,47 +1023,102 @@ public class GXDLMSProfileGeneric extends GXDLMSObject implements IGXDLMSBase {
 
     @Override
     public final void load(final GXXmlReader reader) throws XMLStreamException {
-        buffer.clear();
-        if (reader.isStartElement("Buffer", true)) {
-            while (reader.isStartElement("Row", true)) {
-                List<Object> row = new ArrayList<Object>();
-                while (reader.isStartElement("Cell", false)) {
-                    row.add(reader.readElementContentAsObject("Cell", null, null, 0));
+        while (!reader.isEOF()) {
+            String elementName = reader.getName();
+            if (reader.isStartElement()) {
+                if ("Buffer".equalsIgnoreCase(elementName)) {
+                    if (reader.isStartElement("Buffer", true)) {
+                        buffer.clear();
+                        while (reader.isStartElement("Row", true)) {
+                            List<Object> row = new ArrayList<>();
+                            while (reader.isStartElement("Cell", false)) {
+                                row.add(reader.readElementContentAsObject("Cell", null, null, 0));
+                            }
+                            this.addRow(row.toArray(new Object[row.size()]));
+                        }
+                        reader.readEndElement("Buffer");
+                    }
+                } else if ("CaptureObjects".equalsIgnoreCase(elementName)) {
+                    if (reader.isStartElement("CaptureObjects", true)) {
+                        captureObjects.clear();
+                        // Process each Item element with explicit control over reader positioning
+                        while (reader.isStartElement("Item", true)) {
+                            ObjectType ot = null;
+                            String ln = null;
+                            int ai = 0;
+                            int di = 0;
+                            
+                            // Read the Item's contents
+                            while (!reader.isEOF()) {
+                                if (reader.isStartElement()) {
+                                    String name = reader.getName();
+                                    if ("ObjectType".equalsIgnoreCase(name)) {
+                                        ot = ObjectType.forValue(reader.readElementContentAsInt("ObjectType"));
+                                    } else if ("LN".equalsIgnoreCase(name)) {
+                                        ln = reader.readElementContentAsString("LN");
+                                    } else if ("Attribute".equalsIgnoreCase(name) || "AttributeIndex".equalsIgnoreCase(name)) {
+                                        ai = reader.readElementContentAsInt(name);
+                                    } else if ("Data".equalsIgnoreCase(name) || "DataIndex".equalsIgnoreCase(name)) {
+                                        di = reader.readElementContentAsInt(name);
+                                    } else {
+                                        // Skip unknown elements
+                                        reader.read();
+                                    }
+                                } else {
+                                    // Check if we're at the end of an Item element
+                                    if (!reader.isStartElement() && reader.getName() != null && "Item".equalsIgnoreCase(reader.getName())) {
+                                        reader.read(); // Consume the Item end tag
+                                        break;
+                                    }
+                                    reader.read();
+                                }
+                            }
+                            
+                            // Add the capture object if we have all the required information
+                            if (ot != null && ln != null && ai > 0) {
+                                GXDLMSCaptureObject co = new GXDLMSCaptureObject(ai, di);
+                                GXDLMSObject obj = reader.getObjects().findByLN(ot, ln);
+                                if (obj == null) {
+                                    obj = GXDLMSClient.createObject(ot);
+                                    obj.setLogicalName(ln);
+                                }
+                                GXSimpleEntry<GXDLMSObject, GXDLMSCaptureObject> o = new GXSimpleEntry<>(obj, co);
+                                captureObjects.add(o);
+                            }
+                        }
+                        
+                        // End of CaptureObjects
+                        reader.readEndElement("CaptureObjects");
+                    }
+                } else if ("CapturePeriod".equalsIgnoreCase(elementName)) {
+                    this.capturePeriod = reader.readElementContentAsInt("CapturePeriod");
+                } else if ("SortMethod".equalsIgnoreCase(elementName)) {
+                    this.sortMethod = SortMethod.forValue(reader.readElementContentAsInt("SortMethod"));
+                } else if ("SortObject".equalsIgnoreCase(elementName)) {
+                    if (reader.isStartElement("SortObject", true)) {
+                        ObjectType ot = ObjectType.forValue(reader.readElementContentAsInt("ObjectType"));
+                        String ln = reader.readElementContentAsString("LN");
+                        sortObject = reader.getObjects().findByLN(ot, ln);
+                        reader.readEndElement("SortObject");
+                    }
+                } else if ("EntriesInUse".equalsIgnoreCase(elementName)) {
+                    this.entriesInUse = reader.readElementContentAsInt("EntriesInUse");
+                } else if ("ProfileEntries".equalsIgnoreCase(elementName)) {
+                    this.profileEntries = reader.readElementContentAsInt("ProfileEntries");
+                } else {
+                    // Skip unknown elements
+                    reader.read();
                 }
-                this.addRow(row.toArray(new Object[row.size()]));
-            }
-            reader.readEndElement("Buffer");
-        }
-        captureObjects.clear();
-        if (reader.isStartElement("CaptureObjects", true)) {
-            while (reader.isStartElement("Item", true)) {
-                ObjectType ot = ObjectType.forValue(reader.readElementContentAsInt("ObjectType"));
-                String ln = reader.readElementContentAsString("LN");
-                int ai = reader.readElementContentAsInt("Attribute");
-                int di = reader.readElementContentAsInt("Data");
-                GXDLMSCaptureObject co = new GXDLMSCaptureObject(ai, di);
-                GXDLMSObject obj = reader.getObjects().findByLN(ot, ln);
-                if (obj == null) {
-                    obj = GXDLMSClient.createObject(ot);
-                    obj.setLogicalName(ln);
+            } else {
+                // Check if we've reached the end of this object
+                if (!reader.isStartElement() && elementName != null && 
+                    (elementName.startsWith("GXDLMS") || "Object".equalsIgnoreCase(elementName))) {
+                    reader.read();
+                    break; // We've reached the end of this object
                 }
-                GXSimpleEntry<GXDLMSObject, GXDLMSCaptureObject> o =
-                        new GXSimpleEntry<GXDLMSObject, GXDLMSCaptureObject>(obj, co);
-                captureObjects.add(o);
+                reader.read();
             }
-            reader.readEndElement("CaptureObjects");
         }
-        capturePeriod = reader.readElementContentAsInt("CapturePeriod");
-        sortMethod = SortMethod.forValue(reader.readElementContentAsInt("SortMethod"));
-        if (reader.isStartElement("SortObject", true)) {
-            capturePeriod = reader.readElementContentAsInt("CapturePeriod");
-            ObjectType ot = ObjectType.forValue(reader.readElementContentAsInt("ObjectType"));
-            String ln = reader.readElementContentAsString("LN");
-            sortObject = reader.getObjects().findByLN(ot, ln);
-            reader.readEndElement("SortObject");
-        }
-        entriesInUse = reader.readElementContentAsInt("EntriesInUse");
-        profileEntries = reader.readElementContentAsInt("ProfileEntries");
     }
 
     @Override
