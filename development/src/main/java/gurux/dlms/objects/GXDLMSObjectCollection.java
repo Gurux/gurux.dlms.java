@@ -233,21 +233,20 @@ public class GXDLMSObjectCollection extends ArrayList<GXDLMSObject> implements j
                     obj = GXDLMSClient.createObject(type);
                     obj.setVersion(0);
                 } else if ("SN".equalsIgnoreCase(target)) {
+                    int shortName = reader.readElementContentAsInt("SN");
                     if (obj != null) {
-                        obj.setShortName(reader.readElementContentAsInt("SN"));
+                        obj.setShortName(shortName);
                         GXDLMSObject tmp = reader.getObjects().findBySN(obj.getShortName());
                         if (tmp == null) {
                             reader.getObjects().add(obj);
                         } else {
                             obj = tmp;
                         }
-                    } else {
-                        // Skip SN if obj is null
-                        reader.readElementContentAsInt("SN");
                     }
                 } else if ("LN".equalsIgnoreCase(target)) {
+                    String logicalName = reader.readElementContentAsString("LN");
                     if (obj != null) {
-                        obj.setLogicalName(reader.readElementContentAsString("LN"));
+                        obj.setLogicalName(logicalName);
                         GXDLMSObject tmp = reader.getObjects().findByLN(obj.getObjectType(), obj.getLogicalName());
                         if (tmp == null) {
                             reader.getObjects().add(obj);
@@ -258,23 +257,16 @@ public class GXDLMSObjectCollection extends ArrayList<GXDLMSObject> implements j
                             tmp.setVersion(obj.getVersion());
                             obj = tmp;
                         }
-                    } else {
-                        // Skip LN if obj is null
-                        reader.readElementContentAsString("LN");
                     }
                 } else if ("Description".equalsIgnoreCase(target)) {
+                    String description = reader.readElementContentAsString("Description");
                     if (obj != null) {
-                        obj.setDescription(reader.readElementContentAsString("Description"));
-                    } else {
-                        // Skip Description if obj is null
-                        reader.readElementContentAsString("Description");
+                        obj.setDescription(description);
                     }
                 } else if ("Version".equalsIgnoreCase(target)) {
+                    int version = reader.readElementContentAsInt("Version");
                     if (obj != null) {
-                        obj.setVersion(reader.readElementContentAsInt("Version"));
-                    } else {
-                        // Skip Version if obj is null
-                        reader.readElementContentAsInt("Version");
+                        obj.setVersion(version);
                     }
                 } else if ("Access".equalsIgnoreCase(target)) {
                     String accessStr = reader.readElementContentAsString("Access");
@@ -299,11 +291,11 @@ public class GXDLMSObjectCollection extends ArrayList<GXDLMSObject> implements j
                         }
                     }
                 } else if ("Access3".equalsIgnoreCase(target)) {
-                    String tmp = reader.readElementContentAsString("Access3");
-                    if (tmp != null && obj != null) {
-                        for (int pos = 0; pos != tmp.length() / 4; ++pos) {
+                    String access3Str = reader.readElementContentAsString("Access3");
+                    if (access3Str != null && obj != null) {
+                        for (int pos = 0; pos != access3Str.length() / 4; ++pos) {
                             obj.getAccess3(pos).addAll(
-                                    AccessMode3.forValue(Integer.parseInt(tmp.substring(4 * pos, 4 * pos + 4), 16)));
+                                    AccessMode3.forValue(Integer.parseInt(access3Str.substring(4 * pos, 4 * pos + 4), 16)));
                         }
                     }
                 } else if ("MethodAccess".equalsIgnoreCase(target)) {
@@ -321,11 +313,11 @@ public class GXDLMSObjectCollection extends ArrayList<GXDLMSObject> implements j
                         }
                     }
                 } else if ("MethodAccess3".equalsIgnoreCase(target)) {
-                    String tmp = reader.readElementContentAsString("MethodAccess3");
-                    if (tmp != null && obj != null) {
-                        for (int pos = 0; pos != tmp.length() / 4; ++pos) {
+                    String methodAccess3Str = reader.readElementContentAsString("MethodAccess3");
+                    if (methodAccess3Str != null && obj != null) {
+                        for (int pos = 0; pos != methodAccess3Str.length() / 4; ++pos) {
                             obj.getMethodAccess3(pos).addAll(MethodAccessMode3
-                                    .forValue(Integer.parseInt(tmp.substring(4 * pos, 4 * pos + 4), 16)));
+                                    .forValue(Integer.parseInt(methodAccess3Str.substring(4 * pos, 4 * pos + 4), 16)));
                         }
                     }
                 } else {
