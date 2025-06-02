@@ -1,0 +1,51 @@
+{
+    // Use IntelliSense to learn about possible attributes.
+    // Hover to view descriptions of existing attributes.
+    // For more information, visit: https://go.microsoft.com/fwlink/?linkid=830387
+    "version": "0.2.0",
+    "configurations": [
+
+        {
+            "type": "java",
+            "name": "Current File",
+            "request": "launch",
+            "mainClass": "${file}"
+        },
+        {
+            "type": "java",
+            "name": "sampleclient",
+            "request": "launch",
+            "mainClass": "gurux.dlms.client.sampleclient",
+            "projectName": "gurux.dlms.client.example.java"
+        },
+        {
+            "type": "java",
+            "name": "GuruxDlmsPushListenerExample",
+            "request": "launch",
+            "mainClass": "gurux.dlms.push.listener.example.GuruxDlmsPushListenerExample",
+            "projectName": "gurux.dlms.push.listener.example"
+        },
+        {
+            "type": "java",
+            "name": "GuruxDlmsServerExample",
+            "request": "launch",
+            "mainClass": "gurux.dlms.server.example.GuruxDlmsServerExample",
+            "projectName": "gurux.dlms.server.example.java"
+        },
+        {
+            "type": "java",
+            "name": "Simulator",
+            "request": "launch",
+            "mainClass": "gurux.dlms.simulator.Simulator",
+            "projectName": "gurux.dlms.simulator.java",
+            "args": "-p 1000 -x \"./gurux.dlms.simulator.java/elster_a1140.xml\" -t Verbose -N 10"
+        },
+        {
+            "type": "java",
+            "name": "Program",
+            "request": "launch",
+            "mainClass": "main.java.gurux.dlms.xmlClient.Program",
+            "projectName": "gurux.dlms.xmlClient"
+        }
+    ]
+}

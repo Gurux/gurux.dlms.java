@@ -1,0 +1,288 @@
+<?xml version="1.0" encoding="utf-8"?>
+<Objects>
+  <!-- Basic Information -->
+  <GXDLMSData>
+    <LN>0.0.42.0.0.255</LN>
+    <Description>Ch. 0 COSEM Logical device name</Description>
+    <Access>11</Access>
+    <MethodAccess />
+    <Value Type="9" UIType="10">ELS16038540</Value>
+  </GXDLMSData>
+  <GXDLMSData>
+    <LN>0.0.96.1.0.255</LN>
+    <Description>Ch. 0 Device ID 1, manufacturing number</Description>
+    <Access>11</Access>
+    <MethodAccess />
+    <Value Type="9" UIType="10">16038540</Value>
+  </GXDLMSData>
+  <GXDLMSData>
+    <LN>0.0.96.1.1.255</LN>
+    <Description>Ch. 0 Device ID 2, meter type</Description>
+    <Access>11</Access>
+    <MethodAccess />
+    <Value Type="9" UIType="10">Elster A1140</Value>
+  </GXDLMSData>
+  <GXDLMSClock>
+    <LN>0.0.1.0.0.255</LN>
+    <Description>Ch. 0 Clock object</Description>
+    <Access>111111111</Access>
+    <MethodAccess>000000</MethodAccess>
+    <Time>05/14/2025 13:06:00</Time>
+    <TimeZone>0</TimeZone>
+    <Status>0</Status>
+    <Begin>*/*/* *:*:*</Begin>
+    <End>*/*/* *:*:*</End>
+    <Deviation>60</Deviation>
+    <Enabled>0</Enabled>
+    <ClockBase>1</ClockBase>
+  </GXDLMSClock>
+  
+  <!-- Energy Registers -->
+  <GXDLMSRegister>
+    <LN>1.1.1.8.0.255</LN>
+    <Description>Active energy import (+A)</Description>
+    <Access>11</Access>
+    <MethodAccess>1</MethodAccess>
+    <Unit>30</Unit>
+    <Scaler>0</Scaler>
+    <Value>0</Value>
+  </GXDLMSRegister>
+  <GXDLMSRegister>
+    <LN>1.1.2.8.0.255</LN>
+    <Description>Active energy export (-A)</Description>
+    <Access>11</Access>
+    <MethodAccess>1</MethodAccess>
+    <Unit>30</Unit>
+    <Scaler>0</Scaler>
+    <Value>0</Value>
+  </GXDLMSRegister>
+  <GXDLMSRegister>
+    <LN>1.1.3.8.0.255</LN>
+    <Description>Reactive energy import (+R)</Description>
+    <Access>11</Access>
+    <MethodAccess>1</MethodAccess>
+    <Unit>32</Unit>
+    <Scaler>0</Scaler>
+    <Value>0</Value>
+  </GXDLMSRegister>
+  <GXDLMSRegister>
+    <LN>1.1.4.8.0.255</LN>
+    <Description>Reactive energy export (-R)</Description>
+    <Access>11</Access>
+    <MethodAccess>1</MethodAccess>
+    <Unit>32</Unit>
+    <Scaler>0</Scaler>
+    <Value>0</Value>
+  </GXDLMSRegister>
+  
+  <!-- Association for LLS -->
+  <GXDLMSAssociationLogicalName>
+    <LN>0.0.40.0.1.255</LN>
+    <Version>1</Version>
+    <Description>Ch. 0 Association LLS</Description>
+    <Access>111111010</Access>
+    <MethodAccess>0000</MethodAccess>
+    <ClientSAP>16</ClientSAP>
+    <ServerSAP>1</ServerSAP>
+    <ApplicationContextName>
+      <JointIsoCtt>96</JointIsoCtt>
+      <Country>133</Country>
+      <CountryName>116</CountryName>
+      <IdentifiedOrganization>5</IdentifiedOrganization>
+      <DlmsUA>8</DlmsUA>
+      <ApplicationContext>1</ApplicationContext>
+      <ContextId>1</ContextId>
+    </ApplicationContextName>
+    <XDLMSContextInfo>
+      <Conformance>524288</Conformance>
+      <MaxReceivePduSize>832</MaxReceivePduSize>
+      <MaxSendPduSize>65535</MaxSendPduSize>
+      <DlmsVersionNumber>6</DlmsVersionNumber>
+      <QualityOfService>0</QualityOfService>
+      <CypheringInfo />
+    </XDLMSContextInfo>
+    <AuthenticationMechanismName>
+      <JointIsoCtt>96</JointIsoCtt>
+      <Country>133</Country>
+      <CountryName>116</CountryName>
+      <IdentifiedOrganization>5</IdentifiedOrganization>
+      <DlmsUA>8</DlmsUA>
+      <AuthenticationMechanismName>2</AuthenticationMechanismName>
+      <MechanismId>0</MechanismId>
+    </AuthenticationMechanismName>
+    <Secret />
+    <AssociationStatus>2</AssociationStatus>
+    <SecuritySetupReference>0.0.0.0.0.0</SecuritySetupReference>
+  </GXDLMSAssociationLogicalName>
+  
+  <!-- Additional Registers -->
+  <GXDLMSRegister>
+    <LN>1.1.31.7.0.255</LN>
+    <Description>Instantaneous Current L1</Description>
+    <Access>11</Access>
+    <MethodAccess>1</MethodAccess>
+    <Unit>33</Unit>
+    <Scaler>0</Scaler>
+    <Value>0</Value>
+  </GXDLMSRegister>
+  <GXDLMSRegister>
+    <LN>1.1.51.7.0.255</LN>
+    <Description>Instantaneous Current L2</Description>
+    <Access>11</Access>
+    <MethodAccess>1</MethodAccess>
+    <Unit>33</Unit>
+    <Scaler>0</Scaler>
+    <Value>0</Value>
+  </GXDLMSRegister>
+  <GXDLMSRegister>
+    <LN>1.1.71.7.0.255</LN>
+    <Description>Instantaneous Current L3</Description>
+    <Access>11</Access>
+    <MethodAccess>1</MethodAccess>
+    <Unit>33</Unit>
+    <Scaler>0</Scaler>
+    <Value>0</Value>
+  </GXDLMSRegister>
+  <GXDLMSRegister>
+    <LN>1.1.32.7.0.255</LN>
+    <Description>Instantaneous Voltage L1</Description>
+    <Access>11</Access>
+    <MethodAccess>1</MethodAccess>
+    <Unit>35</Unit>
+    <Scaler>0</Scaler>
+    <Value>230</Value>
+  </GXDLMSRegister>
+  <GXDLMSRegister>
+    <LN>1.1.52.7.0.255</LN>
+    <Description>Instantaneous Voltage L2</Description>
+    <Access>11</Access>
+    <MethodAccess>1</MethodAccess>
+    <Unit>35</Unit>
+    <Scaler>0</Scaler>
+    <Value>230</Value>
+  </GXDLMSRegister>
+  <GXDLMSRegister>
+    <LN>1.1.72.7.0.255</LN>
+    <Description>Instantaneous Voltage L3</Description>
+    <Access>11</Access>
+    <MethodAccess>1</MethodAccess>
+    <Unit>35</Unit>
+    <Scaler>0</Scaler>
+    <Value>230</Value>
+  </GXDLMSRegister>
+  <GXDLMSRegister>
+    <LN>1.1.13.7.0.255</LN>
+    <Description>Instantaneous Power Factor</Description>
+    <Access>11</Access>
+    <MethodAccess>1</MethodAccess>
+    <Unit>255</Unit>
+    <Scaler>0</Scaler>
+    <Value>1</Value>
+  </GXDLMSRegister>
+  <GXDLMSRegister>
+    <LN>1.1.14.7.0.255</LN>
+    <Description>Frequency</Description>
+    <Access>11</Access>
+    <MethodAccess>1</MethodAccess>
+    <Unit>44</Unit>
+    <Scaler>0</Scaler>
+    <Value>50</Value>
+  </GXDLMSRegister>
+  
+  <!-- Event Code Data -->
+  <GXDLMSData>
+    <LN>0.0.96.11.0.255</LN>
+    <Description>Event Code</Description>
+    <Access>11</Access>
+    <MethodAccess />
+    <Value Type="9" UIType="10">0</Value>
+  </GXDLMSData>
+  
+  <!-- 15-minute Load Profile -->
+  <GXDLMSProfileGeneric>
+    <LN>1.0.99.1.0.255</LN>
+    <Description>15-minute Load Profile</Description>
+    <Access>11111</Access>
+    <MethodAccess>11</MethodAccess>
+    <CapturePeriod>900</CapturePeriod>
+    <SortMethod>1</SortMethod>
+    <EntriesInUse>0</EntriesInUse>
+    <ProfileEntries>1440</ProfileEntries>
+    <CaptureObjects>
+      <Item>
+        <ObjectType>8</ObjectType>
+        <LN>0.0.1.0.0.255</LN>
+        <AttributeIndex>2</AttributeIndex>
+        <DataIndex>0</DataIndex>
+      </Item>
+      <Item>
+        <ObjectType>3</ObjectType>
+        <LN>1.1.1.8.0.255</LN>
+        <AttributeIndex>2</AttributeIndex>
+        <DataIndex>0</DataIndex>
+      </Item>
+      <Item>
+        <ObjectType>3</ObjectType>
+        <LN>1.1.2.8.0.255</LN>
+        <AttributeIndex>2</AttributeIndex>
+        <DataIndex>0</DataIndex>
+      </Item>
+      <Item>
+        <ObjectType>3</ObjectType>
+        <LN>1.1.3.8.0.255</LN>
+        <AttributeIndex>2</AttributeIndex>
+        <DataIndex>0</DataIndex>
+      </Item>
+      <Item>
+        <ObjectType>3</ObjectType>
+        <LN>1.1.4.8.0.255</LN>
+        <AttributeIndex>2</AttributeIndex>
+        <DataIndex>0</DataIndex>
+      </Item>
+    </CaptureObjects>
+  </GXDLMSProfileGeneric>
+  
+  <!-- Daily Load Profile -->
+  <GXDLMSProfileGeneric>
+    <LN>1.0.99.2.0.255</LN>
+    <Description>Daily Load Profile</Description>
+    <Access>11111</Access>
+    <MethodAccess>11</MethodAccess>
+    <CapturePeriod>86400</CapturePeriod>
+    <SortMethod>1</SortMethod>
+    <EntriesInUse>0</EntriesInUse>
+    <ProfileEntries>60</ProfileEntries>
+    <CaptureObjects>
+      <Item>
+        <ObjectType>8</ObjectType>
+        <LN>0.0.1.0.0.255</LN>
+        <AttributeIndex>2</AttributeIndex>
+        <DataIndex>0</DataIndex>
+      </Item>
+      <Item>
+        <ObjectType>3</ObjectType>
+        <LN>1.1.1.8.0.255</LN>
+        <AttributeIndex>2</AttributeIndex>
+        <DataIndex>0</DataIndex>
+      </Item>
+      <Item>
+        <ObjectType>3</ObjectType>
+        <LN>1.1.2.8.0.255</LN>
+        <AttributeIndex>2</AttributeIndex>
+        <DataIndex>0</DataIndex>
+      </Item>
+      <Item>
+        <ObjectType>3</ObjectType>
+        <LN>1.1.3.8.0.255</LN>
+        <AttributeIndex>2</AttributeIndex>
+        <DataIndex>0</DataIndex>
+      </Item>
+      <Item>
+        <ObjectType>3</ObjectType>
+        <LN>1.1.4.8.0.255</LN>
+        <AttributeIndex>2</AttributeIndex>
+        <DataIndex>0</DataIndex>
+      </Item>
+    </CaptureObjects>
+  </GXDLMSProfileGeneric>
+</Objects>

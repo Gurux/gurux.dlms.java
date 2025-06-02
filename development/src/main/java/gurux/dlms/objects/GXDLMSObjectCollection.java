@@ -233,86 +233,142 @@ public class GXDLMSObjectCollection extends ArrayList<GXDLMSObject> implements j
                     obj = GXDLMSClient.createObject(type);
                     obj.setVersion(0);
                 } else if ("SN".equalsIgnoreCase(target)) {
-                    obj.setShortName(reader.readElementContentAsInt("SN"));
-                    GXDLMSObject tmp = reader.getObjects().findBySN(obj.getShortName());
-                    if (tmp == null) {
-                        reader.getObjects().add(obj);
+                    int shortName = reader.readElementContentAsInt("SN");
+                    if (obj != null) {
+                        obj.setShortName(shortName);
+                        GXDLMSObject tmp = reader.getObjects().findBySN(obj.getShortName());
+                        if (tmp == null) {
+                            reader.getObjects().add(obj);
+                        } else {
+                            obj = tmp;
+                        }
                     } else {
-                        obj = tmp;
+                        System.out.println("Skipping Short Name '" + shortName + "' because object is null.");
                     }
                 } else if ("LN".equalsIgnoreCase(target)) {
-                    obj.setLogicalName(reader.readElementContentAsString("LN"));
-                    GXDLMSObject tmp = reader.getObjects().findByLN(obj.getObjectType(), obj.getLogicalName());
-                    if (tmp == null) {
-                        reader.getObjects().add(obj);
+                    String logicalName = reader.readElementContentAsString("LN");
+                    if (obj != null) {
+                        obj.setLogicalName(logicalName);
+                        GXDLMSObject tmp = reader.getObjects().findByLN(obj.getObjectType(), obj.getLogicalName());
+                        if (tmp == null) {
+                            reader.getObjects().add(obj);
+                        } else {
+                            // Version must be update because component might be
+                            // added to the association
+                            // view.
+                            tmp.setVersion(obj.getVersion());
+                            obj = tmp;
+                        }
                     } else {
-                        // Version must be update because component might be
-                        // added to the association
-                        // view.
-                        tmp.setVersion(obj.getVersion());
-                        obj = tmp;
+                        System.out.println("Skipping Logical Name '" + logicalName + "' because object is null.");
                     }
                 } else if ("Description".equalsIgnoreCase(target)) {
-                    obj.setDescription(reader.readElementContentAsString("Description"));
+                    String description = reader.readElementContentAsString("Description");
+                    if (obj != null) {
+                        obj.setDescription(description);
+                    } else {
+                        System.out.println("Skipping Description '" + description + "' because object is null.");
+                    }
                 } else if ("Version".equalsIgnoreCase(target)) {
-                    obj.setVersion(reader.readElementContentAsInt("Version"));
+                    int version = reader.readElementContentAsInt("Version");
+                    if (obj != null) {
+                        obj.setVersion(version);
+                    } else {
+                        System.out.println("Skipping Version '" + version + "' because object is null.");
+                    }
                 } else if ("Access".equalsIgnoreCase(target)) {
-                    int pos = 0;
-                    for (byte it : reader.readElementContentAsString("Access").getBytes()) {
-                        ++pos;
-                        if (obj.getVersion() < 3) {
-                            obj.setAccess(pos, AccessMode.forValue(it - 0x30));
-                        } else {
-                            // Handle old cases.
-                            int tmp = it - 0x30;
-                            if (tmp == 1) {
-                                obj.getAccess3(pos).add(AccessMode3.READ);
-                            } else if (tmp == 2) {
-                                obj.getAccess3(pos).add(AccessMode3.WRITE);
-                            } else if (tmp == 3) {
-                                obj.getAccess3(pos).add(AccessMode3.READ);
-                                obj.getAccess3(pos).add(AccessMode3.WRITE);
+                    String accessStr = reader.readElementContentAsString("Access");
+                    if (obj != null) {
+                        if (accessStr != null && accessStr.length() > 0) {
+                            int pos = 0;
+                            for (byte it : accessStr.getBytes()) {
+                                ++pos;
+                                if (obj.getVersion() < 3) {
+                                    obj.setAccess(pos, AccessMode.forValue(it - 0x30));
+                                } else {
+                                    // Handle old cases.
+                                    int tmp = it - 0x30;
+                                    if (tmp == 1) {
+                                        obj.getAccess3(pos).add(AccessMode3.READ);
+                                    } else if (tmp == 2) {
+                                        obj.getAccess3(pos).add(AccessMode3.WRITE);
+                                    } else if (tmp == 3) {
+                                        obj.getAccess3(pos).add(AccessMode3.READ);
+                                        obj.getAccess3(pos).add(AccessMode3.WRITE);
+                                    }
+                                }
                             }
                         }
+                    } else {
+                        System.out.println("Skipping Access '" + accessStr + "' because object is null.");
                     }
                 } else if ("Access3".equalsIgnoreCase(target)) {
-                    String tmp = reader.readElementContentAsString("Access3");
-                    if (tmp != null) {
-                        for (int pos = 0; pos != tmp.length() / 4; ++pos) {
-                            obj.getAccess3(pos).addAll(
-                                    AccessMode3.forValue(Integer.parseInt(tmp.substring(4 * pos, 4 * pos + 4), 16)));
+                    String access3Str = reader.readElementContentAsString("Access3");
+                    if (obj != null) {
+                        if (access3Str != null && access3Str.length() > 0) {
+                            for (int pos = 0; pos != access3Str.length() / 4; ++pos) {
+                                obj.getAccess3(pos).addAll(
+                                        AccessMode3.forValue(Integer.parseInt(access3Str.substring(4 * pos, 4 * pos + 4), 16)));
+                            }
                         }
+                    } else {
+                        System.out.println("Skipping Access3 '" + access3Str + "' because object is null.");
                     }
                 } else if ("MethodAccess".equalsIgnoreCase(target)) {
-                    int pos = 0;
-                    for (byte it : reader.readElementContentAsString("MethodAccess").getBytes()) {
-                        ++pos;
-                        if (obj.getVersion() < 3) {
-                            obj.setMethodAccess(pos, MethodAccessMode.forValue(it - 0x30));
-                        } else {
-                            // Handle old cases.
-                            obj.getMethodAccess3(pos).addAll(MethodAccessMode3.forValue(it - 0x30));
+                    String methodAccessStr = reader.readElementContentAsString("MethodAccess");
+                    if (obj != null) {
+                        if (methodAccessStr != null && methodAccessStr.length() > 0) {
+                            int pos = 0;
+                            for (byte it : methodAccessStr.getBytes()) {
+                                ++pos;
+                                if (obj.getVersion() < 3) {
+                                    obj.setMethodAccess(pos, MethodAccessMode.forValue(it - 0x30));
+                                } else {
+                                    // Handle old cases.
+                                    obj.getMethodAccess3(pos).addAll(MethodAccessMode3.forValue(it - 0x30));
+                                }
+                            }
                         }
+                    } else {
+                        System.out.println("Skipping MethodAccess '" + methodAccessStr + "' because object is null.");
                     }
                 } else if ("MethodAccess3".equalsIgnoreCase(target)) {
-                    String tmp = reader.readElementContentAsString("MethodAccess3");
-                    if (tmp != null) {
-                        for (int pos = 0; pos != tmp.length() / 4; ++pos) {
-                            obj.getMethodAccess3(pos).addAll(MethodAccessMode3
-                                    .forValue(Integer.parseInt(tmp.substring(4 * pos, 4 * pos + 4), 16)));
+                    String methodAccess3Str = reader.readElementContentAsString("MethodAccess3");
+                    if (obj != null) {
+                        if (methodAccess3Str != null && methodAccess3Str.length() > 0) {
+                            for (int pos = 0; pos != methodAccess3Str.length() / 4; ++pos) {
+                                obj.getMethodAccess3(pos).addAll(MethodAccessMode3
+                                        .forValue(Integer.parseInt(methodAccess3Str.substring(4 * pos, 4 * pos + 4), 16)));
+                            }
                         }
+                    } else {
+                        System.out.println("Skipping MethodAccess3 '" + methodAccess3Str + "' because object is null.");
                     }
                 } else {
-                    ((IGXDLMSBase) obj).load(reader);
-                    obj = null;
+                    // Check if obj is null before calling load
+                    if (obj != null) {
+                        try {
+                            ((IGXDLMSBase) obj).load(reader);
+                        } catch (Exception e) {
+                            System.out.println("Error loading object: " + e.getMessage());
+                        }
+                        obj = null;
+                    } else {
+                        // Skip unknown element with context information
+                        String parentInfo = "";
+                        if (type != null) {
+                            parentInfo = " in " + type.toString();
+                        }
+                        
+                        System.out.println("Skipping unknown element: '" + target + "'" + parentInfo);
+                        reader.read();
+                    }
                 }
             } else {
                 reader.read();
             }
         }
-        for (
-
-        GXDLMSObject it : reader.getObjects()) {
+        for (GXDLMSObject it : reader.getObjects()) {
             ((IGXDLMSBase) it).postLoad(reader);
         }
         return reader.getObjects();

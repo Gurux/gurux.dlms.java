@@ -163,6 +163,8 @@ public class GXXmlReader implements AutoCloseable {
         if (reader.getEventType() == XMLStreamConstants.END_ELEMENT && name.equalsIgnoreCase(getName())) {
             read();
             getNext();
+            // Clear the cached element name to prevent stale references
+            this.elementName = null;
         }
     }
 
