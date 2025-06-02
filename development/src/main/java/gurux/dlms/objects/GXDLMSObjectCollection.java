@@ -242,6 +242,8 @@ public class GXDLMSObjectCollection extends ArrayList<GXDLMSObject> implements j
                         } else {
                             obj = tmp;
                         }
+                    } else {
+                        System.out.println("Skipping Short Name '" + shortName + "' because object is null.");
                     }
                 } else if ("LN".equalsIgnoreCase(target)) {
                     String logicalName = reader.readElementContentAsString("LN");
@@ -257,68 +259,90 @@ public class GXDLMSObjectCollection extends ArrayList<GXDLMSObject> implements j
                             tmp.setVersion(obj.getVersion());
                             obj = tmp;
                         }
+                    } else {
+                        System.out.println("Skipping Logical Name '" + logicalName + "' because object is null.");
                     }
                 } else if ("Description".equalsIgnoreCase(target)) {
                     String description = reader.readElementContentAsString("Description");
                     if (obj != null) {
                         obj.setDescription(description);
+                    } else {
+                        System.out.println("Skipping Description '" + description + "' because object is null.");
                     }
                 } else if ("Version".equalsIgnoreCase(target)) {
                     int version = reader.readElementContentAsInt("Version");
                     if (obj != null) {
                         obj.setVersion(version);
+                    } else {
+                        System.out.println("Skipping Version '" + version + "' because object is null.");
                     }
                 } else if ("Access".equalsIgnoreCase(target)) {
                     String accessStr = reader.readElementContentAsString("Access");
                     if (obj != null) {
-                        int pos = 0;
-                        for (byte it : accessStr.getBytes()) {
-                            ++pos;
-                            if (obj.getVersion() < 3) {
-                                obj.setAccess(pos, AccessMode.forValue(it - 0x30));
-                            } else {
-                                // Handle old cases.
-                                int tmp = it - 0x30;
-                                if (tmp == 1) {
-                                    obj.getAccess3(pos).add(AccessMode3.READ);
-                                } else if (tmp == 2) {
-                                    obj.getAccess3(pos).add(AccessMode3.WRITE);
-                                } else if (tmp == 3) {
-                                    obj.getAccess3(pos).add(AccessMode3.READ);
-                                    obj.getAccess3(pos).add(AccessMode3.WRITE);
+                        if (accessStr != null && accessStr.length() > 0) {
+                            int pos = 0;
+                            for (byte it : accessStr.getBytes()) {
+                                ++pos;
+                                if (obj.getVersion() < 3) {
+                                    obj.setAccess(pos, AccessMode.forValue(it - 0x30));
+                                } else {
+                                    // Handle old cases.
+                                    int tmp = it - 0x30;
+                                    if (tmp == 1) {
+                                        obj.getAccess3(pos).add(AccessMode3.READ);
+                                    } else if (tmp == 2) {
+                                        obj.getAccess3(pos).add(AccessMode3.WRITE);
+                                    } else if (tmp == 3) {
+                                        obj.getAccess3(pos).add(AccessMode3.READ);
+                                        obj.getAccess3(pos).add(AccessMode3.WRITE);
+                                    }
                                 }
                             }
                         }
+                    } else {
+                        System.out.println("Skipping Access '" + accessStr + "' because object is null.");
                     }
                 } else if ("Access3".equalsIgnoreCase(target)) {
                     String access3Str = reader.readElementContentAsString("Access3");
-                    if (access3Str != null && obj != null) {
-                        for (int pos = 0; pos != access3Str.length() / 4; ++pos) {
-                            obj.getAccess3(pos).addAll(
-                                    AccessMode3.forValue(Integer.parseInt(access3Str.substring(4 * pos, 4 * pos + 4), 16)));
+                    if (obj != null) {
+                        if (access3Str != null && access3Str.length() > 0) {
+                            for (int pos = 0; pos != access3Str.length() / 4; ++pos) {
+                                obj.getAccess3(pos).addAll(
+                                        AccessMode3.forValue(Integer.parseInt(access3Str.substring(4 * pos, 4 * pos + 4), 16)));
+                            }
                         }
+                    } else {
+                        System.out.println("Skipping Access3 '" + access3Str + "' because object is null.");
                     }
                 } else if ("MethodAccess".equalsIgnoreCase(target)) {
                     String methodAccessStr = reader.readElementContentAsString("MethodAccess");
                     if (obj != null) {
-                        int pos = 0;
-                        for (byte it : methodAccessStr.getBytes()) {
-                            ++pos;
-                            if (obj.getVersion() < 3) {
-                                obj.setMethodAccess(pos, MethodAccessMode.forValue(it - 0x30));
-                            } else {
-                                // Handle old cases.
-                                obj.getMethodAccess3(pos).addAll(MethodAccessMode3.forValue(it - 0x30));
+                        if (methodAccessStr != null && methodAccessStr.length() > 0) {
+                            int pos = 0;
+                            for (byte it : methodAccessStr.getBytes()) {
+                                ++pos;
+                                if (obj.getVersion() < 3) {
+                                    obj.setMethodAccess(pos, MethodAccessMode.forValue(it - 0x30));
+                                } else {
+                                    // Handle old cases.
+                                    obj.getMethodAccess3(pos).addAll(MethodAccessMode3.forValue(it - 0x30));
+                                }
                             }
                         }
+                    } else {
+                        System.out.println("Skipping MethodAccess '" + methodAccessStr + "' because object is null.");
                     }
                 } else if ("MethodAccess3".equalsIgnoreCase(target)) {
                     String methodAccess3Str = reader.readElementContentAsString("MethodAccess3");
-                    if (methodAccess3Str != null && obj != null) {
-                        for (int pos = 0; pos != methodAccess3Str.length() / 4; ++pos) {
-                            obj.getMethodAccess3(pos).addAll(MethodAccessMode3
-                                    .forValue(Integer.parseInt(methodAccess3Str.substring(4 * pos, 4 * pos + 4), 16)));
+                    if (obj != null) {
+                        if (methodAccess3Str != null && methodAccess3Str.length() > 0) {
+                            for (int pos = 0; pos != methodAccess3Str.length() / 4; ++pos) {
+                                obj.getMethodAccess3(pos).addAll(MethodAccessMode3
+                                        .forValue(Integer.parseInt(methodAccess3Str.substring(4 * pos, 4 * pos + 4), 16)));
+                            }
                         }
+                    } else {
+                        System.out.println("Skipping MethodAccess3 '" + methodAccess3Str + "' because object is null.");
                     }
                 } else {
                     // Check if obj is null before calling load
