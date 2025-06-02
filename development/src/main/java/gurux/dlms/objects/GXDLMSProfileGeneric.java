@@ -1091,20 +1091,21 @@ public class GXDLMSProfileGeneric extends GXDLMSObject implements IGXDLMSBase {
                         reader.readEndElement("CaptureObjects");
                     }
                 } else if ("CapturePeriod".equalsIgnoreCase(elementName)) {
-                    this.capturePeriod = reader.readElementContentAsInt("CapturePeriod");
+                    capturePeriod = reader.readElementContentAsInt("CapturePeriod");
                 } else if ("SortMethod".equalsIgnoreCase(elementName)) {
-                    this.sortMethod = SortMethod.forValue(reader.readElementContentAsInt("SortMethod"));
+                    sortMethod = SortMethod.forValue(reader.readElementContentAsInt("SortMethod"));
                 } else if ("SortObject".equalsIgnoreCase(elementName)) {
                     if (reader.isStartElement("SortObject", true)) {
+                        capturePeriod = reader.readElementContentAsInt("CapturePeriod");
                         ObjectType ot = ObjectType.forValue(reader.readElementContentAsInt("ObjectType"));
                         String ln = reader.readElementContentAsString("LN");
                         sortObject = reader.getObjects().findByLN(ot, ln);
                         reader.readEndElement("SortObject");
                     }
                 } else if ("EntriesInUse".equalsIgnoreCase(elementName)) {
-                    this.entriesInUse = reader.readElementContentAsInt("EntriesInUse");
+                    entriesInUse = reader.readElementContentAsInt("EntriesInUse");
                 } else if ("ProfileEntries".equalsIgnoreCase(elementName)) {
-                    this.profileEntries = reader.readElementContentAsInt("ProfileEntries");
+                    profileEntries = reader.readElementContentAsInt("ProfileEntries");
                 } else {
                     // Skip unknown elements
                     reader.read();
