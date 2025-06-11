@@ -259,4 +259,14 @@ public class GXDLMSExtendedRegister extends GXDLMSRegister {
     @Override
     public final void postLoad(final GXXmlReader reader) {
     }
+
+    @Override
+    public String[] getNames() {
+        return new String[] { "Logical Name", "Value", "Scaler and Unit", "Status", "Capture Time" };
+    }
+
+    @Override
+    public String[] getMethodNames() {
+        return new String[] { "Reset" };
+    }
 }
