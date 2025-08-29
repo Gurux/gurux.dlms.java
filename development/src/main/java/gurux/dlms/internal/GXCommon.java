@@ -2764,8 +2764,8 @@ public final class GXCommon {
         long sn = 0;
         if (!isIdis) {
             sn = (st[3] << 8);
-            sn |= st[4];
         }
+        sn |= st[4];
         sn <<= 8;
         sn |= st[5];
         sn <<= 8;

@@ -338,7 +338,5 @@ public class GXPkcs8 {
         d2.add(d3);
         d.add(GXAsn1Converter.toByteArray(d2));
         return GXCommon.toBase64(GXAsn1Converter.toByteArray(d));
-
-        // return GXCommon.toBase64(privateKey.getEncoded());
     }
 }

@@ -3441,9 +3441,7 @@ public class GXDLMSClient {
      *            Is logical name referencing used.
      * @return Initial Conformance.
      */
-    public static Set<Conformance>
-
-            getInitialConformance(final boolean useLogicalNameReferencing) {
+    public static Set<Conformance> getInitialConformance(final boolean useLogicalNameReferencing) {
         Set<Conformance> list = new HashSet<Conformance>();
         if (useLogicalNameReferencing) {
             list.addAll(Arrays.asList(Conformance.GENERAL_BLOCK_TRANSFER, Conformance.BLOCK_TRANSFER_WITH_ACTION,

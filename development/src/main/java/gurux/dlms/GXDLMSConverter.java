@@ -97,8 +97,7 @@ public class GXDLMSConverter {
      *            Description filter.
      * @return Array of descriptions that match given OBIS code.
      */
-    public final String[] getDescription(final String logicalName, final ObjectType type,
-            final String description) {
+    public final String[] getDescription(final String logicalName, final ObjectType type, final String description) {
         if (codes.isEmpty()) {
             readStandardObisInfo(standard, codes);
         }
@@ -110,9 +109,9 @@ public class GXDLMSConverter {
                 continue;
             }
             if (all) {
-                list.add("A=" + it.getOBIS()[0] + ", B=" + it.getOBIS()[1] + ", C="
-                        + it.getOBIS()[2] + ", D=" + it.getOBIS()[3] + ", E=" + it.getOBIS()[4]
-                        + ", F=" + it.getOBIS()[5] + "\r\n" + it.getDescription());
+                list.add("A=" + it.getOBIS()[0] + ", B=" + it.getOBIS()[1] + ", C=" + it.getOBIS()[2] + ", D="
+                        + it.getOBIS()[3] + ", E=" + it.getOBIS()[4] + ", F=" + it.getOBIS()[5] + "\r\n"
+                        + it.getDescription());
             } else {
                 list.add(it.getDescription());
             }
@@ -130,8 +129,8 @@ public class GXDLMSConverter {
      * @param it
      *            used DLMS standard.
      */
-    private static void updateOBISCodeInfo(final GXStandardObisCodeCollection codes,
-            final GXDLMSObject it, final Standard standard) {
+    private static void updateOBISCodeInfo(final GXStandardObisCodeCollection codes, final GXDLMSObject it,
+            final Standard standard) {
         String ln = it.getLogicalName();
         GXStandardObisCode[] list = codes.find(ln, it.getObjectType());
         GXStandardObisCode code = list[0];
@@ -214,8 +213,7 @@ public class GXDLMSConverter {
                 DataType type = DataType.forValue(Integer.parseInt(code.getDataType()));
                 ObjectType objectType = it.getObjectType();
                 if (objectType == ObjectType.DATA || objectType == ObjectType.REGISTER
-                        || objectType == ObjectType.REGISTER_ACTIVATION
-                        || objectType == ObjectType.EXTENDED_REGISTER) {
+                        || objectType == ObjectType.REGISTER_ACTIVATION || objectType == ObjectType.EXTENDED_REGISTER) {
                     it.setDataType(2, type);
                 }
             }
@@ -223,8 +221,7 @@ public class GXDLMSConverter {
                 DataType type = DataType.forValue(Integer.parseInt(code.getUIDataType()));
                 ObjectType objectType = it.getObjectType();
                 if (objectType == ObjectType.DATA || objectType == ObjectType.REGISTER
-                        || objectType == ObjectType.REGISTER_ACTIVATION
-                        || objectType == ObjectType.EXTENDED_REGISTER) {
+                        || objectType == ObjectType.REGISTER_ACTIVATION || objectType == ObjectType.EXTENDED_REGISTER) {
                     it.setUIDataType(2, type);
                 }
             }
@@ -332,8 +329,7 @@ public class GXDLMSConverter {
      *            Collection of standard OBIS codes.
      */
     @SuppressWarnings("squid:S00112")
-    private static void readStandardObisInfo(final Standard standard,
-            final GXStandardObisCodeCollection codes) {
+    private static void readStandardObisInfo(final Standard standard, final GXStandardObisCodeCollection codes) {
 
         if (standard != Standard.DLMS) {
             for (GXObisCode it : getObjects(standard)) {
@@ -368,10 +364,9 @@ public class GXDLMSConverter {
             if (!it.isEmpty()) {
                 List<String> items = GXCommon.split(it, ';');
                 List<String> obis = GXCommon.split(items.get(0), '.');
-                GXStandardObisCode code = new GXStandardObisCode(
-                        obis.toArray(new String[0]), items.get(3) + "; " + items.get(4) + "; "
-                                + items.get(5) + "; " + items.get(6) + "; " + items.get(7),
-                        items.get(1), items.get(2));
+                GXStandardObisCode code =
+                        new GXStandardObisCode(obis.toArray(new String[0]), items.get(3) + "; " + items.get(4) + "; "
+                                + items.get(5) + "; " + items.get(6) + "; " + items.get(7), items.get(1), items.get(2));
                 codes.add(code);
             }
         }
@@ -653,8 +648,7 @@ public class GXDLMSConverter {
      *            Are comments added.
      * @return System title in string format.
      */
-    public static String systemTitleToString(final Standard standard, final byte[] st,
-            final boolean addComments) {
+    public static String systemTitleToString(final Standard standard, final byte[] st, final boolean addComments) {
         return GXCommon.systemTitleToString(standard, st, addComments);
     }
 
@@ -700,5 +694,16 @@ public class GXDLMSConverter {
             throw new IllegalArgumentException();
         }
         return ret;
+    }
+
+    /**
+     * Convert byte array to logical name.
+     * 
+     * @param value
+     *            Logical name as byte array.
+     * @return Logical name as a string.
+     */
+    public static String toLogicalName(final Object value) {
+        return GXCommon.toLogicalName(value);
     }
 }

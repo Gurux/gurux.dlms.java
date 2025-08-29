@@ -226,8 +226,8 @@ public class GXDLMSExtendedRegister extends GXDLMSRegister {
             } else {
                 GXDateTime tmp;
                 if (e.getValue() instanceof byte[]) {
-                    tmp = (GXDateTime) GXDLMSClient.changeType((byte[]) e.getValue(),
-                            DataType.DATETIME, e.getSettings());
+                    tmp = (GXDateTime) GXDLMSClient.changeType((byte[]) e.getValue(), DataType.DATETIME,
+                            e.getSettings());
                 } else {
                     tmp = (GXDateTime) e.getValue();
                 }
@@ -258,5 +258,10 @@ public class GXDLMSExtendedRegister extends GXDLMSRegister {
 
     @Override
     public final void postLoad(final GXXmlReader reader) {
+    }
+
+    @Override
+    public String[] getNames() {
+        return new String[] { "Logical Name", "Value", "Scaler and Unit", "Status", "Capture Time" };
     }
 }
