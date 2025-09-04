@@ -3033,6 +3033,8 @@ public class GXDLMSClient {
     /**
      * Create custom object by object type.
      * 
+     * @param settings
+     *            DLMS settings.
      * @param type
      *            Object type as an integer.
      * @return Created object.
@@ -3343,7 +3345,7 @@ public class GXDLMSClient {
      * @param list
      *            List of access items.
      * @return Read request as byte array.
-     *         {@link #parseAccessResponse(List, GXByteBuffer)
+     *         {@link #parseAccessResponse(List, GXByteBuffer)}
      * @throws NoSuchPaddingException
      *             No such padding exception.
      * @throws NoSuchAlgorithmException
