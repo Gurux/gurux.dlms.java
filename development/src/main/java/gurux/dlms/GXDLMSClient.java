@@ -98,7 +98,14 @@ import gurux.dlms.secure.GXSecure;
  */
 public class GXDLMSClient {
 
-    private boolean useProtectedRelease = false;
+    /**
+     * If protected release is used release is including a ciphered xDLMS
+     * Initiate request.
+     * </p>
+     * New DLMS Conformance Tests tests expect protected release. It's not
+     * optional anymore.
+     */
+    private boolean useProtectedRelease = true;
 
     /**
      * DLMS translator.
@@ -689,7 +696,7 @@ public class GXDLMSClient {
 
     /**
      * @return HDLC connection settings.
-     * @deprecated use {@link getHdlcSettings} instead.
+     * @deprecated use {@link #getHdlcSettings()} instead.
      */
     public final GXDLMSLimits getLimits() {
         return (GXDLMSLimits) settings.getHdlcSettings();
@@ -1541,12 +1548,11 @@ public class GXDLMSClient {
             int ot = ((Number) (objects.get(0))).intValue() & 0xFFFF;
             // Get LN association version.
             if (ot == ObjectType.ASSOCIATION_LOGICAL_NAME.getValue()
-                    && "0.0.40.0.0.255".equals(GXCommon.toLogicalName((byte[]) objects.get(2)))) {
+                    && "0.0.40.0.0.255".equals(GXCommon.toLogicalName(objects.get(2)))) {
                 lnVersion = ((Number) (objects.get(1))).intValue();
                 break;
             }
         }
-        objectCnt = 0;
         buff.position(pos);
         for (long objPos = 0; objPos != cnt; ++objPos) {
             // Some meters give wrong item count.
@@ -1746,7 +1752,7 @@ public class GXDLMSClient {
         if (type == DataType.NONE) {
             return GXCommon.toHex(value, true);
         }
-        if (type == DataType.OCTET_STRING && value instanceof byte[]) {
+        if (type == DataType.OCTET_STRING) {
             return new GXByteBuffer(value);
         }
         if (type == DataType.STRING && !GXByteBuffer.isAsciiString(value)) {
@@ -2176,7 +2182,7 @@ public class GXDLMSClient {
      *             Illegal block size exception.
      * @throws SignatureException
      *             Signature exception.
-     * @deprecated use {@link writeList} instead.
+     * @deprecated use {@link #writeList(List)} instead.
      */
     public final byte[][] writeList2(final List<GXWriteItem> list)
             throws InvalidKeyException, NoSuchAlgorithmException, NoSuchPaddingException,
@@ -2632,7 +2638,7 @@ public class GXDLMSClient {
             final List<Entry<GXDLMSObject, GXDLMSCaptureObject>> columns)
             throws InvalidKeyException, NoSuchAlgorithmException, NoSuchPaddingException,
             InvalidAlgorithmParameterException, IllegalBlockSizeException, BadPaddingException, SignatureException {
-        int pos = 0;
+        int pos;
         int columnStart = 1, columnEnd = 0;
         // If columns are given find indexes.
         if (columns != null && !columns.isEmpty()) {
@@ -3195,7 +3201,7 @@ public class GXDLMSClient {
             throws InvalidKeyException, NoSuchAlgorithmException, NoSuchPaddingException,
             InvalidAlgorithmParameterException, IllegalBlockSizeException, BadPaddingException, SignatureException {
         data.setXml(null);
-        boolean ret = false;
+        boolean ret;
         try {
             ret = GXDLMS.getData(settings, reply, data, notify);
         } catch (Exception ex) {
@@ -3336,7 +3342,8 @@ public class GXDLMSClient {
      *            Send time. Set to DateTime.MinValue is not used.
      * @param list
      *            List of access items.
-     * @return Read request as byte array. {@link parseAccessResponse}
+     * @return Read request as byte array.
+     *         {@link #parseAccessResponse(List, GXByteBuffer)
      * @throws NoSuchPaddingException
      *             No such padding exception.
      * @throws NoSuchAlgorithmException

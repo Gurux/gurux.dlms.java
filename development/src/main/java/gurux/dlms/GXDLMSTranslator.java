@@ -95,7 +95,8 @@ public class GXDLMSTranslator {
     private boolean hex = true;
 
     /**
-     * Is string serialized as hex. {@link messageToXml} {@link PduOnly}
+     * Is string serialized as hex. {@link #messageToXml(byte[])} messageToXm}
+     * {@link #pduOnly}
      */
     private boolean showStringAsHex;
 
@@ -110,7 +111,7 @@ public class GXDLMSTranslator {
 
     /**
      * Is only PDU shown when data is parsed with messageToXml.
-     * {@link messageToXml} {@link CompleatePdu}
+     * {@link #messageToXml(byte[])} {@link #completePdu}
      */
     private boolean pduOnly;
 
@@ -375,8 +376,8 @@ public class GXDLMSTranslator {
     }
 
     /**
-     * Is only complete PDU parsed and shown. {@link messageToXml}
-     * {@link PduOnly}
+     * Is only complete PDU parsed and shown. {@link #messageToXml(byte[])}
+     * {@link #pduOnly}
      */
     private boolean completePdu;
 
@@ -680,7 +681,7 @@ public class GXDLMSTranslator {
     }
 
     /**
-     * Clear {@link messageToXml} internal settings.
+     * Clear {@link #messageToXml(byte[])} internal settings.
      */
     public void clear() {
         multipleFrames = false;
@@ -742,8 +743,8 @@ public class GXDLMSTranslator {
      * 
      * @param value
      *            Bytes to convert.
-     * @return Converted XML. {@link clear} {@link setPduOnly}
-     *         {@link setCompleatePdu}
+     * @return Converted XML. {@link #clear} {@link #pduOnly}
+     *         {@link #completePdu}
      * @throws NoSuchPaddingException
      *             No such padding exception.
      * @throws NoSuchAlgorithmException
@@ -857,10 +858,10 @@ public class GXDLMSTranslator {
 
     /**
      * Convert message to XML.
-     * 
+     *
      * @param msg
-     *            Translator message data. {@link clear} {@link setPduOnly}
-     *            {@link setCompleatePdu}
+     *            Translator message data. {@link #clear} {@link #pduOnly}
+     *            {@link #completePdu}
      * @throws NoSuchPaddingException
      *             No such padding exception.
      * @throws NoSuchAlgorithmException

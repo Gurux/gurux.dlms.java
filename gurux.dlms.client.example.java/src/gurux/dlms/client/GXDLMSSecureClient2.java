@@ -109,8 +109,17 @@ public class GXDLMSSecureClient2 extends GXDLMSSecureClient implements IGXCrypto
     }
 
     @Override
-    public void onPduEventHandler(Object sender, byte[] data) {
-
+    public void onPdu(Object sender, byte[] data) {
+        /*
+        // Send and received PDUs are converted to XML.
+        GXDLMSTranslator translator = new GXDLMSTranslator();
+        translator.setComments(true);
+        translator.setSecuritySuite(getCiphering().getSecuritySuite());
+        translator.setBlockCipherKey(getCiphering().getBlockCipherKey());
+        translator.setAuthenticationKey(getCiphering().getAuthenticationKey());
+        String xml = translator.pduToXml(data);
+        System.out.print(xml);
+        */
     }
 
     /**

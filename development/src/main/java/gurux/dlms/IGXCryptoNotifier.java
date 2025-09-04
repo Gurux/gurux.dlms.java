@@ -46,7 +46,7 @@ public interface IGXCryptoNotifier {
      * @param data
      *            Un-ciphered PDU.
      */
-    void onPduEventHandler(Object sender, byte[] data);
+    void onPdu(Object sender, byte[] data);
 
     /**
      * Called when the public or private key is needed and it's unknown.
@@ -68,4 +68,4 @@ public interface IGXCryptoNotifier {
      *            Arguments
      */
     void onCrypto(Object sender, GXCryptoKeyParameter args);
-};
+}
