@@ -82,9 +82,9 @@ final class TranslatorStandardTags {
         GXDLMSTranslator.addTag(list, TranslatorGeneralTags.CALLING_AE_INVOCATION_ID, "calling-AE-invocation-id");
         GXDLMSTranslator.addTag(list, TranslatorGeneralTags.CALLED_AE_INVOCATION_ID, "called-AE-invocation-id");
         GXDLMSTranslator.addTag(list, TranslatorGeneralTags.RESPONDING_AE_INVOCATION_ID, "responding-AE-invocation-id");
+        GXDLMSTranslator.addTag(list, TranslatorGeneralTags.CALLING_AE_QUALIFIER, "calling-Ae-qualifier");
         GXDLMSTranslator.addTag(list, Command.EXCEPTION_RESPONSE, "exception-response");
         GXDLMSTranslator.addTag(list, TranslatorTags.STATE_ERROR, "state-error");
-        GXDLMSTranslator.addTag(list, TranslatorTags.SERVICE_ERROR, "service-error");
     }
 
     /*
@@ -167,7 +167,7 @@ final class TranslatorStandardTags {
         list.put(TranslatorTags.ACCESS_RESPONSE_LIST_OF_DATA, "access-response-list-of-data");
         list.put(TranslatorTags.SERVICE, "service");
         list.put(TranslatorTags.SERVICE_ERROR, "service-error");
-        list.put(Command.GENERAL_BLOCK_TRANSFER, "general-block-transfer");
+        GXDLMSTranslator.addTag(list, Command.GENERAL_BLOCK_TRANSFER, "general-block-transfer");
         GXDLMSTranslator.addTag(list, Command.GATEWAY_REQUEST, "gateway-request");
         GXDLMSTranslator.addTag(list, Command.GATEWAY_RESPONSE, "gateway-response");
     }

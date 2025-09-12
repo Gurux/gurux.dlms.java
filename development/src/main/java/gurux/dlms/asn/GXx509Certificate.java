@@ -80,14 +80,14 @@ public class GXx509Certificate {
     private PublicKey publicKey;
 
     /**
-     * Algorithm.
+     * Public Key algorithm.
      */
-    private HashAlgorithm publicKeySignature;
+    private HashAlgorithm publicKeyAlgorithm;
 
     /**
      * Parameters.
      */
-    private Object parameters;
+    private Object publicKeyParameters;
 
     /**
      * Signature.
@@ -289,14 +289,14 @@ public class GXx509Certificate {
         String tmp = ((GXAsn1Sequence) reqInfo.get(2)).get(0).toString();
         // Signature Algorithm
         signatureAlgorithm = HashAlgorithm.forValue(tmp);
-        if (signatureAlgorithm != HashAlgorithm.SHA256withECDSA
-                && signatureAlgorithm != HashAlgorithm.SHA384withECDSA) {
+        if (signatureAlgorithm != HashAlgorithm.SHA_256_WITH_ECDSA
+                && signatureAlgorithm != HashAlgorithm.SHA_384_WITH_ECDSA) {
             throw new IllegalArgumentException(
                     "DLMS certificate must be signed with ecdsa-with-SHA256 or ecdsa-with-SHA384.");
         }
         // Optional.
         if (((GXAsn1Sequence) reqInfo.get(2)).size() > 1) {
-            parameters = ((GXAsn1Sequence) reqInfo.get(2)).get(1);
+            publicKeyParameters = ((GXAsn1Sequence) reqInfo.get(2)).get(1);
         }
         // Issuer
         issuerRaw = GXAsn1Converter.toByteArray(reqInfo.get(3));
@@ -446,7 +446,11 @@ public class GXx509Certificate {
         } catch (InvalidKeySpecException e) {
             throw new IllegalArgumentException(e.getMessage());
         }
-        publicKeySignature = HashAlgorithm.forValue(((GXAsn1Sequence) seq.get(1)).get(0).toString());
+        publicKeyAlgorithm = HashAlgorithm.forValue(((GXAsn1Sequence) seq.get(1)).get(0).toString());
+        if (publicKeyAlgorithm != HashAlgorithm.SHA_256_WITH_ECDSA
+                && publicKeyAlgorithm != HashAlgorithm.SHA_384_WITH_ECDSA) {
+            throw new IllegalArgumentException("DLMS certificate must be signed with ECDSA with SHA256 or SHA384.");
+        }
         // Optional.
         if (((GXAsn1Sequence) seq.get(1)).size() > 1) {
             signatureParameters = ((GXAsn1Sequence) seq.get(1)).get(1);
@@ -574,7 +578,7 @@ public class GXx509Certificate {
      * @return Parameters.
      */
     public final Object getParameters() {
-        return parameters;
+        return publicKeyParameters;
     }
 
     /**
@@ -582,7 +586,7 @@ public class GXx509Certificate {
      *            Parameters.
      */
     public final void setParameters(final Object value) {
-        parameters = value;
+        publicKeyParameters = value;
     }
 
     /**
@@ -758,33 +762,46 @@ public class GXx509Certificate {
     @Override
     public final String toString() {
         StringBuilder bb = new StringBuilder();
+        if (extendedKeyUsage.contains(ExtendedKeyUsage.SERVER_AUTH)) {
+            bb.append("Server certificate");
+            bb.append("\n");
+        } else if (extendedKeyUsage.contains(ExtendedKeyUsage.CLIENT_AUTH)) {
+            bb.append("Client certificate");
+            bb.append("\n");
+        } else if (extendedKeyUsage.contains(ExtendedKeyUsage.SERVER_AUTH)
+                && extendedKeyUsage.contains(ExtendedKeyUsage.CLIENT_AUTH)) {
+            bb.append("TLS certificate");
+            bb.append("\n");
+        }
+        bb.append("\n");
         bb.append("Version: ");
         bb.append(version.toString());
         bb.append("\n");
         bb.append("Serial Number: ");
         bb.append(serialNumber.toString());
         bb.append("\n");
-        bb.append("Signature Algorithm: ");
+        bb.append("Signature: ");
         if (signatureAlgorithm != null) {
             bb.append(signatureAlgorithm.toString());
             bb.append(", OID = ");
             bb.append(signatureAlgorithm.getValue());
         }
         bb.append("\n");
-
         bb.append("Issuer: ");
         bb.append(issuer);
         bb.append("\n");
         bb.append("Validity: [From: ");
         bb.append(validFrom.toString());
-        bb.append(", \n");
-        bb.append("To: ");
+        bb.append(" To: ");
         bb.append(validTo.toString());
         bb.append("]\n");
-        bb.append("Subject Public Key Info:\n");
-        bb.append("Public Key Algorythm: ");
-        bb.append(publicKey.getAlgorithm());
+        bb.append("Subject: ");
+        bb.append(subject);
         bb.append("\n");
+        bb.append("Public Key Algorythm: ");
+        bb.append(publicKeyAlgorithm.toString());
+        bb.append("\n");
+        bb.append("Key: ");
         bb.append(publicKey.toString());
         bb.append("\n");
         if (subjectKeyIdentifier != null) {

@@ -73,4 +73,10 @@ final class TranslatorGeneralTags {
     static final int CHAR_STRING = 0xAA;
     static final int USER_INFORMATION = 0xAB;
     static final int RESPONDING_AE_INVOCATION_ID = 0xAD;
+    static final int PRIME_NEW_DEVICE_NOTIFICATION = 0xAE;
+    static final int PRIME_REMOVE_DEVICE_NOTIFICATION = 0xAF;
+    static final int PRIME_START_REPORTING_METERS = 0xB0;
+    static final int PRIME_DELETE_METERS = 0xB1;
+    static final int PRIME_ENABLE_AUTO_CLOSE = 0xB2;
+    static final int PRIME_DISABLE_AUTO_CLOSE = 0xB3;
 }

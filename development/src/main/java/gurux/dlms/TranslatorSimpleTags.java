@@ -76,6 +76,20 @@ final class TranslatorSimpleTags {
         GXDLMSTranslator.addTag(list, Command.CONFIRMED_SERVICE_ERROR, "ConfirmedServiceError");
         GXDLMSTranslator.addTag(list, Command.INFORMATION_REPORT, "InformationReportRequest");
         GXDLMSTranslator.addTag(list, Command.EVENT_NOTIFICATION, "EventNotificationRequest");
+        GXDLMSTranslator.addTag(list, Command.GENERAL_BLOCK_TRANSFER, "GeneralBlockTransfer");
+        GXDLMSTranslator.addTag(list, TranslatorGeneralTags.CALLING_AE_INVOCATION_ID, "CallingAEInvocationId");
+        GXDLMSTranslator.addTag(list, TranslatorGeneralTags.CALLED_AE_INVOCATION_ID, "CalledAEInvocationId");
+        GXDLMSTranslator.addTag(list, TranslatorGeneralTags.RESPONDING_AE_INVOCATION_ID, "RespondingAEInvocationId");
+        GXDLMSTranslator.addTag(list, TranslatorGeneralTags.CALLING_AE_QUALIFIER, "CallingAEQualifier");
+
+        GXDLMSTranslator.addTag(list, TranslatorGeneralTags.PRIME_NEW_DEVICE_NOTIFICATION,
+                "PrimeNewDeviceNotification");
+        GXDLMSTranslator.addTag(list, TranslatorGeneralTags.PRIME_REMOVE_DEVICE_NOTIFICATION,
+                "PrimeRemoveDeviceNotification");
+        GXDLMSTranslator.addTag(list, TranslatorGeneralTags.PRIME_START_REPORTING_METERS, "PrimeStartReportingMeters");
+        GXDLMSTranslator.addTag(list, TranslatorGeneralTags.PRIME_DELETE_METERS, "PrimeDeleteMeters");
+        GXDLMSTranslator.addTag(list, TranslatorGeneralTags.PRIME_ENABLE_AUTO_CLOSE, "PrimeEnableAutoClose");
+        GXDLMSTranslator.addTag(list, TranslatorGeneralTags.PRIME_DISABLE_AUTO_CLOSE, "PrimeDisableAutoClose");
         GXDLMSTranslator.addTag(list, Command.EXCEPTION_RESPONSE, "ExceptionResponse");
         GXDLMSTranslator.addTag(list, TranslatorTags.STATE_ERROR, "StateError");
         GXDLMSTranslator.addTag(list, TranslatorTags.SERVICE_ERROR, "ServiceError");
@@ -158,10 +172,6 @@ final class TranslatorSimpleTags {
         list.put(TranslatorTags.ACCESS_RESPONSE_LIST_OF_DATA, "AccessResponseListOfData");
         list.put(TranslatorTags.SERVICE, "Service");
         list.put(TranslatorTags.SERVICE_ERROR, "ServiceError");
-        list.put(Command.GENERAL_BLOCK_TRANSFER, "GeneralBlockTransfer");
-        GXDLMSTranslator.addTag(list, TranslatorGeneralTags.CALLING_AE_INVOCATION_ID, "CallingAEInvocationId");
-        GXDLMSTranslator.addTag(list, TranslatorGeneralTags.CALLED_AE_INVOCATION_ID, "CalledAEInvocationId");
-        GXDLMSTranslator.addTag(list, TranslatorGeneralTags.RESPONDING_AE_INVOCATION_ID, "RespondingAEInvocationId");
         GXDLMSTranslator.addTag(list, Command.GATEWAY_REQUEST, "GatewayRequest");
         GXDLMSTranslator.addTag(list, Command.GATEWAY_RESPONSE, "GatewayResponse");
     }

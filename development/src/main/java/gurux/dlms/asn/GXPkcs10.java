@@ -402,9 +402,9 @@ public class GXPkcs10 {
     private boolean verify(final byte[] data, final byte[] sign) {
         try {
             Signature instance;
-            if (signatureAlgorithm == HashAlgorithm.SHA256withECDSA) {
+            if (signatureAlgorithm == HashAlgorithm.SHA_256_WITH_ECDSA) {
                 instance = Signature.getInstance("SHA256withECDSA");
-            } else if (signatureAlgorithm == HashAlgorithm.SHA384withECDSA) {
+            } else if (signatureAlgorithm == HashAlgorithm.SHA_384_WITH_ECDSA) {
                 instance = Signature.getInstance("SHA384withECDSA");
             } else if (signatureAlgorithm == HashAlgorithm.SHA_256_RSA) {
                 instance = Signature.getInstance("SHA256withRSA");
@@ -497,9 +497,9 @@ public class GXPkcs10 {
         pkc10.setSubject(subject);
         HashAlgorithm algorithm;
         if (kp.getPrivate().getEncoded().length < 70) {
-            algorithm = HashAlgorithm.SHA256withECDSA;
+            algorithm = HashAlgorithm.SHA_256_WITH_ECDSA;
         } else {
-            algorithm = HashAlgorithm.SHA384withECDSA;
+            algorithm = HashAlgorithm.SHA_384_WITH_ECDSA;
         }
         pkc10.sign(kp, algorithm);
         return pkc10;

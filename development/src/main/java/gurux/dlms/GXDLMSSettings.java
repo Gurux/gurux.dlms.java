@@ -529,6 +529,9 @@ public class GXDLMSSettings {
     public final void setCtoSChallenge(final byte[] value) {
         if (!customChallenges || ctoSChallenge == null) {
             ctoSChallenge = value;
+            if (ctoSChallenge != null && ctoSChallenge.length == 0) {
+                ctoSChallenge = null;
+            }
         }
     }
 

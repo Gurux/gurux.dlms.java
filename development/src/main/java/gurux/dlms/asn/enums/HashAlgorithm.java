@@ -141,20 +141,20 @@ public enum HashAlgorithm implements GXOid {
     /*
      * 
      */
-    SHA1withECDSA("1.2.840.10045.4.1"),
+    SHA_1_WITH_ECDSA("1.2.840.10045.4.1"),
 
     /*
      * 
      */
-    SHA256withECDSA("1.2.840.10045.4.3.2"),
+    SHA_256_WITH_ECDSA("1.2.840.10045.4.3.2"),
     /*
      * 
      */
-    SHA384withECDSA("1.2.840.10045.4.3.3"),
+    SHA_384_WITH_ECDSA("1.2.840.10045.4.3.3"),
     /*
      * 
      */
-    SHA512withECDSA("1.2.840.10045.4.3.4"),
+    SHA_512_WITH_ECDSA("1.2.840.10045.4.3.4"),
     /*
      * 
      */
