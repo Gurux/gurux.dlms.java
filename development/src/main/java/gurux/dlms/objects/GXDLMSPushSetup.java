@@ -498,7 +498,8 @@ public class GXDLMSPushSetup extends GXDLMSObject implements IGXDLMSBase {
                             GXCommon.logicalNameToBytes(it.getKey().getLogicalName()));
                     GXCommon.setData(settings, buff, DataType.INT8, it.getValue().getAttributeIndex());
                     GXCommon.setData(settings, buff, DataType.UINT16, it.getValue().getDataIndex());
-                    GXCommon.setData(settings, buff, DataType.ENUM, it.getValue().getRestriction().getType());
+                    GXCommon.setData(settings, buff, DataType.ENUM,
+                            it.getValue().getRestriction().getType().getValue());
                     switch (it.getValue().getRestriction().getType()) {
                     case NONE:
                         GXCommon.setData(settings, buff, DataType.NONE, null);

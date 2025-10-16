@@ -5,23 +5,23 @@
   <version>4.0.83-SNAPSHOT</version>
   <packaging>jar</packaging>
   <name>gurux.dlms.java</name>
-  <url>http://www.gurux.org</url>
+  <url>http://www.gurux.fi</url>
   <description>gurux.dlms.java package is used to communicate with DLMS devices.</description>
   <developers>
     <developer>
       <id>Gurux</id>
       <name>Gurux Ltd.</name>
-      <email>gurux@gurux.org</email>
-      <url>http://www.gurux.org</url>
+      <email>gurux@gurux.fi</email>
+      <url>http://www.gurux.fi</url>
       <organization>Gurux Ltd.</organization>
-      <organizationUrl>http://www.gurux.org</organizationUrl>
+      <organizationUrl>http://www.gurux.fi</organizationUrl>
       <roles>
         <role>architect</role>
         <role>developer</role>
       </roles>
       <timezone>Europe/Helsinki</timezone>
       <properties>
-        <picUrl>http://www.gurux.org/images/gurux-avatar.png</picUrl>
+        <picUrl>http://www.gurux.fi/images/gurux-avatar.png</picUrl>
       </properties>
     </developer>
   </developers>
@@ -54,7 +54,7 @@
       <plugin>
         <groupId>org.apache.maven.plugins</groupId>
         <artifactId>maven-javadoc-plugin</artifactId>
-        <version>3.10.0</version>
+        <version>3.12.0</version>
         <executions>
           <execution>
             <id>attach-javadocs</id>
@@ -97,7 +97,7 @@
           <plugin>
             <groupId>org.apache.maven.plugins</groupId>
             <artifactId>maven-gpg-plugin</artifactId>
-            <version>1.5</version>
+            <version>3.2.8</version>
             <executions>
               <execution>
                 <id>sign-artifacts</id>
@@ -115,7 +115,7 @@
           <plugin>
           <groupId>org.sonatype.central</groupId>
           <artifactId>central-publishing-maven-plugin</artifactId>
-          <version>0.8.0</version>
+          <version>0.9.0</version>
           <extensions>true</extensions>
           <configuration>
             <publishingServerId>central</publishingServerId>
@@ -152,7 +152,7 @@
     </license>
   </licenses>
   <organization>
-    <url>http://www.gurux.org</url>
+    <url>http://www.gurux.fi</url>
     <name>Gurux Ltd.</name>
   </organization>
 </project>

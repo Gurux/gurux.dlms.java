@@ -103,6 +103,8 @@ public class Settings {
         System.out.println(" -I \t Auto increase invoke ID");
         System.out.println(" -o \t Cache association view to make reading faster. Ex. -o C:\\device.xml");
         System.out.println(" -T \t System title that is used with chiphering. Ex -T 4775727578313233");
+        System.out.println(" -M \t Meter system title that is used with chiphering. Ex -T 4775727578313233");
+
         System.out.println(
                 " -A \t Authentication key that is used with chiphering. Ex -A D0D1D2D3D4D5D6D7D8D9DADBDCDDDEDF");
         System.out.println(
