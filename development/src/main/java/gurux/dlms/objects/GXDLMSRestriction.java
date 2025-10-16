@@ -55,27 +55,55 @@ public class GXDLMSRestriction {
      */
     private Object to;
 
+    /**
+     * @return Restriction type.
+     */
     public final RestrictionType getType() {
         return type;
     }
 
+    /**
+     * @param value
+     *            Restriction type.
+     */
     public final void setType(final RestrictionType value) {
         type = value;
     }
 
+    /**
+     * @return From date or entry.
+     */
     public final Object getFrom() {
         return from;
     }
 
+    /**
+     * @param value
+     *            From date or entry.
+     */
     public final void setFrom(final Object value) {
         from = value;
     }
 
+    /**
+     * @return To date or entry.
+     */
     public final Object getTo() {
         return to;
     }
 
+    /**
+     * @param value
+     *            To date or entry.
+     */
     public final void setTo(final Object value) {
         to = value;
+    }
+
+    /**
+     * Constructor.
+     */
+    public GXDLMSRestriction() {
+        type = RestrictionType.NONE;
     }
 }
