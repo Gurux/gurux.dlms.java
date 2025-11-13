@@ -1037,7 +1037,10 @@ public class GXDLMSServerBase {
                     }
                 }
                 // Check inactivity time out.
-                if (settings.getHdlc() != null && settings.getHdlc().getInactivityTimeout() != 0) {
+                if ((settings.getInterfaceType() == InterfaceType.HDLC
+                        || settings.getInterfaceType() == InterfaceType.HDLC_WITH_MODE_E
+                        || settings.getInterfaceType() == InterfaceType.PLC_HDLC) && settings.getHdlc() != null
+                        && settings.getHdlc().getInactivityTimeout() != 0) {
                     if (info.getCommand() != Command.SNRM) {
                         int elapsed = (int) (Calendar.getInstance().getTimeInMillis() - dataReceived) / 1000;
                         // If inactivity time out is elapsed.
@@ -1048,7 +1051,8 @@ public class GXDLMSServerBase {
                             return;
                         }
                     }
-                } else if (settings.getWrapper() != null && settings.getWrapper().getInactivityTimeout() != 0) {
+                } else if (settings.getInterfaceType() == InterfaceType.WRAPPER && settings.getWrapper() != null
+                        && settings.getWrapper().getInactivityTimeout() != 0) {
                     if (info.getCommand() != Command.AARQ) {
                         int elapsed = (int) (Calendar.getInstance().getTimeInMillis() - dataReceived) / 1000;
                         // If inactivity time out is elapsed.

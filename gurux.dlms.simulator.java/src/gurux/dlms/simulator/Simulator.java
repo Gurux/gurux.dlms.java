@@ -35,7 +35,13 @@ package gurux.dlms.simulator;
 
 import java.io.File;
 import java.io.IOException;
+import java.net.Inet4Address;
+import java.net.InetAddress;
+import java.net.InterfaceAddress;
+import java.net.NetworkInterface;
 import java.util.ArrayList;
+import java.util.Collections;
+import java.util.Enumeration;
 import java.util.List;
 import java.util.Map;
 
@@ -46,10 +52,15 @@ import gurux.dlms.enums.AccessMode;
 import gurux.dlms.enums.Authentication;
 import gurux.dlms.enums.InterfaceType;
 import gurux.dlms.enums.ObjectType;
+import gurux.dlms.internal.GXCommon;
 import gurux.dlms.objects.GXDLMSAssociationLogicalName;
+import gurux.dlms.objects.GXDLMSIp4Setup;
+import gurux.dlms.objects.GXDLMSIp6Setup;
+import gurux.dlms.objects.GXDLMSMacAddressSetup;
 import gurux.dlms.objects.GXDLMSObject;
 import gurux.dlms.objects.GXDLMSObjectCollection;
 import gurux.dlms.objects.GXDLMSSecuritySetup;
+import gurux.dlms.objects.GXXmlWriterSettings;
 import gurux.io.BaudRate;
 import gurux.io.Parity;
 import gurux.io.StopBits;
@@ -130,6 +141,112 @@ public class Simulator {
         }
     }
 
+    /**
+     * Password are given as command line parameters because they can't read
+     * from the meter.
+     * 
+     * @param settings
+     * @param server
+     * @throws IOException
+     * @throws XMLStreamException
+     */
+    private static void updateSettings(Settings settings, GXDLMSMeter server) throws XMLStreamException, IOException {
+        boolean changed = false;
+        if (settings.client.getPassword() != null) {
+            for (GXDLMSObject tmp : server.getItems().getObjects(ObjectType.ASSOCIATION_LOGICAL_NAME)) {
+                GXDLMSAssociationLogicalName it = (GXDLMSAssociationLogicalName) tmp;
+                if (it.getAuthenticationMechanismName().getMechanismId() != Authentication.NONE
+                        && it.getAuthenticationMechanismName().getMechanismId() != Authentication.HIGH_GMAC) {
+                    if (GXCommon.toHex(it.getSecret()) != GXCommon.toHex(settings.client.getPassword())) {
+                        it.setSecret(settings.client.getPassword());
+                        changed = true;
+                    }
+                }
+            }
+        }
+        // Update IP address to the meter.
+        GXNet net = null;
+        if (settings.media instanceof GXNet) {
+            net = (GXNet) settings.media;
+        }
+        if (net != null) {
+            Enumeration<NetworkInterface> nets = NetworkInterface.getNetworkInterfaces();
+            InetAddress ipAddress = null;
+            InetAddress gateway = null;
+            String subnetMask = null;
+            String mac = null;
+            InetAddress dnsAddress = null;
+            for (NetworkInterface ni : Collections.list(nets)) {
+
+                if (!ni.isUp() || ni.isLoopback()) {
+                    // Pass loopback and down
+                    continue;
+                }
+                System.out.println("Interface: " + ni.getName());
+                for (InterfaceAddress ia : ni.getInterfaceAddresses()) {
+
+                    if (!(ia.getAddress() instanceof Inet4Address)) {
+                        // Only IPv4
+                        continue;
+                    }
+                    ipAddress = ia.getAddress();
+                    if (net.getHostName() != null && !net.getHostName().equals(ipAddress.toString())) {
+                        continue;
+                    }
+                    short prefixLength = ia.getNetworkPrefixLength();
+                    int mask = 0xffffffff << (32 - prefixLength);
+                    subnetMask = String.format("%d.%d.%d.%d", (mask >>> 24) & 0xff, (mask >>> 16) & 0xff,
+                            (mask >>> 8) & 0xff, mask & 0xff);
+                    break;
+                }
+                if (ipAddress != null) {
+                    break;
+                }
+            }
+            if (mac != null) {
+                for (GXDLMSObject tmp : server.getItems().getObjects(ObjectType.MAC_ADDRESS_SETUP)) {
+                    GXDLMSMacAddressSetup it = (GXDLMSMacAddressSetup) tmp;
+                    if (!mac.equals(it.getMacAddress())) {
+                        it.setMacAddress(mac);
+                        changed = true;
+                    }
+                }
+            }
+            if (ipAddress != null || dnsAddress != null) {
+                for (GXDLMSObject tmp : server.getItems().getObjects(ObjectType.IP4_SETUP)) {
+                    GXDLMSIp4Setup it = (GXDLMSIp4Setup) tmp;
+                    if (ipAddress != null) {
+                        if (!String.valueOf(it.getIPAddress()).equals(ipAddress.toString())) {
+                            it.setIPAddress(ipAddress);
+                            it.setSubnetMask(subnetMask);
+                            it.setGatewayIPAddress(gateway);
+                            changed = true;
+                        }
+                    }
+                    if (dnsAddress != null) {
+                        if (!String.valueOf(it.getPrimaryDNSAddress()).equals(dnsAddress.toString())) {
+                            it.setPrimaryDNSAddress(dnsAddress);
+                            changed = true;
+                        }
+                    }
+                }
+                for (GXDLMSObject tmp : server.getItems().getObjects(ObjectType.IP6_SETUP)) {
+                    GXDLMSIp6Setup it = (GXDLMSIp6Setup) tmp;
+                    if (dnsAddress != null) {
+                        if (!String.valueOf(it.getPrimaryDNSAddress()).equals(dnsAddress.toString())) {
+                            it.setPrimaryDNSAddress(dnsAddress);
+                            changed = true;
+                        }
+                    }
+                }
+            }
+        }
+        if (changed) {
+            GXXmlWriterSettings s = new GXXmlWriterSettings();
+            server.getItems().save(settings.inputFile, s);
+        }
+    }
+
     /*
      * Start simulator.
      */
@@ -143,6 +260,7 @@ public class Simulator {
                 System.out.println(String.format("Short Name DLMS Server in serial port %1$s.", settings.media));
             }
             server.initialize(settings.media, settings.trace, settings.inputFile, 1, false);
+            updateSettings(settings, server);
             System.out.println("----------------------------------------------------------");
             while (System.in.read() != 13) {
                 System.out.println("Press Enter to close.");
@@ -182,9 +300,13 @@ public class Simulator {
                 servers.add(server);
                 if (settings.exclusive) {
                     server.initialize(net, settings.trace, settings.inputFile, pos + 1, settings.exclusive);
+                    updateSettings(settings, server);
                 } else {
                     server.initialize(new GXNet(net.getProtocol(), net.getPort() + pos), settings.trace,
                             settings.inputFile, pos + 1, settings.exclusive);
+                }
+                if (pos == 0) {
+                    updateSettings(settings, server);
                 }
                 if (pos == 0 && settings.client.getUseLogicalNameReferencing()) {
                     str = "Server address: " + String.valueOf(settings.client.getServerAddress());

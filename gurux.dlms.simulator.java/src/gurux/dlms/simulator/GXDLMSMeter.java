@@ -544,7 +544,7 @@ public class GXDLMSMeter extends GXDLMSSecureServer3 implements IGXMediaListener
     }
 
     @Override
-    public void onPduEventHandler(Object sender, byte[] data) {
+    public void onPdu(Object sender, byte[] data) {
 
     }
 
