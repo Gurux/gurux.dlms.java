@@ -91,6 +91,7 @@ import gurux.dlms.objects.enums.SecuritySuite;
  */
 public final class GXCommon {
     private static String zeroes = "00000000000000000000000000000000";
+    private static String max = "FFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFF";
     private static char[] hexArray = { '0', '1', '2', '3', '4', '5', '6', '7', '8', '9', 'A', 'B', 'C', 'D', 'E', 'F' };
 
     private static final char[] BASE_64_ARRAY = { 'A', 'B', 'C', 'D', 'E', 'F', 'G', 'H', 'I', 'J', 'K', 'L', 'M', 'N',
@@ -716,6 +717,10 @@ public final class GXCommon {
         String str = Long.toString(tmp, 16).toUpperCase();
         if (desimals == 0 || str.length() >= desimals || str.length() == zeroes.length()) {
             return str;
+        }
+        if (tmp < 0) {
+            // Remove negative sign.
+            return max.substring(0, 1 + desimals - str.length()) + str.substring(1);
         }
         return zeroes.substring(0, desimals - str.length()) + str;
     }
