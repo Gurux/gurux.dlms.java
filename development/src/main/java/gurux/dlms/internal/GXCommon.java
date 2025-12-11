@@ -2768,15 +2768,17 @@ public final class GXCommon {
     private static long getSerialNumber(byte[] st, boolean isIdis) {
         long sn = 0;
         if (!isIdis) {
-            sn = (st[3] << 8);
+            sn = (st[3] & 0xFF << 8);
+            sn |= st[4] & 0xFF;
+        } else {
+            sn = st[4] & 0xF;
         }
-        sn |= st[4];
         sn <<= 8;
-        sn |= st[5];
+        sn |= st[5] & 0xFF;
         sn <<= 8;
-        sn |= st[6];
+        sn |= st[6] & 0xFF;
         sn <<= 8;
-        sn |= st[7];
+        sn |= st[7] & 0xFF;
         return sn;
     }
 
@@ -2834,7 +2836,7 @@ public final class GXCommon {
         } else {
             sb.append(new String(new char[] { (char) st[0], (char) st[1], (char) st[2] }));
             sb.append(" ");
-            sb.append(String.valueOf(getSerialNumber(st, false)));
+            sb.append(String.valueOf(getSerialNumber(st, true)));
         }
         return sb.toString();
     }
