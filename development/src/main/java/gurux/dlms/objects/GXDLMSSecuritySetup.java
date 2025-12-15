@@ -1452,7 +1452,7 @@ public class GXDLMSSecuritySetup extends GXDLMSObject implements IGXDLMSBase {
                 }
                 try {
                     info.setSubjectRaw((byte[]) it.get(4));
-                    info.setSubject(getStringFromAsn1(info.getIssuerRaw()));
+                    info.setSubject(getStringFromAsn1(info.getSubjectRaw()));
                 } catch (Exception ex) {
                     // Show subject as a octet-string.
                     info.setSubject(new String((byte[]) it.get(4)));
