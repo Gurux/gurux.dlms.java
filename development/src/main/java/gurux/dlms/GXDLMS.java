@@ -2750,12 +2750,12 @@ abstract class GXDLMS {
     @SuppressWarnings({ "squid:S1940", "squid:S106" })
     static boolean getTcpData(final GXDLMSSettings settings, final GXByteBuffer buff, final GXReplyData data,
             final GXReplyData notify) {
-        GXReplyData target = data;
         // If whole frame is not received yet.
         if (buff.size() - buff.position() < 8) {
-            target.setComplete(false);
+            data.setComplete(false);
             return true;
         }
+        GXReplyData target = data;
         boolean isData = true;
         int pos = buff.position();
         int value;
@@ -2772,7 +2772,7 @@ abstract class GXDLMS {
                     break;
                 }
                 // Check TCP/IP addresses.
-                if (!checkWrapperAddress(settings, buff, target)) {
+                if (!checkWrapperAddress(settings, buff, target, notify)) {
                     if (notify != null) {
                         target = notify;
                     }
@@ -3738,36 +3738,36 @@ abstract class GXDLMS {
     }
 
     private static boolean checkWrapperAddress(final GXDLMSSettings settings, final GXByteBuffer buff,
-            final GXReplyData notify) {
+            final GXReplyData data, final GXReplyData notify) {
         boolean ret = true;
         int value;
         if (settings.isServer()) {
             value = buff.getUInt16();
+            data.setSourceAddress(value);
             // Check that client addresses match.
             if (settings.getClientAddress() != 0 && settings.getClientAddress() != value) {
                 throw new GXDLMSException("Source addresses do not match. It is " + String.valueOf(value)
                         + ". It should be " + String.valueOf(settings.getClientAddress()) + ".");
-            } else {
-                settings.setClientAddress(value);
             }
-
+            settings.setClientAddress(value);
             value = buff.getUInt16();
+            data.setTargetAddress(value);
             // Check that server addresses match.
             if (settings.getServerAddress() != 0 && settings.getServerAddress() != value) {
                 throw new GXDLMSException("Destination addresses do not match. It is " + String.valueOf(value)
                         + ". It should be " + String.valueOf(settings.getServerAddress()) + ".");
-            } else {
-                settings.setServerAddress(value);
             }
+            settings.setServerAddress(value);
         } else {
             value = buff.getUInt16();
+            data.setTargetAddress(value);
             // Check that server addresses match.
             if (settings.getServerAddress() != 0 && settings.getServerAddress() != value) {
                 if (notify == null) {
                     throw new GXDLMSException("Source addresses do not match. It is " + String.valueOf(value)
                             + ". It should be " + String.valueOf(settings.getServerAddress()) + ".");
                 }
-                notify.setServerAddress(value);
+                notify.setSourceAddress(value);
                 ret = false;
             } else {
                 settings.setServerAddress(value);
@@ -3781,7 +3781,7 @@ abstract class GXDLMS {
                             + ". It should be " + String.valueOf(settings.getClientAddress()) + ".");
                 }
                 ret = false;
-                notify.setClientAddress(value);
+                notify.setTargetAddress(value);
             } else {
                 settings.setClientAddress(value);
             }
@@ -5278,8 +5278,8 @@ abstract class GXDLMS {
             if (!getTcpData(settings, reply, target, notify)) {
                 if (notify != null) {
                     target = notify;
-                    isNotify = true;
                 }
+                isNotify = true;
             }
             break;
         case WIRELESS_MBUS:
