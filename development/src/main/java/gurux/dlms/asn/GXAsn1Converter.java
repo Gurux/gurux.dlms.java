@@ -338,7 +338,13 @@ public final class GXAsn1Converter {
             getValue(bb, tmp, s, false);
             if (tmp.get(0) instanceof GXAsn1Sequence) {
                 tmp = (GXAsn1Sequence) tmp.get(0);
-                objects.add(new GXSimpleEntry<Object, Object>(tmp.get(0), tmp.get(1)));
+                Object value;
+                if (tmp.size() == 1) {
+                    value = null;
+                } else {
+                    value = tmp.get(1);
+                }
+                objects.add(new GXSimpleEntry<Object, Object>(tmp.get(0), value));
             } else {
                 GXSimpleEntry<Object, Object> e = new GXSimpleEntry<Object, Object>(tmp, null);
                 objects.add(e);
