@@ -680,12 +680,12 @@ public class GXDLMSServerBase {
         byte[] tmp = GXAPDU.getUserInformation(settings, settings.getCipher());
         replyData.setUInt8(0x63);
         // Len.
-        replyData.setUInt8((byte) (tmp.length + 3));
+        replyData.setUInt8((byte) (tmp.length + 7));
         replyData.setUInt8(0x80);
         replyData.setUInt8(0x01);
         replyData.setUInt8(0x00);
         replyData.setUInt8(0xBE);
-        replyData.setUInt8((byte) (tmp.length + 1));
+        replyData.setUInt8((byte) (tmp.length + 2));
         replyData.setUInt8(4);
         replyData.setUInt8((byte) (tmp.length));
         replyData.set(tmp);
