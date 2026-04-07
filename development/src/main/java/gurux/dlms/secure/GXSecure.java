@@ -44,6 +44,8 @@ import java.security.PrivateKey;
 import java.security.PublicKey;
 import java.security.Signature;
 import java.security.SignatureException;
+import java.security.interfaces.ECPrivateKey;
+import java.security.spec.ECParameterSpec;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Random;
@@ -476,9 +478,25 @@ public final class GXSecure {
      */
     public static byte[] getEphemeralPublicKeySignature(final int keyId, final PublicKey ephemeralKey,
             final PrivateKey signKey) throws NoSuchAlgorithmException, InvalidKeyException, SignatureException {
+        if (!(signKey instanceof ECPrivateKey)) {
+            throw new IllegalArgumentException("Not an ECDSA key");
+        }
+        ECPrivateKey ecKey = (ECPrivateKey) signKey;
+        ECParameterSpec params = ecKey.getParams();
+
+        int fieldSize = params.getCurve().getField().getFieldSize();
+
         byte[] epk = getEphemeralPublicKeyData(keyId, ephemeralKey);
+
         // Add ephemeral public key signature.
-        Signature instance = Signature.getInstance("SHA256withECDSA");
+        Signature instance;
+        if (fieldSize == 256) {
+            instance = Signature.getInstance("SHA256withECDSA");
+        } else if (fieldSize == 384) {
+            instance = Signature.getInstance("SHA384withECDSA");
+        } else {
+            throw new IllegalArgumentException("Not an ECDSA key");
+        }
         instance.initSign(signKey);
         instance.update(epk);
         byte[] sign = instance.sign();
