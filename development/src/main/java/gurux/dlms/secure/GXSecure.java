@@ -371,6 +371,44 @@ public final class GXSecure {
         return result;
     }
 
+    /**
+     * Use key derivation function to get the final key
+     * @param suite Security Suite used to set correct KDF parameters
+     * @param z Shared secret
+     * @param partyUInfo Client system title bytes
+     * @param partyVInfo Server system title bytes
+     * @param suppPubInfo Not used in DLMS.
+     * @param suppPrivInfo Not used in DLMS.
+     * @return Generated KDF.
+     * @throws IllegalArgumentException If invalid security suite is given.
+     */
+    public static byte[] generateKDF(SecuritySuite suite, final byte[] z,
+                                     final byte[] partyUInfo, final byte[] partyVInfo,
+                                     final byte[] suppPubInfo, final byte[] suppPrivInfo) throws IllegalArgumentException {
+        byte[] algorithmID;
+        String hashAlg;
+        int keyDataLen;
+
+        switch (suite) {
+            case SUITE_1:
+                algorithmID = GXCommon.hexToBytes("60857405080300"); // AES-GCM-128
+                hashAlg = "SHA-256";
+                keyDataLen = 128;
+                break;
+
+            case SUITE_2:
+                algorithmID = GXCommon.hexToBytes("60857405080301"); // AES-GCM-256
+                hashAlg = "SHA-384";
+                keyDataLen = 256;
+                break;
+
+            default:
+                throw new IllegalArgumentException("Invalid security suite.");
+        }
+
+        return generateKDF(hashAlg, z, keyDataLen, algorithmID, partyUInfo, partyVInfo, suppPubInfo, suppPrivInfo);
+    }
+
     /*
      * Generate KDF.
      * @param hashAlg Hash Algorithm. (SHA-256 or SHA-384 )
