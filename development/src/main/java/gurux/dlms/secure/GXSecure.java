@@ -408,11 +408,15 @@ public final class GXSecure {
      */
     private static byte[] generateKDF(final String hashAlg, final byte[] z, final int keyDataLen,
             final byte[] otherInfo) {
-        byte[] key = new byte[keyDataLen / 8];
+        byte[] key = new byte[keyDataLen / 8]; // AES-256 needs 64bytes => 256 / 8 = 64
         try {
             MessageDigest md = MessageDigest.getInstance(hashAlg);
             int hashLen = md.getDigestLength();
-            int cnt = key.length / hashLen;
+            int cnt = (key.length + hashLen - 1) / hashLen; // It needs to ceil the number, not basic round.
+
+            //Alternative with ceil:
+            //int cnt = (int) Math.ceil((double) key.length / hashLen);
+
             byte[] v = new byte[4];
             for (int pos = 1; pos <= cnt; pos++) {
                 md.reset();
