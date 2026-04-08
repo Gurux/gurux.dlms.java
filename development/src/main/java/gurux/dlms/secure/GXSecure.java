@@ -45,6 +45,7 @@ import java.security.PublicKey;
 import java.security.Signature;
 import java.security.SignatureException;
 import java.security.interfaces.ECPrivateKey;
+import java.security.interfaces.ECPublicKey;
 import java.security.spec.ECParameterSpec;
 import java.util.ArrayList;
 import java.util.List;
@@ -489,6 +490,7 @@ public final class GXSecure {
         ECParameterSpec params = ecKey.getParams();
 
         int fieldSize = params.getCurve().getField().getFieldSize();
+        int keySize = fieldSize / 8;
 
         byte[] epk = getEphemeralPublicKeyData(keyId, ephemeralKey);
 
@@ -506,7 +508,7 @@ public final class GXSecure {
         byte[] sign = instance.sign();
         GXAsn1Sequence tmp2 = (GXAsn1Sequence) GXAsn1Converter.fromByteArray(sign);
         LOGGER.log(Level.FINEST, "{0}", GXCommon.toHex(sign));
-        GXByteBuffer data = new GXByteBuffer(64);
+        GXByteBuffer data = new GXByteBuffer(2 * keySize);
         // Truncate to 64 bytes. Remove zeros from the begin.
         byte[] arr = ((GXAsn1Integer) tmp2.get(0)).getByteArray();
         if (arr.length < 32) {
@@ -515,9 +517,9 @@ public final class GXSecure {
             bb.set(arr);
             arr = bb.array();
         }
-        data.set(arr, arr.length - 32, 32);
+        data.set(arr, arr.length - keySize, keySize);
         arr = ((GXAsn1Integer) tmp2.get(1)).getByteArray();
-        data.set(arr, arr.length - 32, 32);
+        data.set(arr, arr.length - keySize, keySize);
         return data.array();
     }
 
@@ -530,14 +532,28 @@ public final class GXSecure {
      */
     public static boolean validateEphemeralPublicKeySignature(final byte[] data, final byte[] sign,
             final PublicKey publicSigningKey) throws NoSuchAlgorithmException, InvalidKeyException, SignatureException {
+        ECPublicKey ecKey = (ECPublicKey) publicSigningKey;
+        ECParameterSpec params = ecKey.getParams();
 
-        GXAsn1Integer a = new GXAsn1Integer(sign, 0, 32);
-        GXAsn1Integer b = new GXAsn1Integer(sign, 32, 32);
+        int fieldSize = params.getCurve().getField().getFieldSize();
+        int keySize = fieldSize / 8;
+
+        GXAsn1Integer a = new GXAsn1Integer(sign, 0, keySize);
+        GXAsn1Integer b = new GXAsn1Integer(sign, keySize, keySize);
         GXAsn1Sequence s = new GXAsn1Sequence();
         s.add(a);
         s.add(b);
         byte[] tmp = GXAsn1Converter.toByteArray(s);
-        Signature instance = Signature.getInstance("SHA256withECDSA");
+
+        Signature instance;
+        if (fieldSize == 256) {
+            instance = Signature.getInstance("SHA256withECDSA");
+        } else if (fieldSize == 384) {
+            instance = Signature.getInstance("SHA384withECDSA");
+        } else {
+            throw new IllegalArgumentException("Not an ECDSA key");
+        }
+
         instance.initVerify(publicSigningKey);
         instance.update(data);
         boolean v = instance.verify(tmp);
