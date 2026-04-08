@@ -41,6 +41,8 @@ import java.security.KeyPair;
 import java.security.NoSuchAlgorithmException;
 import java.security.PublicKey;
 import java.security.SignatureException;
+import java.security.interfaces.ECPrivateKey;
+import java.security.spec.ECParameterSpec;
 import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
@@ -535,7 +537,12 @@ public class GXDLMSSecuritySetup extends GXDLMSObject implements IGXDLMSBase {
         GXByteBuffer bb = new GXByteBuffer();
         byte[] data = GXSecure.getEphemeralPublicKeyData(type.ordinal(),
                 client.getCiphering().getEphemeralKeyPair().getPublic());
-        bb.set(data, 1, 64);
+
+        ECPrivateKey ecKey = (ECPrivateKey) client.getCiphering().getSigningKeyPair().getPrivate();
+        ECParameterSpec params = ecKey.getParams();
+        int fieldSize = params.getCurve().getField().getFieldSize();
+        
+        bb.set(data, 1, fieldSize / 4);
         Logger.getLogger(GXDLMSSecuritySetup.class.getName()).log(Level.INFO, "Signin public key: {0}",
                 client.getCiphering().getSigningKeyPair().getPublic());
 
