@@ -35,12 +35,7 @@
 package gurux.dlms.objects;
 
 import java.math.BigInteger;
-import java.security.InvalidAlgorithmParameterException;
-import java.security.InvalidKeyException;
-import java.security.KeyPair;
-import java.security.NoSuchAlgorithmException;
-import java.security.PublicKey;
-import java.security.SignatureException;
+import java.security.*;
 import java.security.interfaces.ECPrivateKey;
 import java.security.spec.ECParameterSpec;
 import java.util.*;
@@ -117,6 +112,11 @@ public class GXDLMSSecuritySetup extends GXDLMSObject implements IGXDLMSBase {
      * TLS pair of the server.
      */
     public KeyPair tls;
+
+    /**
+     * Ephemeral key pairs for key agreement method
+     */
+    private Map<GlobalKeyType, KeyPair> ephemeralKeyPairs;
 
     /**
      * Available certificates of the server.
@@ -460,6 +460,76 @@ public class GXDLMSSecuritySetup extends GXDLMSObject implements IGXDLMSBase {
 
     /**
      * Agree on one or more symmetric keys using the key agreement algorithm.
+     * You need to have setup signing key pair: client.getCiphering().getSigningKeyPair()
+     * Ephemeral keys are generated in the method itself
+     *
+     * @param client
+     *            DLMS client that is used to generate action.
+     * @param generateKeys
+     *            Global key types.
+     * @return Generated action.
+     * @throws NoSuchPaddingException
+     *             No such padding exception.
+     * @throws NoSuchAlgorithmException
+     *             No such algorithm exception.
+     * @throws InvalidKeyException
+     *             Invalid key exception.
+     * @throws BadPaddingException
+     *             Bad padding exception.
+     * @throws IllegalBlockSizeException
+     *             Illegal block size exception.
+     * @throws InvalidAlgorithmParameterException
+     *             Invalid algorithm parameter exception.
+     * @throws SignatureException
+     *             Signature exception.
+     */
+    public final byte[][] keyAgreement(final GXDLMSSecureClient client, final GlobalKeyType... generateKeys)
+            throws NoSuchAlgorithmException, InvalidKeyException, SignatureException, NoSuchPaddingException,
+            InvalidAlgorithmParameterException, IllegalBlockSizeException, BadPaddingException {
+
+        List<GXSimpleEntry<GlobalKeyType, byte[]>> list = new ArrayList<GXSimpleEntry<GlobalKeyType, byte[]>>();
+
+        ephemeralKeyPairs = new HashMap<GlobalKeyType, KeyPair>();
+
+        for(GlobalKeyType keyType : generateKeys) {
+            GXByteBuffer bb = new GXByteBuffer();
+
+            //Generate EphemeralKey
+            if (securitySuite == SecuritySuite.SUITE_1) {
+                ephemeralKeyPairs.put(keyType, GXEcdsa.generateKeyPair(Ecc.P256));
+            } else if (securitySuite == SecuritySuite.SUITE_2) {
+                ephemeralKeyPairs.put(keyType, GXEcdsa.generateKeyPair(Ecc.P384));
+            } else {
+                throw new IllegalArgumentException("Invalid security suite.");
+            }
+
+            byte[] data = GXSecure.getEphemeralPublicKeyData(keyType.ordinal(),
+                                                             ephemeralKeyPairs.get(keyType).getPublic());
+
+            ECPrivateKey ecKey = (ECPrivateKey) client.getCiphering().getSigningKeyPair().getPrivate();
+            ECParameterSpec params = ecKey.getParams();
+            int fieldSize = params.getCurve().getField().getFieldSize();
+
+            bb.set(data, 1, fieldSize / 4);
+            Logger.getLogger(GXDLMSSecuritySetup.class.getName()).log(Level.INFO, "Signin public key: {0}",
+                                                                      client.getCiphering().getSigningKeyPair().getPublic());
+
+            // Add signature.
+            byte[] sign = GXSecure.getEphemeralPublicKeySignature(keyType.ordinal(),
+                                                                  ephemeralKeyPairs.get(keyType).getPublic(),
+                                                                  client.getCiphering().getSigningKeyPair().getPrivate());
+            bb.set(sign);
+            Logger.getLogger(GXDLMSSecuritySetup.class.getName()).log(Level.FINEST, "Data: {0}", GXCommon.toHex(data));
+            Logger.getLogger(GXDLMSSecuritySetup.class.getName()).log(Level.FINEST, "Sign: {0}", GXCommon.toHex(sign));
+
+
+            list.add(new GXSimpleEntry<>(keyType, bb.array()));
+        }
+        return keyAgreement(client, list);
+    }
+
+    /**
+     * Agree on one or more symmetric keys using the key agreement algorithm.
      * 
      * @param client
      *            DLMS client that is used to generate action.
@@ -481,7 +551,7 @@ public class GXDLMSSecuritySetup extends GXDLMSObject implements IGXDLMSBase {
      * @throws SignatureException
      *             Signature exception.
      */
-    public final byte[][] keyAgreement(final GXDLMSClient client, final List<GXSimpleEntry<GlobalKeyType, byte[]>> list)
+    private final byte[][] keyAgreement(final GXDLMSClient client, final List<GXSimpleEntry<GlobalKeyType, byte[]>> list)
             throws InvalidKeyException, NoSuchAlgorithmException, NoSuchPaddingException,
             InvalidAlgorithmParameterException, IllegalBlockSizeException, BadPaddingException, SignatureException {
         if (list == null || list.isEmpty()) {
@@ -498,57 +568,6 @@ public class GXDLMSSecuritySetup extends GXDLMSObject implements IGXDLMSBase {
             GXCommon.setData(null, bb, DataType.OCTET_STRING, it.getValue());
         }
         return client.method(this, 3, bb.array(), DataType.ARRAY);
-    }
-
-    /**
-     * Agree on one or more symmetric keys using the key agreement algorithm.
-     * 
-     * @param client
-     *            DLMS client that is used to generate action.
-     * @param type
-     *            Global key type.
-     * @return Generated action.
-     * @throws NoSuchPaddingException
-     *             No such padding exception.
-     * @throws NoSuchAlgorithmException
-     *             No such algorithm exception.
-     * @throws InvalidKeyException
-     *             Invalid key exception.
-     * @throws BadPaddingException
-     *             Bad padding exception.
-     * @throws IllegalBlockSizeException
-     *             Illegal block size exception.
-     * @throws InvalidAlgorithmParameterException
-     *             Invalid algorithm parameter exception.
-     * @throws SignatureException
-     *             Signature exception.
-     */
-    public final byte[][] keyAgreement(final GXDLMSSecureClient client, final GlobalKeyType type)
-            throws NoSuchAlgorithmException, InvalidKeyException, SignatureException, NoSuchPaddingException,
-            InvalidAlgorithmParameterException, IllegalBlockSizeException, BadPaddingException {
-        GXByteBuffer bb = new GXByteBuffer();
-        byte[] data = GXSecure.getEphemeralPublicKeyData(type.ordinal(),
-                client.getCiphering().getEphemeralKeyPair().getPublic());
-
-        ECPrivateKey ecKey = (ECPrivateKey) client.getCiphering().getSigningKeyPair().getPrivate();
-        ECParameterSpec params = ecKey.getParams();
-        int fieldSize = params.getCurve().getField().getFieldSize();
-
-        bb.set(data, 1, fieldSize / 4);
-        Logger.getLogger(GXDLMSSecuritySetup.class.getName()).log(Level.INFO, "Signin public key: {0}",
-                client.getCiphering().getSigningKeyPair().getPublic());
-
-        // Add signature.
-        byte[] sign = GXSecure.getEphemeralPublicKeySignature(type.ordinal(),
-                client.getCiphering().getEphemeralKeyPair().getPublic(),
-                client.getCiphering().getSigningKeyPair().getPrivate());
-        bb.set(sign);
-        Logger.getLogger(GXDLMSSecuritySetup.class.getName()).log(Level.FINEST, "Data: {0}", GXCommon.toHex(data));
-        Logger.getLogger(GXDLMSSecuritySetup.class.getName()).log(Level.FINEST, "Sign: {0}", GXCommon.toHex(sign));
-
-        List<GXSimpleEntry<GlobalKeyType, byte[]>> list = new ArrayList<GXSimpleEntry<GlobalKeyType, byte[]>>();
-        list.add(new GXSimpleEntry<GlobalKeyType, byte[]>(type, bb.array()));
-        return keyAgreement(client, list);
     }
 
     /**
@@ -1064,8 +1083,7 @@ public class GXDLMSSecuritySetup extends GXDLMSObject implements IGXDLMSBase {
     }
 
     /**
-     * Client side method, to finalize the key agreement method. This will generate the keys, that should be used on the client side.
-     * Currently supports only 1 key agreement at the same time, but can be extended to support multiple key agreements if needed.
+     * Client side method, to finalize the key agreement method. This will generate the keys from server response.
      * @param client
      * @param replyData
      * @return List of agreed keys
@@ -1090,11 +1108,6 @@ public class GXDLMSSecuritySetup extends GXDLMSObject implements IGXDLMSBase {
         }
 
         int size = GXCommon.getObjectCount(data);
-
-        if(size > 1) {
-            // TODO: Handle multiple ephemeral key pairs to allow support for multiple keys.
-            throw new IllegalArgumentException("Only one key change is currently supported by key agreement method.");
-        }
 
         List<Map.Entry<GlobalKeyType, byte[]>> list = new ArrayList<>();
 
@@ -1135,9 +1148,14 @@ public class GXDLMSSecuritySetup extends GXDLMSObject implements IGXDLMSBase {
                 throw new IllegalArgumentException("Invalid signature of received KeyAgreement data.");
             }
 
+            //Verify ephemeral private key exists
+            if(ephemeralKeyPairs == null || !ephemeralKeyPairs.containsKey(GlobalKeyType.values()[keyId])) {
+                throw new IllegalArgumentException("Invalid ephemeral key pair.");
+            }
+
             // Generate shared secret.
             KeyAgreement ka = KeyAgreement.getInstance("ECDH");
-            ka.init(client.getCiphering().getEphemeralKeyPair().getPrivate());
+            ka.init(ephemeralKeyPairs.remove(GlobalKeyType.values()[keyId]).getPrivate()); //Take ephemeral key from saved map
             ka.doPhase(publicKey, true);
             byte[] sharedSecret = ka.generateSecret();
 
@@ -1150,6 +1168,9 @@ public class GXDLMSSecuritySetup extends GXDLMSObject implements IGXDLMSBase {
         }
 
         updateKeys(list);
+
+        //Clear key pair map
+        ephemeralKeyPairs = null;
 
         return list;
     }
