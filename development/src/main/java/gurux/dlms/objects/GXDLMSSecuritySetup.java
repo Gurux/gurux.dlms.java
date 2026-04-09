@@ -62,7 +62,6 @@ import gurux.dlms.enums.DataType;
 import gurux.dlms.enums.ErrorCode;
 import gurux.dlms.enums.ObjectType;
 import gurux.dlms.enums.Security;
-import gurux.dlms.enums.Signing;
 import gurux.dlms.internal.GXCommon;
 import gurux.dlms.internal.GXDataInfo;
 import gurux.dlms.objects.enums.CertificateEntity;
@@ -489,16 +488,18 @@ public class GXDLMSSecuritySetup extends GXDLMSObject implements IGXDLMSBase {
 
         List<GXSimpleEntry<GlobalKeyType, byte[]>> list = new ArrayList<GXSimpleEntry<GlobalKeyType, byte[]>>();
 
-        ephemeralKeyPairs = new HashMap<GlobalKeyType, KeyPair>();
+        if(ephemeralKeyPairs == null) {
+            ephemeralKeyPairs = new HashMap<GlobalKeyType, KeyPair>();
+        }
 
         for(GlobalKeyType keyType : generateKeys) {
             GXByteBuffer bb = new GXByteBuffer();
 
-            //Generate EphemeralKey
+            //Generate EphemeralKey if not in ephemeral map
             if (securitySuite == SecuritySuite.SUITE_1) {
-                ephemeralKeyPairs.put(keyType, GXEcdsa.generateKeyPair(Ecc.P256));
+                ephemeralKeyPairs.putIfAbsent(keyType, GXEcdsa.generateKeyPair(Ecc.P256));
             } else if (securitySuite == SecuritySuite.SUITE_2) {
-                ephemeralKeyPairs.put(keyType, GXEcdsa.generateKeyPair(Ecc.P384));
+                ephemeralKeyPairs.putIfAbsent(keyType, GXEcdsa.generateKeyPair(Ecc.P384));
             } else {
                 throw new IllegalArgumentException("Invalid security suite.");
             }
@@ -1196,70 +1197,97 @@ public class GXDLMSSecuritySetup extends GXDLMSObject implements IGXDLMSBase {
     }
 
     private byte[] invokeKeyAgreement(final GXDLMSSettings settings, final ValueEventArgs e) {
+        List<Map.Entry<GlobalKeyType, byte[]>> keysToUpdate = new ArrayList<>();
+
+        GXByteBuffer response = new GXByteBuffer();
+
         try {
-            List<?> tmp = (List<?>) ((List<?>) e.getParameters()).get(0); //It currently allows for only 1 keyAgreement
-            short keyId = ((Number) tmp.get(0)).shortValue();
-            if (keyId != 0) {
-                e.setError(ErrorCode.READ_WRITE_DENIED);
-            } else {
-                byte[] data = (byte[]) tmp.get(1);
-                // ephemeral public key
-                GXByteBuffer data2 = new GXByteBuffer(65);
-                data2.setUInt8(keyId);
-                data2.set(data, 0, 64);
-                GXByteBuffer sign = new GXByteBuffer();
-                sign.set(data, 64, 64);
-                PublicKey pk = settings.getCipher().getKeyAgreementKeyPair().getPublic();
-                if (pk == null || !GXSecure.validateEphemeralPublicKeySignature(data2.array(), sign.array(), pk)) {
-                    e.setError(ErrorCode.READ_WRITE_DENIED);
-                    settings.setTargetEphemeralKey(null);
-                } else {
-                    e.setByteArray(true);
-                    settings.setTargetEphemeralKey(GXAsn1Converter.getPublicKey(data2.subArray(1, 64)));
-                    // Generate ephemeral keys.
-                    KeyPair eKpS = settings.getCipher().getEphemeralKeyPair();
-                    eKpS = GXEcdsa.generateKeyPair(Ecc.P256);
-                    settings.getCipher().setEphemeralKeyPair(eKpS);
-                    // Generate shared secret.
-                    KeyAgreement ka = KeyAgreement.getInstance("ECDH");
-                    ka.init(eKpS.getPrivate());
-                    ka.doPhase(settings.getTargetEphemeralKey(), true);
-                    byte[] sharedSecret = ka.generateSecret();
-                    // settings.getCipher().setSharedSecret(sharedSecret);
-                    Logger.getLogger(GXDLMSSecuritySetup.class.getName()).log(Level.FINEST, "Server shared secret: {0}",
-                            GXCommon.toHex(sharedSecret));
-                    GXByteBuffer bb = new GXByteBuffer();
-                    bb.setUInt8(DataType.ARRAY);
-                    bb.setUInt8(1);
-                    bb.setUInt8(DataType.STRUCTURE);
-                    bb.setUInt8(2);
-                    // Add key ID.
-                    bb.setUInt8(0x16);
-                    bb.setUInt8(0);
-                    bb.setUInt8(DataType.OCTET_STRING);
-                    GXCommon.setObjectCount(128, bb);
-                    data = GXSecure.getEphemeralPublicKeyData(keyId, eKpS.getPublic());
-                    bb.set(data, 1, 64);
-                    // Add signature.
-                    byte[] tmp2 = GXSecure.getEphemeralPublicKeySignature(keyId, eKpS.getPublic(),
-                            settings.getCipher().getSigningKeyPair().getPrivate());
-                    bb.set(tmp2);
-                    Logger.getLogger(GXDLMSSecuritySetup.class.getName()).log(Level.FINEST, "Data: {0}",
-                            GXCommon.toHex(data));
-                    Logger.getLogger(GXDLMSSecuritySetup.class.getName()).log(Level.FINEST, "Sign: {0}",
-                            GXCommon.toHex(tmp2));
-                    byte[] algID = GXCommon.hexToBytes("60857405080300"); // AES-GCM-128
-                    GXByteBuffer kdf = new GXByteBuffer();
-                    kdf.set(GXSecure.generateKDF("SHA-256", sharedSecret, 256, algID, settings.getSourceSystemTitle(),
-                            settings.getCipher().getSystemTitle(), null, null), 0, 16);
-                    Logger.getLogger(GXDLMSSecuritySetup.class.getName()).log(Level.INFO, "GUEK: {0}", kdf);
-                    settings.getCipher().setSigning(Signing.EPHEMERAL_UNIFIED_MODEL);
+            // Array, size
+            List<List<?>> array = (List<List<?>>) e.getParameters();
 
-                    updateKeys(List.of(new AbstractMap.SimpleEntry<>(GlobalKeyType.values()[keyId], kdf.array())));
+            // Structure, size
+            for(List<?> structure : array) {
+                // Enum, key id
+                short keyId = ((Number) structure.get(0)).shortValue();
+                GlobalKeyType keyType = GlobalKeyType.values()[keyId];
 
-                    return bb.array();
+                if (keyId != 0) {
+                    e.setError(ErrorCode.INCONSISTENT_CLASS);
+                    return null;
                 }
+
+                // Octet string, ephemeral public key + signature
+                GXByteBuffer keyData = new GXByteBuffer((byte[]) structure.get(1));
+                int keySize = keyData.size() / 4;
+
+                PublicKey publicKey = GXAsn1Converter.getPublicKey(keyData.subArray(0, keySize * 2));
+                byte[] signature = keyData.subArray(keySize * 2, keySize * 2);
+
+                // Verify signature of key data, using client public key (client signed it by signing certificate)
+                if(!GXSecure.validateEphemeralPublicKeySignature(GXSecure.getEphemeralPublicKeyData(keyId, publicKey), signature,
+                                                                 settings.getServerPublicKeyCertificate().getPublicKey())) {
+                    e.setError(ErrorCode.OTHER_REASON);
+                    return null;
+                }
+                e.setByteArray(true); //Not sure, what was it for.
+
+                KeyPair serverEphemeralKeyPair;
+
+                //Generate EphemeralKey if not in ephemeral map
+                if (securitySuite == SecuritySuite.SUITE_1) {
+                    serverEphemeralKeyPair = GXEcdsa.generateKeyPair(Ecc.P256);
+                } else if (securitySuite == SecuritySuite.SUITE_2) {
+                    serverEphemeralKeyPair = GXEcdsa.generateKeyPair(Ecc.P384);
+                } else {
+                    e.setError(ErrorCode.OTHER_REASON);
+                    throw new IllegalArgumentException("Invalid security suite.");
+                }
+
+                // Generate shared secret.
+                KeyAgreement ka = KeyAgreement.getInstance("ECDH");
+                ka.init(serverEphemeralKeyPair.getPrivate());
+                ka.doPhase(settings.getTargetEphemeralKey(), true);
+                byte[] sharedSecret = ka.generateSecret();
+
+                Logger.getLogger(GXDLMSSecuritySetup.class.getName()).log(Level.FINEST, keyType + ": Server shared secret: {0}", GXCommon.toHex(sharedSecret));
+
+                //Generate key from share secret
+                GXByteBuffer kdf = new GXByteBuffer();
+                kdf.set(GXSecure.generateKDF(securitySuite, sharedSecret,
+                                             settings.getSourceSystemTitle(), settings.getCipher().getSystemTitle(),
+                                             null, null));
+
+                Logger.getLogger(GXDLMSSecuritySetup.class.getName()).log(Level.INFO, keyType + ": {0}", kdf);
+                keysToUpdate.add(new AbstractMap.SimpleEntry<>(keyType, kdf.array()));
+
+                //Prepare key_data for client
+                GXByteBuffer keyDataForClient = new GXByteBuffer();
+                byte[] data = GXSecure.getEphemeralPublicKeyData(keyType.ordinal(),
+                                                                 serverEphemeralKeyPair.getPublic());
+
+                ECPrivateKey signingKey = (ECPrivateKey) settings.getCipher().getSigningKeyPair().getPrivate();
+                ECParameterSpec params = signingKey.getParams();
+                int fieldSize = params.getCurve().getField().getFieldSize();
+
+                keyDataForClient.set(data, 0, fieldSize / 4);
+
+                // Add signature.
+                byte[] sign = GXSecure.getEphemeralPublicKeySignature(keyType.ordinal(),
+                                                                      serverEphemeralKeyPair.getPublic(),
+                                                                      signingKey);
+                keyDataForClient.set(sign);
+
+                response.setUInt8(DataType.STRUCTURE.getValue()); response.setUInt8(DataType.STRUCTURE.getValue());
+                response.setUInt8(2);
+                GXCommon.setData(null, response, DataType.ENUM, keyType.ordinal());
+                GXCommon.setData(null, response, DataType.OCTET_STRING, keyDataForClient.array());
             }
+
+            // Update keys in this security setup object
+            // TODO: add logic, to update keys for the server (if this security setup is for current association)
+            updateKeys(keysToUpdate);
+
+            return response.array();
         } catch (Exception ex) {
             e.setError(ErrorCode.INCONSISTENT_CLASS);
         }
