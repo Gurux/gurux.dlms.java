@@ -43,10 +43,7 @@ import java.security.PublicKey;
 import java.security.SignatureException;
 import java.security.interfaces.ECPrivateKey;
 import java.security.spec.ECParameterSpec;
-import java.util.ArrayList;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Set;
+import java.util.*;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
@@ -56,12 +53,7 @@ import javax.crypto.KeyAgreement;
 import javax.crypto.NoSuchPaddingException;
 import javax.xml.stream.XMLStreamException;
 
-import gurux.dlms.GXByteBuffer;
-import gurux.dlms.GXDLMSClient;
-import gurux.dlms.GXDLMSSettings;
-import gurux.dlms.GXDLMSTranslator;
-import gurux.dlms.GXSimpleEntry;
-import gurux.dlms.ValueEventArgs;
+import gurux.dlms.*;
 import gurux.dlms.asn.GXAsn1Converter;
 import gurux.dlms.asn.GXAsn1Sequence;
 import gurux.dlms.asn.GXPkcs10;
@@ -541,7 +533,7 @@ public class GXDLMSSecuritySetup extends GXDLMSObject implements IGXDLMSBase {
         ECPrivateKey ecKey = (ECPrivateKey) client.getCiphering().getSigningKeyPair().getPrivate();
         ECParameterSpec params = ecKey.getParams();
         int fieldSize = params.getCurve().getField().getFieldSize();
-        
+
         bb.set(data, 1, fieldSize / 4);
         Logger.getLogger(GXDLMSSecuritySetup.class.getName()).log(Level.INFO, "Signin public key: {0}",
                 client.getCiphering().getSigningKeyPair().getPublic());
@@ -1071,9 +1063,120 @@ public class GXDLMSSecuritySetup extends GXDLMSObject implements IGXDLMSBase {
         }
     }
 
+    /**
+     * Client side method, to finalize the key agreement method. This will generate the keys, that should be used on the client side.
+     * Currently supports only 1 key agreement at the same time, but can be extended to support multiple key agreements if needed.
+     * @param client
+     * @param replyData
+     * @return List of agreed keys
+     * @throws InvalidKeyException
+     * @throws NoSuchAlgorithmException
+     * @throws SignatureException
+     */
+    public List<Map.Entry<GlobalKeyType, byte[]>> finalizeKeyAgreement(GXDLMSSecureClient client, GXReplyData replyData) throws InvalidKeyException, NoSuchAlgorithmException, SignatureException {
+        if(client.getCiphering().getSigningKeyPair() == null || client.getCiphering().getSigningKeyPair().getPublic() == null) {
+            throw new IllegalArgumentException("Invalid signing key.");
+        }
+
+        if(clientSystemTitle == null || clientSystemTitle.length != 8 ||
+                serverSystemTitle == null || serverSystemTitle.length != 8) {
+            throw new IllegalArgumentException("Invalid system title.");
+        }
+
+        GXByteBuffer data = new GXByteBuffer(replyData.getData());
+
+        if(data.getUInt8() != DataType.ARRAY.getValue()) {
+            throw new IllegalArgumentException("Invalid tag.");
+        }
+
+        int size = GXCommon.getObjectCount(data);
+
+        if(size > 1) {
+            // TODO: Handle multiple ephemeral key pairs to allow support for multiple keys.
+            throw new IllegalArgumentException("Only one key change is currently supported by key agreement method.");
+        }
+
+        List<Map.Entry<GlobalKeyType, byte[]>> list = new ArrayList<>();
+
+        for (int i = 0; i < size; i++) {
+            if (data.getUInt8() != DataType.STRUCTURE.getValue()) {
+                throw new IllegalArgumentException("Invalid tag.");
+            }
+
+            if (data.getUInt8() != 2)
+            {
+                throw new IllegalArgumentException("Invalid length.");
+            }
+
+            if (data.getUInt8() != DataType.ENUM.getValue())
+            {
+                throw new IllegalArgumentException("Invalid key id data type.");
+            }
+
+            int keyId = data.getUInt8();
+
+            if (keyId > 4)
+            {
+                throw new IllegalArgumentException("Invalid key type.");
+            }
+
+            if (data.getUInt8() != DataType.OCTET_STRING.getValue())
+            {
+                throw new IllegalArgumentException("Invalid tag.");
+            }
+
+            int keySize = GXCommon.getObjectCount(data) / 4;
+            GXByteBuffer keyData = new GXByteBuffer(data.remaining());
+
+            PublicKey publicKey = GXAsn1Converter.getPublicKey(keyData.subArray(0, keySize * 2));
+            byte[] signature = keyData.subArray(keySize * 2, keySize * 2);
+
+            if(!GXSecure.validateEphemeralPublicKeySignature(GXSecure.getEphemeralPublicKeyData(keyId, publicKey), signature, client.getCiphering().getSigningKeyPair().getPublic())) {
+                throw new IllegalArgumentException("Invalid signature of received KeyAgreement data.");
+            }
+
+            // Generate shared secret.
+            KeyAgreement ka = KeyAgreement.getInstance("ECDH");
+            ka.init(client.getCiphering().getEphemeralKeyPair().getPrivate());
+            ka.doPhase(publicKey, true);
+            byte[] sharedSecret = ka.generateSecret();
+
+            GXByteBuffer kdf = new GXByteBuffer();
+            kdf.set(GXSecure.generateKDF(securitySuite, sharedSecret,
+                                         clientSystemTitle,
+                                         serverSystemTitle,
+                                         null, null));
+            list.add(new AbstractMap.SimpleEntry<>(GlobalKeyType.values()[keyId], kdf.array()));
+        }
+
+        updateKeys(list);
+
+        return list;
+    }
+
+    // Function to update keys in this security setup object
+    private void updateKeys(List<Map.Entry<GlobalKeyType, byte[]>> listOfKeys) {
+        for(Map.Entry<GlobalKeyType, byte[]> entry : listOfKeys) {
+            switch (entry.getKey()) {
+                case BROADCAST_ENCRYPTION:
+                    gbek = entry.getValue();
+                    break;
+                case UNICAST_ENCRYPTION:
+                    guek = entry.getValue();
+                    break;
+                case AUTHENTICATION:
+                    gak = entry.getValue();
+                    break;
+                case KEK:
+                    kek = entry.getValue();
+                    break;
+            }
+        }
+    }
+
     private byte[] invokeKeyAgreement(final GXDLMSSettings settings, final ValueEventArgs e) {
         try {
-            List<?> tmp = (List<?>) ((List<?>) e.getParameters()).get(0);
+            List<?> tmp = (List<?>) ((List<?>) e.getParameters()).get(0); //It currently allows for only 1 keyAgreement
             short keyId = ((Number) tmp.get(0)).shortValue();
             if (keyId != 0) {
                 e.setError(ErrorCode.READ_WRITE_DENIED);
@@ -1130,23 +1233,9 @@ public class GXDLMSSecuritySetup extends GXDLMSObject implements IGXDLMSBase {
                             settings.getCipher().getSystemTitle(), null, null), 0, 16);
                     Logger.getLogger(GXDLMSSecuritySetup.class.getName()).log(Level.INFO, "GUEK: {0}", kdf);
                     settings.getCipher().setSigning(Signing.EPHEMERAL_UNIFIED_MODEL);
-                    switch (GlobalKeyType.values()[keyId]) {
-                    case BROADCAST_ENCRYPTION:
-                        gbek = kdf.array();
-                        break;
-                    case UNICAST_ENCRYPTION:
-                        guek = kdf.array();
-                        break;
-                    case AUTHENTICATION:
-                        gak = kdf.array();
-                        break;
-                    case KEK:
-                        kek = kdf.array();
-                        break;
-                    default:
-                        e.setError(ErrorCode.INCONSISTENT_CLASS);
-                        break;
-                    }
+
+                    updateKeys(List.of(new AbstractMap.SimpleEntry<>(GlobalKeyType.values()[keyId], kdf.array())));
+
                     return bb.array();
                 }
             }
