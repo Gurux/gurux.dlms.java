@@ -530,11 +530,11 @@ public class GXDLMSIec6205541Attributes extends GXDLMSObject implements IGXDLMSB
     @Override
     public final void load(GXXmlReader reader) throws XMLStreamException {
         String str = reader.readElementContentAsString("IssuerId");
-        if (str != null && str != "") {
+        if (str != null && !str.isEmpty()) {
             meterPan.setIssuerId(new BigInteger(str));
         }
         str = reader.readElementContentAsString("DecoderReferenceNumber");
-        if (str != null && str != "") {
+        if (str != null && !str.isEmpty()) {
             meterPan.setDecoderReferenceNumber(new BigInteger(str));
         }
         meterPan.setPanCheckDigit((short) reader.readElementContentAsInt("PanCheckDigit"));
@@ -559,7 +559,7 @@ public class GXDLMSIec6205541Attributes extends GXDLMSObject implements IGXDLMSB
 
     @Override
     public final void save(GXXmlWriter writer) throws XMLStreamException {
-        writer.writeElementString("IssuerId", String.valueOf(meterPan.getIssuerId()));
+        writer.writeElementString("IssuerId", meterPan.getIssuerId());
         writer.writeElementString("DecoderReferenceNumber", String.valueOf(meterPan.getDecoderReferenceNumber()));
         writer.writeElementString("PanCheckDigit", meterPan.getPanCheckDigit());
         writer.writeElementString("Commodity", commodity);

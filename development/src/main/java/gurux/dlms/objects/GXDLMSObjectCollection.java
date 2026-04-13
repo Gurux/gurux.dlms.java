@@ -218,6 +218,7 @@ public class GXDLMSObjectCollection extends ArrayList<GXDLMSObject> implements j
                 } else if (target.startsWith("GXDLMSCustom")) {
                     int ot = Integer.parseInt(target.substring(12));
                     obj = GXDLMSClient.createCustomObject(settings, ot);
+                    reader.read();
                 } else if (target.startsWith("GXDLMS")) {
                     type = ObjectType.getEnum(target.substring(6));
                     if (type == null) {
@@ -310,10 +311,10 @@ public class GXDLMSObjectCollection extends ArrayList<GXDLMSObject> implements j
                 reader.read();
             }
         }
-        for (
-
-        GXDLMSObject it : reader.getObjects()) {
-            ((IGXDLMSBase) it).postLoad(reader);
+        for (GXDLMSObject it : reader.getObjects()) {
+            if (it instanceof IGXDLMSBase) {
+                ((IGXDLMSBase) it).postLoad(reader);
+            }
         }
         return reader.getObjects();
     }

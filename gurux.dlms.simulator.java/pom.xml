@@ -52,7 +52,7 @@
     <dependency>
       <groupId>org.gurux</groupId>
       <artifactId>gurux.dlms</artifactId>
-      <version>4.0.90</version>
+      <version>4.0.92</version>
     </dependency>
   </dependencies>
   <licenses>
