@@ -560,7 +560,7 @@ public class GXDLMSIec6205541Attributes extends GXDLMSObject implements IGXDLMSB
     @Override
     public final void save(GXXmlWriter writer) throws XMLStreamException {
         writer.writeElementString("IssuerId", meterPan.getIssuerId());
-        writer.writeElementString("DecoderReferenceNumber", String.valueOf(meterPan.getDecoderReferenceNumber()));
+        writer.writeElementString("DecoderReferenceNumber", meterPan.getDecoderReferenceNumber());
         writer.writeElementString("PanCheckDigit", meterPan.getPanCheckDigit());
         writer.writeElementString("Commodity", commodity);
         writer.writeStartElement("TokenCarrierTypes");
