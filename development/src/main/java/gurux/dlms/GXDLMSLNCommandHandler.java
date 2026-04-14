@@ -255,32 +255,7 @@ final class GXDLMSLNCommandHandler {
                             && attributeIndex == 1) {
                         GXDLMS.appendData(obj, attributeIndex, bb, new byte[] { 0, 0, 40, 0, 0, (byte) 255 });
                     } else {
-                        if (obj instanceof GXDLMSProfileGeneric && attributeIndex == 2) {
-                            DataType dt;
-                            int rowsize = 0;
-                            GXDLMSProfileGeneric pg = (GXDLMSProfileGeneric) e.getTarget();
-                            // Count how many rows we can fit to one PDU.
-                            for (Entry<GXDLMSObject, GXDLMSCaptureObject> it : pg.getCaptureObjects()) {
-                                dt = it.getKey().getDataType(it.getValue().getAttributeIndex());
-                                if (dt == DataType.OCTET_STRING) {
-                                    dt = it.getKey().getUIDataType(it.getValue().getAttributeIndex());
-                                    if (dt == DataType.DATETIME) {
-                                        rowsize += GXCommon.getDataTypeSize(DataType.DATETIME);
-                                    } else if (dt == DataType.DATE) {
-                                        rowsize += GXCommon.getDataTypeSize(DataType.DATE);
-                                    } else if (dt == DataType.TIME) {
-                                        rowsize += GXCommon.getDataTypeSize(DataType.TIME);
-                                    }
-                                } else if (dt == DataType.NONE) {
-                                    rowsize += 2;
-                                } else {
-                                    rowsize += GXCommon.getDataTypeSize(dt);
-                                }
-                            }
-                            if (rowsize != 0) {
-                                e.setRowToPdu(settings.getMaxPduSize() / rowsize);
-                            }
-                        }
+                        verifyProfileGeneric(settings, e);
                         server.notifyRead(new ValueEventArgs[] { e });
                         Object value;
                         if (e.getHandled()) {
@@ -1092,12 +1067,12 @@ final class GXDLMSLNCommandHandler {
             xml.appendStartTag(TranslatorTags.ACCESS_REQUEST_BODY);
             xml.appendStartTag(TranslatorTags.LIST_OF_ACCESS_REQUEST_SPECIFICATION, "Qty", xml.integerToHex(cnt, 2));
         }
-        List<GXDLMSAccessItem> list = new ArrayList<GXDLMSAccessItem>();
+        List<GXDLMSAccessSelectionItem> list = new ArrayList<>();
         byte type;
         for (int pos = 0; pos != cnt; ++pos) {
             type = (byte) data.getUInt8();
-            if (!(type == AccessServiceCommandType.GET || type == AccessServiceCommandType.SET
-                    || type == AccessServiceCommandType.ACTION)) {
+            if (!(type == AccessServiceCommandType.GET || type == AccessServiceCommandType.SET || type == AccessServiceCommandType.ACTION
+                || type == AccessServiceCommandType.GET_WITH_SELECTION || type == AccessServiceCommandType.SET_WITH_SELECTION)) {
                 throw new IllegalArgumentException("Invalid access service command type.");
             }
             // CI
@@ -1106,6 +1081,13 @@ final class GXDLMSLNCommandHandler {
             data.get(ln);
             // Attribute Id
             short attributeIndex = data.getUInt8();
+            int selector = 0;
+            Object parameters = null;
+            if (type == AccessServiceCommandType.GET_WITH_SELECTION || type == AccessServiceCommandType.SET_WITH_SELECTION) {
+                GXDataInfo di = new GXDataInfo();
+                selector = data.getUInt8();
+                parameters = GXCommon.getData(settings, data, di);
+            }
             if (xml != null) {
                 xml.appendStartTag(TranslatorTags.ACCESS_REQUEST_SPECIFICATION);
                 xml.appendStartTag(Command.ACCESS_REQUEST, type);
@@ -1122,7 +1104,8 @@ final class GXDLMSLNCommandHandler {
                         obj = null;
                     }
                 }
-                list.add(new GXDLMSAccessItem(type, obj, attributeIndex));
+                ValueEventArgs e = new ValueEventArgs(settings, obj, attributeIndex, selector, parameters);
+                list.add(new GXDLMSAccessSelectionItem(type, e));
             }
         }
         if (xml != null) {
@@ -1151,30 +1134,39 @@ final class GXDLMSLNCommandHandler {
                     value = GXCommon.toHex((byte[]) value, false);
                 }
                 if (xml == null) {
-                    GXDLMSAccessItem it = list.get(pos);
-                    results.setUInt8(it.getCommand());
+                    GXDLMSAccessSelectionItem it = list.get(pos);
+                    if (it.getCommand() == AccessServiceCommandType.GET_WITH_SELECTION) {
+                        results.setUInt8(AccessServiceCommandType.GET);
+                    } else if (it.getCommand() == AccessServiceCommandType.SET_WITH_SELECTION) {
+                        results.setUInt8(AccessServiceCommandType.SET);
+                    } else {
+                        results.setUInt8(it.getCommand());
+                    }
                     if (it.getTarget() == null) {
                         // If target is unknown.
                         bb.setUInt8(0);
                         results.setUInt8(ErrorCode.UNAVAILABLE_OBJECT.getValue());
                     } else {
-                        ValueEventArgs e = new ValueEventArgs(settings, it.getTarget(), it.getIndex(), 0, value);
+                        ValueEventArgs e = it.getTarget();
                         settings.setIndex(0);
-                        if (it.getCommand() == AccessServiceCommandType.GET) {
+                        if (it.getCommand() == AccessServiceCommandType.GET
+                            || it.getCommand() == AccessServiceCommandType.GET_WITH_SELECTION) {
                             if ((server.notifyGetAttributeAccess(e) & AccessMode.READ.getValue()) == 0) {
                                 // Read Write denied.
                                 results.setUInt8(ErrorCode.READ_WRITE_DENIED.getValue());
                             } else {
+                                verifyProfileGeneric(settings, e);
                                 server.notifyRead(new ValueEventArgs[] { e });
                                 if (e.getHandled()) {
                                     value = e.getValue();
                                 } else {
-                                    value = it.getTarget().getValue(settings, e);
+                                    settings.setCount(e.getRowEndIndex() - e.getRowBeginIndex());
+                                    value = e.getTarget().getValue(settings, e);
                                 }
                                 if (e.isByteArray()) {
                                     bb.set((byte[]) value);
                                 } else {
-                                    GXDLMS.appendData(it.getTarget(), it.getIndex(), bb, value);
+                                    GXDLMS.appendData(e.getTarget(), e.getIndex(), bb, value);
                                 }
                                 server.notifyPostRead(new ValueEventArgs[] { e });
                                 results.setUInt8(ErrorCode.OK.getValue());
@@ -1264,6 +1256,35 @@ final class GXDLMSLNCommandHandler {
                 Logger.getLogger(GXDLMS.class.getName()).log(Level.INFO,
                         "InformationReport message. Unknown object :{0} ",
                         String.valueOf(ObjectType.forValue(ci)) + " " + GXCommon.toLogicalName(ln));
+            }
+        }
+    }
+
+    private static void verifyProfileGeneric(final GXDLMSSettings settings, final ValueEventArgs e) {
+        if (e.getTarget() instanceof GXDLMSProfileGeneric && e.getIndex() == 2) {
+            DataType dt;
+            int rowsize = 0;
+            GXDLMSProfileGeneric pg = (GXDLMSProfileGeneric) e.getTarget();
+            // Count how many rows we can fit to one PDU.
+            for (Entry<GXDLMSObject, GXDLMSCaptureObject> it : pg.getCaptureObjects()) {
+                dt = it.getKey().getDataType(it.getValue().getAttributeIndex());
+                if (dt == DataType.OCTET_STRING) {
+                    dt = it.getKey().getUIDataType(it.getValue().getAttributeIndex());
+                    if (dt == DataType.DATETIME) {
+                        rowsize += GXCommon.getDataTypeSize(DataType.DATETIME);
+                    } else if (dt == DataType.DATE) {
+                        rowsize += GXCommon.getDataTypeSize(DataType.DATE);
+                    } else if (dt == DataType.TIME) {
+                        rowsize += GXCommon.getDataTypeSize(DataType.TIME);
+                    }
+                } else if (dt == DataType.NONE) {
+                    rowsize += 2;
+                } else {
+                    rowsize += GXCommon.getDataTypeSize(dt);
+                }
+            }
+            if (rowsize != 0) {
+                e.setRowToPdu(settings.getMaxPduSize() / rowsize);
             }
         }
     }
