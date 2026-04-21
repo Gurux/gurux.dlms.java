@@ -2091,16 +2091,23 @@ public final class GXCommon {
         } else {
             buff.setUInt8(tm.get(java.util.Calendar.DATE));
         }
+        
+        // Day of week.
         if (dt.getSkip().contains(DateTimeSkips.DAY_OF_WEEK)) {
-            // Week day is not specified.
             buff.setUInt8(0xFF);
         } else {
+            if (dt.getDayOfWeek() == 0) {
             int val = tm.get(java.util.Calendar.DAY_OF_WEEK);
             if (val == java.util.Calendar.SUNDAY) {
                 val = 8;
             }
             buff.setUInt8(val - 1);
+            } else {
+                buff.setUInt8(dt.getDayOfWeek());
         }
+    }
+
+        // NEODOO - END
     }
 
     public static GXDateTime getDateTime(final Object value) {
