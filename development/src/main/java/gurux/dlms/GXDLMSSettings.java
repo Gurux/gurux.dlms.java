@@ -1807,7 +1807,7 @@ public class GXDLMSSettings {
     }
 
     /**
-     * @returnCompression notifier.
+     * @return Compression notifier.
      */
     public IGXCompressionNotifier getCompressionNotifier() {
         return compressionNotifier;
