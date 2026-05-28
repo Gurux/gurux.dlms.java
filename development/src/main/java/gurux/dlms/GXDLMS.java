@@ -58,6 +58,8 @@ import gurux.dlms.asn.GXAsn1Converter;
 import gurux.dlms.asn.GXAsn1Integer;
 import gurux.dlms.asn.GXAsn1Sequence;
 import gurux.dlms.asn.enums.Ecc;
+import gurux.dlms.compression.GXCompressionArgs;
+import gurux.dlms.compression.enums.CompressionOperation;
 import gurux.dlms.ecdsa.GXEcdsa;
 import gurux.dlms.enums.AccessMode3;
 import gurux.dlms.enums.Command;
@@ -1126,40 +1128,38 @@ abstract class GXDLMS {
         byte[] key;
         GXICipher cipher = p.getSettings().getCipher();
         // If client.
-        if (p.cipheredCommand == Command.NONE) {
-            // General protection can be used with pre-established connections.
+        if (p.getCipheredCommand() == Command.NONE) {
             if (((p.getSettings().getConnected() & ConnectionState.DLMS) == 0
-                    || (Conformance.toInteger(p.getSettings().getNegotiatedConformance())
-                            & Conformance.GENERAL_PROTECTION.getValue()) == 0)
-                    && (p.getSettings().getPreEstablishedSystemTitle() == null
+                    || !p.getSettings().getNegotiatedConformance().contains(Conformance.GENERAL_PROTECTION))
+                    // General protection can be used with pre-established
+                    // connections.
+                    && ((p.getSettings().getPreEstablishedSystemTitle() == null
                             || p.getSettings().getPreEstablishedSystemTitle().length == 0
-                            || (Conformance.toInteger(p.getSettings().getProposedConformance())
-                                    & Conformance.GENERAL_PROTECTION.getValue()) == 0)) {
+                            || !p.getSettings().getProposedConformance().contains(Conformance.GENERAL_PROTECTION)))) {
                 if (cipher.getDedicatedKey() != null && (p.getSettings().getConnected() & ConnectionState.DLMS) != 0) {
-                    cmd = getDedMessage(p.getCommand());
+                    cmd = getDedMessage(p.command);
                     key = cipher.getDedicatedKey();
                 } else {
                     cmd = getGloMessage(p.getCommand());
                     key = getBlockCipherKey(p.getSettings());
                 }
             } else {
-                if (p.getSettings().getCipher().getDedicatedKey() != null) {
+                if (cipher.getDedicatedKey() != null) {
                     cmd = Command.GENERAL_DED_CIPHERING;
                     key = cipher.getDedicatedKey();
                 } else {
-                    cmd = Command.GENERAL_DED_CIPHERING;
+                    cmd = Command.GENERAL_GLO_CIPHERING;
                     key = getBlockCipherKey(p.getSettings());
                 }
             }
-        } else // If server.
-        {
-            if (p.cipheredCommand == Command.GENERAL_DED_CIPHERING) {
-                cmd = (byte) Command.GENERAL_DED_CIPHERING;
+        } else {// If server.
+            if (p.getCipheredCommand() == Command.GENERAL_DED_CIPHERING) {
+                cmd = Command.GENERAL_DED_CIPHERING;
                 key = cipher.getDedicatedKey();
-            } else if (p.cipheredCommand == Command.GENERAL_GLO_CIPHERING) {
+            } else if (p.getCipheredCommand() == Command.GENERAL_GLO_CIPHERING) {
                 cmd = Command.GENERAL_GLO_CIPHERING;
                 key = getBlockCipherKey(p.getSettings());
-            } else if (p.getSettings().getCipher().getDedicatedKey() == null || isGloMessage(p.cipheredCommand)) {
+            } else if (isGloMessage(p.getCipheredCommand())) {
                 cmd = getGloMessage(p.command);
                 key = getBlockCipherKey(p.getSettings());
             } else {
@@ -1498,77 +1498,57 @@ abstract class GXDLMS {
         return settings.getCipher().getAuthenticationKey();
     }
 
+    private static byte[] decompress(GXDLMSSettings settings, byte[] tmp) {
+        if (settings.getCompressionNotifier() != null) {
+            GXCompressionArgs args =
+                    new GXCompressionArgs(CompressionOperation.DECOMPRESS, settings.getCompressionOptions(), tmp);
+            settings.getCompressionNotifier().onCompression(args);
+            if (args.getOperation() != CompressionOperation.DECOMPRESS) {
+                throw new RuntimeException("Decompression was not successful.");
+            }
+            return args.getOutputData();
+        }
+        throw new RuntimeException("Data is compressed but compression handler is not defined.");
+    }
+
+    /*
+     * Compress data if compression is used. Compression is used if ciphering is
+     * used and compression options are defined. Compression is done before
+     * ciphering.
+     */
+    private static byte[] compress(GXDLMSSettings settings, byte[] tmp) {
+        if (settings.getCompressionNotifier() != null) {
+            GXCompressionArgs args =
+                    new GXCompressionArgs(CompressionOperation.COMPRESS, settings.getCompressionOptions(), tmp);
+            settings.getCompressionNotifier().onCompression(args);
+            if (args.getOperation() != CompressionOperation.COMPRESS) {
+                // Id data is not compressed.
+                return null;
+            }
+            return args.getOutputData();
+        }
+        throw new RuntimeException("Data compression failed. Compression handler is not defined.");
+    }
+
     /*
      * Cipher using security suite 0.
      * @param p LN settings.
      * @param data Data to encrypt.
      */
-    static byte[] cipher0(final GXDLMSLNParameters p, final byte[] data)
-            throws InvalidKeyException, NoSuchAlgorithmException, NoSuchPaddingException,
-            InvalidAlgorithmParameterException, IllegalBlockSizeException, BadPaddingException {
-        int cmd;
-        byte[] key;
-        GXICipher cipher = p.getSettings().getCipher();
-        // If client.
-        if (p.getCipheredCommand() == Command.NONE) {
-            if (((p.getSettings().getConnected() & ConnectionState.DLMS) == 0
-                    || !p.getSettings().getNegotiatedConformance().contains(Conformance.GENERAL_PROTECTION))
-                    // General protection can be used with pre-established
-                    // connections.
-                    && ((p.getSettings().getPreEstablishedSystemTitle() == null
-                            || p.getSettings().getPreEstablishedSystemTitle().length == 0
-                            || !p.getSettings().getProposedConformance().contains(Conformance.GENERAL_PROTECTION)))) {
-                if (cipher.getDedicatedKey() != null && (p.getSettings().getConnected() & ConnectionState.DLMS) != 0) {
-                    cmd = getDedMessage(p.command);
-                    key = cipher.getDedicatedKey();
-                } else {
-                    cmd = getGloMessage(p.getCommand());
-                    key = getBlockCipherKey(p.getSettings());
-                }
-            } else {
-                if (cipher.getDedicatedKey() != null) {
-                    cmd = Command.GENERAL_DED_CIPHERING;
-                    key = cipher.getDedicatedKey();
-                } else {
-                    cmd = Command.GENERAL_GLO_CIPHERING;
-                    key = getBlockCipherKey(p.getSettings());
-                }
-            }
-        } else {// If server.
-            if (p.getCipheredCommand() == Command.GENERAL_DED_CIPHERING) {
-                cmd = Command.GENERAL_DED_CIPHERING;
-                key = cipher.getDedicatedKey();
-            } else if (p.getCipheredCommand() == Command.GENERAL_GLO_CIPHERING) {
-                cmd = Command.GENERAL_GLO_CIPHERING;
-                key = getBlockCipherKey(p.getSettings());
-            } else if (isGloMessage(p.getCipheredCommand())) {
-                cmd = getGloMessage(p.command);
-                key = getBlockCipherKey(p.getSettings());
-            } else {
-                cmd = getDedMessage(p.command);
-                key = cipher.getDedicatedKey();
+    static byte[] cipher0(final GXDLMSLNParameters p, byte[] data) throws InvalidKeyException, NoSuchAlgorithmException,
+            NoSuchPaddingException, InvalidAlgorithmParameterException, IllegalBlockSizeException, BadPaddingException {
+        AesGcmParameter s = getCipheringParameters(p);
+        if (p.getSettings().getCompressionOptions().getEnableCompression()) {
+            byte[] tmp = compress(p.getSettings(), data);
+            if (tmp != null) {
+                // If data is compressed, set compression bit to security
+                // control.
+                data = tmp;
+                s.setCompression(true);
             }
         }
-        // If external Hardware Security Module is used.
-        CryptoKeyType keyType;
-        switch (cipher.getSecurity()) {
-        case AUTHENTICATION:
-            keyType = CryptoKeyType.AUTHENTICATION;
-            break;
-        case ENCRYPTION:
-            keyType = CryptoKeyType.BLOCK_CIPHER;
-            break;
-        case AUTHENTICATION_ENCRYPTION:
-            keyType = CryptoKeyType
-                    .forValue(CryptoKeyType.AUTHENTICATION.getValue() | CryptoKeyType.BLOCK_CIPHER.getValue());
-            break;
-        default:
-            throw new IllegalArgumentException("Security");
-        }
-        AesGcmParameter s = new AesGcmParameter(p.getSettings(), cmd, cipher.getSecurity(), cipher.getSecuritySuite(),
-                cipher.getInvocationCounter(), cipher.getSystemTitle(), key, getAuthenticationKey(p.getSettings()));
         byte[] tmp = GXCiphering.encrypt(s, data);
-        cipher.setInvocationCounter(1 + cipher.getInvocationCounter());
+        p.getSettings().getCipher().setInvocationCounter(1 + p.getSettings().getCipher().getInvocationCounter());
         return tmp;
     }
 
@@ -5118,6 +5098,9 @@ abstract class GXDLMS {
 
                 }
                 byte[] tmp = GXCiphering.decrypt(settings.getCipher(), p, bb);
+                if (p.isCompression()) {
+                    tmp = decompress(settings, tmp);
+                }
                 data.getData().set(tmp);
                 if (settings.getCryptoNotifier() != null && data.isComplete()
                         && !data.getMoreData().contains(RequestTypes.FRAME)) {

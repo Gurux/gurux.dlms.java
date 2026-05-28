@@ -92,6 +92,7 @@ import gurux.dlms.objects.IGXDLMSBase;
 import gurux.dlms.objects.enums.CertificateType;
 import gurux.dlms.objects.enums.SecuritySuite;
 import gurux.dlms.secure.GXSecure;
+import gurux.dlms.compression.IGXCompressionNotifier;
 
 /**
  * GXDLMS implements methods to communicate with DLMS/COSEM metering devices.
@@ -211,7 +212,9 @@ public class GXDLMSClient {
         IGXCryptoNotifier notifier1 = this instanceof IGXCryptoNotifier ? (IGXCryptoNotifier) this : null;
         IGXCustomObjectNotifier notifier2 =
                 this instanceof IGXCustomObjectNotifier ? (IGXCustomObjectNotifier) this : null;
-        settings = new GXDLMSSettings(false, notifier1, notifier2);
+        IGXCompressionNotifier notifier3 =
+                this instanceof IGXCompressionNotifier ? (IGXCompressionNotifier) this : null;
+        settings = new GXDLMSSettings(false, notifier1, notifier2, notifier3);
         setUseLogicalNameReferencing(useLogicalNameReferencing);
         setClientAddress(clientAddress);
         setServerAddress(serverAddress);
@@ -1660,7 +1663,7 @@ public class GXDLMSClient {
      */
     public static Object getValue(final GXByteBuffer data, final boolean useUtc) {
         GXDataInfo info = new GXDataInfo();
-        GXDLMSSettings settings = new GXDLMSSettings(false, null, null);
+        GXDLMSSettings settings = new GXDLMSSettings(false, null, null, null);
         settings.setUseUtc2NormalTime(useUtc);
         return GXCommon.getData(settings, data, info);
     }
@@ -1713,7 +1716,7 @@ public class GXDLMSClient {
         if (value == null) {
             return null;
         }
-        GXDLMSSettings settings = new GXDLMSSettings(false, null, null);
+        GXDLMSSettings settings = new GXDLMSSettings(false, null, null, null);
         settings.setUseUtc2NormalTime(useUtc);
         return changeType(value, type, settings);
     }

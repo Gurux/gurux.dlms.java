@@ -447,7 +447,7 @@ public class GXDLMSTranslator {
     public final boolean findNextFrame(final GXByteBuffer data, final GXByteBuffer pdu)
             throws InvalidKeyException, NoSuchAlgorithmException, NoSuchPaddingException,
             InvalidAlgorithmParameterException, IllegalBlockSizeException, BadPaddingException, SignatureException {
-        GXDLMSSettings settings = new GXDLMSSettings(true, null, null);
+        GXDLMSSettings settings = new GXDLMSSettings(true, null, null, null);
         GXReplyData reply = new GXReplyData();
         reply.setXml(new GXDLMSTranslatorStructure(outputType, isOmitXmlNameSpace(), hex, getShowStringAsHex(),
                 comments, tags));
@@ -501,7 +501,7 @@ public class GXDLMSTranslator {
      */
     @SuppressWarnings("squid:S135")
     public final boolean findNextFrame(final GXByteBuffer data, final GXByteBuffer pdu, final InterfaceType type) {
-        GXDLMSSettings settings = new GXDLMSSettings(true, null, null);
+        GXDLMSSettings settings = new GXDLMSSettings(true, null, null, null);
         settings.setInterfaceType(type);
         GXReplyData reply = new GXReplyData();
         reply.setXml(
@@ -645,8 +645,8 @@ public class GXDLMSTranslator {
         GXReplyData data = new GXReplyData();
         data.setXml(
                 new GXDLMSTranslatorStructure(outputType, omitXmlNameSpace, hex, getShowStringAsHex(), comments, tags));
-        GXDLMSSettings settings =
-                new GXDLMSSettings(true, this instanceof IGXCryptoNotifier ? (IGXCryptoNotifier) this : null, null);
+        GXDLMSSettings settings = new GXDLMSSettings(true,
+                this instanceof IGXCryptoNotifier ? (IGXCryptoNotifier) this : null, null, null);
         settings.setInterfaceType(framing);
         GXDLMS.getData(settings, value, data, null);
         return data.getData().array();
@@ -891,8 +891,8 @@ public class GXDLMSTranslator {
             data.setXml(xml);
             GXByteBuffer value = msg.getMessage();
             int offset = value.position();
-            GXDLMSSettings settings =
-                    new GXDLMSSettings(true, this instanceof IGXCryptoNotifier ? (IGXCryptoNotifier) this : null, null);
+            GXDLMSSettings settings = new GXDLMSSettings(true,
+                    this instanceof IGXCryptoNotifier ? (IGXCryptoNotifier) this : null, null, null);
             getCiphering(settings, true);
             // If HDLC framing.
             if (value.getUInt8(value.position()) == 0x7e) {
@@ -1522,8 +1522,8 @@ public class GXDLMSTranslator {
             throw new IllegalArgumentException("value");
         }
         try {
-            GXDLMSSettings settings =
-                    new GXDLMSSettings(true, this instanceof IGXCryptoNotifier ? (IGXCryptoNotifier) this : null, null);
+            GXDLMSSettings settings = new GXDLMSSettings(true,
+                    this instanceof IGXCryptoNotifier ? (IGXCryptoNotifier) this : null, null, null);
             short cmd = value.getUInt8();
             if (msg != null) {
                 msg.setCommand(cmd);
@@ -1547,13 +1547,13 @@ public class GXDLMSTranslator {
             case Command.INITIATE_REQUEST:
                 value.position(0);
                 settings = new GXDLMSSettings(true, this instanceof IGXCryptoNotifier ? (IGXCryptoNotifier) this : null,
-                        null);
+                        null, null);
                 GXAPDU.parseInitiate(true, settings, settings.getCipher(), value, xml);
                 break;
             case Command.INITIATE_RESPONSE:
                 value.position(0);
                 settings = new GXDLMSSettings(false,
-                        this instanceof IGXCryptoNotifier ? (IGXCryptoNotifier) this : null, null);
+                        this instanceof IGXCryptoNotifier ? (IGXCryptoNotifier) this : null, null, null);
                 getCiphering(settings, true);
                 GXAPDU.parseInitiate(true, settings, settings.getCipher(), value, xml);
                 break;
@@ -1567,7 +1567,7 @@ public class GXDLMSTranslator {
             case Command.AARE:
                 value.position(0);
                 settings = new GXDLMSSettings(false,
-                        this instanceof IGXCryptoNotifier ? (IGXCryptoNotifier) this : null, null);
+                        this instanceof IGXCryptoNotifier ? (IGXCryptoNotifier) this : null, null, null);
                 getCiphering(settings, true);
                 GXAPDU.parsePDU(settings, settings.getCipher(), value, xml);
                 if (msg != null) {

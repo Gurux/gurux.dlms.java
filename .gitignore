@@ -242,3 +242,5 @@ gurux.dlms.simulator.java/trace.txt
 gurux.dlms.simulator.java/logFile.txt
 gurux.dlms.simulator.java/dependency-reduced-pom.xml
 *.pem
+/development/.vscode
+/.vscode

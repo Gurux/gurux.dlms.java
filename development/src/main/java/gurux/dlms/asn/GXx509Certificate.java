@@ -5,6 +5,7 @@ package gurux.dlms.asn;
 
 import java.io.IOException;
 import java.math.BigInteger;
+import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
@@ -911,7 +912,8 @@ public class GXx509Certificate {
      *             IO exception.
      */
     public static GXx509Certificate load(final Path path) throws IOException {
-        return GXx509Certificate.fromPem(Files.readString(path));
+        String str = new String(Files.readAllBytes(path), StandardCharsets.US_ASCII);
+        return GXx509Certificate.fromPem(str);
     }
 
     /**
@@ -923,7 +925,7 @@ public class GXx509Certificate {
      *             IO exception.
      */
     public void save(final Path path) throws IOException {
-        Files.write(path, toPem().getBytes(), StandardOpenOption.CREATE);
+        Files.write(path, toPem().getBytes(StandardCharsets.US_ASCII), StandardOpenOption.CREATE);
     }
 
     /**

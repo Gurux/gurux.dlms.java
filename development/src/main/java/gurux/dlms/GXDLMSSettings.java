@@ -47,6 +47,8 @@ import java.util.logging.Logger;
 import gurux.dlms.asn.GXPkcs8;
 import gurux.dlms.asn.GXx509Certificate;
 import gurux.dlms.asn.enums.KeyUsage;
+import gurux.dlms.compression.GXCompressionOptions;
+import gurux.dlms.compression.IGXCompressionNotifier;
 import gurux.dlms.enums.Authentication;
 import gurux.dlms.enums.Conformance;
 import gurux.dlms.enums.ConnectionState;
@@ -323,6 +325,16 @@ public class GXDLMSSettings {
     private final IGXCustomObjectNotifier customObjectNotifier;
 
     /**
+     * Compression notifier.
+     */
+    private final IGXCompressionNotifier compressionNotifier;
+
+    /**
+     * Compression options.
+     */
+    private GXCompressionOptions compressionOptions;
+
+    /**
      * Block number acknowledged in GBT.
      */
     private int blockNumberAck;
@@ -479,10 +491,13 @@ public class GXDLMSSettings {
     /*
      * Constructor.
      */
-    GXDLMSSettings(final boolean isServer, final IGXCryptoNotifier notifier, final IGXCustomObjectNotifier notifier2) {
+    GXDLMSSettings(final boolean isServer, final IGXCryptoNotifier notifier, final IGXCustomObjectNotifier notifier2,
+            final IGXCompressionNotifier notifier3) {
         server = isServer;
         cryptoNotifier = notifier;
         customObjectNotifier = notifier2;
+        compressionNotifier = notifier3;
+        compressionOptions = new GXCompressionOptions();
         objects = new GXDLMSObjectCollection();
         hdlcSettings = new GXDLMSLimits(this);
         plc = new GXPlcSettings(this);
@@ -1775,5 +1790,26 @@ public class GXDLMSSettings {
      */
     public IGXCustomObjectNotifier getCustomObjectNotifier() {
         return customObjectNotifier;
+    }
+
+    /// <summary>
+    /// Gets or sets the compression options used for data transmission.
+    /// </summary>
+    public GXCompressionOptions getCompressionOptions() {
+        return compressionOptions;
+    }
+
+    public void setCompressionOptions(final GXCompressionOptions value) {
+        if (value == null) {
+            throw new NullPointerException("CompressionOptions");
+        }
+        compressionOptions = value;
+    }
+
+    /**
+     * @returnCompression notifier.
+     */
+    public IGXCompressionNotifier getCompressionNotifier() {
+        return compressionNotifier;
     }
 }

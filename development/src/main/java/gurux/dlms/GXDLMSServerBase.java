@@ -12,6 +12,7 @@ import javax.crypto.BadPaddingException;
 import javax.crypto.IllegalBlockSizeException;
 import javax.crypto.NoSuchPaddingException;
 
+import gurux.dlms.compression.IGXCompressionNotifier;
 import gurux.dlms.enums.AccessMode;
 import gurux.dlms.enums.AccessMode3;
 import gurux.dlms.enums.AcseServiceProvider;
@@ -297,7 +298,9 @@ public class GXDLMSServerBase {
         IGXCryptoNotifier notifier1 = this instanceof IGXCryptoNotifier ? (IGXCryptoNotifier) this : null;
         IGXCustomObjectNotifier notifier2 =
                 this instanceof IGXCustomObjectNotifier ? (IGXCustomObjectNotifier) this : null;
-        settings = new GXDLMSSettings(true, notifier1, notifier2);
+        IGXCompressionNotifier notifier3 =
+                this instanceof IGXCompressionNotifier ? (IGXCompressionNotifier) this : null;
+        settings = new GXDLMSSettings(true, notifier1, notifier2, notifier3);
         owner = forOwner;
         settings.setUseLogicalNameReferencing(logicalNameReferencing);
         settings.setInterfaceType(type);

@@ -594,6 +594,14 @@ public final class GXSecure {
             LOGGER.log(Level.FINEST, "Authentication key: {0}", GXCommon.toHex(p.getAuthenticationKey()));
             LOGGER.log(Level.FINEST, "Block cipher key key: {0}", GXCommon.toHex(p.getBlockCipherKey()));
         }
+        int tag = p.getSecurity().getValue() | p.getSecuritySuite().getValue();
+        if (p.isBroadcast()) {
+            tag |= 0x40;
+        }
+        if (p.isCompression()) {
+            tag |= 0x80;
+        }
+
         // If external Hardware Security Module is used.
         CryptoKeyType keyType;
         switch (p.getSecurity()) {
@@ -614,7 +622,7 @@ public final class GXSecure {
         GXByteBuffer bb = new GXByteBuffer(10 + data.length);
         if (encrypt) {
             if (p.getType() == CountType.PACKET) {
-                bb.setUInt8(p.getSecurity().getValue() | p.getSecuritySuite().getValue());
+                bb.setUInt8(tag);
                 bb.setUInt32(p.getInvocationCounter());
             }
             if (p.getSecurity() == Security.AUTHENTICATION) {
@@ -636,7 +644,7 @@ public final class GXSecure {
                     bb.set(crypted);
                 } else {
                     GXByteBuffer data2 = new GXByteBuffer();
-                    data2.setUInt8(p.getSecurity().getValue() | p.getSecuritySuite().getValue());
+                    data2.setUInt8(tag);
                     data2.set(p.getAuthenticationKey());
                     c.updateAAD(data2.array());
                     bb.set(c.doFinal(data));
@@ -686,13 +694,6 @@ public final class GXSecure {
                 return tmp;
             }
             GXByteBuffer data2 = new GXByteBuffer();
-            int tag = p.getSecurity().getValue() | p.getSecuritySuite().getValue();
-            if (p.isCompressed()) {
-                tag |= 0x80;
-            }
-            if (p.isBroadcasted()) {
-                tag |= 0x40;
-            }
             data2.setUInt8(tag);
             data2.set(p.getAuthenticationKey());
             c.updateAAD(data2.array());
@@ -951,13 +952,15 @@ public final class GXSecure {
             p.setSecurity(Security.forValue(sc & 0x30));
             if ((sc & 0x80) != 0) {
                 LOGGER.log(Level.FINEST, "Compression is used.");
+                p.setCompression(true);
             }
             if ((sc & 0x40) != 0) {
-                LOGGER.log(Level.FINEST, "Key_Set is used.");
-                if (p.getXml() == null) {
+                LOGGER.log(Level.FINEST, "Broadcast is used.");
+                if (p.getXml() == null && p.getSettings().getCipher().getBroadcastBlockCipherKey() == null) {
                     throw new GXDLMSExceptionResponse(ExceptionStateError.SERVICE_NOT_ALLOWED,
                             ExceptionServiceError.DECIPHERING_ERROR, null);
                 }
+                p.setBroadcast(true);
             }
             if ((sc & 0x20) != 0) {
                 LOGGER.log(Level.FINEST, "Encryption is applied.");

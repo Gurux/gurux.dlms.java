@@ -80,7 +80,7 @@ class GXDLMSXmlSettings {
      */
     GXDLMSXmlSettings(final TranslatorOutputType type, final boolean numericsAsHex, final boolean hex,
             final HashMap<String, Integer> list) {
-        settings = new GXDLMSSettings(true, null, null);
+        settings = new GXDLMSSettings(true, null, null, null);
         outputType = type;
         showNumericsAsHex = outputType != TranslatorOutputType.STANDARD_XML && numericsAsHex;
         showStringAsHex = hex;

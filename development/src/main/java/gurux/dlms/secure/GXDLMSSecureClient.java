@@ -44,6 +44,7 @@ import javax.crypto.NoSuchPaddingException;
 
 import gurux.dlms.GXDLMSClient;
 import gurux.dlms.asn.GXx509Certificate;
+import gurux.dlms.compression.GXCompressionOptions;
 import gurux.dlms.enums.Authentication;
 import gurux.dlms.enums.InterfaceType;
 
@@ -104,6 +105,20 @@ public class GXDLMSSecureClient extends GXDLMSClient {
      */
     public final GXCiphering getCiphering() {
         return ciphering;
+    }
+
+    /// <summary>
+    /// Gets or sets the compression options used for data transmission.
+    /// </summary>
+    public GXCompressionOptions getCompressionOptions() {
+        return settings.getCompressionOptions();
+    }
+
+    public void setCompressionOptions(final GXCompressionOptions value) {
+        if (value == null) {
+            throw new NullPointerException("CompressionOptions");
+        }
+        settings.setCompressionOptions(value);
     }
 
     /**

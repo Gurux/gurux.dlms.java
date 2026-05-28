@@ -61,6 +61,7 @@ import gurux.dlms.objects.GXDLMSCaptureObject;
 import gurux.dlms.objects.GXDLMSObject;
 import gurux.dlms.objects.GXDLMSObjectCollection;
 import gurux.dlms.objects.GXDLMSPushSetup;
+import gurux.dlms.compression.IGXCompressionNotifier;
 
 /**
  * This class is used to send data notify and push messages to the clients.
@@ -91,7 +92,9 @@ public class GXDLMSNotify {
         IGXCryptoNotifier notifier1 = this instanceof IGXCryptoNotifier ? (IGXCryptoNotifier) this : null;
         IGXCustomObjectNotifier notifier2 =
                 this instanceof IGXCustomObjectNotifier ? (IGXCustomObjectNotifier) this : null;
-        settings = new GXDLMSSettings(true, notifier1, notifier2);
+        IGXCompressionNotifier notifier3 =
+                this instanceof IGXCompressionNotifier ? (IGXCompressionNotifier) this : null;
+        settings = new GXDLMSSettings(true, notifier1, notifier2, notifier3);
         setUseLogicalNameReferencing(useLogicalNameReferencing);
         settings.setClientAddress(clientAddress);
         settings.setServerAddress(serverAddress);

@@ -123,9 +123,14 @@ public class AesGcmParameter {
     private boolean ignoreSystemTitle;
 
     /*
-     * Is data broadcasted.
+     * Is data send as a broadcast or unicast.
      */
-    private boolean broadcasted;
+    private boolean broadcast;
+
+    /*
+     * V.44 Compression is used.
+     */
+    private boolean compression;
 
     private GXDLMSTranslatorStructure xml;
 
@@ -147,9 +152,8 @@ public class AesGcmParameter {
      * @param forAuthenticationKey
      *            Authentication key.
      */
-    public AesGcmParameter(final GXDLMSSettings s, final int forTag,
-            final Security forSecurity, final SecuritySuite forSecuritySuite,
-            final long forInvocationCounter, final byte[] forSystemTitle,
+    public AesGcmParameter(final GXDLMSSettings s, final int forTag, final Security forSecurity,
+            final SecuritySuite forSecuritySuite, final long forInvocationCounter, final byte[] forSystemTitle,
             final byte[] forBlockCipherKey, final byte[] forAuthenticationKey) {
         settings = s;
         tag = forTag;
@@ -188,13 +192,10 @@ public class AesGcmParameter {
      * @param forOtherInformation
      *            Other information.
      */
-    public AesGcmParameter(final int forTag, GXDLMSSettings forSettings,
-            final Security forSecurity, final SecuritySuite forSecuritySuite,
-            final long forInvocationCounter, final byte[] kdf,
-            final byte[] forAuthenticationKey,
-            final byte[] forOriginatorSystemTitle,
-            final byte[] forRecipientSystemTitle, final byte[] forDateTime,
-            final byte[] forOtherInformation) {
+    public AesGcmParameter(final int forTag, GXDLMSSettings forSettings, final Security forSecurity,
+            final SecuritySuite forSecuritySuite, final long forInvocationCounter, final byte[] kdf,
+            final byte[] forAuthenticationKey, final byte[] forOriginatorSystemTitle,
+            final byte[] forRecipientSystemTitle, final byte[] forDateTime, final byte[] forOtherInformation) {
         settings = forSettings;
         tag = forTag;
         security = forSecurity;
@@ -221,9 +222,8 @@ public class AesGcmParameter {
      * @param forauthenticationKey
      *            Authentication key.
      */
-    public AesGcmParameter(final GXDLMSSettings forSettings,
-            final byte[] forsystemTitle, final byte[] forblockCipherKey,
-            final byte[] forauthenticationKey) {
+    public AesGcmParameter(final GXDLMSSettings forSettings, final byte[] forsystemTitle,
+            final byte[] forblockCipherKey, final byte[] forauthenticationKey) {
         systemTitle = forsystemTitle;
         blockCipherKey = forblockCipherKey;
         authenticationKey = forauthenticationKey;
@@ -492,17 +492,32 @@ public class AesGcmParameter {
     }
 
     /**
-     * @return Is data broadcasted.
+     * @return Is data send as a broadcast or unicast.
      */
-    public boolean isBroadcasted() {
-        return broadcasted;
+    public boolean isBroadcast() {
+        return broadcast;
     }
 
     /**
      * @param value
-     *            Is data broadcasted.
+     *            Is data send as a broadcast or unicast.
      */
-    public void setBroadcasted(final boolean value) {
-        broadcasted = value;
+    public void setBroadcast(final boolean value) {
+        broadcast = value;
+    }
+
+    /**
+     * @return V.44 Compression is used.
+     */
+    public boolean isCompression() {
+        return compression;
+    }
+
+    /**
+     * @param value
+     *            V.44 Compression is used.
+     */
+    public void setCompression(final boolean value) {
+        compression = value;
     }
 }
