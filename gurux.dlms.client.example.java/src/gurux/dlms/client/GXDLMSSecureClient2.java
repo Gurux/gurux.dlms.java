@@ -33,6 +33,7 @@
 //---------------------------------------------------------------------------
 package gurux.dlms.client;
 
+import java.io.Console;
 import java.io.IOException;
 import java.nio.file.Path;
 import java.nio.file.Paths;
@@ -45,6 +46,7 @@ import javax.crypto.NoSuchPaddingException;
 import javax.crypto.spec.GCMParameterSpec;
 import javax.crypto.spec.SecretKeySpec;
 
+import gurux.common.GXCommon;
 import gurux.dlms.GXByteBuffer;
 import gurux.dlms.GXCryptoKeyParameter;
 import gurux.dlms.GXDLMSTranslator;
@@ -52,18 +54,22 @@ import gurux.dlms.IGXCryptoNotifier;
 import gurux.dlms.IGXCustomObjectNotifier;
 import gurux.dlms.asn.GXPkcs8;
 import gurux.dlms.asn.GXx509Certificate;
+import gurux.dlms.compression.GXCompressionArgs;
+import gurux.dlms.compression.IGXCompressionNotifier;
+import gurux.dlms.compression.enums.CompressionOperation;
 import gurux.dlms.objects.GXDLMSObject;
 import gurux.dlms.objects.enums.CertificateType;
 import gurux.dlms.objects.enums.SecuritySuite;
 import gurux.dlms.secure.GXDLMSSecureClient;
 
-public class GXDLMSSecureClient2 extends GXDLMSSecureClient implements IGXCryptoNotifier, IGXCustomObjectNotifier {
+public class GXDLMSSecureClient2 extends GXDLMSSecureClient
+        implements IGXCryptoNotifier, IGXCustomObjectNotifier, IGXCompressionNotifier {
 
     /**
      * Constructor.
      * 
      * @param useLogicalNameReferencing
-     *            Is Logical Name referencing used.
+     *                                  Is Logical Name referencing used.
      */
     public GXDLMSSecureClient2(final boolean useLogicalNameReferencing) {
         super(useLogicalNameReferencing);
@@ -73,13 +79,13 @@ public class GXDLMSSecureClient2 extends GXDLMSSecureClient implements IGXCrypto
      * Return correct path.
      * 
      * @param securitySuite
-     *            Security Suite.
+     *                      Security Suite.
      * @param type
-     *            Certificate type.
+     *                      Certificate type.
      * @param path
-     *            Folder.
+     *                      Folder.
      * @param systemTitle
-     *            System title.
+     *                      System title.
      * @return Path to the certificate file or folder if system title is not
      *         given.
      */
@@ -96,14 +102,14 @@ public class GXDLMSSecureClient2 extends GXDLMSSecureClient implements IGXCrypto
             return tmp;
         }
         switch (type) {
-        case DIGITAL_SIGNATURE:
-            pre = "D";
-            break;
-        case KEY_AGREEMENT:
-            pre = "A";
-            break;
-        default:
-            throw new RuntimeException("Invalid type.");
+            case DIGITAL_SIGNATURE:
+                pre = "D";
+                break;
+            case KEY_AGREEMENT:
+                pre = "A";
+                break;
+            default:
+                throw new RuntimeException("Invalid type.");
         }
         return Paths.get(tmp.toString(), pre + GXDLMSTranslator.toHex(systemTitle, false) + ".pem");
     }
@@ -111,15 +117,15 @@ public class GXDLMSSecureClient2 extends GXDLMSSecureClient implements IGXCrypto
     @Override
     public void onPdu(Object sender, byte[] data) {
         /*
-        // Send and received PDUs are converted to XML.
-        GXDLMSTranslator translator = new GXDLMSTranslator();
-        translator.setComments(true);
-        translator.setSecuritySuite(getCiphering().getSecuritySuite());
-        translator.setBlockCipherKey(getCiphering().getBlockCipherKey());
-        translator.setAuthenticationKey(getCiphering().getAuthenticationKey());
-        String xml = translator.pduToXml(data);
-        System.out.print(xml);
-        */
+         * // Send and received PDUs are converted to XML.
+         * GXDLMSTranslator translator = new GXDLMSTranslator();
+         * translator.setComments(true);
+         * translator.setSecuritySuite(getCiphering().getSecuritySuite());
+         * translator.setBlockCipherKey(getCiphering().getBlockCipherKey());
+         * translator.setAuthenticationKey(getCiphering().getAuthenticationKey());
+         * String xml = translator.pduToXml(data);
+         * System.out.print(xml);
+         */
     }
 
     /**
@@ -213,5 +219,20 @@ public class GXDLMSSecureClient2 extends GXDLMSSecureClient implements IGXCrypto
         // return new ManufacturerSpecificObject();
         // }
         return null;
+    }
+
+    @Override
+    public void onCompression(GXCompressionArgs args) {
+        if (args.getOperation() == CompressionOperation.COMPRESS) {
+            // Compress data using GXV44 compression.
+            // This is just an example, you can use any compression method you like.
+            // GXV44Encoder encoder = new GXV44Encoder();
+            // args.setOutputData(encoder.compress(args.getInputData()));
+        } else {
+            // Decompress data using GXV44 compression.
+            // This is just an example, you can use any compression method you like.
+            // GXV44Decoder decoder = new GXV44Decoder();
+            // args.setOutputData(decoder.decompress(args.getInputData()));
+        }
     }
 }

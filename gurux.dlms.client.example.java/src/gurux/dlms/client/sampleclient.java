@@ -61,7 +61,7 @@ public class sampleclient {
 
     /**
      * @param args
-     *            the command line arguments
+     *             the command line arguments
      * @throws IOException
      * @throws XMLStreamException
      * @throws SignatureException
@@ -98,6 +98,11 @@ public class sampleclient {
             }
             ////////////////////////////////////////
             reader = new GXDLMSReader(settings.client, settings.media, settings.trace, settings.invocationCounter);
+
+            // Enable Compression:
+            // Add compression package to onCompression event handler when compression is
+            // needed.
+            // settings.client.getCompressionOptions().setEnableCompression(true);
             try {
                 settings.media.open();
             } catch (Exception ex) {
