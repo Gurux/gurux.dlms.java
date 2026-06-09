@@ -1942,22 +1942,36 @@ abstract class GXDLMS {
             throw new IllegalArgumentException("Invalid CoAP option type.");
         }
         // Add opt delta to type.
-        if (type - last < 13) {
-            len |= ((type - last) << 4);
-            bb.setUInt8(len);
-        } else if (type - last < 269) {
-            len |= (13 << 4);
-            bb.setUInt8(len);
-            // Opt delta extended.
-            int delta = (type - last + 1);
-            bb.setUInt8(delta);
+        int delta = (type - last);
+        if (value.size() > 1034) {
+            throw new IllegalArgumentException("CoAP option value is too long.");
+        }
+        byte deltaNibble;
+        if (delta < 13) {
+            deltaNibble = (byte) delta;
+        } else if (delta < 269) {
+            deltaNibble = 13;
         } else {
-            len |= (byte) (14 << 4);
-            bb.setUInt8(len);
-            // Opt delta extended.
-            int delta = type;
-            delta -= (269 + last);
-            bb.setUInt16(delta);
+            deltaNibble = 14;
+        }
+        byte lengthNibble;
+        if (value.size() < 13) {
+            lengthNibble = (byte) value.size();
+        } else if (value.size() < 269) {
+            lengthNibble = 13;
+        } else {
+            lengthNibble = 14;
+        }
+        bb.setUInt8((byte) ((deltaNibble << 4) | lengthNibble));
+        if (deltaNibble == 13) {
+            bb.setUInt8((byte) (delta - 13));
+        } else if (deltaNibble == 14) {
+            bb.setUInt16(delta - 269);
+        }
+        if (lengthNibble == 13) {
+            bb.setUInt8((byte) (value.size() - 13));
+        } else if (lengthNibble == 14) {
+            bb.setUInt16(value.size() - 269);
         }
         bb.set(value);
         return type;
@@ -3664,7 +3678,7 @@ abstract class GXDLMS {
             throws InvalidKeyException, NoSuchAlgorithmException, NoSuchPaddingException,
             InvalidAlgorithmParameterException, IllegalBlockSizeException, BadPaddingException, SignatureException {
         if (buff.size() - buff.position() < 8) {
-            return false;
+            // MIKKO return false;
         }
         int pos = buff.position();
         try {
