@@ -3678,7 +3678,7 @@ abstract class GXDLMS {
             throws InvalidKeyException, NoSuchAlgorithmException, NoSuchPaddingException,
             InvalidAlgorithmParameterException, IllegalBlockSizeException, BadPaddingException, SignatureException {
         if (buff.size() - buff.position() < 8) {
-            // MIKKO return false;
+            return false;
         }
         int pos = buff.position();
         try {
