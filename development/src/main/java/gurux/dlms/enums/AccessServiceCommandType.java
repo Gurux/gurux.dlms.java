@@ -27,4 +27,12 @@ public final class AccessServiceCommandType {
      * Action request or response.
      */
     public static final int ACTION = 3;
+    /**
+     * Get with selection request or response.
+     */
+    public static final int GET_WITH_SELECTION = 4;
+    /**
+     * Set with selection request or response.
+     */
+    public static final int SET_WITH_SELECTION = 5;
 }
