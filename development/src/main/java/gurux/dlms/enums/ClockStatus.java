@@ -132,12 +132,10 @@ public enum ClockStatus {
      * @return The enumerated value, which represents the integer.
      */
     public static java.util.Set<ClockStatus> forValue(final int value) {
-        java.util.Set<ClockStatus> types;
+        java.util.Set<ClockStatus> types = new HashSet<ClockStatus>();
         if (value == 0) {
-            types = new HashSet<ClockStatus>();
             types.add(ClockStatus.OK);
-        } else {
-            types = new HashSet<ClockStatus>();
+        } else if (value != 0xFF) {
             ClockStatus[] enums = getEnumConstants();
             for (int pos = 0; pos != enums.length; ++pos) {
                 if (enums[pos] != ClockStatus.OK
