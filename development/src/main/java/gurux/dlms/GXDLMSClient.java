@@ -34,6 +34,8 @@
 
 package gurux.dlms;
 
+import java.io.ByteArrayOutputStream;
+import java.math.BigInteger;
 import java.security.InvalidAlgorithmParameterException;
 import java.security.InvalidKeyException;
 import java.security.KeyPair;
@@ -57,8 +59,7 @@ import javax.crypto.BadPaddingException;
 import javax.crypto.IllegalBlockSizeException;
 import javax.crypto.NoSuchPaddingException;
 
-import gurux.dlms.asn.GXAsn1Converter;
-import gurux.dlms.asn.GXAsn1Integer;
+import gurux.dlms.compression.IGXCompressionNotifier;
 import gurux.dlms.enums.AccessMode;
 import gurux.dlms.enums.AccessMode3;
 import gurux.dlms.enums.AccessServiceCommandType;
@@ -92,7 +93,6 @@ import gurux.dlms.objects.IGXDLMSBase;
 import gurux.dlms.objects.enums.CertificateType;
 import gurux.dlms.objects.enums.SecuritySuite;
 import gurux.dlms.secure.GXSecure;
-import gurux.dlms.compression.IGXCompressionNotifier;
 
 /**
  * GXDLMS implements methods to communicate with DLMS/COSEM metering devices.
@@ -1069,6 +1069,27 @@ public class GXDLMSClient {
         return method(0xFA00, ObjectType.ASSOCIATION_SHORT_NAME, 8, challenge, DataType.OCTET_STRING);
     }
 
+    private static byte[] p1363ToDer(final Signature sig, final byte[] signature) {
+        int partLength = signature.length / 2;
+
+        byte[] rBytes = Arrays.copyOfRange(signature, 0, partLength);
+        byte[] sBytes = Arrays.copyOfRange(signature, partLength, signature.length);
+
+        byte[] r = new BigInteger(1, rBytes).toByteArray();
+        byte[] s = new BigInteger(1, sBytes).toByteArray();
+        int sequenceLength = 2 + r.length + 2 + s.length;
+        ByteArrayOutputStream out = new ByteArrayOutputStream();
+        out.write(0x30);
+        out.write(sequenceLength);
+        out.write(0x02);
+        out.write(r.length);
+        out.writeBytes(r);
+        out.write(0x02);
+        out.write(s.length);
+        out.writeBytes(s);
+        return out.toByteArray();
+    }
+
     /**
      * Parse server's challenge if HLS authentication is used.
      * 
@@ -1119,17 +1140,8 @@ public class GXDLMSClient {
                         bb.set(settings.getCtoSChallenge());
                         bb.set(settings.getStoCChallenge());
                         ver.update(bb.array());
-                        bb.size(0);
-                        bb.set(value);
-                        if (settings.getCipher().getSecuritySuite() == SecuritySuite.SUITE_1) {
-                            value = GXAsn1Converter.toByteArray(new Object[] { new GXAsn1Integer(bb.subArray(0, 32)),
-                                    new GXAsn1Integer(bb.subArray(32, 32)) });
-                        } else {
-                            value = GXAsn1Converter.toByteArray(new Object[] { new GXAsn1Integer(bb.subArray(0, 48)),
-                                    new GXAsn1Integer(bb.subArray(48, 48)) });
-                        }
+                        value = p1363ToDer(ver, value);
                         equals = ver.verify(value);
-
                     } catch (Exception ex) {
                         throw new RuntimeException(ex.getMessage());
                     }
