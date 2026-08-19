@@ -90,6 +90,7 @@ import gurux.dlms.objects.GXDLMSCertificateInfo;
 import gurux.dlms.objects.GXDLMSCompactData;
 import gurux.dlms.objects.GXDLMSData;
 import gurux.dlms.objects.GXDLMSDemandRegister;
+import gurux.dlms.objects.GXDLMSImageTransfer;
 import gurux.dlms.objects.GXDLMSObject;
 import gurux.dlms.objects.GXDLMSObjectCollection;
 import gurux.dlms.objects.GXDLMSProfileGeneric;
@@ -99,6 +100,7 @@ import gurux.dlms.objects.GXXmlWriterSettings;
 import gurux.dlms.objects.IGXDLMSBase;
 import gurux.dlms.objects.enums.CertificateEntity;
 import gurux.dlms.objects.enums.CertificateType;
+import gurux.dlms.objects.enums.ImageTransferStatus;
 import gurux.io.BaudRate;
 import gurux.io.Parity;
 import gurux.io.StopBits;
@@ -232,6 +234,112 @@ public class GXDLMSReader {
 
         }
         reply.clear();
+    }
+
+    /**
+     * This method is used to update meter firmware.
+     *
+     * @param target
+     *            Image transfer object.
+     * @param identification
+     *            Image identification.
+     * @param image
+     *            Updated image.
+     * @throws Exception
+     *             If image transfer fails.
+     */
+    public void imageUpdate(GXDLMSImageTransfer target, byte[] identification, byte[] image) throws Exception {
+        // Check that image transfer is enabled. BB: 4.4.6.4
+        read(target, 5);
+        if (!target.getImageTransferEnabled()) {
+            throw new Exception("Image transfer is not enabled");
+        }
+
+        // Step 1: Read image block size.
+        read(target, 2);
+        System.out.println("Image block size is " + target.getImageBlockSize() + " bytes.");
+
+        // Step 2: Initiate the Image transfer process.
+        GXReplyData reply = new GXReplyData();
+        readDataBlock(target.imageTransferInitiate(dlms, identification, image.length), reply);
+
+        // Step 3: Transfers ImageBlocks.
+        reply.clear();
+        List<byte[]> blocks = target.getImageBlocks(image);
+        for (byte[] b : blocks) {
+            try {
+                readDataBlock(dlms.method(target, 2, b, DataType.ARRAY), reply);
+            } catch (Exception ex) {
+                throw new Exception("Image block transfer failed. " + ex.getMessage());
+            }
+            if (reply.getError() != 0) {
+                System.out.println("Image transfer failed. Error code: " + reply.getError());
+                return;
+            }
+            reply.clear();
+        }
+
+        // Step 4: Check the completeness of the Image.
+        read(target, 3);
+        if (target.getImageTransferredBlocksStatus().length() != blocks.size()) {
+            if (target.getImageTransferredBlocksStatus().length() > blocks.size()) {
+                throw new RuntimeException(
+                        "Image Transferred blocks status is wrong. Amount of bits is different than block size. ("
+                                + target.getImageTransferredBlocksStatus().length() + "/" + blocks.size() + ")");
+            }
+            throw new RuntimeException(
+                    "Image Transferred blocks status is wrong. Amount of bits is different than block size. ("
+                            + target.getImageTransferredBlocksStatus().length() + "/" + blocks.size() + ")");
+        }
+        for (char it : target.getImageTransferredBlocksStatus().toCharArray()) {
+            if (it != '1') {
+                throw new RuntimeException("Image transferred blocks status is not set.");
+            }
+        }
+
+        // Step 5: The image is verified.
+        System.out.println("Verifying image...");
+        do {
+            read(target, 6);
+            if (target.getImageTransferStatus() != ImageTransferStatus.IMAGE_TRANSFER_INITIATED) {
+                System.out.println("Transfering image on progress. Waiting...");
+                Thread.sleep(10000);
+            }
+        } while (target.getImageTransferStatus() != ImageTransferStatus.IMAGE_TRANSFER_INITIATED);
+        try {
+            reply.clear();
+            readDataBlock(target.imageVerify(dlms), reply);
+        } catch (GXDLMSException ex) {
+            reply.setError((short) ex.getErrorCode());
+        }
+        if (reply.getError() == ErrorCode.TEMPORARY_FAILURE.getValue()) {
+            System.out.println("Check is image verify ready...");
+            read(target, 6);
+            if (target.getImageTransferStatus() == ImageTransferStatus.IMAGE_VERIFICATION_INITIATED) {
+                System.out.println("Still verifying...");
+            }
+            Thread.sleep(10000);
+        } else if (reply.getError() != 0) {
+            throw new RuntimeException("Image verification failed. Error code: " + reply.getError());
+        }
+
+        // Read image transfer status.
+        reply.clear();
+        readDataBlock(dlms.read(target, 6), reply);
+        dlms.updateValue(target, 6, reply.getValue());
+        if (target.getImageTransferStatus() != ImageTransferStatus.IMAGE_VERIFICATION_SUCCESSFUL) {
+            throw new Exception("Image transfer status is " + target.getImageTransferStatus());
+        }
+
+        // Step 7: Activate image.
+        reply.clear();
+        try {
+            reply.clear();
+            readDataBlock(target.imageActivate(dlms), reply);
+        } catch (Exception ex) {
+        }
+        // Disconnect is not send because meter is restarted and not answering.
+        Media.close();
     }
 
     /*
@@ -482,34 +590,43 @@ public class GXDLMSReader {
         if (replyStr.length() == 0 || replyStr.charAt(0) != '/') {
             throw new Exception("Invalid responce : " + replyStr);
         }
-        int bitrate = 0;
-        char baudrate = replyStr.charAt(4);
-        switch (baudrate) {
+        int baudrate = 0;
+        char br = replyStr.charAt(4);
+        switch (br) {
         case '0':
-            bitrate = 300;
+            baudrate = 300;
             break;
         case '1':
-            bitrate = 600;
+            baudrate = 600;
             break;
         case '2':
-            bitrate = 1200;
+            baudrate = 1200;
             break;
         case '3':
-            bitrate = 2400;
+            baudrate = 2400;
             break;
         case '4':
-            bitrate = 4800;
+            baudrate = 4800;
             break;
         case '5':
-            bitrate = 9600;
+            baudrate = 9600;
             break;
         case '6':
-            bitrate = 19200;
+            baudrate = 19200;
+            break;
+        case '7':
+            baudrate = 38400;
+            break;
+        case '8':
+            baudrate = 57600;
+            break;
+        case '9':
+            baudrate = 115200;
             break;
         default:
             throw new Exception("Unknown baud rate.");
         }
-        System.out.println("Bitrate is : " + bitrate);
+        System.out.println("Bitrate is : " + baudrate);
         // Send ACK
         // Send Protocol control character
         byte controlCharacter = (byte) '2';// "2" HDLC protocol
@@ -536,7 +653,7 @@ public class GXDLMSReader {
             serial.setDataBits(8);
             serial.setParity(Parity.NONE);
             serial.setStopBits(StopBits.ONE);
-            serial.setBaudRate(BaudRate.forValue(bitrate));
+            serial.setBaudRate(BaudRate.forValue(baudrate));
             Media.open();
             serial.setDtrEnable(true);
             serial.setRtsEnable(true);
