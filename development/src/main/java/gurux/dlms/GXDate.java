@@ -82,6 +82,7 @@ public class GXDate extends GXDateTime {
         getSkip().add(DateTimeSkips.SECOND);
         getSkip().add(DateTimeSkips.MILLISECOND);
         getExtra().addAll(forvalue.getExtra());
+        this.setDayOfWeek(forvalue.getDayOfWeek());
     }
 
     /**
