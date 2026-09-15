@@ -1168,7 +1168,7 @@ public class GXDLMSSecuritySetup extends GXDLMSObject implements IGXDLMSBase {
             list.add(new AbstractMap.SimpleEntry<>(GlobalKeyType.values()[keyId], kdf.array()));
         }
 
-        updateKeys(list);
+        updateKeys(list, null);
 
         //Clear key pair map
         ephemeralKeyPairs = null;
@@ -1176,21 +1176,29 @@ public class GXDLMSSecuritySetup extends GXDLMSObject implements IGXDLMSBase {
         return list;
     }
 
-    // Function to update keys in this security setup object
-    private void updateKeys(List<Map.Entry<GlobalKeyType, byte[]>> listOfKeys) {
+    /**
+     * Function to update keys in this security setup object
+     * @param listOfKeys List of map entries of key type and key bytes
+     * @param settings if settings is needed to update keys for current association, it can be used in this method. Otherwise it is not used.
+     */
+    private void updateKeys(List<Map.Entry<GlobalKeyType, byte[]>> listOfKeys, GXDLMSSettings settings) {
         for(Map.Entry<GlobalKeyType, byte[]> entry : listOfKeys) {
             switch (entry.getKey()) {
                 case BROADCAST_ENCRYPTION:
                     gbek = entry.getValue();
+                    if(settings != null) settings.getCipher().setBroadcastBlockCipherKey(gbek);
                     break;
                 case UNICAST_ENCRYPTION:
                     guek = entry.getValue();
+                    if(settings != null) settings.getCipher().setBlockCipherKey(guek);
                     break;
                 case AUTHENTICATION:
                     gak = entry.getValue();
+                    if(settings != null) settings.getCipher().setAuthenticationKey(gak);
                     break;
                 case KEK:
                     kek = entry.getValue();
+                    // if(settings != null) settings.getCipher().setkeBroadcastBlockCipherKey(kek);
                     break;
             }
         }
@@ -1285,7 +1293,8 @@ public class GXDLMSSecuritySetup extends GXDLMSObject implements IGXDLMSBase {
 
             // Update keys in this security setup object
             // TODO: add logic, to update keys for the server (if this security setup is for current association)
-            updateKeys(keysToUpdate);
+            settings.getAssignedAssociation().getSecuritySetupReference().equals(getLogicalName());
+            updateKeys(keysToUpdate, null);
 
             return response.array();
         } catch (Exception ex) {
