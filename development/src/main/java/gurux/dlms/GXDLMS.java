@@ -747,10 +747,10 @@ abstract class GXDLMS {
         // Check is all data fit to one message if data is given.
         int len = 0;
         if (p.getData() != null) {
-            len = p.getData().size() - p.getData().position();
+            len = p.getData().available();
         }
         if (p.getAttributeDescriptor() != null) {
-            len += p.getAttributeDescriptor().size();
+            len += p.getAttributeDescriptor().available();
         }
         if (ciphering) {
             len += CIPHERING_HEADER_SIZE;
@@ -758,7 +758,12 @@ abstract class GXDLMS {
         // If system title is sent.
         if ((Conformance.toInteger(p.getSettings().getNegotiatedConformance())
                 & Conformance.GENERAL_PROTECTION.getValue()) != 0) {
-            len += 9;
+            // System title is not send with Italy protocol.
+            if (p.getSettings().getStandard() != Standard.ITALY) {
+                len += 9;
+            } else {
+                len += 1;
+            }
         }
         len += getSigningSize(p);
         if (!p.isMultipleBlocks()) {
@@ -767,11 +772,11 @@ abstract class GXDLMS {
         }
         if (p.isMultipleBlocks()) {
             // Add command type and invoke and priority.
-            p.setLastBlock(!(8 + reply.size() + len > p.getSettings().getMaxPduSize()));
+            p.setLastBlock(!(8 + reply.available() + len > p.getSettings().getMaxPduSize()));
         }
         if (p.isLastBlock()) {
             // Add command type and invoke and priority.
-            p.setLastBlock(!(8 + reply.size() + len > p.getSettings().getMaxPduSize()));
+            p.setLastBlock(!(8 + reply.available() + len > p.getSettings().getMaxPduSize()));
         }
     }
 
